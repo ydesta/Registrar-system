@@ -1,0 +1,6 @@
+@DaynamicAuthorizationAndAuthentication.API_HostAddress = http://localhost:5073
+
+GET {{DaynamicAuthorizationAndAuthentication.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

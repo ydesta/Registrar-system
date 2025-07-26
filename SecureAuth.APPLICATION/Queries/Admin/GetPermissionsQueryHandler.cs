@@ -1,0 +1,30 @@
+using SecureAuth.APPLICATION.Queries.Admin;
+using SecureAuth.APPLICATION.DTOs.Admin;
+using SecureAuth.APPLICATION.Interfaces;
+
+namespace SecureAuth.APPLICATION.Queries.Admin
+{
+    public class GetPermissionsQueryHandler : IQueryHandler<GetPermissionsQuery, List<PermissionModel>>
+    {
+        private readonly IUnitOfWork _unitOfWork;
+
+        public GetPermissionsQueryHandler(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<List<PermissionModel>> HandleAsync(GetPermissionsQuery query)
+        {
+            var permissions = await _unitOfWork.Permissions.GetAllAsync();
+            
+            return permissions.Select(permission => new PermissionModel
+            {
+                Id = permission.Id,
+                Name = permission.Name,
+                Description = permission.Description,
+                Category = permission.Category,
+                IsActive = permission.IsActive
+            }).ToList();
+        }
+    }
+} 
