@@ -1,0 +1,74 @@
+<div>
+    <div>
+        <div class="add-button">
+            <a routerLink="../add-student-attendance/null" nz-button nzType="primary">
+                <i nz-icon nzType="plus" nzTheme="outline"></i>
+               <span>Student Course Attendance</span></a>
+        </div>
+<div>
+    <h3 class="h-tag">Student Course Attendances</h3>
+</div>
+    </div>
+    <div style="width: 300px; padding-top: 10px;">
+      <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+        <input type="text" nz-input placeholder="search..." />
+      </nz-input-group>
+      <ng-template #suffixIconButton>
+        <button nz-button nzType="primary" nzSearch><i nz-icon nzType="search"></i></button>
+      </ng-template>
+    </div>
+    <div>
+        <nz-table #basicTable [nzData]="courseAttendances!" nzBordered >
+            <thead class="table-header-row">
+              <tr class="table-header-row">
+                <th> <label nz-checkbox [(ngModel)]="checked">All</label></th>
+                <th class="th-row">Student ID</th>
+                <th class="th-row">course</th>
+                <th class="th-row">Academic Term Code</th>
+                <th class="th-row">No Of Days Present</th>
+                <th class="th-row">Remark</th>
+                <th class="th-row">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr tabindex="0" *ngFor="let data of basicTable.data; let i =index">
+                <td><label nz-checkbox [(ngModel)]="checked"></label></td>
+                <td>{{data.studentID}}</td>
+                <td>{{data.course.courseTitle }}</td>
+                <td>{{data.termCourseOffering.academicTermCode}}</td>
+                <td>{{data.noOfDaysPresent}}</td>
+                <td>{{data.remark}}</td>
+                <td>
+                      
+                       <ng-container >
+                        <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomLeft"> <i class="more" nz-icon nzType="more" nzTheme="outline"></i></button>
+                        <nz-dropdown-menu #menu="nzDropdownMenu" >
+                          <ul nz-menu style="padding-right: 50px;">
+                          <li>
+                            <button nz-button nzType="default" class="detail">
+                                <i nz-icon nzType="eye" nzTheme="fill"></i>
+                               <span>Detail</span></button>
+                          </li>
+                    <li>
+                        <a style="border-style: none" routerLink="../add-student-attendance/{{data.id}}" nz-button nzType="default" class="edit">
+                            <i nz-icon nzType="edit" nzTheme="fill"></i>
+                           <span>Edit</span></a>
+                    </li>
+                      <li>
+                        <button nz-button nzDanger nzType="default" (click)="showDeleteConfirm(data.id)">
+                            <i nz-icon nzType="delete" nzTheme="fill"></i>
+                           <span>Delete</span></button>
+                      </li>
+                          </ul>
+                        </nz-dropdown-menu>
+                      </ng-container>
+                </td>
+              </tr>
+            </tbody>
+          </nz-table>
+          <div>
+            <button nz-button class="export"  nzShape="round"> <i nz-icon nzType="file-excel" nzTheme="outline"></i> Export(2)</button>
+            <button nz-button class="group-delete" nzType="default" nzDanger nzShape="round"> <i nz-icon nzType="delete" nzTheme="fill"></i> Detele(2)</button>
+          </div>
+    </div>
+</div>

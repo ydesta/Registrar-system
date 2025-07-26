@@ -1,0 +1,43 @@
+
+<h3 class="h-tag">{{action}}</h3>
+
+<div>
+    <form nz-form  nzLayout="vertical" [formGroup]="staffForm" (ngSubmit)="submitForm()">
+      <nz-form-label [nzSpan]="7" nzRequired>Student</nz-form-label>
+      <nz-form-control [nzSpan]="7" nzValidatingTip="Validating...">
+        <nz-select formControlName="studentId" nzPlaceHolder="select student" >
+            <nz-option *ngFor="let item of students" [nzValue]="item.studentId" [nzLabel]="item.applicant.firstName + ' ' + item.applicant.fatherName "></nz-option>
+          </nz-select>
+      </nz-form-control>
+        <nz-form-item>  
+          <nz-form-label [nzSpan]="7" nzRequired>Labrary Clearance</nz-form-label>
+          <nz-form-control [nzSpan]="7">
+            <nz-switch formControlName="labraryClearance"></nz-switch>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label [nzSpan]="7" nzRequired>Linance Clearance</nz-form-label>
+          <nz-form-control [nzSpan]="7">
+            <nz-switch formControlName ="financeClearance"></nz-switch>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSpan]="7" >Aystem Admin</nz-form-label>
+            <nz-form-control [nzSpan]="7">
+              <nz-switch formControlName="systemadmin"></nz-switch>
+            </nz-form-control>
+          </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSpan]="7" >Remark</nz-form-label>
+            <nz-form-control [nzSpan]="7">
+              <input nz-input formControlName="remark" placeholder="enter remark" />
+            </nz-form-control>
+          </nz-form-item>
+       
+        <nz-form-item>
+          <nz-form-control [nzOffset]="7" [nzSpan]="7">
+            <button nz-button nzType="primary">{{submit}}</button>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+</div>

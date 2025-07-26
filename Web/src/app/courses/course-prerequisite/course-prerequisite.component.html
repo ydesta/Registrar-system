@@ -1,0 +1,126 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h3 class="title-text">Course Prerequisites</h3>
+        <p class="subtitle-text">Manage and view all course prerequisite relationships</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-section">
+          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+            <input type="text" nz-input placeholder="Search prerequisites..." [(ngModel)]="searchKey" (ngModelChange)="onSearch()" />
+          </nz-input-group>
+          <ng-template #suffixIconButton>
+            <button nz-button nzType="primary" class="search-btn" nzSearch>
+              <i nz-icon nzType="search"></i>
+            </button>
+          </ng-template>
+        </div>
+        <button
+          [routerLink]="['/course/add-course-prerequisite', 'null']"
+          class="add-btn"
+          nz-button
+          nzType="primary"
+        >
+          <i nz-icon nzType="plus" nzTheme="outline"></i>
+          <span>Add Prerequisite</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div id="print-section">
+      <nz-table 
+        #basicTable 
+        [nzData]="paginatedPrerequisites" 
+        nzBordered
+        [nzPageSize]="pageSize"
+        [nzPageSizeOptions]="pageSizeOption"
+        [nzShowSizeChanger]="true"
+        [nzTotal]="total"
+        [nzPageIndex]="pageIndex"
+        (nzPageIndexChange)="onPageIndexChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+        [nzFrontPagination]="false"
+        [nzShowTotal]="rangeTemplate"
+        [nzLoading]="isLoading"
+        [nzNoResult]="emptyTpl"
+        class="prerequisites-table"
+      >
+        <ng-template #rangeTemplate let-range="range" let-total>
+          Showing {{ range[0] }}-{{ range[1] }} of {{ total }} items
+        </ng-template>
+        <thead>
+          <tr>
+            <th class="sn-column">S/N</th>
+            <th>Course Code</th>
+            <th>Course Title</th>
+            <th>Prerequisite Course Code</th>
+            <th>Prerequisite Course Title</th>
+            <th>Remark</th>
+            <th class="action-column">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let prerequisite of paginatedPrerequisites; let i = index">
+            <td class="sn-column">
+              <span class="sn-badge">{{ (pageIndex - 1) * pageSize + i + 1 }}</span>
+            </td>
+            <td>{{ prerequisite.courseCode }}</td>
+            <td>{{ prerequisite.courseTitle }}</td>
+            <td>{{ prerequisite.preRequisiteCourseCode }}</td>
+            <td>{{ prerequisite.preRequisiteCourseTitle }}</td>
+            <td>{{ prerequisite.remark }}</td>
+            <td class="action-column">
+              <button 
+                nz-button 
+                nz-dropdown 
+                [nzDropdownMenu]="menu" 
+                nzPlacement="bottomLeft"
+                class="action-button"
+              >
+                <i nz-icon nzType="more" nzTheme="outline"></i>
+              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li>
+                    <a
+                      [routerLink]="['/course/add-course-prerequisite', prerequisite.id]"
+                      nz-button
+                      nzType="default"
+                      class="action-item edit"
+                    >
+                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                      <span>Edit</span>
+                    </a>
+                  </li>
+                  <li>
+                    <button
+                      nz-button
+                      nzDanger
+                      nzType="default"
+                      class="action-item delete"
+                      (click)="showDeleteConfirm(prerequisite.id)"
+                    >
+                      <i nz-icon nzType="delete" nzTheme="fill"></i>
+                      <span>Delete</span>
+                    </button>
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </td>
+          </tr>
+        </tbody>
+        <ng-template #emptyTpl>
+          <div class="no-data">
+            <i nz-icon nzType="book" nzTheme="outline"></i>
+            <p>No course prerequisite records available</p>
+          </div>
+        </ng-template>
+      </nz-table>
+    </div>
+  </div>
+</div>

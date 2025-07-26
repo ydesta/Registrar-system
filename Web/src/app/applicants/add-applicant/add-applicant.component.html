@@ -1,0 +1,602 @@
+<ng-template #cardTitle>
+  <h3 class="title">{{ action }}</h3>
+</ng-template>
+
+<div class="applicant">
+  <nz-card [nzTitle]="cardTitle">
+
+    <!-- <div style="padding-bottom: 20px">
+        <nz-steps [nzCurrent]="steps">
+          <nz-step nzTitle="Start"></nz-step>
+          <nz-step nzTitle=""></nz-step>
+          <nz-step nzTitle=""></nz-step>
+          <nz-step nzTitle=""></nz-step>
+          <nz-step nzTitle=""></nz-step>
+          <nz-step nzTitle=""></nz-step>
+          <nz-step nzTitle=""></nz-step>
+          <nz-step nzTitle=""></nz-step>
+          <nz-step nzTitle=""></nz-step>
+          <nz-step nzTitle="Finished"></nz-step>
+        </nz-steps>
+      </div> -->
+
+
+    <div nz-row>
+      <div nz-col nzSpan="17" class="card-container">
+        <nz-card class="custom-card">
+          <nz-card-meta nzTitle="Instruction"></nz-card-meta>
+          <nz-divider></nz-divider>
+          <p>
+            <em nz-icon nzType="check-circle" nzTheme="outline" class="check-icon"></em>
+            The application form should be returned along with one attested
+            copy (non-returnable) of each testimonial (transcript and degree)
+            with the original (returnable).
+          </p>
+          <p>
+            <em nz-icon nzType="check-circle" nzTheme="outline" class="check-icon"></em>
+            Applicants will be notified of their admission request status by
+            the office after the required processing of their application.
+          </p>
+          <p>
+            <em nz-icon nzType="check-circle" nzTheme="outline" class="check-icon"></em>
+            A letter of motivation.
+          </p>
+          <p>
+            <em nz-icon nzType="check-circle" nzTheme="outline" class="check-icon"></em>
+            Applying for admission doesn't guarantee acceptance.
+          </p>
+        </nz-card>
+      </div>
+      <div nz-col nzSpan="6">
+        <nz-card class="custom-card">
+          <nz-card-meta nzTitle="Personal Photo"></nz-card-meta>
+          <nz-divider></nz-divider>
+          <div class="attach-photo">
+            <div style="padding: 14px;align-items: center;">
+              <img *ngIf="profilePath == ''" width="180" height="180" src="./../../../assets/images/profile.png" alt=""
+                srcset="" />
+            </div>
+            <img [src]="profilePath" class="profile-path " alt="" />
+          </div>
+          <section class="profile-photo" style="padding-top: 20px">
+            <label class="photo-icon">
+              <em nz-icon nzType="camera" nzTheme="outline" class="camera-icon"></em>
+              <span style="padding-left: 5px;">Upload Photo</span>
+              <input (change)="passSteps()" type="file" id="test" name="data" style="visibility: hidden"
+                (change)="uploadFile($event, 'Profile')" />
+            </label>
+          </section>
+        </nz-card>
+      </div>
+    </div>
+    <div nz-row style="padding: 10px;">
+      <div nz-col nzSpan="24">
+        <div class="custom-card">
+          <nz-collapse [nzAccordion]="true">
+            <nz-collapse-panel nzHeader="General Informations" [nzActive]="activePanelIndex === 0">
+              <form nz-form [formGroup]="applicantForm">
+                <nz-form-item style="display: none">
+                  <nz-form-label [nzSpan]="8">Applicant ID</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="applicantID"
+                      placeholder="enter applicant ID" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" nzRequired>First Name</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="firstName" placeholder="enter first name" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" nzRequired>Father Name</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="fatherName"
+                      placeholder="enter father name" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8">Grand Father Name</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="grandFatherName"
+                      placeholder="entergrand father name" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8">Sir Name</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="sirName" placeholder="enter sir name" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" nzRequired>Mother Name</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="motherName"
+                      placeholder="enter mother name" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" nzRequired>Gender</nz-form-label>
+                  <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
+                    <nz-select (nzOpenChange)="passSteps()" formControlName="gender" nzPlaceHolder="select gender"
+                      nzShowSearch="true" nzAllowClear="true">
+                      <nz-option nzValue="Male" nzLabel="Male"></nz-option>
+                      <nz-option nzValue="Female" nzLabel="Female"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" nzRequired>Birth Date</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <nz-date-picker (nzOnCalendarChange)="passSteps()" formControlName="birthDate"></nz-date-picker>
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" nzRequired>Birth Place</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="birthPlace"
+                      placeholder="enter birth place" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" nzRequired>Nationality</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="nationality"
+                      placeholder="enter nationality" />
+                  </nz-form-control>
+                </nz-form-item>
+              </form>
+              <nz-divider></nz-divider>
+              <div class="parent-container">
+                <div class="button-container">
+                  <button nz-button nzType="primary" (click)="nextPanel()">Next
+                    <span nz-icon nzType="step-forward" nzTheme="outline"></span>
+                  </button>
+                </div>
+              </div>
+              <nz-divider></nz-divider>
+            </nz-collapse-panel>
+          </nz-collapse>
+
+          <nz-collapse [nzAccordion]="true">
+            <nz-collapse-panel nzHeader="Contact Information" [nzActive]="activePanelIndex === 1">
+              <form nz-form [formGroup]="applicantAddressForm">
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8">Office Phone</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="telephonOffice"
+                      placeholder="Enter office phone number" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8">Home Phone</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="telephonHome"
+                      placeholder="Enter home phone number" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" nzRequired>Mobile Number</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="mobile" placeholder="Enter mobile number" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8">Postal Address</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="postalAddress"
+                      placeholder="enter postal address" />
+                  </nz-form-control>
+                </nz-form-item>
+
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" nzRequired>Email Address</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="emailAddress"
+                      placeholder="enter email address" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" nzRequired>Region</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="region" placeholder="enter region"
+                      required />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" nzRequired>City</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="city" placeholder="enter city" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8">Woreda</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="woreda" placeholder="enter woreda" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8">Kebele</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="kebele" placeholder="enter kebele" />
+                  </nz-form-control>
+                </nz-form-item>
+              </form>
+              <nz-divider></nz-divider>
+              <div class="button-container">
+                <button nz-button nzType="primary" (click)="prevPanel()">
+                  <span nz-icon nzType="step-backward" nzTheme="outline"></span>
+                  Previous</button>
+                <button nz-button nzType="primary" (click)="nextPanel()">Next
+                  <span nz-icon nzType="step-forward" nzTheme="outline"></span>
+                </button>
+              </div>
+              <nz-divider></nz-divider>
+            </nz-collapse-panel>
+          </nz-collapse>
+
+          <nz-collapse nzAccordion>
+            <nz-collapse-panel nzHeader="Work Experiences" [nzActive]="activePanelIndex === 2">
+              <p>
+                <label nz-checkbox (nzCheckedChange)="haveWorkExpe()"></label>
+                I have work experience
+              </p>
+              <div *ngIf="haveWorkExperience">
+                <form nz-form [formGroup]="applicantWorkExpForm">
+                  <nz-form-item>
+                    <nz-form-label [nzSpan]="8" nzRequired>Company Name</nz-form-label>
+                    <nz-form-control [nzSpan]="10">
+                      <input (change)="passSteps()" nz-input formControlName="companyName"
+                        placeholder="enter company" />
+                    </nz-form-control>
+                  </nz-form-item>
+                  <nz-form-item>
+                    <nz-form-label [nzSpan]="8" nzRequired>Total Work Year</nz-form-label>
+                    <nz-form-control [nzSpan]="10">
+                      <input (change)="passSteps()" nz-input formControlName="totalWorkYear"
+                        placeholder="enter total work year" type="number" />
+                    </nz-form-control>
+                  </nz-form-item>
+                  <nz-form-item>
+                    <nz-form-label [nzSpan]="8">post </nz-form-label>
+                    <nz-form-control [nzSpan]="10">
+                      <input (change)="passSteps()" nz-input formControlName="post" placeholder="enter post" />
+                    </nz-form-control>
+                  </nz-form-item>
+                  <nz-form-item>
+                    <nz-form-label [nzSpan]="10">Attach File</nz-form-label>
+                    <nz-form-control [nzSpan]="10">
+                      <section class="profile-photo" style="padding-top: 5px">
+                        <label class="photo-icon">
+                          <em nz-icon nzType="paper-clip" nzTheme="outline"></em>
+                          <input (change)="passSteps()" nz-input formControlName="attachFile" type="file" id="test"
+                            name="data" style="visibility: hidden" (change)="
+                                uploadFile($event, 'Work Experience Attachment')
+                              " />
+                          {{ workExpeFile }}
+                        </label>
+                      </section>
+                    </nz-form-control>
+                  </nz-form-item>
+                </form>
+              </div>
+              <nz-divider></nz-divider>
+              <div class="button-container">
+                <button nz-button nzType="primary" (click)="prevPanel()">
+                  <span nz-icon nzType="step-backward" nzTheme="outline"></span>
+                  Previous</button>
+                <button nz-button nzType="primary" (click)="nextPanel()">Next
+                  <span nz-icon nzType="step-forward" nzTheme="outline"></span>
+                </button>
+              </div>
+              <nz-divider></nz-divider>
+            </nz-collapse-panel>
+          </nz-collapse>
+
+          <nz-collapse nzAccordion>
+            <nz-collapse-panel nzHeader="Educational Backgrounds" [nzActive]="activePanelIndex === 3">
+              <div nz-row>
+                <div nz-col nzSpan="18"></div>
+                <div nz-col nzSpan="6">
+                  <button (click)="showAddEducationModal()" nz-button nzType="primary">
+                    <em nz-icon nzType="plus" nzTheme="outline"></em>
+                    Education Background
+                  </button>
+                </div>
+              </div>
+              <nz-table #basicTable [nzData]="educationLists" nzBordered>
+                <thead class="table-header-row">
+                  <tr class="table-header-row">
+                    <th class="th-row">College/University</th>
+                    <th class="th-row">Major Area of Study</th>
+                    <th class="th-row">Degree Obtained</th>
+                    <th class="th-row">Year(From - To)</th>
+                    <th class="th-row">
+                      <em nz-icon nzType="paper-clip" nzTheme="outline"></em>
+                    </th>
+                    <th class="th-row">Remark</th>
+                    <th class="th-row">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr tabindex="0" *ngFor="let data of basicTable.data; let i = index">
+                    <td>{{ data.schoollName }}</td>
+                    <td>{{ data.fieldOfStudy }}</td>
+                    <td>{{ data.programmeLevel }}</td>
+                    <td>
+                      {{ data.graduatedYear[0] | date : "yyyy" }} -
+                      {{ data.graduatedYear[1] | date : "yyyy" }}
+                    </td>
+                    <td>
+                      <a nz-button>
+                        {{
+                        data.attachFile.split("\\")[
+                        data.attachFile.split("\\").length - 1
+                        ]
+                        }}
+                      </a>
+                    </td>
+                    <td>{{ data.remark }}</td>
+                    <td>
+                      <ng-container>
+                        <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomLeft">
+                          <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
+                        </button>
+                        <nz-dropdown-menu #menu="nzDropdownMenu">
+                          <ul nz-menu style="padding-right: 50px">
+                            <li>
+                              <a style="border-style: none" (click)="editEducation(i)" nz-button nzType="default"
+                                class="edit">
+                                <em nz-icon nzType="edit" nzTheme="fill"></em>
+                                <span>Edit</span></a>
+                            </li>
+                            <li>
+                              <button nz-button nzDanger nzType="default" (click)="deleteEducation(i)">
+                                <em nz-icon nzType="delete" nzTheme="fill"></em>
+                                <span>Delete</span>
+                              </button>
+                            </li>
+                          </ul>
+                        </nz-dropdown-menu>
+                      </ng-container>
+                    </td>
+                  </tr>
+                </tbody>
+              </nz-table>
+              <nz-divider></nz-divider>
+              <div class="button-container">
+                <button nz-button nzType="primary" (click)="prevPanel()">
+                  <span nz-icon nzType="step-backward" nzTheme="outline"></span>
+                  Previous</button>
+                <button nz-button nzType="primary" (click)="nextPanel()">
+                  Next
+                  <span nz-icon nzType="step-forward" nzTheme="outline"></span>
+                </button>
+              </div>
+              <nz-divider></nz-divider>
+            </nz-collapse-panel>
+          </nz-collapse>
+
+          <nz-collapse nzAccordion>
+            <nz-collapse-panel nzHeader="Contact Person" [nzActive]="activePanelIndex === 4">
+              <form nz-form [formGroup]="applicantContactPersonForm">
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" required>Full Name</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="fullName" placeholder="enter full name" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" required>Telephone Office</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="telephoneOffice"
+                      placeholder="enter telephone office" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8">Telephone Home </nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <input (change)="passSteps()" nz-input formControlName="telephoneHome"
+                      placeholder="enter telephone home" />
+                  </nz-form-control>
+                </nz-form-item>
+
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" required>Relation</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <nz-select (nzOpenChange)="passSteps()" formControlName="relation" nzPlaceHolder="select relation"
+                      nzShowSearch="true" nzAllowClear="true">
+                      <nz-option nzValue="Relative" nzLabel="Relative"></nz-option>
+                      <nz-option nzValue="Employer" nzLabel="Employer"></nz-option>
+                      <nz-option nzValue="Other" nzLabel="Other"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </form>
+              <nz-divider></nz-divider>
+              <div class="button-container">
+                <button nz-button nzType="primary" (click)="prevPanel()">
+                  <span nz-icon nzType="step-backward" nzTheme="outline"></span>
+                  Previous
+                </button>
+                <button nz-button nzType="primary" (click)="nextPanel()">
+                  <span nz-icon nzType="step-forward" nzTheme="outline"></span>
+                  Next
+                </button>
+              </div>
+            </nz-collapse-panel>
+          </nz-collapse>
+
+          <nz-collapse nzAccordion>
+            <nz-collapse-panel nzHeader="Academic Programme" [nzActive]="activePanelIndex === 5">
+              <form nz-form [formGroup]="programmeForm">
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" nzRequired>Academic Programme</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <nz-select (nzOpenChange)="passSteps()" formControlName="acadamicProgrammeCode"
+                      nzPlaceHolder="select academic programme" nzShowSearch="true" nzAllowClear="true">
+                      <nz-option *ngFor="let item of acadamicProgrammes" [nzValue]="item.acadamicProgrammeCode"
+                        [nzLabel]="item.acadamicProgrammeTitle"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" nzRequired>Division
+                  </nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <nz-select (nzOpenChange)="passSteps()" formControlName="division" nzPlaceHolder="select division"
+                      nzShowSearch="true" nzAllowClear="true">
+                      <nz-option nzValue="1" nzLabel="Day"></nz-option>
+
+                      <nz-option nzValue="2" nzLabel="Night"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </form>
+              <nz-divider></nz-divider>
+              <div class="button-container">
+                <button nz-button nzType="primary" (click)="prevPanel()">
+                  <span nz-icon nzType="step-backward" nzTheme="outline"></span>
+                  Previous</button>
+                <button nz-button nzType="primary" (click)="nextPanel()">
+
+                  Next
+                  <span nz-icon nzType="step-forward" nzTheme="outline"></span>
+                </button>
+              </div>
+            </nz-collapse-panel>
+          </nz-collapse>
+
+          <nz-collapse nzAccordion>
+            <nz-collapse-panel nzHeader="Other Informations" [nzActive]="activePanelIndex === 6">
+              <form nz-form [formGroup]="otherForm">
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8" required>Source Of Finance</nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <nz-select (nzOpenChange)="passSteps()" formControlName="sourceOfFinance"
+                      nzPlaceHolder="select source of finance" nzShowSearch="true" nzAllowClear="true">
+                      <nz-option nzValue="Personal" nzLabel="Personal"></nz-option>
+                      <nz-option nzValue="Employer" nzLabel="Employer"></nz-option>
+                      <nz-option nzValue="Family" nzLabel="Family"></nz-option>
+                      <nz-option nzValue="Other" nzLabel="Other"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="8">How Did You Come to know about HilcoE
+                  </nz-form-label>
+                  <nz-form-control [nzSpan]="10">
+                    <nz-select (nzOpenChange)="passSteps()" formControlName="howDidYouComeKnow"
+                      nzPlaceHolder="select how did you know about HilcoE?" nzShowSearch="true" nzAllowClear="true">
+                      <nz-option nzValue="Colleague" nzLabel="Colleague"></nz-option>
+                      <nz-option nzValue="Former Student" nzLabel="Former Student"></nz-option>
+                      <nz-option nzValue="Brochure" nzLabel="Brochure"></nz-option>
+                      <nz-option nzValue="Radio" nzLabel="Radio"></nz-option>
+                      <nz-option nzValue="Television" nzLabel="Television"></nz-option>
+                      <nz-option nzValue="Newpaper" nzLabel="Newpaper"></nz-option>
+                      <nz-option nzValue="Poster" nzLabel="Poster"></nz-option>
+                      <nz-option nzValue="Web site" nzLabel="Web site"></nz-option>
+                      <nz-option nzValue="Other" nzLabel="Other"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </form>
+              <nz-divider></nz-divider>
+              <div class="parent-container">
+                <div class="button-container">
+
+                  <button nz-button nzType="primary" (click)="prevPanel()"><span nz-icon nzType="step-backward"
+                      nzTheme="outline"></span>Previous</button>
+                </div>
+              </div>
+
+              <nz-divider></nz-divider>
+            </nz-collapse-panel>
+          </nz-collapse>
+        </div>
+      </div>
+    </div>
+
+    <div nz-row style="padding-left: 0%; padding-top: 20px">
+      <div nz-col nzSpan="24">
+        <nz-card class="custom-card">
+          <p>
+            <label nz-checkbox (nzCheckedChange)="passSteps()" [(ngModel)]="selfConfirmedApplicantInformation"></label>
+            The undersigned, attest that the information contained in this
+            application and all supporting documents are accurate and authentic.
+            All the qualification obtained are accredited by HERQA/MOE. I also
+            abide to the rules and regulations of the college as per the detail
+            in the prospectus.
+          </p>
+          <div>
+            <label style="padding: 10px"> Date of Apply</label>
+            <nz-date-picker (ngModelChange)="passSteps()" [(ngModel)]="dateOfApply"></nz-date-picker>
+          </div>
+          <div>
+            <div></div>
+            <div style="padding: 20px; float: right">
+              <button (click)="submitForm()" nz-button nzType="primary">
+                {{ submit }}
+              </button>
+            </div>
+          </div>
+        </nz-card>
+
+      </div>
+      <div nz-col nzSpan="4"></div>
+    </div>
+    <!-- </div> -->
+  </nz-card>
+</div>
+
+<nz-modal [(nzVisible)]="educationModalVisible" nzTitle="Add Education Back Ground"
+  (nzOnCancel)="educationHandleCancel()" (nzOnOk)="educationHandleOk()">
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="applicantEducationBacgroundForm">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="10" nzRequired>Name of College/University</nz-form-label>
+        <nz-form-control [nzSpan]="10">
+          <input (change)="passSteps()" nz-input formControlName="schoollName" placeholder="enter schooll name" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="10" nzRequired>Major Area of Study</nz-form-label>
+        <nz-form-control [nzSpan]="10">
+          <input (change)="passSteps()" nz-input formControlName="fieldOfStudy" placeholder="enter field of study" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="10" nzRequired>Degree Obtained</nz-form-label>
+        <nz-form-control [nzSpan]="10">
+          <input (change)="passSteps()" nz-input formControlName="programmeLevel" placeholder="enter levele" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="10" nzRequired>Year(from -to)</nz-form-label>
+        <nz-form-control [nzSpan]="10">
+          <nz-range-picker nzMode="year" formControlName="graduatedYear"></nz-range-picker>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="10">Remark</nz-form-label>
+        <nz-form-control [nzSpan]="10">
+          <input (change)="passSteps()" nz-input formControlName="remark" placeholder="enter remark" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="10">Attach File</nz-form-label>
+        <nz-form-control [nzSpan]="10">
+          <section class="profile-photo" style="padding-top: 5px">
+            <label class="photo-icon">
+              <em nz-icon nzType="paper-clip" nzTheme="outline"></em>
+              <input (change)="passSteps()" nz-input formControlName="attachFile" type="file" id="test" name="data"
+                style="visibility: hidden" (change)="uploadFile($event, 'Education Attachment')" />
+              {{ educationFile }}
+            </label>
+          </section>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+</nz-modal>

@@ -1,0 +1,193 @@
+<nz-card
+  style="margin: 0px auto; border-radius: 12px; box-shadow: 0 4px 24px rgba(9,62,150,0.08); background: #f9fbfd; padding: 32px 24px; overflow: visible;">
+  <div style="text-align: center; margin-bottom: 12px;">
+    <h1 style="color: #093e96; font-weight: 700; margin-bottom: 0; font-size: 2rem;">
+      Academic Term Registration Slip
+    </h1>
+    <nz-divider style="margin: 12px 0 20px 0;"></nz-divider>
+    <p style="color: #888; margin-top: 0; font-size: 1rem;">
+      Please select the term, year, and batch code to generate the slip.
+    </p>
+  </div>
+  
+  <nz-collapse>
+    <nz-collapse-panel 
+      nzKey="form-panel" 
+      nzHeader="Search Criteria" 
+      [nzActive]="!isFormCollapsed">
+      <form nz-form [formGroup]="formCourseOffered" >
+        <div nz-row [nzGutter]="16">
+          <div nz-col nzSpan="24" style="margin-bottom: 12px;">
+            <nz-form-item>
+              <nz-form-label nzRequired>
+                <span nz-icon nzType="calendar" style="margin-right: 4px;"></span>
+                Academic Term
+              </nz-form-label>
+              <nz-form-control>
+                <nz-select formControlName="termId" nzPlaceHolder="Select Academic Term" nzShowSearch nzAllowClear
+                  style="width: 100%;">
+                  <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
+                    [nzLabel]="item.Description"></nz-option>
+                </nz-select>
+                <div nz-form-explain
+                  *ngIf="formCourseOffered.get('termId')?.invalid && formCourseOffered.get('termId')?.touched">
+                  Please select an academic term.
+                </div>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col nzSpan="24" style="margin-bottom: 12px;">
+            <nz-form-item>
+              <nz-form-label nzRequired>
+                <span nz-icon nzType="calendar" style="margin-right: 4px;"></span>
+                Term Year
+              </nz-form-label>
+              <nz-form-control>
+                <nz-select formControlName="termYear" nzPlaceHolder="Select Term Year" nzShowSearch style="width: 100%;">
+                  <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item"></nz-option>
+                </nz-select>
+                <div nz-form-explain
+                  *ngIf="formCourseOffered.get('termYear')?.invalid && formCourseOffered.get('termYear')?.touched">
+                  Please select a term year.
+                </div>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col nzSpan="24" style="margin-bottom: 20px;">
+            <nz-form-item>
+              <nz-form-label nzRequired>
+                <span nz-icon nzType="team" style="margin-right: 4px;"></span>
+                Batch Code
+              </nz-form-label>
+              <nz-form-control>
+                <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch Code" nzShowSearch nzAllowClear
+                  style="width: 100%;">
+                  <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.id" [nzLabel]="item.batchCode"></nz-option>
+                </nz-select>
+                <div nz-form-explain
+                  *ngIf="formCourseOffered.get('batchCode')?.invalid && formCourseOffered.get('batchCode')?.touched">
+                  Please select a batch code.
+                </div>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+        <button nz-button nzType="primary" [disabled]="!formCourseOffered.valid" (click)="generatePdf()"
+          style="width: 100%; font-size: 1.1rem; height: 40px; margin-top: 8px;">
+          <span nz-icon nzType="file-pdf"></span>
+          Generate Slip
+        </button>
+      </form>
+    </nz-collapse-panel>
+  </nz-collapse>
+
+  <!-- Show expand button when form is collapsed and data is loaded -->
+  <div *ngIf="isFormCollapsed && listOdRegisteredStudent.length > 0" style="margin: 16px 0; text-align: center;">
+    <button nz-button nzType="default" (click)="toggleFormCollapse()" style="margin-right: 8px;">
+      <span nz-icon nzType="down"></span>
+      Show Search Form
+    </button>
+    <span style="color: #52c41a; font-size: 14px;">
+      <span nz-icon nzType="check-circle"></span>
+      Data loaded successfully! Form collapsed to save space.
+    </span>
+  </div>
+
+  <nz-table #basicTable [nzData]="listOdRegisteredStudent" nzBordered [nzPageSize]="pageSize" [nzShowSizeChanger]="true"
+    [nzTotal]="totalRecord" [nzPageIndex]="pageindex" (nzPageIndexChange)="onPageIndexChange($event)"
+    (nzPageSizeChange)="onPageSizeChange($event)" [nzLoading]="tbLoading" [nzNoResult]="emptyTpl"
+    [nzShowQuickJumper]="true" [nzShowTotal]="totalTemplate" [nzPageSizeOptions]="pageSizeOption"
+    [nzScroll]="{ x: '1200px' }" style="overflow-x: auto;" class="mobile-table-container">
+    <thead>
+      <tr>
+        <th style="min-width: 50px;">#</th>
+        <th nzSortOrder="null" (nzSortOrderChange)="sort('studentCode', $event)" style="min-width: 120px;">Student Code</th>
+        <th nzSortOrder="null" (nzSortOrderChange)="sort('fullName', $event)" style="min-width: 150px;">Full Name</th>
+        <th nzSortOrder="null" (nzSortOrderChange)="sort('registrationDate', $event)" style="min-width: 120px;">Registration Date</th>
+        <th nzSortOrder="null" (nzSortOrderChange)="sort('fromBank', $event)" style="min-width: 100px;">From Bank</th>
+        <th nzSortOrder="null" (nzSortOrderChange)="sort('toBank', $event)" style="min-width: 100px;">To Bank</th>
+        <th nzSortOrder="null" (nzSortOrderChange)="sort('bankTransactionId', $event)" style="min-width: 120px;">Transaction Id</th>
+        <th class="th-row paginate sticky-action" style="min-width: 80px;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container tabindex="0" *ngFor="let data of basicTable.data; let i = index">
+        <tr>
+          <td [nzExpand]="expandSet.has(data.studentCode)" (nzExpandChange)="onExpandChange(data.studentCode, $event)">
+          </td>
+          <td>{{ data.studentCode }}</td>
+          <td>{{data.fullName}}</td>
+          <td>{{ data.registrationDate | date : "dd-MM-yyyy" }}</td>
+          <td>{{ data.fromBank }}</td>
+          <td>{{ data.toBank }}</td>
+          <td>{{ data.bankTransactionId }}</td>
+          <td class="paginate sticky-action" [class.sticky-action-even]="i % 2 === 1">
+            <ng-container>
+              <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomLeft">
+                <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
+              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu style="padding-right: 50px">
+                  <li>
+                    <a style="border-style: none" (click)="getFileName(data.fileName)">
+                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                      <span>View File</span>
+                    </a>
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </ng-container>
+          </td>
+        </tr>
+
+        <tr [nzExpand]="expandSet.has(data.studentCode)">
+          <td colspan="8">
+            <nz-table [nzData]="getCourseDetails(data)" nzBordered [nzScroll]="{ x: '600px' }" [nzShowPagination]="false">
+              <thead>
+                <tr>
+                  <th style="min-width: 80px;">Serial No.</th>
+                  <th style="min-width: 120px;">Course Code</th>
+                  <th style="min-width: 200px;">Course Title</th>
+                  <th style="min-width: 100px;">Credit Hours</th>
+                  <th style="min-width: 100px;">TotalAmount</th>
+                </tr>
+              </thead>
+    <tbody>
+      <tr *ngFor="let course of getCourseDetails(data); let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ course.code }}</td>
+        <td>{{ course.title }}</td>
+        <td>{{ course.creditHours }}</td>
+        <td>{{ course.amount }}</td>
+
+      </tr>
+    </tbody>
+    <tfoot class="footer-row">
+      <tr>
+        <td></td>
+        <td></td>
+        <td>Total </td>
+        <td>{{ getTotalCreditHours(data) }}</td>
+        <td>{{getTotalAmount(data)}}</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </nz-table>
+  </td>
+  </tr>
+  </ng-container>
+
+  </tbody>
+  <ng-template #emptyTpl>
+    <div class="no-data">
+      <span nz-icon nzType="book" nzTheme="outline"></span>
+      <p>No course offerings available</p>
+    </div>
+  </ng-template>
+  </nz-table>
+
+  <!-- Template for showing total records -->
+  <ng-template #totalTemplate let-total let-range="range">
+    Showing {{ range[0] }}-{{ range[1] }} of {{ total }} items
+  </ng-template>
+</nz-card>

@@ -1,0 +1,160 @@
+.readonly-input {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  color: #000;
+  opacity: 1;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 16px 0;
+  border-top: 1px solid #f0f0f0;
+
+  button {
+    min-width: 100px;
+    height: 40px;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+.error-message {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+::ng-deep {
+  .ant-modal-body {
+    padding: 24px;
+  }
+
+  .ant-form-item {
+    margin-bottom: 24px;
+
+    .ant-form-item-label {
+      padding-bottom: 8px;
+
+      label {
+        font-weight: 500;
+        color: #262626;
+      }
+    }
+
+    .ant-form-item-control {
+      .ant-input,
+      .ant-input-textarea,
+      .ant-select-selector,
+      .ant-picker {
+        border-radius: 6px;
+        border-color: #d9d9d9;
+        transition: all 0.3s;
+
+        &:hover {
+          border-color: #40a9ff;
+        }
+
+        &:focus,
+        &-focused {
+          border-color: #40a9ff;
+          box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+        }
+      }
+
+      .ant-select-selector {
+        padding: 4px 11px;
+      }
+
+      .ant-input-textarea {
+        textarea {
+          min-height: 100px;
+          resize: vertical;
+        }
+      }
+    }
+  }
+
+  .ant-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .ant-card-body {
+      padding: 24px;
+    }
+  }
+
+  // File upload styling
+  input[type="file"] {
+    padding: 8px;
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.3s;
+
+    &:hover {
+      border-color: #40a9ff;
+    }
+  }
+
+  // Date picker styling
+  .ant-calendar-picker {
+    width: 100%;
+  }
+
+  // Select dropdown styling
+  .ant-select {
+    width: 100%;
+  }
+
+  // Form grid spacing
+  .ant-row {
+    margin: 0 -12px;
+
+    .ant-col {
+      padding: 0 12px;
+    }
+  }
+}
+
+// Modal header styling
+::ng-deep .ant-modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 0;
+
+  .ant-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #262626;
+  }
+}
+
+// Required field indicator
+.required-field::after {
+  content: '*';
+  color: #ff4d4f;
+  margin-left: 4px;
+}
+
+// Form section headers
+.form-section-header {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+} 

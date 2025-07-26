@@ -1,0 +1,91 @@
+<div>
+  <div>
+    <h3 class="h-tag">Programme Coordinators</h3>
+  </div>
+  <div nz-row>
+    <div nz-col nzSpan="5">
+      <a routerLink="../add-programme-coordinator/null" class="add-button" nz-button nzType="default">
+        <em nz-icon nzType="plus" nzTheme="outline"></em>
+        <span>Programme Coordinator</span></a>
+    </div>
+    <div nz-col nzSpan="4">
+      <div style="float: right; margin-right: 5px">
+        <button nz-button class="export main-color">
+          <em nz-icon nzType="file-excel" nzTheme="outline"></em> Export
+        </button>
+      </div>
+      <div nz-col nzSpan="4">
+        <button class="main-color" nz-button nzType="primary" printTitle="." printSectionId="print-section" ngxPrint>
+          <em nz-icon nzType="printer" nzTheme="outline"></em>Print
+        </button>
+      </div>
+    </div>
+    <div nz-col nzSpan="4">
+      <div style="width: 300px">
+        <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+          <input type="text" nz-input placeholder="search..." />
+        </nz-input-group>
+        <ng-template #suffixIconButton>
+          <button nz-button class="serch" nzSearch>
+            <em style="color: white" nz-icon nzType="search"></em>
+          </button>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <nz-table #basicTable [nzData]="programCoordinator" nzBordered>
+      <thead class="table-header-row">
+        <tr class="table-header-row">
+          <!-- <th><label nz-checkbox [(ngModel)]="checked">All</label></th> -->
+          <th class="th-row">Staff Id</th>
+          <th class="th-row">Academic Programme</th>
+          <th class="th-row">Start Date</th>
+          <th class="th-row">End Date</th>
+          <th class="th-row">Remark</th>
+          <th class="th-row">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of basicTable.data; let i = index">
+          <!-- <td><label nz-checkbox [(ngModel)]="checked"></label></td> -->
+          <td>{{ data.staffId }}</td>
+          <td>{{ data.acadamicProgramme.acadamicProgrammeTitle }}</td>
+          <td>{{ data.startDate | date : "yyyy-MM-dd" }}</td>
+          <td>{{ data.endDate | date : "yyyy-MM-dd" }}</td>
+          <td>{{ data.remark }}</td>
+          <td>
+            <ng-container>
+              <button nz-button nz-dropdown [nzDropdownMenu]="menu">
+                <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
+              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li>
+                    <button nz-button nzType="default" class="detail">
+                      <i nz-icon nzType="eye" nzTheme="fill"></i>
+                      <span>Detail</span>
+                    </button>
+                  </li>
+                  <li>
+                    <a style="border-style: none" routerLink="../add-programme-coordinator/{{ data.id }}" nz-button
+                      nzType="default" class="edit">
+                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                      <span>Edit</span></a>
+                  </li>
+                  <li>
+                    <button nz-button nzDanger nzType="default" (click)="showDeleteConfirm(data.id)">
+                      <i nz-icon nzType="delete" nzTheme="fill"></i>
+                      <span>Delete</span>
+                    </button>
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>

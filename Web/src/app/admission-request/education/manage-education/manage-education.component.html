@@ -1,0 +1,69 @@
+<div class="education-background-container">
+    <div class="header-section">
+        <h2 *ngIf="!isApplicantProfile">Education Background</h2>
+        <button (click)="openModal()" nz-button nzType="primary" [disabled]="isSubmittedApplicationForm>0" *ngIf="!isApplicantProfile">
+            <span nz-icon nzType="plus" nzTheme="outline"></span>
+            Add Education
+        </button>
+    </div>
+
+    <nz-table #basicTable [nzData]="educationLists" nzBordered [nzPageSize]="5" [nzShowSizeChanger]="true"  [nzNoResult]="noDataTemplate">
+        <thead>
+            <tr>
+                <th>College/University</th>
+                <th>Major Area of Study</th>
+                <th>Degree Obtained</th>
+                <th>Year(From - To)</th>
+                <th>Remark</th>
+                <th>Document</th>
+                <th *ngIf="!isApplicantProfile">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let data of basicTable.data; let i = index">
+                <td>{{ data.schoollName }}</td>
+                <td>{{ data.fieldOfStudy }}</td>
+                <td>{{ data.programmeLevel }}</td>
+                <td>
+                    {{ data.graduatedYear.split(',')[0] | date : "yyyy"}} -
+                    {{ data.graduatedYear.split(',')[1] | date : "yyyy" }}
+                </td>
+                <td>{{ data.remark }}</td>
+                <td>
+                    <button nz-button class="action-button view-file" (click)="viewFile(data)" nzSize="small">
+                        <span nz-icon nzType="file-text" nzTheme="outline"></span>
+                        View File
+                    </button>
+                </td>
+                <td *ngIf="!isApplicantProfile">
+                    <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomRight"
+                        [disabled]="isSubmittedApplicationForm>0" nzTrigger="click" class="action-button">
+                        <span nz-icon nzType="more" nzTheme="outline"></span>
+                    </button>
+                    <nz-dropdown-menu #menu="nzDropdownMenu">
+                        <ul nz-menu>
+                            <li nz-menu-item (click)="editModal(data)">
+                                <a class="edit">
+                                    <span nz-icon nzType="edit" nzTheme="outline"></span>
+                                    Edit
+                                </a>
+                            </li>
+                            <li nz-menu-item (click)="deleteEducation(data.id)">
+                                <button class="delete" nzDanger>
+                                    <span nz-icon nzType="delete" nzTheme="outline"></span>
+                                    Delete
+                                </button>
+                            </li>
+                        </ul>
+                    </nz-dropdown-menu>
+                </td>
+            </tr>
+        </tbody>
+    </nz-table>
+</div>
+<ng-template #noDataTemplate>
+    <div class="no-data">
+        <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+        <p>No Education Background added yet</p>
+    </div>
+</ng-template>

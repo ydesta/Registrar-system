@@ -1,0 +1,66 @@
+<div class="table-container">
+  <h2 class="table-title">
+    <span nz-icon nzType="tags"></span> Registered Courses
+  </h2>
+
+  <div id="print-section">
+    <nz-table #basicTable [nzData]="studentTermCourseReg!" nzBordered>
+      <thead class="table-header-row">
+        <tr class="table-header-row">
+          <th nzWidth="60px" class="th-row">Courses</th>
+          <th class="th-row">Academic Term</th>
+          <th class="th-row">Registration Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let data of basicTable.data; let i = index">
+          <tr>
+            <td [nzExpand]="expandSet.has(data.id)" (nzExpandChange)="onExpandChange(data.id, $event)"></td>
+            <td>
+              {{
+              getAcademicTermStatusDescription(data.academicTermSeason) + data.year
+              }}
+            </td>
+            <td>{{ data.registrationDate | date : "dd/MM/yyyy" }}</td>
+          </tr>
+          <tr [nzExpand]="expandSet.has(data.id)">
+            <td colspan="3">
+              <nz-table [nzData]="getCourseDetails(data)" nzBordered>
+                <thead>
+                  <tr>
+                    <th>Course Code</th>
+                    <th>Course Title</th>
+                    <th>Credit Hours</th>
+                    <th>Status</th>
+                    <th>Grade</th>
+                    <th>Point</th>
+                  </tr>
+                </thead>
+      <tbody>
+        <tr *ngFor="let course of getCourseDetails(data); let i = index">
+          <td>{{ course.code }}</td>
+          <td>{{ course.title }}</td>
+          <td>{{ course.creditHours }}</td>
+          <td>{{ getStatusDescription(course.status) }}</td>
+          <td>{{ course.grade }}</td>
+          <td>{{ course.point }}</td>
+        </tr>
+      </tbody>
+      <tfoot class="footer-row">
+        <tr>
+          <td></td>
+          <td><strong>Total</strong></td>
+          <td><strong>{{ getTotalCreditHours(data) }}</strong></td>
+          <td></td>
+          <td><strong>{{ calculateGPA(data) }}</strong></td>
+          <td><strong>{{ getTotalPoints(data) }}</strong></td>
+        </tr>
+      </tfoot>
+    </nz-table>
+    </td>
+    </tr>
+    </ng-container>
+    </tbody>
+    </nz-table>
+  </div>
+</div>

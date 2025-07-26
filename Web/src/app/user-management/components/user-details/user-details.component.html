@@ -1,0 +1,270 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <button nz-button class="back-button" (click)="goBack()">
+        <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+        Back to Users
+      </button>
+      
+      <div class="header-actions">
+        <div *ngIf="!isEditing" class="edit-actions">
+          <button nz-button class="edit-button" (click)="startEditing()">
+            <span nz-icon nzType="edit" nzTheme="outline"></span>
+            Edit User
+          </button>
+        </div>
+        
+        <div *ngIf="isEditing" class="edit-actions">
+          <button nz-button class="save-button" (click)="saveChanges()" [disabled]="!form.valid || loading">
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+            Save Changes
+          </button>
+          <button nz-button class="cancel-button" (click)="cancelEditing()">
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <nz-spin nzSize="large"></nz-spin>
+    <p>Loading user details...</p>
+  </div>
+
+  <!-- User Details Content -->
+  <div *ngIf="!loading && user" class="user-details-content">
+    <!-- Basic Information -->
+    <div class="info-card">
+      <nz-card nzTitle="Basic Information" [nzExtra]="basicInfoExtra">
+        <ng-template #basicInfoExtra>
+          <span nz-icon nzType="user" nzTheme="outline" style="color: #1890ff; font-size: 18px;"></span>
+        </ng-template>
+        
+        <div *ngIf="!isEditing">
+          <nz-descriptions nzSize="small" [nzColumn]="2">
+            <nz-descriptions-item nzTitle="Full Name">
+              <span nz-icon nzType="user" nzTheme="outline"></span>
+              {{ user.firstName }} {{ user.lastName }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Email">
+              <span nz-icon nzType="mail" nzTheme="outline"></span>
+              {{ user.email }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Phone Number">
+              <span nz-icon nzType="phone" nzTheme="outline"></span>
+              {{ user.phoneNumber || 'Not provided' }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Created Date">
+              <span nz-icon nzType="calendar" nzTheme="outline"></span>
+              {{ user.createdAt | date:'mediumDate' }}
+            </nz-descriptions-item>
+          </nz-descriptions>
+        </div>
+        
+        <form *ngIf="isEditing" nz-form [formGroup]="form" nzLayout="vertical">
+          <div nz-row [nzGutter]="16">
+            <div nz-col [nzSpan]="12">
+              <nz-form-item nz-col label="First Name">
+                <nz-form-control nzErrorTip="Please input first name!">
+                  <input nz-input formControlName="firstName" placeholder="Enter first name" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item nz-col label="Last Name">
+                <nz-form-control nzErrorTip="Please input last name!">
+                  <input nz-input formControlName="lastName" placeholder="Enter last name" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+          
+          <div nz-row [nzGutter]="16">
+            <div nz-col [nzSpan]="12">
+              <nz-form-item nz-col label="Email">
+                <nz-form-control nzErrorTip="Please input email!">
+                  <input nz-input formControlName="email" placeholder="Enter email" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item nz-col label="Phone Number">
+                <nz-form-control>
+                  <input nz-input formControlName="phoneNumber" placeholder="Enter phone number" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+        </form>
+      </nz-card>
+    </div>
+
+    <!-- Account Status -->
+    <div class="info-card">
+      <nz-card nzTitle="Account Status" [nzExtra]="statusExtra">
+        <ng-template #statusExtra>
+          <span nz-icon nzType="safety" nzTheme="outline" style="color: #52c41a; font-size: 18px;"></span>
+        </ng-template>
+        
+        <nz-descriptions nzSize="small" [nzColumn]="2">
+          <nz-descriptions-item nzTitle="Email Verified">
+            <nz-tag [nzColor]="user.isEmailConfirmed ? 'green' : 'red'">
+              <span nz-icon [nzType]="user.isEmailConfirmed ? 'check-circle' : 'close-circle'" nzTheme="outline"></span>
+              {{ user.isEmailConfirmed ? 'Verified' : 'Not Verified' }}
+            </nz-tag>
+          </nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Phone Verified">
+            <nz-tag [nzColor]="user.isPhoneConfirmed ? 'green' : 'orange'">
+              <span nz-icon [nzType]="user.isPhoneConfirmed ? 'lock' : 'unlock'" nzTheme="outline"></span>
+              {{ user.isPhoneConfirmed ? 'Verified' : 'Not Verified' }}
+            </nz-tag>
+          </nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Account Status">
+            <nz-tag [nzColor]="user.isActive ? 'green' : 'red'">
+              <span nz-icon [nzType]="user.isActive ? 'check-circle' : 'stop'" nzTheme="outline"></span>
+              {{ user.isActive ? 'Active' : 'Inactive' }}
+            </nz-tag>
+          </nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Last Login">
+            <span nz-icon nzType="clock-circle" nzTheme="outline"></span>
+            {{ user.lastLoginAt ? (user.lastLoginAt | date:'medium') : 'Never' }}
+          </nz-descriptions-item>
+        </nz-descriptions>
+      </nz-card>
+    </div>
+
+    <!-- Roles -->
+    <div class="info-card">
+      <nz-card nzTitle="User Roles" [nzExtra]="rolesExtra">
+        <ng-template #rolesExtra>
+          <span nz-icon nzType="team" nzTheme="outline" style="color: #722ed1; font-size: 18px;"></span>
+        </ng-template>
+        
+        <div *ngIf="!isEditing" class="roles-section">
+          <div *ngIf="user.roles && user.roles.length > 0; else noRoles">
+            <div class="role-item" *ngFor="let role of user.roles">
+              <nz-tag class="active-role">
+                <span nz-icon nzType="crown" nzTheme="outline"></span>
+                {{ role.name }}
+              </nz-tag>
+            </div>
+          </div>
+          <ng-template #noRoles>
+            <div class="no-roles">
+              <span nz-icon nzType="user-delete" nzTheme="outline"></span>
+              No roles assigned
+            </div>
+          </ng-template>
+        </div>
+
+        <!-- Role Selection in Edit Mode -->
+        <div *ngIf="isEditing">
+          <nz-form-item label="User Roles">
+            <nz-form-control>
+              <nz-select 
+                formControlName="selectedRoles" 
+                [nzMode]="'multiple'"
+                nzPlaceHolder="Select roles for this user"
+                [nzLoading]="loadingRoles"
+                [nzShowSearch]="true"
+                style="width: 100%;">
+                <nz-option 
+                  *ngFor="let role of availableRoles" 
+                  [nzValue]="role.id" 
+                  [nzLabel]="role.name">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span nz-icon nzType="crown" nzTheme="outline" style="color: #722ed1;"></span>
+                    <span>{{ role.name }}</span>
+                    <span *ngIf="role.description" style="color: #6b7280; font-size: 12px; margin-left: auto;">
+                      {{ role.description }}
+                    </span>
+                  </div>
+                </nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+          
+          <div class="selected-roles-preview" *ngIf="form.get('selectedRoles')?.value?.length > 0">
+            <div class="preview-label">Selected Roles:</div>
+            <div class="roles-section">
+              <div class="role-item" *ngFor="let roleId of form.get('selectedRoles')?.value">
+                <nz-tag class="active-role">
+                  <span nz-icon nzType="crown" nzTheme="outline"></span>
+                  {{ getRoleNameById(roleId) }}
+                </nz-tag>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nz-card>
+    </div>
+
+    <!-- Permissions -->
+    <div class="info-card">
+      <nz-card nzTitle="User Permissions" [nzExtra]="permissionsExtra">
+        <ng-template #permissionsExtra>
+          <span nz-icon nzType="key" nzTheme="outline" style="color: #fa8c16; font-size: 18px;"></span>
+        </ng-template>
+        
+        <div class="permissions-section">
+          <div *ngIf="user.permissions && user.permissions.length > 0; else noPermissions">
+            <div class="permission-item" *ngFor="let permission of user.permissions">
+              <nz-tag>
+                <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+                {{ permission.name }}
+              </nz-tag>
+            </div>
+          </div>
+          <ng-template #noPermissions>
+            <div class="no-roles">
+              <span nz-icon nzType="stop" nzTheme="outline"></span>
+              No permissions assigned
+            </div>
+          </ng-template>
+        </div>
+      </nz-card>
+    </div>
+
+    <!-- Account Details -->
+    <div class="info-card">
+      <nz-card nzTitle="Account Details" [nzExtra]="accountExtra">
+        <ng-template #accountExtra>
+          <span nz-icon nzType="setting" nzTheme="outline" style="color: #13c2c2; font-size: 18px;"></span>
+        </ng-template>
+        
+        <nz-descriptions nzSize="small" [nzColumn]="2">
+          <nz-descriptions-item nzTitle="User ID">
+            <span nz-icon nzType="idcard" nzTheme="outline"></span>
+            {{ user.id }}
+          </nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Email">
+            <span nz-icon nzType="user" nzTheme="outline"></span>
+            {{ user.email }}
+          </nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Created Date">
+            <span nz-icon nzType="calendar" nzTheme="outline"></span>
+            {{ user.createdAt | date:'medium' }}
+          </nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Last Login">
+            <span nz-icon nzType="edit" nzTheme="outline"></span>
+            {{ user.lastLoginAt ? (user.lastLoginAt | date:'medium') : 'Never' }}
+          </nz-descriptions-item>
+        </nz-descriptions>
+      </nz-card>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !user" class="empty-state">
+    <nz-empty nzNotFoundImage="simple" nzNotFoundContent="User not found">
+      <button nz-button nzType="primary" (click)="goBack()">
+        <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+        Back to Users
+      </button>
+    </nz-empty>
+  </div>
+</div> 

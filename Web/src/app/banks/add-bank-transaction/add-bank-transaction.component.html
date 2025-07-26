@@ -1,0 +1,38 @@
+
+<h3 class="h-tag">{{action}}</h3>
+
+<div>
+    <form nz-form  nzLayout="vertical" [formGroup]="bankTransactionForm" (ngSubmit)="submitForm()">
+        <nz-form-item>
+            <nz-form-label [nzSpan]="7" nzRequired>Bank"</nz-form-label>
+            <nz-form-control [nzSpan]="7" nzValidatingTip="Validating...">
+              <nz-select formControlName="bankID" nzPlaceHolder="select bank" >
+                  <nz-option *ngFor="let item of banks" [nzValue]="item.id" [nzLabel]="item.bankName "></nz-option>
+                </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="7" nzRequired>Transaction ID</nz-form-label>
+            <nz-form-control [nzSpan]="7" nzValidatingTip="Validating...">
+                <input nz-input formControlName="transactionID" placeholder="enter transactionID" />
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="7" nzRequired>Payment Date</nz-form-label>
+            <nz-form-control [nzSpan]="7">
+                <nz-date-picker formControlName="paymentDate"></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+        <nz-form-item>
+          <nz-form-label [nzSpan]="7" nzRequired>Amount</nz-form-label>
+          <nz-form-control [nzSpan]="7">
+            <input nz-input formControlName="amount" placeholder="enter amount" />
+          </nz-form-control>
+        </nz-form-item>   
+        <nz-form-item>
+          <nz-form-control [nzOffset]="7" [nzSpan]="7">
+            <button nz-button nzType="primary">{{submit}}</button>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+</div>

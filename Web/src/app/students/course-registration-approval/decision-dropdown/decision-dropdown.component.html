@@ -1,0 +1,47 @@
+<!-- <ng-container>
+    <button nz-button nz-dropdown [nzDropdownMenu]="menu">
+        <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
+    </button>
+    <nz-dropdown-menu #menu="nzDropdownMenu">
+        <ul nz-menu>
+            <li>
+                <button nz-button nzType="primary" (click)="acceptCourse(courseId)">
+                    <span>Accept</span>
+                </button>
+            </li>
+            <li>
+                <button nz-button nzDanger nzType="default" (click)="rejectCourse(courseId)">
+                    <i nz-icon nzType="delete" nzTheme="fill"></i>
+                    <span>Reject</span>
+                </button>
+            </li>
+        </ul>
+    </nz-dropdown-menu>
+</ng-container> -->
+
+<ng-container>
+    <button nz-button nz-dropdown [nzDropdownMenu]="menu">
+        <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
+    </button>
+    <nz-dropdown-menu #menu="nzDropdownMenu">
+        <ul nz-menu>
+            <li>
+                <button nz-button nzType="default" class="detail">
+                    <i nz-icon nzType="eye" nzTheme="fill"></i>
+                    <span>Detail</span>
+                </button>
+            </li>
+            <li>
+                <a style="border-style: none" nz-button nzType="default" class="edit">
+                    <i nz-icon nzType="edit" nzTheme="fill"></i>
+                    <span>Edit</span></a>
+            </li>
+            <li>
+                <button nz-button nzDanger nzType="default">
+                    <i nz-icon nzType="delete" nzTheme="fill"></i>
+                    <span>Delete</span>
+                </button>
+            </li>
+        </ul>
+    </nz-dropdown-menu>
+</ng-container>

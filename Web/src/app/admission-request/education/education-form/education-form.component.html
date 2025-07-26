@@ -1,0 +1,192 @@
+<div class="education-form-container">
+  <!-- Form Header -->
+  <div class="form-header">
+    <div class="header-icon">
+      <i nz-icon nzType="book" nzTheme="outline"></i>
+    </div>
+    <div class="header-content">
+      <h2 class="form-title">Education Background</h2>
+      <p class="form-subtitle">Please provide your educational qualifications and achievements</p>
+    </div>
+  </div>
+
+  <!-- Form Content -->
+  <form nz-form [formGroup]="applicantEducationBacgroundForm" class="education-form">
+    <!-- School/University Name Field -->
+    <nz-form-item>
+      <nz-form-label [nzSpan]="8" required>
+        <i nz-icon nzType="bank" nzTheme="outline" class="field-icon"></i>
+        Institution Name
+      </nz-form-label>
+      <nz-form-control [nzSpan]="16" [nzErrorTip]="schoolNameErrorTpl">
+        <input 
+          nz-input 
+          formControlName="schoollName" 
+          placeholder="Enter college or university name"
+          class="form-input"
+          [class.error]="schoollName.invalid && (schoollName.dirty || schoollName.touched)" 
+        />
+        <ng-template #schoolNameErrorTpl let-control>
+          <div class="error-message" *ngIf="control.hasError('required')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            Institution name is required
+          </div>
+          <div class="error-message" *ngIf="control.hasError('alphabetsOnly')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            {{ control.getError('alphabetsOnly').message }}
+          </div>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!-- Major Area of Study Field -->
+    <nz-form-item>
+      <nz-form-label [nzSpan]="8" required>
+        <i nz-icon nzType="experiment" nzTheme="outline" class="field-icon"></i>
+        Field of Study
+      </nz-form-label>
+      <nz-form-control [nzSpan]="16" [nzErrorTip]="fieldOfStudyErrorTpl">
+        <input 
+          nz-input 
+          formControlName="fieldOfStudy" 
+          placeholder="Enter your major or field of study"
+          class="form-input"
+          [class.error]="fieldOfStudy.invalid && (fieldOfStudy.dirty || fieldOfStudy.touched)" 
+        />
+        <ng-template #fieldOfStudyErrorTpl let-control>
+          <div class="error-message" *ngIf="control.hasError('required')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            Field of study is required
+          </div>
+          <div class="error-message" *ngIf="control.hasError('alphabetsOnly')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            {{ control.getError('alphabetsOnly').message }}
+          </div>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!-- Degree Obtained Field -->
+    <nz-form-item>
+      <nz-form-label [nzSpan]="8" required>
+        <i nz-icon nzType="trophy" nzTheme="outline" class="field-icon"></i>
+        Degree Level
+      </nz-form-label>
+      <nz-form-control [nzSpan]="16" [nzErrorTip]="programmeLevelErrorTpl">
+        <input 
+          nz-input 
+          formControlName="programmeLevel" 
+          placeholder="Enter degree level (e.g., Bachelor's, Master's)"
+          class="form-input"
+          [class.error]="programmeLevel.invalid && (programmeLevel.dirty || programmeLevel.touched)" 
+        />
+        <ng-template #programmeLevelErrorTpl let-control>
+          <div class="error-message" *ngIf="control.hasError('required')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            Degree level is required
+          </div>
+          <div class="error-message" *ngIf="control.hasError('alphabetsOnly')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            {{ control.getError('alphabetsOnly').message }}
+          </div>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!-- Year Range Field -->
+    <nz-form-item>
+      <nz-form-label [nzSpan]="8" required>
+        <i nz-icon nzType="calendar" nzTheme="outline" class="field-icon"></i>
+        Study Period
+      </nz-form-label>
+      <nz-form-control [nzSpan]="16" [nzErrorTip]="graduatedYearErrorTpl">
+        <nz-range-picker 
+          nzMode="year" 
+          formControlName="graduatedYear"
+          placeholder="['Start Year', 'End Year']"
+          class="form-date-picker"
+          [class.error]="graduatedYear.invalid && (graduatedYear.dirty || graduatedYear.touched)"
+        ></nz-range-picker>
+        <ng-template #graduatedYearErrorTpl let-control>
+          <div class="error-message" *ngIf="control.hasError('required')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            Study period is required
+          </div>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!-- Remark Field -->
+    <nz-form-item>
+      <nz-form-label [nzSpan]="8">
+        <i nz-icon nzType="file-text" nzTheme="outline" class="field-icon"></i>
+        Additional Notes
+      </nz-form-label>
+      <nz-form-control [nzSpan]="16">
+        <input 
+          nz-input 
+          formControlName="remark" 
+          placeholder="Enter any additional information or achievements"
+          class="form-input"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <!-- File Upload Field -->
+    <nz-form-item *ngIf="educationId==undefined">
+      <nz-form-label [nzSpan]="8">
+        <i nz-icon nzType="upload" nzTheme="outline" class="field-icon"></i>
+        Supporting Documents
+      </nz-form-label>
+      <nz-form-control [nzSpan]="16">
+        <div class="file-upload-section">
+          <label class="file-upload-label">
+            <i nz-icon nzType="paper-clip" nzTheme="outline"></i>
+            <span class="upload-text">Click to attach documents</span>
+            <input 
+              nz-input 
+              type="file" 
+              style="visibility: hidden" 
+              #f_input
+              (change)="handleFileInputChange(f_input.files)" 
+              accept=".pdf, .jpg, .jpeg, .png, .gif"
+              multiple 
+            />
+          </label>
+          <!-- File List Display -->
+          <div class="file-list" *ngIf="file_list.length > 0">
+            <div class="file-item" *ngFor="let fileName of file_list">
+              <i nz-icon nzType="file" nzTheme="outline"></i>
+              <span class="file-name">{{ fileName }}</span>
+            </div>
+          </div>
+        </div>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <div class="action-buttons">
+        <button 
+          nz-button 
+          nzType="default" 
+          (click)="closeModal()"
+          class="cancel-btn"
+        >
+          <i nz-icon nzType="close" nzTheme="outline"></i>
+          Cancel
+        </button>
+        <button 
+          nz-button 
+          nzType="primary" 
+          (click)="onSave()"
+          [disabled]="!applicantEducationBacgroundForm.valid"
+          class="submit-btn"
+        >
+          <i nz-icon nzType="save" nzTheme="outline"></i>
+          {{ educationId ? 'Update' : 'Save' }} Education
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

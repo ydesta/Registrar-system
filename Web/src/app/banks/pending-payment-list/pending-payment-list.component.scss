@@ -1,0 +1,246 @@
+.pending-payments-container {
+  padding: 24px;
+
+  .header-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+
+    .title-section {
+      h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #262626;
+      }
+
+      .subtitle {
+        margin-top: 4px;
+        color: #8c8c8c;
+        font-size: 14px;
+      }
+    }
+
+    .total-amount {
+      background: #f5f5f5;
+      padding: 16px 24px;
+      border-radius: 8px;
+      text-align: right;
+
+      .label {
+        font-size: 14px;
+        color: #8c8c8c;
+        margin-bottom: 4px;
+      }
+
+      .amount {
+        font-size: 24px;
+        font-weight: 600;
+        color: #262626;
+      }
+    }
+  }
+
+  .instruction-section {
+    background: #fff;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    h4 {
+      margin: 0 0 20px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #262626;
+    }
+
+    .steps {
+      display: grid;
+      gap: 20px;
+
+      .step {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+
+        .step-number {
+          width: 32px;
+          height: 32px;
+          background: #1890ff;
+          color: white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
+          flex-shrink: 0;
+        }
+
+        .step-content {
+          flex: 1;
+
+          .step-title {
+            font-weight: 500;
+            color: #262626;
+            margin-bottom: 4px;
+          }
+
+          .step-description {
+            color: #8c8c8c;
+            font-size: 14px;
+            line-height: 1.5;
+          }
+        }
+      }
+    }
+  }
+}
+
+::ng-deep {
+  .ant-table {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .ant-table-thead > tr > th {
+      background: #fafafa;
+      color: #262626;
+      font-weight: 600;
+      padding: 16px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .ant-table-tbody > tr > td {
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .ant-table-tbody > tr:hover > td {
+      background: #f5f5f5;
+    }
+  }
+
+  .action-button {
+    button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 32px;
+      padding: 0 16px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+
+      .currency-symbol {
+        font-size: 14px;
+        font-weight: 600;
+        color: inherit;
+      }
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+
+  .status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+
+    &.pending {
+      background: #fff7e6;
+      color: #d46b08;
+      border: 1px solid #ffd591;
+    }
+
+    &.approved {
+      background: #f6ffed;
+      color: #389e0d;
+      border: 1px solid #b7eb8f;
+    }
+
+    &.rejected {
+      background: #fff1f0;
+      color: #cf1322;
+      border: 1px solid #ffa39e;
+    }
+  }
+
+  .amount-cell {
+    font-weight: 500;
+    color: #262626;
+  }
+
+  .date-cell {
+    color: #8c8c8c;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+
+    .empty-icon {
+      font-size: 48px;
+      color: #d9d9d9;
+      margin-bottom: 16px;
+    }
+
+    .empty-text {
+      color: #8c8c8c;
+      font-size: 16px;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .pending-payments-container {
+    padding: 16px;
+
+    .header-section {
+      flex-direction: column;
+      gap: 16px;
+
+      .total-amount {
+        width: 100%;
+        text-align: left;
+      }
+    }
+
+    .instruction-section {
+      padding: 16px;
+
+      .steps {
+        .step {
+          gap: 12px;
+
+          .step-number {
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+          }
+
+          .step-content {
+            .step-title {
+              font-size: 14px;
+            }
+
+            .step-description {
+              font-size: 13px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

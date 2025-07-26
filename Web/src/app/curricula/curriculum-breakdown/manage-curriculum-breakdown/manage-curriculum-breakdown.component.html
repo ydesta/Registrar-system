@@ -1,0 +1,61 @@
+<h3 class="h-tag">
+    <button nz-button style="float: right;" nzType="primary" (click)="goToCurriculum()"> <span nz-icon
+        nzType="left-circle" nzTheme="outline"></span>
+    Back</button>
+    {{code}} - {{programme}}</h3>
+<nz-divider></nz-divider>
+<nz-card>
+
+    <div>
+        <form nz-form [formGroup]="curriculumBreakdownForm">
+            <div nz-row [nzGutter]="24">
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
+                        <nz-form-label [nzSpan]="6" nzRequired>Year Number</nz-form-label>
+                        <nz-form-control nzValidatingTip="Validating...">
+                            <nz-form-control>
+                                <nz-select formControlName="yearNumber" nzPlaceHolder="select year number" required>
+                                    <nz-option *ngFor="let item of listOfYearNumber" [nzValue]="item.Id"
+                                        [nzLabel]="item.Description"></nz-option>
+                                </nz-select>
+                                <!-- <div nz-form-explain
+                                    *ngIf="curriculumBreakdawnForm.controls['yearNumber'].invalid && (curriculumBreakdawnForm.controls['yearNumber'].dirty || curriculumBreakdawnForm.controls['yearNumber'].touched)">
+                                    <span class="error-message">Year Number is required.</span>
+                                </div> -->
+                            </nz-form-control>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</nz-card>
+<nz-card style="margin-top: 6px;" >
+    <div *ngIf="numberOfTerms; else elseBlock">
+        <nz-row [nzGutter]="16">
+            <nz-col *ngFor="let breakdown of curriculumQuadrants; let first = first" [nzSpan]="12"
+                class="panel-padding">
+                <nz-collapse [nzAccordion]="true">
+                    <nz-collapse-panel [nzHeader]="getAcademicTermStatusDescription(breakdown.termNumber)">
+                        <app-course-details [courses]="breakdown.course"></app-course-details>
+                    </nz-collapse-panel>
+                </nz-collapse>
+            </nz-col>
+        </nz-row>
+    </div>
+    <ng-template #elseBlock>
+        <nz-alert nzShowIcon nzType="info" nzMessage="info" [nzDescription]="descriptionTemplate1"
+            [nzAction]="actionTemplate2"></nz-alert>
+        <ng-template #descriptionTemplate1>
+            <p>Please proceed with the task of recording the course breakdown for the curriculum quadrants.
+                Kindly begin by documenting the course breakdown for the curriculum quadrant, focusing on this
+                particular
+                curriculum.</p>
+        </ng-template>
+        <ng-template #actionTemplate2>
+            <button nz-button nzSize="small" nzType="primary" (click)="doAction()">Click here to record
+                course breakdown</button>
+        </ng-template>
+    </ng-template>
+</nz-card>

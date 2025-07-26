@@ -1,0 +1,593 @@
+.custom-tabset {
+  display: flex;
+  border: none;
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  margin-bottom: 32px;
+}
+
+.custom-tab {
+  padding: 16px 24px;
+  border: none;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #495057;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  &:hover {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    color: #1890ff;
+    transform: translateY(-2px);
+  }
+  
+  &.active {
+    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+    
+    span {
+      color: #ffffff !important;
+    }
+  }
+  
+  span {
+    font-size: 16px;
+  }
+}
+
+.custom-buttons {
+  display: flex;
+  size: 20px;
+  margin-top: 16px;
+}
+
+.custom-button {
+  margin-right: 8px;
+}
+
+.custom-button.primary {
+  background-color: #1890ff;
+  border-color: #1890ff;
+}
+
+.custom-button.primary:hover {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
+}
+::ng-deep .ant-card-head {
+  background: #1890ff;
+}
+/* Custom styles for form container */
+.nz-form-item {
+  margin-bottom: 24px;
+}
+
+/* Custom styles for form labels */
+.nz-form-label {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 14px;
+}
+
+/* Custom styles for form validation errors */
+.nz-form-explain {
+  color: #ff4d4f;
+}
+
+/* Custom styles for the submit button */
+.nz-form-control-button {
+  text-align: right;
+}
+/* Custom styles for the error message and input */
+.error {
+  border-color: #ff4d4f; /* Change the input border color to red when there's an error */
+}
+
+.error .ant-form-explain {
+  color: #ff4d4f; /* Set the error message color to red */
+  margin-top: 4px; /* Add some spacing between the input and error message */
+}
+.error-message {
+  color: #ff4d4f;
+}
+.profile-container {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+  margin-bottom: 32px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.profile-picture {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-picture img {
+  width: 100%;
+  height: auto;
+  border-radius: 50%;
+}
+.custom-form-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.custom-tabset .ant-tabs-tab {
+  font-size: 26px; /* Adjust the font size as needed */
+}
+/* styles.css or your component's style file */
+.custom-tabset .custom-buttons {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 0;
+}
+.attach-photo {
+  height: 150px;
+  // border: 1px solid #1890ff;
+  padding: 5px;
+  width: 250px;
+  border-radius: 5%;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.profile-path {
+  padding: 4px;
+  align-items: center;
+  height: 200px;
+  width: 300px;
+  border-radius: 50%;
+}
+:host ::ng-deep .custom-tabset .ant-tabs-tab-active {
+  background-color: #1890ff;
+}
+.custom-tabset ::ng-deep .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #fff;
+}
+
+// Enhanced professional styling for applicant request detail component
+.professional-header {
+  margin-bottom: 40px;
+  text-align: center;
+  padding: 32px 0;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 8px 32px rgba(24, 144, 255, 0.3);
+  
+  .page-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: #ffffff;
+  }
+  
+  .page-subtitle {
+    font-size: 18px;
+    opacity: 0.9;
+    margin: 0;
+    font-weight: 300;
+    color: #ffffff;
+  }
+}
+
+.professional-form {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+  margin-bottom: 32px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+}
+
+.profile-section {
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid #1890ff;
+    
+    span {
+      color: #1890ff;
+      font-size: 24px;
+    }
+  }
+}
+
+.information-section {
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid #1890ff;
+    
+    span {
+      color: #1890ff;
+      font-size: 24px;
+    }
+  }
+}
+
+.contact-section {
+  margin-top: 40px;
+  padding-left: 48px;
+  padding-right: 48px;
+  
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid #1890ff;
+    
+    span {
+      color: #1890ff;
+      font-size: 24px;
+    }
+  }
+}
+
+.profile-photo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  
+  .photo-wrapper {
+    position: relative;
+    
+    .profile-image {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 6px solid #ffffff;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+}
+
+.form-label {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 14px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.readonly-input {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  border: 2px solid #e9ecef !important;
+  border-radius: 8px !important;
+  color: #495057 !important;
+  cursor: not-allowed;
+  font-weight: 500;
+  padding: 12px 16px !important;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: #dee2e6 !important;
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%) !important;
+  }
+  
+  &:focus {
+    border-color: #1890ff !important;
+    box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1) !important;
+  }
+}
+
+.readonly-select {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  border: 2px solid #e9ecef !important;
+  border-radius: 8px !important;
+  color: #495057 !important;
+  cursor: not-allowed;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: #dee2e6 !important;
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%) !important;
+  }
+  
+  &:focus {
+    border-color: #1890ff !important;
+    box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1) !important;
+  }
+}
+
+.professional-table {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+  }
+  
+  .table-header {
+    background: #fafafa;
+    font-weight: 600;
+    color: #262626;
+    padding: 20px 16px;
+    border-bottom: 2px solid #f0f0f0;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .table-row {
+    transition: background 0.3s ease;
+    border-bottom: 1px solid #f8f9fa;
+    
+    &:hover {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+  
+  .table-cell {
+    padding: 20px 16px;
+    border-bottom: 1px solid #f8f9fa;
+    vertical-align: middle;
+    font-weight: 500;
+    color: #495057;
+  }
+}
+
+.document-button {
+  color: #1890ff;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background: rgba(24, 144, 255, 0.1);
+  
+  &:hover {
+    color: #ffffff;
+    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  }
+  
+  span {
+    font-size: 16px;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 40px;
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+}
+
+.professional-button {
+  min-width: 140px;
+  height: 48px;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  &.ant-btn-primary {
+    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+    border: none;
+    
+    &:hover {
+      background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%);
+    }
+  }
+  
+  &.ant-btn-default {
+    border: 2px solid #1890ff;
+    color: #1890ff;
+    
+    &:hover {
+      background: #1890ff;
+      color: #ffffff;
+    }
+  }
+}
+
+.files-content {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  padding: 60px;
+  text-align: center;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+  }
+}
+
+// Status tag styling
+::ng-deep .ant-tag {
+  border-radius: 6px;
+  font-weight: 600;
+  padding: 4px 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  &.ant-tag-success {
+    background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+    border: none;
+    color: #ffffff;
+  }
+  
+  &.ant-tag-processing {
+    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+    border: none;
+    color: #ffffff;
+  }
+  
+  &.ant-tag-error {
+    background: linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%);
+    border: none;
+    color: #ffffff;
+  }
+  
+  &.ant-tag-default {
+    background: linear-gradient(135deg, #d9d9d9 0%, #bfbfbf 100%);
+    border: none;
+    color: #595959;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .professional-header {
+    padding: 24px 16px;
+    
+    .page-title {
+      font-size: 24px;
+    }
+    
+    .page-subtitle {
+      font-size: 16px;
+    }
+  }
+  
+  .profile-photo-container {
+    .photo-wrapper {
+      .profile-image {
+        width: 150px;
+        height: 150px;
+      }
+    }
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+    
+    .professional-button {
+      width: 100%;
+      max-width: 250px;
+    }
+  }
+  
+  .professional-form,
+  .profile-container {
+    padding: 24px 16px;
+  }
+  
+  .custom-tab {
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+}
+
+// Animation for page load
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.professional-header,
+.professional-form,
+.profile-container,
+.professional-table {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+// Responsive design for decision section
+@media (max-width: 768px) {
+  .decision-section {
+    .decision-card {
+      ::ng-deep .ant-card-body {
+        padding: 1.5rem;
+      }
+    }
+    
+    .decision-actions {
+      .decision-submit-btn {
+        width: 100%;
+        height: 44px;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+

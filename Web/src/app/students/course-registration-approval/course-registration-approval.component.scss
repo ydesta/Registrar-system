@@ -1,0 +1,477 @@
+// Content Container
+.content-container {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+// Header Section
+.header-section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  position: relative;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .page-title {
+      flex: 1;
+      min-width: 0;
+      .title-text {
+        margin: 0 0 8px 0;
+        font-size: 28px;
+        font-weight: 700;
+        color: #1f2937;
+        line-height: 1.2;
+      }
+      .subtitle-text {
+        margin: 0;
+        color: #6b7280;
+        font-size: 16px;
+        font-weight: 400;
+      }
+    }
+  }
+}
+
+// Table Card
+.table-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  padding: 0 0 24px 0;
+}
+
+// Table Styling
+.registration-table {
+  background: transparent;
+  font-size: 15px;
+  
+  ::ng-deep .ant-table {
+    background: transparent;
+    
+    .ant-table-thead > tr > th {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-bottom: 2px solid #e2e8f0;
+      font-weight: 600;
+      color: #374151;
+      padding: 16px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .ant-table-tbody > tr > td {
+      border-bottom: 1px solid #f1f5f9;
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .ant-table-tbody > tr:hover > td {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      transform: scale(1.01);
+    }
+    
+    .ant-table-tbody > tr:nth-child(even) > td {
+      background: #fafafa;
+    }
+    
+    .ant-table-tbody > tr:nth-child(even):hover > td {
+      background: #f0f0f0;
+    }
+    
+    .ant-table-pagination {
+      margin: 16px 0 0 0;
+    }
+  }
+}
+
+// S/N Badge
+.sn-badge {
+  display: inline-block;
+  background: #1890ff;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 24px;
+  text-align: center;
+}
+
+// Student Info
+.student-info {
+  .student-name {
+    font-weight: 500;
+    color: #1f2937;
+  }
+}
+
+// Tags
+.term-tag, .year-tag, .entry-tag, .status-tag {
+  border-radius: 12px;
+  padding: 4px 12px;
+  font-weight: 500;
+}
+
+// Date Text
+.date-text {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+// Expand Button
+.expand-btn {
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  
+  &:hover {
+    background: #f3f4f6;
+    color: #374151;
+    border-color: #d1d5db;
+  }
+}
+
+// Expanded Row
+.expanded-row {
+  background: #f8f9fa;
+  
+  td {
+    padding: 24px !important;
+  }
+}
+
+// Course Details
+.course-details {
+  .details-header {
+    margin-bottom: 20px;
+    
+    .details-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      span[nz-icon] {
+        color: #1890ff;
+      }
+    }
+  }
+}
+
+// Course Table
+.course-table {
+  margin-bottom: 24px;
+  
+  ::ng-deep .ant-table {
+    .ant-table-thead > tr > th {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-bottom: 2px solid #e2e8f0;
+      font-weight: 600;
+      color: #374151;
+      padding: 12px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .ant-table-tbody > tr > td {
+      border-bottom: 1px solid #f1f5f9;
+      padding: 12px;
+      transition: all 0.3s ease;
+    }
+    
+    .ant-table-tbody > tr:hover > td {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+    
+    .ant-table-tbody > tr:nth-child(even) > td {
+      background: #fafafa;
+    }
+    
+    .ant-table-tbody > tr:nth-child(even):hover > td {
+      background: #f0f0f0;
+    }
+  }
+}
+
+// Course S/N Badge
+.course-sn-badge {
+  display: inline-block;
+  background: #10b981;
+  color: white;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  min-width: 20px;
+  text-align: center;
+}
+
+// Course Info
+.course-code {
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Courier New', monospace;
+}
+
+.course-title {
+  font-weight: 500;
+  color: #374151;
+}
+
+// Credit Tag
+.credit-tag {
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-weight: 500;
+}
+
+// Course Status Tag
+.course-status-tag {
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-weight: 500;
+}
+
+// Action Buttons
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  
+  .accept-btn {
+    border-radius: 6px;
+    font-weight: 500;
+    height: 28px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    
+    span[nz-icon] {
+      font-size: 12px;
+    }
+  }
+  
+  .reject-btn {
+    border-radius: 6px;
+    font-weight: 500;
+    height: 28px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    
+    span[nz-icon] {
+      font-size: 12px;
+    }
+  }
+}
+
+// Summary Row
+.summary-row {
+  background: #f8f9fa;
+  
+  .total-label {
+    font-weight: 600;
+    color: #374151;
+  }
+  
+  .total-credit-tag {
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+}
+
+// Approval Form
+.approval-form {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  
+  ::ng-deep .ant-form-item-label > label {
+    color: #374151;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    span[nz-icon] {
+      color: #1890ff;
+    }
+  }
+  
+  ::ng-deep .ant-input {
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      border-color: #40a9ff;
+    }
+    
+    &:focus {
+      border-color: #1890ff;
+      box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+    }
+  }
+  
+  .submit-btn {
+    background: #1890ff;
+    color: white;
+    border-radius: 10px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+    padding: 0 24px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    
+    &:hover {
+      background: #40a9ff;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+    }
+    
+    span[nz-icon] {
+      font-size: 16px;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 900px) {
+  .header-section {
+    padding: 16px;
+    
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  }
+  
+  .table-card {
+    border-radius: 10px;
+    padding: 0 0 12px 0;
+  }
+  
+  .registration-table {
+    font-size: 13px;
+    
+    ::ng-deep .ant-table-thead > tr > th,
+    ::ng-deep .ant-table-tbody > tr > td {
+      padding: 10px;
+    }
+  }
+  
+  .course-table {
+    ::ng-deep .ant-table-thead > tr > th,
+    ::ng-deep .ant-table-tbody > tr > td {
+      padding: 8px;
+    }
+  }
+  
+  .approval-form {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .registration-table {
+    font-size: 12px;
+    
+    ::ng-deep .ant-table-thead > tr > th,
+    ::ng-deep .ant-table-tbody > tr > td {
+      padding: 8px;
+    }
+  }
+  
+  .course-table {
+    ::ng-deep .ant-table-thead > tr > th,
+    ::ng-deep .ant-table-tbody > tr > td {
+      padding: 6px;
+    }
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+    
+    .accept-btn, .reject-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .registration-table {
+    font-size: 11px;
+    
+    ::ng-deep .ant-table-thead > tr > th,
+    ::ng-deep .ant-table-tbody > tr > td {
+      padding: 6px 4px;
+    }
+  }
+  
+  .course-table {
+    ::ng-deep .ant-table-thead > tr > th,
+    ::ng-deep .ant-table-tbody > tr > td {
+      padding: 4px 2px;
+    }
+  }
+}
+
+// Global Overrides
+::ng-deep {
+  .ant-pagination {
+    .ant-pagination-item {
+      border-radius: 6px;
+      border: 1px solid #d9d9d9;
+      transition: all 0.3s ease;
+
+      &:hover {
+        border-color: #40a9ff;
+        color: #40a9ff;
+      }
+
+      &.ant-pagination-item-active {
+        background-color: #1890ff;
+        border-color: #1890ff;
+      }
+    }
+  }
+}

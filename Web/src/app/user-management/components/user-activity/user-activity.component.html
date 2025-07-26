@@ -1,0 +1,140 @@
+<div class="user-activity-container">
+  <!-- <div class="header-section">
+    <h2>User Activity</h2>
+    <p>Monitor user activities and system events</p>
+  </div> -->
+
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <div class="filter-row">
+      <div class="filter-item">
+        <label>User Email</label>
+        <input 
+          nz-input 
+          placeholder="Search by email..." 
+          [(ngModel)]="filters.userEmail" 
+          (ngModelChange)="onFilterChange()"
+          class="filter-input" />
+      </div>
+      
+      <div class="filter-item">
+        <label>Activity Type</label>
+        <nz-select 
+          [(ngModel)]="filters.activityType" 
+          (ngModelChange)="onFilterChange()" 
+          nzAllowClear 
+          nzPlaceHolder="Select activity type"
+          class="filter-select">
+          <nz-option 
+            *ngFor="let option of activityTypeOptions" 
+            [nzValue]="option.value" 
+            [nzLabel]="option.label">
+          </nz-option>
+        </nz-select>
+      </div>
+      
+      <div class="filter-item">
+        <label>Date Range</label>
+        <nz-range-picker 
+          [(ngModel)]="filters.dateRange" 
+          (ngModelChange)="onFilterChange()"
+          [nzShowTime]="false"
+          nzFormat="yyyy-MM-dd"
+          class="filter-date-picker">
+        </nz-range-picker>
+      </div>
+      
+      <div class="filter-item filter-actions">
+        <button 
+          nz-button 
+          nzType="primary" 
+          nzGhost
+          (click)="resetFilters()"
+          [disabled]="!hasActiveFilters()">
+          <span nz-icon nzType="reload"></span>
+          Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <nz-card [nzLoading]="loading">
+      <nz-table #activityTable 
+                [nzData]="activities" 
+                nzBordered
+                [nzPageSize]="pageSize"
+                [nzPageSizeOptions]="pageSizeOption"
+                [nzShowSizeChanger]="true"
+                [nzTotal]="total"
+                [nzPageIndex]="pageIndex"
+                (nzPageIndexChange)="onPageIndexChange($event)"
+                (nzPageSizeChange)="onPageSizeChange($event)"
+                [nzFrontPagination]="false"
+                [nzShowTotal]="rangeTemplate"
+                [nzLoading]="loading"
+                [nzNoResult]="emptyTpl"
+                [nzScroll]="{ x: '1400px' }"
+                style="overflow-x: auto;"
+                class="mobile-table-container">
+        <ng-template #rangeTemplate let-range="range" let-total>
+          <span style="color: #6b7280; font-weight: 500;">
+            {{ range[0] }}-{{ range[1] }} of {{ total }} activities
+          </span>
+        </ng-template>
+        <ng-template #emptyTpl>
+          <nz-empty nzNotFoundImage="simple">
+            <ng-template #nzNotFoundTitle>
+              <span>No activities found</span>
+            </ng-template>
+            <ng-template #nzNotFoundContent>
+              <span>No user activities have been recorded yet</span>
+            </ng-template>
+          </nz-empty>
+        </ng-template>
+        <thead>
+          <tr>
+            <th style="min-width: 50px; width: 50px;">#</th>
+            <th style="min-width: 140px;">Activity Type</th>
+            <th style="min-width: 180px;">User</th>
+            <th style="min-width: 220px;">Description</th>
+            <th style="min-width: 140px;">IP Address</th>
+            <th style="min-width: 180px;">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let activity of activityTable.data; let i = index">
+            <td style="text-align: center; width: 50px;">
+              <span class="serial-number">{{ (pageIndex - 1) * pageSize + i + 1 }}</span>
+            </td>
+            <td>
+              <nz-tag [nzColor]="getActivityColor(activity.activityType)">
+                {{ activity.activityType }}
+              </nz-tag>
+            </td>
+            <td>
+              <div class="user-info">
+                <div class="user-name">{{ activity.fullName || 'Unknown User' }}</div>
+                <div class="user-email">{{ activity.userEmail || 'N/A' }}</div>
+              </div>
+            </td>
+            <td>{{ activity.description }}</td>
+            <td>{{ activity.ipAddress || 'N/A' }}</td>
+            <td>{{ activity.createdAt | date:'medium' }}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </nz-card>
+  </div>
+
+  <nz-empty 
+    *ngIf="!loading && activities.length === 0"
+    nzNotFoundImage="simple">
+    <ng-template #nzNotFoundTitle>
+      <span>No activities found</span>
+    </ng-template>
+    <ng-template #nzNotFoundContent>
+      <span>No user activities have been recorded yet</span>
+    </ng-template>
+  </nz-empty>
+</div> 

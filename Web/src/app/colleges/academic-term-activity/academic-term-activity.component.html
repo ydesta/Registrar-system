@@ -1,0 +1,148 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h3 class="title-text">Academic Term Activities</h3>
+        <p class="subtitle-text">Manage and view all academic term activity information</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-section">
+          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+            <input type="text" nz-input placeholder="Search activities..." />
+          </nz-input-group>
+          <ng-template #suffixIconButton>
+            <button nz-button nzType="primary" class="search-btn" nzSearch>
+              <i nz-icon nzType="search"></i>
+            </button>
+          </ng-template>
+        </div>
+        <button
+          routerLink="../add-academic-term-activity/null"
+          class="add-btn"
+          nz-button
+          nzType="primary"
+        >
+          <i nz-icon nzType="plus" nzTheme="outline"></i>
+          <span>Add Activity</span>
+        </button>
+        <button nz-button class="export-btn" (click)="exportTermActivity()">
+          <i nz-icon nzType="file-excel" nzTheme="outline"></i>
+          <span>Export</span>
+        </button>
+        <button
+          class="print-btn"
+          nz-button
+          nzType="default"
+          printTitle="Academic Term Activities"
+          printSectionId="print-section"
+          ngxPrint
+        >
+          <i nz-icon nzType="printer" nzTheme="outline"></i>
+          <span>Print</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div id="print-section">
+      <nz-table 
+        #basicTable 
+        [nzData]="academicTermActivities" 
+        nzBordered
+        [nzPageSize]="pageSize"
+        [nzPageSizeOptions]="pageSizeOption"
+        [nzShowSizeChanger]="true"
+        [nzTotal]="total"
+        [nzPageIndex]="pageIndex"
+        (nzPageIndexChange)="onPageIndexChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+        [nzFrontPagination]="false"
+        [nzShowTotal]="rangeTemplate"
+        [nzLoading]="isLoading"
+        [nzNoResult]="emptyTpl"
+        class="activities-table"
+      >
+        <ng-template #rangeTemplate let-range="range" let-total>
+          Showing {{ range[0] }}-{{ range[1] }} of {{ total }} items
+        </ng-template>
+        <thead>
+          <tr>
+            <th class="sn-column">S/N</th>
+            <th>Academic Term Code</th>
+            <th>Activity</th>
+            <th>Activity Start Date</th>
+            <th>Activity End Date</th>
+            <th>Remark</th>
+            <th class="action-column">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let activity of basicTable.data; let i = index">
+            <td class="sn-column">
+              <span class="sn-badge">{{ (pageIndex - 1) * pageSize + i + 1 }}</span>
+            </td>
+            <td>{{activity.academicTerm}}</td>
+            <td>{{ activity.title }}</td>
+            <td>{{ activity.activityStartDate | date : "yyyy-MM-dd" }}</td>
+            <td>{{ activity.activityEndDate | date : "yyyy-MM-dd" }}</td>
+            <td>{{ activity.remark }}</td>
+            <td class="action-column">
+              <button 
+                nz-button 
+                nz-dropdown 
+                [nzDropdownMenu]="menu" 
+                nzPlacement="bottomLeft"
+                class="action-button"
+              >
+                <i nz-icon nzType="more" nzTheme="outline"></i>
+              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li>
+                    <button nz-button nzType="default" class="action-item detail">
+                      <i nz-icon nzType="eye" nzTheme="fill"></i>
+                      <span>View Details</span>
+                    </button>
+                  </li>
+                  <li>
+                    <a
+                      routerLink="../add-academic-term-activity/{{ activity.id }}"
+                      nz-button
+                      nzType="default"
+                      class="action-item edit"
+                    >
+                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                      <span>Edit</span>
+                    </a>
+                  </li>
+                  <li>
+                    <button
+                      nz-button
+                      nzDanger
+                      nzType="default"
+                      class="action-item delete"
+                      (click)="showDeleteConfirm(activity.id)"
+                    >
+                      <i nz-icon nzType="delete" nzTheme="fill"></i>
+                      <span>Delete</span>
+                    </button>
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </td>
+          </tr>
+        </tbody>
+        <ng-template #emptyTpl>
+          <div class="no-data">
+            <i nz-icon nzType="book" nzTheme="outline"></i>
+            <p>No academic term activity records available</p>
+          </div>
+        </ng-template>
+      </nz-table>
+    </div>
+  </div>
+</div>
+

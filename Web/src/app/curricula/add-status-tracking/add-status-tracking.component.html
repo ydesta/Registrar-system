@@ -1,0 +1,55 @@
+<h3 class="h-tag">{{ action }}</h3>
+
+<div>
+  <form
+    nz-form
+    nzLayout="vertical"
+    [formGroup]="academicProgramForm"
+    (ngSubmit)="submitForm()"
+  >
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>Curriculum Code</nz-form-label>
+      <nz-form-control [nzSpan]="7" nzValidatingTip="Validating...">
+        <nz-select
+          formControlName="curriculumCode"
+          nzPlaceHolder="select curriculum code"
+        >
+          <nz-option
+            *ngFor="let item of curricula"
+            [nzValue]="item.curriculumCode"
+            [nzLabel]="item.curriculumCode"
+          ></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>Status</nz-form-label>
+      <nz-form-control [nzSpan]="7" nzValidatingTip="Validating...">
+        <nz-select formControlName="status" nzPlaceHolder="select status">
+          <nz-option nzValue="Active" nzLabel="Active"></nz-option>
+          <nz-option nzValue="Phasing Out" nzLabel="Phasing Out"></nz-option>
+          <nz-option nzValue="Retired" nzLabel="Retired"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>Date</nz-form-label>
+      <nz-form-control [nzSpan]="7">
+        <nz-date-picker formControlName="date"></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7">Remark</nz-form-label>
+      <nz-form-control [nzSpan]="7">
+        <input nz-input formControlName="remark" placeholder="enter remark" />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-control [nzOffset]="7" [nzSpan]="7">
+        <button nz-button nzType="primary" class="main-color">
+          {{ submit }}
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</div>

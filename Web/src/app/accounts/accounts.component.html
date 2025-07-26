@@ -1,0 +1,23 @@
+<!-- Authentication Header -->
+<header class="auth-header">
+  <div class="header-container">
+    <div class="logo-section">
+      <img src="assets/images/logo.png" alt="HiLCoE Logo" class="logo">
+      <div class="logo-text">
+        <h1>HiLCoE</h1>
+        <p>School of Computer Science & Technology</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/portal" class="back-to-portal">
+        <i nz-icon nzType="home" nzTheme="outline"></i>
+        Back to Portal
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- Centered container for auth pages -->
+<div class="auth-center-container">
+  <router-outlet></router-outlet>
+</div>

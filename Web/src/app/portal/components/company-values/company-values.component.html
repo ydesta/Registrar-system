@@ -1,0 +1,19 @@
+<div class="values-container">
+  <div class="values-header">
+    <h2>Who We Are</h2>
+    <p class="values-subtitle">Guided by our principles, driven by excellence</p>
+    <div class="header-underline"></div>
+  </div>
+  
+  <div class="values-grid">
+    <div class="value-item" *ngFor="let value of values">
+      <nz-card class="value-card">
+        <div class="icon-wrapper">
+          <i nz-icon [nzType]="value.icon" nzTheme="outline"></i>
+        </div>
+        <h3>{{ value.title }}</h3>
+        <p>{{ value.description }}</p>
+      </nz-card>
+    </div>
+  </div>
+</div>

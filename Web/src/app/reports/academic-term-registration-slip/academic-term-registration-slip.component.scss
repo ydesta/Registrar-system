@@ -1,0 +1,252 @@
+/* Custom styles for the academic term registration slip datatable */
+
+::ng-deep .ant-table-wrapper {
+  .ant-table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    .ant-table-thead > tr > th {
+      background: linear-gradient(135deg, #fafafa, #f5f5f5);
+      font-weight: 600;
+      color: #262626;
+      padding: 16px;
+      border-bottom: 2px solid #f0f0f0;
+      transition: all 0.3s;
+
+      &:hover {
+        background: linear-gradient(135deg, #f0f0f0, #e6e6e6);
+      }
+
+      &.ant-table-column-sort {
+        background: linear-gradient(135deg, #e6f7ff, #bae7ff);
+      }
+
+      // Sticky Action column styles
+      &.sticky-action {
+        position: sticky !important;
+        right: 0;
+        background: linear-gradient(135deg, #fafafa, #f5f5f5) !important;
+        z-index: 10;
+        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .ant-table-tbody > tr > td {
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+      transition: all 0.3s;
+
+      // Sticky Action column styles
+      &.sticky-action {
+        position: sticky !important;
+        right: 0;
+        background: white !important;
+        z-index: 5;
+        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+      }
+
+      &.sticky-action-even {
+        background: #fafafa !important;
+      }
+    }
+
+    .ant-table-tbody > tr:hover > td {
+      background: #f5f5f5;
+
+      &.sticky-action {
+        background: #f5f5f5 !important;
+      }
+    }
+
+    .ant-table-tbody > tr:nth-child(even) > td {
+      background: #fafafa;
+
+      &.sticky-action {
+        background: #fafafa !important;
+      }
+    }
+
+    .ant-table-tbody > tr:nth-child(even):hover > td {
+      background: #f0f0f0;
+
+      &.sticky-action {
+        background: #f0f0f0 !important;
+      }
+    }
+  }
+
+  .ant-table-expanded-row {
+    background: #fafafa;
+    
+    .ant-table {
+      margin: 16px;
+      border-radius: 6px;
+      
+      .ant-table-thead > tr > th {
+        background: #f0f0f0;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+/* Pagination styles */
+::ng-deep .ant-pagination {
+  margin-top: 16px;
+  text-align: center;
+
+  .ant-pagination-item {
+    border-radius: 6px;
+    transition: all 0.3s;
+
+    &:hover {
+      border-color: #1890ff;
+      transform: translateY(-1px);
+    }
+
+    &.ant-pagination-item-active {
+      background: #1890ff;
+      border-color: #1890ff;
+      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);
+    }
+  }
+
+  .ant-pagination-prev,
+  .ant-pagination-next {
+    border-radius: 6px;
+    transition: all 0.3s;
+
+    &:hover {
+      border-color: #1890ff;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+/* Loading state */
+::ng-deep .ant-spin-container {
+  min-height: 200px;
+}
+
+/* Empty state */
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+  color: #8c8c8c;
+
+  .anticon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #d9d9d9;
+  }
+
+  p {
+    margin: 0;
+    font-size: 16px;
+    color: #8c8c8c;
+  }
+}
+
+/* Action buttons */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+
+  button {
+    border-radius: 4px;
+    transition: all 0.3s;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+/* Table scroll indicator */
+.table-scroll-indicator {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.8));
+    pointer-events: none;
+    z-index: 15;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  ::ng-deep .ant-table-wrapper {
+    .ant-table {
+      font-size: 12px;
+
+      .ant-table-thead > tr > th,
+      .ant-table-tbody > tr > td {
+        padding: 8px;
+      }
+
+      // Ensure sticky action column is visible on mobile
+      .ant-table-thead > tr > th.sticky-action,
+      .ant-table-tbody > tr > td.sticky-action {
+        position: sticky !important;
+        right: 0;
+        z-index: 20;
+        min-width: 60px;
+      }
+    }
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  // Mobile-specific table styles
+  .mobile-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+      
+      &:hover {
+        background: #a8a8a8;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  ::ng-deep .ant-table-wrapper {
+    .ant-table {
+      font-size: 11px;
+
+      .ant-table-thead > tr > th,
+      .ant-table-tbody > tr > td {
+        padding: 6px 4px;
+      }
+    }
+  }
+}
+

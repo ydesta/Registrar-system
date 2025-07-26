@@ -1,0 +1,20 @@
+<nz-table #basicTable [nzData]="curriculumStatusTrackingLists" nzBordered>
+    <thead class="table-header-row">
+        <tr class="table-header-row">
+            <th class="th-row" [ngStyle]="{'font-size': '16px', 'width': '30%'}">Previous Status</th>
+            <th class="th-row" [ngStyle]="{'font-size': '16px', 'width': '30%'}">Current Status</th>
+            <th class="th-row" [ngStyle]="{'font-size': '16px', 'width': '40%'}">Action Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr tabindex="0" *ngFor="let data of basicTable.data; let i = index">
+            <td>
+                {{ getCurriculumStatusDescription(data.previousStatus) }}
+            </td>
+            <td>
+                {{ getCurriculumStatusDescription(data.currentStatus)}}
+            </td>
+            <td style="font-size: 18px;">{{ data.actionDate | date : "dd-MM-yyyy HH:SS" }}</td>
+        </tr>
+    </tbody>
+</nz-table>

@@ -1,0 +1,96 @@
+<form nz-form [formGroup]="form" class="general-info-form">
+    <!-- Contact Information -->
+    <div class="form-section">
+        <h3 class="section-header">Contact Information</h3>
+        <div nz-row [nzGutter]="24">
+            <div nz-col nzSpan="12">
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="8" required>Mobile</nz-form-label>
+                    <nz-form-control [nzSpan]="16">
+                        <input nz-input formControlName="mobile" placeholder="Mobile number" readonly />
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col nzSpan="12">
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="8">Office Phone</nz-form-label>
+                    <nz-form-control [nzSpan]="16">
+                        <input nz-input formControlName="telephonOffice" placeholder="Office phone" readonly />
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+        </div>
+
+        <div nz-row [nzGutter]="24">
+            <div nz-col nzSpan="12">
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="8">Home Phone</nz-form-label>
+                    <nz-form-control [nzSpan]="16">
+                        <input nz-input formControlName="telephonHome" placeholder="Home telephone" readonly />
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col nzSpan="12">
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="8" required>Email</nz-form-label>
+                    <nz-form-control [nzSpan]="16">
+                        <input nz-input formControlName="emailAddress" placeholder="Email address" readonly />
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+        </div>
+
+        <!-- <div nz-row [nzGutter]="24">
+                <div nz-col nzSpan="24">
+                    <nz-form-item>
+                        <nz-form-label [nzSpan]="4">Postal Address</nz-form-label>
+                        <nz-form-control [nzSpan]="20">
+                            <input nz-input formControlName="postalAddress" placeholder="Enter postal address" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div> -->
+    </div>
+
+    <!-- Address Information -->
+    <div class="form-section">
+        <h3 class="section-header">Address Information</h3>
+        <div nz-row [nzGutter]="24">
+            <div nz-col nzSpan="12">
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="8">Region</nz-form-label>
+                    <nz-form-control [nzSpan]="16">
+                        <input nz-input formControlName="region" placeholder="Region" readonly />
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col nzSpan="12">
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="8">City</nz-form-label>
+                    <nz-form-control [nzSpan]="16">
+                        <input nz-input formControlName="city" placeholder="City" readonly />
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+        </div>
+
+        <div nz-row [nzGutter]="24">
+            <div nz-col nzSpan="12">
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="8">Woreda</nz-form-label>
+                    <nz-form-control [nzSpan]="16">
+                        <input nz-input formControlName="woreda" placeholder="Woreda" readonly />
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-col nzSpan="12">
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="8">Kebele</nz-form-label>
+                    <nz-form-control [nzSpan]="16">
+                        <input nz-input formControlName="kebele" placeholder="Kebele" readonly />
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+        </div>
+    </div>
+</form>

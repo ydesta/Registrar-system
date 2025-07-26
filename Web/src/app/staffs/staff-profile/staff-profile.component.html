@@ -1,0 +1,99 @@
+<div class="content-container" style="background: #f5f7fa !important; min-height: 100vh;">
+ 
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <nz-spin nzSize="large"></nz-spin>
+    <p>Loading staff profile...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <nz-alert
+      nzType="error"
+      nzMessage="Unable to load staff profile. Please check your credentials or contact support."
+      nzShowIcon
+      class="error-message">
+    </nz-alert>
+    <button nz-button nzType="primary" (click)="loadStaffProfile()">
+      <i nz-icon nzType="reload"></i> Retry
+    </button>
+  </div>
+
+  <!-- Profile Content -->
+  <ng-container *ngIf="staff && !loading && !error">
+    <!-- Header with Edit Profile Button -->
+    <div class="profile-header">
+      <h2 class="profile-title">Staff Profile</h2>
+      <button 
+        nz-button 
+        nzType="primary" 
+        (click)="editProfile()"
+        class="edit-profile-btn"
+      >
+        <i nz-icon nzType="edit" nzTheme="outline"></i>
+        <span>Edit Profile</span>
+      </button>
+    </div>
+
+    <nz-card nzType="inner" class="staff-card">
+      <div nz-row nzGutter="16">
+        <!-- Avatar and Name -->
+        <div nz-col nzSpan="6">
+          <div class="photo-container">
+            <div class="default-avatar">
+              {{ staff?.firstName?.charAt(0) }}{{ staff?.lastName?.charAt(0) }}
+            </div>
+            <h2 class="staff-name">{{ getTitleName(staff?.title) }} {{ staff?.firstName }} {{ staff?.lastName }}</h2>
+            <h4 class="staff-role">{{ getEmploymentTypeName(staff?.employmentType) }}</h4>
+          </div>
+        </div>
+        <!-- Main Info -->
+        <div nz-col nzSpan="10">
+          <div class="info-container">
+             <div class="info-row">
+              <i nz-icon nzType="idcard" class="icon"></i>
+              <p><strong>Employment Type:</strong> {{ getEmploymentTypeName(staff?.employmentType) }}</p>
+            </div>
+           
+            <div class="info-row">
+              <i nz-icon nzType="calendar" class="icon"></i>
+              <p><strong>Birth Date:</strong> {{ formatDate(staff?.birthDate) }}</p>
+            </div>
+            <div class="info-row">
+              <i nz-icon nzType="file-markdown" class="icon"></i>
+              <p><strong>Email:</strong> {{ staff?.email }}</p>
+            </div>
+            <div class="info-row">
+              <i nz-icon nzType="phone" class="icon"></i>
+              <p><strong>Phone Number:</strong> {{ staff?.mobile }}</p>
+            </div>
+          </div>
+        </div>
+        <!-- Extra Info -->
+        <div nz-col nzSpan="8">
+          <div class="info-container">
+             <div class="info-row">
+              <i nz-icon nzType="idcard" class="icon"></i>
+              <p><strong>Staff Code:</strong> {{ staff?.staffCode || 'N/A' }}</p>
+            </div>
+            <div class="info-row">
+              <i nz-icon nzType="bg-colors" class="icon"></i>
+              <p><strong>Nationality:</strong> {{ staff?.nationality }}</p>
+            </div>
+            <div class="info-row">
+              <i nz-icon nzType="team" class="icon"></i>
+              <p><strong>Gender:</strong> {{ getGenderDisplay(staff?.gender) }}</p>
+            </div>
+            <div class="info-row">
+              <i nz-icon nzType="user" class="icon"></i>
+              <p><strong>Title:</strong> {{ getTitleName(staff?.title) }}</p>
+            </div>
+           
+          </div>
+        </div>
+      </div>
+    </nz-card>
+
+  </ng-container>
+</div>

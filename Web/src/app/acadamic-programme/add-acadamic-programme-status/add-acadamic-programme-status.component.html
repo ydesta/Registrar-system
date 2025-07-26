@@ -1,0 +1,59 @@
+<h3 class="h-tag">{{action}}</h3>
+<nz-divider></nz-divider>
+<div>
+  <form nz-form [formGroup]="acadamicProgramStatusForm" (ngSubmit)="submitForm()">
+    <nz-card>
+      <div nz-row [nzGutter]="24">
+        <div nz-col nzSpan="11">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="10" nzRequired>Acadamic Programme</nz-form-label>
+            <nz-form-control [nzSpan]="18" nzValidatingTip="Validating...">
+              <nz-select formControlName="acadamicProgrammeCode" nzPlaceHolder="select program">
+                <nz-option *ngFor="let item of acadamicPrograms" [nzValue]="item.acadamicProgrammeCode"
+                  [nzLabel]="item.acadamicProgrammeTitle"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="10" nzRequired>Acadamic Programme Status</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <nz-select formControlName="status" nzPlaceHolder="select status">
+                <nz-option nzValue="Active" nzLabel="Active"></nz-option>
+                <nz-option nzValue="Pending" nzLabel="Pending"></nz-option>
+                <nz-option nzValue="Retired" nzLabel="Retired"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="10" nzRequired>Date</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <nz-date-picker formControlName="date"></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="10">Remark</nz-form-label>
+
+            <nz-form-control [nzSpan]="18">
+              <nz-textarea-count [nzMaxCharacterCount]="250">
+                <textarea rows="4" formControlName="remark" nz-input></textarea>
+              </nz-textarea-count>
+              <!-- <input nz-input formControlName="remark" placeholder="enter remark" /> -->
+            </nz-form-control>
+          </nz-form-item>
+
+
+        </div>
+      </div>
+    </nz-card>
+
+
+    <nz-form-item style="padding: 10px;">
+      <nz-form-control [nzOffset]="6" [nzSpan]="8">
+        <button nz-button class="submit" nzType="primary"
+          [disabled]="acadamicProgramStatusForm.invalid">{{submit}}</button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</div>

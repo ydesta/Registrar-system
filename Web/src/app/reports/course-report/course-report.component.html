@@ -1,0 +1,61 @@
+<div class="course">
+  <div id="print-section" class="select-div">
+    <h1 style="text-align: center">Course List Report</h1>
+    <img
+      src="../../assets/images/logo.png"
+      alt=""
+      srcset=""
+      style="padding-bottom: 10px"
+    />
+    <nz-table
+      nzBordered
+      #basicTable
+      [nzData]="courses"
+      [nzScroll]="{ y: '500px' }"
+      [nzShowPagination]="false"
+    >
+      <thead>
+        <th class="th-row">Course Code</th>
+        <th class="th-row">Course Title</th>
+        <th class="th-row">Credit Hours</th>
+        <th class="th-row">Lecture Hours</th>
+        <th class="th-row">Lab Hours</th>
+      </thead>
+      <tbody>
+        <tr tabindex="0" *ngFor="let student of courses; let i = index">
+          <td>{{ student.courseCode }}</td>
+          <td>{{ student.courseTitle }}</td>
+          <td>{{ student.creditHours }}</td>
+          <td>{{ student.lectureHours }}</td>
+          <td>{{ student.labHours }}</td>
+        </tr>
+      </tbody>
+    </nz-table>
+    <div class="paginate">
+      <nz-pagination
+        [nzPageSizeOptions]="pageSizeOption"
+        (nzPageSizeChange)="paginatedSizeEvent($event)"
+        (nzPageIndexChange)="paginatedIndexEvent($event)"
+        style="float: right"
+        [nzPageIndex]="pageindex"
+        [nzTotal]="totalRecord"
+        nzShowSizeChanger
+        [nzPageSize]="pageSize"
+      ></nz-pagination>
+    </div>
+  </div>
+
+  <div>
+    <button
+      class="main-color"
+      nz-button
+      nzType="primary"
+      printTitle="."
+      [useExistingCss]="true"
+      printSectionId="print-section"
+      ngxPrint
+    >
+      Print
+    </button>
+  </div>
+</div>

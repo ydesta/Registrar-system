@@ -1,0 +1,114 @@
+<nz-modal
+  [(nzVisible)]="isVisible"
+  (nzVisibleChange)="isVisibleChange.emit($event)"
+  nzTitle="Grade Change Request Decision"
+  [nzWidth]="600"
+  [nzClosable]="true"
+  [nzMaskClosable]="false"
+  (nzOnCancel)="handleCancel()"
+  (nzOnOk)="handleOk()"
+  [nzOkText]="'Submit Decision'"
+  [nzCancelText]="'Cancel'"
+  [nzOkLoading]="loading"
+  [nzOkDisabled]="decisionForm.invalid || loading">
+  
+  <div class="modal-content" *nzModalContent>
+    <!-- Request Information -->
+    <div class="request-info" *ngIf="request">
+      <div class="info-section">
+        <h4>Request Details</h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Student:</label>
+            <span>{{ request.fullName }}</span>
+          </div>
+          <div class="info-item">
+            <label>Course:</label>
+            <span>{{ request.course }}</span>
+          </div>
+          <div class="info-item">
+            <label>Curriculum:</label>
+            <span>{{ request.curriculumCode }}</span>
+          </div>
+          <div class="info-item">
+            <label>Previous Grade:</label>
+            <nz-tag nzColor="orange">{{ request.previousGrade }}</nz-tag>
+          </div>
+          <div class="info-item">
+            <label>New Grade:</label>
+            <nz-tag nzColor="green">{{ request.newGrade }}</nz-tag>
+          </div>
+          <div class="info-item">
+            <label>Instructor:</label>
+            <span>{{ request.instructorName }}</span>
+          </div>
+          <div class="info-item full-width">
+            <label>Reason:</label>
+            <span>{{ request.reason || 'No reason provided' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decision Form -->
+    <div class="decision-form">
+      <h4>Decision</h4>
+      <form nz-form [formGroup]="decisionForm" nzLayout="vertical">
+        
+        <!-- Status Selection -->
+        <nz-form-item>
+          <nz-form-label nzRequired>Decision</nz-form-label>
+          <nz-form-control nzErrorTip="Please select a decision">
+            <nz-radio-group formControlName="status">
+              <label nz-radio [nzValue]="3">
+                <span nz-icon nzType="check-circle" nzTheme="outline" style="color: #52c41a; margin-right: 8px;"></span>
+                Approve Request
+              </label>
+              <label nz-radio [nzValue]="2">
+                <span nz-icon nzType="close-circle" nzTheme="outline" style="color: #ff4d4f; margin-right: 8px;"></span>
+                Reject Request
+              </label>
+            </nz-radio-group>
+          </nz-form-control>
+        </nz-form-item>
+
+        <!-- Review Comments -->
+        <nz-form-item>
+          <nz-form-label nzRequired>Review Comments</nz-form-label>
+          <nz-form-control 
+            nzErrorTip="Please provide detailed comments (minimum 10 characters)">
+            <textarea 
+              nz-input 
+              formControlName="reviewComments" 
+              [nzAutosize]="{ minRows: 4, maxRows: 8 }"
+              placeholder="Please provide detailed comments explaining your decision...">
+            </textarea>
+          </nz-form-control>
+        </nz-form-item>
+
+        <!-- Decision Maker -->
+        <nz-form-item>
+          <nz-form-label nzRequired>Decision Maker</nz-form-label>
+          <nz-form-control nzErrorTip="Please enter the decision maker name">
+            <input 
+              nz-input 
+              formControlName="lastModifiedBy" 
+              placeholder="Enter your name or title">
+          </nz-form-control>
+        </nz-form-item>
+
+      </form>
+    </div>
+
+    <!-- Warning Message -->
+    <div class="warning-message" *ngIf="decisionForm.get('status')?.value">
+      <nz-alert
+        [nzType]="decisionForm.get('status')?.value === 3 ? 'success' : 'error'"
+        [nzMessage]="decisionForm.get('status')?.value === 3 ? 'This will approve the grade change request' : 'This will reject the grade change request'"
+        [nzDescription]="decisionForm.get('status')?.value === 3 ? 'The student\'s grade will be updated to the requested new grade.' : 'The grade change request will be rejected and the original grade will remain unchanged.'"
+        nzShowIcon>
+      </nz-alert>
+    </div>
+
+  </div>
+</nz-modal> 

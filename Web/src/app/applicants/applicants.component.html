@@ -1,0 +1,83 @@
+<div>
+  <div>
+    <div>
+      <h3 class="h-tag">Applicants</h3>
+    </div>
+  </div>
+  <div style="width: 300px; padding-top: 10px">
+    <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+      <input type="text" nz-input placeholder="search..." [(ngModel)]="searchText"
+        (ngModelChange)="onSearchTextChanged()" />
+    </nz-input-group>
+    <ng-template #suffixIconButton>
+      <button nz-button nzType="primary" nzSearch>
+        <i nz-icon nzType="search"></i>
+      </button>
+    </ng-template>
+  </div>
+  <div>
+    <nz-table [nzLoading]="tableLoading" #basicTable [nzData]="applicants!" nzBordered>
+      <thead class="table-header-row">
+        <tr class="table-header-row">
+          <!-- <th><label nz-checkbox [(ngModel)]="checked">All</label></th> -->
+          <!-- <th class="th-row">Academic Programme</th> -->
+          <th class="th-row">Applicant ID</th>
+          <th class="th-row">Applicant</th>
+          <th class="th-row">Gender</th>
+          <th class="th-row">Mobile</th>
+          <th class="th-row">Email</th>
+          <th class="th-row">Nationality</th>
+          <th class="th-row">City</th>
+          <th class="th-row">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr tabindex="0" *ngFor="let data of basicTable.data; let i = index">
+          <!-- <td><label nz-checkbox [(ngModel)]="checked"></label></td> -->
+          <!-- <td>{{ data.acadamicProgramme.acadamicProgrammeTitle }}</td> -->
+          <td>{{ data.applicantID }}</td>
+          <td>{{ data.firstName + " " + data.fatherName }}</td>
+          <td>{{ data.gender }}</td>
+          <td>{{ data.mobile }}</td>
+          <td>{{ data.emailAddress }}</td>
+          <td>{{ data.nationality }}</td>
+          <td>{{ data.city }}</td>
+          <td>
+            <ng-container>
+              <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomLeft">
+                <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
+              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu style="padding-right: 50px">
+                  <li>
+                    <a style="border-style: none" routerLink="../applicants/add-applicant-history/{{
+                        data.id
+                      }}" nz-button nzType="default" class="edit">
+                      <i nz-icon nzType="eye" nzTheme="fill"></i>
+                      <span>Review</span></a>
+                  </li>
+                  <!-- <li>
+                    <a style="border-style: none" routerLink="../applicants/add-applicant/{{ data.id }}" nz-button
+                      nzType="default" class="edit">
+                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                      <span>Edit</span></a>
+                  </li>
+                  <li>
+                    <button nz-button nzDanger nzType="default" (click)="showDeleteConfirm(data.id)">
+                      <i nz-icon nzType="delete" nzTheme="fill"></i>
+                      <span>Delete</span>
+                    </button>
+                  </li> -->
+                </ul>
+              </nz-dropdown-menu>
+            </ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+    <!-- <div>
+            <button nz-button class="export"  nzShape="round"> <i nz-icon nzType="file-excel" nzTheme="outline"></i> Export(2)</button>
+            <button nz-button class="group-delete" nzType="default" nzDanger nzShape="round"> <i nz-icon nzType="delete" nzTheme="fill"></i> Detele(2)</button>
+          </div> -->
+  </div>
+</div>

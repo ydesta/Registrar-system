@@ -1,0 +1,63 @@
+
+<h3 class="h-tag">{{action}}</h3>
+
+<div>
+    <form nz-form  nzLayout="vertical" [formGroup]="applicantExpForm" (ngSubmit)="submitForm()">
+        <div nz-row>
+            <div nz-col nzSpan="7">
+        <nz-form-item>
+            <nz-form-label [nzSpan]="20" nzRequired>Applicant</nz-form-label>
+            <nz-form-control [nzSpan]="20" nzValidatingTip="Validating...">
+              <nz-select formControlName="applicantID" nzPlaceHolder="select applicant" >
+                  <nz-option *ngFor="let item of applicants" [nzValue]="item.applicantID" [nzLabel]="item.firstName + ' ' + item.fatherName"></nz-option>
+                </nz-select>
+            </nz-form-control>
+          </nz-form-item>   
+          <nz-form-item>
+            <nz-form-label [nzSpan]="20" required >Full Name</nz-form-label>
+            <nz-form-control [nzSpan]="20">
+                <input nz-input formControlName="fullName" placeholder="enter full name"/> 
+            </nz-form-control>
+          </nz-form-item> 
+          <nz-form-item>
+            <nz-form-label [nzSpan]="20" required>Telephone Office</nz-form-label>
+            <nz-form-control [nzSpan]="20">
+                <input nz-input formControlName="telephoneOffice" placeholder="enter telephone office"/>
+            </nz-form-control>
+          </nz-form-item> 
+          <nz-form-item>
+            <nz-form-label [nzSpan]="20" >Telephone Home </nz-form-label>
+            <nz-form-control [nzSpan]="20">
+                <input nz-input formControlName="post" placeholder="enter telephone home"/>
+            </nz-form-control>
+          </nz-form-item> 
+        </div>
+            <div nz-col nzSpan="12">
+            <nz-form-item>
+                <nz-form-label [nzSpan]="20" required >Relation</nz-form-label>
+                <nz-form-control [nzSpan]="20">
+                    <input nz-input formControlName="relation" placeholder="enter relation"/> 
+                </nz-form-control>
+              </nz-form-item> 
+              <nz-form-item>
+                <nz-form-label [nzSpan]="20" required>Source Of Finance</nz-form-label>
+                <nz-form-control [nzSpan]="20">
+                    <input nz-input formControlName="sourceOfFinance" placeholder="enter source of finance"/>
+                </nz-form-control>
+              </nz-form-item> 
+              <nz-form-item>
+                <nz-form-label [nzSpan]="20" >How Did You Come Know </nz-form-label>
+                <nz-form-control [nzSpan]="20">
+                    <input nz-input formControlName="howDidYouComeKnow" placeholder="enter how did you know"/>
+                </nz-form-control>
+              </nz-form-item> 
+            <nz-form-item>
+          
+          <nz-form-control [nzOffset]="10" [nzSpan]="10">
+            <button nz-button nzType="primary">{{submit}}</button>
+          </nz-form-control>
+        </nz-form-item>
+    </div>
+        </div>
+      </form>
+</div>

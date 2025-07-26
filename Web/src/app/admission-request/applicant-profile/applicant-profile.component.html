@@ -1,0 +1,36 @@
+<!-- profile.component.html -->
+<app-profile-summary></app-profile-summary>
+<nz-card [nzExtra]="editButtonTemplate" style="margin-top: 10px;">
+  <nz-tabset class="custom-tabset" nzType="card" style="padding: 20px;">
+    <nz-tab nzTitle="Address" class="custom-tab">
+      <app-address></app-address>
+    </nz-tab>
+
+    <nz-tab nzTitle="Education Background" class="custom-tab">
+      <app-manage-education></app-manage-education>
+    </nz-tab>
+
+    <nz-tab nzTitle="Work Experience" class="custom-tab">
+      <app-manage-work-experience></app-manage-work-experience>
+    </nz-tab>
+
+    <nz-tab nzTitle="Emergency Contact" class="custom-tab">
+      <app-manage-contact-person-form></app-manage-contact-person-form>
+    </nz-tab>
+
+    <nz-tab nzTitle="Program" class="custom-tab">
+      <app-manage-student-program-requester></app-manage-student-program-requester>
+    </nz-tab>
+  </nz-tabset>
+</nz-card>
+
+<ng-template #editButtonTemplate>
+  <!-- <button 
+    nz-button 
+    class="edit-button"
+    (click)="editProfile()"
+  >
+    <i nz-icon nzType="edit" nzTheme="outline"></i>
+    Edit Profile
+  </button> -->
+</ng-template>

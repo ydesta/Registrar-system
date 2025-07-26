@@ -1,0 +1,82 @@
+.user-management-container {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: 100vh;
+
+  .page-header {
+    background: white;
+    margin-bottom: 24px;
+    border-radius: 8px;
+
+    nz-page-header-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #262626;
+    }
+
+    nz-page-header-subtitle {
+      color: #8c8c8c;
+      font-size: 14px;
+    }
+  }
+
+  .content-area {
+    .management-card {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-radius: 8px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .card-content {
+        text-align: center;
+        padding: 20px;
+
+        .card-icon {
+          font-size: 48px;
+          color: #1890ff;
+          margin-bottom: 16px;
+          display: block;
+        }
+
+        h3 {
+          margin: 0 0 8px 0;
+          color: #262626;
+          font-size: 18px;
+          font-weight: 600;
+        }
+
+        p {
+          margin: 0;
+          color: #8c8c8c;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .user-management-container {
+    .page-header {
+      padding: 12px 16px;
+
+      nz-page-header-title {
+        font-size: 20px;
+      }
+    }
+
+    .content-area {
+      padding: 16px;
+    }
+  }
+} 

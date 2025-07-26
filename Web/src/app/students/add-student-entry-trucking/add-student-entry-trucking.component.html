@@ -1,0 +1,43 @@
+
+<h3 class="h-tag">{{action}}</h3>
+
+<div>
+    <form nz-form  nzLayout="vertical" [formGroup]="staffForm" (ngSubmit)="submitForm()">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzRequired>Student</nz-form-label>
+        <nz-form-control [nzSpan]="7" nzValidatingTip="Validating...">
+          <nz-select formControlName="studentID" nzPlaceHolder="select student" >
+              <nz-option *ngFor="let item of students" [nzValue]="item.studentId" [nzLabel]="item.applicant.firstName + ' ' + item.applicant.fatherName "></nz-option>
+            </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzRequired>Entry</nz-form-label>
+        <nz-form-control [nzSpan]="7" nzValidatingTip="Validating...">
+          <nz-select formControlName="entryCode" nzPlaceHolder="select entry" >
+              <nz-option *ngFor="let item of entries" [nzValue]="item.entryCode" [nzLabel]="item.year"></nz-option>
+            </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+   
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzRequired>Assigned Date</nz-form-label>
+        <nz-form-control [nzSpan]="7">
+            <nz-date-picker formControlName="assignedDate"></nz-date-picker>
+        </nz-form-control>
+      </nz-form-item>
+   
+        <nz-form-item>  
+          <nz-form-label [nzSpan]="7" >Remark</nz-form-label>
+          <nz-form-control [nzSpan]="7">
+            <input nz-input formControlName="remark" placeholder="enter remark" />
+          </nz-form-control>
+        </nz-form-item>
+       
+        <nz-form-item>
+          <nz-form-control [nzOffset]="7" [nzSpan]="7">
+            <button nz-button nzType="primary">{{submit}}</button>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+</div>

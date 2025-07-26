@@ -1,0 +1,143 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h3 class="title-text">{{action}}</h3>
+        <p class="subtitle-text">Add or update academic term activity information</p>
+      </div>
+      <div class="header-actions">
+        <button 
+          routerLink="../academic-term-activity" 
+          nz-button 
+          nzType="default" 
+          class="back-btn"
+        >
+          <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
+          <span>Back to Activities</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="form-card">
+    <div class="form-header">
+      <div class="form-icon">
+        <i nz-icon nzType="calendar" nzTheme="outline"></i>
+      </div>
+      <div class="form-title">
+        <h4>Academic Term Activity Information</h4>
+        <p>Please fill in the activity details below</p>
+      </div>
+    </div>
+
+    <form
+      nz-form
+      nzLayout="vertical"
+      [formGroup]="acadamicTermActivityForm"
+      (ngSubmit)="submitForm()"
+      class="activity-form"
+    >
+      <div class="form-grid">
+        <!-- Row 1: Academic Term & Activity -->
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Academic Term</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-select 
+                formControlName="academicTermId"  
+                nzPlaceHolder="Select academic term" 
+                [nzShowSearch]="true"
+                class="form-select"
+              >
+                <nz-option *ngFor="let item of academicTerms" [nzValue]="item.id"
+                  [nzLabel]="item.academicTerm + '-' + item.year"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Activity</nz-form-label>
+            <nz-form-control>
+              <nz-select 
+                formControlName="activityID" 
+                nzPlaceHolder="Select activity"
+                class="form-select"
+              >
+                <nz-option *ngFor="let item of activities" [nzValue]="item.id" [nzLabel]="item.title"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <!-- Row 2: Activity Start Date & Activity End Date -->
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Activity Start Date</nz-form-label>
+            <nz-form-control>
+              <nz-date-picker 
+                [nzDisabledDate]="disablePastDates" 
+                class="form-input" 
+                formControlName="activityStartDate"
+                nzPlaceHolder="Select start date"
+              ></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Activity End Date</nz-form-label>
+            <nz-form-control>
+              <nz-date-picker 
+                [nzDisabledDate]="disablePastDates" 
+                class="form-input" 
+                formControlName="activityEndDate"
+                nzPlaceHolder="Select end date"
+              ></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <!-- Row 3: Remark -->
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label>Remark</nz-form-label>
+            <nz-form-control nzErrorTip="Please input your remark!">
+              <nz-textarea-count [nzMaxCharacterCount]="250">
+                <textarea 
+                  rows="4" 
+                  formControlName="remark" 
+                  nz-input 
+                  class="form-textarea"
+                  placeholder="Enter remark"
+                ></textarea>
+              </nz-textarea-count>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button 
+          nz-button 
+          nzType="default" 
+          class="cancel-btn"
+          type="button"
+          routerLink="../academic-term-activity"
+        >
+          <i nz-icon nzType="close" nzTheme="outline"></i>
+          <span>Cancel</span>
+        </button>
+        <button 
+          nz-button 
+          nzType="primary" 
+          class="submit-btn"
+          type="submit"
+        >
+          <i nz-icon nzType="save" nzTheme="outline"></i>
+          <span>{{submit}}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,63 @@
+.add-button {
+    background: rgb(9, 62, 150);
+    color: white;
+}
+
+.export {
+    border-style: solid;
+    border-color: rgb(9, 62, 150);
+    color: #f8fcff;
+}
+
+.serch {
+    background: rgb(9, 62, 150);
+    color: white;
+}
+
+nz-table {
+    padding-top: 10px;
+}
+
+button {
+    //margin: 3px;
+    border-style: none;
+}
+
+.edit {
+    color: rgb(23, 131, 198);
+    border-color: rgb(23, 131, 198);
+}
+
+.detail {
+    color: rgb(23, 131, 198);
+    border-color: rgb(23, 131, 198)
+}
+
+.more {
+    color: rgb(23, 131, 198);
+    font-size: 20px;
+}
+
+.th-row {
+    color: rgb(23, 131, 198);
+}
+
+
+.main-color {
+    background-color: rgb(9, 62, 150);
+}
+
+
+.logo {
+    display: none;
+}
+
+@media print {
+    .paginate {
+        display: none;
+    }
+
+    .logo {
+        display: block;
+    }
+}

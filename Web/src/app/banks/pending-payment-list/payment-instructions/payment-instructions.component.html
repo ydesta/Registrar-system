@@ -1,0 +1,12 @@
+<div class="instruction-section">
+  <h4>Payment Instructions</h4>
+  <div class="steps">
+    <div class="step" *ngFor="let instruction of instructions">
+      <div class="step-number">{{ instruction.number }}</div>
+      <div class="step-content">
+        <div class="step-title">{{ instruction.title }}</div>
+        <div class="step-description">{{ instruction.description }}</div>
+      </div>
+    </div>
+  </div>
+</div> 

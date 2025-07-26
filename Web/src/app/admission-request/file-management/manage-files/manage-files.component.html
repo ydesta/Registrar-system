@@ -1,0 +1,50 @@
+<nz-table #basicTable [nzData]="fileList" nzBordered>
+    <thead class="table-header-row">
+        <tr class="table-header-row">
+            <th class="th-row">File Name</th>
+            <th class="th-row">File Type</th>
+            <th class="th-row">Category</th>
+            <th class="th-row">Created Date</th>
+            <th class="th-row">
+                <em nz-icon nzType="paper-clip" nzTheme="outline"></em>
+            </th>
+            <!-- <th class="th-row">Action</th> -->
+        </tr>
+    </thead>
+    <tbody>
+        <tr tabindex="0" *ngFor="let data of basicTable.data; let i = index">
+            <td>{{ data.fileName }}</td>
+            <td>{{ data.fileType }}</td>
+            <td>{{ data.category }}</td>
+            <td>{{ data.createdDate | date:'dd-MM-yyyy' }}</td>
+            <td>
+                <a nz-button (click)="viewFile(data)">
+                    View File
+                </a>
+            </td>
+            <!-- <td>
+                <ng-container>
+                    <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomLeft">
+                        <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
+                    </button>
+                    <nz-dropdown-menu #menu="nzDropdownMenu">
+                        <ul nz-menu style="padding-right: 50px">
+                            <li>
+                                <a style="border-style: none" (click)="editModal(data)" nz-button nzType="default"
+                                    class="edit">
+                                    <em nz-icon nzType="edit" nzTheme="fill"></em>
+                                    <span>Edit</span></a>
+                            </li>
+                            <li>
+                                <button nz-button nzDanger nzType="default" (click)="delete(i)">
+                                    <em nz-icon nzType="delete" nzTheme="fill"></em>
+                                    <span>Delete</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </nz-dropdown-menu>
+                </ng-container>
+            </td> -->
+        </tr>
+    </tbody>
+</nz-table>

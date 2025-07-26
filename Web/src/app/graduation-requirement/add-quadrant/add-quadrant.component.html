@@ -1,0 +1,110 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h3 class="title-text">{{ action }}</h3>
+        <p class="subtitle-text">Add or update quadrant information</p>
+      </div>
+      <div class="header-actions">
+        <button 
+          routerLink="../quadrant" 
+          nz-button 
+          nzType="default" 
+          class="back-btn"
+        >
+          <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
+          <span>Back to Quadrants</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="form-card">
+    <div class="form-header">
+      <div class="form-icon">
+        <i nz-icon nzType="appstore" nzTheme="outline"></i>
+      </div>
+      <div class="form-title">
+        <h4>Quadrant Information</h4>
+        <p>Please fill in the quadrant details below</p>
+      </div>
+    </div>
+
+    <form
+      nz-form
+      nzLayout="vertical"
+      [formGroup]="acadamicProgramForm"
+      (ngSubmit)="submitForm()"
+      class="quadrant-form"
+    >
+      <div class="form-grid">
+        <!-- Row 1: Quadrant ID & Quadrant Heading -->
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Quadrant ID</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <input
+                nz-input
+                formControlName="quadrantsID"
+                placeholder="Enter quadrant ID"
+                class="form-input"
+              />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Quadrant Heading</nz-form-label>
+            <nz-form-control>
+              <input
+                nz-input
+                formControlName="quadrantHeading"
+                placeholder="Enter quadrant heading"
+                class="form-input"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <!-- Row 2: Remark -->
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label>Remark</nz-form-label>
+            <nz-form-control>
+              <textarea
+                nz-input
+                formControlName="remark"
+                placeholder="Enter remark"
+                class="form-textarea"
+                [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+              ></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button 
+          nz-button 
+          nzType="default" 
+          class="cancel-btn"
+          type="button"
+          routerLink="../quadrant"
+        >
+          <i nz-icon nzType="close" nzTheme="outline"></i>
+          <span>Cancel</span>
+        </button>
+        <button 
+          nz-button 
+          nzType="primary" 
+          class="submit-btn"
+          type="submit"
+        >
+          <i nz-icon nzType="save" nzTheme="outline"></i>
+          <span>{{ submit }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

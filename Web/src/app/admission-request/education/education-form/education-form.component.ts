@@ -1,0 +1,186 @@
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { NzModalRef } from "ng-zorro-antd/modal";
+import {
+  alphabetsOnlyValidator,
+  alphabetsWithSpecialCharsValidator
+} from "src/app/common/constant";
+import { ApplicantEducationBackgroundRequest } from "../../model/applicant-education-background-request.model";
+import { EducationBackgroundService } from "../../services/education-background.service";
+import { CustomNotificationService } from "src/app/services/custom-notification.service";
+
+@Component({
+  selector: "app-education-form",
+  templateUrl: "./education-form.component.html",
+  styleUrls: ["./education-form.component.scss"]
+})
+export class EducationFormComponent implements OnInit {
+  @Input() applicationId: string;
+  @Input() educationBackground: ApplicantEducationBackgroundRequest;
+  applicantEducationBacgroundForm: FormGroup;
+  educationFile = "";
+  formData = new FormData();
+  file_store: FileList;
+  file_list: Array<string> = [];
+  @Output() dataUpdated = new EventEmitter<void>();
+  educationId: string;
+  constructor(
+    private modalRef: NzModalRef,
+    private _fb: FormBuilder,
+    private educationBackgroundService: EducationBackgroundService,
+    private _customNotificationService: CustomNotificationService
+  ) {
+    this.createEducationBackground();
+  }
+
+  ngOnInit(): void {
+    if (this.educationBackground != undefined) {
+      this.educationId = this.educationBackground.id;
+      this.applicantEducationBacgroundForm.patchValue(this.educationBackground);
+    }
+  }
+  closeModal(): void {
+    this.modalRef.close();
+  }
+  createEducationBackground() {
+    this.applicantEducationBacgroundForm = this._fb.group({
+      createdBy: ["-"],
+      lastModifiedBy: ["-"],
+      applicantID: [""],
+      schoollName: [
+        "",
+        [Validators.required, alphabetsWithSpecialCharsValidator()]
+      ],
+      fieldOfStudy: [
+        "",
+        [Validators.required, alphabetsWithSpecialCharsValidator()]
+      ],
+      programmeLevel: [
+        "",
+        [Validators.required, alphabetsWithSpecialCharsValidator()]
+      ],
+      graduatedYear: ["", Validators.required],
+      remark: [""],
+      ActualFile: [""]
+    });
+  }
+  private getApplicantEducationBackground(): ApplicantEducationBackgroundRequest {
+    const formModel = this.applicantEducationBacgroundForm.getRawValue();
+    const education = new ApplicantEducationBackgroundRequest();
+    education.applicantID = this.applicationId;
+    education.createdBy = "";
+    education.fieldOfStudy = formModel.fieldOfStudy;
+    education.graduatedYear = formModel.graduatedYear.toString();
+    education.programmeLevel = formModel.programmeLevel;
+    education.remark = formModel.remark;
+    education.schoollName = formModel.schoollName;
+    return education;
+  }
+  get schoollName() {
+    return this.applicantEducationBacgroundForm.get("schoollName");
+  }
+  get fieldOfStudy() {
+    return this.applicantEducationBacgroundForm.get("fieldOfStudy");
+  }
+  get programmeLevel() {
+    return this.applicantEducationBacgroundForm.get("programmeLevel");
+  }
+  get graduatedYear() {
+    return this.applicantEducationBacgroundForm.get("graduatedYear");
+  }
+  remark() {
+    return this.applicantEducationBacgroundForm.get("remark");
+  }
+
+  //#region File upload Function
+
+  handleFileInputChange(files: FileList): void {
+    this.file_store = files;
+    if (files.length) {
+      const count = files.length > 1 ? ` (+${files.length - 1} files)` : "";
+      this.applicantEducationBacgroundForm.patchValue({
+        ActualFile: `${files[0].name}${count}`
+      });
+
+      this.file_list = []; // Clear previous files
+      for (let i = 0; i < files.length; i++) {
+        this.file_list.push(files[i].name);
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          this.educationFile = e.target.result;
+        };
+        reader.readAsDataURL(files[i]);
+      }
+    } else {
+      this.applicantEducationBacgroundForm.patchValue({
+        ActualFile: ""
+      });
+      this.file_list = []; // Clear files if no selection
+    }
+  }
+
+  handleSubmit() {
+    var fd = new FormData();
+    for (let i = 0; i < this.file_store.length; i++) {
+      fd.append("Files", this.file_store[i]);
+    }
+
+    // Now you can use 'fd' to send files to the server using HTTP request
+    // You can also send additional data along with the files if needed
+  }
+  //#endregion
+
+  onSave(): void {
+    if (this.applicantEducationBacgroundForm.valid) {
+      const postData = this.getApplicantEducationBackground();
+      if (this.educationId == undefined) {
+        Object.keys(postData).forEach(key => {
+          if (key !== "ActualFile") {
+            if (this.formData.get(key) != postData[key]) {
+              this.formData.append(key, postData[key]);
+            }
+          }
+        });
+        if (this.file_store != undefined) {
+          for (let i = 0; i < this.file_store.length; i++) {
+            this.formData.append("ActualFile", this.file_store[i]);
+          }
+        }
+        this.educationBackgroundService
+          .createEducation(this.formData)
+          .subscribe(res => {
+            if (res) {
+              this._customNotificationService.notification(
+                "success",
+                "Success",
+                "Applicant Education  is save succesfully."
+              );
+              // Emit the event when data is successfully saved
+              this.dataUpdated.emit();
+              // Close the modal here if needed
+              this.modalRef.close();
+            }
+          });
+      } else {
+        postData.id = this.educationId;
+        postData.applicantID = this.educationBackground.applicantID;
+        this.educationBackgroundService
+          .update(this.educationId, postData)
+          .subscribe(res => {
+            if (res) {
+              this._customNotificationService.notification(
+                "success",
+                "Success",
+                "Applicant Education  is update succesfully."
+              );
+              // Emit the event when data is successfully saved
+              this.dataUpdated.emit();
+              // Close the modal here if needed
+              this.modalRef.close();
+            }
+          });
+      }
+    } else {
+    }
+  }
+}

@@ -1,0 +1,65 @@
+
+<h3 class="h-tag">{{action}}</h3>
+
+<div>
+    <form nz-form  nzLayout="vertical" [formGroup]="staffForm" (ngSubmit)="submitForm()">
+      <div nz-row>
+        <div nz-col nzSpan="12">
+
+      
+      <nz-form-item>
+        <nz-form-label [nzSpan]="10" nzRequired>Curriculum</nz-form-label>
+        <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
+          <nz-select nzShowSearch="true" nzAllowClear = "true" formControlName="curriculumCode" nzPlaceHolder="select curriculum" >
+              <nz-option *ngFor="let item of curricula" [nzValue]="item.curriculumCode" [nzLabel]="item.curriculumCode"></nz-option>
+            </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="10" nzRequired>Batch</nz-form-label>
+        <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
+          <nz-select nzShowSearch="true" nzAllowClear = "true" formControlName="batchCode" nzPlaceHolder="select batch" >
+              <nz-option *ngFor="let item of batchs" [nzValue]="item.batchCode" [nzLabel]="item.batchCode"></nz-option>
+            </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+     
+      <nz-form-item>
+        <nz-form-label [nzSpan]="10" nzRequired>Entry</nz-form-label>
+        <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
+          <nz-select formControlName="entryCode" nzShowSearch="true" nzAllowClear = "true" nzPlaceHolder="select entry" >
+              <nz-option *ngFor="let item of entries" [nzValue]="item.entryCode" [nzLabel]="item.entryTerm"></nz-option>
+            </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col nzSpan="12">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="10" nzRequired>Student ID</nz-form-label>
+        <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
+          <input nz-input formControlName="studentId" placeholder="enter student ID" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="10" nzRequired>Applicant</nz-form-label>
+        <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
+          <nz-select nzShowSearch="true" nzAllowClear = "true" formControlName="applicantId" nzPlaceHolder="select applicant" >
+              <nz-option *ngFor="let item of applicants" [nzValue]="item.applicantID" [nzLabel]="item.firstName + ' ' + item.fatherName "></nz-option>
+            </nz-select>
+        </nz-form-control>
+      </nz-form-item>     
+        <nz-form-item>
+            <nz-form-label [nzSpan]="10">Remark</nz-form-label>
+            <nz-form-control [nzSpan]="10">
+              <input nz-input formControlName="remark" placeholder="enter remark" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+        <nz-form-item>
+          <nz-form-control [nzOffset]="10" [nzSpan]="10">
+            <button nz-button nzType="primary">{{submit}}</button>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+</div>

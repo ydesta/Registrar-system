@@ -1,0 +1,117 @@
+<div class="grade-change-request-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <h2>Manage Grade Change Requests</h2>
+    <div class="header-actions">
+      <button 
+        nz-button 
+        nzType="primary" 
+        (click)="navigateToNewRequest()">
+        <i nz-icon nzType="plus"></i>
+        New Grade Change Request
+      </button>
+      <!-- <button 
+        nz-button 
+        nzType="primary" 
+        (click)="refreshData()" 
+        [nzLoading]="loading">
+        <i nz-icon nzType="reload"></i>
+        Refresh
+      </button> -->
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <nz-spin nzSize="large">
+      <span nz-icon nzType="loading"></span>
+      <div class="loading-text">Loading grade change requests...</div>
+    </nz-spin>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!loading && !staffId" class="error-container">
+    <nz-result
+      nzStatus="error"
+      nzTitle="Staff ID Not Found"
+      nzSubTitle="Unable to load grade change requests. Please ensure you are logged in with a valid staff account.">
+    </nz-result>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && staffId && gradeChangeRequests.length === 0" class="empty-container">
+    <nz-result
+      nzStatus="info"
+      nzTitle="No Grade Change Requests"
+      nzSubTitle="There are no grade change requests to display.">
+    </nz-result>
+  </div>
+
+  <!-- Data Table -->
+  <div *ngIf="!loading && staffId && gradeChangeRequests.length > 0" class="table-container">
+    <nz-table 
+      #gradeChangeTable 
+      [nzData]="gradeChangeRequests"
+      [nzPageSize]="10"
+      [nzShowSizeChanger]="true"
+      [nzShowQuickJumper]="true">
+      
+      <!-- Student Code Column -->
+      <thead>
+        <tr>
+          <th>Student Name</th>
+          <th>Course</th>
+          <th>Curriculum</th>
+          <th>Academic Term</th>
+          <th>Previous Grade</th>
+          <th>New Grade</th>
+          <th>Reason</th>
+          <th>Status</th>
+          <th>Request Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      
+      <tbody>
+        <tr *ngFor="let request of gradeChangeTable.data">
+          <td>{{ request.fullName }}</td>
+          <td>{{ request.course }}</td>
+          <td>{{ request.curriculumCode }}</td>
+          <td>{{ request.academicTerm }}</td>
+          <td>
+            <nz-tag [nzColor]="'red'">{{ request.previousGrade }}</nz-tag>
+          </td>
+          <td>
+            <nz-tag [nzColor]="'green'">{{ request.newGrade }}</nz-tag>
+          </td>
+          <td>
+            <span class="reason-text" [nz-tooltip]="request.reason">
+              {{ request.reason.length > 30 ? (request.reason | slice:0:30) + '...' : request.reason }}
+            </span>
+          </td>
+          <td>
+            <nz-tag 
+              [nzColor]="getStatusColor(request.status)">
+              {{ getStatusText(request.status) }}
+            </nz-tag>
+          </td>
+          <td>{{ request.requestDate | date:'short' }}</td>
+          <td>
+            <div class="action-buttons">
+              <button 
+                nz-button 
+                nzType="link" 
+                nzSize="small"
+                (click)="viewDetails(request)">
+                <i nz-icon nzType="eye"></i>
+                View
+              </button>
+              
+              
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>

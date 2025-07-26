@@ -1,0 +1,192 @@
+<app-auth-header></app-auth-header>
+
+<div class="register-container">
+  <div class="register-card">
+    <div class="logo-section">
+      <img src="../../../assets/images/logo.png" alt="HiLCoE Logo" class="logo" (click)="goToHome()" style="cursor: pointer;">
+      <h2>Create Account</h2>
+      <p>Join HiLCoE School of Computer Science & Technology</p>
+    </div>
+
+    <form nz-form [formGroup]="registerForm" class="register-form" (ngSubmit)="submitForm()">
+      <!-- First Name and Last Name Row -->
+      <div class="form-row">
+        <nz-form-item>
+          <nz-form-control 
+            [nzErrorTip]="firstNameErrorTpl"
+            [nzValidateStatus]="firstName?.invalid && firstName?.touched ? 'error' : ''">
+            <nz-input-group nzPrefixIcon="user">
+              <input 
+                type="text" 
+                nz-input 
+                formControlName="firstName" 
+                placeholder="First Name"
+                [attr.aria-describedby]="firstName?.invalid && firstName?.touched ? 'firstName-error' : null" />
+            </nz-input-group>
+          </nz-form-control>
+          <ng-template #firstNameErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')">First name is required</ng-container>
+            <ng-container *ngIf="control.hasError('minlength')">First name must be at least 2 characters</ng-container>
+            <ng-container *ngIf="control.hasError('maxlength')">First name cannot exceed 50 characters</ng-container>
+          </ng-template>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control 
+            [nzErrorTip]="lastNameErrorTpl"
+            [nzValidateStatus]="lastName?.invalid && lastName?.touched ? 'error' : ''">
+            <nz-input-group nzPrefixIcon="user">
+              <input 
+                type="text" 
+                nz-input 
+                formControlName="lastName" 
+                placeholder="Last Name"
+                [attr.aria-describedby]="lastName?.invalid && lastName?.touched ? 'lastName-error' : null" />
+            </nz-input-group>
+          </nz-form-control>
+          <ng-template #lastNameErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')">Last name is required</ng-container>
+            <ng-container *ngIf="control.hasError('minlength')">Last name must be at least 2 characters</ng-container>
+            <ng-container *ngIf="control.hasError('maxlength')">Last name cannot exceed 50 characters</ng-container>
+          </ng-template>
+        </nz-form-item>
+      </div>
+
+      <!-- Email and Phone Row -->
+      <div class="form-row">
+      <nz-form-item>
+        <nz-form-control 
+          [nzErrorTip]="emailErrorTpl"
+          [nzValidateStatus]="email?.invalid && email?.touched ? 'error' : ''">
+          <nz-input-group nzPrefixIcon="mail">
+            <input 
+              type="email" 
+              nz-input 
+              formControlName="email" 
+              placeholder="Email Address"
+              [attr.aria-describedby]="email?.invalid && email?.touched ? 'email-error' : null" />
+          </nz-input-group>
+        </nz-form-control>
+        <ng-template #emailErrorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')">Email is required</ng-container>
+          <ng-container *ngIf="control.hasError('email')">Please enter a valid email address</ng-container>
+        </ng-template>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control 
+          [nzErrorTip]="phoneErrorTpl"
+          [nzValidateStatus]="phoneNumber?.invalid && phoneNumber?.touched ? 'error' : ''">
+          <nz-input-group nzPrefixIcon="phone">
+            <input 
+              type="tel" 
+              nz-input 
+              formControlName="phoneNumber" 
+              placeholder="Phone Number"
+              [attr.aria-describedby]="phoneNumber?.invalid && phoneNumber?.touched ? 'phone-error' : null" />
+          </nz-input-group>
+        </nz-form-control>
+        <ng-template #phoneErrorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')">Phone number is required</ng-container>
+          <ng-container *ngIf="control.hasError('pattern')">Please enter a valid phone number</ng-container>
+        </ng-template>
+      </nz-form-item>
+      </div>
+
+      <!-- Password and Confirm Password Row -->
+      <div class="form-row">
+      <nz-form-item>
+        <nz-form-control 
+          [nzErrorTip]="passwordErrorTpl"
+          [nzValidateStatus]="password?.invalid && password?.touched ? 'error' : ''">
+          <nz-input-group nzPrefixIcon="lock" [nzSuffix]="passwordSuffix">
+            <input 
+              [type]="passwordVisible ? 'text' : 'password'" 
+              nz-input 
+              formControlName="password" 
+              placeholder="Password"
+              [attr.aria-describedby]="password?.invalid && password?.touched ? 'password-error' : null" />
+          </nz-input-group>
+          <ng-template #passwordSuffix>
+            <i 
+              nz-icon 
+              [nzType]="passwordVisible ? 'visibility-off' : 'visibility'" 
+              nzTheme="outline"
+              (click)="togglePasswordVisibility()"
+              class="password-toggle"
+              [attr.aria-label]="passwordVisible ? 'Hide password' : 'Show password'">
+            </i>
+          </ng-template>
+        </nz-form-control>
+        <ng-template #passwordErrorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')">Password is required</ng-container>
+          <ng-container *ngIf="control.hasError('minlength')">Password must be at least 8 characters</ng-container>
+          <ng-container *ngIf="control.hasError('pattern')">Password must contain uppercase, lowercase, number, and special character</ng-container>
+        </ng-template>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control 
+          [nzErrorTip]="confirmPasswordErrorTpl"
+          [nzValidateStatus]="confirmPassword?.invalid && confirmPassword?.touched ? 'error' : ''">
+          <nz-input-group nzPrefixIcon="lock" [nzSuffix]="confirmPasswordSuffix">
+            <input 
+              [type]="confirmPasswordVisible ? 'text' : 'password'" 
+              nz-input 
+              formControlName="confirmPassword" 
+              placeholder="Confirm Password"
+              [attr.aria-describedby]="confirmPassword?.invalid && confirmPassword?.touched ? 'confirmPassword-error' : null" />
+          </nz-input-group>
+          <ng-template #confirmPasswordSuffix>
+            <i 
+              nz-icon 
+              [nzType]="confirmPasswordVisible ? 'visibility-off' : 'visibility'" 
+              nzTheme="outline"
+              (click)="toggleConfirmPasswordVisibility()"
+              class="password-toggle"
+              [attr.aria-label]="confirmPasswordVisible ? 'Hide password' : 'Show password'">
+            </i>
+          </ng-template>
+        </nz-form-control>
+        <ng-template #confirmPasswordErrorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')">Please confirm your password</ng-container>
+          <ng-container *ngIf="control.hasError('passwordMismatch')">Passwords do not match</ng-container>
+        </ng-template>
+      </nz-form-item>
+      </div>
+
+      <div class="terms-section">
+        <nz-form-item>
+          <nz-form-control 
+            [nzErrorTip]="acceptTermsErrorTpl"
+            [nzValidateStatus]="acceptTerms?.invalid && acceptTerms?.touched ? 'error' : ''">
+            <label nz-checkbox formControlName="acceptTerms" class="terms-checkbox">
+              I agree to the <a href="#" target="_blank" rel="noopener">Terms and Conditions</a> and <a href="#" target="_blank" rel="noopener">Privacy Policy</a>
+            </label>
+          </nz-form-control>
+          <ng-template #acceptTermsErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')">You must accept the terms and conditions</ng-container>
+          </ng-template>
+        </nz-form-item>
+      </div>
+
+      <div class="register-actions">
+        <button 
+          nz-button 
+          class="register-button" 
+          [nzType]="'primary'" 
+          [nzLoading]="isLoading"
+          [disabled]="!registerForm.valid || isLoading"
+          type="submit">
+          {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+        </button>
+      </div>
+    </form>
+
+    <!-- Login Link -->
+    <div class="login-link">
+      <span>Already have an account? </span>
+      <a (click)="goToLogin()">Sign in</a>
+    </div>
+  </div>
+</div>

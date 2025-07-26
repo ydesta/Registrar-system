@@ -1,0 +1,214 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <!-- <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h3 class="title-text">{{ action }}</h3>
+        <p class="subtitle-text">Import student grades from Excel files</p>
+      </div>
+      <div class="header-actions">
+        <button routerLink="../StudentGrades" nz-button nzType="default" class="back-btn">
+          <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
+          <span>Back to Grades</span>
+        </button>
+      </div>
+    </div>
+  </div> -->
+
+  <!-- Form Card -->
+  <div class="form-card">
+    <div class="form-header">
+      <div class="form-icon">
+        <i nz-icon nzType="upload" nzTheme="outline"></i>
+      </div>
+      <div class="form-title">
+        <h4>Grade Import Information</h4>
+        <p>Please select the instructor, course, and upload the grade file</p>
+      </div>
+    </div>
+
+    <form nz-form nzLayout="vertical" [formGroup]="importStudentGradeForm" (ngSubmit)="submitForm()" class="grade-form">
+      <div class="form-grid">
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Academic Term</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-select formControlName="academicTermId" nzShowSearch nzPlaceHolder="Select Academic Term" nzAllowClear>
+                <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
+                  [nzLabel]="item.Description"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Academic Term Year</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-select formControlName="academicTermYearId" nzShowSearch nzPlaceHolder="Select Year" nzAllowClear>
+                <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item">
+                </nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+
+
+        </div>
+        <div class="form-row">
+
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Batch Code</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-select formControlName="batchCode" nzPlaceHolder="Select Course" nzShowSearch>
+                <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.id" [nzLabel]="item.batchCode"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Course</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-select formControlName="courseId" nzPlaceHolder="Select Course" nzShowSearch>
+                <nz-option *ngFor="let item of courseList" [nzLabel]="item.courseCode + ' - ' + item.courseTitle"
+                  [nzValue]="item.id">
+                </nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+        </div>
+        <div class="form-row">
+          <nz-form-item class="form-item full-width">
+            <nz-form-label nzRequired>Upload Grade File</nz-form-label>
+            <nz-form-control>
+              <nz-upload nzType="drag" [nzMultiple]="true" nzAction="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                (nzChange)="handleChange($event)" accept=".xls, .xlsx" class="upload-area">
+                <p class="ant-upload-drag-icon">
+                  <span nz-icon nzType="inbox"></span>
+                </p>
+                <p class="ant-upload-text">Click or drag Excel file to this area to upload</p>
+                <p class="ant-upload-hint">Supports .xls and .xlsx files</p>
+              </nz-upload>
+            </nz-form-control>
+          </nz-form-item>
+
+
+
+
+        </div>
+
+        <!-- Row 3: Remark -->
+        <!-- <div class="form-row">
+          <nz-form-item class="form-item full-width">
+            <nz-form-label>Remark</nz-form-label>
+            <nz-form-control>
+              <nz-textarea-count [nzMaxCharacterCount]="250">
+                <textarea rows="4" formControlName="remark" nz-input
+                  placeholder="Enter any additional remarks about the grade import">
+                </textarea>
+              </nz-textarea-count>
+            </nz-form-control>
+          </nz-form-item>
+        </div> -->
+      </div>
+
+      <div class="form-actions">
+        <button nz-button nzType="default" class="cancel-btn" type="button" routerLink="../StudentGrades">
+          <i nz-icon nzType="close" nzTheme="outline"></i>
+          <span>Cancel</span>
+        </button>
+        <button nz-button nzType="primary" class="submit-btn" type="submit"
+          [disabled]="!canSave() || !importStudentGradeForm.valid">
+          <i nz-icon nzType="upload" nzTheme="outline"></i>
+          <span>{{ submit }}</span>
+        </button>
+       
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Error Modal -->
+<nz-modal
+  [(nzVisible)]="isErrorModalVisible"
+  nzTitle="Grade Import Errors"
+  nzWidth="900px"
+  (nzOnCancel)="handleErrorModalCancel()"
+  [nzFooter]="null"
+  [nzMaskClosable]="false"
+  [nzClosable]="true">
+  
+  <div *nzModalContent>
+    <div class="error-summary">
+      <nz-alert
+        nzType="error"
+        nzMessage="Grade Import Completed with Errors"
+        nzDescription="The following validation errors were found during the grade import process. Please review and correct these issues before re-uploading your file."
+        class="error-alert"
+        [nzShowIcon]="true">
+      </nz-alert>
+    </div>
+
+    <div class="error-list">
+      <h4>
+        <i nz-icon nzType="exclamation-circle" nzTheme="outline" style="margin-right: 8px; color: #1890ff;"></i>
+        Error Details
+      </h4>
+      <nz-table
+        #errorTable
+        [nzData]="errorList"
+        [nzPageSize]="10"
+        [nzShowSizeChanger]="true"
+        [nzShowQuickJumper]="true"
+        [nzShowTotal]="totalTemplate"
+        class="error-table"
+        [nzScroll]="{ y: '400px' }">
+        
+        <thead>
+          <tr>
+            <th nzWidth="120px" style="text-align: center;">
+              <i nz-icon nzType="number" nzTheme="outline" style="margin-right: 4px;"></i>
+              Row Index
+            </th>
+            <th>
+              <i nz-icon nzType="message" nzTheme="outline" style="margin-right: 4px;"></i>
+              Error Message
+            </th>
+          </tr>
+        </thead>
+        
+        <tbody>
+          <tr *ngFor="let error of errorTable.data; let i = index">
+            <td style="text-align: center;">
+              <nz-tag nzColor="red" style="font-weight: 600; padding: 6px 12px;">
+                <i nz-icon nzType="file-exclamation" nzTheme="outline" style="margin-right: 4px;"></i>
+                {{ error.rowIndex }}
+              </nz-tag>
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <i nz-icon nzType="warning" nzTheme="outline" style="color: #faad14; font-size: 16px;"></i>
+                <span style="font-weight: 500;">{{ error.message }}</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+      
+      <!-- Custom total template -->
+      <ng-template #totalTemplate let-total>
+        <span style="color: #666; font-weight: 500;">
+          <i nz-icon nzType="info-circle" nzTheme="outline" style="margin-right: 4px;"></i>
+          Total {{ total }} errors found
+        </span>
+      </ng-template>
+    </div>
+
+    <div class="modal-actions">
+      <button nz-button nzType="default" (click)="handleErrorModalCancel()" style="border-radius: 8px;">
+        <i nz-icon nzType="close" nzTheme="outline"></i>
+        Close
+      </button>
+      
+    </div>
+  </div>
+</nz-modal>

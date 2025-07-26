@@ -1,0 +1,367 @@
+<div class="content-container">
+  <!-- Stats Section -->
+  <div class="stats-section">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <span nz-icon nzType="team" nzTheme="outline"></span>
+      </div>
+      <div class="stat-number">{{ total }}</div>
+      <div class="stat-label">Total Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+      </div>
+      <div class="stat-number">{{ activeUsersCount }}</div>
+      <div class="stat-label">Active Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <span nz-icon nzType="stop" nzTheme="outline"></span>
+      </div>
+      <div class="stat-number">{{ inactiveUsersCount }}</div>
+      <div class="stat-label">Inactive Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+      </div>
+      <div class="stat-number">{{ totalRolesCount }}</div>
+      <div class="stat-label">Total Roles</div>
+    </div>
+  </div>
+
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="action-buttons">
+      <div class="search-section">
+        <nz-input-group [nzSuffix]="suffixIconSearch">
+          <input type="text" nz-input placeholder="Search users by name, email, or phone..." [(ngModel)]="searchKey" (ngModelChange)="onSearch()"/>
+        </nz-input-group>
+        <ng-template #suffixIconSearch>
+          <span nz-icon nzType="search"></span>
+        </ng-template>
+      </div>
+      
+      <div class="filter-section">
+        <!-- Status Filter -->
+        <nz-select 
+          [(ngModel)]="statusFilter" 
+          (ngModelChange)="onStatusFilterChange($event)"
+          placeholder="Status"
+          nzShowSearch="false">
+          <nz-option nzValue="all" nzLabel="All Status"></nz-option>
+          <nz-option nzValue="active" nzLabel="Active"></nz-option>
+          <nz-option nzValue="inactive" nzLabel="Inactive"></nz-option>
+        </nz-select>
+
+        <!-- Role Filter -->
+        <nz-select 
+          [(ngModel)]="roleFilter" 
+          (ngModelChange)="onRoleFilterChange($event)"
+          placeholder="Role"
+          nzShowSearch="false">
+          <nz-option nzValue="" nzLabel="All Roles"></nz-option>
+          <nz-option 
+            *ngFor="let role of roles" 
+            [nzValue]="role.name" 
+            [nzLabel]="role.name">
+          </nz-option>
+        </nz-select>
+      </div>
+
+      <button nz-button nzType="primary" class="add-user-btn" (click)="openAddUserModal()">
+        <span nz-icon nzType="plus" nzTheme="outline"></span>
+        Add User
+      </button>
+      <button nz-button nzType="primary" class="export-btn" (click)="onExportUsers()">
+        <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <!-- Table Container -->
+  <div class="table-container">
+    <!-- Desktop/Tablet Table View -->
+    <div class="desktop-table-view">
+      <nz-table #basicTable 
+                [nzData]="paginatedUsers" 
+                nzBordered
+                [nzPageSize]="pageSize"
+                [nzPageSizeOptions]="pageSizeOption"
+                [nzShowSizeChanger]="true"
+                [nzTotal]="total"
+                [nzPageIndex]="pageIndex"
+                (nzPageIndexChange)="onPageIndexChange($event)"
+                (nzPageSizeChange)="onPageSizeChange($event)"
+                [nzFrontPagination]="false"
+                [nzShowTotal]="rangeTemplate"
+                [nzLoading]="loading"
+                [nzNoResult]="emptyTpl"
+                [nzScroll]="{ x: '1200px' }"
+                style="overflow-x: auto;"
+                class="mobile-table-container">
+        <ng-template #rangeTemplate let-range="range" let-total>
+          <span style="color: #6b7280; font-weight: 500;">
+            {{ range[0] }}-{{ range[1] }} of {{ total }} users
+          </span>
+        </ng-template>
+        <thead>
+          <tr>
+            <th style="min-width: 200px;">Full name</th>
+            <th style="min-width: 180px;">Email</th>
+            <th style="min-width: 120px;">Phone number</th>
+            <th style="min-width: 150px;">Roles</th>
+            <th style="min-width: 100px;">Status</th>
+            <th style="min-width: 120px;">Verification</th>
+            <th style="min-width: 150px;">Activity</th>
+            <th class="sticky-action" style="min-width: 80px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of paginatedUsers; let i = index">
+            <td>
+              <div class="user-info">
+                <nz-avatar [nzSize]="40" [nzText]="user.firstName.charAt(0)"></nz-avatar>
+                <div class="user-details">
+                  <span class="user-name">{{ getDisplayName(user) }}</span>
+                  <span class="user-id">ID: {{ user.id }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="contact-info">
+                <div class="email">{{ user.email }}</div>
+              </div>
+            </td>
+            <td>
+              <div class="contact-info">
+                <div class="phone">{{ user.phoneNumber || '-' }}</div>
+              </div>
+            </td>
+            <td>
+              <div class="roles-container">
+                <nz-tag 
+                  *ngFor="let role of user.roles" 
+                  [class]="role.isActive ? 'active-role' : 'inactive-role'"
+                  style="margin: 2px;">
+                  {{ role.name }}
+                </nz-tag>
+              </div>
+            </td>
+            <td>
+              <nz-tag [nzColor]="getStatusTag(user).color">
+                <span nz-icon [nzType]="user.isActive ? 'check-circle' : 'stop'" nzTheme="outline"></span>
+                {{ getStatusTag(user).text }}
+              </nz-tag>
+            </td>
+            <td>
+              <div class="verification-status">
+                <nz-tag [nzColor]="getEmailStatus(user).color" style="margin-bottom: 4px;">
+                  <span nz-icon nzType="mail" nzTheme="outline"></span>
+                  {{ getEmailStatus(user).text }}
+                </nz-tag>
+                <nz-tag [nzColor]="getPhoneStatus(user).color" *ngIf="user.phoneNumber">
+                  <span nz-icon nzType="phone" nzTheme="outline"></span>
+                  {{ getPhoneStatus(user).text }}
+                </nz-tag>
+              </div>
+            </td>
+            <td>
+              <div class="activity-info">
+                <div class="created-date">
+                  <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                  {{ formatDate(user.createdAt) }}
+                </div>
+                <div class="last-login" *ngIf="user.lastLoginAt">
+                  <span nz-icon nzType="clock-circle" nzTheme="outline"></span>
+                  {{ formatDate(user.lastLoginAt) }}
+                </div>
+              </div>
+            </td>
+            <td class="sticky-action" [class.sticky-action-even]="i % 2 === 1">
+              <button nz-button 
+                      nz-dropdown 
+                      [nzDropdownMenu]="menu" 
+                      nzPlacement="bottomRight"
+                      nzTrigger="click"
+                      class="action-button">
+                <span nz-icon nzType="more" nzTheme="outline"></span>
+              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li nz-menu-item>
+                    <button nz-button nzType="default" class="action-item" (click)="onViewUser(user.id)">
+                      <span nz-icon nzType="eye" nzTheme="outline"></span>
+                      View Details
+                    </button>
+                  </li>
+                  <li nz-menu-item>
+                    <button nz-button nzType="default" class="action-item" (click)="onEditUser(user.id)">
+                      <span nz-icon nzType="edit" nzTheme="outline"></span>
+                      Edit User
+                    </button>
+                  </li>
+                  <li nz-menu-item>
+                    <button nz-button nzType="default" class="action-item" (click)="onToggleUserStatus(user)">
+                      <span nz-icon nzType="poweroff" nzTheme="outline"></span>
+                      {{ user.isActive ? 'Deactivate' : 'Activate' }}
+                    </button>
+                  </li>
+                  <li nz-menu-item>
+                    <button nz-button nzType="default" class="action-item" (click)="onResetPassword(user.id)">
+                      <span nz-icon nzType="key" nzTheme="outline"></span>
+                      Regenerate Password
+                    </button>
+                  </li>
+                  <li nz-menu-item nzDanger>
+                    <button nz-button nzType="default" class="action-item danger" (click)="onDeleteUser(user)">
+                      <span nz-icon nzType="delete" nzTheme="outline"></span>
+                      Delete User
+                    </button>
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </td>
+          </tr>
+        </tbody>
+        <ng-template #emptyTpl>
+          <div class="no-data">
+            <span nz-icon nzType="user" nzTheme="outline"></span>
+            <p>No user records available</p>
+            <p class="no-data-subtitle">Try adjusting your search or filters</p>
+          </div>
+        </ng-template>
+      </nz-table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="mobile-card-view">
+      <div class="mobile-pagination-info">
+        <span style="color: #6b7280; font-weight: 500;">
+          {{ (pageIndex - 1) * pageSize + 1 }}-{{ Math.min(pageIndex * pageSize, total) }} of {{ total }} users
+        </span>
+      </div>
+      
+      <div class="user-cards" *ngIf="!loading; else mobileLoading">
+        <div class="user-card" *ngFor="let user of paginatedUsers">
+          <div class="card-header">
+            <div class="user-info">
+              <nz-avatar [nzSize]="48" [nzText]="user.firstName.charAt(0)"></nz-avatar>
+              <div class="user-details">
+                <span class="user-name">{{ getDisplayName(user) }}</span>
+                <span class="user-id">ID: {{ user.id }}</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button nz-button 
+                      nz-dropdown 
+                      [nzDropdownMenu]="mobileMenu" 
+                      nzPlacement="bottomRight"
+                      nzTrigger="click"
+                      class="action-button">
+                <span nz-icon nzType="more" nzTheme="outline"></span>
+              </button>
+              <nz-dropdown-menu #mobileMenu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li nz-menu-item>
+                    <button nz-button nzType="default" class="action-item" (click)="onViewUser(user.id)">
+                      <span nz-icon nzType="eye" nzTheme="outline"></span>
+                      View Details
+                    </button>
+                  </li>
+                  <li nz-menu-item>
+                    <button nz-button nzType="default" class="action-item" (click)="onEditUser(user.id)">
+                      <span nz-icon nzType="edit" nzTheme="outline"></span>
+                      Edit User
+                    </button>
+                  </li>
+                  <li nz-menu-item>
+                    <button nz-button nzType="default" class="action-item" (click)="onToggleUserStatus(user)">
+                      <span nz-icon nzType="poweroff" nzTheme="outline"></span>
+                      {{ user.isActive ? 'Deactivate' : 'Activate' }}
+                    </button>
+                  </li>
+                  <li nz-menu-item>
+                    <button nz-button nzType="default" class="action-item" (click)="onResetPassword(user.id)">
+                      <span nz-icon nzType="key" nzTheme="outline"></span>
+                      Regenerate Password
+                    </button>
+                  </li>
+                  <li nz-menu-item nzDanger>
+                    <button nz-button nzType="default" class="action-item danger" (click)="onDeleteUser(user)">
+                      <span nz-icon nzType="delete" nzTheme="outline"></span>
+                      Delete User
+                    </button>
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </div>
+          </div>
+          
+          <div class="card-content">
+            <div class="info-row">
+              <span class="label">Email:</span>
+              <span class="value">{{ user.email }}</span>
+            </div>
+            
+            <div class="info-row" *ngIf="user.phoneNumber">
+              <span class="label">Phone:</span>
+              <span class="value">{{ user.phoneNumber }}</span>
+            </div>
+            
+            <div class="info-row">
+              <span class="label">Roles:</span>
+              <div class="roles-container">
+                <nz-tag 
+                  *ngFor="let role of user.roles" 
+                  [class]="role.isActive ? 'active-role' : 'inactive-role'"
+                  style="margin: 2px;">
+                  {{ role.name }}
+                </nz-tag>
+              </div>
+            </div>
+            
+            <div class="info-row">
+              <span class="label">Status:</span>
+              <nz-tag [nzColor]="getStatusTag(user).color">
+                <span nz-icon [nzType]="user.isActive ? 'check-circle' : 'stop'" nzTheme="outline"></span>
+                {{ getStatusTag(user).text }}
+              </nz-tag>
+            </div>
+            
+            <div class="info-row">
+              <span class="label">Created:</span>
+              <span class="value">{{ formatDate(user.createdAt) }}</span>
+            </div>
+            
+            <div class="info-row" *ngIf="user.lastLoginAt">
+              <span class="label">Last Login:</span>
+              <span class="value">{{ formatDate(user.lastLoginAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <ng-template #mobileLoading>
+        <div class="mobile-loading">
+          <nz-spin nzSize="large"></nz-spin>
+          <p>Loading users...</p>
+        </div>
+      </ng-template>
+      
+      <!-- Mobile Pagination -->
+      <div class="mobile-pagination">
+        <nz-pagination
+          [nzPageIndex]="pageIndex"
+          [nzPageSize]="pageSize"
+          [nzTotal]="total"
+          [nzShowSizeChanger]="false"
+          [nzShowQuickJumper]="false"
+          (nzPageIndexChange)="onPageIndexChange($event)">
+        </nz-pagination>
+      </div>
+    </div>
+  </div>
+</div> 

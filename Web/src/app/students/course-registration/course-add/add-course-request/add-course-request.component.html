@@ -1,0 +1,81 @@
+<div class="container">
+    <div class="header-section">
+        <div class="title-section">
+            <h2 class="page-title">Course Registration</h2>
+            <div class="term-info">{{ nextTerm }}</div>
+        </div>
+
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="card-icon">📚</div>
+                <div class="card-content">
+                    <div class="card-label">Total Credit Hours</div>
+                    <div class="card-value">{{ totalCreditHours }}</div>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="card-icon">💰</div>
+                <div class="card-content">
+                    <div class="card-label">Total Amount</div>
+                    <div class="card-value">ETB{{ totalAmount | number:'1.2-2' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <nz-spin [nzSpinning]="loading">
+            <div class="course-list" *ngIf="listOfOfAddDropCourse?.studentCoursesTaken?.length">
+                <nz-table #basicTable [nzData]="listOfOfAddDropCourse?.studentCoursesTaken || []" [nzPageSize]="10"
+                    [nzShowPagination]="false" [nzLoading]="loading" [nzFrontPagination]="false"
+                    [nzTotal]="listOfOfAddDropCourse?.studentCoursesTaken?.length || 0" nzShowSizeChanger
+                    [nzPageSizeOptions]="[5, 10, 20, 50]">
+                    <thead>
+                        <tr>
+                            <th class="text-center" nzWidth="60px">No.</th>
+                            <th class="text-center">Course Code</th>
+                            <th class="text-center">Course Title</th>
+                            <th class="text-center">Credit Hours</th>
+                            <th class="text-center">Amount</th>
+                            <th class="text-center">Request Type</th>
+                            <th class="text-center">Approval Status</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let course of basicTable.data; let i = index">
+                            <td class="text-center">{{ i + 1 }}</td>
+                            <td class="text-center">{{ course.courseCode }}</td>
+                            <td class="text-center">{{ course.courseName }}</td>
+                            <td class="text-center">{{ course.creditHours }}</td>
+                            <td class="text-center">ETB{{ course.totalAmount | number:'1.2-2' }}</td>
+                            <td class="text-center">
+                                <nz-tag [nzColor]="getStatusColor(course.registeredStatus)">
+                                    {{ course.registeredStatus }}
+                                </nz-tag>
+                            </td>
+                            <td class="text-center">
+                                <nz-tag [nzColor]="getStatusColor(course.approvalStatus)">
+                                    {{ course.approvalStatus }}
+                                </nz-tag>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </nz-table>
+            </div>
+
+            <div class="no-data" *ngIf="!listOfOfAddDropCourse?.studentCoursesTaken?.length">
+                <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="'No courses found'">
+                </nz-empty>
+            </div>
+        </nz-spin>
+    </div>
+
+    <!-- <div class="action-section">
+        <button nz-button nzType="primary" (click)="refreshData()" [nzLoading]="loading">
+            <span nz-icon nzType="reload"></span>
+            Refresh
+        </button>
+    </div> -->
+</div>

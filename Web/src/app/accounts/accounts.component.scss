@@ -1,0 +1,152 @@
+.auth-header {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  color: white;
+  padding: 1rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  .header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .logo {
+        height: 50px;
+        width: auto;
+        filter: brightness(0) invert(1);
+      }
+
+      .logo-text {
+        h1 {
+          margin: 0;
+          font-size: 1.8rem;
+          font-weight: 700;
+          color: white;
+        }
+
+        p {
+          margin: 0;
+          font-size: 0.9rem;
+          opacity: 0.9;
+          color: white;
+        }
+      }
+    }
+
+    .header-actions {
+      .back-to-portal {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.5);
+          transform: translateY(-1px);
+        }
+
+        i {
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .auth-header {
+    .header-container {
+      padding: 0 1rem;
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+
+      .logo-section {
+        .logo-text {
+          h1 {
+            font-size: 1.5rem;
+          }
+
+          p {
+            font-size: 0.8rem;
+          }
+        }
+      }
+
+      .header-actions {
+        .back-to-portal {
+          font-size: 0.9rem;
+          padding: 0.4rem 0.8rem;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-header {
+    .header-container {
+      .logo-section {
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .logo {
+          height: 40px;
+        }
+
+        .logo-text {
+          h1 {
+            font-size: 1.3rem;
+          }
+
+          p {
+            font-size: 0.75rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+.auth-center-container {
+  min-height: calc(100vh - 80px); // Account for header height
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F8F8FF;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+}
+
+// Make sure all auth cards have a max width and are centered
+.login-container, .register-container, .forgot-password-container, .reset-password-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Responsive: reduce padding on small screens
+@media (max-width: 600px) {
+  .auth-center-container {
+    padding: 1rem 0.2rem;
+  }
+}

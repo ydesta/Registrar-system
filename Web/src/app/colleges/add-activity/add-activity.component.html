@@ -1,0 +1,18 @@
+<div class="p-5">
+  <nz-card  [nzBordered]="false" class="shadow-md rounded-lg">
+    <form nz-form nzLayout="vertical" [formGroup]="activityForm" (ngSubmit)="submitForm()">
+      
+      <nz-form-item>
+        <nz-form-label nzFor="title" [nzRequired]="true">Title</nz-form-label>
+        <nz-form-control nzErrorTip="Please enter a title!">
+          <input nz-input id="title" formControlName="title" placeholder="Enter activity title" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <div class="flex justify-end mt-4 gap-2">
+        <button nz-button nzType="primary" [disabled]="activityForm.invalid">{{submit}}</button>
+      </div>
+
+    </form>
+  </nz-card>
+</div>

@@ -1,0 +1,31 @@
+<nz-card>
+    <h3 class="h-tag">Data Migration</h3>
+    <nz-divider></nz-divider>
+    <div>
+        <form nz-form [formGroup]="dataMigrationForm">
+            <nz-card>
+                <div nz-row [nzGutter]="24">
+                    <div nz-col nzSpan="12">
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="10" nzRequired>Data Migration Name</nz-form-label>
+                            <nz-form-control nzValidatingTip="Validating...">
+                                <nz-select formControlName="uploadTypeList" nzShowSearch nzPlaceHolder="Select program">
+                                    <nz-option *ngFor="let item of dataMigrationList" [nzValue]="item.Id"
+                                        [nzLabel]="item.Description"></nz-option>
+                                </nz-select>
+                            </nz-form-control>
+                        </nz-form-item>
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="10" nzRequired>Upload File</nz-form-label>
+                            <nz-form-control [nzErrorTip]="'Please upload a valid file'">
+                                <input type="file" (change)="onFileSelected($event)"
+                                    [disabled]="dataMigrationForm.get('file')?.disabled" accept=".xls, .xlsx" />
+                            </nz-form-control>
+                        </nz-form-item>
+
+                    </div>
+                </div>
+            </nz-card>
+        </form>
+    </div>
+</nz-card>

@@ -1,0 +1,398 @@
+// Modal Content Styling
+.modal-content {
+  padding: 0;
+
+  // Request Information Section
+  .request-info {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f0f0;
+
+    .info-section {
+      h4 {
+        margin: 0 0 16px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &::before {
+          content: '';
+          width: 4px;
+          height: 16px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 2px;
+        }
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+
+        .info-item {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          &.full-width {
+            grid-column: 1 / -1;
+          }
+
+          label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          span {
+            font-size: 14px;
+            color: #1f2937;
+            font-weight: 500;
+            line-height: 1.4;
+          }
+
+          nz-tag {
+            align-self: flex-start;
+            margin-top: 2px;
+          }
+        }
+      }
+    }
+  }
+
+  // Decision Form Section
+  .decision-form {
+    margin-bottom: 24px;
+
+    h4 {
+      margin: 0 0 16px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      &::before {
+        content: '';
+        width: 4px;
+        height: 16px;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border-radius: 2px;
+      }
+    }
+
+    // Form styling
+    ::ng-deep {
+      .ant-form-item {
+        margin-bottom: 16px;
+
+        .ant-form-item-label {
+          padding-bottom: 4px;
+
+          label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+          }
+        }
+
+        .ant-form-item-control {
+          .ant-form-item-control-input {
+            .ant-form-item-control-input-content {
+              .ant-radio-group {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+
+                label.ant-radio-wrapper {
+                  margin: 0;
+                  padding: 12px 16px;
+                  border: 2px solid #e5e7eb;
+                  border-radius: 8px;
+                  transition: all 0.3s ease;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  font-weight: 500;
+                  color: #374151;
+
+                  &:hover {
+                    border-color: #d1d5db;
+                    background: #f9fafb;
+                  }
+
+                  &.ant-radio-wrapper-checked {
+                    border-color: #1890ff;
+                    background: #f0f9ff;
+                    color: #1890ff;
+                  }
+
+                  .ant-radio {
+                    margin-right: 12px;
+                  }
+                }
+              }
+
+              textarea.ant-input {
+                border-radius: 8px;
+                border: 2px solid #e5e7eb;
+                transition: all 0.3s ease;
+                font-size: 14px;
+                line-height: 1.5;
+
+                &:hover {
+                  border-color: #d1d5db;
+                }
+
+                &:focus {
+                  border-color: #1890ff;
+                  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+                }
+              }
+
+              input.ant-input {
+                border-radius: 8px;
+                border: 2px solid #e5e7eb;
+                transition: all 0.3s ease;
+                font-size: 14px;
+
+                &:hover {
+                  border-color: #d1d5db;
+                }
+
+                &:focus {
+                  border-color: #1890ff;
+                  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Warning Message
+  .warning-message {
+    margin-top: 16px;
+
+    ::ng-deep .ant-alert {
+      border-radius: 8px;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      &.ant-alert-success {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border-left: 4px solid #22c55e;
+      }
+
+      &.ant-alert-error {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        border-left: 4px solid #ef4444;
+      }
+
+      .ant-alert-message {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 14px;
+      }
+
+      .ant-alert-description {
+        color: #6b7280;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// Modal Override Styling
+::ng-deep {
+  .ant-modal {
+    .ant-modal-content {
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .ant-modal-header {
+      border-bottom: 1px solid #f0f0f0;
+      padding: 20px 24px;
+      border-radius: 16px 16px 0 0;
+
+      .ant-modal-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1f2937;
+      }
+    }
+
+    .ant-modal-body {
+      padding: 24px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .ant-modal-footer {
+      border-top: 1px solid #f0f0f0;
+      padding: 16px 24px;
+      border-radius: 0 0 16px 16px;
+
+      .ant-btn {
+        border-radius: 8px;
+        font-weight: 500;
+        height: 40px;
+        padding: 0 20px;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-1px);
+        }
+
+        &.ant-btn-primary {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border: none;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+
+          &:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+          }
+        }
+
+        &.ant-btn-default {
+          border: 2px solid #e5e7eb;
+          color: #6b7280;
+          background: white;
+
+          &:hover {
+            border-color: #d1d5db;
+            color: #374151;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .modal-content {
+    .request-info {
+      .info-section {
+        .info-grid {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+      }
+    }
+
+    .decision-form {
+      ::ng-deep {
+        .ant-form-item {
+          .ant-form-item-control {
+            .ant-form-item-control-input {
+              .ant-form-item-control-input-content {
+                .ant-radio-group {
+                  label.ant-radio-wrapper {
+                    padding: 10px 12px;
+                    font-size: 14px;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  ::ng-deep {
+    .ant-modal {
+      .ant-modal-content {
+        margin: 16px;
+        max-width: calc(100vw - 32px);
+      }
+
+      .ant-modal-body {
+        padding: 20px;
+        max-height: 60vh;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    .request-info {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+
+      .info-section {
+        h4 {
+          font-size: 14px;
+        }
+
+        .info-grid {
+          gap: 10px;
+
+          .info-item {
+            label {
+              font-size: 11px;
+            }
+
+            span {
+              font-size: 13px;
+            }
+          }
+        }
+      }
+    }
+
+    .decision-form {
+      margin-bottom: 20px;
+
+      h4 {
+        font-size: 14px;
+      }
+    }
+  }
+
+  ::ng-deep {
+    .ant-modal {
+      .ant-modal-content {
+        margin: 12px;
+        max-width: calc(100vw - 24px);
+      }
+
+      .ant-modal-header {
+        padding: 16px 20px;
+
+        .ant-modal-title {
+          font-size: 16px;
+        }
+      }
+
+      .ant-modal-body {
+        padding: 16px;
+      }
+
+      .ant-modal-footer {
+        padding: 12px 20px;
+
+        .ant-btn {
+          height: 36px;
+          padding: 0 16px;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+} 

@@ -1,0 +1,133 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h3 class="title-text">Staffs</h3>
+        <p class="subtitle-text">Manage and view all staff members</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-section">
+          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+            <input type="text" nz-input placeholder="Search staffs..." />
+          </nz-input-group>
+          <ng-template #suffixIconButton>
+            <button nz-button nzType="primary" class="search-btn" nzSearch>
+              <i nz-icon nzType="search"></i>
+            </button>
+          </ng-template>
+        </div>
+        <button
+          routerLink="../staffs/add-staff/null"
+          class="add-btn"
+          nz-button
+          nzType="primary"
+        >
+          <i nz-icon nzType="plus" nzTheme="outline"></i>
+          <span>Add Staff</span>
+        </button>
+        <button nz-button class="export-btn" (click)="exportStaff()">
+          <i nz-icon nzType="file-excel" nzTheme="outline"></i>
+          <span>Export</span>
+        </button>
+        <button
+          class="print-btn"
+          nz-button
+          nzType="default"
+          printTitle="."
+          printSectionId="print-section"
+          ngxPrint
+        >
+          <i nz-icon nzType="printer" nzTheme="outline"></i>
+          <span>Print</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div id="print-section">
+      <img class="logo" src="../../assets/images/logo.png" />
+      <nz-table
+        #basicTable
+        [nzData]="staffs!"
+        nzBordered
+        [nzShowPagination]="true"
+        [nzPageSize]="10"
+        [nzPageSizeOptions]="[5, 10, 20, 50]"
+        [nzShowSizeChanger]="true"
+        [nzShowQuickJumper]="true"
+        [nzShowTotal]="totalTemplate"
+        class="staffs-table"
+      >
+        <thead>
+          <tr>
+            <th>Staff Code</th>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Birth Date</th>
+            <th class="action-column">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of basicTable.data; let i = index">
+            <td>{{ data.staffCode }}</td>
+            <td>{{ data.firstName + " " + data.lastName }}</td>
+            <td>{{ data.gender }}</td>
+            <td>{{ data.birthDate | date : "yyyy-MM-dd" }}</td>
+            <td class="action-column">
+              <button
+                nz-button
+                nz-dropdown
+                [nzDropdownMenu]="menu"
+                nzPlacement="bottomLeft"
+                class="action-button"
+              >
+                <i nz-icon nzType="more" nzTheme="outline"></i>
+              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li>
+                    <button nz-button nzType="default" class="action-item detail">
+                      <i nz-icon nzType="eye" nzTheme="fill"></i>
+                      <span>Detail</span>
+                    </button>
+                  </li>
+                  <li>
+                    <a
+                      routerLink="../staffs/add-staff/{{ data.id }}"
+                      nz-button
+                      nzType="default"
+                      class="action-item edit"
+                    >
+                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                      <span>Edit</span>
+                    </a>
+                  </li>
+                  <li>
+                    <button
+                      nz-button
+                      nzDanger
+                      nzType="default"
+                      class="action-item delete"
+                      (click)="showDeleteConfirm(data.id)"
+                    >
+                      <i nz-icon nzType="delete" nzTheme="fill"></i>
+                      <span>Delete</span>
+                    </button>
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+</div>
+
+<!-- Pagination Template -->
+<ng-template #totalTemplate let-total let-range="range">
+  Showing {{ range[0] }}-{{ range[1] }} of {{ total }} items
+</ng-template>

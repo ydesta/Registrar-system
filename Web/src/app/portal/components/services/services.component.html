@@ -1,0 +1,16 @@
+<div class="services-container">
+  <div class="services-header">
+    <h2>Our Core Services</h2>
+    <p class="services-subtitle">Empowering education through comprehensive academic programs and research opportunities</p>
+    <div class="header-underline"></div>
+  </div>
+  <div class="services-grid">
+    <div class="service-item" *ngFor="let service of services">
+      <nz-card [nzHoverable]="true" class="service-card">
+        <i nz-icon [nzType]="service.icon" nzTheme="outline" class="service-icon"></i>
+        <h3>{{ service.title }}</h3>
+        <p>{{ service.description }}</p>
+      </nz-card>
+    </div>
+  </div>
+</div> 

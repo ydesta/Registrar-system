@@ -1,0 +1,68 @@
+<h3 class="h-tag">{{action}}</h3>
+<nz-divider></nz-divider>
+<form nz-form [formGroup]="collegeForm" (ngSubmit)="submitForm()">
+  <nz-card>
+    <div nz-row [nzGutter]="24">
+      <div nz-col nzSpan="12">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="7">Name</nz-form-label>
+          <nz-form-control>
+            <input nz-input formControlName="collegeName" placeholder="enter college name" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label [nzSpan]="7" nzRequired>Country</nz-form-label>
+          <nz-form-control nzValidatingTip="Validating...">
+            <nz-select formControlName="country" nzPlaceHolder="select country">
+              <nz-option nzValue="Ethiopia" nzLabel="Ethiopia"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label [nzSpan]="7" nzRequired>City</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="city" nzPlaceHolder="select city">
+              <nz-option nzValue="Addis Ababa" nzLabel="Addis Ababa"></nz-option>
+              <nz-option nzValue="Adama" nzLabel="Adama"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label [nzSpan]="7">Remark</nz-form-label>
+          <nz-form-control nzErrorTip="Please input your remark!">
+            <nz-textarea-count [nzMaxCharacterCount]="250">
+              <textarea rows="4" formControlName="remark" nz-input></textarea>
+            </nz-textarea-count>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div nz-col nzSpan="11">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="8">Telephone 1</nz-form-label>
+          <nz-form-control>
+            <input nz-input formControlName="telephone1" placeholder="enter telephone 1" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label [nzSpan]="8">Telephone 2</nz-form-label>
+          <nz-form-control>
+            <input nz-input formControlName="telephone2" placeholder="enter telephone 2" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label [nzSpan]="8">Telephone 3</nz-form-label>
+          <nz-form-control>
+            <input nz-input formControlName="telephone3" placeholder="enter telephone 3" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control [nzOffset]="12" [nzSpan]="12" style="margin-top:40px ;">
+            <button nz-button nzType="primary">{{submit}}</button>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      
+    </div>
+  </nz-card>
+</form>

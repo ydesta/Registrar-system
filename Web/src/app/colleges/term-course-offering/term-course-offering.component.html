@@ -1,0 +1,175 @@
+<ng-template #customExpandIcon let-expand="expand" let-collapsed="collapsed">
+  <span
+    class="custom-expand-icon"
+    [ngClass]="{ 'expanded': !collapsed }"
+    (click)="expand($event)"
+  >
+    <i
+      nz-icon
+      [nzType]="collapsed ? 'plus-square' : 'minus-square'"
+      [style.color]="collapsed ? '#1890ff' : '#ef4444'"
+      style="font-size: 20px;"
+    ></i>
+  </span>
+</ng-template>
+
+<div class="content-container">
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">Course Offerings</h2>
+        <p class="subtitle-text">View, search, and manage all term course offerings</p>
+      </div>
+      <div class="action-buttons">
+        <button nz-button nzType="primary" routerLink="../add-term-course-offering/null" class="action-btn">
+          <span nz-icon nzType="plus" nzTheme="outline"></span>
+          <span class="btn-text">Add Term Course Offering</span>
+        </button>
+        <button nz-button nzType="primary" (click)="exportTermCourseOffering()" class="action-btn">
+          <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+          <span class="btn-text">Export</span>
+        </button>
+        <button nz-button nzType="primary" printTitle="." [useExistingCss]="true" printSectionId="print-section" ngxPrint class="action-btn">
+          <span nz-icon nzType="printer" nzTheme="outline"></span>
+          <span class="btn-text">Print</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="table-card">
+    <div class="table-responsive">
+      <nz-table #basicTable 
+                [nzData]="termCourseOfferings" 
+                nzBordered
+                [nzPageSize]="pageSize"
+                [nzShowSizeChanger]="true"
+                [nzShowPagination]="true"
+                [nzShowQuickJumper]="false"
+                [nzShowTotal]="totalTemplate"
+                [nzTotal]="totalRecord"
+                [nzPageIndex]="pageindex"
+                (nzPageIndexChange)="onPageIndexChange($event)"
+                (nzPageSizeChange)="onPageSizeChange($event)"
+                [nzLoading]="tbLoading"
+                [nzNoResult]="emptyTpl"
+                [nzFrontPagination]="false"
+                class="responsive-table">
+        <thead>
+          <tr>
+            <th class="expand-column">Courses</th>
+            <th class="batch-column">Batch Code</th>
+            <th class="term-column">Academic Term</th>
+            <th class="date-column">Registration Start Date</th>
+            <th class="date-column">Registration End Date</th>
+            <th class="action-column">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container tabindex="0" *ngFor="let data of basicTable.data; trackBy: trackById; let i = index">
+            <tr class="main-row">
+              <td class="expand-column">
+                <span
+                  class="custom-expand-icon"
+                  (click)="onExpandChange(data.id, !expandSet.has(data.id))"
+                  style="cursor:pointer;"
+                >
+                  <i
+                    nz-icon
+                    [nzType]="expandSet.has(data.id) ? 'minus-square' : 'plus-square'"
+                    [style.color]="expandSet.has(data.id) ? '#ef4444' : '#1890ff'"
+                    style="font-size: 20px;"
+                  ></i>
+                </span>
+              </td>
+              <td class="batch-column">{{ data.batchCode }}</td>
+              <td class="term-column">{{data.academicTerm}} {{data.year}}</td>
+              <td class="date-column">{{ data.registrationStartDate | date : "dd-MM-yyyy" }}</td>
+              <td class="date-column">{{ data.registrationEndDate | date : "dd-MM-yyyy" }}</td>
+              <td class="action-column">
+                <ng-container>
+                  <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomLeft" class="action-dropdown-btn">
+                    <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
+                  </button>
+                  <nz-dropdown-menu #menu="nzDropdownMenu">
+                    <ul nz-menu style="padding-right: 50px">
+                      <li class="edit">
+                        <a style="border-style: none" routerLink="../add-term-course-offering/{{ data.id }}" nz-button
+                          nzType="default">
+                          <i nz-icon nzType="edit" nzTheme="fill"></i>
+                          <span>Edit</span></a>
+                      </li>
+                      <li class="delete">
+                        <button nz-button nzDanger nzType="default" (click)="showDeleteConfirm(data.id)">
+                          <i nz-icon nzType="delete" nzTheme="fill"></i>
+                          <span>Delete</span>
+                        </button>
+                      </li>
+                      <li class="deactivate">
+                        <button nz-button nzDanger nzType="default" (click)="showDeactivateConfirm(data.id)">
+                          <i nz-icon nzType="stop"  nzTheme="fill"></i>
+                          <span>Deactivate</span>
+                        </button>
+                      </li>
+                    </ul>
+                  </nz-dropdown-menu>
+                </ng-container>
+              </td>
+            </tr>
+            <tr [nzExpand]="expandSet.has(data.id)" class="expanded-content">
+              <td colspan="6">
+                <div class="course-details-container">
+                  <div class="course-details-table">
+                    <nz-table [nzData]="data.courseDetails" nzBordered class="nested-table">
+                      <thead>
+                        <tr>
+                          <th class="course-code-column">Course Code</th>
+                          <th class="course-title-column">Course Title</th>
+                          <th class="credit-column">Credit Hours</th>
+                          <th class="instructor-column">Number of Assigned Instructors</th>
+                          <th class="nested-action-column">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let course of data.courseDetails; trackBy: trackByCourseId; let i = index">
+                          <td class="course-code-column">{{ course.code }}</td>
+                          <td class="course-title-column">{{ course.title }}</td>
+                          <td class="credit-column">{{ course.creditHours }}</td>
+                          <td class="instructor-column">{{ course.noOfAssignedInstructor }}</td>
+                          <td class="nested-action-column">
+                            <button class="assign-instructor-btn" (click)="openModal(course)"> 
+                              <span nz-icon nzType="user-add" nzTheme="outline"></span>
+                              <span class="btn-text">Assign Instructor</span>
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                      <tfoot class="footer-row">
+                        <tr>
+                          <td class="empty-cell"></td>
+                          <td class="total-label">Total</td>
+                          <td class="total-credit">{{ data.totalCreditHours }}</td>
+                          <td class="total-instructors">{{ data.totalAssignedInstructors }}</td>
+                          <td class="empty-cell"></td>
+                        </tr>
+                      </tfoot>
+                    </nz-table>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+        <ng-template #emptyTpl>
+          <div class="no-data">
+            <span nz-icon nzType="book" nzTheme="outline"></span>
+            <p>No course offerings available</p>
+          </div>
+        </ng-template>
+        <ng-template #totalTemplate let-total let-range="range">
+          {{ range[0] }}-{{ range[1] }} of {{ total }} term course offerings (Debug: total={{ total }}, range={{ range }})
+        </ng-template>
+      </nz-table>
+    </div>
+  </div>
+</div>

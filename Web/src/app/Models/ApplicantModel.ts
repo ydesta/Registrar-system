@@ -1,0 +1,32 @@
+export interface ApplicantModel {
+  applicantID: string;
+  photo: string;
+  firstName: string;
+  fatherName: string;
+  grandFatherName: string;
+  sirName: string;
+  motherName: string;
+  gender: string;
+  birthDate: Date;
+  birthPlace: string;
+  nationality: string;
+  telephonOffice: string;
+  telephonHome: string;
+  mobile: string;
+  postalAddress: string;
+  emailAddress: string;
+  region: string;
+  city: string;
+  woreda: string;
+  kebele: string;
+  acadamicProgrammeCode: string;
+  acadamicProgramme: any;
+  id: string;
+  createdBy: string;
+  createdDate: Date;
+  lastModifiedBy: string;
+  lastModifiedDate: Date;
+  isDeleted: boolean;
+  applicantUserId: string;
+  admissionDecision: string;
+}

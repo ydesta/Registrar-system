@@ -1,0 +1,335 @@
+<div class="content-container">
+  <!-- Page Header -->
+  <div class="header-section">
+    <div class="page-title">
+      <h1>Registered New Students</h1>
+      <p class="subtitle">Manage and view registered new students</p>
+    </div>
+  </div>
+
+  <!-- Collapsible Search Form -->
+  <div class="search-section">
+    <nz-collapse>
+      <nz-collapse-panel [nzHeader]="searchHeader" [nzActive]="!isFormCollapsed"
+        (nzActiveChange)="isFormCollapsed = !$event">
+
+        <ng-template #searchHeader>
+          <span>
+            <i nz-icon nzType="search" nzTheme="outline"></i>
+            Search Filters
+          </span>
+        </ng-template>
+
+        <form nz-form [formGroup]="formStudent" (ngSubmit)="onSearch()">
+          <div nz-row [nzGutter]="24">
+            <!-- Entry Year -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">Entry Year</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                  <nz-input-number formControlName="entryYear" [nzMin]="2000" [nzMax]="2030"
+                    nzPlaceHolder="Enter entry year" style="width: 100%;">
+                  </nz-input-number>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Academic Programme -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">Programme</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                  <nz-select formControlName="academicProgrameCode" nzPlaceHolder="Select programme" nzShowSearch
+                    nzAllowClear style="width: 100%;">
+                    <nz-option *ngFor="let programme of acadamicProgrammes" [nzValue]="programme.acadamicProgrammeCode"
+                      [nzLabel]="programme.acadamicProgrammeTitle">
+                    </nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Start Date -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">Start Date</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                  <nz-date-picker formControlName="startDate" nzPlaceHolder="Select start date" nzFormat="yyyy-MM-dd"
+                    style="width: 100%;">
+                  </nz-date-picker>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- End Date -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">End Date</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                  <nz-date-picker formControlName="endDate" nzPlaceHolder="Select end date" nzFormat="yyyy-MM-dd"
+                    style="width: 100%;">
+                  </nz-date-picker>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div nz-row>
+            <div nz-col [nzSpan]="24" class="text-right">
+              <button nz-button nzType="default" (click)="loadData()" class="mr-2">
+                <i nz-icon nzType="reload" nzTheme="outline"></i>
+                Reset
+              </button>
+              <button nz-button nzType="primary" (click)="onSearch()" [nzLoading]="tbLoading">
+                <i nz-icon nzType="search" nzTheme="outline"></i>
+                Search
+              </button>
+            </div>
+          </div>
+        </form>
+      </nz-collapse-panel>
+    </nz-collapse>
+  </div>
+
+  <!-- Data Table with AcademicTermRegistrationSlipComponent styling -->
+  <div class="table-container">
+    <!-- Quick Filters Section -->
+    <div class="quick-filters-section">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="6">
+          <nz-input-group [nzSuffix]="suffixIconName" nzPlaceHolder="Filter by name">
+            <input nz-input [(ngModel)]="nameFilter" (ngModelChange)="onNameFilterChange($event)" />
+          </nz-input-group>
+          <ng-template #suffixIconName>
+            <span nz-icon nzType="user" nzTheme="outline"></span>
+          </ng-template>
+        </div>
+        <div nz-col [nzSpan]="6">
+          <nz-input-group [nzSuffix]="suffixIconEmail" nzPlaceHolder="Filter by email">
+            <input nz-input [(ngModel)]="emailFilter" (ngModelChange)="onEmailFilterChange($event)" />
+          </nz-input-group>
+          <ng-template #suffixIconEmail>
+            <span nz-icon nzType="mail" nzTheme="outline"></span>
+          </ng-template>
+        </div>
+        <div nz-col [nzSpan]="6">
+          <nz-input-group [nzSuffix]="suffixIconPhone" nzPlaceHolder="Filter by phone">
+            <input nz-input [(ngModel)]="phoneFilter" (ngModelChange)="onPhoneFilterChange($event)" />
+          </nz-input-group>
+          <ng-template #suffixIconPhone>
+            <span nz-icon nzType="phone" nzTheme="outline"></span>
+          </ng-template>
+        </div>
+        <div nz-col [nzSpan]="4">
+          <nz-select [(ngModel)]="emailChangedFilter" (ngModelChange)="onEmailChangedFilterChange($event)" nzPlaceHolder="Email Changed" nzAllowClear>
+            <nz-option nzValue="true" nzLabel="Yes"></nz-option>
+            <nz-option nzValue="false" nzLabel="No"></nz-option>
+          </nz-select>
+        </div>
+        <div nz-col [nzSpan]="2">
+          <button nz-button nzType="default" (click)="clearAllFilters()" nzSize="default">
+            <span nz-icon nzType="clear" nzTheme="outline"></span>
+            Clear
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <nz-table #basicTable [nzData]="filteredStudents" nzBordered [nzPageSize]="pageSize"
+      [nzShowSizeChanger]="true" [nzTotal]="totalRecord" [nzPageIndex]="pageindex"
+      (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)"
+      [nzLoading]="tbLoading" [nzNoResult]="emptyTpl" [nzShowQuickJumper]="true" [nzShowTotal]="totalTemplate"
+      [nzPageSizeOptions]="pageSizeOption" [nzScroll]="{ x: '1200px' }" style="overflow-x: auto;"
+      class="mobile-table-container">
+      <thead>
+        <tr>
+          <th style="min-width: 50px;">#</th>
+          <th nzSortOrder="null" (nzSortOrderChange)="sort('fullName', $event)" style="min-width: 150px;">Full Name</th>
+          <th nzSortOrder="null" (nzSortOrderChange)="sort('academicProgram', $event)" style="min-width: 150px;">
+            Academic Programme</th>
+          <th nzSortOrder="null" (nzSortOrderChange)="sort('entryYear', $event)" style="min-width: 120px;">Entry Year
+          </th>
+          <th nzSortOrder="null" (nzSortOrderChange)="sort('registeredDate', $event)" style="min-width: 120px;">
+            Registered Date</th>
+          <th nzSortOrder="null" (nzSortOrderChange)="sort('currentEmail', $event)" style="min-width: 200px;">Current
+            Email</th>
+          <th nzSortOrder="null" (nzSortOrderChange)="sort('previousEmail', $event)" style="min-width: 200px;">Previous
+            Email</th>
+          <th nzSortOrder="null" (nzSortOrderChange)="sort('phoneNumber', $event)" style="min-width: 120px;">Phone
+            Number</th>
+          <th nzSortOrder="null" (nzSortOrderChange)="sort('isEmailChanged', $event)" style="min-width: 100px;">Email
+            Changed</th>
+          <th class="th-row paginate sticky-action" style="min-width: 80px;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container tabindex="0" *ngFor="let data of basicTable.data; let i = index">
+          <tr>
+            <td>
+              <span class="serial-number">
+                {{ (pageindex - 1) * pageSize + i + 1 }}
+              </span>
+            </td>
+            <td>{{ data.fullName }}</td>
+            <td>{{ data.academicProgram }}</td>
+            <td>{{ data.entryYear }}</td>
+            <td>{{ data.registeredDate | date : "dd-MM-yyyy" }}</td>
+            <td>
+              <a href="mailto:{{ data.currentEmail }}">{{ data.currentEmail }}</a>
+            </td>
+            <td>
+              <span *ngIf="data.previousEmail; else noPreviousEmail">
+                <a href="mailto:{{ data.previousEmail }}">{{ data.previousEmail }}</a>
+              </span>
+              <ng-template #noPreviousEmail>
+                <span class="text-muted">-</span>
+              </ng-template>
+            </td>
+            <td>{{ data.phoneNumber || '-' }}</td>
+            <td>
+              <nz-tag [nzColor]="data.isEmailChanged ? 'red' : 'green'">
+                {{ data.isEmailChanged ? 'Yes' : 'No' }}
+              </nz-tag>
+            </td>
+                          <td class="paginate sticky-action" [class.sticky-action-even]="i % 2 === 1">
+                <ng-container>
+                  <button 
+                    nz-button 
+                    nz-dropdown 
+                    [nzDropdownMenu]="menu" 
+                    nzPlacement="bottomRight"
+                    class="action-dropdown-btn">
+                    <span nz-icon nzType="more" nzTheme="outline"></span>
+                  </button>
+                  <nz-dropdown-menu #menu="nzDropdownMenu" class="action-dropdown-menu">
+                    <ul nz-menu>
+                      <li nz-menu-item class="action-menu-item">
+                        <a (click)="editStudent(data)" class="action-link">
+                          <div class="action-icon edit-icon">
+                            <span nz-icon nzType="edit" nzTheme="outline"></span>
+                          </div>
+                          <div class="action-content">
+                            <!-- <span class="action-title">Update Email</span> -->
+                            <span class="action-description">Change student email address</span>
+                          </div>
+                        </a>
+                      </li>
+                    </ul>
+                  </nz-dropdown-menu>
+                </ng-container>
+              </td>
+          </tr>
+        </ng-container>
+      </tbody>
+      <ng-template #emptyTpl>
+        <div class="no-data">
+          <span nz-icon nzType="user" nzTheme="outline"></span>
+          <p>No registered students found</p>
+        </div>
+      </ng-template>
+    </nz-table>
+
+    <!-- Template for showing total records -->
+    <ng-template #totalTemplate let-total let-range="range">
+      Showing {{ range[0] }}-{{ range[1] }} of {{ total }} items
+    </ng-template>
+  </div>
+</div>
+
+<!-- Update Student Modal -->
+<nz-modal
+  [(nzVisible)]="isUpdateModalVisible"
+  nzTitle="Update Student Email Address"
+  [nzWidth]="600"
+  (nzOnCancel)="handleUpdateModalCancel()"
+  [nzFooter]="null"
+  [nzClosable]="true"
+  [nzMaskClosable]="false">
+  
+  <ng-container *nzModalContent>
+    <div class="modal-content">
+      <!-- Student Info Header -->
+      <div class="student-info-header">
+        <div class="student-avatar">
+          <nz-avatar [nzSize]="48" [nzText]="selectedStudent?.fullName?.charAt(0) || 'S'"></nz-avatar>
+        </div>
+        <div class="student-details">
+          <h4 class="student-name">{{ selectedStudent?.fullName }}</h4>
+          <p class="student-program">{{ selectedStudent?.academicProgram }}</p>
+          <p class="student-id">ID: {{ selectedStudent?.id }}</p>
+        </div>
+      </div>
+
+      <!-- Email Update Form -->
+      <form nz-form [formGroup]="updateForm" (ngSubmit)="handleUpdateSubmit()" class="email-update-form">
+        <div class="form-section">
+          <h5 class="section-title">
+            <span nz-icon nzType="mail" nzTheme="outline"></span>
+            Email Information
+          </h5>
+          
+          <!-- Current Email -->
+          <div class="current-email-section">
+            <label class="form-label">Current Email Address</label>
+            <div class="current-email-display">
+              <span nz-icon nzType="mail" nzTheme="outline"></span>
+              <span class="email-text">{{ selectedStudent?.currentEmail }}</span>
+              <nz-tag [nzColor]="'blue'" class="status-tag">Active</nz-tag>
+            </div>
+          </div>
+
+          <!-- New Email -->
+          <div class="new-email-section">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8" nzRequired>
+                <span nz-icon nzType="edit" nzTheme="outline"></span>
+                New Email Address
+              </nz-form-label>
+              <nz-form-control [nzSpan]="16" nzErrorTip="Please enter a valid email address">
+                <input 
+                  nz-input 
+                  formControlName="newEmail" 
+                  placeholder="Enter new email address"
+                  class="email-input" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <!-- Warning Message -->
+          <div class="warning-message">
+            <nz-alert
+              nzType="warning"
+              nzMessage="Email Update Notice"
+              nzDescription="Changing the email address will update the student's primary contact information. This action cannot be undone immediately."
+              nzShowIcon
+              class="update-warning">
+            </nz-alert>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="modal-footer">
+          <button 
+            nz-button 
+            nzType="default" 
+            (click)="handleUpdateModalCancel()"
+            class="cancel-btn">
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+          <button 
+            nz-button 
+            nzType="primary" 
+            type="submit"
+            [nzLoading]="updateLoading"
+            [disabled]="!updateForm.valid"
+            class="update-btn">
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+            {{ updateLoading ? 'Updating...' : 'Update Email' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </ng-container>
+</nz-modal>

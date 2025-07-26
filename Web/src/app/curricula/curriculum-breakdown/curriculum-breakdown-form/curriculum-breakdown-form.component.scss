@@ -1,0 +1,17 @@
+.main-color {
+  background-color: rgb(9, 62, 150);
+}
+.register-are {
+  margin-bottom: 10px;
+}
+.error {
+  border-color: #ff4d4f; /* Change the input border color to red when there's an error */
+}
+
+.error .ant-form-explain {
+  color: #ff4d4f; /* Set the error message color to red */
+  margin-top: 4px; /* Add some spacing between the input and error message */
+}
+.error-message {
+  color: #ff4d4f;
+}

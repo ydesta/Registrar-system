@@ -1,0 +1,29 @@
+<div class="event-slider" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+  <div class="slider-container">
+    <div class="slides" [style.transform]="'translateX(-' + (currentIndex * 100) + '%)'">
+      <div class="slide" *ngFor="let image of eventImages">
+        <img [src]="image.url" [alt]="image.title" loading="lazy">
+        <div class="slide-content">
+          <h3>{{ image.title }}</h3>
+          <p>{{ image.description }}</p>
+        </div>
+      </div>
+    </div>
+    
+    <button class="nav-button prev" (click)="prevSlide()" aria-label="Previous slide">
+      <i nz-icon nzType="left" nzTheme="outline"></i>
+    </button>
+    <button class="nav-button next" (click)="nextSlide()" aria-label="Next slide">
+      <i nz-icon nzType="right" nzTheme="outline"></i>
+    </button>
+
+    <div class="slider-dots">
+      <button class="dot" 
+              *ngFor="let image of eventImages; let i = index" 
+              [class.active]="i === currentIndex"
+              (click)="setCurrentSlide(i)"
+              [attr.aria-label]="'Go to slide ' + (i + 1)">
+      </button>
+    </div>
+  </div>
+</div>

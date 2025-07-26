@@ -1,0 +1,466 @@
+// =============================================================================
+// EXAMPLE USAGE OF COMMON STYLES
+// =============================================================================
+// This file demonstrates how to use the common styles in various scenarios
+
+@import './common.scss';
+
+// =============================================================================
+// EXAMPLE 1: Basic Page Layout
+// =============================================================================
+
+.example-page {
+  @extend .page-container;
+  
+  .page-header {
+    @extend .section-header;
+    
+    .header-content {
+      .header-text {
+        .page-title {
+          @extend .section-title;
+        }
+        
+        .page-subtitle {
+          @extend .section-subtitle;
+        }
+      }
+    }
+  }
+  
+  .page-content {
+    @extend .content-card;
+    
+    .card-body {
+      // Custom content here
+    }
+  }
+}
+
+// =============================================================================
+// EXAMPLE 2: List Component
+// =============================================================================
+
+.example-list {
+  @extend .content-card;
+  
+  .list-header {
+    @extend .card-header;
+    
+    .card-title {
+      // Inherits from .card-title
+    }
+  }
+  
+  .list-items {
+    .list-item {
+      @extend .list-item;
+      @include fade-in-up;
+      
+      // Custom animation delays
+      &:nth-child(1) { animation-delay: 0.1s; }
+      &:nth-child(2) { animation-delay: 0.2s; }
+      &:nth-child(3) { animation-delay: 0.3s; }
+      
+      // Custom hover effects
+      &:hover {
+        .item-icon {
+          @include scale-hover;
+        }
+      }
+    }
+  }
+}
+
+// =============================================================================
+// EXAMPLE 3: Form Component
+// =============================================================================
+
+.example-form {
+  @extend .content-card;
+  
+  .form-section {
+    @extend .form-section;
+    
+    .form-title {
+      // Inherits from .form-title
+    }
+    
+    .form-group {
+      @extend .form-group;
+      
+      // Custom form field styling
+      &.required {
+        label::after {
+          content: ' *';
+          color: $error-color;
+        }
+      }
+      
+      &.has-error {
+        input, select, textarea {
+          border-color: $error-color;
+          
+          &:focus {
+            box-shadow: 0 0 0 2px rgba($error-color, 0.1);
+          }
+        }
+      }
+    }
+  }
+  
+  .form-actions {
+    @include flex-between;
+    padding: $spacing-lg 0;
+    border-top: 1px solid $border-color;
+    margin-top: $spacing-xl;
+    
+    .btn {
+      @include button-primary;
+      
+      &.btn-cancel {
+        @extend .btn-secondary;
+      }
+      
+      &.btn-submit {
+        @extend .btn-success;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// EXAMPLE 4: Dashboard Component
+// =============================================================================
+
+.example-dashboard {
+  @extend .page-container;
+  
+  .dashboard-header {
+    @extend .section-header;
+  }
+  
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xl;
+    
+    .dashboard-card {
+      @extend .content-card;
+      @include card-hover;
+      
+      .card-header {
+        @extend .card-header;
+        
+        .card-title {
+          @include flex-between;
+          
+          .title-text {
+            // Inherits from .card-title
+          }
+          
+          .card-actions {
+            @include flex-start;
+            gap: $spacing-sm;
+            
+            .btn {
+              @include button-primary;
+              padding: $spacing-xs $spacing-sm;
+              font-size: $font-size-sm;
+            }
+          }
+        }
+      }
+      
+      .card-body {
+        @extend .card-body;
+        
+        .metric {
+          @include flex-between;
+          padding: $spacing-md 0;
+          border-bottom: 1px solid $border-color;
+          
+          &:last-child {
+            border-bottom: none;
+          }
+          
+          .metric-label {
+            color: $text-secondary;
+            font-weight: $font-weight-medium;
+          }
+          
+          .metric-value {
+            color: $primary-color;
+            font-weight: $font-weight-bold;
+            font-size: $font-size-lg;
+          }
+        }
+      }
+    }
+  }
+}
+
+// =============================================================================
+// EXAMPLE 5: Alert System
+// =============================================================================
+
+.example-alerts {
+  .alert {
+    @extend .alert;
+    
+    &.alert-info {
+      @extend .alert-info;
+    }
+    
+    &.alert-success {
+      @extend .alert-success;
+    }
+    
+    &.alert-warning {
+      @extend .alert-warning;
+    }
+    
+    &.alert-danger {
+      @extend .alert-danger;
+    }
+  }
+}
+
+// =============================================================================
+// EXAMPLE 6: Loading States
+// =============================================================================
+
+.example-loading {
+  .loading-container {
+    @extend .loading;
+    
+    .spinner {
+      @include icon-primary;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  }
+  
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: $border-radius-sm;
+    height: 20px;
+    margin-bottom: $spacing-sm;
+    
+    &.skeleton-title {
+      height: 32px;
+      width: 60%;
+    }
+    
+    &.skeleton-text {
+      height: 16px;
+      width: 100%;
+    }
+  }
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// =============================================================================
+// EXAMPLE 7: Empty States
+// =============================================================================
+
+.example-empty {
+  .empty-container {
+    @extend .empty-state;
+    
+    .empty-icon {
+      @extend .empty-icon;
+    }
+    
+    .empty-title {
+      @extend .empty-title;
+    }
+    
+    .empty-description {
+      @extend .empty-description;
+    }
+    
+    .empty-actions {
+      margin-top: $spacing-lg;
+      
+      .btn {
+        @include button-primary;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// EXAMPLE 8: Responsive Design
+// =============================================================================
+
+.example-responsive {
+  @extend .content-card;
+  
+  .responsive-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-lg;
+    
+    @include mobile {
+      grid-template-columns: 1fr;
+      gap: $spacing-md;
+    }
+    
+    @include tablet {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  .responsive-text {
+    font-size: $font-size-lg;
+    
+    @include mobile {
+      font-size: $font-size-base;
+    }
+    
+    @include tablet {
+      font-size: $font-size-lg;
+    }
+  }
+}
+
+// =============================================================================
+// EXAMPLE 9: Custom Component with Mixins
+// =============================================================================
+
+.custom-component {
+  // Using variables for consistency
+  background: $background-white;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xl;
+  
+  // Using mixins for layout
+  @include flex-column;
+  gap: $spacing-lg;
+  
+  .custom-header {
+    @include flex-between;
+    padding-bottom: $spacing-md;
+    border-bottom: 2px solid $border-color;
+    
+    .custom-title {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+    }
+    
+    .custom-actions {
+      @include flex-start;
+      gap: $spacing-sm;
+      
+      .btn {
+        @include button-primary;
+        
+        &.btn-small {
+          padding: $spacing-xs $spacing-sm;
+          font-size: $font-size-sm;
+        }
+      }
+    }
+  }
+  
+  .custom-content {
+    @include flex-column;
+    gap: $spacing-md;
+    
+    .custom-item {
+      @include flex-start;
+      gap: $spacing-md;
+      padding: $spacing-md;
+      @include gradient-light;
+      border-radius: $border-radius-md;
+      transition: all $transition-normal;
+      
+      &:hover {
+        background: darken($background-light, 2%);
+        transform: translateX($spacing-xs);
+      }
+      
+      .item-icon {
+        @include icon-primary;
+        @include scale-hover;
+        width: 40px;
+        height: 40px;
+        @include gradient-card;
+        border-radius: $border-radius-sm;
+      }
+      
+      .item-content {
+        flex: 1;
+        
+        .item-title {
+          font-weight: $font-weight-medium;
+          color: $text-primary;
+          margin-bottom: $spacing-xs;
+        }
+        
+        .item-description {
+          color: $text-secondary;
+          font-size: $font-size-sm;
+          line-height: $line-height-normal;
+        }
+      }
+    }
+  }
+  
+  .custom-footer {
+    @include flex-between;
+    padding-top: $spacing-md;
+    border-top: 1px solid $border-color;
+    
+    .footer-info {
+      color: $text-muted;
+      font-size: $font-size-sm;
+    }
+    
+    .footer-actions {
+      @include flex-start;
+      gap: $spacing-sm;
+    }
+  }
+}
+
+// =============================================================================
+// EXAMPLE 10: Utility Classes Usage
+// =============================================================================
+
+.example-utilities {
+  // Spacing utilities
+  .spacing-example {
+    @extend .mt-4, .mb-3, .p-2;
+  }
+  
+  // Text utilities
+  .text-example {
+    @extend .text-center, .text-primary, .font-bold;
+  }
+  
+  // Display utilities
+  .display-example {
+    @extend .d-flex, .justify-center, .align-center;
+  }
+  
+  // Combined utilities
+  .combined-example {
+    @extend .d-flex, .justify-between, .align-center, .mt-3, .mb-2, .p-4;
+    @include gradient-light;
+    border-radius: $border-radius-md;
+  }
+} 

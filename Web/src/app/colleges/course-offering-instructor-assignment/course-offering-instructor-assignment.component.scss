@@ -1,0 +1,325 @@
+// Professional styling for course offering instructor assignment component
+.course-offering-instructor-assignment {
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 32px auto;
+
+  .search-container {
+    margin-bottom: 24px;
+    
+    nz-input-group {
+      max-width: 400px;
+      
+      input {
+        border-radius: 6px;
+        border: 1px solid #d9d9d9;
+        transition: all 0.3s ease;
+        
+        &:focus {
+          border-color: #1890ff;
+          box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+      }
+    }
+  }
+
+  // Table styling
+  nz-table {
+    border-radius: 8px;
+    //  overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    width: 100% !important;
+    min-width: 0;
+    display: block;
+    
+    // Width options
+    &.table-full-width {
+      width: 100%;
+    }
+    
+    &.table-fixed-width {
+      width: 800px;
+      margin: 0 auto;
+    }
+    
+    &.table-medium-width {
+      width: 70%;
+      margin: 0 auto;
+    }
+    
+    &.table-small-width {
+      width: 50%;
+      margin: 0 auto;
+    }
+    
+    // Custom width class
+    &.table-custom-width {
+      width: var(--table-width, 100%);
+    }
+    
+    ::ng-deep {
+      .ant-table-thead > tr > th {
+        background: #fafafa;
+        border-bottom: 2px solid #f0f0f0;
+        font-weight: 600;
+        color: #262626;
+        padding: 16px 12px;
+        
+        &:first-child {
+          border-top-left-radius: 8px;
+        }
+        
+        &:last-child {
+          border-top-right-radius: 8px;
+        }
+      }
+      
+      .ant-table-tbody > tr > td {
+        padding: 16px 12px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.3s ease;
+        
+        &:first-child {
+          width: 50px;
+          text-align: center;
+        }
+      }
+      
+      .ant-table-tbody > tr:hover > td {
+        background-color: #f5f7fa;
+      }
+      
+      .ant-table-tbody > tr:last-child > td {
+        border-bottom: none;
+      }
+      
+      // Checkbox styling
+      .ant-checkbox-wrapper {
+        .ant-checkbox {
+          .ant-checkbox-inner {
+            border-radius: 4px;
+            border: 2px solid #d9d9d9;
+            
+            &:hover {
+              border-color: #1890ff;
+            }
+          }
+          
+          &.ant-checkbox-checked .ant-checkbox-inner {
+            background-color: #1890ff;
+            border-color: #1890ff;
+          }
+        }
+      }
+      
+      // Pagination styling
+      .ant-pagination {
+        margin-top: 16px;
+        
+        .ant-pagination-item {
+          border-radius: 6px;
+          
+          &.ant-pagination-item-active {
+            background-color: #1890ff;
+            border-color: #1890ff;
+          }
+        }
+      }
+    }
+  }
+
+  // Filter dropdown styling
+  .ant-table-filter-dropdown {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #f0f0f0;
+    
+    .search-box {
+      padding: 16px;
+      background: #ffffff;
+      
+      input {
+        width: 100%;
+        margin-bottom: 12px;
+        border-radius: 6px;
+        border: 1px solid #d9d9d9;
+        padding: 8px 12px;
+        transition: all 0.3s ease;
+        
+        &:focus {
+          border-color: #1890ff;
+          box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+      }
+      
+      button {
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        
+        &.ant-btn-primary {
+          background-color: #1890ff;
+          border-color: #1890ff;
+          
+          &:hover {
+            background-color: #40a9ff;
+            border-color: #40a9ff;
+          }
+        }
+        
+        &:not(.ant-btn-primary) {
+          border-color: #d9d9d9;
+          color: #595959;
+          
+          &:hover {
+            border-color: #1890ff;
+            color: #1890ff;
+          }
+        }
+      }
+      
+      .search-button {
+        margin-right: 8px;
+      }
+    }
+  }
+
+  // Action buttons container
+  .button-container {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    
+    button {
+      border-radius: 6px;
+      font-weight: 500;
+      padding: 8px 24px;
+      height: 40px;
+      transition: all 0.3s ease;
+      
+      &.ant-btn-primary {
+        background-color: #1890ff;
+        border-color: #1890ff;
+        box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
+        
+        &:hover {
+          background-color: #40a9ff;
+          border-color: #40a9ff;
+          box-shadow: 0 4px 8px rgba(24, 144, 255, 0.3);
+          transform: translateY(-1px);
+        }
+        
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+
+  // Divider styling
+  nz-divider {
+    margin: 24px 0 16px 0;
+    border-color: #f0f0f0;
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    padding: 16px;
+    
+    .search-container {
+      margin-bottom: 16px;
+      
+      nz-input-group {
+        max-width: 100%;
+      }
+    }
+    
+    // Reset table width on mobile
+    nz-table {
+      width: 100% !important;
+      
+      &.table-fixed-width,
+      &.table-medium-width,
+      &.table-small-width {
+        width: 100% !important;
+        margin: 0;
+      }
+    }
+    
+    .button-container {
+      flex-direction: column;
+      align-items: stretch;
+      
+      button {
+        width: 100%;
+      }
+    }
+    
+    nz-table ::ng-deep {
+      .ant-table-thead > tr > th,
+      .ant-table-tbody > tr > td {
+        padding: 12px 8px;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 12px;
+    
+    nz-table ::ng-deep {
+      .ant-table-thead > tr > th,
+      .ant-table-tbody > tr > td {
+        padding: 8px 6px;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+// Loading state styling
+.loading-overlay {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+}
+
+// Empty state styling
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #8c8c8c;
+  
+  nz-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #d9d9d9;
+  }
+  
+  h3 {
+    margin-bottom: 8px;
+    color: #595959;
+  }
+  
+  p {
+    color: #8c8c8c;
+    margin: 0;
+  }
+}

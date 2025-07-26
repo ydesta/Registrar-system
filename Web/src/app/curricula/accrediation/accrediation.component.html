@@ -1,0 +1,95 @@
+<div class="content-container">
+  <div class="header-section">
+    <h2>Accreditation</h2>
+    <div class="action-buttons">
+      <button nz-button nzType="primary" routerLink="../add-accrediation/null">
+        <span nz-icon nzType="plus" nzTheme="outline"></span>
+        Add Accreditation
+      </button>
+      <button nz-button nzType="primary" (click)="exportAccrediation()">
+        <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+        Export
+      </button>
+      <button nz-button nzType="primary" ngxPrint [printSectionId]="'print-section'" [printTitle]="'Accreditation List'">
+        <span nz-icon nzType="printer" nzTheme="outline"></span>
+        Print
+      </button>
+    </div>
+  </div>
+
+  <nz-divider></nz-divider>
+
+  <div id="print-section">
+    <nz-table #basicTable 
+              [nzData]="curriculums" 
+              nzBordered
+              [nzPageSize]="pageSize"
+              [nzPageSizeOptions]="pageSizeOption"
+              [nzShowSizeChanger]="true"
+              [nzTotal]="totalRecord"
+              [nzPageIndex]="pageindex"
+              (nzPageIndexChange)="paginatedIndexEvent($event)"
+              (nzPageSizeChange)="paginatedSizeEvent($event)"
+              [nzFrontPagination]="false"
+              [nzShowTotal]="rangeTemplate"
+              [nzLoading]="tbLoading"
+              [nzNoResult]="emptyTpl">
+      <ng-template #rangeTemplate let-range="range" let-total>
+        {{ range[0] }}-{{ range[1] }} of {{ total }} items
+      </ng-template>
+      <thead>
+        <tr>
+          <th>Curriculum Code</th>
+          <th>Re-accreditation Submission Date</th>
+          <th>Accreditation Begin Date</th>
+          <th>Accreditation End Date</th>
+          <th>Division</th>
+          <th>Remark</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of basicTable.data">
+          <td>{{ data.curriculumCode }}</td>
+          <td>{{ data.reaccreditionSubmissionDate | date : "dd-MM-yyyy" }}</td>
+          <td>{{ data.accreditionBeginDate | date : "dd-MM-yyyy" }}</td>
+          <td>{{ data.accreditionEndDate | date : "dd-MM-yyyy" }}</td>
+          <td>{{ data.division }}</td>
+          <td>{{ data.remark }}</td>
+          <td>
+            <button nz-button 
+                    nz-dropdown 
+                    [nzDropdownMenu]="menu" 
+                    nzPlacement="bottomRight"
+                    nzTrigger="click"
+                    class="action-button">
+              <span nz-icon nzType="more" nzTheme="outline"></span>
+            </button>
+            <nz-dropdown-menu #menu="nzDropdownMenu">
+              <ul nz-menu>
+                <li nz-menu-item>
+                  <a routerLink="../add-accrediation/{{ data.id }}" class="action-item">
+                    <span nz-icon nzType="edit" nzTheme="outline"></span>
+                    Edit
+                  </a>
+                </li>
+                <li nz-menu-item>
+                  <button nz-button nzType="default" class="action-item" (click)="showDeleteConfirm(data.id)">
+                    <span nz-icon nzType="delete" nzTheme="outline"></span>
+                    Delete
+                  </button>
+                </li>
+              </ul>
+            </nz-dropdown-menu>
+          </td>
+        </tr>
+      </tbody>
+      <ng-template #emptyTpl>
+        <div class="no-data">
+          <span nz-icon nzType="book" nzTheme="outline"></span>
+          <p>No accreditation records available</p>
+        </div>
+      </ng-template>
+    </nz-table>
+  </div>
+</div>

@@ -1,0 +1,119 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h3 class="title-text">{{ action }}</h3>
+        <p class="subtitle-text">Add or update course equivalent information</p>
+      </div>
+      <div class="header-actions">
+        <button 
+          routerLink="../course-equivalent" 
+          nz-button 
+          nzType="default" 
+          class="back-btn"
+        >
+          <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
+          <span>Back to Course Equivalents</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="form-card">
+    <div class="form-header">
+      <div class="form-icon">
+        <i nz-icon nzType="swap" nzTheme="outline"></i>
+      </div>
+      <div class="form-title">
+        <h4>Course Equivalent Information</h4>
+        <p>Please select the courses that are equivalent to each other</p>
+      </div>
+    </div>
+
+    <form
+      nz-form
+      nzLayout="vertical"
+      [formGroup]="acadamicProgramForm"
+      (ngSubmit)="submitForm()"
+      class="course-form"
+    >
+      <div class="form-grid">
+        <!-- Row 1: Course & Equivalent Course -->
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Course</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-select
+                formControlName="courseCode"
+                nzPlaceHolder="Select course"
+                nzShowSearch="true"
+              >
+                <nz-option
+                  *ngFor="let item of courses"
+                  [nzValue]="item.courseCode"
+                  [nzLabel]="item.courseTitle"
+                ></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Equivalent Course</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                formControlName="equivalentCourseCode"
+                nzPlaceHolder="Select equivalent course"
+                nzShowSearch
+              >
+                <nz-option
+                  *ngFor="let item of courses"
+                  [nzValue]="item.courseCode"
+                  [nzLabel]="item.courseTitle"
+                ></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <!-- Row 2: Remark -->
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label>Remark</nz-form-label>
+            <nz-form-control>
+              <textarea
+                nz-input
+                formControlName="remark"
+                placeholder="Enter remark"
+                rows="3"
+              ></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button 
+          nz-button 
+          nzType="default" 
+          class="cancel-btn"
+          type="button"
+          routerLink="../course-equivalent"
+        >
+          <i nz-icon nzType="close" nzTheme="outline"></i>
+          <span>Cancel</span>
+        </button>
+        <button 
+          nz-button 
+          nzType="primary" 
+          class="submit-btn"
+          type="submit"
+        >
+          <i nz-icon nzType="save" nzTheme="outline"></i>
+          <span>{{ submit }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

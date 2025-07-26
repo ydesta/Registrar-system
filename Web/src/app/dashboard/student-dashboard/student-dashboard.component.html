@@ -1,0 +1,208 @@
+<div class="dashboard-container">
+  <nz-row [nzGutter]="24" class="kpi-row">
+    <nz-col *ngFor="let kpi of kpis" nzXs="24" nzSm="12" nzMd="6">
+      <div class="kpi-card" [style.background]="kpi.gradient">
+        <div class="kpi-content">
+          <div class="kpi-icon">
+            <i nz-icon [nzType]="kpi.icon" [nzTheme]="kpi.theme"></i>
+          </div>
+          <div class="kpi-text">
+            <h3>{{ kpi.value }}</h3>
+            <p>{{ kpi.title }}</p>
+          </div>
+        </div>
+        <div class="kpi-wave"></div>
+      </div>
+    </nz-col>
+  </nz-row>
+  <nz-row [nzGutter]="24" class="chart-row">
+    <nz-col nzXs="24">
+      <div class="chart-card">
+        <h3 class="chart-title">GPA Trend</h3>
+        <div class="chart-container">
+          <ngx-charts-line-chart
+            [results]="gpaTrend"
+            [gradient]="false"
+            [xAxis]="true"
+            [yAxis]="true"
+            [autoScale]="true"
+            [showXAxisLabel]="true"
+            [showYAxisLabel]="true"
+            xAxisLabel="Semester"
+            yAxisLabel="GPA"
+            [customColors]="trendColors"
+            [animations]="true"
+            [timeline]="true"
+            [rangeFillOpacity]="0.1"
+            [curve]="curveLinear"
+            [showGridLines]="true"
+            [roundDomains]="true"
+            [tooltipDisabled]="false"
+            [yScaleMin]="0"
+            [yScaleMax]="4">
+            <ng-template #seriesTooltipTemplate let-model="model">
+              <div class="custom-tooltip">
+                <div *ngFor="let item of model" class="tooltip-item">
+                  <span class="tooltip-label">{{ item.name }}</span>
+                  <span class="tooltip-value">{{ item.value | number:'1.2-2' }} GPA</span>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-charts-line-chart>
+        </div>
+      </div>
+    </nz-col>
+  </nz-row>
+  <div class="section-card">
+    <h3 class="chart-title">Upcoming Course Offering</h3>
+    <nz-table #termTable [nzData]="termCourses" nzSize="middle" class="styled-table">
+      <thead>
+        <tr>
+          <th nzAlign="center">Code</th>
+          <th>Course Name</th>
+          <th nzAlign="center">Credits</th>
+          <th nzAlign="center">Term</th>
+          <th nzAlign="center">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let course of termTable.data">
+          <td nzAlign="center" class="course-code">{{ course.code }}</td>
+          <td>{{ course.name }}</td>
+          <td nzAlign="center">
+            <nz-tag class="credit-tag">{{ course.credits }}</nz-tag>
+          </td>
+          <td nzAlign="center">{{ course.term }}</td>
+          <td nzAlign="center">
+            <nz-badge [nzStatus]="course.status === 'Completed' ? 'success' : 'processing'"></nz-badge>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+  <nz-row [nzGutter]="24" class="chart-row">
+    <nz-col nzXs="24" nzLg="12">
+      <div class="chart-card">
+        <h3 class="chart-title">GPA Distribution</h3>
+        <ngx-charts-pie-chart [results]="gpaData" [labels]="true" [doughnut]="false" [explodeSlices]="true"
+          [gradient]="true" [customColors]="pieColors" [animations]="true" [view]="[350, 400]">
+        </ngx-charts-pie-chart>
+      </div>
+    </nz-col>
+    <nz-col nzXs="24" nzLg="12">
+      <div class="chart-card">
+        <h3 class="chart-title">Course Completion</h3>
+        <ngx-charts-pie-chart [results]="courseCompletionData" [labels]="true" [doughnut]="true" [explodeSlices]="true"
+          [gradient]="true" [customColors]="completionColors" [animations]="true" [view]="[350, 400]">
+        </ngx-charts-pie-chart>
+      </div>
+    </nz-col>
+  </nz-row>
+  <nz-row [nzGutter]="24" class="activities-row">
+    <nz-col nzXs="24" nzLg="12">
+      <div class="section-card activities-card">
+        <h3 class="section-title">Academic Calendar</h3>
+        <nz-timeline class="academic-timeline">
+          <nz-timeline-item *ngFor="let event of academicEvents" [nzColor]="event.color">
+            <div class="timeline-content">
+              <div class="event-header">
+                <h4>{{ event.title }}</h4>
+                <nz-tag [nzColor]="event.tagColor">{{ event.date }}</nz-tag>
+              </div>
+              <p class="event-description">{{ event.description }}</p>
+              <div class="event-meta" *ngIf="event.location">
+                <i nz-icon nzType="environment" nzTheme="outline"></i>
+                <span>{{ event.location }}</span>
+              </div>
+            </div>
+          </nz-timeline-item>
+        </nz-timeline>
+      </div>
+    </nz-col>
+
+    <nz-col nzXs="24" nzLg="12">
+      <div class="section-card deadlines-card">
+        <h3 class="section-title">Important Deadlines</h3>
+        <nz-list [nzDataSource]="deadlines" nzItemLayout="horizontal" class="deadlines-list">
+          <nz-list-item *ngFor="let deadline of deadlines">
+            <nz-list-item-meta>
+              <nz-list-item-meta-title>
+                <div class="deadline-header">
+                  <div class="deadline-icon" [style.background]="deadline.iconBg">
+                    <i nz-icon [nzType]="deadline.icon" [nzTheme]="deadline.iconTheme"></i>
+                  </div>
+                  <div class="deadline-info">
+                    <h4>{{ deadline.title }}</h4>
+                    <p class="deadline-date">{{ deadline.date }}</p>
+                  </div>
+                </div>
+              </nz-list-item-meta-title>
+              <nz-list-item-meta-description>
+                <div class="deadline-progress">
+                  <nz-progress [nzPercent]="deadline.progress" [nzStatus]="deadline.progressStatus"
+                    [nzStrokeColor]="deadline.progressColor">
+                  </nz-progress>
+                  <div class="deadline-status">
+                    <nz-tag [nzColor]="deadline.statusColor">{{ deadline.status }}</nz-tag>
+                  </div>
+                </div>
+              </nz-list-item-meta-description>
+            </nz-list-item-meta>
+          </nz-list-item>
+        </nz-list>
+      </div>
+    </nz-col>
+  </nz-row>
+  <nz-row [nzGutter]="24" class="bottom-row">
+    <nz-col nzXs="24" nzLg="12">
+      <div class="section-card highlight-card">
+        <h3 class="section-title">Top Performances</h3>
+        <nz-list [nzDataSource]="topCourses" nzItemLayout="vertical">
+          <nz-list-item *ngFor="let course of topCourses; let i = index">
+            <nz-list-item-meta>
+              <nz-list-item-meta-title>
+                <div class="course-header">
+                  <div class="rank-badge">{{ i + 1 }}</div>
+                  <div class="course-info">
+                    <h4>{{ course.name }}</h4>
+                    <p class="course-code">{{ course.code }}</p>
+                  </div>
+                </div>
+              </nz-list-item-meta-title>
+              <nz-list-item-meta-description>
+                <div class="grade-progress">
+                  <nz-progress [nzPercent]="(course.grade || 0) * 25" [nzShowInfo]="false" nzStrokeColor="#52c41a">
+                  </nz-progress>
+                  <div class="grade-details">
+                    <span class="grade-value">{{ course.grade?.toFixed(1) }}</span>
+                    <span class="grade-term">{{ course.term }}</span>
+                  </div>
+                </div>
+              </nz-list-item-meta-description>
+            </nz-list-item-meta>
+          </nz-list-item>
+        </nz-list>
+      </div>
+    </nz-col>
+
+    <nz-col nzXs="24" nzLg="12">
+      <div class="section-card">
+        <h3 class="section-title">Upcoming Courses</h3>
+        <nz-timeline class="course-timeline">
+          <nz-timeline-item *ngFor="let course of nextTermCourses">
+            <div class="timeline-content">
+              <h4>{{ course.name }}</h4>
+              <div class="course-meta">
+                <nz-tag class="credit-tag">{{ course.credits }} Credits</nz-tag>
+                <div class="prerequisites">
+                  <span>Requires:</span>
+                  <nz-tag *ngFor="let pre of course.prerequisites" class="prereq-tag">{{ pre }}</nz-tag>
+                </div>
+              </div>
+            </div>
+          </nz-timeline-item>
+        </nz-timeline>
+      </div>
+    </nz-col>
+  </nz-row>
+</div>

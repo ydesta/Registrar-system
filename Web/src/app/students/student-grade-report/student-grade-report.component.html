@@ -1,0 +1,160 @@
+<div class="report">
+  <div id="print-section">
+    <h1 class="title">HiLCoE</h1>
+    <h3 class="sub-title">School of Computer Science & Technology</h3>
+    <div class="logo">
+      <img src="./../../../assets/images/logo2.png" alt="" srcset="" />
+    </div>
+
+    <h3 class="report-type">Term Grade Report</h3>
+    <div class="general">
+      <div class="person">
+        <div class="form-item">
+          <p>Student Name:</p>
+          <p style="font-weight: bolder">
+            {{
+              studentGrades![0].student.firstName +
+                " " +
+                studentGrades![0].student.fatherName +
+                " " +
+                studentGrades![0].student.grandFatherName
+            }}
+          </p>
+        </div>
+        <div class="form-item">
+          <p>Programme:</p>
+          <p>{{ academicProgrammeTitle }}</p>
+        </div>
+        <div class="form-item">
+          <p>Term:</p>
+          <p>{{ studentGrades![0].academicTerm.academicTermCode }}</p>
+        </div>
+        <div class="form-item">
+          <p>Issued Date:</p>
+          <p>{{ currentDate | date : "yyyy/MM/dd" }}</p>
+        </div>
+      </div>
+
+      <div class="servicecode">
+        <p>Service Request Code:</p>
+        <p style="font-weight: bolder">
+          {{ studentGrades![0].student.studentId }}
+        </p>
+      </div>
+    </div>
+    <div class="table">
+      <nz-table
+        #basicTable
+        [nzData]="studentGrades!"
+        [nzShowPagination]="false"
+      >
+        <thead>
+          <tr>
+            <th>Course Title</th>
+            <th>Course Code</th>
+            <th>Credit Hourse</th>
+            <th>Grade</th>
+            <th>Grdae Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of basicTable.data">
+            <td>{{ data.couse.courseTitle }}</td>
+            <td>{{ data.couse.courseCode }}</td>
+            <td>{{ data.couse.creditHours }}</td>
+            <td>{{ data.gradeLetter }}</td>
+            <!-- gradePoint(
+                  data.couse.courseCode,
+                  data.couse.creditHours,
+                  data.gradeLetter
+                ) -->
+            <td>
+              {{
+                data.gradeLetter == "A" || data.gradeLetter == "A+"
+                  ? 4.0
+                  : data.gradeLetter == "A-"
+                  ? 3.75
+                  : data.gradeLetter == "B+"
+                  ? 3.5
+                  : data.gradeLetter == "B"
+                  ? 3.0
+                  : data.gradeLetter == "B-"
+                  ? 2.75
+                  : data.gradeLetter == "C+"
+                  ? 2.5
+                  : data.gradeLetter == "C"
+                  ? 2.0
+                  : data.gradeLetter == "D"
+                  ? 1.0
+                  : 0
+              }}
+            </td>
+          </tr>
+          <tr>
+            <td>Total</td>
+            <td></td>
+            <td>{{ totalCH }}</td>
+            <td></td>
+            <td>{{ totalGPoint }}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+      <div style="margin-top: 30px">
+        <nz-table #basicTable [nzData]="studentGrades!">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Credit Hours</th>
+              <th>Grade Point</th>
+              <th>GPA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Previous Total</td>
+              <td>{{ totalCHPrevious }}</td>
+              <td>{{ totalGPointPrevious }}</td>
+              <td>4</td>
+            </tr>
+            <tr>
+              <td>Term Total</td>
+              <td>{{ totalCH }}</td>
+              <td>{{ totalGPoint }}</td>
+              <td>4</td>
+            </tr>
+            <tr>
+              <td>Cumulative</td>
+              <td>2</td>
+              <td>3</td>
+              <td>4</td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </div>
+    </div>
+
+    <div class="signature">
+      <hr />
+      <div>
+        <p>Director Academics</p>
+      </div>
+    </div>
+
+    <div class="report-footer">
+      <p>Tel: 011-4673585, 0114673147</p>
+      <p>www.hilcoe.com.et</p>
+      <p>e-mail: hilcoe@ethionet.et</p>
+    </div>
+  </div>
+
+  <div class="save">
+    <button
+      printTitle="."
+      [useExistingCss]="true"
+      printSectionId="print-section"
+      ngxPrint
+    >
+      Save as PDF
+    </button>
+  </div>
+</div>

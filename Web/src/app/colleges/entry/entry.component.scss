@@ -1,0 +1,70 @@
+.add-button {
+    float: right;
+}
+
+nz-table {
+    padding-top: 10px;
+}
+
+button {
+    //margin: 3px;
+    border-style: none;
+}
+
+.edit {
+    color: rgb(23, 131, 198);
+    border-color: rgb(23, 131, 198);
+}
+
+.detail {
+    color: rgb(23, 131, 198);
+    border-color: rgb(23, 131, 198)
+}
+
+.more {
+    color: rgb(23, 131, 198);
+    font-size: 20px;
+}
+
+.th-row {
+    color: rgb(23, 131, 198);
+}
+
+.export {
+    border-style: solid;
+    border-color: rgb(23, 131, 198);
+    color: #e2ecf3;
+}
+
+.group-delete {
+    border-style: solid;
+    border-color: rgb(181, 38, 38);
+    //color: rgb(23, 131, 198);
+}
+
+::ng-deep .ant-table-tbody>tr>td {
+    border-bottom: 1px solid #f0f0f0;
+    border-top: 1px solid #f0f0f0;
+}
+
+::ng-deep .ant-table-tbody>tr:current {
+    background-color: red;
+}
+
+.main-color {
+    background-color: rgb(9, 62, 150);
+}
+
+.logo {
+    display: none;
+}
+
+@media print {
+    .paginate {
+        display: none;
+    }
+
+    .logo {
+        display: block;
+    }
+}

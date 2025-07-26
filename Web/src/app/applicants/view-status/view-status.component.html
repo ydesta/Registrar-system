@@ -1,0 +1,316 @@
+<nz-tabset>
+  <nz-tab nzTitle="General Informations">
+    <nz-card class="custom-card">
+      <form nz-form>
+        <div nz-row>
+          <div nz-col>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="12">Academic Programme</nz-form-label>
+              <nz-form-control [nzSpan]="18" nz nzValidatingTip="Validating...">
+                <input type="text" value="{{ applicant?.acadamicProgrammeCode }}" name="" id="" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="12">Applicant ID</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter applicant ID"
+                  value="{{ applicant?.applicantID}}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="12">First Name</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" [disabled]="true" nz-input placeholder="enter first name"
+                  value="{{ applicant?.firstName }}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="12">Father Name</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter father name" value="{{ applicant?.fatherName}}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="12">Grand Father Name</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="entergrand father name"
+                  value="{{ applicant?.grandFatherName}}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="12">Sir Name</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter sir name" value="{{ applicant?.sirName}}" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col nzOffset="5">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Mother Name</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter mother name" value="{{ applicant?.motherName}}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Gender</nz-form-label>
+              <nz-form-control [nzSpan]="18" nzValidatingTip="Validating...">
+                <input [readonly]="true" nz-input value="{{ applicant?.gender}}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Birth Date</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <!-- <nz-date-picker [nzDisabled]="true"></nz-date-picker> -->
+                <input [readonly]="true" nz-input value="{{ applicant?.birthDate | date: 'dd/MM/yyyy'}}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Birth Place</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter birth place" value="{{ applicant?.birthPlace }}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Nationality</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter nationality" value="{{ applicant?.nationality}}" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </form>
+    </nz-card>
+
+  </nz-tab>
+  <nz-tab nzTitle="Permanent Addresses">
+    <nz-card>
+
+      <form nz-form>
+        <div nz-row>
+          <div nz-col nzSpan="7">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Telephon Office</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter telephon office"
+                  value="{{ applicant?.telephoneOffice}}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Telephon Home</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter telephon Home"
+                  value="{{ applicant?.telephoneHome}}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Mobile</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter mobile" value="{{ applicant?.mobile }}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Postal Address</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter postal address"
+                  value="{{ applicant?.postalAddress}}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Email Address</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter email address"
+                  value="{{ applicant?.emailAddress }}" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col nzSpan="7" nzOffset="5">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Region</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter region" value="{{ applicant?.region}}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">City</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter city" value="{{ applicant?.city}}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Woreda</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter woreda" value="{{ applicant?.woreda}}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Kebele</nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input [readonly]="true" nz-input placeholder="enter kebele" value="{{ applicant?.kebele }}" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </form>
+    </nz-card>
+
+  </nz-tab>
+  <nz-tab nzTitle="Work Experiences">
+    <div nz-row>
+      <div nz-col nzSpan="12">
+        <nz-card>
+          <form nz-form>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Company Name</nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                <input [readonly]="true" nz-input placeholder="enter company" value="{{ applicant }}" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Total Work Year</nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                <input [readonly]="true" nz-input placeholder="enter total work year" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">post </nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                <input [readonly]="true" nz-input placeholder="enter post" />
+              </nz-form-control>
+            </nz-form-item>
+          </form>
+        </nz-card>
+      </div>
+      <div nz-col nzSpan="7"></div>
+    </div>
+  </nz-tab>
+  <nz-tab nzTitle="Educational Backgrounds">
+    <nz-table [nzShowPagination]="false" #basicTable [nzData]="applicant?.educationLists" nzBordered>
+      <thead class="table-header-row">
+        <tr class="table-header-row">
+          <th class="th-row">College/University</th>
+          <th class="th-row">Major Area of Study</th>
+          <th class="th-row">Degree Obtained</th>
+          <th class="th-row">Year(From - To)</th>
+          <th class="th-row">Remark</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr tabindex="0" *ngFor="let data of basicTable.data; let i = index">
+          <td>{{ data.schoollName }}</td>
+          <td>{{ data.fieldOfStudy }}</td>
+          <td>{{ data.programmeLevel }}</td>
+          <td>
+            {{ data.graduatedYear.toString().split(",")[0] | date : "yyyy" }} -
+            {{ data.graduatedYear.toString().split(",")[1] | date : "yyyy" }}
+          </td>
+          <td>{{ data.remark }}</td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-tab>
+  <nz-tab nzTitle="Contact Person">
+    <div nz-row>
+      <div nz-col nzSpan="12">
+        <nz-card>
+          <form nz-form style="text-align: left">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8" required>Full Name</nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                <input [readonly]="true" nz-input placeholder="enter full name" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8" required>Telephone Office</nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                <input [readonly]="true" nz-input placeholder="enter telephone office" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Telephone Home </nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                <input [readonly]="true" nz-input placeholder="enter telephone home" />
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8" required>Relation</nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                <input [readonly]="true" nz-input />
+              </nz-form-control>
+            </nz-form-item>
+          </form>
+        </nz-card>
+      </div>
+      <!-- <div nz-col nzSpan="12"></div> -->
+    </div>
+  </nz-tab>
+  <nz-tab nzTitle="Other Informations">
+    <nz-row>
+      <nz-col nzSpan="12">
+        <nz-card>
+          <form nz-form>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8" required>Source Of Finance</nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                <input [readonly]="true" nz-input />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">How Did You Come to know about HilcoE</nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                <input [readonly]="true" nz-input placeholder="enter kebele" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label [nzSpan]="8">Date of Apply </nz-form-label>
+              <nz-form-control [nzSpan]="16">
+                <nz-date-picker [nzDisabled]="true"></nz-date-picker>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-control [nzSpan]="24">
+                <label nz-checkbox [nzDisabled]="true"></label>
+                The undersigned, attest that the information contained in this application and all supporting documents
+                are accurate and authentic. All the qualification obtained are accredited by HERQA/MOE. I also abide by
+                the rules and regulations of the college as per the detail in the prospectus.
+              </nz-form-control>
+            </nz-form-item>
+          </form>
+        </nz-card>
+      </nz-col>
+      <nz-col nzSpan="12"></nz-col>
+    </nz-row>
+
+  </nz-tab>
+  <nz-tab nzTitle="Approval Status">
+    <div nz-row>
+      <div nz-col nzSpan="7">
+        <form nz-form>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="9" required>Application Date</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-date-picker [nzDisabled]="true"></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="9" required>Approval Date</nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-date-picker></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="9">admission Decision </nz-form-label>
+            <nz-form-control [nzSpan]="16">
+              <nz-select nzPlaceHolder="select admission decision" nzShowSearch="true" nzAllowClear="true">
+                <nz-option nzValue="Pending" nzLabel="Pending"></nz-option>
+                <nz-option nzValue="Accepted" nzLabel="Accepted"></nz-option>
+                <nz-option nzValue="Rejected" nzLabel="Rejected"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </form>
+        <div nz-col nzSpan="7"></div>
+      </div>
+    </div>
+  </nz-tab>
+</nz-tabset>

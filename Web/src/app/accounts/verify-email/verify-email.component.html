@@ -1,0 +1,103 @@
+<app-auth-header></app-auth-header>
+
+<div class="verify-email-container">
+  <div class="verify-email-card">
+    <div class="logo-section">
+      <img src="../../../assets/images/logo.png" alt="HiLCoE Logo" class="logo" (click)="goToHome()" style="cursor: pointer;">
+      <h2>Email Verification</h2>
+      <p>Verify your email address to complete registration</p>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-icon">
+        <i nz-icon nzType="loading" nzTheme="outline"></i>
+      </div>
+      <h3>Verifying Your Email</h3>
+      <p>Please wait while we verify your email address...</p>
+    </div>
+
+    <!-- Pending State (when no email/token or verification not started) -->
+    <div *ngIf="!isLoading && verificationStatus === 'pending'" class="pending-state">
+      <div class="pending-icon">
+        <i nz-icon nzType="mail" nzTheme="outline"></i>
+      </div>
+      <h3>Email Verification Required</h3>
+      <p *ngIf="userEmail">Ready to verify email: {{ userEmail }}</p>
+      <p *ngIf="!userEmail">No email address found in the verification link.</p>
+      
+      <div class="pending-actions">
+        <button 
+          *ngIf="userEmail"
+          nz-button 
+          class="verify-button" 
+          [nzType]="'primary'"
+          (click)="manualVerify()">
+          Verify Email Now
+        </button>
+        <button 
+          nz-button 
+          class="login-button" 
+          [nzType]="'default'"
+          (click)="goToLogin()">
+          Go to Login
+        </button>
+      </div>
+    </div>
+
+    <!-- Success State -->
+    <div *ngIf="verificationStatus === 'success'" class="success-state">
+      <div class="success-icon">
+        <i nz-icon nzType="check-circle" nzTheme="twotone" nzTwotoneColor="#52c41a"></i>
+      </div>
+      <h3>Email Verified Successfully</h3>
+      <p>Your email address has been verified. You can now login to your account.</p>
+      
+      <div class="redirect-info" *ngIf="redirectCountdown > 0">
+        <p>Redirecting to login page in {{ redirectCountdown }} seconds...</p>
+      </div>
+      
+      <div class="success-actions">
+        <button 
+          nz-button 
+          class="login-button" 
+          [nzType]="'primary'"
+          (click)="goToLogin()">
+          Go to Login Now
+        </button>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="verificationStatus === 'error'" class="error-state">
+      <div class="error-icon">
+        <i nz-icon nzType="close-circle" nzTheme="twotone" nzTwotoneColor="#ff4d4f"></i>
+      </div>
+      <h3>Verification Failed</h3>
+      <p>{{ errorMessage }}</p>
+      
+      <div class="error-actions">
+        <button 
+          nz-button 
+          class="resend-button" 
+          [nzType]="'default'"
+          (click)="resendVerification()">
+          Resend Verification
+        </button>
+        <button 
+          nz-button 
+          class="login-button" 
+          [nzType]="'primary'"
+          (click)="goToLogin()">
+          Go to Login
+        </button>
+      </div>
+    </div>
+
+    <!-- Login Link -->
+    <div class="login-link">
+      <span>Already have an account? </span>
+      <a (click)="goToLogin()">Sign in</a>
+    </div>
+  </div>
+</div> 

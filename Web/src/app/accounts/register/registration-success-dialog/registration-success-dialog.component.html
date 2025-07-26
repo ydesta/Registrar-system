@@ -1,0 +1,66 @@
+<div class="registration-success-dialog">
+  <!-- Header Section -->
+  <div class="dialog-header">
+    <div class="logo-container">
+      <img src="../../../../assets/images/logo.png" alt="HiLCoE Logo" class="logo">
+    </div>
+    <h2 class="success-title">Registration Successful!</h2>
+    <p class="welcome-text">Welcome to HiLCoE School of Computer Science & Technology</p>
+  </div>
+
+  <!-- Content Section -->
+  <div class="dialog-content">
+    <!-- Success Icon -->
+    <div class="success-icon-container">
+      <div class="success-icon-wrapper">
+        <span nz-icon nzType="check-circle" class="success-icon"></span>
+      </div>
+    </div>
+
+    <!-- Email Confirmation Section -->
+    <div class="info-section email-section">
+      <div class="info-content">
+        <span nz-icon nzType="mail" class="section-icon email-icon"></span>
+        <div class="section-text">
+          <h4 class="section-title">Check Your Email</h4>
+          <p class="section-description">
+            We've sent a confirmation email to your registered email address. 
+            Please check your inbox and click the confirmation link to activate your account.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Administration Section -->
+    <div class="info-section contact-section">
+      <div class="info-content">
+        <span nz-icon nzType="info-circle" class="section-icon contact-icon"></span>
+        <div class="section-text">
+          <p class="section-description">
+            <strong>Didn't receive the email?</strong> Please check your spam folder or 
+            contact our administration team for assistance.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Next Steps Section -->
+    <div class="next-steps-section">
+      <p class="next-steps-text">
+        <span nz-icon nzType="clock-circle" class="clock-icon"></span>
+        You can now proceed to sign in once your email is confirmed
+      </p>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="dialog-actions">
+    <button 
+      nz-button 
+      nzType="primary" 
+      class="sign-in-button"
+      (click)="goToSignIn()">
+      Go to Sign In
+    </button>
+  </div>
+</div> 

@@ -1,0 +1,82 @@
+<div class="user-management-container">
+  <!-- Test Message -->
+  <div style="background: green; color: white; padding: 20px; margin: 20px; border-radius: 8px;">
+    <h2>UserManagementComponent is loaded!</h2>
+    <p>If you can see this, the main component is working.</p>
+    <p>Current URL: {{ router.url }}</p>
+  </div>
+
+  <nz-page-header class="page-header">
+    <nz-breadcrumb nz-page-header-breadcrumb>
+      <nz-breadcrumb-item>Dashboard</nz-breadcrumb-item>
+      <nz-breadcrumb-item>User Management</nz-breadcrumb-item>
+    </nz-breadcrumb>
+    <nz-page-header-title>User Management</nz-page-header-title>
+    <nz-page-header-subtitle>Manage users, roles, and permissions</nz-page-header-subtitle>
+  </nz-page-header>
+
+  <div class="content-area">
+    <nz-row [nzGutter]="16">
+      <nz-col [nzSpan]="6">
+        <nz-card class="management-card" (click)="navigateTo('users')">
+          <div class="card-content">
+            <span nz-icon nzType="team" nzTheme="outline" class="card-icon"></span>
+            <h3>Users</h3>
+            <p>Manage system users and their accounts</p>
+          </div>
+        </nz-card>
+      </nz-col>
+      
+      <nz-col [nzSpan]="6">
+        <nz-card class="management-card" (click)="navigateTo('roles')">
+          <div class="card-content">
+            <span nz-icon nzType="safety" nzTheme="outline" class="card-icon"></span>
+            <h3>Roles</h3>
+            <p>Manage user roles and permissions</p>
+          </div>
+        </nz-card>
+      </nz-col>
+      
+      <nz-col [nzSpan]="6">
+        <nz-card class="management-card" (click)="navigateTo('permissions')">
+          <div class="card-content">
+            <span nz-icon nzType="key" nzTheme="outline" class="card-icon"></span>
+            <h3>Permissions</h3>
+            <p>Configure system permissions</p>
+          </div>
+        </nz-card>
+      </nz-col>
+      
+      <nz-col [nzSpan]="6">
+        <nz-card class="management-card" (click)="navigateTo('activity')">
+          <div class="card-content">
+            <span nz-icon nzType="audit" nzTheme="outline" class="card-icon"></span>
+            <h3>User Activity</h3>
+            <p>Monitor user activities and logs</p>
+          </div>
+        </nz-card>
+      </nz-col>
+    </nz-row>
+
+    <nz-row [nzGutter]="16" style="margin-top: 16px;">
+      <nz-col [nzSpan]="24">
+        <nz-card title="Quick Actions">
+          <nz-space>
+            <button nz-button nzType="primary" (click)="navigateTo('users/create')">
+              <span nz-icon nzType="plus" nzTheme="outline"></span>
+              Create New User
+            </button>
+            <button nz-button nzType="default" (click)="navigateTo('users')">
+              <span nz-icon nzType="search" nzTheme="outline"></span>
+              View All Users
+            </button>
+            <button nz-button nzType="default" (click)="navigateTo('roles')">
+              <span nz-icon nzType="setting" nzTheme="outline"></span>
+              Manage Roles
+            </button>
+          </nz-space>
+        </nz-card>
+      </nz-col>
+    </nz-row>
+  </div>
+</div> 

@@ -1,0 +1,29 @@
+<form nz-form [formGroup]="academicProgramRequestForm">
+    <nz-form-item>
+        <nz-form-label nzRequired>Academic Programme</nz-form-label>
+        <nz-form-control>
+            <nz-select formControlName="acadamicProgrammeId" nzPlaceHolder="select academic programme"
+                nzShowSearch="true" nzAllowClear="true">
+                <nz-option *ngFor="let item of acadamicProgrammes" [nzValue]="item.id"
+                    [nzLabel]="item.acadamicProgrammeTitle"></nz-option>
+            </nz-select>
+        </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+        <nz-form-label nzRequired>Division
+        </nz-form-label>
+        <nz-form-control>
+            <nz-select formControlName="division" nzPlaceHolder="select division" nzShowSearch="true"
+                nzAllowClear="true">
+                <nz-option *ngFor="let item of divisionStatusist" [nzValue]="item.Id"
+                    [nzLabel]="item.Description"></nz-option>
+            </nz-select>
+        </nz-form-control>
+    </nz-form-item>
+</form>
+<nz-divider></nz-divider>
+<div class="button-container">
+    <button nz-button nzType="primary" (click)="onSubmit()">
+        Save
+    </button>
+</div>

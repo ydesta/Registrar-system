@@ -1,0 +1,98 @@
+<div class="program-requester-container">
+    <div class="header-section">
+        <h2 *ngIf="!isApplicantProfile">Academic Program Information</h2>
+        <button (click)="openModal()" nz-button nzType="primary" [disabled]="noOfApplicantProgramRequest>0" *ngIf="!isApplicantProfile">
+            <span nz-icon nzType="plus" nzTheme="outline"></span>
+            Add Academic Program
+        </button>
+    </div>
+
+    <nz-table #basicTable 
+              [nzData]="applicationProgramRequestList" 
+              nzBordered
+              [nzPageSize]="5"
+              [nzShowSizeChanger]="true"
+              [nzNoResult]="noDataTemplate">
+        <thead>
+            <tr>
+                <th>Application Program</th>
+                <th>Division</th>
+                <th>Request Status</th>
+                <th>Applicant Status</th>
+                <th>Created Date</th>
+                <th *ngIf="!isApplicantProfile">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let data of basicTable.data; let i = index">
+                <td>{{ getAcademicProgramDescription(data.acadamicProgrammeId) }}</td>
+                <td>{{ getDivisionStatusDescription(data.division) }}</td>
+                <td>
+                    <button class="status-button" 
+                            [ngClass]="{
+                                'pending': data.approvalStatus === 0,
+                                'approved': data.approvalStatus === 1,
+                                'rejected': data.approvalStatus === 2
+                            }">
+                        {{ getReguestStatus(data.approvalStatus) }}
+                    </button>
+                </td>
+                <td>
+                    <button class="status-button" 
+                            [ngClass]="{
+                                'pending': data.studentStatus === 0,
+                                'approved': data.studentStatus === 1,
+                                'rejected': data.studentStatus === 2
+                            }">
+                        {{ getStudentStatus(data.studentStatus) }}
+                    </button>
+                </td>
+                <td>{{ data.createdDate | date:'dd-MM-yyyy' }}</td>
+                <td *ngIf="!isApplicantProfile">
+                    <div class="action-buttons">
+                        <button nz-button 
+                                nzType="link"
+                                (click)="openDecisionModal(data)"
+                                class="document-button"
+                                [disabled]="!(data.studentStatus === 1 && data.approvalStatus === 1)">
+                            <span nz-icon nzType="audit" nzTheme="outline"></span>
+                            Review
+                        </button>
+                        <button nz-button 
+                                nz-dropdown 
+                                [nzDropdownMenu]="menu" 
+                                nzPlacement="bottomRight"
+                                [disabled]="isSubmittedApplicationForm>0"
+                                nzTrigger="click"
+                                class="action-button">
+                            <span nz-icon nzType="more" nzTheme="outline"></span>
+                        </button>
+                    </div>
+                    <nz-dropdown-menu #menu="nzDropdownMenu">
+                        <ul nz-menu>
+                            <li nz-menu-item (click)="editModal(data)">
+                                <a class="edit">
+                                    <span nz-icon nzType="edit" nzTheme="outline"></span>
+                                    Edit
+                                </a>
+                            </li>
+                            <li nz-menu-item (click)="delete(data.id)">
+                                <button class="delete" nzDanger>
+                                    <span nz-icon nzType="delete" nzTheme="outline"></span>
+                                    Delete
+                                </button>
+                            </li>
+                        </ul>
+                    </nz-dropdown-menu>
+                </td>
+            </tr>
+        </tbody>
+    </nz-table>
+</div>
+
+<ng-template #noDataTemplate>
+    <div class="no-data">
+        <span nz-icon nzType="read" nzTheme="outline"></span>
+        <p>No academic programs added yet</p>
+    </div>
+</ng-template>

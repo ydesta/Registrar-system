@@ -1,0 +1,74 @@
+<div class="contact-container">
+  <div class="contact-header">
+    <h2>Get in Touch</h2>
+    <p class="subtitle">We'd love to hear from you. Please fill out this form or shoot us an email.</p>
+    <div class="header-underline"></div>
+  </div>
+
+  <div class="contact-content">
+    <div class="contact-info">
+      <div class="info-card">
+        <div class="card-header">
+          <i nz-icon nzType="phone" nzTheme="outline"></i>
+          <h3>Call Us</h3>
+        </div>
+        <p>+251-11-6292971</p>
+        <p>Monday to Friday, 9am to 5pm</p>
+      </div>
+
+      <div class="info-card">
+        <div class="card-header">
+          <i nz-icon nzType="mail" nzTheme="outline"></i>
+          <h3>Email Us</h3>
+        </div>
+        <p>info@hilcoe.net</p>
+        <p>We'll respond within 24 hours</p>
+      </div>
+
+      <div class="info-card">
+        <div class="card-header">
+          <i nz-icon nzType="environment" nzTheme="outline"></i>
+          <h3>Visit Us</h3>
+        </div>
+        <p>Megenagna, Addis Ababa</p>
+        <p>Ethiopia</p>
+      </div>
+    </div>
+
+    <div class="form-container">
+      <h3>Send us a Message</h3>
+      <form class="contact-form" (ngSubmit)="onSubmit()" #contactForm="ngForm">
+        <div class="form-row">
+          <nz-form-item>
+            <nz-form-control nzHasFeedback>
+              <input nz-input placeholder="Your Name" [(ngModel)]="formData.name" name="name" required>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-control nzHasFeedback>
+              <input nz-input placeholder="Your Email" [(ngModel)]="formData.email" name="email" required type="email">
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <nz-form-item>
+          <nz-form-control nzHasFeedback>
+            <input nz-input placeholder="Subject" [(ngModel)]="formData.subject" name="subject" required>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control nzHasFeedback>
+            <textarea nz-input placeholder="Your Message" [(ngModel)]="formData.message" name="message" required rows="5"></textarea>
+          </nz-form-control>
+        </nz-form-item>
+
+        <button nz-button nzType="primary" [disabled]="!contactForm.form.valid" type="submit">
+          <i nz-icon nzType="send" nzTheme="outline"></i>
+          Send Message
+        </button>
+      </form>
+    </div>
+  </div>
+</div> 

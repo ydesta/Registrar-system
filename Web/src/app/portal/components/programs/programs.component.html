@@ -1,0 +1,35 @@
+<div class="programs-container">
+  <div class="programs-header">
+    <h2>Our Academic Programs</h2>
+    <p class="programs-subtitle">Explore our comprehensive range of computer science and technology programs</p>
+    <div class="header-underline"></div>
+  </div>
+  
+  <div class="programs-content">
+    <div class="programs-grid">
+      <div class="program-card" *ngFor="let program of programs">
+        <div class="program-icon">
+          <i nz-icon [nzType]="program.icon" nzTheme="outline"></i>
+        </div>
+        <h3>{{ program.title }}</h3>
+        <p class="program-description">{{ program.description }}</p>
+        <div class="program-details">
+          <div class="detail-item">
+            <i nz-icon nzType="clock-circle" nzTheme="fill"></i>
+            <span>{{ program.duration }}</span>
+          </div>
+          <div class="detail-item">
+            <i nz-icon nzType="trophy" nzTheme="fill"></i>
+            <span>{{ program.level }}</span>
+          </div>
+        </div>
+        <div class="program-features">
+          <div class="feature" *ngFor="let feature of program.features">
+            <i nz-icon nzType="check-circle" nzTheme="fill"></i>
+            <span>{{ feature }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

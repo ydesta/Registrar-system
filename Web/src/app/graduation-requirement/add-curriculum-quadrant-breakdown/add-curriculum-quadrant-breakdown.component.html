@@ -1,0 +1,115 @@
+<nz-card>
+  <h3 class="h-tag">{{action}}</h3>
+  <nz-divider></nz-divider>
+  <div>
+    <form nz-form [formGroup]="acadamicProgramForm" (ngSubmit)="submitForm()">
+      <div nz-row [nzGutter]="24">
+        <div nz-col nzSpan="12">
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzRequired>Curriculum Code</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-select formControlName="CurriculumId" nzPlaceHolder="select curriculum code" nzShowSearch>
+                <nz-option *ngFor="let item of curricula" [nzValue]="item.id"
+                  [nzLabel]="item.curriculumCode"></nz-option>
+              </nz-select>
+              <div nz-form-explain
+                *ngIf="acadamicProgramForm.controls['CurriculumId'].invalid && (acadamicProgramForm.controls['CurriculumId'].dirty || acadamicProgramForm.controls['CurriculumId'].touched)">
+                <span class="error-message">Curriculum is required.</span>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzRequired>Year Number</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-form-control>
+                <nz-select formControlName="yearNumber" nzPlaceHolder="select year number" required
+                  [class.error]="acadamicProgramForm.controls['yearNumber'].invalid && (acadamicProgramForm.controls['yearNumber'].dirty || acadamicProgramForm.controls['yearNumber'].touched)">
+                  <nz-option *ngFor="let item of listOfYearNumber" [nzValue]="item.Id"
+                    [nzLabel]="item.Description"></nz-option>
+                </nz-select>
+                <div nz-form-explain
+                  *ngIf="acadamicProgramForm.controls['yearNumber'].invalid && (acadamicProgramForm.controls['yearNumber'].dirty || acadamicProgramForm.controls['yearNumber'].touched)">
+                  <span class="error-message">Year Number is required.</span>
+                </div>
+              </nz-form-control>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzRequired>Course Code</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-select nzMode="multiple" formControlName="courseId" nzPlaceHolder="select course code" nzShowSearch
+                [(ngModel)]="listOfSelectedValue">
+                <nz-option *ngFor="let item of courses" [nzValue]="item.id" [nzLabel]="item.courseTitle"></nz-option>
+              </nz-select>
+              <div nz-form-explain
+                *ngIf="acadamicProgramForm.controls['courseId'].invalid && (acadamicProgramForm.controls['courseId'].dirty || acadamicProgramForm.controls['courseId'].touched)">
+                <span class="error-message">course is required.</span>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+
+
+        </div>
+
+        <div nz-col nzSpan="10">
+
+          <!-- <nz-form-item>
+            <nz-form-label [nzSpan]="8" nzRequired>Quadrant </nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-select formControlName="quadrantsId" nzPlaceHolder="select quadrant ID" nzShowSearch required
+                [class.error]="acadamicProgramForm.controls['quadrantsId'].invalid && (acadamicProgramForm.controls['quadrantsId'].dirty || acadamicProgramForm.controls['quadrantsId'].touched)">
+                <nz-option *ngFor="let item of quadrants" [nzValue]="item.id"
+                  [nzLabel]="item.quadrantHeading"></nz-option>
+              </nz-select>
+              <div nz-form-explain
+                *ngIf="acadamicProgramForm.controls['quadrantsId'].invalid && (acadamicProgramForm.controls['quadrantsId'].dirty || acadamicProgramForm.controls['quadrantsId'].touched)">
+                <span class="error-message">quadrants is required.</span>
+              </div>
+            </nz-form-control>
+          </nz-form-item> -->
+
+
+
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="8" nzRequired>Term Number</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-form-control>
+                <nz-select formControlName="termNumber" nzPlaceHolder="select term number" required
+                  [class.error]="acadamicProgramForm.controls['termNumber'].invalid && (acadamicProgramForm.controls['termNumber'].dirty || acadamicProgramForm.controls['termNumber'].touched)">
+                  <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
+                    [nzLabel]="item.Description"></nz-option>
+                </nz-select>
+              </nz-form-control>
+              <div nz-form-explain
+                *ngIf="acadamicProgramForm.controls['termNumber'].invalid && (acadamicProgramForm.controls['termNumber'].dirty || acadamicProgramForm.controls['termNumber'].touched)">
+                <span class="error-message">Term Number is required.</span>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="8">Remark</nz-form-label>
+            <nz-form-control>
+              <nz-textarea-count [nzMaxCharacterCount]="250">
+                <textarea rows="4" formControlName="remark" nz-input></textarea>
+              </nz-textarea-count>
+              <div nz-form-explain *ngIf="remark.hasError('invalidChars') && (remark.dirty || remark.touched)">
+                <span class="error-message">{{ remark.getError('invalidChars').message
+                  }}</span>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+      <nz-form-item>
+        <nz-form-control [nzOffset]="12" [nzSpan]="12" class="register-are">
+          <button nz-button nzType="primary" class="main-color" [disabled]="!acadamicProgramForm.valid">
+            {{ submit }}
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </div>
+</nz-card>

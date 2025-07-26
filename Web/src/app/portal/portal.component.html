@@ -1,0 +1,158 @@
+<nz-layout class="layout">
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-content">
+      <div class="logo" (click)="goToHome()" style="cursor: pointer;">
+        <img src="assets/images/logo.png" alt="HiLCoE Logo">
+        <!-- <span class="school-name">School of Computer Science & Technology</span> -->
+      </div>
+      <nav class="main-nav">
+        <!-- <a routerLink="/about">About us</a> -->
+        <!-- <a routerLink="/contact">Contact</a> -->
+        <!-- <a routerLink="/register">Sign Up</a> -->
+        <ng-container *ngIf="!isAuthenticated; else authenticatedUser">
+          <button class="register-btn" (click)="register()">Register</button>
+        <button class="login-btn" (click)="login()">Login</button>
+        </ng-container>
+        <ng-template #authenticatedUser>
+          <div class="user-menu">
+            <span class="welcome-text">Welcome, {{ currentUser?.firstName || 'User' }}!</span>
+            <button class="dashboard-btn" (click)="goToDashboard()">Dashboard</button>
+            <button class="logout-btn" (click)="logout()">Logout</button>
+          </div>
+        </ng-template>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Hero Slider -->
+    <!-- <div class="hero-slider">
+      <app-home-slider></app-home-slider>
+    </div> -->
+    <!-- Attractive Hero Image Section -->
+    <section class="hero-image-section">
+      <div class="hero-image-wrapper">
+        <!-- <img src="assets/images/hero-attractive.jpg" alt="HiLCoE Campus" class="hero-main-image"> -->
+        <div class="hero-overlay animated">
+          <div class="hero-glass-card">
+            <h1 class="hero-anim hero-anim-h1">Shaping the Future of Technology Education</h1>
+            <p class="hero-anim hero-anim-p">Join HiLCoE School of Computer Science & Technology and become a tech leader of tomorrow.</p>
+            <ng-container *ngIf="!isAuthenticated; else authenticatedCta">
+            <a class="cta-btn hero-anim hero-anim-btn" (click)="login()">Get Started</a>
+            </ng-container>
+            <ng-template #authenticatedCta>
+              <a class="cta-btn hero-anim hero-anim-btn" (click)="goToDashboard()">Go to Dashboard</a>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="info-section">
+      <div class="container">
+        <div class="about-header">
+          <h2>About Us</h2>
+          <p class="about-subtitle">Discover our commitment to excellence in computer science education and innovation
+          </p>
+          <div class="header-underline"></div>
+        </div>
+        <div class="row">
+          <div class="col-half" data-aos="fade-up" data-aos-duration="1000">
+            <app-about-college></app-about-college>
+          </div>
+          <div class="col-half" data-aos="fade-left" data-aos-duration="1000">
+            <app-event-slider></app-event-slider>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="values-section">
+      <div class="container">
+        <app-programs></app-programs>
+      </div>
+    </section>
+    <section class="services-section">
+      <div class="container">
+        <app-services></app-services>
+      </div>
+    </section>
+    <section class="values-section">
+      <div class="container">
+        <app-company-values></app-company-values>
+      </div>
+    </section>
+    
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-grid">
+        <!-- Logo and Description -->
+        <div class="footer-col">
+          <div class="footer-logo">
+            <img src="assets/images/logo.png" alt="HiLCoE Logo">
+            <!-- <p>School of Computer Science & Technology</p> -->
+          </div>
+        </div>
+
+        <!-- Contact Us -->
+        <div class="footer-col">
+          <h3>Contact Us</h3>
+          <ul class="footer-contact">
+            <li>
+              <i nz-icon nzType="phone" nzTheme="outline"></i>
+              <span>Tel: +251-11-6292971</span>
+            </li>
+            <li>
+              <i nz-icon nzType="mail" nzTheme="outline"></i>
+              <span>Email: info&#64;hilcoe.net</span>
+            </li>
+            <li>
+              <i nz-icon nzType="environment" nzTheme="outline"></i>
+              <span>Address: 4kilo, Addis Ababa, Ethiopia</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="footer-col">
+          <h3>Quick Links</h3>
+          <ul class="footer-links">
+            <li><a (click)="goToHome()" style="cursor: pointer;">Home</a></li>
+            <li><a routerLink="#">About Us</a></li>
+            <li><a routerLink="#">Contact Us</a></li>
+            <li><a routerLink="#">Programs</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Social Media Links -->
+      <div class="social-links">
+        <a href="#" nz-tooltip nzTooltipTitle="Follow us on Facebook" target="_blank">
+          <i nz-icon nzType="facebook" nzTheme="outline"></i>
+        </a>
+        <a href="#" nz-tooltip nzTooltipTitle="Follow us on Twitter" target="_blank">
+          <i nz-icon nzType="twitter" nzTheme="outline"></i>
+        </a>
+        <a href="#" nz-tooltip nzTooltipTitle="Follow us on Instagram" target="_blank">
+          <i nz-icon nzType="instagram" nzTheme="outline"></i>
+        </a>
+        <a href="#" nz-tooltip nzTooltipTitle="Connect with us on LinkedIn" target="_blank">
+          <i nz-icon nzType="linkedin" nzTheme="outline"></i>
+        </a>
+        <a href="#" nz-tooltip nzTooltipTitle="Join our Telegram channel" target="_blank">
+          <i nz-icon nzType="message" nzTheme="outline"></i>
+        </a>
+      </div>
+
+      <!-- Copyright -->
+      <div class="copyright">
+        <p>HiLCoE © {{ currentYear }} Powered By Technosys</p>
+      </div>
+    </div>
+  </footer>
+</nz-layout>

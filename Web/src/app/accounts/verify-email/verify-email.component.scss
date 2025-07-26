@@ -1,0 +1,302 @@
+.verify-email-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #F8F8FF;
+  padding: 20px;
+  padding-top: 90px;
+}
+
+.verify-email-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-left: 8px solid #1890ff;
+  padding: 40px;
+  width: 100%;
+  max-width: 500px;
+  backdrop-filter: blur(10px);
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 30px;
+
+  .logo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    color: #333;
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  p {
+    color: #666;
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.loading-state {
+  text-align: center;
+  padding: 20px 0;
+
+  .loading-icon {
+    margin-bottom: 16px;
+    
+    i {
+      font-size: 48px;
+      color: #1890ff;
+      animation: spin 1s linear infinite;
+    }
+  }
+
+  h3 {
+    color: #333;
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  p {
+    color: #666;
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.pending-state {
+  text-align: center;
+  padding: 20px 0;
+
+  .pending-icon {
+    margin-bottom: 16px;
+    
+    i {
+      font-size: 48px;
+      color: #1890ff;
+    }
+  }
+
+  h3 {
+    color: #333;
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  p {
+    color: #666;
+    margin: 0 0 20px 0;
+    font-size: 14px;
+  }
+
+  .pending-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+
+    .verify-button {
+      height: 44px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      background: #1890ff;
+      border: none;
+
+      &:hover {
+        background: #096dd9;
+      }
+    }
+
+    .login-button {
+      height: 44px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      border: 1px solid #d9d9d9;
+      background: white;
+      color: #666;
+
+      &:hover {
+        border-color: #1890ff;
+        color: #1890ff;
+      }
+    }
+  }
+}
+
+.success-state {
+  text-align: center;
+  padding: 20px 0;
+
+  .success-icon {
+    margin-bottom: 16px;
+    
+    i {
+      font-size: 48px;
+    }
+  }
+
+  h3 {
+    color: #333;
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  p {
+    color: #666;
+    margin: 0 0 20px 0;
+    font-size: 14px;
+  }
+
+  .redirect-info {
+    background: #f6ffed;
+    border: 1px solid #b7eb8f;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 20px;
+
+    p {
+      color: #52c41a;
+      margin: 0;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+
+  .success-actions {
+    .login-button {
+      height: 44px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      background: #1890ff;
+      border: none;
+
+      &:hover {
+        background: #096dd9;
+      }
+    }
+  }
+}
+
+.error-state {
+  text-align: center;
+  padding: 20px 0;
+
+  .error-icon {
+    margin-bottom: 16px;
+    
+    i {
+      font-size: 48px;
+    }
+  }
+
+  h3 {
+    color: #333;
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  p {
+    color: #666;
+    margin: 0 0 20px 0;
+    font-size: 14px;
+  }
+
+  .error-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+
+    .resend-button {
+      height: 44px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      border: 1px solid #d9d9d9;
+      background: white;
+      color: #666;
+
+      &:hover {
+        border-color: #1890ff;
+        color: #1890ff;
+      }
+    }
+
+    .login-button {
+      height: 44px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      background: #1890ff;
+      border: none;
+
+      &:hover {
+        background: #096dd9;
+      }
+    }
+  }
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 14px;
+  color: #666;
+
+  a {
+    color: #1890ff;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive design
+@media (max-width: 480px) {
+  .verify-email-container {
+    padding: 10px;
+  }
+  
+  .verify-email-card {
+    padding: 30px 20px;
+  }
+  
+  .error-actions {
+    flex-direction: column;
+    align-items: center;
+    
+    .resend-button,
+    .login-button {
+      width: 100%;
+      max-width: 200px;
+    }
+  }
+} 

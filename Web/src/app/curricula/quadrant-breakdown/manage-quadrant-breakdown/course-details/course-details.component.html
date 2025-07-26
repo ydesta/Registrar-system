@@ -1,0 +1,33 @@
+<nz-table #courseTable [nzData]="courses" [nzBordered]="false" [nzShowPagination]="false">
+    <thead>
+        <tr>
+            <!-- <th nzWidth="5%">#</th> -->
+            <th nzWidth="7%">Course Code</th>
+            <th nzWidth="20%">Course Title</th>
+            <!-- <th nzWidth="20%">Credit Hours</th>
+            <th nzWidth="20%">Lecture Hours</th>
+            <th nzWidth="20%">Lab Hours</th> -->
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let course of courses ;let i = index">
+            <!-- <td>{{ i+1 }}</td> -->
+
+            <td>{{ course.courseCode }}</td>
+            <td>{{ course.courseTitle }}</td>
+            <!-- <td>{{ course.creditHours }}</td>
+            <td>{{ course.lectureHours }}</td>
+            <td>{{ course.labHours }}</td> -->
+        </tr>
+    </tbody>
+    <!-- <tfoot class="footer-row">
+        <tr>
+            <td>Total:</td>
+            <td></td>
+            <td></td>
+            <td>{{ calculateTotalCreditHours() }}</td>
+            <td>{{ calculateTotalLectureHours() }}</td>
+            <td>{{ calculateTotalLabHours() }}</td>
+        </tr>
+    </tfoot> -->
+</nz-table>

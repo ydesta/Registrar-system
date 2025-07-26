@@ -1,0 +1,158 @@
+<div>
+  <h3 class="h-tag">{{ action }}</h3>
+
+  <div nz-row>
+    <div nz-col nzSpan="8">
+      <form
+        nzLayout="horizontal"
+        nz-form
+        [formGroup]="studentIdForm"
+        (ngSubmit)="getStudentById()"
+      >
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6">Student Id</nz-form-label>
+          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+            <input
+              type="text"
+              formControlName="studentId"
+              nz-input
+              placeholder="enter student id"
+            />
+          </nz-input-group>
+        </nz-form-item>
+        <ng-template #suffixIconButton>
+          <button nz-button nzType="primary" class="primary-color" nzSearch>
+            <span nz-icon nzType="search"></span>
+          </button>
+        </ng-template>
+      </form>
+    </div>
+    <div nz-col nzSpan="6"></div>
+  </div>
+
+  <div nz-row class="search-result">
+    <div nz-col nzSpan="12">
+      <div class="lable-display">
+        <h3>Full Name:</h3>
+        <p *ngIf="students?.firstName">
+          {{
+            students.firstName +
+              " " +
+              students.fatherName +
+              " " +
+              students.grandFatherName
+          }}
+        </p>
+      </div>
+      <div class="lable-display">
+        <h3>Gender:</h3>
+        <p>{{ students.gender }}</p>
+      </div>
+    </div>
+    <div nz-col nzSpan="12">
+      <div class="lable-display">
+        <h3>Academic Programme:</h3>
+        <p>{{ acadamicProgramme.acadamicProgrammeTitle! }}</p>
+      </div>
+      <div class="lable-display">
+        <h3>Curriculume:</h3>
+        <p>{{ students.curriculumCode }}</p>
+      </div>
+    </div>
+  </div>
+
+  <form
+    nz-form
+    nzLayout="vertical"
+    class="grade-form"
+    [formGroup]="studentGradeForm"
+    (ngSubmit)="submitForm()"
+  >
+    <div nz-row>
+      <div nz-col nzSpan="12">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6">Academic Term</nz-form-label>
+          <nz-form-control [nzSpan]="14">
+            <nz-select
+              nzPlaceHolder="select academic term"
+              formControlName="academicTermCode"
+            >
+              <nz-option
+                *ngFor="let academicTerm of academicTerms"
+                [nzValue]="academicTerm.academicTermCode"
+                [nzLabel]="academicTerm.academicTermCode"
+              ></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6">Course</nz-form-label>
+          <nz-form-control [nzSpan]="14">
+            <nz-select
+              nzPlaceHolder="select course"
+              formControlName="courseCode"
+            >
+              <nz-option
+                *ngFor="let course of courses"
+                [nzValue]="course.courseCode"
+                [nzLabel]="course.courseTitle"
+              ></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6">Staff</nz-form-label>
+          <nz-form-control [nzSpan]="14">
+            <nz-select nzPlaceHolder="select staff" formControlName="staffID">
+              <nz-option
+                *ngFor="let staff of staffs"
+                [nzValue]="staff.id"
+                [nzLabel]="staff.firstName + ' ' + staff.lastName"
+              ></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div nz-col nzSpan="12">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6">Mark out of 100</nz-form-label>
+          <nz-form-control [nzSpan]="14">
+            <input nz-input formControlName="mark" type="number" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6">Grade</nz-form-label>
+          <nz-form-control [nzSpan]="14">
+            <nz-select
+              nzPlaceHolder="select Grade"
+              formControlName="gradeLetter"
+            >
+              <nz-option nzValue="A+" nzLabel="A+"></nz-option>
+              <nz-option nzValue="A" nzLabel="A"></nz-option>
+              <nz-option nzValue="B+" nzLabel="B+"></nz-option>
+              <nz-option nzValue="B" nzLabel="B"></nz-option>
+              <nz-option nzValue="C" nzLabel="C+"></nz-option>
+              <nz-option nzValue="C+" nzLabel="C"></nz-option>
+              <nz-option nzValue="D" nzLabel="D"></nz-option>
+              <nz-option nzValue="F" nzLabel="F"></nz-option>
+              <nz-option nzValue="RC" nzLabel="RC"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <div>
+          <button
+            nz-button
+            nzType="primary"
+            class="primary-color submit"
+            nzSearch
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

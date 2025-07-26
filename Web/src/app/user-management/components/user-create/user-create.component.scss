@@ -1,0 +1,93 @@
+.user-create-container {
+  max-width: 700px;
+  margin: 32px auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(24, 144, 255, 0.08);
+  padding: 40px 32px 32px 32px;
+  position: relative;
+}
+
+.user-create-container h2 {
+  margin-bottom: 32px;
+  color: #1890ff;
+  font-weight: 700;
+  font-size: 2rem;
+  letter-spacing: 0.5px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nz-form-item {
+  margin-bottom: 20px;
+}
+
+input[nz-input],
+.nz-select-selector {
+  border-radius: 8px !important;
+  font-size: 15px;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  transition: border-color 0.2s;
+}
+
+input[nz-input]:focus,
+.nz-select-focused .nz-select-selector {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  justify-content: flex-end;
+}
+
+button[nz-button] {
+  min-width: 120px;
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+button[nzType="primary"] {
+  background: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.08);
+}
+
+button[nzType="primary"]:hover {
+  background: linear-gradient(90deg, #40a9ff 0%, #1890ff 100%);
+  color: #fff;
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 24px rgba(24, 144, 255, 0.15);
+}
+
+button[nzType="default"] {
+  background: #f5f7fa;
+  color: #1890ff;
+  border: 1px solid #e5e7eb;
+}
+
+button[nzType="default"]:hover {
+  background: #e6f7ff;
+  color: #1890ff;
+  border-color: #1890ff;
+}
+
+@media (max-width: 768px) {
+  .user-create-container {
+    padding: 20px 8px;
+  }
+  .form-actions {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+} 

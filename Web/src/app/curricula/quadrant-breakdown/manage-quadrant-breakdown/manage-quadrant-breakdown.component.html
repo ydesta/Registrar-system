@@ -1,0 +1,41 @@
+<nz-card>
+    <div>
+        <h3 class="h-tag">
+            <button nz-button style="float: right;" nzType="primary" (click)="goToCurriculum()"> <span nz-icon
+                    nzType="left-circle" nzTheme="outline"></span>
+                Back</button>
+            <p>{{code}} - {{programme}}</p>
+        </h3>
+    </div>
+
+
+    <nz-divider></nz-divider>
+    <div *ngIf="numberOfQuadrantBreakdown; else elseBlock">
+        <nz-row [nzGutter]="16">
+            <nz-col *ngFor="let quadrant of curriculumQuadrants; let first = first" [nzSpan]="12" class="panel-padding">
+                <nz-collapse [nzAccordion]="true">
+                    <nz-collapse-panel [nzHeader]="quadrant.quadrantCode">
+                        <app-course-details [courses]="quadrant.course"></app-course-details>
+                    </nz-collapse-panel>
+                </nz-collapse>
+            </nz-col>
+        </nz-row>
+    </div>
+
+    <ng-template #elseBlock>
+        <nz-alert nzShowIcon nzType="info" nzMessage="info" [nzDescription]="descriptionTemplate1"
+            [nzAction]="actionTemplate2"></nz-alert>
+        <ng-template #descriptionTemplate1>
+            <p>Please proceed with the task of recording the course breakdown for the curriculum quadrants.
+                Kindly begin by documenting the course breakdown for the curriculum quadrant, focusing on this
+                particular
+                curriculum.</p>
+        </ng-template>
+        <ng-template #actionTemplate2>
+            <button nz-button nzSize="small" nzType="primary" (click)="doAction()">Click here to record
+                course breakdown</button>
+        </ng-template>
+    </ng-template>
+
+
+</nz-card>

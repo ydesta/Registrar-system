@@ -1,0 +1,44 @@
+<form nz-form [formGroup]="applicantWorkExpForm">
+    <nz-form-item>
+        <nz-form-label [nzSpan]="8" nzRequired>Company Name</nz-form-label>
+        <nz-form-control [nzSpan]="10">
+            <input nz-input formControlName="companyName" placeholder="enter company" />
+        </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+        <nz-form-label [nzSpan]="8" nzRequired>Total Work Year</nz-form-label>
+        <nz-form-control [nzSpan]="10">
+            <input nz-input formControlName="totalWorkYear" placeholder="enter total work year" type="number" />
+        </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+        <nz-form-label [nzSpan]="8">post </nz-form-label>
+        <nz-form-control [nzSpan]="10">
+            <input nz-input formControlName="post" placeholder="enter post" />
+        </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item *ngIf="workExperinceId==undefined">
+        <nz-form-label [nzSpan]="12">Attach Files</nz-form-label>
+        <nz-form-control [nzSpan]="10">
+            <section class="attach-file">
+                <label class="attach-icon">
+                    <em nz-icon nzType="paper-clip" nzTheme="outline"></em>
+                    <input nz-input type="file" id="test" name="data" style="visibility: hidden" #f_input
+                        (change)="handleFileInputChange(f_input.files)" accept=".pdf, .jpg, .jpeg, .png, .gif"
+                        multiple />
+                    <!-- Display the file names and count here -->
+                    <span *ngFor="let fileName of file_list">{{ fileName }}</span>
+                </label>
+            </section>
+        </nz-form-control>
+    </nz-form-item>
+
+
+    <nz-form-item>
+        <nz-form-control [nzSpan]="10" [nzOffset]="4">
+            <button nz-button [nzType]="'primary'" (click)="onSave()"
+                [disabled]="!applicantWorkExpForm.valid">Save</button>
+        </nz-form-control>
+    </nz-form-item>
+</form>

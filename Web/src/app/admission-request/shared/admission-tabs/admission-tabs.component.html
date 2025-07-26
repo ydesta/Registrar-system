@@ -1,0 +1,116 @@
+<nz-tabset [(nzSelectedIndex)]="selectedTabIndex" class="custom-tabset" (nzSelectedIndexChange)="onTabIndexChange($event)">
+    <nz-tab *ngIf="showInstructionTab" [nzTitle]="instructionTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[0]">
+        <ng-template #instructionTemplate>
+            <span nz-icon nzType="question-circle" nzTheme="outline"></span>
+            Instruction
+        </ng-template>
+        <div class="tab-content">
+            <ng-content select="[tabContent='instruction']"></ng-content>
+        </div>
+    </nz-tab>
+
+    <nz-tab [nzTitle]="generalInfoTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[1]">
+        <ng-template #generalInfoTemplate>
+            <span nz-icon nzType="user" nzTheme="outline"></span>
+            General Information
+        </ng-template>
+        <div class="tab-content">
+            <ng-content select="[tabContent='generalInfo']"></ng-content>
+        </div>
+    </nz-tab>
+
+    <nz-tab [nzTitle]="contactTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[2]">
+        <ng-template #contactTemplate>
+            <span nz-icon nzType="contacts" nzTheme="outline"></span>
+            Contact Person
+        </ng-template>
+        <div class="tab-content">
+            <ng-content select="[tabContent='contactPerson']"></ng-content>
+        </div>
+    </nz-tab>
+
+    <nz-tab [nzTitle]="educationTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[3]">
+        <ng-template #educationTemplate>
+            <span nz-icon nzType="book" nzTheme="outline"></span>
+            Education Background
+        </ng-template>
+        <div class="tab-content">
+            <ng-content select="[tabContent='education']"></ng-content>
+        </div>
+    </nz-tab>
+
+    <nz-tab [nzTitle]="workTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[4]">
+        <ng-template #workTemplate>
+            <span nz-icon nzType="solution" nzTheme="outline"></span>
+            Work Experience
+        </ng-template>
+        <div class="tab-content">
+            <ng-content select="[tabContent='workExperience']"></ng-content>
+        </div>
+    </nz-tab>
+
+    <nz-tab [nzTitle]="academicTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[5]">
+        <ng-template #academicTemplate>
+            <span nz-icon nzType="read" nzTheme="outline"></span>
+            Academic Program Request
+        </ng-template>
+        <div class="tab-content">
+            <ng-content select="[tabContent='academicProgram']"></ng-content>
+        </div>
+    </nz-tab>
+
+    <nz-tab *ngIf="showFilesTab" [nzTitle]="agreementTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[6]">
+        <ng-template #agreementTemplate>
+            <span nz-icon [nzType]="isUserReviewer() ? 'check-circle' : 'file-text'" nzTheme="outline"></span>
+            {{ isUserReviewer() ? 'Review Decision' : 'Agreement' }}
+        </ng-template>
+        <div class="tab-content">
+            <ng-content select="[tabContent='files']"></ng-content>
+        </div>
+    </nz-tab>
+</nz-tabset>
+
+<div class="custom-buttons">
+    <button 
+        *ngIf="selectedTabIndex > 0" 
+        nz-button 
+        nzType="default" 
+        (click)="previousTab()" 
+        class="custom-button">
+        <span nz-icon nzType="left"></span>
+        Previous
+    </button>
+
+    <button 
+        *ngIf="showSave" 
+        nz-button 
+        nzType="primary" 
+        (click)="onSave()" 
+        [disabled]="saveDisabled"
+        class="custom-button save-button">
+        <span nz-icon nzType="save"></span>
+        Save
+    </button>
+
+    <button 
+        *ngIf="!isLastTabForCurrentUser() && selectedTabIndex >= 0" 
+        nz-button 
+        nzType="primary" 
+        (click)="nextTab()" 
+        [disabled]="nextDisabled"
+        class="custom-button">
+        Next
+        <span nz-icon nzType="right"></span>
+    </button>
+
+    <button 
+        *ngIf="showSubmit" 
+        nz-button 
+        nzType="primary" 
+        (click)="onSubmit()" 
+        [disabled]="submitDisabled"
+        class="custom-button submit-button">
+        <span nz-icon nzType="check"></span>
+        Submit
+    </button>
+</div> 

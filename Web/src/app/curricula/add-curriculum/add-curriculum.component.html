@@ -1,0 +1,226 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h3 class="title-text">{{ action }}</h3>
+        <p class="subtitle-text">Add or update curriculum information</p>
+      </div>
+      <div class="header-actions">
+        <button 
+          routerLink="../curriculum" 
+          nz-button 
+          nzType="default" 
+          class="back-btn"
+        >
+          <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
+          <span>Back to Curricula</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="form-card">
+    <div class="form-header">
+      <div class="form-icon">
+        <i nz-icon nzType="read" nzTheme="outline"></i>
+      </div>
+      <div class="form-title">
+        <h4>Curriculum Information</h4>
+        <p>Please fill in the curriculum details below</p>
+      </div>
+    </div>
+
+    <form
+      nz-form
+      nzLayout="vertical"
+      [formGroup]="academicProgramForm"
+      (ngSubmit)="submitForm()"
+      class="curriculum-form"
+    >
+      <div class="form-grid">
+        <!-- Row 1: Academic Programme & Curriculum Code -->
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Academic Programme</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-select
+                formControlName="acadamicProgrammeID"
+                nzShowSearch
+                nzPlaceHolder="Select program"
+                class="form-select"
+              >
+                <nz-option
+                  *ngFor="let item of academicPrograms"
+                  [nzValue]="item.id"
+                  [nzLabel]="item.acadamicProgrammeTitle"
+                ></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Curriculum Code</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <input
+                nz-input
+                formControlName="curriculumCode"
+                placeholder="Enter curriculum code"
+                class="form-input"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <!-- Row 2: Effective Date & Duration Of Study -->
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Effective Date</nz-form-label>
+            <nz-form-control>
+              <nz-date-picker
+                formControlName="effectiveDate"
+                class="form-date-picker"
+              ></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Duration Of Study</nz-form-label>
+            <nz-form-control>
+              <input
+                nz-input
+                formControlName="durationOfStudy"
+                placeholder="Enter duration of Study"
+                class="form-input"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <!-- Row 3: Minimum Cumulative GPA & Minimum Major GPA -->
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Minimum Cumulative GPA</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <input
+                nz-input
+                formControlName="minimumCumlativGPA"
+                type="number"
+                step="0.01"
+                min="0"
+                max="4"
+                placeholder="Enter minimum cumulative GPA"
+                class="form-input"
+              />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Minimum Major GPA</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <input
+                nz-input
+                formControlName="minimumMajorGPA"
+                type="number"
+                step="0.01"
+                min="0"
+                max="4"
+                placeholder="Enter minimum major GPA"
+                class="form-input"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <!-- Row 4: Min Total Credit Hours & Passing Grade -->
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Min Total Credit Hours</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <input
+                nz-input
+                formControlName="minTotalCreditHours"
+                type="number"
+                min="0"
+                placeholder="Enter minimum total credit hours"
+                class="form-input"
+              />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Passing Grade</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <input
+                nz-input
+                formControlName="passingGrade"
+                placeholder="Enter passing grade"
+                class="form-input"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <!-- Row 5: Status (if editing) & Remark -->
+        <div class="form-row">
+          <nz-form-item class="form-item" *ngIf="progId != 'null'">
+            <nz-form-label>Status</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-select
+                formControlName="status"
+                nzShowSearch
+                nzPlaceHolder="Select status"
+                class="form-select"
+              >
+                <nz-option
+                  *ngFor="let item of listOfCurriculumStatus"
+                  [nzValue]="item.Id"
+                  [nzLabel]="item.Description"
+                ></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="form-item">
+            <nz-form-label>Remark</nz-form-label>
+            <nz-form-control>
+              <nz-textarea-count [nzMaxCharacterCount]="250">
+                <textarea 
+                  rows="3" 
+                  formControlName="remark" 
+                  nz-input
+                  placeholder="Enter remark"
+                  class="form-textarea"
+                ></textarea>
+              </nz-textarea-count>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button 
+          nz-button 
+          nzType="default" 
+          class="cancel-btn"
+          type="button"
+          routerLink="../curriculum"
+        >
+          <i nz-icon nzType="close" nzTheme="outline"></i>
+          <span>Cancel</span>
+        </button>
+        <button 
+          nz-button 
+          nzType="primary" 
+          class="submit-btn"
+          type="submit"
+          [disabled]="!academicProgramForm.valid"
+        >
+          <i nz-icon nzType="save" nzTheme="outline"></i>
+          <span>{{ submit }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

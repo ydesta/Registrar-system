@@ -1,0 +1,26 @@
+::ng-deep .ant-table-tbody>tr>td {
+    border-bottom: 1px solid #f0f0f0;
+    border-top: 1px solid #f0f0f0;
+}
+
+::ng-deep .ant-table-tbody>tr:current {
+    background-color: red;
+}
+
+.main-color {
+    background-color: rgb(9, 62, 150);
+}
+
+.logo {
+    display: none;
+}
+
+@media print {
+    .paginate {
+        display: none;
+    }
+
+    .logo {
+        display: block;
+    }
+}

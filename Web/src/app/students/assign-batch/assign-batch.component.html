@@ -1,0 +1,126 @@
+<div>
+  
+<div>
+    <h3 class="h-tag">Approved Applicants</h3>
+</div>
+<div nz-row style="padding-bottom:5px;">
+  <div nz-col nzSpan="3">   
+      <button nz-button  [ngClass]="{'serch':!assignEnable}" disabled="{{assignEnable}}" (click)="showAssignModal()">Assign Batch</button>
+  </div>
+  <div nz-col nzSpan="2">
+    <div style="float:right; margin-right: 5px;">
+      <button nz-button class="export"> <em nz-icon nzType="file-excel" nzTheme="outline"></em> Export</button>
+    </div>
+  </div>
+  <div nz-col nzSpan="4">
+    <div style="width: 300px;">
+      <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+        <input type="text" nz-input placeholder="search..." />
+      </nz-input-group>
+      <ng-template #suffixIconButton>
+        <button nz-button class="serch" nzSearch><em style="color: white;" nz-icon nzType="search"></em></button>
+      </ng-template>
+    </div>
+  </div>
+  </div>
+
+    <div>
+        <nz-table #basicTable [nzData]="students!" nzBordered [nzScroll]="{ y: '350px' }">
+            <thead class="table-header-row">
+              <tr class="table-header-row">
+                <th> 
+                  <!-- <label nz-checkbox [(ngModel)]="checked">All</label> -->
+                </th>             
+                <th class="th-row">Name</th>
+                <th class="th-row">Gender</th>
+                <th class="th-row">Mobile</th>
+                <th class="th-row">Email</th>
+                <th class="th-row">Application Date</th>
+                <th class="th-row">Status</th>
+                <th class="th-row">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr tabindex="0" *ngFor="let data of basicTable.data; let i =index">
+                <td><label></label></td>
+                <td>{{data.firstName + ' ' + data.fatherName }}</td>
+                <td>{{data.gender}}</td>
+                <td>{{data.mobile}}</td>
+                <td>{{data.emailAddress}}</td>
+               
+                <td>
+                      
+                       <ng-container >
+                        <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomLeft"> <i class="more" nz-icon nzType="more" nzTheme="outline"></i></button>
+                        <nz-dropdown-menu #menu="nzDropdownMenu" >
+                          <ul nz-menu style="padding-right: 50px;">
+                          <li>
+                            <button nz-button nzType="default" class="detail">
+                                <i nz-icon nzType="eye" nzTheme="fill"></i>
+                               <span>Detail</span></button>
+                          </li>
+                    <li>
+                        <a style="border-style: none" routerLink="../students/add-student/{{data.id}}" nz-button nzType="default" class="edit">
+                            <i nz-icon nzType="edit" nzTheme="fill"></i>
+                           <span>Edit</span></a>
+                    </li>
+                      <li>
+                        <button nz-button nzDanger nzType="default" (click)="showDeleteConfirm(data.id)">
+                            <i nz-icon nzType="delete" nzTheme="fill"></i>
+                           <span>Delete</span></button>
+                      </li>
+                          </ul>
+                        </nz-dropdown-menu>
+                      </ng-container>
+                </td>
+              </tr>
+            </tbody>
+          </nz-table>
+    </div>
+</div>
+  <nz-modal
+  [(nzVisible)]="isAssignModalVisible"
+  nzTitle="Assign Batch to Applicant"
+  (nzOnCancel)="handleCancel()"
+  (nzOnOk)="submitAssignBatchForm()"
+  [nzOkLoading]="isAssignModalOkLoading"
+>
+<div *nzModalContent>
+ <div style="margin-bottom: 5px;">
+  <span>You have selected {{applicantIdList.length}} applicant(s)</span>
+ </div>
+  <form nz-form  [formGroup]="assignBatchForm"> 
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>Curriculum</nz-form-label>
+      <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
+        <nz-select nzShowSearch="true" nzAllowClear = "true" formControlName="curriculumCode" nzPlaceHolder="select curriculum" >
+            <nz-option *ngFor="let item of curricula" [nzValue]="item.curriculumCode" [nzLabel]="item.curriculumCode"></nz-option>
+          </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>Batch</nz-form-label>
+      <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
+        <nz-select nzShowSearch="true" nzAllowClear = "true" formControlName="batchCode" nzPlaceHolder="select batch" >
+            <nz-option *ngFor="let item of batches" [nzValue]="item.batchCode" [nzLabel]="item.batchCode"></nz-option>
+          </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+   
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>Entry</nz-form-label>
+      <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
+        <nz-select formControlName="entryCode" nzShowSearch="true" nzAllowClear = "true" nzPlaceHolder="select entry" >
+            <nz-option *ngFor="let item of entries" [nzValue]="item.entryCode" [nzLabel]="item.entryTerm"></nz-option>
+          </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+      <nz-form-item>
+          <nz-form-label [nzSpan]="7">Remark</nz-form-label>
+          <nz-form-control [nzSpan]="10">
+            <input nz-input formControlName="remark" placeholder="enter remark" />
+          </nz-form-control>
+        </nz-form-item>
+    </form>
+</div>
+</nz-modal>

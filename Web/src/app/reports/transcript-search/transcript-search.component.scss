@@ -1,0 +1,459 @@
+.transcript-search-container {
+  padding: 20px;
+  background-color: #f0f2f5;
+  min-height: 100vh;
+
+  .search-section {
+    max-width: 600px;
+    margin: 0 auto;
+    
+    .search-content {
+      text-align: center;
+      
+      h2 {
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+      
+      p {
+        margin-bottom: 30px;
+        color: #666;
+      }
+    }
+  }
+
+  .transcript-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    
+    .transcript-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      
+      h2 {
+        margin: 0;
+        font-weight: 600;
+      }
+      
+      .header-actions {
+        display: flex;
+        gap: 15px;
+      }
+    }
+
+    .transcript-content {
+      .transcript-document {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        background: white;
+
+        .watermark {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-45deg);
+          font-size: 120px;
+          font-weight: bold;
+          color: rgba(0, 0, 0, 0.08);
+          z-index: 1;
+          pointer-events: none;
+          opacity: 0.6;
+        }
+
+        .header-section {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 40px;
+          position: relative;
+          z-index: 2;
+          padding: 30px 30px 0 30px;
+
+          .university-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+
+            .university-logo {
+              width: 70px;
+              height: 70px;
+              background: linear-gradient(135deg, #d9d9d9 0%, #f0f0f0 100%);
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              
+              i {
+                color: #666;
+                font-size: 28px;
+              }
+            }
+
+            .university-details {
+              .university-name {
+                font-size: 32px;
+                font-weight: bold;
+                color: #262626;
+                margin: 0 0 8px 0;
+                letter-spacing: -0.5px;
+              }
+
+              .university-subtitle {
+                font-size: 18px;
+                color: #262626;
+                margin: 0 0 18px 0;
+                font-weight: 500;
+                line-height: 1.3;
+              }
+
+              .contact-info {
+                p {
+                  margin: 6px 0;
+                  color: #666;
+                  font-size: 13px;
+                  line-height: 1.4;
+                }
+              }
+            }
+          }
+
+          .student-program-info {
+            display: flex;
+            gap: 40px;
+
+            .program-details,
+            .student-details {
+              .info-row {
+                display: flex;
+                margin-bottom: 10px;
+                font-size: 13px;
+                line-height: 1.4;
+
+                .label {
+                  font-weight: 600;
+                  color: #262626;
+                  min-width: 110px;
+                }
+
+                .value {
+                  color: #262626;
+                  margin-left: 12px;
+                  font-weight: 500;
+                }
+              }
+            }
+          }
+        }
+
+        .academic-records {
+          position: relative;
+          z-index: 2;
+          padding: 0 30px;
+
+          .term-section {
+            margin-bottom: 35px;
+
+            .term-card {
+              border-radius: 8px;
+              box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+              overflow: hidden;
+
+              .term-header {
+                background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+                color: white;
+                padding: 15px 25px;
+                margin: -24px -24px 25px -24px;
+                border-radius: 8px 8px 0 0;
+                box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+
+                h3 {
+                  margin: 0;
+                  font-size: 18px;
+                  font-weight: 600;
+                  color: white;
+                  letter-spacing: -0.3px;
+                }
+              }
+
+              // Custom table styling for ng-zorro
+              ::ng-deep .ant-table {
+                border-radius: 6px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+                .ant-table-thead > tr > th {
+                  background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
+                  border: 1px solid #d9d9d9;
+                  font-weight: 600;
+                  color: #262626;
+                  text-align: center;
+                  padding: 14px 10px;
+                  font-size: 13px;
+                  letter-spacing: -0.2px;
+                }
+
+                .ant-table-tbody > tr > td {
+                  border: 1px solid #d9d9d9;
+                  padding: 12px 10px;
+                  font-size: 13px;
+                  color: #262626;
+                  line-height: 1.4;
+
+                  &.center-cell {
+                    text-align: center;
+                    font-weight: 500;
+                  }
+                }
+
+                .ant-table-tbody > tr:nth-child(even) {
+                  background-color: #fafafa;
+                }
+
+                .ant-table-tbody > tr:hover > td {
+                  background-color: #e6f7ff;
+                  transition: background-color 0.2s ease;
+                }
+              }
+            }
+          }
+
+          // Summary table styling
+          .term-summary {
+            margin-top: 15px;
+            
+            .summary-table {
+              width: 100%;
+              border-collapse: collapse;
+              background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
+              border: 1px solid #d9d9d9;
+              border-radius: 6px;
+              overflow: hidden;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+              
+              tr {
+                border-bottom: 1px solid #e8e8e8;
+                transition: background-color 0.2s ease;
+                
+                &:hover {
+                  background-color: #f0f0f0;
+                }
+                
+                &:last-child {
+                  border-bottom: none;
+                }
+                
+                td {
+                  padding: 12px 16px;
+                  font-size: 13px;
+                  line-height: 1.4;
+                  
+                  &.summary-label {
+                    width: 60%;
+                    text-align: right;
+                    color: #262626;
+                    font-weight: 600;
+                    border-right: 1px solid #d9d9d9;
+                  }
+                  
+                  &.summary-value {
+                    width: 40%;
+                    text-align: center;
+                    color: #1890ff;
+                    font-weight: bold;
+                    font-size: 15px;
+                    letter-spacing: -0.2px;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        .footer-section {
+          position: relative;
+          z-index: 2;
+          margin-top: 50px;
+          padding: 0 30px 30px 30px;
+
+          .grade-scale-card {
+            margin-bottom: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            
+            p {
+              margin: 8px 0;
+              font-size: 13px;
+              color: #262626;
+              line-height: 1.5;
+              
+              strong {
+                color: #262626;
+                font-weight: 600;
+              }
+            }
+          }
+
+          .signatures-card {
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+            .signatures-section {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-end;
+              margin-bottom: 25px;
+              padding: 20px 0;
+
+              .signature-left,
+              .signature-right {
+                flex: 1;
+                text-align: center;
+                max-width: 200px;
+
+                .signature-line {
+                  width: 160px;
+                  height: 2px;
+                  background: linear-gradient(90deg, #d9d9d9 0%, #bfbfbf 100%);
+                  margin: 0 auto 12px;
+                  border-radius: 1px;
+                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                }
+
+                .signature-name {
+                  font-weight: 600;
+                  color: #262626;
+                  margin-bottom: 6px;
+                  font-size: 15px;
+                  letter-spacing: -0.2px;
+                }
+
+                .signature-title {
+                  color: #8c8c8c;
+                  font-size: 13px;
+                  margin: 0;
+                  font-weight: 500;
+                }
+              }
+
+              .university-seal {
+                flex: 1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                .seal-circle {
+                  width: 130px;
+                  height: 130px;
+                  border: 3px solid #1890ff;
+                  border-radius: 50%;
+                  background: linear-gradient(135deg, #f0f8ff 0%, #e6f7ff 100%);
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  position: relative;
+                  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.2);
+
+                  &::before {
+                    content: '';
+                    position: absolute;
+                    top: -2px;
+                    left: -2px;
+                    right: -2px;
+                    bottom: -2px;
+                    border: 1px solid #1890ff;
+                    border-radius: 50%;
+                  }
+
+                  .seal-content {
+                    text-align: center;
+                    color: #1890ff;
+                    font-weight: bold;
+
+                    .seal-logo {
+                      font-size: 18px;
+                      font-weight: bold;
+                      margin-bottom: 6px;
+                      letter-spacing: -0.3px;
+                    }
+
+                    .seal-text {
+                      font-size: 9px;
+                      line-height: 1.3;
+                      margin-bottom: 10px;
+                    }
+
+                    .seal-contact {
+                      font-size: 7px;
+                      line-height: 1.3;
+
+                      div {
+                        margin-bottom: 3px;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .generation-date {
+        text-align: center;
+        color: #8c8c8c;
+        font-size: 14px;
+        margin-top: 25px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .transcript-search-container {
+    .transcript-section {
+      .transcript-content {
+        .transcript-document {
+          .header-section {
+            flex-direction: column;
+            gap: 20px;
+
+            .university-info {
+              flex-direction: column;
+              text-align: center;
+            }
+
+            .student-program-info {
+              flex-direction: column;
+              gap: 20px;
+            }
+          }
+
+          .footer-section {
+            .signatures-card {
+              .signatures-section {
+                flex-direction: column;
+                gap: 20px;
+                align-items: center;
+
+                .signature-left,
+                .signature-right {
+                  max-width: none;
+                }
+
+                .university-seal {
+                  order: -1;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+} 

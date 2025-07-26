@@ -1,0 +1,71 @@
+<div class="hero-section">
+  <div class="side-content">
+    <h2 class="side-title">Shaping the Future of Technology Education</h2>
+    <p class="side-description">Join HiLCoE School of Computer Science & Technology</p>
+    <p class="side-text">At HiLCoE, we are dedicated to nurturing the next generation of technology leaders. Our comprehensive programs, experienced faculty, and state-of-the-art facilities provide students with the perfect environment to excel in computer science and technology education.</p>
+    <div class="side-buttons">
+      <button class="side-btn primary">View Programs</button>
+      <button class="side-btn secondary">Apply Now</button>
+    </div>
+    <p class="side-tagline">Empowering minds, advancing technology, shaping tomorrow</p>
+    <div class="social-icons">
+      <a href="#" class="social-icon" nz-tooltip nzTooltipTitle="Follow us on Facebook" aria-label="Facebook">
+        <i nz-icon nzType="facebook" nzTheme="fill"></i>
+      </a>
+      <a href="#" class="social-icon" nz-tooltip nzTooltipTitle="Follow us on Twitter" aria-label="Twitter">
+        <i nz-icon nzType="twitter-circle" nzTheme="fill"></i>
+      </a>
+      <a href="#" class="social-icon" nz-tooltip nzTooltipTitle="Connect with us on LinkedIn" aria-label="LinkedIn">
+        <i nz-icon nzType="linkedin" nzTheme="fill"></i>
+      </a>
+      <a href="#" class="social-icon" nz-tooltip nzTooltipTitle="Follow us on Instagram" aria-label="Instagram">
+        <i nz-icon nzType="instagram" nzTheme="fill"></i>
+      </a>
+      <a href="#" class="social-icon" nz-tooltip nzTooltipTitle="Subscribe to our YouTube" aria-label="YouTube">
+        <i nz-icon nzType="youtube" nzTheme="fill"></i>
+      </a>
+      <a href="#" class="social-icon" nz-tooltip nzTooltipTitle="Join our Telegram channel" aria-label="Telegram">
+        <i nz-icon nzType="message" nzTheme="fill"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-slider" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+    <div class="slider-container">
+      <div class="slides" [style.transform]="'translateX(-' + (currentIndex * 100) + '%)'">
+        <div class="slide" *ngFor="let slide of slides">
+          <img [src]="slide.imageUrl" [alt]="slide.title" loading="lazy">
+          <div class="slide-overlay"></div>
+          <div class="slide-content">
+            <h1 class="slide-title">{{ slide.title }}</h1>
+            <p class="slide-description">{{ slide.description }}</p>
+            <!-- <div class="slide-buttons">
+              <button class="primary-btn" *ngIf="slide.primaryButton" (click)="onSlideClick('primary', currentIndex)">
+                {{ slide.primaryButton }}
+              </button>
+              <button class="secondary-btn" *ngIf="slide.secondaryButton" (click)="onSlideClick('secondary', currentIndex)">
+                {{ slide.secondaryButton }}
+              </button>
+            </div> -->
+          </div>
+        </div>
+      </div>
+
+      <!-- <button class="nav-button prev" (click)="prevSlide()" aria-label="Previous slide">
+        <i nz-icon nzType="left" nzTheme="outline"></i>
+      </button>
+      <button class="nav-button next" (click)="nextSlide()" aria-label="Next slide">
+        <i nz-icon nzType="right" nzTheme="outline"></i>
+      </button> -->
+
+      <div class="slider-dots">
+        <button class="dot" 
+                *ngFor="let slide of slides; let i = index" 
+                [class.active]="i === currentIndex"
+                (click)="setCurrentSlide(i)"
+                [attr.aria-label]="'Go to slide ' + (i + 1)">
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

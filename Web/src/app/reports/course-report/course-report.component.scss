@@ -1,0 +1,59 @@
+// .course {
+//   display: flex;
+//   flex-direction: column;
+//   padding-left: 5px;
+//   padding-right: 5px;
+// }
+
+// .activ-status {
+//   color: green;
+//   padding-left: 10px;
+// }
+
+// .inactiv-status {
+//   color: red;
+//   padding-left: 10px;
+// }
+
+
+// .fixed_header tbody {
+//   display: block;
+//   overflow: auto;
+//   height: 150px;
+//   width: 100%;
+
+// }
+
+.fixed_header thead tr {
+  display: block;
+}
+
+
+::ng-deep .ant-table-tbody>tr>td {
+  border-bottom: 1px solid #f0f0f0;
+  border-top: 1px solid #f0f0f0;
+}
+
+::ng-deep .ant-table-tbody>tr:current {
+  background-color: red;
+}
+
+.main-color {
+  background-color: rgb(9, 62, 150);
+}
+
+@media print {
+  .select-div {
+    display: none;
+  }
+}
+
+@media print {
+  .paginate {
+    display: none;
+  }
+
+  .logo {
+    display: block;
+  }
+}

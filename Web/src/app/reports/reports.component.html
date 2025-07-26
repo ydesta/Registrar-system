@@ -1,0 +1,94 @@
+<div class="student">
+  <div id="print-section">
+    <h1 style="text-align: center">Student List Report</h1>
+    <div>
+      <div></div>
+      <div class="select-div" style="float: right">
+        <form
+          [formGroup]="studentQueryForm"
+          (ngSubmit)="studentQueryFormSubmit()"
+        >
+          <nz-select
+            formControlName="academicProgrammeCode"
+            nzAllowClear
+            nzPlaceHolder="Select Academic Programme"
+            nzShowSearch
+          >
+            <nz-option
+              *ngFor="let ac of academicPrograms"
+              [nzValue]="ac.acadamicProgrammeCode"
+              [nzLabel]="ac.acadamicProgrammeTitle"
+            ></nz-option>
+          </nz-select>
+          <nz-select
+            formControlName="batchCode"
+            nzAllowClear
+            nzPlaceHolder="Select Batch"
+            nzShowSearch
+          >
+            <nz-option
+              *ngFor="let bc of batches"
+              [nzValue]="bc.batchCode"
+              [nzLabel]="bc.batchCode"
+            ></nz-option>
+          </nz-select>
+
+          <button class="main-color" nz-button nzType="primary">Show</button>
+        </form>
+      </div>
+    </div>
+    <div>
+      <img
+        src="../../assets/images/logo.png"
+        alt=""
+        srcset=""
+        style="padding-bottom: 5px"
+      />
+
+      <nz-table
+        nzBordered
+        #basicTable
+        [nzData]="students"
+        [nzScroll]="{ y: '300px' }"
+      >
+        <thead>
+          <th class="th-row">Student ID</th>
+          <th class="th-row">Full Name</th>
+          <th class="th-row">Gender</th>
+          <th class="th-row">Mobile</th>
+          <th class="th-row">Email</th>
+          <th class="th-row">Acadamic Program</th>
+          <th class="th-row">Batch</th>
+          <th class="th-row">Curriculum</th>
+          <th class="th-row">Entry Year</th>
+        </thead>
+        <tbody>
+          <tr tabindex="0" *ngFor="let student of students; let i = index">
+            <td>{{ student.studentId }}</td>
+            <td>{{ student.firstName + " " + student.fatherName }}</td>
+            <td>{{ student.gender }}</td>
+            <td>{{ student.mobile }}</td>
+            <td>{{ student.emailAddress }}</td>
+            <td>{{ student.acadamicProgrammeCode }}</td>
+            <td>{{ student.batchCode }}</td>
+            <td>{{ student.curriculumCode }}</td>
+            <td>{{ student.entryCode }}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+  <div>
+    <button
+      class="main-color"
+      nz-button
+      nzType="primary"
+      printTitle="."
+      [useExistingCss]="true"
+      printSectionId="print-section"
+      ngxPrint
+    >
+      Print Student List
+    </button>
+  </div>
+</div>

@@ -1,0 +1,185 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">Course Approval</h2>
+        <p class="subtitle-text">Review and approve course registrations for students</p>
+      </div>
+      <div class="header-actions">
+        <div class="course-selection">
+          <form [formGroup]="formAddedCourses" class="course-form">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired>Select Course</nz-form-label>
+              <nz-form-control [nzSpan]="24">
+                <nz-select 
+                  formControlName="courseId" 
+                  nzPlaceHolder="Choose a course to review registrations" 
+                  class="course-select" 
+                  nzShowSearch
+                  [nzDropdownMatchSelectWidth]="true" 
+                  [nzDropdownStyle]="{ minWidth: '350px' }">
+                  <nz-option 
+                    *ngFor="let course of listOfAddedCourses" 
+                    [nzValue]="course.id" 
+                    [nzLabel]="course.courseTitle">
+                  </nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </form>
+        </div>
+        <div class="student-count" *ngIf="listOfStudents.length > 0">
+          <span class="count-badge">{{ listOfStudents.length }} Students</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card Container -->
+  <div class="table-card" *ngIf="listOfStudents.length > 0">
+    <div class="table-header">
+      <div class="table-actions">
+        <nz-button-group>
+          <button 
+            nz-button 
+            nzType="default" 
+            (click)="onAllChecked(true)"
+            [disabled]="listOfStudents.length === 0"
+            class="action-btn">
+            <span nz-icon nzType="check" nzTheme="outline"></span>
+            Select All
+          </button>
+          <button 
+            nz-button 
+            nzType="default" 
+            (click)="onAllChecked(false)"
+            [disabled]="listOfStudents.length === 0"
+            class="action-btn">
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Clear All
+          </button>
+        </nz-button-group>
+      </div>
+    </div>
+
+    <nz-table 
+      #studentTable 
+      [nzData]="listOfStudents" 
+      [nzLoading]="loading" 
+      [nzPageSize]="10" 
+      [nzShowSizeChanger]="true"
+      [nzShowTotal]="totalTemplate" 
+      (nzCurrentPageDataChange)="onCurrentPageDataChange($event)" 
+      nzBordered
+      class="approval-table">
+      <ng-template #totalTemplate let-range="range" let-total>
+        <span style="color: #6b7280; font-weight: 500;">
+          {{ range[0] }}-{{ range[1] }} of {{ total }} students
+        </span>
+      </ng-template>
+      <thead>
+        <tr>
+          <th style="width: 60px; text-align: center;">S/N</th>
+          <th style="width: 60px; text-align: center;">
+            <label 
+              nz-checkbox 
+              [nzChecked]="checked" 
+              [nzIndeterminate]="indeterminate"
+              (nzCheckedChange)="onAllChecked($event)">
+            </label>
+          </th>
+          <th style="min-width: 200px;">Full Name</th>
+          <th style="min-width: 120px; text-align: center;">Batch Code</th>
+          <th style="min-width: 120px; text-align: center;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let student of studentTable.data; let i = index">
+          <td style="text-align: center;">
+            <span class="sn-badge">{{ i + 1 }}</span>
+          </td>
+          <td style="text-align: center;">
+            <label 
+              nz-checkbox 
+              [nzChecked]="setOfCheckedId.has(student.courseTakenId)"
+              (nzCheckedChange)="onItemChecked(student.courseTakenId, $event)" 
+              [nzDisabled]="!student.courseTakenId">
+            </label>
+          </td>
+          <td>
+            <div class="student-info">
+              <span class="student-name">{{ student.fullName }}</span>
+            </div>
+          </td>
+          <td style="text-align: center;">
+            <nz-tag nzColor="blue" class="batch-tag">{{ student.batchCode }}</nz-tag>
+          </td>
+          <td style="text-align: center;">
+            <nz-tag 
+              [nzColor]="setOfCheckedId.has(student.courseTakenId) ? 'success' : 'error'"
+              class="status-tag">
+              {{ setOfCheckedId.has(student.courseTakenId) ? 'Approved' : 'Rejected' }}
+            </nz-tag>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+
+  <!-- Approval Summary Card -->
+  <div class="summary-card" *ngIf="listOfStudents.length > 0">
+    <div class="summary-header">
+      <h3 class="summary-title">Approval Summary</h3>
+    </div>
+    <div class="summary-content">
+      <div class="summary-stats">
+        <div class="stat-item approved">
+          <div class="stat-icon">
+            <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">Approved Students</div>
+            <div class="stat-value">{{ approvedCount }}</div>
+          </div>
+        </div>
+        <div class="stat-item rejected">
+          <div class="stat-icon">
+            <span nz-icon nzType="close-circle" nzTheme="outline"></span>
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">Rejected Students</div>
+            <div class="stat-value">{{ rejectedCount }}</div>
+          </div>
+        </div>
+        <div class="stat-item total">
+          <div class="stat-icon">
+            <span nz-icon nzType="team" nzTheme="outline"></span>
+          </div>
+          <div class="stat-info">
+            <div class="stat-label">Total Students</div>
+            <div class="stat-value">{{ listOfStudents.length }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="summary-actions">
+        <button 
+          nz-button 
+          nzType="primary" 
+          [disabled]="listOfStudents.length === 0" 
+          (click)="submitApproval()"
+          [nzLoading]="loading" 
+          class="submit-btn">
+          <span nz-icon nzType="save" nzTheme="outline"></span>
+          Submit Approval
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="no-data" *ngIf="listOfStudents.length === 0 && !loading">
+    <span nz-icon nzType="inbox" nzTheme="outline"></span>
+    <p>No students found for the selected course</p>
+  </div>
+</div>

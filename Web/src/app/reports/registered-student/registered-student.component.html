@@ -1,0 +1,105 @@
+<form [formGroup]="gradeQueryForm" (ngSubmit)="acadamicTermFormSubmit()">
+  <div nz-row>
+    <div nz-col nzSpan="4">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="14" nzRequired>Acadamic Term</nz-form-label>
+        <nz-form-control [nzSpan]="22">
+          <nz-select
+            formControlName="termCode"
+            nzAllowClear
+            nzPlaceHolder="Select Academic Term"
+            nzShowSearch
+            nzShowSearch
+          >
+            <nz-option
+              *ngFor="let ac of academicTerms"
+              [nzValue]="ac.academicTermCode"
+              [nzLabel]="ac.academicTermCode"
+            ></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col nzSpan="6">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzRequired>Course</nz-form-label>
+        <nz-form-control [nzSpan]="22">
+          <nz-select
+            formControlName="courseCode"
+            nzPlaceHolder="select course"
+            nzShowSearch
+          >
+            <nz-option
+              *ngFor="let item of courses"
+              [nzValue]="item.courseCode"
+              [nzLabel]="item.courseTitle"
+            ></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col nzSpan="6">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="4" nzRequired>Status</nz-form-label>
+        <nz-form-control [nzSpan]="22">
+          <nz-radio-group formControlName="radio">
+            <label nz-radio *ngFor="let val of radioValues" [nzValue]="val">{{
+              val
+            }}</label>
+          </nz-radio-group>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col nzSpan="2" style="margin-top: 30px">
+      <button class="serch main-color" nz-button nzType="primary">Show</button>
+    </div>
+  </div>
+</form>
+
+<div *ngIf="registeredStudents">
+  <div id="print-section">
+    <img src="../../assets/images/logo.png" class="logo" />
+    <h1 style="text-align: center">Registered Student List</h1>
+    <p>
+      Course: <b>{{ this.gradeQueryForm.value["courseCode"] }}</b> &nbsp; &nbsp;
+      Acadamic Term: <b>{{ this.gradeQueryForm.value["termCode"] }}</b>
+    </p>
+    <nz-table
+      nzBordered
+      #basicTable
+      [nzData]="registeredStudents"
+      [nzScroll]="{ y: '500px' }"
+      [nzShowPagination]="false"
+    >
+      <thead>
+        <th class="th-row">Student ID</th>
+        <th class="th-row">Student Name</th>
+        <th class="th-row">Batch</th>
+      </thead>
+      <tbody>
+        <tr
+          tabindex="0"
+          *ngFor="let student of registeredStudents; let i = index"
+        >
+          <td>{{ student.studentID }}</td>
+          <td>{{ student.student.firstName }}</td>
+          <td>{{ student.student.batchCode }}</td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+
+  <div>
+    <button
+      class="main-color"
+      nz-button
+      nzType="primary"
+      printTitle="."
+      [useExistingCss]="true"
+      printSectionId="print-section"
+      ngxPrint
+    >
+      Print
+    </button>
+  </div>
+</div>

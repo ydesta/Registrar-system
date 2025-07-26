@@ -1,0 +1,180 @@
+{
+    "id": "1",
+    "fullName": "John Doe",
+    "studentCode": "ABC123",
+    "entryYear": "2021",
+    "birthDate": "1990-01-01",
+    "gender": "Male",
+    "academicProgram": "Computer Science",
+    "curriculumCode": "CS101",
+    "batch": "2021",   
+    "studentAcademicYears": [
+      {
+        "academicYear": 2021,
+        "studentAcademicTerms": [
+          {
+            "AcademicTerm": 1,
+            "studentCoursesTaken": [
+              {
+                "courseId": "CSC101",
+                "courseName": "Introduction to Programming",
+                "grade": "A",
+                "creditHours": 3,
+                "points": 4.0
+              },
+              {
+                "courseId": "MAT101",
+                "courseName": "Calculus I",
+                "grade": "B",
+                "creditHours": 4,
+                "points": 3.0
+              }
+            ]
+          },
+          {
+            "AcademicTerm": 2,
+            "studentCoursesTaken": [
+              {
+                "courseId": "CSC102",
+                "courseName": "Data Structures",
+                "grade": "A-",
+                "creditHours": 3,
+                "points": 3.7
+              },
+              {
+                "courseId": "PHY101",
+                "courseName": "Physics I",
+                "grade": "B+",
+                "creditHours": 4,
+                "points": 3.3
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "academicYear": 2020,
+        "studentAcademicTerms": [
+          {
+            "AcademicTerm": 1,
+            "studentCoursesTaken": [
+              {
+                "courseId": "CSC101",
+                "courseName": "Introduction to Programming",
+                "grade": "A",
+                "creditHours": 3,
+                "points": 4.0
+              },
+              {
+                "courseId": "MAT101",
+                "courseName": "Calculus I",
+                "grade": "B",
+                "creditHours": 4,
+                "points": 3.0
+              }
+            ]
+          },
+          {
+            "AcademicTerm": 2,
+            "studentCoursesTaken": [
+              {
+                "courseId": "CSC102",
+                "courseName": "Data Structures",
+                "grade": "A-",
+                "creditHours": 3,
+                "points": 3.7
+              },
+              {
+                "courseId": "PHY101",
+                "courseName": "Physics I",
+                "grade": "B+",
+                "creditHours": 4,
+                "points": 3.3
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "academicYear": 2022,
+        "studentAcademicTerms": [
+          {
+            "AcademicTerm": 1,
+            "studentCoursesTaken": [
+              {
+                "courseId": "CSC101",
+                "courseName": "Introduction to Programming",
+                "grade": "A",
+                "creditHours": 3,
+                "points": 4.0
+              },
+              {
+                "courseId": "MAT101",
+                "courseName": "Calculus I",
+                "grade": "B",
+                "creditHours": 4,
+                "points": 3.0
+              }
+            ]
+          },
+          {
+            "AcademicTerm": 2,
+            "studentCoursesTaken": [
+              {
+                "courseId": "CSC102",
+                "courseName": "Data Structures",
+                "grade": "A-",
+                "creditHours": 3,
+                "points": 3.7
+              },
+              {
+                "courseId": "PHY101",
+                "courseName": "Physics I",
+                "grade": "B+",
+                "creditHours": 4,
+                "points": 3.3
+              }
+            ]
+          },{
+            "AcademicTerm": 3,
+            "studentCoursesTaken": [
+              {
+                "courseId": "CSC102",
+                "courseName": "Data Structures",
+                "grade": "A-",
+                "creditHours": 3,
+                "points": 3.7
+              },
+              {
+                "courseId": "PHY101",
+                "courseName": "Physics I",
+                "grade": "B+",
+                "creditHours": 4,
+                "points": 3.3
+              }
+            ]
+          },
+          {
+            "AcademicTerm": 4,
+            "studentCoursesTaken": [
+              {
+                "courseId": "CSC102",
+                "courseName": "Data Structures",
+                "grade": "A-",
+                "creditHours": 3,
+                "points": 3.7
+              },
+              {
+                "courseId": "PHY101",
+                "courseName": "Physics I",
+                "grade": "B+",
+                "creditHours": 4,
+                "points": 3.3
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  

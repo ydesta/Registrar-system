@@ -1,0 +1,282 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <button nz-button nzType="default" class="back-btn" (click)="goToCurriculum()">
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Course Offerings
+    </button>
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">{{ action }}</h2>
+        <p class="subtitle-text">Create and manage term course offerings for academic programs</p>
+        <div class="term-info">
+          <span nz-icon nzType="calendar" nzTheme="outline"></span>
+          <span class="term-duration">Term Duration: {{startDate | date: 'dd-MMM-yy' }} - {{endDate | date:
+            'dd-MMM-yy'}}</span>
+          <span class="term-name">{{nextTerm}} {{nextTermYear}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Container -->
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="book" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>Course Offering Information</h3>
+          <p>Configure the term course offering details and select courses</p>
+        </div>
+      </div>
+
+      <form nz-form [formGroup]="termCourseOfferingForm" class="course-offering-form">
+        <div class="form-sections">
+          <!-- Basic Information Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+                Basic Information
+              </h4>
+              <p class="section-description">Select batch and configure offering details</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Batch</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select a batch">
+                    <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch" [nzShowSearch]="true"
+                      [nzAllowClear]="true" [nzShowArrow]="true" [nzDropdownMatchSelectWidth]="false"
+                      class="professional-select">
+                      <nz-option *ngFor="let item of batchs" [nzValue]="item.batchCode"
+                        [nzLabel]="item.batchCode"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Batch Entry</nz-form-label>
+                  <nz-form-control>
+                    <input nz-input formControlName="entryCode" readonly class="form-input readonly"
+                      placeholder="Auto-populated" />
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Offer Year</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select an offer year">
+                    <nz-select formControlName="Year" nzPlaceHolder="Select Entry Year" [nzShowSearch]="true"
+                      [nzShowArrow]="true" [nzDropdownMatchSelectWidth]="false" class="professional-select">
+                      <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item.toString()"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Batch Term</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select an academic term">
+                    <nz-select formControlName="AcademicTermSeason" nzPlaceHolder="Select Academic Term Season"
+                      [nzShowSearch]="true" [nzDisabled]="true" [nzShowArrow]="true"
+                      [nzDropdownMatchSelectWidth]="false" class="professional-select">
+                      <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
+                        [nzLabel]="item.Description"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label>Curriculum</nz-form-label>
+                  <nz-form-control>
+                    <input nz-input formControlName="curriculumCode" readonly class="form-input readonly"
+                      placeholder="Auto-populated" />
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label>Remark</nz-form-label>
+                  <nz-form-control>
+                    <nz-textarea-count [nzMaxCharacterCount]="250">
+                      <textarea rows="4" formControlName="remark" nz-input class="form-textarea"
+                        placeholder="Enter remarks (optional)"></textarea>
+                    </nz-textarea-count>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Course Selection Section -->
+    <div class="course-selection-container">
+      <div class="selection-header">
+        <h3 class="selection-title">
+          <span nz-icon nzType="check-square" nzTheme="outline"></span>
+          Select Term Course Offering
+        </h3>
+        <p class="selection-description">Choose courses to include in this term offering</p>
+      </div>
+
+      <div class="course-tabs">
+        <!-- Curriculum Course Breakdown Tab -->
+        <div class="course-section">
+          <div class="section-card">
+            <div class="card-header">
+              <div class="header-content">
+                <h4 class="card-title">
+                  <span nz-icon nzType="book" nzTheme="outline"></span>
+                  Curriculum Course Breakdown
+                </h4>
+                <p class="card-description">Select courses from the curriculum breakdown</p>
+              </div>
+              <div class="header-stats">
+                <div class="stat-item">
+                  <span nz-icon nzType="book" nzTheme="outline"></span>
+                  <span class="stat-label">Total Courses:</span>
+                  <span class="stat-value">{{listOfCourseBreakDown?.length || 0}}</span>
+                </div>
+                <div class="stat-item">
+                  <span nz-icon nzType="check-square" nzTheme="outline"></span>
+                  <span class="stat-label">Selected Credits:</span>
+                  <span class="stat-value">{{getSelectedCreditHours()}}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="search-container">
+              <nz-input-group nzSearch class="search-input">
+                <input nz-input placeholder="Search courses..." [(ngModel)]="searchTextB"
+                  (ngModelChange)="onSearchBreak()" class="search-field">
+                <span nz-icon nzType="search" nzTheme="outline"></span>
+              </nz-input-group>
+            </div>
+
+            <div class="table-container">
+              <nz-table nzBordered #basicTable [nzData]="listOfCourseBreakDown || []" [nzShowPagination]="true"
+                nzShowPagination nzShowSizeChanger (nzCurrentPageDataChange)="onCurrentPageDataChange($event)"
+                class="course-table">
+                <thead>
+                  <tr>
+                    <th class="checkbox-column" [nzChecked]="checked" [nzIndeterminate]="indeterminate"
+                      (nzCheckedChange)="onAllChecked($event)">
+                    </th>
+                    <th class="course-code-column">Course Code</th>
+                    <th class="course-title-column">Course Title</th>
+                    <th class="credit-hours-column">Credit Hours</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let data of basicTable.data; let i = index" class="course-row">
+                    <td class="checkbox-cell">
+                      <label nz-checkbox [nzChecked]="setOfCheckedId.has(data.courseId)"
+                        (nzCheckedChange)="onItemChecked(data.courseId, $event)" class="course-checkbox">
+                      </label>
+                    </td>
+                    <td class="course-code">{{ data.courseCode }}</td>
+                    <td class="course-title">{{ data.courseTitle }}</td>
+                    <td class="credit-hours">{{ data.creditHours }}</td>
+                  </tr>
+                </tbody>
+              </nz-table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Courses Tab -->
+        <div class="course-section">
+          <div class="section-card">
+            <div class="card-header">
+              <div class="header-content">
+                <h4 class="card-title">
+                  <span nz-icon nzType="plus-circle" nzTheme="outline"></span>
+                  Additional Courses (Not in Curriculum)
+                </h4>
+                <p class="card-description">Select additional courses not part of the curriculum</p>
+              </div>
+              <div class="header-stats">
+                <div class="stat-item">
+                  <span nz-icon nzType="book" nzTheme="outline"></span>
+                  <span class="stat-label">Total Courses:</span>
+                  <span class="stat-value">{{courses?.length || 0}}</span>
+                </div>
+                <div class="stat-item">
+                  <span nz-icon nzType="check-square" nzTheme="outline"></span>
+                  <span class="stat-label">Selected Credits:</span>
+                  <span class="stat-value">{{getSelectedAdditionalCreditHours()}}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="search-container">
+              <nz-input-group nzSearch class="search-input">
+                <input nz-input placeholder="Search courses..." [(ngModel)]="searchText" (ngModelChange)="onSearch()"
+                  class="search-field">
+                <span nz-icon nzType="search" nzTheme="outline"></span>
+              </nz-input-group>
+            </div>
+
+            <div class="table-container">
+              <nz-table nzBordered #basicTableA [nzData]="courses || []" [nzShowPagination]="true" nzShowPagination
+                nzShowSizeChanger (nzCurrentPageDataChange)="onCurrentPageDataChangeA($event)" class="course-table">
+                <thead>
+                  <tr>
+                    <th class="checkbox-column" [nzChecked]="checkedA" [nzIndeterminate]="indeterminateA"
+                      (nzCheckedChange)="onAllCheckedA($event)">
+                    </th>
+                    <th class="course-code-column">Course Code</th>
+                    <th class="course-title-column">Course Title</th>
+                    <th class="credit-hours-column">Credit Hours</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let data of basicTableA.data; let i = index" class="course-row">
+                    <td class="checkbox-cell">
+                      <label nz-checkbox [nzChecked]="setOfCheckedIdA.has(data.courseId)"
+                        (nzCheckedChange)="onItemCheckedA(data.courseId, $event)" class="course-checkbox">
+                      </label>
+                    </td>
+                    <td class="course-code">{{ data.courseCode }}</td>
+                    <td class="course-title">{{ data.courseTitle }}</td>
+                    <td class="credit-hours">{{ data.creditHours }}</td>
+                  </tr>
+                </tbody>
+              </nz-table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button nz-button nzType="default" class="cancel-btn" (click)="goToCurriculum()">
+          <span nz-icon nzType="close" nzTheme="outline"></span>
+          Cancel
+        </button>
+        <button nz-button nzType="primary" class="submit-btn" (click)="submitForm()" [nzLoading]="loading">
+          <span nz-icon nzType="save" nzTheme="outline"></span>
+          {{ submit }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

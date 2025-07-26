@@ -1,0 +1,212 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">Student Course Registration Approval</h2>
+        <p class="subtitle-text">Review and approve course registrations for students</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card Container -->
+  <div class="table-card">
+    <div id="print-section">
+      <nz-table 
+        #basicTable 
+        [nzData]="studentTermCourseReg!" 
+        nzBordered
+        [nzPageSize]="10"
+        [nzShowSizeChanger]="true"
+        [nzShowTotal]="totalTemplate"
+        class="registration-table">
+        <ng-template #totalTemplate let-range="range" let-total>
+          <span style="color: #6b7280; font-weight: 500;">
+            {{ range[0] }}-{{ range[1] }} of {{ total }} registrations
+          </span>
+        </ng-template>
+        <thead>
+          <tr>
+            <th style="width: 60px; text-align: center;">S/N</th>
+            <th style="min-width: 200px;">Full Name</th>
+            <th style="min-width: 150px;">Academic Program</th>
+            <th style="min-width: 120px; text-align: center;">Season of Term</th>
+            <th style="min-width: 120px; text-align: center;">Term of Year</th>
+            <th style="min-width: 120px; text-align: center;">Entry Code</th>
+            <th style="min-width: 120px; text-align: center;">Registration Date</th>
+            <th style="min-width: 120px; text-align: center;">Status</th>
+            <th style="width: 60px; text-align: center;">Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let data of basicTable.data; let i = index">
+            <tr>
+              <td style="text-align: center;">
+                <span class="sn-badge">{{ i + 1 }}</span>
+              </td>
+              <td>
+                <div class="student-info">
+                  <span class="student-name">{{ data.fullName }}</span>
+                </div>
+              </td>
+              <td>{{ data.academicProgram }}</td>
+              <td style="text-align: center;">
+                <nz-tag nzColor="blue" class="term-tag">
+                  {{ getAcademicTermStatusDescription(data.academicTermSeason) }}
+                </nz-tag>
+              </td>
+              <td style="text-align: center;">
+                <nz-tag nzColor="green" class="year-tag">
+                  {{ getYearNumberDescription(data.academicTermYear) }}
+                </nz-tag>
+              </td>
+              <td style="text-align: center;">
+                <nz-tag nzColor="orange" class="entry-tag">{{ data.entryCode }}</nz-tag>
+              </td>
+              <td style="text-align: center;">
+                <span class="date-text">{{ data.registrationDate | date: 'dd/MM/yyyy' }}</span>
+              </td>
+              <td style="text-align: center;">
+                <nz-tag 
+                  nzColor="default"
+                  class="status-tag">
+                  {{ getApprovalStatusDescription(data.status) }}
+                </nz-tag>
+              </td>
+              <td style="text-align: center;">
+                <button 
+                  nz-button 
+                  nzType="default"
+                  (click)="onExpandChange(data.id, !expandSet.has(data.id))"
+                  class="expand-btn">
+                  <span nz-icon nzType="down" nzTheme="outline"></span>
+                </button>
+              </td>
+            </tr>
+            <tr [nzExpand]="expandSet.has(data.id)" class="expanded-row">
+              <td colspan="9">
+                <div class="course-details">
+                  <div class="details-header">
+                    <h3 class="details-title">
+                      <span nz-icon nzType="book" nzTheme="outline"></span>
+                      Semester Course Registered
+                    </h3>
+                  </div>
+                  
+                  <nz-table [nzData]="getCourseDetails(data)" nzBordered class="course-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 80px; text-align: center;">S/N</th>
+                        <th style="min-width: 120px;">Course Code</th>
+                        <th style="min-width: 200px;">Course Title</th>
+                        <th style="width: 120px; text-align: center;">Credit Hours</th>
+                        <th style="width: 120px; text-align: center;">Course Status</th>
+                        <th style="width: 200px; text-align: center;">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let course of getCourseDetails(data); let i = index">
+                        <td style="text-align: center;">
+                          <span class="course-sn-badge">{{ i + 1 }}</span>
+                        </td>
+                        <td>
+                          <span class="course-code">{{ course.code }}</span>
+                        </td>
+                        <td>
+                          <span class="course-title">{{ course.title }}</span>
+                        </td>
+                        <td style="text-align: center;">
+                          <nz-tag nzColor="blue" class="credit-tag">{{ course.creditHours }}</nz-tag>
+                        </td>
+                        <td style="text-align: center;">
+                          <nz-tag 
+                            nzColor="default"
+                            class="course-status-tag">
+                            {{ getCourseStatusDescription(course.status) }}
+                          </nz-tag>
+                        </td>
+                        <td style="text-align: center;">
+                          <div class="action-buttons">
+                            <button 
+                              nz-button 
+                              nzType="primary" 
+                              nzSize="small"
+                              (click)="acceptRejectCourse(course.id,2,i)"
+                              [disabled]="acceptButtonDisabled[i]"
+                              class="accept-btn">
+                              <span nz-icon nzType="check" nzTheme="outline"></span>
+                              Accept
+                            </button>
+                            <button 
+                              nz-button 
+                              nzType="default" 
+                              nzDanger
+                              nzSize="small"
+                              (click)="acceptRejectCourse(course.id,3,i)"
+                              [disabled]="rejectButtonDisabled[i]"
+                              class="reject-btn">
+                              <span nz-icon nzType="close" nzTheme="outline"></span>
+                              Reject
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                    <tfoot>
+                      <tr class="summary-row">
+                        <td colspan="3"></td>
+                        <td style="text-align: center;">
+                          <span class="total-label">Total Credit Hours:</span>
+                        </td>
+                        <td style="text-align: center;">
+                          <nz-tag nzColor="green" class="total-credit-tag">
+                            {{ getTotalCreditHours(data) }}
+                          </nz-tag>
+                        </td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </nz-table>
+
+                  <!-- Approval Form -->
+                  <div class="approval-form">
+                    <form nz-form [formGroup]="gradeQueryForm">
+                      <nz-form-item>
+                        <nz-form-label [nzSpan]="24" nzFor="remark">
+                          <span nz-icon nzType="message" nzTheme="outline"></span>
+                          Remark
+                        </nz-form-label>
+                        <nz-form-control [nzSpan]="24" nzErrorTip="Please input your remark!">
+                          <nz-textarea-count [nzMaxCharacterCount]="250">
+                            <textarea 
+                              rows="4" 
+                              nz-input 
+                              formControlName="remark"
+                              placeholder="Enter your approval remarks here...">
+                            </textarea>
+                          </nz-textarea-count>
+                        </nz-form-control>
+                      </nz-form-item>
+                      <nz-form-item>
+                        <nz-form-control [nzSpan]="24" style="text-align: center;">
+                          <button 
+                            nz-button 
+                            nzType="primary" 
+                            (click)="onSubmit(data)"
+                            class="submit-btn">
+                            <span nz-icon nzType="save" nzTheme="outline"></span>
+                            Submit Approval
+                          </button>
+                        </nz-form-control>
+                      </nz-form-item>
+                    </form>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+</div>

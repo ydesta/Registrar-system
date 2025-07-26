@@ -1,0 +1,86 @@
+.applicant {
+  padding: 0px;
+  font: 1em sans-serif;
+  font-weight: 300;
+}
+.photo-icon {
+  color: #1890ff;
+}
+.photo-icon :hover {
+  color: #1890ff;
+}
+
+.attach-photo {
+  height: 150px;
+  // border: 1px solid #1890ff;
+  padding: 5px;
+  width: 250px;
+  border-radius: 5%;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.profile-path {
+  padding: 4px;
+  align-items: center;
+  height: 200px;
+  width: 300px;
+  border-radius: 50%;
+}
+.th-row {
+  color: rgb(23, 131, 198);
+  font-size: 14px;
+}
+.check-icon {
+  color: #3291ea;
+}
+.title {
+  color: white;
+  //text-align: center;
+}
+nz-table {
+  padding-top: 10px;
+}
+button {
+  //margin: 3px;
+  border-style: none;
+  font-size: 20px;
+  align-items: center;
+  border-radius: 0.5rem;
+  height: auto;
+}
+.edit {
+  color: rgb(23, 131, 198);
+  border-color: rgb(23, 131, 198);
+}
+.detail {
+  color: rgb(23, 131, 198);
+  border-color: rgb(23, 131, 198);
+}
+.more {
+  color: rgb(23, 131, 198);
+  font-size: 20px;
+}
+::ng-deep .ant-card-head {
+  background: #1890ff;
+}
+.custom-card {
+  height: 100%;
+  border: 1px solid #1890ff;
+}
+
+.custom-card + .custom-card {
+  margin-top: 20px;
+}
+.card-container {
+  margin-right: 20px;
+}
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+.parent-container {
+  display: flex;
+  justify-content: flex-end;
+}

@@ -1,0 +1,322 @@
+<div class="content-container">
+  <div class="header-section">
+    <div class="action-buttons">
+      <div class="search-section">
+        <nz-input-group [nzSuffix]="suffixIconSearch">
+          <input type="text" nz-input placeholder="Search roles by name or description..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"/>
+        </nz-input-group>
+        <ng-template #suffixIconSearch>
+          <span nz-icon nzType="search"></span>
+        </ng-template>
+      </div>
+      
+      <div class="filter-section">
+        <!-- Status Filter -->
+        <nz-select 
+          [(ngModel)]="statusFilter" 
+          (ngModelChange)="onStatusFilterChange($event)"
+          placeholder="Status"
+          nzShowSearch="false">
+          <nz-option nzValue="all" nzLabel="All Status"></nz-option>
+          <nz-option nzValue="active" nzLabel="Active"></nz-option>
+          <nz-option nzValue="inactive" nzLabel="Inactive"></nz-option>
+        </nz-select>
+      </div>
+
+      <button nz-button nzType="primary" class="add-role-btn" (click)="openCreateRoleModal()">
+        <span nz-icon nzType="plus" nzTheme="outline"></span>
+        Add Role
+      </button>
+      <button nz-button nzType="primary" class="export-btn" (click)="onExportRoles()">
+        <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-section">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <span nz-icon nzType="team" nzTheme="outline"></span>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ totalRolesCount }}</div>
+        <div class="stat-label">Total Roles</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon active">
+        <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ activeRolesCount }}</div>
+        <div class="stat-label">Active Roles</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon inactive">
+        <span nz-icon nzType="stop" nzTheme="outline"></span>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ inactiveRolesCount }}</div>
+        <div class="stat-label">Inactive Roles</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Container -->
+  <div class="table-container">
+    <nz-table 
+      #basicTable 
+      [nzData]="paginatedRoles"
+      [nzLoading]="loading"
+      [nzShowPagination]="true"
+      [nzPageIndex]="pageIndex"
+      [nzPageSize]="pageSize"
+      [nzTotal]="total"
+      [nzShowSizeChanger]="true"
+      [nzShowQuickJumper]="true"
+      [nzShowTotal]="totalTemplate"
+      [nzPageSizeOptions]="pageSizeOption"
+      (nzPageIndexChange)="onPageIndexChange($event)"
+      (nzPageSizeChange)="onPageSizeChange($event)"
+      [nzScroll]="{ x: '1000px' }">
+      
+      <thead>
+        <tr>
+          <th>Role Name</th>
+          <th>Description</th>
+          <th>Permissions</th>
+          <th>Users</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th class="sticky-action">Actions</th>
+        </tr>
+      </thead>
+      
+      <tbody>
+        <tr *ngFor="let role of basicTable.data; let i = index">
+          <td>
+            <div class="role-info">
+              <nz-avatar [nzSize]="32" [nzText]="role.name.charAt(0)"></nz-avatar>
+              <div class="role-details">
+                <span class="role-name">{{ role.name }}</span>
+                <span class="role-id">ID: {{ role.id }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="description">{{ role.description || 'No description' }}</span>
+          </td>
+          <td>
+            <div class="permissions-container">
+              <nz-tag 
+                *ngFor="let permission of getRolePermissions(role).slice(0, 3)" 
+                [nzColor]="'blue'"
+                class="permission-tag">
+                {{ permission.name }}
+              </nz-tag>
+              <span *ngIf="getRolePermissions(role).length > 3" class="more-permissions">
+                +{{ getRolePermissions(role).length - 3 }} more
+              </span>
+            </div>
+          </td>
+          <td>
+            <span class="user-count">{{ role.userCount || 0 }} users</span>
+          </td>
+          <td>
+            <nz-tag 
+              [nzColor]="role.isActive ? 'green' : 'red'"
+              class="status-tag">
+              {{ role.isActive ? 'Active' : 'Inactive' }}
+            </nz-tag>
+          </td>
+          <td>
+            <span class="created-date">{{ role.createdAt | date:'shortDate' }}</span>
+          </td>
+          <td class="sticky-action" [class.sticky-action-even]="i % 2 === 1">
+            <button nz-button 
+                    nz-dropdown 
+                    [nzDropdownMenu]="menu" 
+                    nzPlacement="bottomRight"
+                    nzTrigger="click"
+                    class="action-button">
+              <span nz-icon nzType="more" nzTheme="outline"></span>
+            </button>
+            <nz-dropdown-menu #menu="nzDropdownMenu">
+              <ul nz-menu>
+                <li nz-menu-item>
+                  <button nz-button nzType="default" class="action-item" (click)="onViewRoleDetails(role)">
+                    <span nz-icon nzType="eye" nzTheme="outline"></span>
+                    View Details
+                  </button>
+                </li>
+                <li nz-menu-item>
+                  <button nz-button nzType="default" class="action-item" (click)="openEditRoleModal(role)">
+                    <span nz-icon nzType="edit" nzTheme="outline"></span>
+                    Edit Role
+                  </button>
+                </li>
+                <li nz-menu-item>
+                  <button nz-button nzType="default" class="action-item" (click)="openPermissionManagementModal(role)">
+                    <span nz-icon nzType="safety" nzTheme="outline"></span>
+                    Manage Permissions
+                  </button>
+                </li>
+                <li nz-menu-item>
+                  <button nz-button nzType="default" class="action-item" (click)="onDuplicateRole(role)">
+                    <span nz-icon nzType="copy" nzTheme="outline"></span>
+                    Duplicate
+                  </button>
+                </li>
+                <li nz-menu-item nzDanger>
+                  <button nz-button nzType="default" class="action-item danger" (click)="onDeleteRole(role)">
+                    <span nz-icon nzType="delete" nzTheme="outline"></span>
+                    Delete Role
+                  </button>
+                </li>
+              </ul>
+            </nz-dropdown-menu>
+          </td>
+        </tr>
+      </tbody>
+      <ng-template #emptyTpl>
+        <div class="no-data">
+          <span nz-icon nzType="team" nzTheme="outline"></span>
+          <p>No role records available</p>
+          <p class="no-data-subtitle">Try adjusting your search or filters</p>
+        </div>
+      </ng-template>
+      
+      <ng-template #totalTemplate let-total>
+        Showing {{ (pageIndex - 1) * pageSize + 1 }} to {{ pageIndex * pageSize > total ? total : pageIndex * pageSize }} of {{ total }} roles
+      </ng-template>
+    </nz-table>
+  </div>
+
+  <!-- Mobile Card View -->
+  <div class="mobile-card-view">
+    <div class="mobile-pagination-info">
+      <span style="color: #6b7280; font-weight: 500;">
+        {{ (pageIndex - 1) * pageSize + 1 }}-{{ Math.min(pageIndex * pageSize, total) }} of {{ total }} roles
+      </span>
+    </div>
+    
+    <div class="role-cards" *ngIf="!loading; else mobileLoading">
+      <div class="role-card" *ngFor="let role of paginatedRoles">
+        <div class="card-header">
+          <div class="role-info">
+            <nz-avatar [nzSize]="48" [nzText]="role.name.charAt(0)"></nz-avatar>
+            <div class="role-details">
+              <span class="role-name">{{ role.name }}</span>
+              <span class="role-id">ID: {{ role.id }}</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button nz-button 
+                    nz-dropdown 
+                    [nzDropdownMenu]="mobileMenu" 
+                    nzPlacement="bottomRight"
+                    nzTrigger="click"
+                    class="action-button">
+              <span nz-icon nzType="more" nzTheme="outline"></span>
+            </button>
+            <nz-dropdown-menu #mobileMenu="nzDropdownMenu">
+              <ul nz-menu>
+                <li nz-menu-item>
+                  <button nz-button nzType="default" class="action-item" (click)="onViewRoleDetails(role)">
+                    <span nz-icon nzType="eye" nzTheme="outline"></span>
+                    View Details
+                  </button>
+                </li>
+                <li nz-menu-item>
+                  <button nz-button nzType="default" class="action-item" (click)="openEditRoleModal(role)">
+                    <span nz-icon nzType="edit" nzTheme="outline"></span>
+                    Edit Role
+                  </button>
+                </li>
+                <li nz-menu-item>
+                  <button nz-button nzType="default" class="action-item" (click)="openPermissionManagementModal(role)">
+                    <span nz-icon nzType="safety" nzTheme="outline"></span>
+                    Manage Permissions
+                  </button>
+                </li>
+                <li nz-menu-item>
+                  <button nz-button nzType="default" class="action-item" (click)="onDuplicateRole(role)">
+                    <span nz-icon nzType="copy" nzTheme="outline"></span>
+                    Duplicate
+                  </button>
+                </li>
+                <li nz-menu-item nzDanger>
+                  <button nz-button nzType="default" class="action-item danger" (click)="onDeleteRole(role)">
+                    <span nz-icon nzType="delete" nzTheme="outline"></span>
+                    Delete Role
+                  </button>
+                </li>
+              </ul>
+            </nz-dropdown-menu>
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <div class="info-row">
+            <span class="label">Description:</span>
+            <span class="value">{{ role.description || 'No description' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Permissions:</span>
+            <div class="permissions-container">
+              <nz-tag 
+                *ngFor="let permission of getRolePermissions(role).slice(0, 3)" 
+                [nzColor]="'blue'"
+                class="permission-tag">
+                {{ permission.name }}
+              </nz-tag>
+              <span *ngIf="getRolePermissions(role).length > 3" class="more-permissions">
+                +{{ getRolePermissions(role).length - 3 }} more
+              </span>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="label">Users:</span>
+            <span class="value">{{ role.userCount || 0 }} users</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Status:</span>
+            <nz-tag 
+              [nzColor]="role.isActive ? 'green' : 'red'"
+              class="status-tag">
+              {{ role.isActive ? 'Active' : 'Inactive' }}
+            </nz-tag>
+          </div>
+          <div class="info-row">
+            <span class="label">Created:</span>
+            <span class="value">{{ role.createdAt | date:'shortDate' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <ng-template #mobileLoading>
+      <div class="mobile-loading">
+        <nz-spin nzSize="large"></nz-spin>
+        <p>Loading roles...</p>
+      </div>
+    </ng-template>
+    
+    <!-- Mobile Pagination -->
+    <div class="mobile-pagination">
+      <nz-pagination
+        [nzPageIndex]="pageIndex"
+        [nzPageSize]="pageSize"
+        [nzTotal]="total"
+        [nzShowSizeChanger]="false"
+        [nzShowQuickJumper]="false"
+        (nzPageIndexChange)="onPageIndexChange($event)">
+      </nz-pagination>
+    </div>
+  </div>
+</div> 

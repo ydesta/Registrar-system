@@ -1,0 +1,43 @@
+<!-- component-a.component.html -->
+<nz-collapse style="margin-top: 40px;">
+    <nz-collapse-panel [nzHeader]="'Workflow Form'" [nzActive]="true">
+        <form nz-form [formGroup]="workflowForm">
+            <nz-form-item>
+                <nz-form-label [nzSpan]="8" required>Student Full Name</nz-form-label>
+                <nz-form-control [nzSpan]="15">
+                    <input nz-input formControlName="fullName" readonly />
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+                <nz-form-label [nzSpan]="8" nzRequired>Decision
+                </nz-form-label>
+                <nz-form-control [nzSpan]="15">
+                    <nz-select formControlName="currentStatus" nzPlaceHolder="select Status" nzShowSearch="true"
+                        nzAllowClear="true">
+                        <nz-option *ngFor="let item of listOfApprovalStatus" [nzValue]="item.Id"
+                            [nzLabel]="item.Description"></nz-option>
+                    </nz-select>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label [nzSm]="8" [nzXs]="24" nzFor="description" nzRequired>Remark</nz-form-label>
+                <nz-form-control id="description" [nzSm]="15" [nzXs]="24" nzErrorTip="Please input your remark!">
+                    <nz-textarea-count [nzMaxCharacterCount]="250">
+                        <textarea rows="3" formControlName="description" nz-input></textarea>
+                    </nz-textarea-count>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-divider></nz-divider>
+            <div class="button-container" style="margin-left: 180px;">
+                <button nz-button nzType="primary" (click)="onSubmit()">
+                    Save
+                </button>
+            </div>
+        </form>
+    </nz-collapse-panel>
+    <nz-collapse-panel [nzHeader]="'Previous Decision'">
+        <app-manage-work-flow></app-manage-work-flow>
+    </nz-collapse-panel>
+</nz-collapse>

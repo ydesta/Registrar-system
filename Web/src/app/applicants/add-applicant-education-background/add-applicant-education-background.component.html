@@ -1,0 +1,47 @@
+
+<h3 class="h-tag">{{action}}</h3>
+
+<div>
+    <form nz-form  nzLayout="vertical" [formGroup]="educationForm" (ngSubmit)="submitForm()">
+      
+        <nz-form-item>
+            <nz-form-label [nzSpan]="8" nzRequired>Applicant</nz-form-label>
+            <nz-form-control [nzSpan]="8" nzValidatingTip="Validating...">
+              <nz-select formControlName="applicantID" nzPlaceHolder="select applicant" >
+                  <nz-option *ngFor="let item of applicants" [nzValue]="item.applicantID" [nzLabel]="item.firstName + ' ' + item.fatherName"></nz-option>
+                </nz-select>
+            </nz-form-control>
+          </nz-form-item>   
+          <nz-form-item>
+            <nz-form-label [nzSpan]="8" >Schooll Name</nz-form-label>
+            <nz-form-control [nzSpan]="8">
+                <input nz-input formControlName="schoollName"  placeholder="enter schooll name" />
+            </nz-form-control>
+          </nz-form-item> 
+          <nz-form-item>
+            <nz-form-label [nzSpan]="8" >Field of Study</nz-form-label>
+            <nz-form-control [nzSpan]="8">
+                <input nz-input formControlName="fieldOfStudy"  placeholder="enter field of study" />
+            </nz-form-control>
+          </nz-form-item> 
+          <nz-form-item>
+            <nz-form-label [nzSpan]="8" >Programme Level</nz-form-label>
+            <nz-form-control [nzSpan]="8">
+                <input nz-input formControlName="programmeLevel"  placeholder="enter levele" />
+            </nz-form-control>
+          </nz-form-item> 
+          
+        <nz-form-item>
+          <nz-form-label [nzSpan]="8" nzRequired>Graduated Year</nz-form-label>
+          <nz-form-control [nzSpan]="8">
+            <input nz-input formControlName="graduatedYear" type="number" placeholder="enter fee per credit" />
+          </nz-form-control>
+        </nz-form-item>  
+      
+        <nz-form-item>
+          <nz-form-control [nzOffset]="8" [nzSpan]="8">
+            <button nz-button nzType="primary">{{submit}}</button>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+</div>

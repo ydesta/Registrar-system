@@ -1,0 +1,134 @@
+<div class="agreement-container">
+  <div class="agreement-header">
+    <h2 class="section-title">
+      <i nz-icon nzType="file-text" nzTheme="outline"></i>
+      Application Agreement & Information
+    </h2>
+    <p class="section-description">
+      Please provide the following information and confirm your agreement to the terms and conditions.
+    </p>
+  </div>
+
+  <form nz-form [formGroup]="agreementForm" class="agreement-form">
+    <!-- Information Section -->
+    <div class="form-section">
+      <nz-card class="info-card" [nzTitle]="infoCardTitle">
+        <ng-template #infoCardTitle>
+          <div class="card-title">
+            <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+            <span>Application Information</span>
+          </div>
+        </ng-template>
+
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>
+              <i nz-icon nzType="search" nzTheme="outline"></i>
+              How did you learn about HilcoE?
+            </nz-form-label>
+            <nz-form-control [nzErrorTip]="errorTpl">
+              <nz-select 
+                formControlName="howDidYouComeKnow" 
+                nzPlaceHolder="Select how you learned about HilcoE" 
+                nzShowSearch
+                nzAllowClear
+                class="custom-select">
+                <nz-option nzValue="Colleague" nzLabel="Colleague"></nz-option>
+                <nz-option nzValue="Former Student" nzLabel="Former Student"></nz-option>
+                <nz-option nzValue="Brochure" nzLabel="Brochure"></nz-option>
+                <nz-option nzValue="Radio" nzLabel="Radio"></nz-option>
+                <nz-option nzValue="Television" nzLabel="Television"></nz-option>
+                <nz-option nzValue="Newspaper" nzLabel="Newspaper"></nz-option>
+                <nz-option nzValue="Poster" nzLabel="Poster"></nz-option>
+                <nz-option nzValue="Website" nzLabel="Website"></nz-option>
+                <nz-option nzValue="Social Media" nzLabel="Social Media"></nz-option>
+                <nz-option nzValue="Other" nzLabel="Other"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>
+              <i nz-icon nzType="bank" nzTheme="outline"></i>
+              Source of Finance
+            </nz-form-label>
+            <nz-form-control [nzErrorTip]="errorTpl">
+              <nz-select 
+                formControlName="sourceOfFinance" 
+                nzPlaceHolder="Select your source of finance" 
+                nzShowSearch
+                nzAllowClear
+                class="custom-select">
+                <nz-option nzValue="Personal" nzLabel="Personal Savings"></nz-option>
+                <nz-option nzValue="Employer" nzLabel="Employer Sponsorship"></nz-option>
+                <nz-option nzValue="Family" nzLabel="Family Support"></nz-option>
+                <nz-option nzValue="Scholarship" nzLabel="Scholarship"></nz-option>
+                <nz-option nzValue="Loan" nzLabel="Student Loan"></nz-option>
+                <nz-option nzValue="Other" nzLabel="Other"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </nz-card>
+    </div>
+
+    <!-- Agreement Section -->
+    <div class="agreement-section">
+      <nz-card class="agreement-card" [nzTitle]="agreementCardTitle">
+        <ng-template #agreementCardTitle>
+          <div class="card-title">
+            <i nz-icon nzType="safety-certificate" nzTheme="outline"></i>
+            <span>Terms & Conditions Agreement</span>
+          </div>
+        </ng-template>
+
+        <div class="agreement-content">
+          <div class="agreement-text">
+            <p class="agreement-paragraph">
+              I, the undersigned applicant, hereby declare and confirm that:
+            </p>
+            <ul class="agreement-list">
+              <li>All information provided in this application and supporting documents is accurate, complete, and authentic to the best of my knowledge.</li>
+              <li>All academic qualifications and credentials submitted are genuine and properly accredited by HERQA/MOE.</li>
+              <li>I understand and agree to abide by all rules, regulations, and policies of HilcoE College as outlined in the prospectus and student handbook.</li>
+              <li>I acknowledge that any false or misleading information may result in immediate disqualification or dismissal from the program.</li>
+              <li>I consent to the verification of all provided information and credentials by the college administration.</li>
+            </ul>
+          </div>
+
+          <nz-form-item class="agreement-checkbox-item">
+            <nz-form-control [nzErrorTip]="errorTpl" nzRequired>
+              <label nz-checkbox 
+                     formControlName="selfConfirmedApplicantInformation" 
+                     class="agreement-checkbox">
+                <span class="checkbox-text">
+                  I have read, understood, and agree to the above terms and conditions
+                </span>
+              </label>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </nz-card>
+    </div>
+
+    <!-- Form Status Indicator -->
+    <div class="form-status" *ngIf="!agreementForm.valid">
+      <nz-alert 
+        nzType="warning" 
+        nzShowIcon 
+        [nzMessage]="'Please complete all required fields to proceed'"
+        class="status-alert">
+      </nz-alert>
+    </div>
+
+    <!-- Error Template -->
+    <ng-template #errorTpl let-control>
+      <div class="error-message" *ngIf="control.hasError('required')">
+        <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+        <span>This field is required</span>
+      </div>
+    </ng-template>
+  </form>
+</div>

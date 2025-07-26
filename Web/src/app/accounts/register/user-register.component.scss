@@ -1,0 +1,258 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #F8F8FF;
+  padding: 20px;
+  padding-top: 90px;
+}
+
+.register-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-left: 8px solid #1890ff;
+  padding: 30px;
+  width: 100%;
+  max-width: 500px;
+  backdrop-filter: blur(10px);
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 20px;
+
+  .logo {
+    width: 70px;
+    height: auto;
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    color: #333;
+    margin: 0 0 6px 0;
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  p {
+    color: #666;
+    margin: 0;
+    font-size: 13px;
+  }
+}
+
+.register-form {
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .ant-form-item {
+    margin-bottom: 16px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .ant-input-group {
+    .ant-input {
+      height: 40px;
+      border-radius: 6px;
+      border: 1px solid #d9d9d9;
+      transition: all 0.3s;
+
+      &:focus {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+      }
+    }
+
+    .password-toggle {
+      cursor: pointer;
+      color: #999;
+      transition: color 0.3s;
+      font-size: 16px;
+      padding: 4px;
+      border-radius: 4px;
+
+      &:hover {
+        color: #1890ff;
+        background-color: rgba(24, 144, 255, 0.1);
+      }
+    }
+  }
+
+  .ant-checkbox-wrapper {
+    font-size: 13px;
+    line-height: 1.4;
+    display: block;
+    margin-bottom: 16px;
+
+    a {
+      color: #1890ff;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  // Additional styling for nz-checkbox component
+  nz-checkbox {
+    display: block;
+    margin-bottom: 16px;
+    
+    .ant-checkbox-wrapper {
+      font-size: 13px;
+      line-height: 1.4;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+
+      .ant-checkbox {
+        margin-top: 2px;
+      }
+
+      a {
+        color: #1890ff;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  // Terms section styling
+  .terms-section {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: #f0f2f5;
+      border-color: #d9d9d9;
+    }
+    
+    .ant-form-item {
+      margin-bottom: 0;
+    }
+  }
+
+  // Specific styling for terms checkbox
+  .terms-checkbox {
+    display: flex !important;
+    align-items: flex-start !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin: 0 !important;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #333;
+    cursor: pointer;
+    
+    .ant-checkbox {
+      margin-right: 8px;
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .ant-checkbox + span {
+      flex: 1;
+      padding-top: 0;
+    }
+
+    a {
+      color: #1890ff;
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.register-actions {
+  margin-bottom: 20px;
+
+  .register-button {
+    width: 100%;
+    height: 40px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    background: #1890ff;
+    border: none;
+
+    &:hover {
+      background: #096dd9;
+    }
+  }
+}
+
+.login-link {
+  text-align: center;
+  color: #666;
+  font-size: 13px;
+
+  a {
+    color: #1890ff;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 600px) {
+  .register-container {
+    padding: 10px;
+    padding-top: 80px;
+  }
+
+  .register-card {
+    padding: 25px 20px;
+  }
+
+  .register-form {
+    .form-row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .register-container {
+    padding-top: 70px;
+  }
+  
+  .register-card {
+    padding: 20px 15px;
+  }
+  
+  .terms-section {
+    padding: 12px;
+    
+    .terms-checkbox {
+      font-size: 12px;
+      line-height: 1.4;
+    }
+  }
+}

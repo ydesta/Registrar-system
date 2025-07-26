@@ -1,0 +1,71 @@
+<h3 class="h-tag">{{ action }}</h3>
+
+<div>
+  <form
+    nz-form
+    nzLayout="vertical"
+    [formGroup]="requirementQuadrantForm"
+    (ngSubmit)="submitForm()"
+  >
+    <nz-form-item>
+      <nz-form-label [nzSpan]="8" nzRequired
+        >Requirement Quadrant</nz-form-label
+      >
+      <nz-form-control [nzSpan]="8" nzValidatingTip="Validating...">
+        <nz-select
+          formControlName="graduationRequirementID"
+          nzPlaceHolder="select graduation requirement"
+        >
+          <nz-option
+            *ngFor="let item of graduationRequirements"
+            [nzValue]="item.id"
+            [nzLabel]="item.passingGrade"
+          ></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="8" nzRequired>Quadrant</nz-form-label>
+      <nz-form-control [nzSpan]="8" nzValidatingTip="Validating...">
+        <nz-select formControlName="quadrantID" nzPlaceHolder="select quadrant">
+          <nz-option
+            *ngFor="let item of quadrants"
+            [nzValue]="item.quadrantsID"
+            [nzLabel]="item.quadrantHeading"
+          ></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="8" nzRequired
+        >Minimum Credit Hours</nz-form-label
+      >
+      <nz-form-control [nzSpan]="8" nzValidatingTip="Validating...">
+        <nz-form-control>
+          <input
+            nz-input
+            formControlName="minimumCreditHours"
+            type="number"
+            placeholder="enter minimum credit hours"
+          />
+        </nz-form-control>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="8">Remark</nz-form-label>
+      <nz-form-control [nzSpan]="8">
+        <input nz-input formControlName="remark" placeholder="enter remark" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-control [nzOffset]="8" [nzSpan]="8">
+        <button nz-button nzType="primary" class="main-color">
+          {{ submit }}
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</div>

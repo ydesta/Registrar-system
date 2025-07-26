@@ -1,0 +1,129 @@
+<div class="permission-management">
+  <div class="permission-header" *ngIf="role; else noRoleTemplate">
+    <h3>Manage Permissions for Role: {{ role.name }}</h3>
+    <p class="description">Select the permissions you want to assign to this role. Permissions are organized by category for easier management.</p>
+  </div>
+  
+  <ng-template #noRoleTemplate>
+    <div class="permission-header">
+      <h3>Manage Permissions</h3>
+      <p class="description">Role information not available. Please close and try again.</p>
+    </div>
+  </ng-template>
+
+
+
+  <div class="permission-categories" *ngIf="!loading && permissions.length > 0; else loadingTemplate">
+    <!-- Fallback: Show all permissions if no categories -->
+    <div *ngIf="getPermissionCategories().length === 0" class="all-permissions-fallback">
+      <h4>All Permissions</h4>
+      <div class="permission-list">
+        <div class="permission-item" *ngFor="let permission of permissions; trackBy: trackByPermission">
+          <label nz-checkbox 
+                 [ngModel]="isPermissionSelected(permission.id)"
+                 (ngModelChange)="togglePermission(permission.id, $event)"
+                 class="permission-checkbox">
+            <div class="permission-info">
+              <div class="permission-name">{{ permission.name }}</div>
+              <div class="permission-description">{{ permission.description }}</div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Normal categorized view -->
+    <nz-tabset *ngIf="getPermissionCategories().length > 0">
+      <nz-tab *ngFor="let category of getPermissionCategories()" [nzTitle]="category">
+        <div class="category-header">
+          <div class="category-actions">
+            <button 
+              nz-button 
+              nzSize="small" 
+              nzType="default"
+              (click)="selectAllInCategory(category)"
+              [disabled]="isAllSelectedInCategory(category)">
+              <span nz-icon nzType="check-square" nzTheme="outline"></span>
+              Select All
+            </button>
+            <button 
+              nz-button 
+              nzSize="small" 
+              nzType="default"
+              (click)="deselectAllInCategory(category)"
+              [disabled]="!isSomeSelectedInCategory(category) && !isAllSelectedInCategory(category)">
+              <span nz-icon nzType="border" nzTheme="outline"></span>
+              Deselect All
+            </button>
+          </div>
+          <div class="category-status">
+            <nz-tag 
+              [nzColor]="isAllSelectedInCategory(category) ? 'green' : isSomeSelectedInCategory(category) ? 'orange' : 'default'">
+              {{ getSelectedCountInCategory(category) }} / {{ getPermissionsByCategory(category).length }} selected
+            </nz-tag>
+          </div>
+        </div>
+
+        <div class="permission-list">
+          <div *ngIf="getPermissionsByCategory(category).length === 0" class="no-permissions-in-category">
+            <p>No permissions in this category</p>
+          </div>
+          <div class="permission-item" *ngFor="let permission of getPermissionsByCategory(category); trackBy: trackByPermission">
+            <label nz-checkbox 
+                   [ngModel]="isPermissionSelected(permission.id)"
+                   (ngModelChange)="togglePermission(permission.id, $event)"
+                   class="permission-checkbox">
+              <div class="permission-info">
+                <div class="permission-name">{{ permission.name }}</div>
+                <div class="permission-description">{{ permission.description }}</div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </nz-tab>
+    </nz-tabset>
+  </div>
+
+  <div class="permission-summary" *ngIf="permissions.length > 0">
+    <div class="summary-stats">
+      <div class="stat-item">
+        <span class="stat-label">Total Permissions:</span>
+        <span class="stat-value">{{ permissions.length }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Selected Permissions:</span>
+        <span class="stat-value">{{ selectedPermissions.length }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Categories:</span>
+        <span class="stat-value">{{ getPermissionCategories().length }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button nz-button nzType="default" (click)="onCancel()">
+      Cancel
+    </button>
+    <button 
+      nz-button 
+      nzType="primary" 
+      [nzLoading]="submitting" 
+      (click)="onSave()"
+      [disabled]="submitting || permissions.length === 0 || !role">
+      Save Permissions
+    </button>
+  </div>
+</div>
+
+<ng-template #loadingTemplate>
+  <div class="loading-container" *ngIf="loading">
+    <nz-spin nzSize="large"></nz-spin>
+    <p>Loading permissions...</p>
+  </div>
+  <div class="no-permissions-container" *ngIf="!loading && permissions.length === 0">
+    <span nz-icon nzType="safety" nzTheme="outline"></span>
+    <p>No permissions available</p>
+    <p class="no-permissions-subtitle">Please contact your administrator to set up permissions</p>
+  </div>
+</ng-template> 

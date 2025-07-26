@@ -1,0 +1,43 @@
+// Modal footer styles
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+// Form styles
+::ng-deep .ant-form-item {
+  margin-bottom: 16px;
+}
+
+::ng-deep .ant-form-item-label {
+  font-weight: 500;
+  color: #374151;
+}
+
+::ng-deep .ant-input,
+::ng-deep .ant-input-affix-wrapper {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: #1890ff;
+  }
+  
+  &:focus {
+    border-color: #1890ff;
+    box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+  }
+}
+
+::ng-deep .ant-switch {
+  background-color: #d1d5db;
+  
+  &.ant-switch-checked {
+    background-color: #1890ff;
+  }
+} 

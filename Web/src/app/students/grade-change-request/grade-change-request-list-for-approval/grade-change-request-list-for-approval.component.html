@@ -1,0 +1,237 @@
+<div class="approval-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <h2>Grade Change Request Approval</h2>
+      <p>Review and manage grade change requests from students and instructors</p>
+    </div>
+    <div class="header-actions">
+      <button 
+        nz-button 
+        nzType="default" 
+        (click)="clearFilters()"
+        [disabled]="loading">
+        <span nz-icon nzType="clear"></span>
+        Clear Filters
+      </button>
+      <button 
+        nz-button 
+        nzType="default" 
+        (click)="refreshData()"
+        [nzLoading]="loading">
+        <span nz-icon nzType="reload"></span>
+        Refresh
+      </button>
+      <button 
+        nz-button 
+        nzType="primary" 
+        (click)="exportData()"
+        [disabled]="loading">
+        <span nz-icon nzType="download"></span>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-container">
+    <div class="stat-card total">
+      <div class="stat-icon">
+        <i nz-icon nzType="file-text" nzTheme="outline"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ totalRequests }}</div>
+        <div class="stat-label">Total Requests</div>
+      </div>
+    </div>
+
+    <div class="stat-card pending">
+      <div class="stat-icon">
+        <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ pendingRequests }}</div>
+        <div class="stat-label">Pending</div>
+      </div>
+    </div>
+
+    <div class="stat-card approved">
+      <div class="stat-icon">
+        <i nz-icon nzType="check-circle" nzTheme="outline"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ approvedRequests }}</div>
+        <div class="stat-label">Approved</div>
+      </div>
+    </div>
+
+    <div class="stat-card rejected">
+      <div class="stat-icon">
+        <i nz-icon nzType="close-circle" nzTheme="outline"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ rejectedRequests }}</div>
+        <div class="stat-label">Rejected</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="filter-row">
+      <div class="filter-item">
+        <nz-form-item>
+          <nz-form-label>Status Filter</nz-form-label>
+          <nz-form-control>
+            <nz-select 
+              [(ngModel)]="statusFilter" 
+              nzPlaceHolder="Filter by status">
+              <nz-option nzValue="all" nzLabel="All Requests"></nz-option>
+              <nz-option nzValue="Pending" nzLabel="Pending"></nz-option>
+              <nz-option nzValue="Approved" nzLabel="Approved"></nz-option>
+              <nz-option nzValue="Rejected" nzLabel="Rejected"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="filter-item">
+        <nz-form-item>
+          <nz-form-label>Search</nz-form-label>
+          <nz-form-control>
+            <input 
+              nz-input 
+              [(ngModel)]="searchTerm" 
+              placeholder="Search by student, course, or instructor..."
+              nzSize="large">
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <nz-spin nzSize="large"></nz-spin>
+    <div class="loading-text">Loading grade change requests...</div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && gradeChangeRequests.length === 0" class="empty-container">
+    <nz-result
+      nzStatus="info"
+      nzTitle="No Grade Change Requests"
+      nzSubTitle="There are no grade change requests to display at this time.">
+    </nz-result>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-container" *ngIf="!loading && gradeChangeRequests.length > 0">
+    <nz-table 
+      #basicTable 
+      [nzData]="getFilteredRequests()"
+      [nzPageSize]="10"
+      [nzShowSizeChanger]="true"
+      [nzShowQuickJumper]="true">
+      
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Course</th>
+          <th>Curriculum</th>
+          <th>Previous Grade</th>
+          <th>New Grade</th>
+          <th>Instructor</th>
+          <th>Status</th>
+          <th>Request Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      
+      <tbody>
+        <tr *ngFor="let request of basicTable.data">
+          <td>
+            <div class="student-info">
+              <div class="student-name">{{ request.fullName }}</div>
+            </div>
+          </td>
+          
+          <td>
+            <div class="course-info">
+              <div class="course-name">{{ request.course }}</div>
+            </div>
+          </td>
+          
+          <td>
+            <div class="curriculum-info">
+              <nz-tag>{{ request.curriculumCode }}</nz-tag>
+            </div>
+          </td>
+          
+          <td>
+            <div class="grade-info">
+              <nz-tag nzColor="orange">{{ request.previousGrade }}</nz-tag>
+            </div>
+          </td>
+          
+          <td>
+            <div class="grade-info">
+              <nz-tag nzColor="green">{{ request.newGrade }}</nz-tag>
+            </div>
+          </td>
+          
+          <td>
+            <div class="instructor-info">
+              <div class="instructor-name">{{ request.instructorName }}</div>
+            </div>
+          </td>
+          
+          <td>
+            <nz-tag [nzColor]="getStatusColor(request.status)">
+              {{ getStatusText(request.status) }}
+            </nz-tag>
+          </td>
+          
+          <td>
+            <div class="date-info">
+              {{ request.requestDate | date:'shortDate' }}
+            </div>
+          </td>
+          
+          <td>
+            <div class="action-buttons">
+              <button 
+                nz-button 
+                nzType="link" 
+                nzSize="small"
+                (click)="viewDetails(request)"
+                [disabled]="loading">
+                <span nz-icon nzType="eye"></span>
+                View
+              </button>
+              
+              <button 
+                nz-button 
+                nzType="link" 
+                nzSize="small"
+                nzType="primary"
+                (click)="openDecisionModal(request)"
+                [disabled]="loading || request.status !== 'Pending'"
+                *ngIf="request.status === 'Pending'">
+                <span nz-icon nzType="solution"></span>
+                Decision
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+
+  <!-- Decision Modal -->
+  <app-approval-decision-modal
+    [(isVisible)]="isDecisionModalVisible"
+    [request]="selectedRequest"
+    (decisionMade)="onDecisionMade()">
+  </app-approval-decision-modal>
+</div>

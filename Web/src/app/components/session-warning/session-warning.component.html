@@ -1,0 +1,24 @@
+<div class="session-warning-overlay" *ngIf="isVisible">
+  <div class="session-warning-modal">
+    <div class="warning-header">
+      <i class="fas fa-exclamation-triangle warning-icon"></i>
+      <h3>Session Expiring Soon</h3>
+    </div>
+    
+    <div class="warning-content">
+      <p>Your session will expire in <strong>{{ formatTimeRemaining() }}</strong></p>
+      <p>Do you want to extend your session?</p>
+    </div>
+    
+    <div class="warning-actions">
+      <button class="btn btn-primary" (click)="extendSession()">
+        <i class="fas fa-clock"></i>
+        Extend Session
+      </button>
+      <button class="btn btn-secondary" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout Now
+      </button>
+    </div>
+  </div>
+</div> 

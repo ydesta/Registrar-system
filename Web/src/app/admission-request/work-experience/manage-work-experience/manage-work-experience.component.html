@@ -1,0 +1,78 @@
+<div class="work-experience-container">
+    <div class="header-section">
+        <h2 *ngIf="!isApplicantProfile">Work Experience Information</h2>
+        <button (click)="openModal()" nz-button nzType="primary" [disabled]="isSubmittedApplicationForm>0" *ngIf="!isApplicantProfile">
+            <span nz-icon nzType="plus" nzTheme="outline"></span>
+            Add Work Experience
+        </button>
+    </div>
+
+    <nz-table #basicTable 
+              [nzData]="workExperienceLists" 
+              nzBordered
+              [nzPageSize]="5"
+              [nzShowSizeChanger]="true"
+              [nzNoResult]="noDataTemplate">
+        <thead>
+            <tr>
+                <th>Company Name</th>
+                <th>Total Work Year</th>
+                <th>Post</th>
+                <th>Created Date</th>
+                <th>Document</th>
+                <th *ngIf="!isApplicantProfile">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let data of basicTable.data; let i = index">
+                <td>{{ data.companyName }}</td>
+                <td>{{ data.totalWorkYear }}</td>
+                <td>{{ data.post }}</td>
+                <td>{{ data.createdDate | date:'dd-MM-yyyy' }}</td>
+                <td *ngIf="!isApplicantProfile">
+                    <button nz-button 
+                            class="action-button view-file" 
+                            (click)="viewFile(data)"
+                            nzSize="small">
+                        <span nz-icon nzType="file-text" nzTheme="outline"></span>
+                        View File
+                    </button>
+                </td>
+                <td>
+                    <button nz-button 
+                            nz-dropdown 
+                            [nzDropdownMenu]="menu" 
+                            nzPlacement="bottomRight"
+                            [disabled]="isSubmittedApplicationForm>0"
+                            nzTrigger="click"
+                            class="action-button">
+                        <span nz-icon nzType="more" nzTheme="outline"></span>
+                    </button>
+                    <nz-dropdown-menu #menu="nzDropdownMenu">
+                        <ul nz-menu>
+                            <li nz-menu-item (click)="editModal(data)">
+                                <a class="edit">
+                                    <span nz-icon nzType="edit" nzTheme="outline"></span>
+                                    Edit
+                                </a>
+                            </li>
+                            <li nz-menu-item (click)="delete(data.id)">
+                                <button class="delete" nzDanger>
+                                    <span nz-icon nzType="delete" nzTheme="outline"></span>
+                                    Delete
+                                </button>
+                            </li>
+                        </ul>
+                    </nz-dropdown-menu>
+                </td>
+            </tr>
+        </tbody>
+    </nz-table>
+</div>
+
+<ng-template #noDataTemplate>
+    <div class="no-data">
+        <span nz-icon nzType="usergroup-add" nzTheme="outline"></span>
+        <p>No work experience added yet</p>
+    </div>
+</ng-template>

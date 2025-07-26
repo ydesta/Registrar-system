@@ -1,0 +1,48 @@
+
+<h3 class="h-tag">{{action}}</h3>
+
+<div>
+    <form nz-form  nzLayout="vertical" [formGroup]="staffForm" (ngSubmit)="submitForm()">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzRequired>Student</nz-form-label>
+        <nz-form-control [nzSpan]="7" nzValidatingTip="Validating...">
+          <nz-select formControlName="studentID" nzPlaceHolder="select student" >
+              <nz-option *ngFor="let item of students" [nzValue]="item.studentId" [nzLabel]="item.applicant.firstName + ' ' + item.applicant.fatherName "></nz-option>
+            </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzRequired>Academic Status</nz-form-label>
+        <nz-form-control [nzSpan]="7" nzValidatingTip="Validating...">
+          <nz-select formControlName="academicStatusID" nzPlaceHolder="select academic Statu" >
+              <nz-option *ngFor="let item of academicStatuses" [nzValue]="item.id" [nzLabel]="item.academicStatus"></nz-option>
+            </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzRequired>Date</nz-form-label>
+        <nz-form-control [nzSpan]="7">
+            <nz-date-picker formControlName="date"></nz-date-picker>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzRequired>Reason</nz-form-label>
+        <nz-form-control [nzSpan]="7">
+          <input nz-input formControlName="reason" placeholder="enter no of days present" />
+        </nz-form-control>
+      </nz-form-item>
+   
+        <nz-form-item>  
+          <nz-form-label [nzSpan]="7">Remark</nz-form-label>
+          <nz-form-control [nzSpan]="7">
+            <input nz-input formControlName="remark" placeholder="enter remark" />
+          </nz-form-control>
+        </nz-form-item>
+       
+        <nz-form-item>
+          <nz-form-control [nzOffset]="7" [nzSpan]="7">
+            <button nz-button nzType="primary">{{submit}}</button>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+</div>

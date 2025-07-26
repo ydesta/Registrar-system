@@ -1,0 +1,142 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h3 class="title-text">Quadrants</h3>
+        <p class="subtitle-text">Manage and view all quadrant information</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-section">
+          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+            <input type="text" nz-input placeholder="Search quadrants..." [(ngModel)]="searchKey" (ngModelChange)="clickSearchKey()" />
+          </nz-input-group>
+          <ng-template #suffixIconButton>
+            <button nz-button nzType="primary" class="search-btn" nzSearch>
+              <i nz-icon nzType="search"></i>
+            </button>
+          </ng-template>
+        </div>
+        <button
+          routerLink="../../graduation/add-quadrant/null"
+          class="add-btn"
+          nz-button
+          nzType="primary"
+        >
+          <i nz-icon nzType="plus" nzTheme="outline"></i>
+          <span>Add Quadrant</span>
+        </button>
+        <button nz-button class="export-btn">
+          <i nz-icon nzType="file-excel" nzTheme="outline"></i>
+          <span>Export</span>
+        </button>
+        <button
+          class="print-btn"
+          nz-button
+          nzType="default"
+          printTitle="Quadrant List"
+          printSectionId="print-section"
+          ngxPrint
+        >
+          <i nz-icon nzType="printer" nzTheme="outline"></i>
+          <span>Print</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div id="print-section">
+      <img class="logo" src="../../../assets/images/logo.png" />
+      <nz-table
+        #basicTable
+        [nzData]="quadrants!"
+        nzBordered
+        [nzPageSize]="pageSize"
+        [nzPageSizeOptions]="pageSizeOption"
+        [nzShowSizeChanger]="true"
+        [nzFrontPagination]="true"
+        [nzShowTotal]="rangeTemplate"
+        [nzLoading]="isLoading"
+        [nzNoResult]="emptyTpl"
+        class="quadrants-table"
+      >
+        <ng-template #rangeTemplate let-range="range" let-total>
+          Showing {{ range[0] }}-{{ range[1] }} of {{ total }} items
+        </ng-template>
+        <thead>
+          <tr>
+            <th class="sn-column">S/N</th>
+            <th>Quadrant ID</th>
+            <th>Quadrant Heading</th>
+            <th>Date</th>
+            <th>Remark</th>
+            <th class="action-column">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of basicTable.data; let i = index">
+            <td class="sn-column">
+              <span class="sn-badge">{{ (basicTable.nzPageIndex - 1) * basicTable.nzPageSize + i + 1 }}</span>
+            </td>
+            <td>{{ data.quadrantsID }}</td>
+            <td>{{ data.quadrantHeading }}</td>
+            <td>{{ data.createdDate | date : "yyyy-MM-dd" }}</td>
+            <td>{{ data.remark }}</td>
+            <td class="action-column">
+              <button
+                nz-button
+                nz-dropdown
+                [nzDropdownMenu]="menu"
+                nzPlacement="bottomLeft"
+                class="action-button"
+              >
+                <i nz-icon nzType="more" nzTheme="outline"></i>
+              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li>
+                    <button nz-button nzType="default" class="action-item detail">
+                      <i nz-icon nzType="eye" nzTheme="fill"></i>
+                      <span>View Details</span>
+                    </button>
+                  </li>
+                  <li>
+                    <a
+                      routerLink="../../graduation/add-quadrant/{{ data.id }}"
+                      nz-button
+                      nzType="default"
+                      class="action-item edit"
+                    >
+                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                      <span>Edit</span>
+                    </a>
+                  </li>
+                  <li>
+                    <button
+                      nz-button
+                      nzDanger
+                      nzType="default"
+                      class="action-item delete"
+                      (click)="showDeleteConfirm(data.id)"
+                    >
+                      <i nz-icon nzType="delete" nzTheme="fill"></i>
+                      <span>Delete</span>
+                    </button>
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </td>
+          </tr>
+        </tbody>
+        <ng-template #emptyTpl>
+          <div class="no-data">
+            <i nz-icon nzType="book" nzTheme="outline"></i>
+            <p>No quadrant records available</p>
+          </div>
+        </ng-template>
+      </nz-table>
+    </div>
+  </div>
+</div>

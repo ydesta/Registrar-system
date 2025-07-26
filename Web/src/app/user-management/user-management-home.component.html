@@ -1,0 +1,41 @@
+<div class="user-management-container">
+  <div class="page-header">
+    <h2>{{ getPageTitle() }}</h2>
+    <p class="page-description">
+      {{ getPageDescription() }}
+    </p>
+  </div>
+  
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <nz-spin nzSize="large"></nz-spin>
+  </div>
+  
+  <!-- Quick Links -->
+  <div *ngIf="!isLoading" class="quick-links">
+    <a 
+      *ngFor="let link of quickLinks" 
+      class="quick-link"
+      [routerLink]="link.route"
+      routerLinkActive="active"
+    >
+      <div class="quick-link-icon">
+        <i nz-icon [nzType]="link.icon"></i>
+      </div>
+      <div class="quick-link-content">
+        <span class="quick-link-title">{{ link.title }}</span>
+        <span class="quick-link-description">{{ link.description }}</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Info Message -->
+  <div class="info-message">
+    <nz-alert
+      nzType="info"
+      nzMessage="User Management Features"
+      nzDescription="Click on any of the cards above to navigate to the specific user management feature, or use the sidebar menu under 'System Management'."
+      nzShowIcon
+    ></nz-alert>
+  </div>
+</div> 

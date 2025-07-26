@@ -1,0 +1,109 @@
+.auth-header {
+  background: white;
+  border-bottom: 1px solid #e8e8e8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 70px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  height: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  
+  img {
+    transition: transform 0.2s ease;
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+.navigation-section {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  color: #666;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: #1890ff;
+    background: rgba(24, 144, 255, 0.1);
+    text-decoration: none;
+  }
+  
+  i {
+    font-size: 16px;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 16px;
+  }
+  
+  .navigation-section {
+    gap: 8px;
+  }
+  
+  .nav-link {
+    padding: 6px 12px;
+    font-size: 13px;
+    
+    span {
+      display: none;
+    }
+    
+    i {
+      font-size: 18px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-header {
+    height: 60px;
+  }
+  
+  .header-content {
+    padding: 0 12px;
+  }
+  
+  .logo-section img {
+    height: 40px;
+  }
+  
+  .nav-link {
+    padding: 4px 8px;
+    
+    i {
+      font-size: 16px;
+    }
+  }
+} 

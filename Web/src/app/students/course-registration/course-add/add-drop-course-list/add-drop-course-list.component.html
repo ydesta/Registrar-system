@@ -1,0 +1,37 @@
+<div class="course-list-container">
+  <nz-table
+    #basicTable
+    [nzData]="addDropList"
+    [nzLoading]="loading"
+    nzBordered
+    [nzShowPagination]="true"
+    [nzPageSize]="10"
+    class="custom-table">
+    <thead>
+      <tr>
+        <th class="th-row">Courses</th>
+        <th class="th-row">Credit Hours</th>
+        <th class="th-row">Academic Term</th>
+        <th class="th-row">Request Type</th>
+        <th class="th-row">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let data of basicTable.data">
+        <td>{{data.courseCode}} {{data.courseName}}</td>
+        <td>{{data.creditHours}}</td>
+        <td>{{data.academicTerm}}</td>
+        <td>
+          <nz-tag [nzColor]="data.registeredStatus === 'Add' ? 'blue' : 'red'">
+            {{data.registeredStatus}}
+          </nz-tag>
+        </td>
+        <td>
+          <nz-tag [nzColor]="getStatusColor(data.approvalStatus)">
+            {{data.approvalStatus}}
+          </nz-tag>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</div>

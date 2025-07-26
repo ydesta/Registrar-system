@@ -1,0 +1,70 @@
+<div class="decision-dialog">
+    <div class="dialog-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <span nz-icon nzType="audit" nzTheme="outline"></span>
+            </div>
+            <div class="header-text">
+                <h2 class="dialog-title">Review Decision</h2>
+                <p class="dialog-subtitle">Make your admission decision for this academic program request</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dialog-body">
+        <form nz-form [formGroup]="reviewerForm" (ngSubmit)="submitForm()" class="decision-form">
+            <div class="form-section">
+                <div class="section-header">
+                    <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+                    <h3 class="section-title">Decision Details</h3>
+                </div>
+                
+                <div class="form-group">
+                    <nz-form-item>
+                        <nz-form-label nzRequired nzFor="decision" class="form-label">
+                            Admission Decision
+                        </nz-form-label>
+                        <nz-form-control nzErrorTip="Please select an admission decision!">
+                            <nz-select id="decision" formControlName="admissionDecision" 
+                                nzPlaceHolder="Select admission decision"
+                                nzShowSearch="true" nzAllowClear="true" class="decision-select">
+                                <nz-option nzValue="2" nzLabel="Pending"></nz-option>
+                                <nz-option nzValue="3" nzLabel="Accepted"></nz-option>
+                                <nz-option nzValue="4" nzLabel="Rejected"></nz-option>
+                            </nz-select>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                
+                <div class="form-group">
+                    <nz-form-item>
+                        <nz-form-label nzFor="remark" class="form-label">
+                            Decision Remarks
+                        </nz-form-label>
+                        <nz-form-control nzErrorTip="Please provide your decision remarks!">
+                            <nz-textarea-count [nzMaxCharacterCount]="250">
+                                <textarea rows="3" formControlName="remark" nz-input 
+                                    placeholder="Enter your detailed decision remarks here..."
+                                    class="decision-textarea"></textarea>
+                            </nz-textarea-count>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="dialog-footer">
+        <div class="footer-actions">
+            <button type="button" nz-button (click)="cancel()" class="cancel-btn">
+                <span nz-icon nzType="close"></span>
+                Cancel
+            </button>
+            <button [disabled]="!reviewerForm.valid" (click)="submitForm()" 
+                nz-button nzType="primary" class="submit-btn">
+                <span nz-icon nzType="check"></span>
+                Submit Decision
+            </button>
+        </div>
+    </div>
+</div>

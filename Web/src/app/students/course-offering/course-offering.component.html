@@ -1,0 +1,38 @@
+<div>
+    <div>
+        <h3 class="h-tag">Course Offerings</h3>
+    </div>
+    <div nz-row>
+      <div nz-col nzSpan="4">
+        <div style="width: 300px;">
+          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+            <input type="text" [(ngModel)] = "searchKey" (ngModelChange)="clickSearchKey()" nz-input placeholder="search..." />
+          </nz-input-group>
+          <ng-template #suffixIconButton>
+            <button (click)="clickSearchKey()" nz-button class="serch" nzSearch><em style="color: white;" nz-icon nzType="search"></em></button>
+          </ng-template>
+        </div>
+      </div>
+      
+      </div>
+        <div>
+            <nz-table #basicTable [nzData]="termCourseOfferings!" nzBordered >
+                <thead class="table-header-row">
+                  <tr class="table-header-row">
+                    <th></th>
+                    <th class="th-row">Course</th>
+                    <th class="th-row">Instructor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr tabindex="0" *ngFor="let data of basicTable.data; let i =index">
+                    <td><label nz-checkbox (nzCheckedChange)="addCourseList($event, data.id)"></label></td>
+                    <td>{{data.couse.courseTitle}}</td>
+                    <td>{{data.staff.firstName +' '+ data.staff.lastName}}</td>
+                  </tr>
+                </tbody>
+              </nz-table>
+              <button (click)="registerCourse()" class="submit">Register Course</button>
+        </div>
+    </div>
+    

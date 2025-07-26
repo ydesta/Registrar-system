@@ -1,0 +1,28 @@
+<h3 class="h-tag">{{ action }}</h3>
+
+<div>
+  <form
+    nz-form
+    nzLayout="vertical"
+    [formGroup]="acadamicStatusForm"
+    (ngSubmit)="submitForm()"
+  >
+    <nz-form-item>
+      <nz-form-label [nzSpan]="7" nzRequired>Acadamic Status</nz-form-label>
+      <nz-form-control [nzSpan]="7">
+        <input
+          nz-input
+          formControlName="academicStatus"
+          placeholder="enter academic status"
+        />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-control [nzOffset]="7" [nzSpan]="7">
+        <button nz-button nzType="primary" class="main-color">
+          {{ submit }}
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</div>

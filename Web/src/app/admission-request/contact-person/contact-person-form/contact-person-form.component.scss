@@ -1,0 +1,310 @@
+/* Custom styles for the error message and input */
+.error {
+  border-color: #ff4d4f; /* Change the input border color to red when there's an error */
+}
+
+.error .ant-form-explain {
+  color: #ff4d4f; /* Set the error message color to red */
+  margin-top: 4px; /* Add some spacing between the input and error message */
+}
+.error-message {
+  color: #ff4d4f;
+}
+
+/* Contact Person Form Container */
+.contact-person-form-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Form Header */
+.form-header {
+  background: linear-gradient(135deg, #1890ff, #096dd9);
+  color: white;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .header-content {
+    flex: 1;
+
+    .form-title {
+      margin: 0 0 4px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .form-subtitle {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.9;
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+}
+
+/* Form Content */
+.contact-form {
+  padding: 32px 24px 24px;
+
+  /* Form Items */
+  ::ng-deep .ant-form-item {
+    margin-bottom: 24px;
+
+    .ant-form-item-label {
+      label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #262626;
+        height: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        &.ant-form-item-required::before {
+          display: none;
+        }
+        
+        &.ant-form-item-required::after {
+          content: '*';
+          display: inline-block;
+          margin-left: 4px;
+          font-size: 14px;
+          color: #ff4d4f;
+          line-height: 1;
+        }
+
+        .field-icon {
+          color: #1890ff;
+          font-size: 16px;
+        }
+      }
+    }
+
+    .ant-form-item-control {
+      .form-input {
+        height: 44px;
+        padding: 8px 16px;
+        font-size: 14px;
+        border-radius: 8px;
+        border: 2px solid #e8e8e8;
+        transition: all 0.3s ease;
+        background: #fafafa;
+
+        &:hover {
+          border-color: #40a9ff;
+          background: #fff;
+        }
+
+        &:focus {
+          border-color: #1890ff;
+          background: #fff;
+          box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+        }
+
+        &.error {
+          border-color: #ff4d4f;
+          background: #fff1f0;
+
+          &:hover, &:focus {
+            border-color: #ff7875;
+          }
+        }
+      }
+
+      .form-select {
+        .ant-select-selector {
+          height: 44px;
+          padding: 8px 16px;
+          border-radius: 8px;
+          border: 2px solid #e8e8e8;
+          background: #fafafa;
+
+          .ant-select-selection-item {
+            line-height: 26px;
+          }
+        }
+
+        &:hover .ant-select-selector {
+          border-color: #40a9ff;
+          background: #fff;
+        }
+
+        &.ant-select-focused .ant-select-selector {
+          border-color: #1890ff;
+          box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+          background: #fff;
+        }
+
+        &.error .ant-select-selector {
+          border-color: #ff4d4f;
+          background: #fff1f0;
+        }
+      }
+    }
+  }
+}
+
+/* Error Messages */
+.error-message {
+  color: #ff4d4f;
+  font-size: 13px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: fadeIn 0.3s ease;
+  padding: 4px 8px;
+  background: #fff1f0;
+  border-radius: 4px;
+  border-left: 3px solid #ff4d4f;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form Actions - Buttons aligned to the right */
+.form-actions {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+
+  .action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    .cancel-btn {
+      min-width: 100px;
+      height: 40px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+      border: 1px solid #d9d9d9;
+      background: #fff;
+      color: #595959;
+
+      &:hover {
+        border-color: #40a9ff;
+        color: #1890ff;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    .submit-btn {
+      min-width: 140px;
+      height: 40px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #1890ff, #096dd9);
+      border: none;
+      color: white;
+      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);
+
+      &:hover:not(:disabled) {
+        background: linear-gradient(135deg, #40a9ff, #1890ff);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.45);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(24, 144, 255, 0.35);
+      }
+
+      &:disabled {
+        background: #f5f5f5;
+        color: #bfbfbf;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+      }
+    }
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .contact-person-form-container {
+    margin: 0 16px;
+  }
+
+  .form-header {
+    padding: 20px;
+    
+    .header-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+    }
+
+    .header-content {
+      .form-title {
+        font-size: 18px;
+      }
+    }
+  }
+
+  .contact-form {
+    padding: 24px 20px 20px;
+  }
+
+  .form-actions {
+    .action-buttons {
+      flex-direction: column;
+      
+      .cancel-btn,
+      .submit-btn {
+        width: 100%;
+      }
+    }
+  }
+
+  ::ng-deep .ant-form-item-label,
+  ::ng-deep .ant-form-item-control {
+    flex: 0 0 100%;
+    max-width: 100%;
+    text-align: left;
+  }
+}

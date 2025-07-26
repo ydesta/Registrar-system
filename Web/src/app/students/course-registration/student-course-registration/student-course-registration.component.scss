@@ -1,0 +1,819 @@
+.serch {
+  background-color: #093e96;
+  color: white;
+  border-radius: 5px;
+}
+.footer-row {
+  background-color: #f0f0f0;
+  align-items: center;
+  
+  td {
+    text-align: center;
+    
+    &:first-child {
+      text-align: right;
+    }
+  }
+}
+.send-request {
+  margin-bottom: 16px;
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  background-color: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  button {
+    min-width: 120px;
+    height: 40px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover:not([disabled]) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+    }
+
+    &:disabled {
+      background-color: #d9d9d9;
+      border-color: #d9d9d9;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.send-request span {
+  margin-left: 8px;
+}
+::ng-deep .ant-table-tbody>tr>td {
+  border-bottom: 1px solid #f0f0f0;
+  border-top: 1px solid #f0f0f0;
+}
+
+::ng-deep .ant-table-tbody>tr:current {
+  background-color: red;
+}
+
+.disabled-row {
+  opacity: 0.6;
+  pointer-events: none;
+  background-color: #f5f5f5;
+}
+
+.disabled-row td {
+  color: #5e5151;
+}
+
+.paginate {
+  pointer-events: auto !important;
+}
+
+// Global checkbox styling for better visibility
+::ng-deep {
+  .ant-checkbox-wrapper {
+    .ant-checkbox {
+      background-color: #fff !important;
+      border: 1px solid #ff4d4f !important;
+      
+      &:hover {
+        border-color: #1890ff !important;
+      }
+      
+      &.ant-checkbox-checked {
+        background-color: #1890ff !important;
+        border-color: #1890ff !important;
+      }
+      
+      &.ant-checkbox-indeterminate {
+        background-color: #1890ff !important;
+        border-color: #1890ff !important;
+      }
+      
+      .ant-checkbox-inner {
+        background-color: transparent;
+        border: none;
+        
+        &::after {
+          border-color: #fff;
+        }
+      }
+    }
+  }
+}
+
+.main-color {
+  background-color: rgb(9, 62, 150);
+}
+
+.priority-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #1890ff;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.selection-summary {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  width: 100%;
+  max-width: 300px;
+
+  span {
+    font-weight: 600;
+    color: #262626;
+    font-size: 15px;
+    display: block;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #1890ff;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin: 10px 0;
+      color: #595959;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      background-color: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+
+      &:hover {
+        background-color: #f0f7ff;
+        transform: translateX(4px);
+      }
+
+      &:before {
+        content: "•";
+        color: #1890ff;
+        font-weight: bold;
+        display: inline-block;
+        width: 1.5em;
+        font-size: 16px;
+      }
+
+      &:nth-child(1) {
+        border-left: 3px solid #52c41a;
+      }
+
+      &:nth-child(2) {
+        border-left: 3px solid #faad14;
+      }
+
+      &:nth-child(3) {
+        border-left: 3px solid #1890ff;
+      }
+    }
+  }
+}
+
+@media print {
+  .paginate {
+      display: none;
+  }
+
+  .logo {
+      display: block;
+  }
+}
+
+.academic-header {
+  padding: 24px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  border: 1px solid #e8e8e8;
+  background-color: #fff;
+
+  .academic-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #f0f7ff;
+        transform: translateY(-2px);
+      }
+
+      .label {
+        font-size: 13px;
+        color: #666;
+        font-weight: 500;
+      }
+
+      .value {
+        font-size: 16px;
+        color: #262626;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Responsive improvements for academic header
+@media (max-width: 768px) {
+  .academic-header {
+    padding: 16px;
+    margin-bottom: 16px;
+
+    .academic-info {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+
+      .info-item {
+        padding: 10px;
+
+        .label {
+          font-size: 12px;
+        }
+
+        .value {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .academic-header {
+    padding: 12px;
+    margin-bottom: 12px;
+
+    .academic-info {
+      grid-template-columns: 1fr;
+      gap: 8px;
+
+      .info-item {
+        padding: 8px;
+
+        .label {
+          font-size: 11px;
+        }
+
+        .value {
+          font-size: 13px;
+        }
+      }
+    }
+  }
+}
+
+.print-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #fff;
+  border: 1px solid #1890ff;
+  color: #1890ff;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.1);
+
+  &:hover {
+    background-color: #1890ff;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(24, 144, 255, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(24, 144, 255, 0.1);
+  }
+
+  nz-icon {
+    font-size: 16px;
+  }
+}
+
+.print-section {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  justify-content: flex-end;
+  padding: 0 16px;
+
+  .print-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #1890ff;
+    background: #fff;
+    color: #1890ff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(24, 144, 255, 0.1);
+
+    &:hover {
+      background: #1890ff;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(24, 144, 255, 0.2);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(24, 144, 255, 0.1);
+    }
+
+    span[nz-icon] {
+      font-size: 16px;
+    }
+  }
+}
+
+// Responsive improvements for print section
+@media (max-width: 768px) {
+  .print-section {
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 0 8px;
+    justify-content: center;
+
+    .print-button {
+      padding: 6px 12px;
+      font-size: 13px;
+
+      span[nz-icon] {
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .print-section {
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding: 0 4px;
+
+    .print-button {
+      padding: 5px 10px;
+      font-size: 12px;
+      justify-content: center;
+
+      span[nz-icon] {
+        font-size: 13px;
+      }
+    }
+  }
+}
+
+.table-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+::ng-deep {
+  .ant-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .ant-card-head {
+      background: #f8f9fa;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 16px 24px;
+      min-height: 60px;
+
+      .ant-card-head-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #262626;
+        padding: 0;
+      }
+    }
+
+    .ant-card-body {
+      padding: 24px;
+    }
+
+    &.ant-card-bordered {
+      border: 1px solid #e8e8e8;
+    }
+  }
+
+  .ant-table-wrapper {
+    .ant-table {
+      border-radius: 8px;
+      overflow: visible;
+
+      .ant-table-thead > tr > th {
+        background: #f8f9fa;
+        color: #262626;
+        font-weight: 600;
+        padding: 16px;
+        border-bottom: 2px solid #e8e8e8;
+
+        &:nth-child(4),
+        &:nth-child(5) {
+          text-align: center;
+        }
+
+        // Sticky first column (checkbox column)
+        &:first-child {
+          position: sticky;
+          left: 0;
+          z-index: 100;
+          background: #f8f9fa !important;
+          border-right: 2px solid #1890ff;
+          min-width: 60px;
+          width: 60px;
+          box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+          
+          // Ensure checkbox is visible
+          ::ng-deep {
+            .ant-checkbox-wrapper {
+              .ant-checkbox {
+                background-color: #fff;
+                border: 1px solid #ff4d4f;
+                
+                &:hover {
+                  border-color: #1890ff;
+                }
+                
+                &.ant-checkbox-checked {
+                  background-color: #1890ff;
+                  border-color: #1890ff;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .ant-table-tbody > tr > td {
+        padding: 16px;
+        border-bottom: 1px solid #f0f0f0;
+
+        &:nth-child(4),
+        &:nth-child(5) {
+          text-align: center;
+        }
+
+        // Sticky first column (checkbox column)
+        &:first-child {
+          position: sticky;
+          left: 0;
+          z-index: 99;
+          background: #fff !important;
+          border-right: 2px solid #1890ff;
+          min-width: 60px;
+          width: 60px;
+          text-align: center;
+          box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+          
+          // Ensure checkbox is visible
+          ::ng-deep {
+            .ant-checkbox-wrapper {
+              .ant-checkbox {
+                background-color: #fff;
+                border: 1px solid #ff4d4f;
+                
+                &:hover {
+                  border-color: #1890ff;
+                }
+                
+                &.ant-checkbox-checked {
+                  background-color: #1890ff;
+                  border-color: #1890ff;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .ant-table-tbody > tr:hover > td {
+        background: #f0f7ff;
+
+        // Ensure sticky column maintains hover state
+        &:first-child {
+          background: #f0f7ff !important;
+        }
+      }
+
+      // Handle disabled rows
+      .ant-table-tbody > tr.disabled-row > td {
+        &:first-child {
+          background: #f5f5f5 !important;
+        }
+      }
+
+      .ant-table-footer {
+        background: #f0f0f0;
+        
+        td {
+          text-align: center;
+          
+          &:first-child {
+            text-align: right;
+          }
+        }
+      }
+    }
+
+    .ant-pagination {
+      margin: 16px 0 0 0;
+      padding: 16px 0 0 0;
+      border-top: 1px solid #f0f0f0;
+    }
+  }
+}
+
+.card-section {
+  margin-top: 24px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.responsive-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  position: relative;
+  
+  // Add shadow effect for sticky column
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 60px;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0,0,0,0.1), transparent);
+    pointer-events: none;
+    z-index: 15;
+  }
+  
+  // Ensure sticky column is always visible
+  .ant-table {
+    position: relative;
+  }
+}
+
+nz-table {
+  min-width: 600px;
+}
+
+// Tablet and smaller desktop screens
+@media (max-width: 1024px) {
+  nz-table {
+    min-width: 550px;
+    font-size: 14px;
+  }
+  
+  .responsive-table-wrapper {
+    &::after {
+      left: 55px;
+    }
+  }
+
+  ::ng-deep {
+    .ant-table-wrapper {
+      .ant-table {
+        .ant-table-thead > tr > th {
+          padding: 12px 8px;
+          
+          &:first-child {
+            min-width: 55px;
+            width: 55px;
+            padding: 12px 6px;
+            z-index: 100;
+          }
+        }
+
+        .ant-table-tbody > tr > td {
+          padding: 12px 8px;
+          
+          &:first-child {
+            min-width: 55px;
+            width: 55px;
+            padding: 12px 6px;
+            z-index: 99;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Tablet screens
+@media (max-width: 768px) {
+  nz-table {
+    min-width: 500px;
+    font-size: 13px;
+  }
+  
+  .th-row, .paginate {
+    padding: 6px 4px;
+  }
+
+  .responsive-table-wrapper {
+    &::after {
+      left: 50px;
+    }
+  }
+
+  // Adjust sticky column for mobile
+  ::ng-deep {
+    .ant-table-wrapper {
+      .ant-table {
+        .ant-table-thead > tr > th {
+          padding: 10px 6px;
+          font-size: 13px;
+          
+          &:first-child {
+            min-width: 50px;
+            width: 50px;
+            padding: 10px 4px;
+            z-index: 100;
+          }
+        }
+
+        .ant-table-tbody > tr > td {
+          padding: 10px 6px;
+          font-size: 13px;
+          
+          &:first-child {
+            min-width: 50px;
+            width: 50px;
+            padding: 10px 4px;
+            z-index: 99;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Mobile screens
+@media (max-width: 480px) {
+  nz-table {
+    min-width: 400px;
+    font-size: 12px;
+  }
+  
+  .responsive-table-wrapper {
+    &::after {
+      left: 45px;
+    }
+  }
+
+  ::ng-deep {
+    .ant-table-wrapper {
+      .ant-table {
+        .ant-table-thead > tr > th {
+          padding: 8px 4px;
+          font-size: 12px;
+          
+          &:first-child {
+            min-width: 45px;
+            width: 45px;
+            padding: 8px 2px;
+            z-index: 100;
+          }
+        }
+
+        .ant-table-tbody > tr > td {
+          padding: 8px 4px;
+          font-size: 12px;
+          
+          &:first-child {
+            min-width: 45px;
+            width: 45px;
+            padding: 8px 2px;
+            z-index: 99;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Small mobile screens
+@media (max-width: 360px) {
+  nz-table {
+    min-width: 350px;
+    font-size: 11px;
+  }
+  
+  .responsive-table-wrapper {
+    &::after {
+      left: 40px;
+    }
+  }
+
+  ::ng-deep {
+    .ant-table-wrapper {
+      .ant-table {
+        .ant-table-thead > tr > th {
+          padding: 6px 3px;
+          font-size: 11px;
+          
+          &:first-child {
+            min-width: 40px;
+            width: 40px;
+            padding: 6px 1px;
+            z-index: 100;
+          }
+        }
+
+        .ant-table-tbody > tr > td {
+          padding: 6px 3px;
+          font-size: 11px;
+          
+          &:first-child {
+            min-width: 40px;
+            width: 40px;
+            padding: 6px 1px;
+            z-index: 99;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Extra small mobile screens
+@media (max-width: 320px) {
+  nz-table {
+    min-width: 300px;
+    font-size: 10px;
+  }
+  
+  .responsive-table-wrapper {
+    &::after {
+      left: 35px;
+    }
+  }
+
+  ::ng-deep {
+    .ant-table-wrapper {
+      .ant-table {
+        .ant-table-thead > tr > th {
+          padding: 5px 2px;
+          font-size: 10px;
+          
+          &:first-child {
+            min-width: 35px;
+            width: 35px;
+            padding: 5px 1px;
+            z-index: 100;
+          }
+        }
+
+        .ant-table-tbody > tr > td {
+          padding: 5px 2px;
+          font-size: 10px;
+          
+          &:first-child {
+            min-width: 35px;
+            width: 35px;
+            padding: 5px 1px;
+            z-index: 99;
+          }
+        }
+      }
+    }
+  }
+}

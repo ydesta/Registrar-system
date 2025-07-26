@@ -1,0 +1,513 @@
+<app-admission-tabs [(selectedTabIndex)]="selectedTabIndex" [isTabDisabled]="isTabDisabled"
+    [showSave]="selectedTabIndex === 1" [showSubmit]="selectedTabIndex === 6" [isLastTab]="selectedTabIndex === 6"
+    [saveDisabled]="!form?.valid" [submitDisabled]="!isAllFormsValid" [nextDisabled]="(selectedTabIndex === 1 && !id) || 
+                    (selectedTabIndex === 2 && countNoOfContact === 0) ||
+                    (selectedTabIndex === 3 && countNoOfEducation === 0) ||
+                    (selectedTabIndex === 5 && countSubmitionCourse === 0)" (nextTabClicked)="nextTab()"
+    (previousTabClicked)="previousTab()" (saveClicked)="submitForm()" (submitClicked)="onApplicanFormSubmit()">
+
+    <div tabContent="instruction">
+        <app-instruction></app-instruction>
+    </div>
+
+    <div tabContent="generalInfo">
+        <form nz-form [formGroup]="form">
+            <div class="form-container">
+                <!-- Profile Picture Section -->
+                <div class="profile-section">
+                    <div class="section-header-wrapper">
+                        <div class="header-icon">
+                            <i nz-icon nzType="user" nzTheme="outline"></i>
+                        </div>
+                        <div class="header-content">
+                            <h3 class="section-title">Profile Picture</h3>
+                            <p class="section-subtitle">Upload a professional photo for your application</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-container">
+                        <div class="profile-image-wrapper">
+                            <div class="profile-image-container">
+                                <img *ngIf="!profilePicture" src="./../../../assets/images/profile.png"
+                                    class="profile-image" alt="Default Profile" />
+                                <img *ngIf="profilePicture" [src]="profilePicture" class="profile-image"
+                                    alt="Profile Picture" />
+                                <div class="image-overlay">
+                                    <i nz-icon nzType="camera" nzTheme="outline"></i>
+                                </div>
+                            </div>
+                            <div class="upload-button-wrapper">
+                                <label class="upload-button">
+                                    <i nz-icon nzType="upload" nzTheme="outline"></i>
+                                    <span>Upload Photo</span>
+                                    <input type="file" id="profilePhoto" name="data" style="visibility: hidden" #f_input
+                                        (change)="handleFileInputChange(f_input.files)" required
+                                        accept=".jpg, .png, .svg" />
+                                </label>
+                                <p class="upload-hint">JPG, PNG, SVG up to 5MB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Basic Personal Information -->
+                <div class="form-section">
+                    <div class="section-header-wrapper">
+                        <div class="header-icon">
+                            <i nz-icon nzType="idcard" nzTheme="outline"></i>
+                        </div>
+                        <div class="header-content">
+                            <h3 class="section-title">Basic Personal Information</h3>
+                            <p class="section-subtitle">Please provide your complete personal details</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-row">
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="user" nzTheme="outline"></i>
+                                        First Name
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="firstName"
+                                            placeholder="Enter your first name" />
+                                        <div *ngIf="firstName?.errors" class="error-message">
+                                            <span *ngIf="firstName?.errors?.['invalidAmharic']">{{firstName?.errors?.['invalidAmharic']?.message}}</span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="user" nzTheme="outline"></i>
+                                        Father Name
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="fatherName"
+                                            placeholder="Enter your father's name" />
+                                        <div *ngIf="fatherName?.errors" class="error-message">
+                                            <span *ngIf="fatherName?.errors?.['invalidEnglish']">{{fatherName?.errors?.['invalidEnglish']?.message}}</span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="user" nzTheme="outline"></i>
+                                        First Name In Amh
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="firstNameInAmh"
+                                            placeholder="Enter your first name In Amh" />
+                                        <div *ngIf="firstNameInAmh?.errors" class="error-message">
+                                            <span *ngIf="firstNameInAmh?.errors?.['invalidEnglish']">{{firstNameInAmh?.errors?.['invalidEnglish']?.message}}</span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="user" nzTheme="outline"></i>
+                                        Father Name In Amh
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="fatherNameInAmh"
+                                            placeholder="Enter your father's name" />
+                                        <div *ngIf="fatherNameInAmh?.errors" class="error-message">
+                                            <span *ngIf="fatherNameInAmh?.errors?.['invalidAmharic']">{{fatherNameInAmh?.errors?.['invalidAmharic']?.message}}</span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="user" nzTheme="outline"></i>
+                                        Grand Father Name In Amh
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="grandFatherNameInAmh"
+                                            placeholder="Enter your grandfather's name" />
+                                        <div *ngIf="grandFatherNameInAmh?.errors" class="error-message">
+                                            <span *ngIf="grandFatherNameInAmh?.errors?.['invalidAmharic']">{{grandFatherNameInAmh?.errors?.['invalidAmharic']?.message}}</span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="user" nzTheme="outline"></i>
+                                        Grand Father Name
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="grandFatherName"
+                                            placeholder="Enter your grandfather's name" />
+                                        <div *ngIf="grandFatherName?.errors" class="error-message">
+                                            <span *ngIf="grandFatherName?.errors?.['invalidEnglish']">{{grandFatherName?.errors?.['invalidEnglish']?.message}}</span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="user" nzTheme="outline"></i>
+                                        Mother Name
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="motherName"
+                                            placeholder="Enter your mother's name" />
+                                        <div *ngIf="motherName?.errors" class="error-message">
+                                            <span *ngIf="motherName?.errors?.['invalidChars']">{{motherName?.errors?.['invalidChars']?.message}}</span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label>
+                                        <i nz-icon nzType="user" nzTheme="outline"></i>
+                                        Sir Name
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="sirName" placeholder="Enter your sir name" />
+                                        <div *ngIf="sirName?.errors" class="error-message">
+                                            <span *ngIf="sirName?.errors?.['alphabetsOnly']">{{sirName?.errors?.['alphabetsOnly']?.message}}</span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="team" nzTheme="outline"></i>
+                                        Gender
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <nz-select formControlName="gender" nzPlaceHolder="Select your gender">
+                                            <nz-option nzValue="Male" nzLabel="Male"></nz-option>
+                                            <nz-option nzValue="Female" nzLabel="Female"></nz-option>
+                                        </nz-select>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="calendar" nzTheme="outline"></i>
+                                        Birth Date
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <nz-date-picker formControlName="birthDate" [nzDisabledDate]="disabledDate"
+                                            style="width: 100%"></nz-date-picker>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="environment" nzTheme="outline"></i>
+                                        Birth Place
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="birthPlace"
+                                            placeholder="Enter your birth place" />
+                                        <div *ngIf="birthPlace?.errors" class="error-message">
+                                            <span *ngIf="birthPlace?.errors?.['invalidChars']">{{birthPlace?.errors?.['invalidChars']?.message}}</span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="flag" nzTheme="outline"></i>
+                                        Nationality
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="nationality"
+                                            placeholder="Enter your nationality" />
+                                        <div *ngIf="nationality?.errors" class="error-message">
+                                            <span *ngIf="nationality?.errors?.['alphabetsOnly']">{{nationality?.errors?.['alphabetsOnly']?.message}}</span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="environment" nzTheme="outline"></i>
+                                        National Examination ID
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="nationalExaminationId"
+                                            placeholder="Enter your national examination id" />
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="environment" nzTheme="outline"></i>
+                                        National Id
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="nationalId"
+                                            placeholder="Enter your national id" />
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="environment" nzTheme="outline"></i>
+                                        Tax Identification Number (TIN)
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="tin"
+                                            placeholder="Enter your tax identification number" />
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                             <div class="form-field"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="form-section">
+                    <div class="section-header-wrapper">
+                        <div class="header-icon">
+                            <i nz-icon nzType="phone" nzTheme="outline"></i>
+                        </div>
+                        <div class="header-content">
+                            <h3 class="section-title">Contact Information</h3>
+                            <p class="section-subtitle">Provide your contact details for communication</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-row">
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="mobile" nzTheme="outline"></i>
+                                        Mobile
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="mobile"
+                                            placeholder="Enter your mobile number" />
+                                        <div *ngIf="mobile?.errors" class="error-message">
+                                            <span *ngIf="mobile?.errors?.['invalidPhoneNumber']">{{mobile?.errors?.['invalidPhoneNumber']?.message}}</span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label>
+                                        <i nz-icon nzType="phone" nzTheme="outline"></i>
+                                        Office Phone
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="telephonOffice"
+                                            placeholder="Enter your office phone" />
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label>
+                                        <i nz-icon nzType="phone" nzTheme="outline"></i>
+                                        Home Phone
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="telephonHome"
+                                            placeholder="Enter your home phone" />
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label required>
+                                        <i nz-icon nzType="mail" nzTheme="outline"></i>
+                                        Email
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="emailAddress"
+                                            placeholder="Enter your email address" />
+                                        <div *ngIf="emailAddress?.errors" class="error-message">
+                                            <span *ngIf="emailAddress?.errors?.['invalidEmail']">{{emailAddress?.errors?.['invalidEmail']?.message}}</span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label>
+                                        <i nz-icon nzType="home" nzTheme="outline"></i>
+                                        Postal Address
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="postalAddress"
+                                            placeholder="Enter your complete postal address" />
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label>
+                                        <i nz-icon nzType="home" nzTheme="outline"></i>
+                                        Area Type
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="areaType" placeholder="Enter your area type" />
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Information -->
+                <div class="form-section">
+                    <div class="section-header-wrapper">
+                        <div class="header-icon">
+                            <i nz-icon nzType="environment" nzTheme="outline"></i>
+                        </div>
+                        <div class="header-content">
+                            <h3 class="section-title">Address Information</h3>
+                            <p class="section-subtitle">Provide your current residential address details</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-row">
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label>
+                                        <i nz-icon nzType="global" nzTheme="outline"></i>
+                                        Region
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="region" placeholder="Enter your region" />
+                                        <div *ngIf="region?.errors" class="error-message">
+                                            <span *ngIf="region?.errors?.['alphabetsOnly']">{{region?.errors?.['alphabetsOnly']?.message}}</span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label>
+                                        <i nz-icon nzType="bank" nzTheme="outline"></i>
+                                        City
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="city" placeholder="Enter your city" />
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label>
+                                        <i nz-icon nzType="cluster" nzTheme="outline"></i>
+                                        Woreda
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="woreda" placeholder="Enter your woreda" />
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-label>
+                                        <i nz-icon nzType="home" nzTheme="outline"></i>
+                                        Kebele
+                                    </nz-form-label>
+                                    <nz-form-control>
+                                        <input nz-input formControlName="kebele" placeholder="Enter your kebele" />
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Debug section -->
+                <!-- <div style="margin-top: 20px; padding: 16px; background: #f5f5f5; border-radius: 8px;">
+                    <h4>Debug Information</h4>
+                    <button nz-button nzType="primary" (click)="testValidation()">Test Validation</button>
+                    <div style="margin-top: 10px;">
+                        <strong>Form Valid:</strong> {{form?.valid}}<br>
+                        <strong>First Name Errors:</strong> {{firstName?.errors | json}}<br>
+                        <strong>First Name In Amh Errors:</strong> {{firstNameInAmh?.errors | json}}
+                    </div>
+                </div> -->
+            </div>
+        </form>
+    </div>
+
+    <div tabContent="contactPerson">
+        <app-manage-contact-person-form></app-manage-contact-person-form>
+    </div>
+
+    <div tabContent="education">
+        <app-manage-education></app-manage-education>
+    </div>
+
+    <div tabContent="workExperience">
+        <app-manage-work-experience></app-manage-work-experience>
+    </div>
+
+    <div tabContent="academicProgram">
+        <app-manage-student-program-requester></app-manage-student-program-requester>
+    </div>
+
+    <div tabContent="files">
+        <app-school-with-student-agreement (formValidityChange)="onAgreementFormValidityChange($event)"
+            (formValueChange)="onAgreementFormValueChange($event)"></app-school-with-student-agreement>
+    </div>
+
+</app-admission-tabs>

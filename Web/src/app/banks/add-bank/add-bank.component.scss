@@ -1,0 +1,272 @@
+// Content Container
+.content-container {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+// Header Section
+.header-section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  position: relative;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .page-title {
+      flex: 1;
+      min-width: 0;
+      .title-text {
+        margin: 0 0 8px 0;
+        font-size: 28px;
+        font-weight: 700;
+        color: #1f2937;
+        line-height: 1.2;
+      }
+      .subtitle-text {
+        margin: 0;
+        color: #6b7280;
+        font-size: 16px;
+        font-weight: 400;
+      }
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      .back-btn {
+        background: #f1f5f9;
+        color: #374151;
+        border-radius: 10px;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        padding: 0 18px;
+        &:hover {
+          background: #e0e7ef;
+          color: #1890ff;
+        }
+      }
+    }
+  }
+}
+
+// Form Card
+.form-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  padding: 32px;
+}
+
+// Form Container
+.form-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+// Form Styling
+.bank-form {
+  ::ng-deep .ant-form-item {
+    margin-bottom: 24px;
+    
+    .ant-form-item-label {
+      label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 14px;
+        
+        &.ant-form-item-required::before {
+          color: #ef4444;
+        }
+      }
+    }
+    
+    .ant-form-item-control {
+      .ant-form-item-control-input {
+        .ant-form-item-control-input-content {
+          .ant-input {
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            padding: 12px 16px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            
+            &:focus {
+              border-color: #1890ff;
+              box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+            }
+            
+            &:hover {
+              border-color: #40a9ff;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Label Text
+.label-text {
+  font-weight: 600;
+  color: #374151;
+}
+
+// Form Input
+.form-input {
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 12px 16px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    border-color: #1890ff;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
+  
+  &:hover {
+    border-color: #40a9ff;
+  }
+}
+
+// Submit Section
+.submit-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+// Button Group
+.button-group {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+// Cancel Button
+.cancel-btn {
+  background: #f1f5f9;
+  color: #374151;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 0 20px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #e0e7ef;
+    color: #6b7280;
+    transform: translateY(-1px);
+  }
+}
+
+// Submit Button
+.submit-btn {
+  background: #1890ff;
+  color: white;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  padding: 0 24px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  
+  &:hover:not(:disabled) {
+    background: #40a9ff;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+  }
+  
+  &:disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .content-container {
+    padding: 16px;
+  }
+  
+  .header-section {
+    padding: 16px;
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      .header-actions {
+        width: 100%;
+        .back-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    }
+  }
+  
+  .form-card {
+    padding: 20px;
+    border-radius: 12px;
+  }
+  
+  .form-container {
+    max-width: 100%;
+  }
+  
+  .bank-form {
+    ::ng-deep .ant-form-item {
+      .ant-form-item-label {
+        width: 100% !important;
+        text-align: left;
+        margin-bottom: 8px;
+      }
+      .ant-form-item-control {
+        width: 100% !important;
+      }
+    }
+  }
+  
+  .submit-section {
+    .ant-form-item-control {
+      width: 100% !important;
+      margin-left: 0 !important;
+    }
+  }
+  
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+    
+    .cancel-btn, .submit-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}

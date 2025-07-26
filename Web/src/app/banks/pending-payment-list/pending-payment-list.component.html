@@ -1,0 +1,64 @@
+<div class="pending-payments-container">
+  <div class="header-section">
+    <div class="title-section">
+      <h3>Pending Payments</h3>
+      <div class="subtitle">View and manage your pending course payments</div>
+    </div>
+    <div class="total-amount">
+      <div class="label">Total Pending Amount</div>
+      <div class="amount">{{ getTotalAmount() | currency:'ETB ' }}</div>
+    </div>
+  </div>
+
+  <app-payment-instructions></app-payment-instructions>
+
+  <div class="table-section">
+    <nz-table 
+      #basicTable 
+      [nzData]="listOfPendingPayments" 
+      [nzShowPagination]="false"
+      [nzLoading]="isLoading"
+      [nzShowSizeChanger]="true">
+      <thead>
+        <tr>
+          <th>Batch Code</th>
+          <th>Request Type</th>
+          <th>Total Courses</th>
+          <th>Registered On</th>
+          <th>Status</th>
+          <th>Amount</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of basicTable.data">
+          <td>{{ data.batchCode }}</td>
+          <td>{{ data.requestType }}</td>
+          <td>{{ data.numberOfRegistered }}</td>
+          <td class="date-cell">{{ data.registeredOn | date:'mediumDate' }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="data.status.toLowerCase()">{{ data.status }}</span>
+          </td>
+          <td class="amount-cell">{{ data.totalPayment | currency:'ETB ' }}</td>
+          <td class="action-button">
+            <button 
+              nz-button 
+              nzType="primary" 
+              (click)="goToPaymentPage(data)" 
+              [disabled]="data.status === 'Paid'"
+              [nzLoading]="data.isProcessing">
+              <!-- <span class="currency-symbol">ETB</span> -->
+             Payment 
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+
+    <div *ngIf="listOfPendingPayments.length === 0" class="empty-state">
+      <em nz-icon nzType="inbox" nzTheme="outline" class="empty-icon"></em>
+      <div class="empty-text">No pending payments found</div>
+    </div>
+  </div>
+</div>
+  

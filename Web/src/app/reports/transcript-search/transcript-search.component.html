@@ -1,0 +1,232 @@
+<div class="transcript-search-container">
+  <!-- Search Form -->
+  <div *ngIf="showSearchForm">
+     <nz-card>
+      <div class="search-content">
+        <!-- <h2 nz-typography nzTitle>Student Transcript Search</h2>
+        <p nz-typography nzType="secondary">Enter a Student ID to search for their transcript.</p> -->
+         
+        <app-student-search
+          (searchSubmitted)="onSearchSubmitted($event)">
+        </app-student-search>
+       </div>
+    </nz-card> 
+  </div>
+
+  <!-- Transcript Display -->
+  <div *ngIf="transcript && !showSearchForm" class="transcript-section">
+    <div class="transcript-header">
+      <h2 nz-typography nzTitle>Student Transcript</h2>
+      <div class="header-actions">
+        <button 
+          nz-button 
+          nzType="default"
+          (click)="showSearch()">
+          <i nz-icon nzType="arrow-left"></i> New Search
+        </button>
+        <button 
+          nz-button 
+          nzType="primary"
+          [nzLoading]="isExporting"
+          (click)="exportTranscript()">
+          <i nz-icon nzType="download"></i> 
+          {{ isExporting ? 'Exporting...' : 'Export PDF' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="transcript-content">
+      <!-- University Header Section -->
+      <nz-card class="transcript-document">
+        <!-- Watermark -->
+        <div class="watermark">COPY</div>
+        
+        <!-- Header Section -->
+        <div class="header-section">
+          <div class="university-info">
+            <div class="university-logo">
+              <i nz-icon nzType="bank" nzTheme="outline"></i>
+            </div>
+            <div class="university-details">
+              <h1 class="university-name">HiLCoE</h1>
+              <h2 class="university-subtitle">School of Computer Science & Technology</h2>
+              <div class="contact-info">
+                <p>Tel. (+251-111) 559769, 564900 P.O.Box 25304/1000</p>
+                <p>e-mail info&#64;hilcoe.net</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="student-program-info">
+            <div class="program-details">
+              <div class="info-row">
+                <span class="label">Programme:</span>
+                <span class="value">BSc degree in Computer Science</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Division:</span>
+                <span class="value">Day</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Status:</span>
+                <span class="value">Regular</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Major:</span>
+                <span class="value">Computer Science</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Award Date:</span>
+                <span class="value">August 15, 2018</span>
+              </div>
+            </div>
+            
+            <div class="student-details">
+              <div class="info-row">
+                <span class="label">Full Name:</span>
+                <span class="value">{{ transcript.fullName }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Gender:</span>
+                <span class="value">{{ transcript.gender || 'Male' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Date of Birth:</span>
+                <span class="value">{{ transcript.dateOfBirth || 'January 15, 1983' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Place of Birth:</span>
+                <span class="value">{{ transcript.placeOfBirth || 'Wukro' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Admission Date:</span>
+                <span class="value">{{ transcript.admissionDate || 'September 2012' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Academic Records -->
+        <div class="academic-records">
+          <div class="term-section" *ngFor="let termRecord of transcript.academicTerms">
+            <nz-card class="term-card">
+              <div class="term-header">
+                <h3 nz-typography nzTitle>Term: {{ termRecord.termName }}</h3>
+              </div>
+              
+              <nz-table 
+                #courseTable 
+                [nzData]="termRecord.courses"
+                [nzShowPagination]="false"
+                [nzSize]="'small'"
+                [nzBordered]="true"
+                [nzShowSizeChanger]="false"
+                [nzShowQuickJumper]="false">
+                <thead>
+                  <tr>
+                    <th nzWidth="20%">Course Code</th>
+                    <th nzWidth="40%">Course Title</th>
+                    <th nzWidth="12%">Credit Hour</th>
+                    <th nzWidth="12%">Grade</th>
+                    <th nzWidth="16%">Grade Point</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let course of courseTable.data">
+                    <td>{{ course.courseCode }}</td>
+                    <td>{{ course.courseTitle }}</td>
+                    <td class="text-center">{{ course.creditHours }}</td>
+                    <td class="text-center">{{ course.grade }}</td>
+                    <td class="text-center">{{ formatDecimal(course.gradePoint) }}</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td class="summary-label"></td>
+                    <td>Total:</td>
+                    <td class="summary-value text-center">{{ termRecord.totalCreditHours }}</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="summary-label"></td>
+                    <td>Average:</td>
+                    <td class="summary-value text-center">{{ formatDecimal(termRecord.termGPA) }}</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="summary-label"></td>
+                    <td>Total Credit Hour:</td>
+                    <td class="summary-value text-center">{{ formatDecimal(termRecord.totalCreditHours) }}</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="summary-label"></td>
+                    <td>CGPA:</td>
+                    <td class="summary-value text-center">{{ formatDecimal(termRecord.cumulativeGPA) }}</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td></td>
+                    <td>Major CGPA:</td>
+                    <td class="summary-value text-center">{{ formatDecimal(termRecord.cumulativeMajorGPA) }}</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </nz-table>
+              
+              <nz-divider></nz-divider>
+            </nz-card>
+          </div>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="footer-section">
+          <nz-card class="grade-scale-card">
+            <p nz-typography nzType="secondary"><strong>Grade Scale:</strong> A+=4.0, A=4.0, B+=3.5, B=3.0, C+=2.5, C=2.0, D=1.0, F=0.0</p>
+            <p nz-typography nzType="secondary"><strong>Validity Note:</strong> is valid only if it is signed and sealed</p>
+            <p nz-typography nzType="secondary"><strong>Credit Hour Conversion:</strong> 1 credit hour per term at HiLCOE is equivalent to 0.75 credit hour in semester system</p>
+          </nz-card>
+          
+          <nz-card class="signatures-card">
+            <div class="signatures-section">
+              <div class="signature-left">
+                <div class="signature-line"></div>
+                <p class="signature-name">Mohammed Juhar</p>
+                <p class="signature-title">Chief Registrar</p>
+              </div>
+              
+              <div class="university-seal">
+                <div class="seal-circle">
+                  <div class="seal-content">
+                    <div class="seal-logo">HiLCoE</div>
+                    <div class="seal-text">School of Computer Science & Technology</div>
+                    <div class="seal-contact">
+                      <div>+251-11-156 4888</div>
+                      <div>P.O.Box 25304/1000</div>
+                      <div>Addis Ababa, Ethiopia</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="signature-right">
+                <div class="signature-line"></div>
+                <p class="signature-name">Abdella Endris</p>
+                <p class="signature-title">Academic Programme Coordinator</p>
+              </div>
+            </div>
+          </nz-card>
+        </div>
+      </nz-card>
+
+      <div class="generation-date">
+        <p nz-typography nzType="secondary">Generated on: {{ getCurrentDate() }}</p>
+      </div>
+    </div>
+  </div>
+</div> 

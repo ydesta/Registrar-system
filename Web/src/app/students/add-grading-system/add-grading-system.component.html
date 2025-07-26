@@ -1,0 +1,40 @@
+
+<h3 class="h-tag">{{action}}</h3>
+
+<div>
+    <form nz-form  nzLayout="vertical" [formGroup]="staffForm" (ngSubmit)="submitForm()">
+
+      <nz-form-item>  
+        <nz-form-label [nzSpan]="7" nzRequired>Grade</nz-form-label>
+        <nz-form-control [nzSpan]="7">
+          <input nz-input formControlName="grade" placeholder="enter grade " />
+        </nz-form-control>
+      </nz-form-item>
+   
+        <nz-form-item>  
+          <nz-form-label [nzSpan]="7" nzRequired>Grade Description</nz-form-label>
+          <nz-form-control [nzSpan]="7">
+            <input nz-input formControlName="gradeDescription" placeholder="enter grade gescription" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>  
+          <nz-form-label [nzSpan]="7" nzRequired>Point</nz-form-label>
+          <nz-form-control [nzSpan]="7">
+            <input nz-input formControlName="point" placeholder="enter point" />
+          </nz-form-control>
+        </nz-form-item>
+     
+          <nz-form-item>  
+            <nz-form-label [nzSpan]="7" nzRequired>Remark</nz-form-label>
+            <nz-form-control [nzSpan]="7">
+              <input nz-input formControlName="remark" placeholder="enter remark" />
+            </nz-form-control>
+          </nz-form-item>
+         
+        <nz-form-item>
+          <nz-form-control [nzOffset]="7" [nzSpan]="7">
+            <button nz-button nzType="primary">{{submit}}</button>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+</div>

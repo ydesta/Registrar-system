@@ -1,0 +1,255 @@
+// Import common styles
+@import '../styles/common.scss';
+
+/* Main container */
+.instruction-container {
+  @extend .page-container;
+}
+
+/* Header section */
+.instruction-header {
+  @extend .section-header;
+  
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 32px;
+    background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(24, 144, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+      opacity: 0.3;
+    }
+    
+    .header-icon {
+      flex-shrink: 0;
+      
+      i {
+        font-size: 48px;
+        color: white;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+}
+
+    .header-text {
+      flex: 1;
+      
+      .instruction-title {
+        @extend .section-title;
+      }
+      
+      .instruction-subtitle {
+        @extend .section-subtitle;
+      }
+    }
+  }
+}
+
+/* Content section */
+.instruction-content {
+  .instruction-card {
+    @extend .content-card;
+    
+    .instruction-list {
+      padding: 32px;
+      
+      .instruction-item {
+        @extend .list-item;
+        @include fade-in-up;
+        
+        &:nth-child(1) { animation-delay: 0.1s; }
+        &:nth-child(2) { animation-delay: 0.2s; }
+        &:nth-child(3) { animation-delay: 0.3s; }
+        &:nth-child(4) { animation-delay: 0.4s; }
+      }
+    }
+    
+    .instruction-footer {
+      @extend .card-footer;
+      
+      .footer-note {
+        @include flex-start;
+        gap: $spacing-md;
+        padding: $spacing-md $spacing-lg;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: $border-radius-md;
+        border: 1px solid rgba($warning-color, 0.2);
+        
+        i {
+    font-size: 20px;
+          color: $warning-color;
+          flex-shrink: 0;
+  }
+        
+        span {
+          font-size: $font-size-sm;
+          color: $text-muted;
+          font-weight: $font-weight-medium;
+          line-height: $line-height-normal;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .instruction-container {
+    padding: 16px;
+  }
+  
+  .instruction-header .header-content {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px;
+    
+    .header-icon i {
+      font-size: 40px;
+    }
+    
+    .header-text .instruction-title {
+      font-size: 24px;
+    }
+    
+    .header-text .instruction-subtitle {
+      font-size: 14px;
+    }
+  }
+  
+  .instruction-content .instruction-card {
+    .instruction-list {
+      padding: 20px;
+      
+      .instruction-item {
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px;
+        
+        .item-icon {
+          align-self: center;
+  }
+  
+        .item-number {
+          align-self: center;
+        }
+      }
+    }
+    
+    .instruction-footer {
+      padding: 20px;
+      
+      .footer-note {
+    flex-direction: column;
+        text-align: center;
+        gap: 8px;
+      }
+    }
+  }
+}
+  
+  @media (max-width: 480px) {
+  .instruction-container {
+    padding: 12px;
+  }
+  
+  .instruction-header .header-content {
+    padding: 20px;
+    
+    .header-icon i {
+      font-size: 32px;
+    }
+    
+    .header-text .instruction-title {
+    font-size: 20px;
+  }
+}
+
+  .instruction-content .instruction-card {
+    border-radius: 12px;
+    
+    .instruction-list {
+      padding: 16px;
+      
+      .instruction-item {
+        padding: 16px;
+        margin-bottom: 16px;
+        
+        .item-icon {
+          width: 40px;
+          height: 40px;
+          
+          i {
+            font-size: 20px;
+          }
+        }
+        
+        .item-content {
+          .item-title {
+            font-size: 16px;
+          }
+          
+          .item-description {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+    
+    .instruction-footer {
+      padding: 16px;
+    }
+  }
+}
+
+/* Animation for items */
+.instruction-item {
+  animation: fadeInUp 0.6s ease forwards;
+  opacity: 0;
+  transform: translateY(20px);
+  
+  &:nth-child(1) { animation-delay: 0.1s; }
+  &:nth-child(2) { animation-delay: 0.2s; }
+  &:nth-child(3) { animation-delay: 0.3s; }
+  &:nth-child(4) { animation-delay: 0.4s; }
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Print styles */
+@media print {
+  .instruction-container {
+    background: white;
+    padding: 0;
+  }
+  
+  .instruction-header .header-content {
+    background: #f0f0f0;
+    color: #000;
+    
+    .header-text .instruction-title,
+    .header-text .instruction-subtitle {
+      color: #000;
+}
+  }
+  
+  .instruction-content .instruction-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}

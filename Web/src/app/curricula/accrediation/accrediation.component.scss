@@ -1,0 +1,21 @@
+/* Component specific styles can be added here */
+
+// The following styles are now handled by global CSS classes:
+// - content-container
+// - header-section
+// - action-buttons
+// - action-button
+// - action-item
+// - no-data
+// - table styles (nz-table)
+// - pagination styles (nz-pagination)
+
+.logo {
+    display: none;
+}
+
+@media print {
+    .logo {
+        display: block;
+    }
+}

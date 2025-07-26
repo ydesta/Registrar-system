@@ -1,0 +1,60 @@
+<h3 class="h-tag">{{ action }}</h3>
+
+<div>
+  <form nz-form [formGroup]="acadamicProgramForm" (ngSubmit)="submitForm()">
+    <nz-card>
+      <div nz-row [nzGutter]="24">
+        <div nz-col nzSpan="10">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="7" nzRequired>Curriculum</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <nz-select formControlName="curriculumCode" nzPlaceHolder="Select Curriculum ">
+                <nz-option *ngFor="let item of curricula" [nzValue]="item.curriculumCode"
+                  [nzLabel]="item.curriculumCode"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="7" nzRequired>Division</nz-form-label>
+            <nz-form-control nzValidatingTip="Validating...">
+              <input nz-input formControlName="division" placeholder="Enter Division" />
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="7">Remark</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="remark" placeholder="enter remark" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col nzSpan="12">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="12" nzRequired>Re-accreditation  Submission Date</nz-form-label>
+            <nz-form-control>
+              <nz-date-picker formControlName="reaccreditionSubmissionDate"></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="12" nzRequired>Accreditation Begin Date</nz-form-label>
+            <nz-form-control>
+              <nz-date-picker formControlName="accreditionBeginDate"></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label [nzSpan]="12" nzRequired>Accreditation End Date</nz-form-label>
+            <nz-form-control>
+              <nz-date-picker formControlName="accreditionEndDate"></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    <nz-form-item>
+      <nz-form-control [nzOffset]="12" [nzSpan]="12">
+        <button nz-button nzType="primary" class="main-color">
+          {{ submit }}
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </nz-card>
+  </form>
+</div>

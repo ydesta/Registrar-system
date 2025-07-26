@@ -1,0 +1,121 @@
+<app-auth-header></app-auth-header>
+
+<div class="login-container">
+  <div class="login-card">
+    <div class="logo-section">
+      <img src="../../../assets/images/logo.png" alt="HiLCoE Logo" class="logo" (click)="goToHome()" style="cursor: pointer;">
+      <h2>Welcome Back</h2>
+      <p>Sign in to your HiLCoE account</p>
+  </div>
+
+    <!-- Error Message -->
+    <div *ngIf="incorrectLoginAttempt" class="error-message">
+      <span>{{ incorrectLoginAttempt }}</span>
+  </div>
+
+    <!-- Verification Actions -->
+    <div *ngIf="incorrectLoginAttempt && incorrectLoginAttempt.includes('verify your email')" class="verification-actions">
+      <button 
+        nz-button 
+        class="resend-verification-button" 
+        [nzType]="'default'"
+        [nzLoading]="isLoading"
+        (click)="resendVerificationEmail()">
+        {{ isLoading ? 'Sending...' : 'Resend Verification Email' }}
+      </button>
+    </div>
+
+    <!-- Login Form -->
+    <form *ngIf="!requiresTwoFactor" nz-form [formGroup]="loginForm" class="login-form" (ngSubmit)="submitForm()">
+    <nz-form-item>
+        <nz-form-control nzErrorTip="Please input a valid email!">
+          <nz-input-group nzPrefixIcon="mail">
+            <input type="email" nz-input formControlName="email" placeholder="Email Address" />
+        </nz-input-group>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+        <nz-form-control nzErrorTip="Please input your password!">
+        <nz-input-group nzPrefixIcon="lock">
+            <input type="password" nz-input formControlName="password" placeholder="Password" />
+        </nz-input-group>
+      </nz-form-control>
+    </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control>
+          <div class="form-options">
+            <label nz-checkbox formControlName="rememberMe">
+        <span>Remember me</span>
+      </label>
+            <a class="forgot-password" routerLink="/accounts/forgot-password">Forgot password?</a>
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+
+      <div class="login-actions">
+        <button 
+          nz-button 
+          class="login-button" 
+          [nzType]="'primary'" 
+          [nzLoading]="isLoading"
+          [disabled]="!loginForm.valid || isLoading">
+          {{ isLoading ? 'Signing in...' : 'Sign In' }}
+        </button>
+    </div>
+    </form>
+
+    <!-- Two-Factor Authentication Form -->
+    <div *ngIf="requiresTwoFactor" class="otp-form">
+      <h3>Two-Factor Authentication</h3>
+      <p>Please enter the 6-digit verification code sent to your email.</p>
+      <nz-form-item>
+        <nz-form-control>
+          <nz-input-group nzPrefixIcon="safety">
+            <input 
+              type="text" 
+              nz-input 
+              placeholder="Enter 6-digit code" 
+              maxlength="6" 
+              #otpInput 
+              (keyup.enter)="verifyOtp(otpInput.value)"
+              style="text-align: center; font-size: 18px; letter-spacing: 4px;" />
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+      <div class="otp-actions">
+        <button nz-button class="verify-button" [nzType]="'primary'" [nzLoading]="isLoading"
+          (click)="verifyOtp(otpInput.value)">
+          {{ isLoading ? 'Verifying...' : 'Verify Code' }}
+        </button>
+        <button nz-button class="back-button" (click)="requiresTwoFactor = false">
+          Back to Login
+        </button>
+      </div>
+      
+      <div class="resend-otp-section">
+        <p class="resend-text">
+          Didn't receive the code? 
+          <button 
+            *ngIf="canResendOtp"
+            nz-button 
+            nzType="link" 
+            class="resend-link"
+            (click)="resendOtp()">
+            Resend Code
+          </button>
+          <span *ngIf="!canResendOtp" class="countdown-text">
+            Resend available in {{ otpResendCountdown }}s
+          </span>
+        </p>
+      </div>
+    </div>
+    
+    <!-- Register Link -->
+    <div class="register-link">
+      <span>Don't have an account? </span>
+      <a (click)="goToRegister()">Sign up</a>
+    </div>
+  </div>
+  </div>

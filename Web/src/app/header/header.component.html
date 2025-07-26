@@ -1,0 +1,35 @@
+<div class="header">
+  <div class="button">
+    <!-- Show Apply button only for authenticated applicants -->
+    <a
+      routerLink="/applicants/register-applicant/new"
+      nz-button
+      nzType="primary"
+      *ngIf="isUserAuthenticated && isUserApplicant"
+      >Apply</a
+    >
+    
+    <!-- Show login button for unauthenticated users -->
+    <button 
+      nz-button 
+      nzType="primary" 
+      (click)="login()" 
+      class="login"
+      *ngIf="!isUserAuthenticated">
+      Login
+    </button>
+    
+    <!-- Show logout button for authenticated users -->
+    <button 
+      nz-button 
+      nzType="default" 
+      (click)="logout()" 
+      class="logout"
+      *ngIf="isUserAuthenticated">
+      Logout
+    </button>
+  </div>
+  <div class="logo">
+    <img src="../../assets/images/logo.png" height="50" alt="HiLCoE Logo" />
+  </div>
+</div>

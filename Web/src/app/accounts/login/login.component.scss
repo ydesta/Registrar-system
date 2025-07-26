@@ -1,0 +1,278 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #F8F8FF;
+  padding: 20px;
+  padding-top: 90px;
+}
+
+.login-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-left: 8px solid #1890ff;
+  padding: 40px;
+  width: 100%;
+  max-width: 500px;
+  backdrop-filter: blur(10px);
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 30px;
+
+  .logo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    color: #333;
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  p {
+    color: #666;
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.error-message {
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 20px;
+  color: #ff4d4f;
+  font-size: 14px;
+  text-align: center;
+}
+
+.verification-actions {
+  margin-bottom: 20px;
+  text-align: center;
+
+  .resend-verification-button {
+    height: 40px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid #1890ff;
+    background: white;
+    color: #1890ff;
+
+    &:hover {
+      background: #1890ff;
+      color: white;
+    }
+  }
+}
+
+.login-form {
+  .ant-form-item {
+    margin-bottom: 20px;
+  }
+
+  .ant-input-group {
+    .ant-input {
+      height: 44px;
+      border-radius: 6px;
+      border: 1px solid #d9d9d9;
+      transition: all 0.3s;
+
+      &:focus {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+      }
+    }
+  }
+
+  .form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+
+    .ant-checkbox-wrapper {
+      color: #666;
+}
+
+    .forgot-password {
+      color: #1890ff;
+      text-decoration: none;
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.login-actions {
+  margin-bottom: 24px;
+
+  .login-button {
+    width: 100%;
+    height: 44px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    background: #1890ff;
+    border: none;
+
+    &:hover {
+      background: #096dd9;
+    }
+  }
+}
+
+.otp-form {
+  text-align: center;
+
+  h3 {
+    color: #333;
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  p {
+    color: #666;
+    margin: 0 0 20px 0;
+    font-size: 14px;
+  }
+
+  .ant-input-group {
+    .ant-input {
+      height: 44px;
+      border-radius: 6px;
+      border: 1px solid #d9d9d9;
+      transition: all 0.3s;
+      text-align: center;
+      font-size: 18px;
+      letter-spacing: 2px;
+
+      &:focus {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+      }
+    }
+  }
+
+  .otp-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+
+    .verify-button {
+      flex: 1;
+      height: 44px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      background: #1890ff;
+      border: none;
+
+      &:hover {
+        background: #096dd9;
+      }
+    }
+
+    .back-button {
+      flex: 1;
+      height: 44px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      border: 1px solid #d9d9d9;
+      background: white;
+      color: #666;
+
+      &:hover {
+        border-color: #1890ff;
+        color: #1890ff;
+      }
+    }
+  }
+
+  .resend-otp-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+
+    .resend-text {
+      color: #666;
+      font-size: 14px;
+      margin: 0;
+
+      .resend-link {
+        color: #1890ff;
+        padding: 0;
+        height: auto;
+        border: none;
+        background: none;
+        font-size: 14px;
+        text-decoration: none;
+
+        &:hover {
+          color: #096dd9;
+          text-decoration: underline;
+        }
+      }
+
+      .countdown-text {
+        color: #999;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+.register-link {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+
+  a {
+    color: #1890ff;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 600px) {
+  .login-container {
+    padding: 10px;
+    padding-top: 80px;
+}
+
+  .login-card {
+    padding: 30px 20px;
+  }
+
+  .otp-form {
+    .otp-actions {
+      flex-direction: column;
+      gap: 8px;
+}
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding-top: 70px;
+  }
+}

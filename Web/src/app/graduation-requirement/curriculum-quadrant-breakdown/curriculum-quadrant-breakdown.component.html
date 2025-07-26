@@ -1,0 +1,163 @@
+<div>
+  <div>
+    <div>
+      <h3 class="h-tag">Curriculum Breakdowns</h3>
+    </div>
+  </div>
+  <nz-divider></nz-divider>
+  <div nz-row>
+    <div nz-col nzSpan="6">
+      <a routerLink="../../graduation/add-cuadrant-breakdown/null" nz-button nzType="primary" class="main-color">
+        <i nz-icon nzType="plus" nzTheme="outline"></i>
+        <span>Curriculum Breakdown</span></a>
+    </div>
+
+    <div nz-col nzSpan="4">
+      <div style="float: right; margin-right: 5px">
+        <button nz-button class="export main-color">
+          <em nz-icon nzType="file-excel" nzTheme="outline"></em> Export
+        </button>
+      </div>
+      <div nz-col nzSpan="4">
+        <button class="main-color" nz-button nzType="primary" printTitle="." printSectionId="print-section" ngxPrint>
+          <em nz-icon nzType="printer" nzTheme="outline"></em>Print
+        </button>
+      </div>
+    </div>
+
+    <div nz-col nzSpan="5" style="width: 300px">
+      <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+        <input type="text" nz-input placeholder="search..." />
+      </nz-input-group>
+      <ng-template #suffixIconButton>
+        <button nz-button nzType="primary" nzSearch class="main-color">
+          <i nz-icon nzType="search"></i>
+        </button>
+      </ng-template>
+    </div>
+  </div>
+  <nz-divider></nz-divider>
+  <div id="print-section">
+    <img class="logo" src="../../assets/images/logo.png" />
+    <nz-table #basicTable [nzData]="curriculumQuadrantBreakdowns!" nzBordered>
+      <thead class="table-header-row">
+        <tr class="table-header-row">
+          <!-- <th><label nz-checkbox [(ngModel)]="checked">All</label></th> -->
+          <th nzWidth="60px" class="th-row">Courses</th>
+          <th class="th-row">Curriculum</th>
+          <!-- <th class="th-row">Course</th> -->
+          <!-- <th class="th-row">Quadrant</th> -->
+          <th class="th-row">Term</th>
+          <th class="th-row">Year</th>
+          <th class="th-row">Remark</th>
+          <th class="th-row">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container tabindex="0" *ngFor="let data of basicTable.data; let i = index">
+          <tr>
+            <!-- <td><label nz-checkbox [(ngModel)]="checked"></label></td> -->
+            <td [nzExpand]="expandSet.has(data.id)" (nzExpandChange)="onExpandChange(data.id, $event)"></td>
+            <td>{{ data.curriculumCode }}</td>
+            <!-- <td>
+              <ul>
+                <p *ngFor="let course of getCourseTitles(data)">{{ course }}</p>
+              </ul>
+            </td> -->
+            <!-- <td>{{ data.quadrantCode }}</td> -->
+            <td>{{ getAcademicTermStatusDescription(data.termNumber) }}</td>
+            <td>{{ getYearNumberDescription(data.yearNumber) }}</td>
+            <td>{{ data.remark }}</td>
+            <td>
+              <ng-container>
+                <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomLeft">
+                  <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
+                </button>
+                <nz-dropdown-menu #menu="nzDropdownMenu">
+                  <ul nz-menu style="padding-right: 50px">
+                    <li>
+                      <button nz-button nzType="default" class="detail">
+                        <i nz-icon nzType="eye" nzTheme="fill"></i>
+                        <span>Detail</span>
+                      </button>
+                    </li>
+                    <li>
+                      <a style="border-style: none" routerLink="../../graduation/add-cuadrant-breakdown/{{
+                          data.id
+                        }}" nz-button nzType="default" class="edit">
+                        <i nz-icon nzType="edit" nzTheme="fill"></i>
+                        <span>Edit</span></a>
+                    </li>
+                    <li>
+                      <button nz-button nzDanger nzType="default" (click)="showDeleteConfirm(data.id)">
+                        <i nz-icon nzType="delete" nzTheme="fill"></i>
+                        <span>Delete</span>
+                      </button>
+                    </li>
+                  </ul>
+                </nz-dropdown-menu>
+              </ng-container>
+            </td>
+
+          </tr>
+          <!-- <tr [nzExpand]="expandSet.has(data.id)">
+            <h2>List Of Course</h2>
+            <nz-divider></nz-divider>
+            <span>
+              <ul>
+                <p *ngFor="let course of getCourseTitles(data)">{{ course }}</p>
+              </ul>
+            </span>
+          </tr> -->
+          <tr [nzExpand]="expandSet.has(data.id)">
+            <h2>List Of Course</h2>
+            <nz-divider></nz-divider>
+            <td>
+              <nz-table [nzData]="getCourseDetails(data)" nzBordered>
+                <thead>
+                  <tr>
+                    <th>Serial No.</th>
+                    <th>Course Code</th>
+                    <th>Course Title</th>
+                    <th>Credit Hours</th>
+                  </tr>
+                </thead>
+      <tbody>
+        <tr *ngFor="let course of getCourseDetails(data); let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ course.code }}</td>
+          <td>{{ course.title }}</td>
+          <td>{{ course.creditHours }}</td>
+        </tr>
+      </tbody>
+      <tfoot class="footer-row">
+        <tr>
+          <td></td>
+          <td></td>
+          <td>Total Credit Hours</td>
+          <td>{{ getTotalCreditHours(data) }}</td>
+        </tr>
+      </tfoot>
+    </nz-table>
+    </td>
+    </tr>
+    </ng-container>
+
+    </tbody>
+    </nz-table>
+    <!-- <div>
+      <button nz-button class="export" nzShape="round">
+        <i nz-icon nzType="file-excel" nzTheme="outline"></i> Export(2)
+      </button>
+      <button
+        nz-button
+        class="group-delete"
+        nzType="default"
+        nzDanger
+        nzShape="round"
+      >
+        <i nz-icon nzType="delete" nzTheme="fill"></i> Detele(2)
+      </button>
+    </div> -->
+  </div>
+</div>

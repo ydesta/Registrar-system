@@ -1,0 +1,373 @@
+// Main container styling
+.agreement-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #fafafa;
+  min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+// Header section
+.agreement-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding: 24px 0;
+
+  .section-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #262626;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    i {
+      color: #1890ff;
+      font-size: 24px;
+    }
+
+    @media (max-width: 768px) {
+      font-size: 24px;
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+
+  .section-description {
+    font-size: 16px;
+    color: #595959;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+// Form styling
+.agreement-form {
+  .form-section {
+    margin-bottom: 24px;
+  }
+
+  .form-row {
+    margin-bottom: 16px;
+  }
+
+  .form-item {
+    margin-bottom: 0;
+  }
+}
+
+// Card styling
+.info-card,
+.agreement-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  ::ng-deep .ant-card-head {
+    border-bottom: 2px solid #f0f0f0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px 12px 0 0;
+  }
+
+  ::ng-deep .ant-card-body {
+    padding: 24px;
+  }
+}
+
+// Card title styling
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  color: #262626;
+
+  i {
+    color: #1890ff;
+    font-size: 18px;
+  }
+
+  span {
+    font-size: 16px;
+  }
+}
+
+// Form labels - scoped to this component only
+.agreement-form ::ng-deep .ant-form-item-label > label {
+  font-weight: 500;
+  color: #262626;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+
+  i {
+    color: #1890ff;
+    font-size: 14px;
+  }
+
+  &::before {
+    display: inline-block;
+    margin-right: 4px;
+    color: #ff4d4f;
+    font-size: 14px;
+    font-family: SimSun, sans-serif;
+    line-height: 1;
+    content: '*';
+  }
+}
+
+// Form item spacing - scoped to this component only
+.agreement-form ::ng-deep .ant-form-item {
+  margin-bottom: 32px;
+  display: block;
+}
+
+.agreement-form ::ng-deep .ant-form-item-label {
+  padding-bottom: 12px;
+  display: block;
+  text-align: left;
+}
+
+.agreement-form ::ng-deep .ant-form-item-control {
+  padding-top: 8px;
+  display: block;
+}
+
+// Form row spacing
+.form-row {
+  margin-bottom: 24px;
+}
+
+// Custom select styling
+.custom-select {
+  width: 100%;
+
+  ::ng-deep .ant-select-selector {
+    border-radius: 8px;
+    border: 1px solid #d9d9d9;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: #40a9ff;
+    }
+
+    &.ant-select-focused {
+      border-color: #1890ff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    }
+  }
+}
+
+// Agreement section styling
+.agreement-section {
+  margin-top: 24px;
+}
+
+.agreement-content {
+  .agreement-text {
+    margin-bottom: 24px;
+  }
+
+  .agreement-paragraph {
+    font-size: 16px;
+    font-weight: 500;
+    color: #262626;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  .agreement-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px 0;
+
+    li {
+      position: relative;
+      padding: 8px 0 8px 24px;
+      font-size: 14px;
+      color: #595959;
+      line-height: 1.6;
+
+      &::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        top: 8px;
+        color: #52c41a;
+        font-weight: bold;
+        font-size: 16px;
+      }
+
+      &:not(:last-child) {
+        margin-bottom: 8px;
+      }
+    }
+  }
+}
+
+// Checkbox styling
+.agreement-checkbox-item {
+  margin-bottom: 0;
+}
+
+.agreement-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: #e9ecef;
+    border-color: #1890ff;
+  }
+
+  ::ng-deep .ant-checkbox-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  ::ng-deep .ant-checkbox {
+    margin-top: 2px;
+  }
+
+  .checkbox-text {
+    font-size: 14px;
+    color: #262626;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+}
+
+// Error message styling
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
+
+  i {
+    font-size: 12px;
+  }
+}
+
+// Form status styling
+.form-status {
+  margin-top: 24px;
+
+  .status-alert {
+    border-radius: 8px;
+    border: 1px solid #faad14;
+    background: #fffbe6;
+
+    ::ng-deep .ant-alert-message {
+      color: #d48806;
+      font-weight: 500;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .agreement-container {
+    padding: 16px;
+  }
+
+  .agreement-header {
+    margin-bottom: 24px;
+    padding: 16px 0;
+
+    .section-title {
+      font-size: 22px;
+    }
+
+    .section-description {
+      font-size: 14px;
+    }
+  }
+
+  .info-card,
+  .agreement-card {
+    ::ng-deep .ant-card-body {
+      padding: 16px;
+    }
+  }
+
+  .agreement-content {
+    .agreement-paragraph {
+      font-size: 14px;
+    }
+
+    .agreement-list li {
+      font-size: 13px;
+      padding-left: 20px;
+    }
+  }
+
+  .agreement-checkbox {
+    padding: 12px;
+
+    .checkbox-text {
+      font-size: 13px;
+    }
+  }
+}
+
+// Animation for form elements
+.form-section,
+.agreement-section {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Focus states for accessibility
+.custom-select:focus,
+.agreement-checkbox:focus-within {
+  outline: 2px solid #1890ff;
+  outline-offset: 2px;
+}
+
+// Loading state (if needed)
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+// Success state styling
+.success-state {
+  .agreement-checkbox {
+    background: #f6ffed;
+    border-color: #b7eb8f;
+  }
+}

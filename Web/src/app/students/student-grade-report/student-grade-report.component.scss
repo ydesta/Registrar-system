@@ -1,0 +1,99 @@
+.report {
+    overflow-y: scroll;
+    height: 400px;
+}
+
+::ng-deep .ant-layout-content {
+    overflow-y: auto;
+}
+
+.title {
+    text-align: center;
+    font-family:  sans-serif;
+    font-weight: bolder;
+}
+
+.sub-title {
+    text-align: center;
+}
+
+.logo {
+    text-align: center;
+}
+.report-type {
+    padding-left: 70px;
+}
+
+.general {
+    display: flex;
+    justify-content: space-around;
+}
+
+.person {
+    text-align: center;
+}
+
+.form-item {
+    display: flex;
+    gap: 2;
+}
+
+.form-item p:nth-child(2) {
+    margin-left: 10px;
+}
+
+.servicecode {
+    display: flex;
+}
+
+.servicecode p:nth-child(2) {
+    margin-left: 10px;
+}
+
+.table {
+    padding-left: 250px;
+    padding-right: 150px;
+}
+
+::ng-deep .ant-table-thead > tr > th {
+    background-color: hsla(0, 0%, 50%, .6);
+}
+
+::ng-deep .ant-table {
+    background-color: rgba(188, 184, 184, 0.1);
+}
+
+.signature {
+    width: 300px;
+    margin-left: 300px;
+    margin-top: 50px;
+    text-align: center;
+}
+
+.report-footer {
+    display: flex;
+    justify-content: space-between;
+    margin: 50px;
+    margin-bottom: 5px;
+}
+
+.save button {
+    background-color: #093e96;
+    color: white;
+    border-radius: 5px;
+    border: none;
+    float: right;
+    margin-right: 50px;
+}
+
+.save button:hover {
+    background-color: #093e96;
+}
+
+
+@media print {
+    .table {
+        padding-left: 150px;
+        padding-right: 50px;
+    }
+}

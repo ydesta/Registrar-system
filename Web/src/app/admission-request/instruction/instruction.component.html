@@ -1,0 +1,37 @@
+<div class="instruction-container">
+  <div class="instruction-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+      </div>
+      <div class="header-text">
+        <h2 class="instruction-title">Admission Instructions</h2>
+        <p class="instruction-subtitle">Please review the following requirements carefully before proceeding with your application</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="instruction-content">
+    <div class="instruction-card">
+      <div class="instruction-list">
+        <div class="instruction-item" *ngFor="let instruction of instructions; let i = index">
+          <div class="item-icon">
+            <i nz-icon [nzType]="instruction.icon" nzTheme="outline"></i>
+          </div>
+          <div class="item-content">
+            <h4 class="item-title">{{ instruction.title }}</h4>
+            <p class="item-description">{{ instruction.description }}</p>
+          </div>
+          <div class="item-number">{{ i + 1 }}</div>
+        </div>
+      </div>
+
+      <div class="instruction-footer">
+        <div class="footer-note">
+          <i nz-icon nzType="exclamation-circle" nzTheme="outline"></i>
+          <span>Important: Please ensure all documents are properly attested and complete before submission.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

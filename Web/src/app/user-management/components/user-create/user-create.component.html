@@ -1,0 +1,57 @@
+<div class="user-create-container">
+  <form nz-form [formGroup]="userForm" (ngSubmit)="submitForm()">
+    <div nz-row [nzGutter]="16">
+      <div nz-col nzSpan="12">
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="firstName">First Name</nz-form-label>
+          <nz-form-control [nzValidateStatus]="userForm.controls['firstName']" nzErrorTip="Please input first name">
+            <input nz-input formControlName="firstName" id="firstName" placeholder="First Name" />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <div nz-col nzSpan="12">
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="lastName">Last Name</nz-form-label>
+          <nz-form-control [nzValidateStatus]="userForm.controls['lastName']" nzErrorTip="Please input last name">
+            <input nz-input formControlName="lastName" id="lastName" placeholder="Last Name" />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+    <div nz-row [nzGutter]="16">
+      <div nz-col nzSpan="12">
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="email">Email</nz-form-label>
+          <nz-form-control [nzValidateStatus]="userForm.controls['email']" [nzErrorTip]="emailErrorTpl">
+            <input nz-input formControlName="email" id="email" placeholder="Email" />
+          </nz-form-control>
+          <ng-template #emailErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')">Please input a valid email</ng-container>
+            <ng-container *ngIf="control.hasError('email') && !control.hasError('required')">Invalid email format</ng-container>
+          </ng-template>
+        </nz-form-item>
+      </div>
+      <div nz-col nzSpan="12">
+        <nz-form-item>
+          <nz-form-label nzFor="phoneNumber">Phone Number</nz-form-label>
+          <nz-form-control [nzValidateStatus]="userForm.controls['phoneNumber']">
+            <input nz-input formControlName="phoneNumber" id="phoneNumber" placeholder="Phone Number" />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+    <nz-form-item>
+      <nz-form-label [nzRequired]="true" nzFor="roleNames">Roles</nz-form-label>
+      <nz-form-control [nzValidateStatus]="userForm.controls['roleNames']" nzErrorTip="Please select at least one role">
+        <nz-select formControlName="roleNames" id="roleNames" nzMode="multiple" nzPlaceHolder="Select roles">
+          <nz-option *ngFor="let role of roles" [nzValue]="role" [nzLabel]="role"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+    <div class="form-actions">
+      <button nz-button nzType="default" (click)="router.navigate(['/user-management/users'])" [disabled]="loading" type="button">Cancel</button>
+      <button nz-button nzType="primary" [nzLoading]="loading" [disabled]="userForm.invalid">Create User</button>
+      
+    </div>
+  </form>
+</div> 
