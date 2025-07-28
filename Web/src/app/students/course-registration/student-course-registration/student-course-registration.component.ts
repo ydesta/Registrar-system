@@ -194,6 +194,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       })
     ).subscribe({
       next: (results) => {
+        console.log("Registration results:    ", results);
         this.handleCourseData(results);
       },
       error: (error) => {
@@ -796,91 +797,161 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     this.refreshRegularCourseCheckedStatus();
   }
   sendRequest(): void {
+    // Validate required data before proceeding
+    if (!this.studentTermCourseReg) {
+      this._customNotificationService.notification('error', 'Error', 'Student course registration data is not available. Please refresh the page and try again.');
+      return;
+    }
+
+    if (!this.studentTermCourseReg.courseTermOfferings) {
+      this._customNotificationService.notification('error', 'Error', 'No course offerings available for registration.');
+      return;
+    }
+
+    // Check if any courses are selected
+    const hasRegularCourses = this.setOfCheckedId.size > 0;
+    const hasAddCourses = this.setOfCheckedAddCourses.size > 0;
+    const hasAssessmentCourses = this.setOfCheckedAssessmentCourses.size > 0;
+
+    if (!hasRegularCourses && !hasAddCourses && !hasAssessmentCourses) {
+      this._customNotificationService.notification('warning', 'Warning', 'Please select at least one course for registration.');
+      return;
+    }
+
     this.isSubmitting = true;
     const semester = "Semester";
-    const assessmentCourses: SelectedCourses[] = Array.from(this.setOfCheckedAssessmentCourses)
-      .map(courseId => {
-        const course = this.listOfCourseAssessment.find(c => c.courseId === courseId);
-        return {
-          courseId: courseId,
-          registrationStatus: RegistrationStatus.Assessment,
-          priority: 0,
-          totalAmount: course ? course.totalAmount : 0
-        };
-      });
-    const regularCourses: SelectedCourses[] = Array.from(this.setOfCheckedId)
-      .map(courseId => {
-        const course = this.studentTermCourseReg.courseTermOfferings.find(c => c.courseId === courseId);
-        return course;
-      })
-      .filter(course => course && course.isPaid === false)
-      .map(course => ({
-        courseId: course.courseId,
-        registrationStatus: RegistrationStatus.Regular,
-        priority: 0,
-        totalAmount: course.totalAmount
-      }));
 
-    const addCourses: SelectedCourses[] = Array.from(this.setOfCheckedAddCourses)
-      .map(courseId => {
-        const course = this.listOfAddedCourses.find(c => c.courseId === courseId);
-        return {
-          courseId: courseId,
-          registrationStatus: RegistrationStatus.Add,
-          priority: this.coursePriorities.get(courseId) ?? 0,
-          totalAmount: course ? course.totalAmount : 0
+    try {
+      // Build assessment courses array with proper error handling
+      const assessmentCourses: SelectedCourses[] = Array.from(this.setOfCheckedAssessmentCourses)
+        .map(courseId => {
+          const course = this.listOfCourseAssessment?.find(c => c.courseId === courseId);
+          if (!course) {
+            throw new Error(`Assessment course with ID ${courseId} not found`);
+          }
+          return {
+            courseId: courseId,
+            registrationStatus: RegistrationStatus.Assessment,
+            priority: 0,
+            totalAmount: course.totalAmount || 0,
+            batchCode: course.batchCode || null
+          };
+        });
+
+      // Build regular courses array with proper error handling
+      const regularCourses: SelectedCourses[] = Array.from(this.setOfCheckedId)
+        .map(courseId => {
+          const course = this.studentTermCourseReg.courseTermOfferings.find(c => c.courseId === courseId);
+          if (!course) {
+            throw new Error(`Regular course with ID ${courseId} not found`);
+          }
+          return course;
+        })
+        .filter(course => course && course.isPaid === false)
+        .map(course => ({
+          courseId: course.courseId,
+          registrationStatus: RegistrationStatus.Regular,
+          priority: 0,
+          totalAmount: course.totalAmount || 0,
+          batchCode: course.batchCode || null
+        }));
+
+      // Build add courses array with proper error handling
+      const addCourses: SelectedCourses[] = Array.from(this.setOfCheckedAddCourses)
+        .map(courseId => {
+          const course = this.listOfAddedCourses?.find(c => c.courseId === courseId);
+          if (!course) {
+            throw new Error(`Add course with ID ${courseId} not found`);
+          }
+          return {
+            courseId: courseId,
+            registrationStatus: RegistrationStatus.Add,
+            priority: this.coursePriorities.get(courseId) ?? 0,
+            totalAmount: course.totalAmount || 0,
+            batchCode: course.batchCode || null
+          };
+        });
+
+      // Validate add course priorities
+      if (addCourses.length > 0) {
+        const hasUnassignedPriority = addCourses.some(course => course.priority === 0);
+        if (hasUnassignedPriority) {
+          this._customNotificationService.notification('error', 'Error', 'All selected add course requests must have a priority assigned');
+          this.isSubmitting = false;
+          return;
         }
-      });
-    if (addCourses.length > 0) {
-      const hasUnassignedPriority = addCourses.some(course => course.priority === 0);
-      if (hasUnassignedPriority) {
-        this._customNotificationService.notification('error', 'Error', 'All selected add course requests must have a priority assigned');
+      }
+
+      // Create student course offering object
+      const studentCourseOffering = new StudentCourseOffering();
+      studentCourseOffering.academicTermCode = this.studentTermCourseReg.academicProgramId;
+      studentCourseOffering.studentId = this.studentTermCourseReg.studId;
+      studentCourseOffering.termCourseOfferingId = this.studentTermCourseReg.termCourseOfferingId;
+      studentCourseOffering.selectedCourses = [
+        ...regularCourses,
+        ...addCourses,
+        ...assessmentCourses
+      ];
+
+      // Validate the offering object
+      if (!studentCourseOffering.academicTermCode || !studentCourseOffering.studentId || !studentCourseOffering.termCourseOfferingId) {
+        this._customNotificationService.notification('error', 'Error', 'Missing required registration information. Please refresh and try again.');
         this.isSubmitting = false;
         return;
       }
-    }
-    const studentCourseOffering = new StudentCourseOffering();
-    studentCourseOffering.academicTermCode = this.studentTermCourseReg.academicProgramId;
-    studentCourseOffering.studentId = this.studentTermCourseReg.studId;
-    studentCourseOffering.termCourseOfferingId = this.studentTermCourseReg.termCourseOfferingId;
-    studentCourseOffering.selectedCourses = [
-      ...regularCourses,
-      ...addCourses,
-      ...assessmentCourses
-    ];
 
-    if (this.regId != null) {
-      this._studentService.updateStudentCourseRegistration(this.regId, studentCourseOffering).subscribe({
-        next: (res) => {
-          if (res) {
-            this.registrationId = res.data.id;
-            this.handleNotification('success', 'Success', res.studentId);
-            this._route.navigateByUrl(`banks/add-student-payment?registrationid=${this.regId}&code=${this.batchCode}&type=${semester}`);
-          }
-        },
-        error: (error) => {
-          this._customNotificationService.notification('error', 'Error', 'Failed to update course registration');
-        },
-        complete: () => {
-          this.isSubmitting = false;
-        }
-      });
-    } else {
-      this._studentService.create(studentCourseOffering).subscribe({
-        next: (res) => {
-          if (res) {
-            this.registrationId = res.data.id;
-            this.handleNotification('success', 'Success', res.studentId);
-            this._route.navigateByUrl(`banks/add-student-payment?registrationid=${this.registrationId}&code=${this.batchCode}&type=${semester}`);
-          }
-        },
-        error: (error) => {
-          this._customNotificationService.notification('error', 'Error', 'Failed to create course registration');
-        },
-        complete: () => {
-          this.isSubmitting = false;
-        }
-      });
+      // Handle update or create with proper subscription management
+      if (this.regId != null) {
+        this._studentService.updateStudentCourseRegistration(this.regId, studentCourseOffering)
+          .pipe(
+            takeUntil(this.destroy$),
+            finalize(() => {
+              this.isSubmitting = false;
+            })
+          )
+          .subscribe({
+            next: (res) => {
+              if (res && res.data) {
+                this.registrationId = res.data.id;
+                this.handleNotification('success', 'Success', res.studentId);
+                this._route.navigateByUrl(`banks/add-student-payment?registrationid=${this.regId}&code=${this.batchCode}&type=${semester}`);
+              } else {
+                this._customNotificationService.notification('error', 'Error', 'Invalid response from server. Please try again.');
+              }
+            },
+            error: (error) => {
+              console.error('Update registration error:', error);
+              this._customNotificationService.notification('error', 'Error', 'Failed to update course registration. Please try again.');
+            }
+          });
+      } else {
+        this._studentService.create(studentCourseOffering)
+          .pipe(
+            takeUntil(this.destroy$),
+            finalize(() => {
+              this.isSubmitting = false;
+            })
+          )
+          .subscribe({
+            next: (res) => {
+              if (res && res.data) {
+                this.registrationId = res.data.id;
+                this.handleNotification('success', 'Success', res.studentId);
+                this._route.navigateByUrl(`banks/add-student-payment?registrationid=${this.registrationId}&code=${this.batchCode}&type=${semester}`);
+              } else {
+                this._customNotificationService.notification('error', 'Error', 'Invalid response from server. Please try again.');
+              }
+            },
+            error: (error) => {
+              console.error('Create registration error:', error);
+              this._customNotificationService.notification('error', 'Error', 'Failed to create course registration. Please try again.');
+            }
+          });
+      }
+    } catch (error) {
+      console.error('SendRequest error:', error);
+      this._customNotificationService.notification('error', 'Error', 'An unexpected error occurred while processing your request. Please try again.');
+      this.isSubmitting = false;
     }
   }
   goToPayment(id: number, registrationId: string, batchCode: string): void {

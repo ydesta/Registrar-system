@@ -273,4 +273,54 @@ export class StudentService {
     const endpointUrl = `${this.getStudentUrlList()}/cgpa/${studentId}`;
     return this.httpClient.get<number>(endpointUrl);
   }
+   getStudentsPaginated(
+    studentCode: string = '',
+    batchCode: string = '',
+    pageIndex: number = 0,
+    pageSize: number = 20,
+    sortColumn: string = 'studentid',
+    sortOrder: string = 'asc'
+  ): Observable<any> {
+    const endpointUrl = `${this.getStudentUrlList()}/paginated`;
+    let params = new HttpParams()
+      .append('pageIndex', pageIndex.toString())
+      .append('pageSize', pageSize.toString())
+      .append('sortColumn', sortColumn)
+      .append('sortOrder', sortOrder);
+    
+    if (studentCode && studentCode.trim() !== '') {
+      params = params.append('studentCode', studentCode);
+    }
+    if (batchCode && batchCode.trim() !== '') {
+      params = params.append('batchCode', batchCode);
+    }
+    
+    return this.httpClient.get<any>(endpointUrl, { params });
+  }
+
+  deleteStudent(id: string): Observable<any> {
+    const endpointUrl = `${this.getStudentUrlList()}/${id}`;
+    return this.httpClient.delete<any>(endpointUrl);
+  }
+
+  getStudentById(id: string): Observable<any> {
+    const endpointUrl = `${this.getStudentUrlList()}/student/${id}`;
+    return this.httpClient.get<any>(endpointUrl);
+  }
+
+  updateStudent(id: string, data: any): Observable<any> {
+    const endpointUrl = `${this.getStudentUrlList()}/${id}`;
+    return this.httpClient.patch<any>(endpointUrl, data);
+  }
+
+  addStudent(data: any): Observable<any> {
+    const endpointUrl = `${this.getStudentUrlList()}`;
+    return this.httpClient.post<any>(endpointUrl, data);
+  }
+
+  exportStudentsExcel(): Observable<any> {
+    const endpointUrl = `${this.getStudentUrlList()}/excel`;
+    return this.httpClient.get<any>(endpointUrl);
+  }
+
 }

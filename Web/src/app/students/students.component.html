@@ -1,151 +1,260 @@
 <div class="content-container">
-  <!-- Header Section -->
+  <!-- Page Header -->
   <div class="header-section">
-    <div class="header-content">
-      <div class="page-title">
-        <h3 class="title-text">Student Grade Report</h3>
-        <p class="subtitle-text">Manage and view student grade information</p>
-      </div>
-      <div class="header-actions">
-        <div class="search-section">
-          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input
-              type="text"
-              [(ngModel)]="studentId"
-              nz-input
-              placeholder="Search student ID..."
-            />
-          </nz-input-group>
-          <ng-template #suffixIconButton>
-            <button
-              (click)="gradeQueryFormSubmit()"
-              nz-button
-              nzType="primary"
-              class="search-btn"
-              nzSearch
-            >
-              <i nz-icon nzType="search"></i>
-            </button>
-          </ng-template>
-        </div>
-        <div class="filter-section">
-          <form [formGroup]="gradeQueryForm" (ngSubmit)="gradeQueryFormSubmit()">
-            <nz-select
-              formControlName="termCode"
-              nzAllowClear
-              nzPlaceHolder="Select Academic Term"
-              nzShowSearch
-              class="term-select"
-            >
-              <nz-option
-                *ngFor="let ac of academicTerms"
-                [nzValue]="ac.academicTermCode"
-                [nzLabel]="ac.academicTermCode"
-              ></nz-option>
-            </nz-select>
-            <button class="filter-btn" nz-button nzType="primary">Show</button>
-          </form>
-        </div>
-
-      </div>
+    <div class="page-title">
+      <h1>Students Management</h1>
+      <p class="subtitle">Manage and view all students in the system</p>
     </div>
   </div>
 
-  <!-- Table Card -->
-  <div class="table-card">
-    <div id="print-section">
-      <nz-table 
-        #basicTable 
-        [nzData]="studentGrades!" 
-        nzBordered
-        class="students-table"
-        [nzNoResult]="emptyTpl"
-      >
-        <thead>
+  <!-- Collapsible Search Form -->
+  <div class="search-section">
+    <nz-collapse>
+      <nz-collapse-panel [nzHeader]="searchHeader" [nzActive]="true">
+
+        <ng-template #searchHeader>
+          <span>
+            <i nz-icon nzType="search" nzTheme="outline"></i>
+            Search Filters
+          </span>
+        </ng-template>
+
+        <form nz-form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+          <div nz-row [nzGutter]="24">
+            <!-- Student Code -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">Student Code</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                  <input nz-input formControlName="studentCode" nzPlaceHolder="Search by student code..." style="width: 100%;" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Batch Code -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">Batch Code</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                  <input nz-input formControlName="batchCode" nzPlaceHolder="Search by batch code..." style="width: 100%;" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Sort Column -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">Sort By</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                  <nz-select formControlName="sortColumn" nzPlaceHolder="Select column" style="width: 100%;">
+                    <nz-option nzValue="studentid" nzLabel="Student ID"></nz-option>
+                    <nz-option nzValue="firstname" nzLabel="First Name"></nz-option>
+                    <nz-option nzValue="fathername" nzLabel="Father Name"></nz-option>
+                    <nz-option nzValue="grandfathername" nzLabel="Grand Father Name"></nz-option>
+                    <nz-option nzValue="batchcode" nzLabel="Batch Code"></nz-option>
+                    <nz-option nzValue="entryyear" nzLabel="Entry Year"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Sort Order -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">Order</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                  <nz-select formControlName="sortOrder" nzPlaceHolder="Select order" style="width: 100%;">
+                    <nz-option nzValue="asc" nzLabel="Ascending"></nz-option>
+                    <nz-option nzValue="desc" nzLabel="Descending"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div nz-row>
+            <div nz-col [nzSpan]="24" style="text-align: right;">
+              <button nz-button nzType="default" (click)="clearSearch()" style="margin-right: 8px;">
+                <i nz-icon nzType="reload" nzTheme="outline"></i>
+                Reset
+              </button>
+              <button nz-button nzType="primary" type="submit" [nzLoading]="loading">
+                <i nz-icon nzType="search" nzTheme="outline"></i>
+                Search
+              </button>
+            </div>
+          </div>
+        </form>
+      </nz-collapse-panel>
+    </nz-collapse>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-container">
+    <!-- Page Size Selector -->
+    <div class="table-header">
+      <div class="page-info">
+        <span class="text-muted">
+          Showing {{ (currentPage * pageSize) + 1 }} - {{ Math.min((currentPage + 1) * pageSize, totalRowCount) }} 
+          of {{ totalRowCount }} students
+        </span>
+      </div>
+      <div class="page-size-selector">
+        <nz-select [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange($event)" style="width: 120px;">
+          <nz-option nzValue="10" nzLabel="10 per page"></nz-option>
+          <nz-option nzValue="20" nzLabel="20 per page"></nz-option>
+          <nz-option nzValue="50" nzLabel="50 per page"></nz-option>
+          <nz-option nzValue="100" nzLabel="100 per page"></nz-option>
+        </nz-select>
+      </div>
+    </div>
+
+    <nz-table 
+      #basicTable 
+      [nzData]="students"
+      [nzLoading]="loading"
+      [nzShowPagination]="false"
+      [nzNoResult]="emptyTpl"
+      [nzScroll]="{ x: '1000px' }"
+      style="overflow-x: auto;"
+      class="mobile-table-container">
+      
+                      <thead>
           <tr>
-            <th class="sn-column">S/N</th>
-            <th>Student ID</th>
-            <th>Course</th>
-            <th>Instructor</th>
-            <th>Grade Letter</th>
-            <th>Remark</th>
-            <th class="action-column">Actions</th>
+            <th style="min-width: 50px; width: 60px;">#</th>
+            <th (click)="onSort('studentid')" style="min-width: 120px; cursor: pointer;">
+              <div class="d-flex align-items-center">
+                <span>Student ID</span>
+                <i nz-icon [nzType]="getSortIcon('studentid')" class="ml-2"></i>
+              </div>
+            </th>
+            <th (click)="onSort('firstname')" style="min-width: 120px; cursor: pointer;">
+              <div class="d-flex align-items-center">
+                <span>First Name</span>
+                <i nz-icon [nzType]="getSortIcon('firstname')" class="ml-2"></i>
+              </div>
+            </th>
+            <th (click)="onSort('fathername')" style="min-width: 120px; cursor: pointer;">
+              <div class="d-flex align-items-center">
+                <span>Father Name</span>
+                <i nz-icon [nzType]="getSortIcon('fathername')" class="ml-2"></i>
+              </div>
+            </th>
+            <th (click)="onSort('grandfathername')" style="min-width: 140px; cursor: pointer;">
+              <div class="d-flex align-items-center">
+                <span>Grand Father Name</span>
+                <i nz-icon [nzType]="getSortIcon('grandfathername')" class="ml-2"></i>
+              </div>
+            </th>
+            <th (click)="onSort('batchcode')" style="min-width: 100px; cursor: pointer;">
+              <div class="d-flex align-items-center">
+                <span>Batch Code</span>
+                <i nz-icon [nzType]="getSortIcon('batchcode')" class="ml-2"></i>
+              </div>
+            </th>
+            <th (click)="onSort('entryyear')" style="min-width: 100px; cursor: pointer;">
+              <div class="d-flex align-items-center">
+                <span>Entry Year</span>
+                <i nz-icon [nzType]="getSortIcon('entryyear')" class="ml-2"></i>
+              </div>
+            </th>
+            <th class="th-row paginate sticky-action" style="min-width: 80px;">Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <tr *ngFor="let data of basicTable.data; let i = index">
-            <td class="sn-column">
-              <span class="sn-badge">{{ i + 1 }}</span>
+      
+      <tbody>
+        <ng-container *ngFor="let student of basicTable.data; let i = index">
+          <tr>
+            <td>
+              <span class="serial-number">
+                {{ (currentPage * pageSize) + i + 1 }}
+              </span>
             </td>
-            <td>{{ data.student.studentId }}</td>
-            <td>{{ data.couse.courseTitle }}</td>
-            <td>{{ data.staff.firstName + " " + data.staff.lastName }}</td>
-            <td>{{ data.gradeLetter }}</td>
-            <td>{{ data.remark }}</td>
-            <td class="action-column">
+            <td>
+              <div class="d-flex align-items-center">
+                <nz-avatar 
+                  *ngIf="student.photoUrl" 
+                  [nzSrc]="student.photoUrl" 
+                  nzSize="small"
+                  class="mr-2">
+                </nz-avatar>
+                <span>{{ student.studentCode }}</span>
+              </div>
+            </td>
+            <td>{{ student.fullName?.split(' ')[0] || '' }}</td>
+            <td>{{ student.fullName?.split(' ')[1] || '' }}</td>
+            <td>{{ student.fullName?.split(' ')[2] || '' }}</td>
+            <td>
+              <nz-tag *ngIf="student.batch" [nzColor]="'blue'">{{ student.batch }}</nz-tag>
+            </td>
+            <td>{{ student.entryYear }}</td>
+            <td class="paginate sticky-action" [class.sticky-action-even]="i % 2 === 1">
               <button 
                 nz-button 
                 nz-dropdown 
                 [nzDropdownMenu]="menu" 
-                nzPlacement="bottomLeft"
-                class="action-button"
-              >
-                <i nz-icon nzType="more" nzTheme="outline"></i>
+                nzPlacement="bottomRight"
+                class="action-dropdown-btn">
+                <span nz-icon nzType="more" nzTheme="outline"></span>
               </button>
-              <nz-dropdown-menu #menu="nzDropdownMenu">
-                <ul nz-menu>
-                  <li>
-                    <button nz-button nzType="default" class="action-item detail">
-                      <i nz-icon nzType="eye" nzTheme="fill"></i>
-                      <span>View Details</span>
-                    </button>
-                  </li>
-                  <li>
-                    <a
-                      routerLink="../add-student-grade/{{ data.id }}"
-                      nz-button
-                      nzType="default"
-                      class="action-item edit"
-                    >
-                      <i nz-icon nzType="edit" nzTheme="fill"></i>
-                      <span>Edit</span>
-                    </a>
-                  </li>
-                  <li>
-                    <button
-                      (click)="gradeReport(data.student.studentId)"
-                      nz-button
-                      nzType="default"
-                      class="action-item grade-report"
-                    >
-                      <i nz-icon nzType="file-text" nzTheme="fill"></i>
-                      <span>Grade Report</span>
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      nz-button
-                      nzDanger
-                      nzType="default"
-                      class="action-item delete"
-                      (click)="showDeleteConfirm(data.id)"
-                    >
-                      <i nz-icon nzType="delete" nzTheme="fill"></i>
-                      <span>Delete</span>
-                    </button>
-                  </li>
-                </ul>
-              </nz-dropdown-menu>
+                                <nz-dropdown-menu #menu="nzDropdownMenu" class="action-dropdown-menu">
+                    <ul nz-menu>
+                      <li nz-menu-item class="action-menu-item">
+                        <a (click)="viewStudentProfile(student.id)" class="action-link">
+                          <div class="action-content">
+                            <span nz-icon nzType="eye" nzTheme="outline" style="margin-right: 8px;"></span>
+                            <span class="action-description">View Profile</span>
+                          </div>
+                        </a>
+                      </li>
+                      <li nz-menu-item class="action-menu-item">
+                        <a (click)="editStudent(student.id)" class="action-link">
+                          <div class="action-content">
+                            <span nz-icon nzType="edit" nzTheme="outline" style="margin-right: 8px;"></span>
+                            <span class="action-description">Edit</span>
+                          </div>
+                        </a>
+                      </li>
+                      <li nz-menu-item class="action-menu-item">
+                        <a (click)="inactiveStudent(student)" class="action-link">
+                          <div class="action-content">
+                            <span nz-icon nzType="user-delete" nzTheme="outline" style="margin-right: 8px;"></span>
+                            <span class="action-description">Inactive</span>
+                          </div>
+                        </a>
+                      </li>
+                    </ul>
+                  </nz-dropdown-menu>
             </td>
           </tr>
-        </tbody>
-        <ng-template #emptyTpl>
-          <div class="no-data">
-            <i nz-icon nzType="user" nzTheme="outline"></i>
-            <p>No student grade records available</p>
-          </div>
-        </ng-template>
-      </nz-table>
+        </ng-container>
+      </tbody>
+    </nz-table>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <nz-pagination
+        [nzTotal]="totalRowCount"
+        [nzPageSize]="pageSize"
+        [nzShowSizeChanger]="false"
+        [nzShowQuickJumper]="true"
+        [nzShowTotal]="totalTemplate"
+        (nzPageIndexChange)="onPageChange($event - 1)">
+      </nz-pagination>
     </div>
+
+    <!-- Empty State Template -->
+    <ng-template #emptyTpl>
+      <div class="no-data">
+        <span nz-icon nzType="user" nzTheme="outline"></span>
+        <p>No students found</p>
+      </div>
+    </ng-template>
+
+    <!-- Template for showing total records -->
+    <ng-template #totalTemplate let-total let-range="range">
+      Showing {{ range[0] }}-{{ range[1] }} of {{ total }} items
+    </ng-template>
   </div>
 </div>

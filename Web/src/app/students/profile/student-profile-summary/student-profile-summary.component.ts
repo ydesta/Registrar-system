@@ -9,6 +9,7 @@ import {
 import { environment } from 'src/environments/environment';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-student-profile-summary',
@@ -34,11 +35,17 @@ export class StudentProfileSummaryComponent implements OnInit {
   searchCollapse = true;
   initials: string = '';
   isLoading: boolean = false;
+  progStatusId: any;
   constructor(
     private studentServices: StudentService,
-    private _fb: FormBuilder
+    private _fb: FormBuilder,
+    public aciveRoute: ActivatedRoute,
   ) {
     this.userId = localStorage.getItem('userId');
+     this.progStatusId = this.aciveRoute.snapshot.paramMap.get('id');
+    if (this.progStatusId != "null") {
+      this.getListStudentProfileByStudentId(this.progStatusId);
+    }
     this.getLoggedRole();
     this.studentProfileForm = this._fb.group({
       StudentId: ['', Validators.required],
@@ -59,6 +66,7 @@ export class StudentProfileSummaryComponent implements OnInit {
         this.getListStudentProfileByStudentId(res);
       }
     });
+   
   }
 
   getStudentProfileByStudentId() {

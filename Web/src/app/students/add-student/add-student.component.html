@@ -1,65 +1,408 @@
+<div class="single-container">
+    <h3 class="h-tag">
+        <span nz-icon nzType="user-add" nzTheme="outline"></span>
+        {{action}}
+    </h3>
 
-<h3 class="h-tag">{{action}}</h3>
+    <nz-form [formGroup]="form" class="professional-form">
+        <nz-row [nzGutter]="24" class="profile-container">
+            <nz-col nzSpan="6" nzXs="24" nzSm="24" nzMd="8" nzLg="6" nzXl="6">
+                <div class="profile-section">
+                    <h2 class="section-title">
+                        <span nz-icon nzType="user" nzTheme="outline"></span>
+                        Profile Photo
+                    </h2>
+                    <nz-divider></nz-divider>
+                    <div class="profile-photo-container">
+                        <div class="photo-wrapper">
+                            <ng-container *ngIf="profilePicture && profilePicture !== ''; else defaultAvatar">
+                                <img [src]="profilePicture" class="profile-image" alt="Applicant Photo" />
+                            </ng-container>
+                            <ng-template #defaultAvatar>
+                                <div class="default-avatar">
+                                    {{ initials }}
+                                </div>
+                            </ng-template>
+                        </div>
+                    </div>
+                </div>
+            </nz-col>
 
-<div>
-    <form nz-form  nzLayout="vertical" [formGroup]="staffForm" (ngSubmit)="submitForm()">
-      <div nz-row>
-        <div nz-col nzSpan="12">
+            <nz-col nzSpan="18" nzXs="24" nzSm="24" nzMd="16" nzLg="18" nzXl="18">
+                <div class="information-section">
+                    <h2 class="section-title">
+                        <span nz-icon nzType="idcard" nzTheme="outline"></span>
+                        Personal Information
+                    </h2>
+                    <nz-divider></nz-divider>
 
-      
-      <nz-form-item>
-        <nz-form-label [nzSpan]="10" nzRequired>Curriculum</nz-form-label>
-        <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
-          <nz-select nzShowSearch="true" nzAllowClear = "true" formControlName="curriculumCode" nzPlaceHolder="select curriculum" >
-              <nz-option *ngFor="let item of curricula" [nzValue]="item.curriculumCode" [nzLabel]="item.curriculumCode"></nz-option>
-            </nz-select>
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <nz-form-label [nzSpan]="10" nzRequired>Batch</nz-form-label>
-        <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
-          <nz-select nzShowSearch="true" nzAllowClear = "true" formControlName="batchCode" nzPlaceHolder="select batch" >
-              <nz-option *ngFor="let item of batchs" [nzValue]="item.batchCode" [nzLabel]="item.batchCode"></nz-option>
-            </nz-select>
-        </nz-form-control>
-      </nz-form-item>
-     
-      <nz-form-item>
-        <nz-form-label [nzSpan]="10" nzRequired>Entry</nz-form-label>
-        <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
-          <nz-select formControlName="entryCode" nzShowSearch="true" nzAllowClear = "true" nzPlaceHolder="select entry" >
-              <nz-option *ngFor="let item of entries" [nzValue]="item.entryCode" [nzLabel]="item.entryTerm"></nz-option>
-            </nz-select>
-        </nz-form-control>
-      </nz-form-item>
-    </div>
-    <div nz-col nzSpan="12">
-      <nz-form-item>
-        <nz-form-label [nzSpan]="10" nzRequired>Student ID</nz-form-label>
-        <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
-          <input nz-input formControlName="studentId" placeholder="enter student ID" />
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <nz-form-label [nzSpan]="10" nzRequired>Applicant</nz-form-label>
-        <nz-form-control [nzSpan]="10" nzValidatingTip="Validating...">
-          <nz-select nzShowSearch="true" nzAllowClear = "true" formControlName="applicantId" nzPlaceHolder="select applicant" >
-              <nz-option *ngFor="let item of applicants" [nzValue]="item.applicantID" [nzLabel]="item.firstName + ' ' + item.fatherName "></nz-option>
-            </nz-select>
-        </nz-form-control>
-      </nz-form-item>     
-        <nz-form-item>
-            <nz-form-label [nzSpan]="10">Remark</nz-form-label>
-            <nz-form-control [nzSpan]="10">
-              <input nz-input formControlName="remark" placeholder="enter remark" />
-            </nz-form-control>
-          </nz-form-item>
+                    <div nz-row [nzGutter]="24">
+                        <div nz-col nzSpan="12" nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
+                            <nz-form-item>
+                                <nz-form-label nzRequired class="form-label">First Name</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="firstName" placeholder="First name" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+
+                        <div nz-col nzSpan="12" nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
+                            <nz-form-item>
+                                <nz-form-label nzRequired class="form-label">Father's Name</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="fatherName" placeholder="Father's name" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                    </div>
+
+                    <div nz-row [nzGutter]="24">
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label nzRequired class="form-label">Grandfather's Name</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="grandFatherName"
+                                        placeholder="Grandfather's name" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label class="form-label">Sir Name</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="sirName" placeholder="Sir name" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                    </div>
+
+                    <div nz-row [nzGutter]="24">
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label nzRequired class="form-label">Mother's Name</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="motherName" placeholder="Mother's name" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label nzRequired class="form-label">Gender</nz-form-label>
+                                <nz-form-control>
+                                    <nz-select formControlName="gender" nzPlaceHolder="Select gender">
+                                        <nz-option nzValue="Male" nzLabel="Male"></nz-option>
+                                        <nz-option nzValue="Female" nzLabel="Female"></nz-option>
+                                    </nz-select>
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                    </div>
+
+                    <div nz-row [nzGutter]="24">
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label nzRequired class="form-label">Nationality</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="nationality" placeholder="Nationality" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label nzRequired class="form-label">Birth Place</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="birthPlace" placeholder="Birth place" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                    </div>
+
+                    <div nz-row [nzGutter]="24">
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label nzRequired class="form-label">Birth Date</nz-form-label>
+                                <nz-form-control>
+                                    <nz-date-picker formControlName="birthDate" nzPlaceHolder="Birth date"
+                                        nzFormat="yyyy-MM-dd">
+                                    </nz-date-picker>
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label class="form-label">TIN</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="tin" placeholder="TIN" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                    </div>
+                    <div nz-row [nzGutter]="24">
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label nzRequired class="form-label">First Name (Amharic)</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="firstNameInAmh"
+                                        placeholder="First name in Amharic" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label nzRequired class="form-label">Father's Name (Amharic)</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="fatherNameInAmh"
+                                        placeholder="Father's name in Amharic" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                    </div>
+                    <div nz-row [nzGutter]="24">
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label nzRequired class="form-label">Grandfather's Name
+                                    (Amharic)</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="grandFatherNameInAmh"
+                                        placeholder="Grandfather's name in Amharic" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label class="form-label">National Examination ID</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="nationalExaminationId"
+                                        placeholder="National Examination ID" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                    </div>
+                    <div nz-row [nzGutter]="24">
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label class="form-label">National ID</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="nationalId" placeholder="National ID" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                        <div nz-col nzSpan="12">
+                            <nz-form-item>
+                                <nz-form-label class="form-label">Area Type</nz-form-label>
+                                <nz-form-control>
+                                    <input nz-input formControlName="areaType" placeholder="Area Type" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+
+                    </div>
+
+                </div>
+            </nz-col>
+        </nz-row>
+
+        <div class="contact-section">
+            <h2 class="section-title">
+                <span nz-icon nzType="environment" nzTheme="outline"></span>
+                Contact Information
+            </h2>
+            <nz-divider></nz-divider>
+
+            <div nz-row [nzGutter]="24">
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
+                        <nz-form-label class="form-label">Office Phone</nz-form-label>
+                        <nz-form-control>
+                            <input nz-input formControlName="telephonOffice" placeholder="Office phone number" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
+                        <nz-form-label class="form-label">Home Phone</nz-form-label>
+                        <nz-form-control>
+                            <input nz-input formControlName="telephonHome" placeholder="Home phone number" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+
+            <div nz-row [nzGutter]="24">
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
+                        <nz-form-label nzRequired class="form-label">Mobile Number</nz-form-label>
+                        <nz-form-control>
+                            <input nz-input formControlName="mobile" placeholder="Mobile number" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
+                        <nz-form-label class="form-label">Postal Address</nz-form-label>
+                        <nz-form-control>
+                            <input nz-input formControlName="postalAddress" placeholder="Postal address" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+
+            <div nz-row [nzGutter]="24">
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
+                        <nz-form-label nzRequired class="form-label">Email Address</nz-form-label>
+                        <nz-form-control>
+                            <input nz-input formControlName="emailAddress" placeholder="Email address" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
+                        <nz-form-label nzRequired class="form-label">Region</nz-form-label>
+                        <nz-form-control>
+                            <input nz-input formControlName="region" placeholder="Region" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+
+            <div nz-row [nzGutter]="24">
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
+                        <nz-form-label class="form-label">Woreda</nz-form-label>
+                        <nz-form-control>
+                            <input nz-input formControlName="woreda" placeholder="Woreda" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
+                        <nz-form-label class="form-label">Kebele</nz-form-label>
+                        <nz-form-control>
+                            <input nz-input formControlName="kebele" placeholder="Kebele" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
         </div>
-      </div>
-        <nz-form-item>
-          <nz-form-control [nzOffset]="10" [nzSpan]="10">
-            <button nz-button nzType="primary">{{submit}}</button>
-          </nz-form-control>
-        </nz-form-item>
-      </form>
+
+        <!-- Academic Information Section -->
+        <div class="contact-section">
+            <h2 class="section-title">
+                <span nz-icon nzType="book" nzTheme="outline"></span>
+                Academic Information
+            </h2>
+            <nz-divider></nz-divider>
+
+            <div nz-row [nzGutter]="24">
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
+                        <nz-form-label nzRequired class="form-label">Curriculum</nz-form-label>
+                        <nz-form-control>
+                            <nz-select nzShowSearch="true" nzAllowClear="true" formControlName="curriculumCode"
+                                nzPlaceHolder="Select curriculum">
+                                <nz-option *ngFor="let item of curricula" [nzValue]="item.curriculumCode"
+                                    [nzLabel]="item.curriculumCode"></nz-option>
+                            </nz-select>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
+                        <nz-form-label nzRequired class="form-label">Batch</nz-form-label>
+                        <nz-form-control>
+                            <nz-select nzShowSearch="true" nzAllowClear="true" formControlName="batchCode"
+                                nzPlaceHolder="Select batch">
+                                <nz-option *ngFor="let item of batchs" [nzValue]="item.batchCode"
+                                    [nzLabel]="item.batchCode"></nz-option>
+                            </nz-select>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+
+            <div nz-row [nzGutter]="24">
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
+                        <nz-form-label nzRequired class="form-label">Entry Year</nz-form-label>
+                        <nz-form-control>
+                            <input nz-input formControlName="entryYear" placeholder="Enter entry year" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
+                        <nz-form-label nzRequired class="form-label">Student ID</nz-form-label>
+                        <nz-form-control>
+                            <input nz-input formControlName="studentId" placeholder="Enter student ID" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+
+            <div nz-row [nzGutter]="24">
+                <div nz-col nzSpan="12" nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
+                    <nz-form-item>
+                        <nz-form-label class="form-label">Registration Status</nz-form-label>
+                        <nz-form-control>
+                            <nz-select formControlName="isAllowedToRegister" nzPlaceHolder="Select registration status">
+                                <nz-option [nzValue]="0" nzLabel="Pending"></nz-option>
+                                <nz-option [nzValue]="1" nzLabel="Allowed"></nz-option>
+                                <nz-option [nzValue]="2" nzLabel="Not Allowed"></nz-option>
+                            </nz-select>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col nzSpan="12" nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
+                    <nz-form-item>
+                        <nz-form-label class="form-label">Offer Batch Code</nz-form-label>
+                        <nz-form-control>
+                            <nz-select nzShowSearch="true" nzAllowClear="true" formControlName="offerBatchCode" nzPlaceHolder="Select offer batch">
+                                <nz-option *ngFor="let item of batchs" [nzValue]="item.batchCode" [nzLabel]="item.batchCode"></nz-option>
+                            </nz-select>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+
+            <div nz-row [nzGutter]="24">
+                <div nz-col nzSpan="12" nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
+                    <nz-form-item>
+                        <nz-form-label nzRequired class="form-label">Student Status</nz-form-label>
+                        <nz-form-control>
+                            <nz-select formControlName="studentStatus" nzPlaceHolder="Select student status">
+                                <nz-option [nzValue]="1" nzLabel="Pending"></nz-option>
+                                <nz-option [nzValue]="2" nzLabel="Active"></nz-option>
+                                <nz-option [nzValue]="3" nzLabel="Rejected"></nz-option>
+                                <nz-option [nzValue]="4" nzLabel="Suspended"></nz-option>
+                                <nz-option [nzValue]="5" nzLabel="Graduated"></nz-option>
+                                <nz-option [nzValue]="6" nzLabel="Withdrawn"></nz-option>
+                                <nz-option [nzValue]="7" nzLabel="Transferred"></nz-option>
+                                <nz-option [nzValue]="8" nzLabel="Deleted"></nz-option>
+                            </nz-select>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col nzSpan="12" nzXs="24" nzSm="24" nzMd="12" nzLg="12" nzXl="12">
+                    <!-- Empty column for spacing consistency -->
+                </div>
+            </div>
+
+           
+        </div>
+
+            <!-- Action Buttons -->
+    <div class="form-actions">
+        <div class="action-buttons">
+            <button nz-button nzType="default" (click)="goBack()" class="cancel-btn">
+                <span nz-icon nzType="close" nzTheme="outline"></span>
+                Cancel
+            </button>
+            <button nz-button nzType="primary" (click)="submitForm()" [nzLoading]="loading" class="submit-btn">
+                <span nz-icon nzType="check" nzTheme="outline"></span>
+                {{ submit }}
+            </button>
+        </div>
+    </div>
+    </nz-form>
 </div>

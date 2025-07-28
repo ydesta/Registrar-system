@@ -122,6 +122,14 @@ const routes: Routes = [
   {
     path: "grade-change-request-for-approval",
     component: GradeChangeRequestListForApprovalComponent
+  },
+  {
+    path: "profile/:id",
+    component: StudentProfileSummaryComponent
+  },
+  {
+    path: "edit/:id",
+    component: AddStudentComponent
   }
 ];
 

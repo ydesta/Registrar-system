@@ -27,3 +27,34 @@ export interface StudentModel {
   emailAddress :  string ;
  
 }
+export interface StudentProfileViewModel {
+  id: string;
+  fullName: string;
+  studentCode: string;
+  entryYear: number;
+  birthDate?: Date;
+  gender: string;
+  academicProgram: string;
+  curriculumCode: string;
+  batch: string;
+  nationality: string;
+  phoneNo: string;
+  email: string;
+  birthPlace: string;
+  division: string;
+  status: string;
+  major: string;
+  admissionDate: Date;
+  photoUrl: string;
+  studentAcademicYears: StudentAcademicYearView[];
+  studentCoursesTaken: StudentCoursesTakenView[];
+}
+
+export interface StudentAcademicYearView {
+  // Define the fields here based on your backend model
+}
+
+export interface StudentCoursesTakenView {
+  // Define the fields here based on your backend model
+}
+

@@ -11,4 +11,5 @@ export class SelectedCourses {
   public priority: number;
   public registrationStatus: number;
   public totalAmount: number;
+  public batchCode: string;
 }

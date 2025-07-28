@@ -13,6 +13,7 @@ using SecureAuth.APPLICATION.Interfaces;
 using SecureAuth.DOMAIN.Models;
 using System.Security.Claims;
 using SecureAuth.INFRASTRUCTURE.Data;
+using SecureAuth.API.Middleware;
 
 namespace SecureAuth.API.Controllers
 {
