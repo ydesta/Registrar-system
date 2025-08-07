@@ -33,7 +33,7 @@
           <nz-form-item class="form-item">
             <nz-form-label nzRequired>Academic Term</nz-form-label>
             <nz-form-control nzValidatingTip="Validating...">
-              <nz-select formControlName="academicTermId" nzShowSearch nzPlaceHolder="Select Academic Term" nzAllowClear>
+              <nz-select formControlName="academicTermId" nzShowSearch nzPlaceHolder="Select Academic Term" nzAllowClear [nzDropdownMatchSelectWidth]="false">
                 <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
                   [nzLabel]="item.Description"></nz-option>
               </nz-select>
@@ -43,7 +43,7 @@
           <nz-form-item class="form-item">
             <nz-form-label nzRequired>Academic Term Year</nz-form-label>
             <nz-form-control nzValidatingTip="Validating...">
-              <nz-select formControlName="academicTermYearId" nzShowSearch nzPlaceHolder="Select Year" nzAllowClear>
+              <nz-select formControlName="academicTermYearId" nzShowSearch nzPlaceHolder="Select Year" nzAllowClear [nzDropdownMatchSelectWidth]="false">
                 <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item">
                 </nz-option>
               </nz-select>
@@ -58,8 +58,8 @@
           <nz-form-item class="form-item">
             <nz-form-label nzRequired>Batch Code</nz-form-label>
             <nz-form-control nzValidatingTip="Validating...">
-              <nz-select formControlName="batchCode" nzPlaceHolder="Select Course" nzShowSearch>
-                <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.id" [nzLabel]="item.batchCode"></nz-option>
+              <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch Code" nzShowSearch [nzDropdownMatchSelectWidth]="false">
+                <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.batchCode" [nzLabel]="item.batchCode"></nz-option>
               </nz-select>
             </nz-form-control>
           </nz-form-item>
@@ -67,7 +67,7 @@
           <nz-form-item class="form-item">
             <nz-form-label nzRequired>Course</nz-form-label>
             <nz-form-control nzValidatingTip="Validating...">
-              <nz-select formControlName="courseId" nzPlaceHolder="Select Course" nzShowSearch>
+              <nz-select formControlName="courseId" nzPlaceHolder="Select Course" nzShowSearch [nzDropdownMatchSelectWidth]="false">
                 <nz-option *ngFor="let item of courseList" [nzLabel]="item.courseCode + ' - ' + item.courseTitle"
                   [nzValue]="item.id">
                 </nz-option>

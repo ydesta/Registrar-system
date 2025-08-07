@@ -55,6 +55,8 @@ import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
+import { NzCardModule } from 'ng-zorro-antd/card';
 import { AddCourseApprovalComponent } from './course-registration/course-add/add-course-approval/add-course-approval.component';
 import { AddCourseRequestComponent } from "./course-registration/course-add/add-course-request/add-course-request.component";
 import { RegisteredNewStudentListComponent } from './registered-new-student-list/registered-new-student-list.component';
@@ -62,6 +64,9 @@ import { ManageGradeChangeRequestComponent } from './grade-change-request/manage
 import { GradeChangeRequestFormComponent } from './grade-change-request/grade-change-request-form/grade-change-request-form.component';
 import { GradeChangeRequestListForApprovalComponent } from './grade-change-request/grade-change-request-list-for-approval/grade-change-request-list-for-approval.component';
 import { ApprovalDecisionModalComponent } from './grade-change-request/approval-decision-modal/approval-decision-modal.component';
+import { StudentConfirmationModalComponent } from './components/student-confirmation-modal/student-confirmation-modal.component';
+import { SpecialCaseManualRegistrationComponent } from './special-case-manual-registration/special-case-manual-registration.component';
+import { ConfirmationModalComponent } from './special-case-manual-registration/confirmation-modal/confirmation-modal.component';
 
 const routes: Routes = [
   { path: "", component: StudentsComponent },
@@ -113,6 +118,9 @@ const routes: Routes = [
     GradeChangeRequestFormComponent,
     GradeChangeRequestListForApprovalComponent,
     ApprovalDecisionModalComponent,
+    StudentConfirmationModalComponent,
+    SpecialCaseManualRegistrationComponent,
+    ConfirmationModalComponent,
   ],
   imports: [
     CommonModule,
@@ -133,7 +141,9 @@ const routes: Routes = [
     NzAlertModule,
     NzButtonModule,
     NzIconModule,
-    NzRadioModule
+    NzRadioModule,
+    NzCheckboxModule,
+    NzCardModule
   ],
   exports: [StudentProfileSummaryComponent, RegistrarStudentProfileSummaryComponent, ProfileSummaryComponent, AddCourseApprovalComponent]
 })

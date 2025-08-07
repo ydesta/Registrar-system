@@ -1,91 +1,99 @@
 const https = require('https');
 const http = require('http');
 
-// Test endpoints for cross-domain setup
-const endpoints = [
-  'https://hilcoe.edu.et:7123/api/health',
-  'https://hilcoe.edu.et:7123/api/health/ping',
-  'https://hilcoe.edu.et:7123/api/authentication/health',
-  'https://staging.hilcoe.edu.et:7123/api/health',
-  'https://staging.hilcoe.edu.et:7123/api/authentication/health'
+// Test configuration - using localhost for development
+const testUrls = [
+  'https://localhost:7123/api/authentication/login',
+  'https://localhost:7123/api/health',
+  'https://localhost:7123/swagger',
+  'http://localhost:5000/api/authentication/login',
+  'http://localhost:5000/api/health'
 ];
 
-function testEndpoint(url) {
+console.log('🔍 Diagnosing API connectivity issues...\n');
+
+async function testUrl(url) {
   return new Promise((resolve) => {
     const client = url.startsWith('https') ? https : http;
-    const timeout = setTimeout(() => {
-      resolve({ url, status: 'TIMEOUT', error: 'Request timed out after 30 seconds' });
-    }, 30000);
-
-    const req = client.get(url, (res) => {
-      clearTimeout(timeout);
+    const timeout = 10000; // 10 seconds
+    
+    const req = client.get(url, { timeout }, (res) => {
       let data = '';
-      
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      
+      res.on('data', chunk => data += chunk);
       res.on('end', () => {
         resolve({
           url,
           status: res.statusCode,
+          statusText: res.statusMessage,
           headers: res.headers,
-          data: data.substring(0, 200) // First 200 chars
+          data: data.substring(0, 200) + (data.length > 200 ? '...' : ''),
+          error: null
         });
       });
     });
-
+    
     req.on('error', (error) => {
-      clearTimeout(timeout);
-      resolve({ url, status: 'ERROR', error: error.message });
+      resolve({
+        url,
+        status: null,
+        statusText: null,
+        headers: null,
+        data: null,
+        error: error.message
+      });
     });
-
-    req.setTimeout(30000, () => {
-      clearTimeout(timeout);
+    
+    req.on('timeout', () => {
       req.destroy();
-      resolve({ url, status: 'TIMEOUT', error: 'Request timed out' });
+      resolve({
+        url,
+        status: null,
+        statusText: null,
+        headers: null,
+        data: null,
+        error: 'Request timeout'
+      });
     });
   });
 }
 
-async function diagnoseAPI() {
-  console.log('🔍 Diagnosing cross-domain API connectivity...\n');
-  console.log('Setup: Frontend (staging.hilcoe.edu.et) -> API (hilcoe.edu.et:7123)\n');
+async function runTests() {
+  console.log('Testing localhost API endpoints...\n');
   
-  for (const endpoint of endpoints) {
-    console.log(`Testing: ${endpoint}`);
-    const result = await testEndpoint(endpoint);
+  for (const url of testUrls) {
+    console.log(`Testing: ${url}`);
+    const result = await testUrl(url);
     
-    if (result.status === 200) {
-      console.log(`✅ SUCCESS (${result.status})`);
-    } else if (result.status === 504) {
-      console.log(`❌ GATEWAY TIMEOUT (${result.status})`);
-    } else if (result.status === 'TIMEOUT') {
-      console.log(`⏰ TIMEOUT: ${result.error}`);
-    } else if (result.status === 'ERROR') {
-      console.log(`❌ ERROR: ${result.error}`);
+    if (result.error) {
+      console.log(`❌ Error: ${result.error}`);
     } else {
-      console.log(`⚠️  OTHER (${result.status}): ${result.error || 'Unknown error'}`);
+      console.log(`✅ Status: ${result.status} ${result.statusText}`);
+      console.log(`📋 Content-Type: ${result.headers['content-type'] || 'N/A'}`);
+      console.log(`🔒 CORS Headers: ${result.headers['access-control-allow-origin'] || 'N/A'}`);
     }
-    
-    if (result.data) {
-      console.log(`   Response: ${result.data}`);
-    }
-    console.log('');
+    console.log('---');
   }
   
-  console.log('📋 Cross-Domain Setup Summary:');
-  console.log('- Frontend: https://staging.hilcoe.edu.et');
-  console.log('- API: https://hilcoe.edu.et:7123');
-  console.log('- CORS should allow staging.hilcoe.edu.et to access hilcoe.edu.et:7123');
-  console.log('- JWT Audience: staging.hilcoe.edu.et');
-  console.log('- JWT Issuer: hilcoe.edu.et:7123');
-  console.log('');
-  console.log('🔧 Troubleshooting:');
-  console.log('- Check CORS policy allows cross-domain requests');
-  console.log('- Verify JWT configuration for cross-domain setup');
-  console.log('- Ensure both domains are accessible');
-  console.log('- Check firewall settings for both domains');
+  console.log('\n🔍 SSL Certificate Test...');
+  
+  // Test SSL certificate
+  const sslTest = await testUrl('https://localhost:7123');
+  if (sslTest.error) {
+    console.log(`❌ SSL Error: ${sslTest.error}`);
+  } else {
+    console.log('✅ SSL certificate appears valid');
+  }
+  
+  console.log('\n🔍 CORS Preflight Test...');
+  
+  // Test CORS preflight
+  const corsTest = await testUrl('https://localhost:7123/api/authentication/login');
+  if (corsTest.error) {
+    console.log(`❌ CORS Error: ${corsTest.error}`);
+  } else {
+    console.log(`✅ CORS Status: ${corsTest.status}`);
+    console.log(`📋 CORS Headers: ${JSON.stringify(corsTest.headers, null, 2)}`);
+  }
 }
 
-diagnoseAPI().catch(console.error); 
+runTests().catch(console.error); 

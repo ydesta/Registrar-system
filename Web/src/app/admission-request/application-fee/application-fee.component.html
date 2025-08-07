@@ -1,0 +1,60 @@
+<div class="application-fee-container">
+  <nz-card nzTitle="Application Fee Payment" class="custom-card">
+    <div nz-row nzGutter="24">
+      <div nz-col nzSpan="24">
+        <div class="fee-details" *ngIf="!loading">
+          <div class="fee-info">
+            <div class="fee-row">
+              <span class="label">Payment Type:</span>
+              <span class="value">{{ applicationFee?.paymentType || 'Application Fee' }}</span>
+            </div>
+
+            <div class="fee-row">
+              <span class="label">Amount:</span>
+              <span class="value amount">ETB {{ applicationFee?.amount || 0 | number:'1.2-2' }}</span>
+            </div>
+
+            <div class="fee-row">
+              <span class="label">Payment Status:</span>
+              <nz-tag [nzColor]="getStatusColor()" class="status-tag">
+                {{ paymentStatus }}
+              </nz-tag>
+            </div>
+          </div>
+
+          <div class="payment-actions">
+            <button nz-button nzType="primary" nzSize="large" [disabled]="isPaymentButtonDisabled"
+              (click)="openPaymentModal()" class="payment-button">
+              <span nz-icon nzType="credit-card"></span>
+              {{ isPaymentButtonDisabled ? 'Payment Completed' : 'Make Payment' }}
+            </button>
+            <div class="button-spacer" *ngIf="isPaymentButtonDisabled"></div>
+            <button *ngIf="isPaymentButtonDisabled" nz-button nzType="primary" nzSize="large"
+               (click)="getFileName()" class="payment-button">
+              <span nz-icon nzType="file-text"></span>
+              Receipt
+            </button>
+            <div class="payment-note" *ngIf="!isPaymentButtonDisabled">
+              <nz-alert nzType="info" nzShowIcon
+                nzMessage="Please complete your application fee payment to proceed with your application."
+                class="payment-alert">
+              </nz-alert>
+            </div>
+          </div>
+        </div>
+
+        <div class="loading-container" *ngIf="loading">
+          <nz-spin nzSize="large">
+            <span class="loading-text">Loading application fee details...</span>
+          </nz-spin>
+        </div>
+
+        <div class="error-container" *ngIf="!loading && !applicationFee">
+          <nz-alert nzType="error" nzShowIcon
+            nzMessage="Unable to load application fee details. Please try again later." class="error-alert">
+          </nz-alert>
+        </div>
+      </div>
+    </div>
+  </nz-card>
+</div>

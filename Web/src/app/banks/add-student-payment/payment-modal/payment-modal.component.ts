@@ -21,6 +21,7 @@ export class PaymentModalComponent implements OnInit {
   studentCourseRegistrationID: string;
   totalAmount: number;
   type: number;
+  paidFor: number = 0;
   constructor(
     private modalRef: NzModalRef,
     private _fb: FormBuilder,
@@ -33,7 +34,8 @@ export class PaymentModalComponent implements OnInit {
     this.studentCourseRegistrationID = data['studentCourseRegistrationID'];
     this.totalAmount = data['totalAmount'];
     this.type = data['type'];
-
+    this.paidFor = data['paidFor'];
+    console.log("###       ", this.studentCourseRegistrationID, this.totalAmount, this.type, this.paidFor);
     this.paymentForm();
   }
 
@@ -75,7 +77,7 @@ export class PaymentModalComponent implements OnInit {
   private getStudentPayment(): StudentPaymentRequest {
     const formModel = this.bankTransactionForm.getRawValue();
     const payment = new StudentPaymentRequest();
-    payment.studentCourseRegistrationID = this.studentCourseRegistrationID;
+    payment.parentId = this.studentCourseRegistrationID;
     payment.fromBank = formModel.fromBank;
     payment.toBank = formModel.toBank;
     payment.transactionDate = new Date(formModel.transactionDate).toISOString();
@@ -83,6 +85,7 @@ export class PaymentModalComponent implements OnInit {
     payment.bankTransactionID = formModel.bankTransactionID;
     payment.amount = formModel.amount;
     payment.type = this.type;
+    payment.paidFor = this.paidFor;
     return payment;
   }
 

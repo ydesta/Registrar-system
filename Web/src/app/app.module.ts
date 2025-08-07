@@ -20,17 +20,10 @@ import { HeaderComponent } from './header/header.component';
 import { SignoutRedirectCallbackComponent } from './signout-redirect-callback/signout-redirect-callback.component';
 import { SigninRedirectCallbackComponent } from './signin-redirect-callback/signin-redirect-callback.component';
 import { AuthInterceptorService } from './services/auth-interceptor.service';
-import { AuthInterceptor } from './interceptors/auth.interceptor';
-import { TokenRefreshInterceptor } from './interceptors/token-refresh.interceptor';
 import { RouterModule } from '@angular/router';
 import { RegisterComponent } from './register/register.component';
 import { PortalModule } from './portal/portal.module';
-import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
-import { PwaInstallComponent } from './components/pwa-install/pwa-install.component';
-import { PwaUpdateComponent } from './components/pwa-update/pwa-update.component';
-import { SessionWarningComponent } from './components/session-warning/session-warning.component';
-import { SwErrorHandlerService } from './services/sw-error-handler.service';
 
 registerLocaleData(en);
 
@@ -42,9 +35,7 @@ registerLocaleData(en);
     SigninRedirectCallbackComponent,
     UnauthorizedComponent,
     RegisterComponent,
-    PwaInstallComponent,
-    PwaUpdateComponent,
-    SessionWarningComponent,
+
   ],
   imports: [
     BrowserModule,
@@ -59,10 +50,7 @@ registerLocaleData(en);
     NgxPrintModule,
     RouterModule,
     PortalModule,
-    ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: environment.production,
-      registrationStrategy: 'registerWhenStable:30000'
-    })
+
   ],
   providers: [
     AuthInterceptorService,
@@ -72,25 +60,6 @@ registerLocaleData(en);
       useClass: AuthInterceptorService,
       multi: true,
     },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true,
-    },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: TokenRefreshInterceptor,
-      multi: true,
-    },
-    // Add error handling for service worker
-    {
-      provide: 'SW_ERROR_HANDLER',
-      useValue: (error: any) => {
-        console.warn('Service Worker Error:', error);
-        // Don't throw the error to prevent app crashes
-      }
-    },
-    SwErrorHandlerService
   ],
   bootstrap: [AppComponent],
 })

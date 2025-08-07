@@ -16,5 +16,8 @@ namespace SecureAuth.APPLICATION.Interfaces
         Task<int> GetUserCountAsync(string roleName);
         Task<int> GetUserCountByIdAsync(string roleId);
         Task<IEnumerable<string>> GetRoleNamesAsync();
+        
+        // Performance optimization: Get user counts for multiple roles in one query
+        Task<Dictionary<string, int>> GetUserCountsForRolesAsync(List<string> roleNames);
     }
 } 

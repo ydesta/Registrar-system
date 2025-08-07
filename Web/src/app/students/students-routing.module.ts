@@ -34,6 +34,7 @@ import { RegisteredNewStudentListComponent } from "./registered-new-student-list
 import { ManageGradeChangeRequestComponent } from "./grade-change-request/manage-grade-change-request/manage-grade-change-request.component";
 import { GradeChangeRequestListForApprovalComponent } from "./grade-change-request/grade-change-request-list-for-approval/grade-change-request-list-for-approval.component";
 import { GradeChangeRequestFormComponent } from "./grade-change-request/grade-change-request-form/grade-change-request-form.component";
+import { SpecialCaseManualRegistrationComponent } from "./special-case-manual-registration/special-case-manual-registration.component";
 
 const routes: Routes = [
   { path: "", component: StudentsComponent },
@@ -130,7 +131,11 @@ const routes: Routes = [
   {
     path: "edit/:id",
     component: AddStudentComponent
-  }
+  },
+  {
+    path: "special-case-manual-registration",
+    component: SpecialCaseManualRegistrationComponent
+  },
 ];
 
 @NgModule({

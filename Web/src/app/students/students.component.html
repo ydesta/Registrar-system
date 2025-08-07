@@ -159,6 +159,11 @@
                 <i nz-icon [nzType]="getSortIcon('entryyear')" class="ml-2"></i>
               </div>
             </th>
+            <th style="min-width: 100px; cursor: pointer;">
+              <div class="d-flex align-items-center">
+                <span>Status</span>
+              </div>
+            </th>
             <th class="th-row paginate sticky-action" style="min-width: 80px;">Actions</th>
           </tr>
         </thead>
@@ -189,6 +194,11 @@
               <nz-tag *ngIf="student.batch" [nzColor]="'blue'">{{ student.batch }}</nz-tag>
             </td>
             <td>{{ student.entryYear }}</td>
+            <td>
+              <nz-tag [nzColor]="student.isDeleted ? 'red' : 'green'">
+                {{ student.isDeleted ? 'Inactive' : 'Active' }}
+              </nz-tag>
+            </td>
             <td class="paginate sticky-action" [class.sticky-action-even]="i % 2 === 1">
               <button 
                 nz-button 
@@ -216,11 +226,19 @@
                           </div>
                         </a>
                       </li>
-                      <li nz-menu-item class="action-menu-item">
+                      <li nz-menu-item class="action-menu-item" *ngIf="!student.isDeleted">
                         <a (click)="inactiveStudent(student)" class="action-link">
                           <div class="action-content">
                             <span nz-icon nzType="user-delete" nzTheme="outline" style="margin-right: 8px;"></span>
                             <span class="action-description">Inactive</span>
+                          </div>
+                        </a>
+                      </li>
+                      <li nz-menu-item class="action-menu-item" *ngIf="student.isDeleted">
+                        <a (click)="activeStudent(student)" class="action-link">
+                          <div class="action-content">
+                            <span nz-icon nzType="user-add" nzTheme="outline" style="margin-right: 8px;"></span>
+                            <span class="action-description">Active</span>
                           </div>
                         </a>
                       </li>
@@ -257,4 +275,12 @@
       Showing {{ range[0] }}-{{ range[1] }} of {{ total }} items
     </ng-template>
   </div>
+
+  <!-- Student Confirmation Modal -->
+  <app-student-confirmation-modal
+    [isVisible]="isModalVisible"
+    [modalData]="modalData"
+    (confirmed)="onModalConfirmed($event)"
+    (cancelled)="onModalCancelled()">
+  </app-student-confirmation-modal>
 </div>

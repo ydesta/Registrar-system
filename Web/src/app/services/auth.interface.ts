@@ -52,9 +52,14 @@ export interface User {
   email: string | null;
   role: string | null;
   userType: string | null;
+  roles?: string[];
+  permissions?: string[];
 }
 
 export interface AuthenticationInfo {
   isLogin: boolean;
   _user: User;
+  user?: User;
+  roles?: string[];
+  permissions?: string[];
 } 

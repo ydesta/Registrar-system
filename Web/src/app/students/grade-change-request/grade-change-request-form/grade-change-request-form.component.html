@@ -1,5 +1,12 @@
 <div class="container">
-    <div class="form-card">
+    <div *ngIf="showSearchForm" class="slide-up">
+        <div class="search-content">
+
+            <app-student-search (searchSubmitted)="onSearchSubmitted($event)">
+            </app-student-search>
+        </div>
+    </div>
+    <div class="form-card" *ngIf="!showSearchForm">
         <div class="form-header">
             <div class="form-icon">
                 <i nz-icon nzType="edit" nzTheme="outline"></i>
@@ -8,183 +15,162 @@
                 <h4>Grade Change Request</h4>
                 <p>Submit a request to change a student's grade</p>
             </div>
+            <button nz-button nzType="default" (click)="showSearch()">
+                <i nz-icon nzType="search"></i>
+                Search Another Student
+            </button>
+        </div>
+
+        <!-- Student Profile Information -->
+        <div class="student-profile" *ngIf="selectedStudent">
+            <h3><i nz-icon nzType="user"></i> Student Profile Information</h3>
+            <div class="profile-grid">
+                <div class="profile-item">
+                    <strong><i nz-icon nzType="idcard"></i> Student ID:</strong>
+                    <span>{{selectedStudent.studentCode}}</span>
+                </div>
+                <div class="profile-item">
+                    <strong><i nz-icon nzType="user"></i> Full Name:</strong>
+                    <span>{{selectedStudent.fullName}}</span>
+                </div>
+                <div class="profile-item">
+                    <strong><i nz-icon nzType="book"></i> Academic Program:</strong>
+                    <span>{{selectedStudent.academicProgram}}</span>
+                </div>
+                <div class="profile-item">
+                    <strong><i nz-icon nzType="team"></i> Batch Code:</strong>
+                    <span>{{selectedStudent.batchCode}}</span>
+                </div>
+                <div class="profile-item">
+                    <strong><i nz-icon nzType="calendar"></i> Entry Year:</strong>
+                    <span>{{selectedStudent.entryYear}}</span>
+                </div>
+                <div class="profile-item">
+                    <strong><i nz-icon nzType="trophy"></i> Curriculum Code:</strong>
+                    <span>{{selectedStudent.curriculumCode}}</span>
+                </div>
+            </div>
         </div>
 
         <div class="form-content">
             <nz-spin [nzSpinning]="loading">
-                                <form nz-form nzLayout="vertical" [formGroup]="gradeChangeRequestForm" (ngSubmit)="onSubmit()" class="grade-change-form">
+                <form nz-form nzLayout="vertical" [formGroup]="gradeChangeRequestForm" (ngSubmit)="onSubmit()"
+                    class="grade-change-form">
                     <div class="form-section">
-                        <h3 class="section-title">Student Information</h3>
+                        <h3 class="section-title">Course Information</h3>
                         <div class="form-row">
-                            <div class="form-col">
-                                <nz-form-item>
-                                    <nz-form-label nzRequired>Student</nz-form-label>
-                                    <nz-form-control nzErrorTip="Please select a student">
-                                    <nz-select 
-                                        formControlName="studentId" 
-                                        nzPlaceHolder="Select a student"
-                                        nzShowSearch
-                                        [nzFilterOption]="filterStudentOption">
-                                        <nz-option 
-                                            *ngFor="let student of studentList" 
-                                            [nzValue]="student.id" 
-                                            [nzLabel]="student.firstName + ' ' + student.lastName">
-                                        </nz-option>
-                                    </nz-select>
-                                </nz-form-control>
-                            </nz-form-item>
-                        </div>
-                                                    <div class="form-col">
+                            <!-- <div class="form-col">
                                 <nz-form-item>
                                     <nz-form-label nzRequired>Curriculum</nz-form-label>
                                     <nz-form-control nzErrorTip="Please select a curriculum">
-                                    <nz-select 
-                                        formControlName="curriculumId" 
-                                        nzPlaceHolder="Select a curriculum"
-                                        (ngModelChange)="onCurriculumChange($event)">
-                                        <nz-option 
-                                            *ngFor="let curriculum of curricula" 
-                                            [nzValue]="curriculum.id" 
-                                            [nzLabel]="curriculum.curriculumCode">
-                                        </nz-option>
-                                    </nz-select>
-                                </nz-form-control>
-                            </nz-form-item>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h3 class="section-title">Course Information</h3>
-                    <div class="form-row">
-                                                    <div class="form-col">
+                                        <nz-select formControlName="curriculumId" nzPlaceHolder="Select a curriculum"
+                                            (ngModelChange)="onCurriculumChange($event)">
+                                            <nz-option *ngFor="let curriculum of curricula" [nzValue]="curriculum.id"
+                                                [nzLabel]="curriculum.curriculumCode">
+                                            </nz-option>
+                                        </nz-select>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div> -->
+                            <div class="form-col">
                                 <nz-form-item>
                                     <nz-form-label nzRequired>Course</nz-form-label>
                                     <nz-form-control nzErrorTip="Please select a course">
-                                    <nz-select 
-                                        formControlName="courseId" 
-                                        nzPlaceHolder="Select a course"
-                                        nzShowSearch
-                                        [nzFilterOption]="filterCourseOption">
-                                        <nz-option 
-                                            *ngFor="let course of courses" 
-                                            [nzValue]="course.id" 
-                                            [nzLabel]="course.courseCode + ' - ' + course.courseTitle">
-                                        </nz-option>
-                                    </nz-select>
-                                </nz-form-control>
-                            </nz-form-item>
+                                        <nz-select formControlName="courseId" nzPlaceHolder="Select a course"
+                                            nzShowSearch [nzFilterOption]="filterCourseOption" (ngModelChange)="onCourseChange($event)">
+                                            <nz-option *ngFor="let course of studentCourses" [nzValue]="course.courseId"
+                                                [nzLabel]="course.courseCode + ' - ' + course.courseTitle">
+                                            </nz-option>
+                                        </nz-select>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
                         </div>
-                                                    <div class="form-col">
+                        <div class="form-row">
+                            <div class="form-col">
                                 <nz-form-item>
-                                    <nz-form-label nzRequired>Academic Term</nz-form-label>
+                                    <nz-form-label nzRequired>Academic Term (Auto-filled)</nz-form-label>
                                     <nz-form-control nzErrorTip="Please select an academic term">
-                                    <nz-select 
-                                        formControlName="academicTermId" 
-                                        nzPlaceHolder="Select an academic term">
-                                        <nz-option 
-                                            *ngFor="let term of listOfTermNumber" 
-                                            [nzValue]="term.Id" 
-                                            [nzLabel]="term.Description">
-                                        </nz-option>
-                                    </nz-select>
-                                </nz-form-control>
-                            </nz-form-item>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                                                    <div class="form-col">
+                                        <nz-select formControlName="academicTermId"
+                                            nzPlaceHolder="Select an academic term" [nzDisabled]="true">
+                                            <nz-option *ngFor="let term of listOfTermNumber" [nzValue]="term.Id"
+                                                [nzLabel]="term.Description">
+                                            </nz-option>
+                                        </nz-select>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div class="form-col">
                                 <nz-form-item>
-                                    <nz-form-label>Academic Year</nz-form-label>
+                                    <nz-form-label>Academic Year (Auto-filled)</nz-form-label>
                                     <nz-form-control>
-                                    <nz-select 
-                                        formControlName="academicYear" 
-                                        nzPlaceHolder="Select academic year">
-                                        <nz-option 
-                                            *ngFor="let year of yearList" 
-                                            [nzValue]="year" 
-                                            [nzLabel]="year.toString()">
-                                        </nz-option>
-                                    </nz-select>
-                                </nz-form-control>
-                            </nz-form-item>
+                                        <nz-select formControlName="academicYear" nzPlaceHolder="Select academic year" [nzDisabled]="true">
+                                            <nz-option *ngFor="let year of yearList" [nzValue]="year"
+                                                [nzLabel]="year.toString()">
+                                            </nz-option>
+                                        </nz-select>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="form-section">
-                    <h3 class="section-title">Grade Information</h3>
-                    <div class="form-row">
-                                                                                <div class="form-col">
+                    <div class="form-section">
+                        <h3 class="section-title">Grade Information</h3>
+                        <div class="form-row">
+                            <div class="form-col">
                                 <nz-form-item>
-                                    <nz-form-label nzRequired>Previous Grade</nz-form-label>
+                                    <nz-form-label nzRequired>Previous Grade (Auto-filled)</nz-form-label>
                                     <nz-form-control nzErrorTip="Please select a valid grade">
-                                        <nz-select 
-                                            formControlName="previousGrade" 
-                                            nzPlaceHolder="Select previous grade">
-                                            <nz-option 
-                                                *ngFor="let grade of gradeList" 
-                                                [nzValue]="grade" 
+                                        <nz-select formControlName="previousGrade"
+                                            nzPlaceHolder="Select previous grade" [nzDisabled]="true">
+                                            <nz-option *ngFor="let grade of gradeList" [nzValue]="grade"
                                                 [nzLabel]="grade">
                                             </nz-option>
                                         </nz-select>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
-                                                                                <div class="form-col">
+                            <div class="form-col">
                                 <nz-form-item>
                                     <nz-form-label nzRequired>New Grade</nz-form-label>
                                     <nz-form-control nzErrorTip="Please select a valid grade">
-                                        <nz-select 
-                                            formControlName="newGrade" 
-                                            nzPlaceHolder="Select new grade">
-                                            <nz-option 
-                                                *ngFor="let grade of gradeList" 
-                                                [nzValue]="grade" 
+                                        <nz-select formControlName="newGrade" nzPlaceHolder="Select new grade">
+                                            <nz-option *ngFor="let grade of gradeList" [nzValue]="grade"
                                                 [nzLabel]="grade">
                                             </nz-option>
                                         </nz-select>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-col full-width">
-                            <nz-form-item>
-                                <nz-form-label>Reason for Change</nz-form-label>
-                                <nz-form-control>
-                                    <textarea 
-                                        nz-input 
-                                        formControlName="reason" 
-                                        [nzAutosize]="{ minRows: 3, maxRows: 6 }"
-                                        placeholder="Please provide a detailed reason for the grade change request...">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col full-width">
+                                <nz-form-item>
+                                    <nz-form-label>Reason for Change</nz-form-label>
+                                    <nz-form-control>
+                                        <textarea nz-input formControlName="reason"
+                                            [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+                                            placeholder="Please provide a detailed reason for the grade change request...">
                                     </textarea>
-                                </nz-form-control>
-                            </nz-form-item>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="action-section">
-                    <button 
-                        nz-button 
-                        nzType="default" 
-                        (click)="onCancel()" 
-                        [disabled]="loading">
-                        Cancel
-                    </button>
-                    <button 
-                        nz-button 
-                        nzType="primary" 
-                        type="submit" 
-                        [nzLoading]="loading"
-                        [disabled]="gradeChangeRequestForm.invalid">
-                        <span nz-icon nzType="save"></span>
-                        Submit Request
-                    </button>
-                </div>
-            </form>
-        </nz-spin>
+                    <div class="action-section">
+                        <button nz-button nzType="default" (click)="onCancel()" [disabled]="loading">
+                            Cancel
+                        </button>
+                        <button nz-button nzType="primary" type="submit" [nzLoading]="loading"
+                            [disabled]="gradeChangeRequestForm.invalid">
+                            <span nz-icon nzType="save"></span>
+                            Submit Request
+                        </button>
+                    </div>
+                </form>
+            </nz-spin>
         </div>
     </div>
 </div>

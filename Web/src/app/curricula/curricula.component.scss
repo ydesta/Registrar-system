@@ -23,6 +23,14 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 16px;
+    position: relative; // For proper float handling
+    
+    // Clearfix for floated elements
+    &::after {
+      content: '';
+      display: table;
+      clear: both;
+    }
 
     .page-title {
       flex: 1;
@@ -45,9 +53,14 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-shrink: 0; // Prevent shrinking
+      margin-left: auto; // Push to the right
+      float: right; // Float to the right corner
+      
       .search-section {
         max-width: 260px;
-        flex: 1;
+        min-width: 200px;
+        flex-shrink: 0; // Prevent shrinking
         nz-input-group {
           border-radius: 12px;
           overflow: hidden;
@@ -77,6 +90,12 @@
         font-weight: 500;
         box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
         padding: 0 20px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        position: relative; // For proper positioning
         &:hover {
           background: #40a9ff;
           color: white;
@@ -91,6 +110,12 @@
         font-weight: 500;
         box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         padding: 0 18px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        position: relative; // For proper positioning
         &:hover {
           background: #e0e7ef;
           color: #1890ff;
@@ -106,16 +131,30 @@
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  overflow: hidden;
+  overflow-x: auto;
   padding: 0 0 24px 0;
+  
+  // Ensure table container has proper width
+  #print-section {
+    min-width: 100%;
+    overflow-x: auto;
+  }
 }
 
 // Table Styling
 .curricula-table {
   background: transparent;
   font-size: 15px;
+  min-width: 100%;
+  
   ::ng-deep .ant-table {
     background: transparent;
+    min-width: 100%;
+    
+    // Ensure table wrapper has proper overflow handling
+    .ant-table-container {
+      overflow-x: auto;
+    }
     .ant-table-thead > tr > th {
       background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
       border-bottom: 2px solid #e2e8f0;
@@ -292,6 +331,18 @@
 }
 
 // Responsive Design
+@media (max-width: 1200px) {
+  .header-section {
+    .header-content {
+      .header-actions {
+        .search-section {
+          max-width: 200px; // Slightly smaller on medium screens
+        }
+      }
+    }
+  }
+}
+
 @media (max-width: 900px) {
   .header-section {
     padding: 16px;
@@ -303,13 +354,19 @@
         width: 100%;
         flex-wrap: wrap;
         gap: 8px;
+        justify-content: flex-end; // Keep buttons on the right
+        float: right; // Maintain float on mobile
+        margin-left: auto; // Push to the right
         .search-section {
           width: 100%;
           max-width: 100%;
+          order: 1; // Search first
         }
         .add-btn, .export-btn, .print-btn {
-          width: 100%;
+          flex: 1;
+          min-width: 120px;
           justify-content: center;
+          order: 2; // Buttons second
         }
       }
     }
@@ -317,12 +374,16 @@
   .table-card {
     border-radius: 10px;
     padding: 0 0 12px 0;
+    overflow-x: auto;
   }
   .curricula-table {
     font-size: 13px;
+    min-width: 800px; // Ensure minimum width for all columns
+    
     ::ng-deep .ant-table-thead > tr > th,
     ::ng-deep .ant-table-tbody > tr > td {
       padding: 10px;
+      white-space: nowrap; // Prevent text wrapping
     }
 
     // Ensure sticky action column is visible on mobile
@@ -339,9 +400,12 @@
 @media (max-width: 768px) {
   .curricula-table {
     font-size: 12px;
+    min-width: 700px; // Ensure minimum width for all columns
+    
     ::ng-deep .ant-table-thead > tr > th,
     ::ng-deep .ant-table-tbody > tr > td {
       padding: 8px;
+      white-space: nowrap; // Prevent text wrapping
     }
   }
 }
@@ -349,9 +413,12 @@
 @media (max-width: 480px) {
   .curricula-table {
     font-size: 11px;
+    min-width: 600px; // Ensure minimum width for all columns
+    
     ::ng-deep .ant-table-thead > tr > th,
     ::ng-deep .ant-table-tbody > tr > td {
       padding: 6px 4px;
+      white-space: nowrap; // Prevent text wrapping
     }
   }
 }

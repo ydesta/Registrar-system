@@ -49,7 +49,17 @@
         </div>
     </nz-tab>
 
-    <nz-tab [nzTitle]="academicTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[5]">
+    <nz-tab [nzTitle]="applicationFeeTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[5]">
+        <ng-template #applicationFeeTemplate>
+            <span nz-icon nzType="credit-card" nzTheme="outline"></span>
+            Application Fee
+        </ng-template>
+        <div class="tab-content">
+            <ng-content select="[tabContent='applicationFee']"></ng-content>
+        </div>
+    </nz-tab>
+
+    <nz-tab [nzTitle]="academicTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[6]">
         <ng-template #academicTemplate>
             <span nz-icon nzType="read" nzTheme="outline"></span>
             Academic Program Request
@@ -59,7 +69,7 @@
         </div>
     </nz-tab>
 
-    <nz-tab *ngIf="showFilesTab" [nzTitle]="agreementTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[6]">
+    <nz-tab *ngIf="showFilesTab" [nzTitle]="agreementTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[7]">
         <ng-template #agreementTemplate>
             <span nz-icon [nzType]="isUserReviewer() ? 'check-circle' : 'file-text'" nzTheme="outline"></span>
             {{ isUserReviewer() ? 'Review Decision' : 'Agreement' }}

@@ -3,7 +3,7 @@
   <header class="site-header">
     <div class="header-content">
       <div class="logo" (click)="goToHome()" style="cursor: pointer;">
-        <img src="assets/images/logo.png" alt="HiLCoE Logo">
+        <img src="assets/images/logo2.png" alt="HiLCoE Logo">
         <!-- <span class="school-name">School of Computer Science & Technology</span> -->
       </div>
       <nav class="main-nav">
@@ -33,18 +33,33 @@
     </div> -->
     <!-- Attractive Hero Image Section -->
     <section class="hero-image-section">
-      <div class="hero-image-wrapper">
-        <!-- <img src="assets/images/hero-attractive.jpg" alt="HiLCoE Campus" class="hero-main-image"> -->
-        <div class="hero-overlay animated">
-          <div class="hero-glass-card">
-            <h1 class="hero-anim hero-anim-h1">Shaping the Future of Technology Education</h1>
-            <p class="hero-anim hero-anim-p">Join HiLCoE School of Computer Science & Technology and become a tech leader of tomorrow.</p>
+      <div class="hero-container">
+        <!-- Left Column - Text Content -->
+        <div class="hero-text-column">
+          <div class="hero-text-content">
+            <h1 class="hero-title">Shaping the Future of</h1>
+            <h2 class="hero-subtitle">Computer Science & <span class="highlight">Engineering</span></h2>
+            <h3 class="hero-description">Technology Education</h3>
+            <p class="hero-paragraph">Join HiLCoE School of Computer Science & Technology and become a tech leader of tomorrow.</p>
             <ng-container *ngIf="!isAuthenticated; else authenticatedCta">
-            <a class="cta-btn hero-anim hero-anim-btn" (click)="login()">Get Started</a>
+              <button class="hero-cta-btn" (click)="login()">
+                Get Started
+                <i nz-icon nzType="arrow-right" nzTheme="outline"></i>
+              </button>
             </ng-container>
             <ng-template #authenticatedCta>
-              <a class="cta-btn hero-anim hero-anim-btn" (click)="goToDashboard()">Go to Dashboard</a>
+              <button class="hero-cta-btn" (click)="goToDashboard()">
+                Go to Dashboard
+                <i nz-icon nzType="arrow-right" nzTheme="outline"></i>
+              </button>
             </ng-template>
+          </div>
+        </div>
+        
+        <!-- Right Column - Visual Elements -->
+        <div class="hero-visual-column">
+          <div class="hero-visual-container">
+            <img src="assets/images/hero.png" alt="Computer Science Education" class="hero-image">
           </div>
         </div>
       </div>

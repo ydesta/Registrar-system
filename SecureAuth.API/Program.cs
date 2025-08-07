@@ -70,7 +70,7 @@ app.UseCors("AllowAngularApp");
 // Add custom middleware
 app.UseMiddleware<CorsDebugMiddleware>();
 app.UseMiddleware<SecurityHeadersMiddleware>();
-app.UseMiddleware<RateLimitingMiddleware>();
+// app.UseMiddleware<RateLimitingMiddleware>(); // Temporarily disabled due to 429 errors in production
 
 // Add HTTPS redirection for production
 if (!app.Environment.IsDevelopment())

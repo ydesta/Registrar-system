@@ -56,6 +56,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
 
             var query = _context.Set<ActivityLog>()
                 .Include(x => x.User)
+                .AsNoTracking() // Performance optimization
                 .AsQueryable();
 
             // Apply filters using extension methods
@@ -86,6 +87,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
         public async Task<ActivityLog?> GetByIdAsync(string id)
         {
             return await _context.Set<ActivityLog>()
+                .AsNoTracking() // Performance optimization
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
@@ -93,6 +95,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
         {
             return await _context.Set<ActivityLog>()
                 .Include(x => x.User)
+                .AsNoTracking() // Performance optimization
                 .Where(x => x.Id == id)
                 .Select(log => new ActivityLogWithUserInfo
                 {
@@ -116,6 +119,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
         public async Task<IEnumerable<ActivityLog>> GetByUserIdAsync(string userId)
         {
             return await _context.Set<ActivityLog>()
+                .AsNoTracking() // Performance optimization
                 .Where(x => x.UserId == userId)
                 .OrderByDescending(x => x.Timestamp)
                 .ToListAsync();
@@ -124,6 +128,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
         public async Task<IEnumerable<ActivityLog>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
             return await _context.Set<ActivityLog>()
+                .AsNoTracking() // Performance optimization
                 .Where(x => x.Timestamp >= startDate && x.Timestamp <= endDate)
                 .OrderByDescending(x => x.Timestamp)
                 .ToListAsync();
@@ -132,6 +137,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
         public async Task<IEnumerable<ActivityLog>> GetByActionAsync(string action)
         {
             return await _context.Set<ActivityLog>()
+                .AsNoTracking() // Performance optimization
                 .Where(x => x.Action == action)
                 .OrderByDescending(x => x.Timestamp)
                 .ToListAsync();
@@ -140,6 +146,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
         public async Task<IEnumerable<ActivityLog>> GetByEntityTypeAsync(string entityType)
         {
             return await _context.Set<ActivityLog>()
+                .AsNoTracking() // Performance optimization
                 .Where(x => x.EntityType == entityType)
                 .OrderByDescending(x => x.Timestamp)
                 .ToListAsync();
@@ -147,7 +154,9 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
 
         public async Task<int> GetCountAsync()
         {
-            return await _context.Set<ActivityLog>().CountAsync();
+            return await _context.Set<ActivityLog>()
+                .AsNoTracking() // Performance optimization
+                .CountAsync();
         }
 
         public async Task<int> GetFilteredCountAsync(ActivityLogFilterParams filterParams)
@@ -161,6 +170,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
 
             var query = _context.Set<ActivityLog>()
                 .Include(x => x.User)
+                .AsNoTracking() // Performance optimization
                 .AsQueryable();
 
             // Apply filters using extension methods

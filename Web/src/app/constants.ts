@@ -5,9 +5,9 @@ export class Constants {
   // public static idpAuthority = 'https://localhost:7123';
   // public static clientId = 'angular-client';
 
-  // Production environment
+  // Production environment - Cross-domain setup
   public static apiRoot = 'https://hilcoe.edu.et:7123/api';
-  public static clientRoot = 'https://hilcoe.edu.et:4200';
+  public static clientRoot = 'https://staging.hilcoe.edu.et';
   public static idpAuthority = 'https://hilcoe.edu.et:7123';
   public static clientId = 'angular-client';
 }

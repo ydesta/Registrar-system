@@ -1,40 +1,22 @@
-<div class="create-user-container">
-  <!-- Test Message -->
-  <div style="background: orange; color: white; padding: 20px; margin: 20px; border-radius: 8px;">
-    <h2>CreateUserComponent is loaded!</h2>
-    <p>If you can see this, the routing is working.</p>
-  </div>
-
-  <div class="header-section">
-    <div class="header-left">
-      <h2>Create New User</h2>
-      <p>Add a new user to the system with appropriate roles and permissions</p>
-    </div>
-    <div class="header-right">
-      <button nz-button nzType="default" (click)="onCancel()">
-        <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
-        Back to Users
-      </button>
-    </div>
-  </div>
-
-  <nz-card class="form-card">
     <form nz-form [formGroup]="userForm" (ngSubmit)="onSubmit()">
-      <div class="form-sections">
+  <nz-card>
+    <div nz-row [nzGutter]="24">
         <!-- Basic Information -->
-        <div class="form-section">
-          <h3>Basic Information</h3>
-          <div class="form-row">
-            <div class="form-col">
-              <nz-form-item>
-                <nz-form-label [nzSpan]="6" nzRequired>First Name</nz-form-label>
-                <nz-form-control [nzSpan]="18" [nzErrorTip]="firstNameErrorTpl">
+      <div nz-col nzSpan="12">
+        <nz-form-item class="float-label-item">
+          <nz-form-control [nzErrorTip]="firstNameErrorTpl">
+            <div class="float-label-container">
                   <input 
                     nz-input 
                     formControlName="firstName" 
-                    placeholder="Enter first name"
-                    [class.ant-input-error]="isFieldInvalid('firstName')"
-                    [class.ant-input-success]="isFieldValid('firstName')" />
+                placeholder=" "
+                [class.error]="isFieldInvalid('firstName')"
+                [class.filled]="userForm.get('firstName')?.value"
+                id="firstName" />
+              <label for="firstName" class="float-label">
+                First Name <span class="required">*</span>
+              </label>
+            </div>
                   <ng-template #firstNameErrorTpl let-control>
                     <ng-container *ngIf="control.hasError('required')">
                       First name is required
@@ -48,17 +30,21 @@
                   </ng-template>
                 </nz-form-control>
               </nz-form-item>
-            </div>
-            <div class="form-col">
-              <nz-form-item>
-                <nz-form-label [nzSpan]="6" nzRequired>Last Name</nz-form-label>
-                <nz-form-control [nzSpan]="18" [nzErrorTip]="lastNameErrorTpl">
+
+        <nz-form-item class="float-label-item">
+          <nz-form-control [nzErrorTip]="lastNameErrorTpl">
+            <div class="float-label-container">
                   <input 
                     nz-input 
                     formControlName="lastName" 
-                    placeholder="Enter last name"
-                    [class.ant-input-error]="isFieldInvalid('lastName')"
-                    [class.ant-input-success]="isFieldValid('lastName')" />
+                placeholder=" "
+                [class.error]="isFieldInvalid('lastName')"
+                [class.filled]="userForm.get('lastName')?.value"
+                id="lastName" />
+              <label for="lastName" class="float-label">
+                Last Name <span class="required">*</span>
+              </label>
+            </div>
                   <ng-template #lastNameErrorTpl let-control>
                     <ng-container *ngIf="control.hasError('required')">
                       Last name is required
@@ -72,20 +58,21 @@
                   </ng-template>
                 </nz-form-control>
               </nz-form-item>
-            </div>
-          </div>
 
-          <div class="form-row">
-            <div class="form-col">
-              <nz-form-item>
-                <nz-form-label [nzSpan]="6" nzRequired>Email</nz-form-label>
-                <nz-form-control [nzSpan]="18" [nzErrorTip]="emailErrorTpl">
+        <nz-form-item class="float-label-item">
+          <nz-form-control [nzErrorTip]="emailErrorTpl">
+            <div class="float-label-container">
                   <input 
                     nz-input 
                     formControlName="email" 
-                    placeholder="Enter email address"
-                    [class.ant-input-error]="isFieldInvalid('email')"
-                    [class.ant-input-success]="isFieldValid('email')" />
+                placeholder=" "
+                [class.error]="isFieldInvalid('email')"
+                [class.filled]="userForm.get('email')?.value"
+                id="email" />
+              <label for="email" class="float-label">
+                Email Address <span class="required">*</span>
+              </label>
+            </div>
                   <ng-template #emailErrorTpl let-control>
                     <ng-container *ngIf="control.hasError('required')">
                       Email is required
@@ -96,17 +83,21 @@
                   </ng-template>
                 </nz-form-control>
               </nz-form-item>
-            </div>
-            <div class="form-col">
-              <nz-form-item>
-                <nz-form-label [nzSpan]="6">Phone Number</nz-form-label>
-                <nz-form-control [nzSpan]="18" [nzErrorTip]="phoneErrorTpl">
+
+        <nz-form-item class="float-label-item">
+          <nz-form-control [nzErrorTip]="phoneErrorTpl">
+            <div class="float-label-container">
                   <input 
                     nz-input 
                     formControlName="phoneNumber" 
-                    placeholder="Enter phone number"
-                    [class.ant-input-error]="isFieldInvalid('phoneNumber')"
-                    [class.ant-input-success]="isFieldValid('phoneNumber')" />
+                placeholder=" "
+                [class.error]="isFieldInvalid('phoneNumber')"
+                [class.filled]="userForm.get('phoneNumber')?.value"
+                id="phoneNumber" />
+              <label for="phoneNumber" class="float-label">
+                Phone Number
+              </label>
+            </div>
                   <ng-template #phoneErrorTpl let-control>
                     <ng-container *ngIf="control.hasError('pattern')">
                       Please enter a valid phone number
@@ -114,148 +105,18 @@
                   </ng-template>
                 </nz-form-control>
               </nz-form-item>
-            </div>
-          </div>
-        </div>
 
-        <!-- Security Settings -->
-        <div class="form-section">
-          <h3>Security Settings</h3>
-          
-          <!-- Password Requirements -->
-          <div class="password-requirements">
-            <h4>Password Requirements:</h4>
-            <ul>
-              <li [class.requirement-met]="isRequirementMet('length')">At least 8 characters long</li>
-              <li [class.requirement-met]="isRequirementMet('lowercase')">Contains at least one lowercase letter</li>
-              <li [class.requirement-met]="isRequirementMet('uppercase')">Contains at least one uppercase letter</li>
-              <li [class.requirement-met]="isRequirementMet('number')">Contains at least one number</li>
-              <li [class.requirement-met]="isRequirementMet('special')">Contains at least one special character</li>
-            </ul>
-          </div>
-
-          <div class="form-row">
-            <div class="form-col">
-              <nz-form-item>
-                <nz-form-label [nzSpan]="6" nzRequired>Password</nz-form-label>
-                <nz-form-control [nzSpan]="18" [nzErrorTip]="passwordErrorTpl">
-                  <nz-input-group [nzSuffix]="passwordSuffixIcon">
-                    <input 
-                      nz-input 
-                      [type]="passwordVisible ? 'text' : 'password'"
-                      formControlName="password" 
-                      placeholder="Enter password"
-                      [class.ant-input-error]="isFieldInvalid('password')"
-                      [class.ant-input-success]="isFieldValid('password')" />
-                  </nz-input-group>
-                  <ng-template #passwordSuffixIcon>
-                    <span 
-                      nz-icon 
-                      (click)="passwordVisible = !passwordVisible"
-                      style="cursor: pointer;">
-                    </span>
-                  </ng-template>
-                  <ng-template #passwordErrorTpl let-control>
-                    <ng-container *ngIf="control.hasError('required')">
-                      Password is required
-                    </ng-container>
-                    <ng-container *ngIf="control.hasError('minlength')">
-                      Password must be at least 8 characters
-                    </ng-container>
-                    <ng-container *ngIf="control.hasError('pattern')">
-                      Password must contain uppercase, lowercase, number, and special character
-                    </ng-container>
-                  </ng-template>
-                </nz-form-control>
-              </nz-form-item>
-            </div>
-            <div class="form-col">
-              <nz-form-item>
-                <nz-form-label [nzSpan]="6" nzRequired>Confirm Password</nz-form-label>
-                <nz-form-control [nzSpan]="18" [nzErrorTip]="confirmPasswordErrorTpl">
-                  <nz-input-group [nzSuffix]="confirmPasswordSuffixIcon">
-                    <input 
-                      nz-input 
-                      [type]="confirmPasswordVisible ? 'text' : 'password'"
-                      formControlName="confirmPassword" 
-                      placeholder="Confirm password"
-                      [class.ant-input-error]="isFieldInvalid('confirmPassword')"
-                      [class.ant-input-success]="isFieldValid('confirmPassword')" />
-                  </nz-input-group>
-                  <ng-template #confirmPasswordSuffixIcon>
-                    <span 
-                      nz-icon 
-                      (click)="confirmPasswordVisible = !confirmPasswordVisible"
-                      style="cursor: pointer;">
-                    </span>
-                  </ng-template>
-                  <ng-template #confirmPasswordErrorTpl let-control>
-                    <ng-container *ngIf="control.hasError('required')">
-                      Please confirm your password
-                    </ng-container>
-                  </ng-template>
-                </nz-form-control>
-              </nz-form-item>
-            </div>
-          </div>
-
-          <!-- Password Mismatch Error -->
-          <div class="password-mismatch-error" *ngIf="userForm.hasError('passwordMismatch') && userForm.get('confirmPassword')?.touched">
-            <nz-alert
-              nzType="error"
-              nzMessage="Passwords do not match"
-              [nzShowIcon]="true">
-            </nz-alert>
-          </div>
-
-          <!-- Password Strength Indicator -->
-          <div class="password-strength" *ngIf="userForm.get('password')?.value">
-            <div class="strength-bar">
-              <nz-progress 
-                [nzPercent]="(getPasswordStrength().score / 5) * 100"
-                [nzStrokeColor]="getPasswordStrength().color"
-                [nzShowInfo]="false"
-                nzSize="small">
-              </nz-progress>
-            </div>
-            <div class="strength-label">
-              Password Strength: 
-              <span [style.color]="getPasswordStrength().color">
-                {{ getPasswordStrength().label }}
-              </span>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-col">
-              <button 
-                nz-button 
-                nzType="dashed" 
-                nzSize="small"
-                (click)="onGeneratePassword()"
-                style="margin-top: 8px;">
-                <i nz-icon nzType="key" nzTheme="outline"></i>
-                Generate Secure Password
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Role Assignment -->
-        <div class="form-section">
-          <h3>Role Assignment</h3>
-          <div class="form-row">
-            <div class="form-col">
-              <nz-form-item>
-                <nz-form-label [nzSpan]="6" nzRequired>Roles</nz-form-label>
-                <nz-form-control [nzSpan]="18" [nzErrorTip]="rolesErrorTpl">
+        <nz-form-item class="float-label-item">
+          <nz-form-control [nzErrorTip]="rolesErrorTpl">
+            <div class="float-label-container">
                   <nz-select 
                     formControlName="roleNames"
                     [nzMode]="'multiple'"
-                    nzPlaceHolder="Select roles"
+                nzPlaceHolder=" "
                     [nzLoading]="loading"
-                    [class.ant-select-error]="isFieldInvalid('roleNames')"
-                    [class.ant-select-success]="isFieldValid('roleNames')">
+                [class.error]="isFieldInvalid('roleNames')"
+                [class.filled]="userForm.get('roleNames')?.value?.length > 0"
+                id="roleNames">
                     <nz-option 
                       *ngFor="let role of roles" 
                       [nzValue]="role.name" 
@@ -268,6 +129,10 @@
                       </div>
                     </nz-option>
                   </nz-select>
+              <label for="roleNames" class="float-label">
+                Roles <span class="required">*</span>
+              </label>
+            </div>
                   <ng-template #rolesErrorTpl let-control>
                     <ng-container *ngIf="control.hasError('required')">
                       At least one role must be selected
@@ -276,74 +141,65 @@
                 </nz-form-control>
               </nz-form-item>
             </div>
-          </div>
-        </div>
 
-        <!-- Account Settings -->
-        <div class="form-section">
-          <h3>Account Settings</h3>
-          <div class="form-row">
-            <div class="form-col">
-              <nz-form-item>
-                <nz-form-label [nzSpan]="6">Account Status</nz-form-label>
-                <nz-form-control [nzSpan]="18">
+      <!-- Security Settings -->
+      <div nz-col nzSpan="12">
+
+
+        <nz-form-item class="switch-item">
+          <nz-form-control>
+            <div class="switch-container">
+              <label class="switch-label">Account Status</label>
+              <div class="switch-control">
                   <nz-switch formControlName="isActive"></nz-switch>
-                  <span style="margin-left: 8px;">
+                <span class="switch-status">
                     {{ userForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
                   </span>
-                </nz-form-control>
-              </nz-form-item>
+              </div>
             </div>
-          </div>
+          </nz-form-control>
+        </nz-form-item>
 
-          <div class="form-row">
-            <div class="form-col">
-              <nz-form-item>
-                <nz-form-label [nzSpan]="6">Email Confirmation</nz-form-label>
-                <nz-form-control [nzSpan]="18">
+        <nz-form-item class="switch-item">
+          <nz-form-control>
+            <div class="switch-container">
+              <label class="switch-label">Email Confirmation</label>
+              <div class="switch-control">
                   <nz-switch formControlName="requireEmailConfirmation"></nz-switch>
-                  <span style="margin-left: 8px;">
+                <span class="switch-status">
                     {{ userForm.get('requireEmailConfirmation')?.value ? 'Required' : 'Not Required' }}
                   </span>
-                </nz-form-control>
-              </nz-form-item>
+              </div>
             </div>
-            <div class="form-col">
-              <nz-form-item>
-                <nz-form-label [nzSpan]="6">Phone Confirmation</nz-form-label>
-                <nz-form-control [nzSpan]="18">
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item class="switch-item">
+          <nz-form-control>
+            <div class="switch-container">
+              <label class="switch-label">Phone Confirmation</label>
+              <div class="switch-control">
                   <nz-switch formControlName="requirePhoneConfirmation"></nz-switch>
-                  <span style="margin-left: 8px;">
+                <span class="switch-status">
                     {{ userForm.get('requirePhoneConfirmation')?.value ? 'Required' : 'Not Required' }}
                   </span>
-                </nz-form-control>
-              </nz-form-item>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </nz-form-control>
+        </nz-form-item>
 
-      <!-- Form Actions -->
-      <div class="form-actions">
-        <nz-space>
-          <button 
-            nz-button 
-            nzType="default" 
-            (click)="onCancel()"
-            [disabled]="submitting">
-            Cancel
-          </button>
-          <button 
-            nz-button 
-            nzType="primary" 
-            type="submit"
-            [nzLoading]="submitting"
-            [disabled]="userForm.invalid">
+
+      </div>
+    </div>
+
+
+  </nz-card>
+
+  <div class="modal-footer">
+    <button nz-button nzType="default" (click)="onCancel()" [disabled]="submitting">Cancel</button>
+    <button nz-button nzType="primary" type="submit" [nzLoading]="submitting" [disabled]="userForm.invalid">
             <i nz-icon nzType="save" nzTheme="outline"></i>
             Create User
           </button>
-        </nz-space>
       </div>
     </form>
-  </nz-card>
-</div> 

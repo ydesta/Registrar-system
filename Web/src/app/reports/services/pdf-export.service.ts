@@ -159,8 +159,8 @@ export class PdfExportService {
     let cursorY = this.drawHeader(doc, transcript);
 
     cursorY += 10;
-    this.drawMediumOfInstruction(doc, cursorY);
-    this.drawAcademicTermsTwoColumns(doc, transcript.academicTerms, cursorY + 15); 
+    
+    this.drawAcademicTermsTwoColumns(doc, transcript.academicTerms, cursorY + 5, transcript); 
     this.drawSignaturePage(doc);
     doc.save(fileName);
   }
@@ -176,37 +176,45 @@ export class PdfExportService {
   // HEADER
   // ─────────────────────────────────────────────────────────────────────────────
   private drawHeader(doc: jsPDF, transcript?: StudentTranscriptViewModel): number {
-    const y = 40;
-    doc.setFont('helvetica', 'bold').setFontSize(18); 
-    doc.setTextColor(0, 0, 0); 
+    const y = 30; // Reduced from 40 to 30
+    
+    // Draw header background rectangle
+    doc.setFillColor(240, 240, 240); // Light gray background to match table header
+    doc.rect(15, y - 15, 580, 110, 'F'); // Increased height from 100 to 110 to accommodate medium of instruction
+    
+    // Institution name with enhanced styling
+    doc.setFont('helvetica', 'bold').setFontSize(22); 
+    doc.setTextColor(0, 0, 0); // Black text for contrast
     doc.text('HiLCoE', 20, y - 8);
     
-    doc.setFontSize(11); 
+    doc.setFontSize(12); 
     doc.setFont('helvetica', 'bold'); 
-    doc.setTextColor(0, 0, 0); 
-    doc.text('School of Computer Science & Technology', 20, y + 6); 
+    doc.setTextColor(0, 0, 0); // Black text for contrast
+    doc.text('School of Computer Science & Technology', 20, y + 8); 
     
+    // Contact information with subtle styling
     doc.setFontSize(8); 
-    doc.setFont('helvetica', 'bold'); 
-    doc.setTextColor(0, 0, 0); 
-    doc.text('Tel. (+251-111) 559769, 564900', 20, y + 18); 
-    doc.text('P.O.Box 25304/1000', 20, y + 26); 
-    doc.text('e-mail: info@hilcoe.net', 20, y + 34); 
+    doc.setFont('helvetica', 'normal'); 
+    doc.setTextColor(80, 80, 80); // Dark gray text
+    doc.text('Tel. (+251-111) 559769, 564900', 20, y + 24); 
+    doc.text('P.O.Box 25304/1000', 20, y + 36); 
+    doc.text('e-mail: info@hilcoe.net', 20, y + 48);
+    
+    // Add medium of instruction in header
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text('Medium of instruction: English', 20, y + 60); 
     
     // Right side - Student information (if transcript is provided)
     if (transcript) {
       const rightX = 450; 
       let studentY = y - 8; 
       
-      // Student name (larger, more prominent)
-      // doc.setFont('helvetica', 'bold').setFontSize(10);
-      // doc.setTextColor(0, 0, 0); // Changed to black color
-      // doc.text(transcript.fullName, rightX, studentY);
-      
-      // Student details in smaller text
-      doc.setFontSize(7);
+      // Student details with enhanced styling
+      doc.setFontSize(8);
       doc.setFont('helvetica', 'bold'); 
-      doc.setTextColor(0, 0, 0); 
+      doc.setTextColor(0, 0, 0); // Black text for contrast
       studentY += 12;
       
       const dob = transcript.dateOfBirth
@@ -219,14 +227,27 @@ export class PdfExportService {
       
       // Personal Information (Right side)
       doc.text(`Full Name: ${transcript.fullName}`, rightX, studentY);
-      studentY += 8;
+      studentY += 14; // Increased from 12 to 14
       doc.text(`Gender: ${transcript.gender || 'Male'}`, rightX, studentY);
-      studentY += 8;
+      studentY += 14; // Increased from 12 to 14
       doc.text(`Date of Birth: ${dob}`, rightX, studentY);
-      studentY += 8;
+      studentY += 14; // Increased from 12 to 14
       doc.text(`Place of Birth: ${transcript.placeOfBirth || 'Wukro'}`, rightX, studentY);
-      studentY += 8;
-      doc.text(`Admission Date: ${transcript.admissionDate || 'September 2012'}`, rightX, studentY);
+      studentY += 14; // Increased from 12 to 14
+      // Format admission date to date-month-year format
+      let admissionDateFormatted = 'September 2012'; // Default
+      if (transcript.admissionDate) {
+        try {
+          const date = new Date(transcript.admissionDate);
+          const day = date.getDate();
+          const month = date.toLocaleDateString('en-US', { month: 'long' });
+          const year = date.getFullYear();
+          admissionDateFormatted = `${day}-${month}-${year}`;
+        } catch (error) {
+          admissionDateFormatted = 'September 2012'; // Fallback
+        }
+      }
+      doc.text(`Admission Date: ${admissionDateFormatted}`, rightX, studentY);
       
       
       const leftEndX = 200; 
@@ -234,18 +255,30 @@ export class PdfExportService {
       const centerX = (leftEndX + rightStartX) / 2 - 40; 
       studentY = y + 2; 
       
-      doc.text(`Programme: ${transcript.programme || 'BSc degree in Computer Science'}`, centerX, studentY);
-      studentY += 8;
+      // Center section with enhanced styling and text wrapping
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold'); 
+      doc.setTextColor(0, 0, 0); // Black text for contrast
+      
+      // Programme with text wrapping
+      const programmeText = `Programme: ${transcript.programme || 'BSc degree in Computer Science'}`;
+      const maxWidth = 120; // Maximum width for text wrapping
+      const programmeLines = doc.splitTextToSize(programmeText, maxWidth);
+      programmeLines.forEach((line: string, index: number) => {
+        doc.text(line, centerX, studentY + (index * 10));
+      });
+      studentY += (programmeLines.length * 10) + 4; // Dynamic spacing based on wrapped lines
+      
       doc.text(`Division: ${transcript.division || 'Day'}`, centerX, studentY);
-      studentY += 8;
+      studentY += 14; // Increased from 12 to 14
       doc.text(`Status: ${transcript.status || 'Regular'}`, centerX, studentY);
-      studentY += 8;
+      studentY += 14; // Increased from 12 to 14
       doc.text(`Major: ${transcript.major || 'Computer Science'}`, centerX, studentY);
-      studentY += 8;
+      studentY += 14; // Increased from 12 to 14
       doc.text(`Award Date: ${award}`, centerX, studentY);
     }
     
-    return y + 60;
+    return y + 105; // Increased from 95 to 105 to accommodate larger header background with medium of instruction
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -307,12 +340,13 @@ export class PdfExportService {
   private drawAcademicTermsTwoColumns(
     doc: jsPDF,
     terms: any[] = [],
-    startY: number
+    startY: number,
+    transcript?: StudentTranscriptViewModel
   ): void {
     const leftX = 20;
     const rightX = 320; // Increased gap between tables
     const columnWidth = 240; // Reduced width to accommodate spacing
-    let currentY = startY + 10; // Reduced from 20 to 10 points top margin
+    let currentY = startY + 5; // Reduced from 10 to 5 points top margin
 
     // Process terms in pairs (2 per row)
     for (let i = 0; i < terms.length; i += 2) {
@@ -340,7 +374,11 @@ export class PdfExportService {
       
       if (currentY > 60 && maxHeight > availableSpace) {
         doc.addPage();
-        currentY = 60;
+        
+        // Draw header on new page
+        this.drawHeader(doc, transcript);
+        
+        currentY = 140; // Increased from 120 to 140 to add more space after header
         
         // Reset styling context after page break
         doc.setFont('helvetica', 'normal');
@@ -359,19 +397,19 @@ export class PdfExportService {
         this.drawSingleTermTable(doc, term2, rightX, currentY, columnWidth);
       }
 
-      // Move to next row with increased spacing
-      currentY += maxHeight + 70; // Increased spacing between rows from 60 to 70
+      // Move to next row with reduced spacing
+      currentY += maxHeight + 40; // Reduced spacing between rows from 70 to 40
     }
   }
 
   private calculateTableHeight(term: any): number {
     // Estimate height based on number of courses + header + footer
     const courseCount = term.courses ? term.courses.length : 0;
-    const headerHeight = 20; // Term header
-    const tableHeaderHeight = 15; // Table header row
-    const courseRowHeight = 12; // Each course row
-    const footerHeight = 35; // Summary footer (5 rows × 7 points each)
-    const spacing = 10; // Additional spacing
+    const headerHeight = 15; // Reduced term header height from 20 to 15
+    const tableHeaderHeight = 12; // Reduced table header height from 15 to 12
+    const courseRowHeight = 10; // Reduced course row height from 12 to 10
+    const footerHeight = 30; // Reduced footer height from 35 to 30
+    const spacing = 5; // Reduced spacing from 10 to 5
     
     return headerHeight + tableHeaderHeight + (courseRowHeight * courseCount) + footerHeight + spacing;
   }
@@ -385,7 +423,7 @@ export class PdfExportService {
   ): void {
     // Styled term header with background
     const headerWidth = columnWidth + 40; // Increased from 30 to 40 for better coverage
-    const headerHeight = 20; // Increased height for better appearance
+    const headerHeight = 15; // Reduced height from 20 to 15
     
     // Explicitly set all styling properties to ensure consistency
     doc.setFont('helvetica', 'normal');
@@ -396,10 +434,18 @@ export class PdfExportService {
     doc.setFillColor(240, 240, 240); // Changed to match table header color
     doc.rect(x - 9, y - 8, headerWidth, headerHeight, 'F'); // Slightly increased positioning from -8 to -9
     
-    // Draw header text
+    // Draw header text centered
     doc.setFont('helvetica', 'bold').setFontSize(11);
     doc.setTextColor(0, 0, 0); // Changed to black text to match table header
-    doc.text(`Term: ${term.termName}`, x, y + 2); // Adjusted text positioning
+    const termText = `Term: ${term.termName}`;
+    const termTextWidth = doc.getTextWidth(termText);
+    const centerX = x + (headerWidth / 2) - (termTextWidth / 2);
+    doc.text(termText, centerX, y + 2); // Centered text positioning
+
+    // Add horizontal line below header
+    doc.setDrawColor(200, 200, 200); // Light gray line
+    doc.setLineWidth(0.5);
+    doc.line(x - 9, y + headerHeight - 2, x + headerWidth - 9, y + headerHeight - 2);
 
     // Build table data
     const body = term.courses.map((c: any) => [
@@ -410,13 +456,13 @@ export class PdfExportService {
       c.gradePoint.toFixed(2),
     ]);
 
-    // Add summary rows to the table footer
+    // Add summary rows to the table footer with proper alignment
     const foot = [
       ['', 'Total:', term.totalCreditHours.toString(), '', ''],
       ['', 'Average:', term.termGPA.toFixed(2), '', ''],
       ['', 'Total Credit Hour:', term.totalCreditHours.toFixed(2), '', ''],
       ['', 'CGPA:', term.cumulativeGPA.toFixed(2), '', ''],
-      ['', 'Major CGPA:', term.cumulativeMajorGPA.toFixed(2), '', '']
+      ['', 'Major CGPA:', term.cumulativeMajorGPA.toFixed(2), '']
     ];
 
     // Draw the table with explicit styling
@@ -424,12 +470,12 @@ export class PdfExportService {
             head: [['Course Code', 'Course Title', 'Credit Hour', 'Grade', 'Grade Point']],
       body,
       foot,
-      startY: y + 15, // Adjusted to account for larger header
+      startY: y + 12, // Reduced from 15 to 12 to account for smaller header
       margin: { left: x, right: doc.internal.pageSize.width - x - columnWidth },
             theme: 'grid',
       styles: { 
-        fontSize: 8, 
-        cellPadding: 2,
+        fontSize: 7, // Reduced from 8 to 7
+        cellPadding: 1, // Reduced from 2 to 1
         font: 'helvetica',
         textColor: [0, 0, 0],
         lineColor: [0, 0, 0],
@@ -439,7 +485,7 @@ export class PdfExportService {
               fillColor: [240, 240, 240], 
               textColor: [0, 0, 0],
         fontStyle: 'bold', 
-        fontSize: 8,
+        fontSize: 7, // Reduced from 8 to 7
         font: 'helvetica',
         lineColor: [0, 0, 0],
         lineWidth: 0.1
@@ -448,17 +494,17 @@ export class PdfExportService {
         fillColor: [245, 245, 245], 
         textColor: [0, 0, 0], 
         fontStyle: 'bold',
-        fontSize: 8,
+        fontSize: 7, // Reduced from 8 to 7
         font: 'helvetica',
-        lineColor: [0, 0, 0],
-        lineWidth: 0.1
+        lineColor: [255, 255, 255], // Changed to white to hide borders
+        lineWidth: 0
             },
             columnStyles: {
-        0: { cellWidth: 50, halign: 'left' }, // Increased from 45 to 50
-        1: { cellWidth: columnWidth - (50 + 30 + 30), halign: 'left' }, // Adjusted for new widths
-        2: { cellWidth: 30, halign: 'center' }, // Increased from 25 to 30
-        3: { cellWidth: 30, halign: 'center' }, // Increased from 25 to 30
-        4: { cellWidth: 30, halign: 'center' }, // Increased from 25 to 30
+        0: { cellWidth: 50, halign: 'left' }, // Course Code
+        1: { cellWidth: columnWidth - (50 + 30 + 30), halign: 'left' }, // Course Title
+        2: { cellWidth: 30, halign: 'center' }, // Credit Hour
+        3: { cellWidth: 30, halign: 'center' }, // Grade
+        4: { cellWidth: 30, halign: 'center' }, // Grade Point
       },
       didDrawPage: (data) => {
         // Add page number at the bottom center of each page
@@ -471,6 +517,16 @@ export class PdfExportService {
         doc.setTextColor(100, 100, 100);
         doc.text(`Page ${pageCount}`, pageWidth / 2, pageHeight - 20, { align: 'center' });
       },
+      didParseCell: function (data) {
+        // Right-align only footer labels (column 1 in footer section)
+        if (data.section === 'foot' && data.column.index === 1) {
+          data.cell.styles.halign = 'right';
+        }
+        // Center-align footer values (column 2 in footer section - Credit Hour column)
+        if (data.section === 'foot' && data.column.index === 2) {
+          data.cell.styles.halign = 'center';
+        }
+      }
       });
     }
 

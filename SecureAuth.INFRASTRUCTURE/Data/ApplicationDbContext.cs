@@ -84,6 +84,19 @@ namespace SecureAuth.INFRASTRUCTURE.Data
                     .HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedAt)
                     .HasDefaultValueSql("GETUTCDATE()");
+
+                // Add performance indexes for user queries
+                entity.HasIndex(e => e.IsActive).HasDatabaseName("IX_Users_IsActive");
+                entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_Users_CreatedAt");
+                entity.HasIndex(e => e.LastLoginAt).HasDatabaseName("IX_Users_LastLoginAt");
+                entity.HasIndex(e => e.FirstName).HasDatabaseName("IX_Users_FirstName");
+                entity.HasIndex(e => e.LastName).HasDatabaseName("IX_Users_LastName");
+                entity.HasIndex(e => e.Email).HasDatabaseName("IX_Users_Email");
+                entity.HasIndex(e => e.PhoneNumber).HasDatabaseName("IX_Users_PhoneNumber");
+                
+                // Composite index for search queries
+                entity.HasIndex(e => new { e.FirstName, e.LastName, e.Email, e.PhoneNumber })
+                    .HasDatabaseName("IX_Users_Search");
             });
 
             // Configure PasswordResetToken

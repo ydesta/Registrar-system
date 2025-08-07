@@ -85,5 +85,28 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
         {
             return await _dbSet.Select(r => r.Name).ToListAsync();
         }
+
+        public async Task<Dictionary<string, int>> GetUserCountsForRolesAsync(List<string> roleNames)
+        {
+            if (!roleNames.Any())
+                return new Dictionary<string, int>();
+
+            // Use a single query to get user counts for all roles
+            var userCounts = await _context.UserRoles
+                .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { UserRole = ur, Role = r })
+                .Where(x => roleNames.Contains(x.Role.Name))
+                .GroupBy(x => x.Role.Name)
+                .Select(g => new { RoleName = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.RoleName, x => x.Count);
+
+            // Ensure all requested roles are in the result (even if count is 0)
+            var result = new Dictionary<string, int>();
+            foreach (var roleName in roleNames)
+            {
+                result[roleName] = userCounts.TryGetValue(roleName, out var count) ? count : 0;
+            }
+
+            return result;
+        }
     }
 } 

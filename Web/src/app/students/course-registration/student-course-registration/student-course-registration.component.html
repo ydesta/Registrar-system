@@ -314,7 +314,7 @@
     </ng-template>
   </nz-tab>
 
-  <nz-tab [nzTitle]="seasonTitles" class="custom-tab" *ngIf="resultStatus==2 || resultStatus == 5">
+  <nz-tab [nzTitle]="seasonTitles" class="custom-tab no-sticky-tab" *ngIf="resultStatus==2 || resultStatus == 5">
     <div class="academic-header" *ngIf="studentTermCourseReg">
       <div class="academic-info">
         <div class="info-item">
@@ -369,10 +369,10 @@
         </tbody>
         <tfoot class="footer-row">
           <tr>
-            <td colspan="2" style="font-weight: bold;">Total</td>
-            <td style="font-weight: bold;"> {{studentTermCourseReg?.courseTermOfferings ? getTotalCreditHours():0 }}
+            <td colspan="2" style="font-weight: bold; text-align: left;">Total</td>
+            <td style="font-weight: bold; text-align: center;"> {{studentTermCourseReg?.courseTermOfferings ? getTotalCreditHours():0 }}
             </td>
-            <td style="font-weight: bold;"> {{studentTermCourseReg?.courseTermOfferings ? getTotalAmount():0 }}</td>
+            <td style="font-weight: bold; text-align: center;"> {{studentTermCourseReg?.courseTermOfferings ? getTotalAmount():0 }}</td>
           </tr>
         </tfoot>
       </nz-table>
@@ -426,8 +426,8 @@
           </tbody>
           <tfoot class="footer-row">
             <tr>
-              <td colspan="4" style="font-weight: bold;">Total</td>
-              <td style="font-weight: bold;"> {{studentTermCourseReg?.courseTermOfferings ? getTotalAmount():0 }}</td>
+              <td colspan="4" style="font-weight: bold; text-align: left;">Total</td>
+              <td style="font-weight: bold; text-align: center;"> {{studentTermCourseReg?.courseTermOfferings ? getTotalAmount():0 }}</td>
             </tr>
           </tfoot>
         </nz-table>

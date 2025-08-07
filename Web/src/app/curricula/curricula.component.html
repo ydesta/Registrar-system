@@ -4,7 +4,7 @@
     <div class="header-content">
       <div class="page-title">
         <h2 class="title-text">Curricula</h2>
-        <p class="subtitle-text">View, search, and manage all curricula in the system</p>
+        <p class="subtitle-text">View, search, and manage all curricula</p>
       </div>
       <div class="header-actions">
         <div class="search-section">
@@ -57,14 +57,68 @@
         <thead>
           <tr>
             <th style="min-width: 60px;">S/N</th>
-            <th style="min-width: 140px;" *ngFor="let column of listOfColumns" 
-                [nzSortOrder]="column.sortOrder"
-                [nzSortFn]="column.sortFn" 
-                [nzSortDirections]="column.sortDirections"
-                [nzFilterMultiple]="column.filterMultiple" 
-                [nzFilters]="column.listOfFilter" 
-                [nzFilterFn]="column.filterFn">
-              {{ column.name }}
+            <th style="min-width: 140px;" 
+                [nzSortOrder]="listOfColumns[0].sortOrder"
+                [nzSortFn]="listOfColumns[0].sortFn" 
+                [nzSortDirections]="listOfColumns[0].sortDirections"
+                [nzFilterMultiple]="listOfColumns[0].filterMultiple" 
+                [nzFilters]="listOfColumns[0].listOfFilter" 
+                [nzFilterFn]="listOfColumns[0].filterFn">
+              {{ listOfColumns[0].name }}
+            </th>
+            <th style="min-width: 180px;" 
+                [nzSortOrder]="listOfColumns[1].sortOrder"
+                [nzSortFn]="listOfColumns[1].sortFn" 
+                [nzSortDirections]="listOfColumns[1].sortDirections"
+                [nzFilterMultiple]="listOfColumns[1].filterMultiple" 
+                [nzFilters]="listOfColumns[1].listOfFilter" 
+                [nzFilterFn]="listOfColumns[1].filterFn">
+              {{ listOfColumns[1].name }}
+            </th>
+            <th style="min-width: 160px;" 
+                [nzSortOrder]="listOfColumns[2].sortOrder"
+                [nzSortFn]="listOfColumns[2].sortFn" 
+                [nzSortDirections]="listOfColumns[2].sortDirections"
+                [nzFilterMultiple]="listOfColumns[2].filterMultiple" 
+                [nzFilters]="listOfColumns[2].listOfFilter" 
+                [nzFilterFn]="listOfColumns[2].filterFn">
+              {{ listOfColumns[2].name }}
+            </th>
+            <th style="min-width: 140px;" 
+                [nzSortOrder]="listOfColumns[3].sortOrder"
+                [nzSortFn]="listOfColumns[3].sortFn" 
+                [nzSortDirections]="listOfColumns[3].sortDirections"
+                [nzFilterMultiple]="listOfColumns[3].filterMultiple" 
+                [nzFilters]="listOfColumns[3].listOfFilter" 
+                [nzFilterFn]="listOfColumns[3].filterFn">
+              {{ listOfColumns[3].name }}
+            </th>
+            <th style="min-width: 140px;" 
+                [nzSortOrder]="listOfColumns[4].sortOrder"
+                [nzSortFn]="listOfColumns[4].sortFn" 
+                [nzSortDirections]="listOfColumns[4].sortDirections"
+                [nzFilterMultiple]="listOfColumns[4].filterMultiple" 
+                [nzFilters]="listOfColumns[4].listOfFilter" 
+                [nzFilterFn]="listOfColumns[4].filterFn">
+              {{ listOfColumns[4].name }}
+            </th>
+            <th style="min-width: 140px;" 
+                [nzSortOrder]="listOfColumns[5].sortOrder"
+                [nzSortFn]="listOfColumns[5].sortFn" 
+                [nzSortDirections]="listOfColumns[5].sortDirections"
+                [nzFilterMultiple]="listOfColumns[5].filterMultiple" 
+                [nzFilters]="listOfColumns[5].listOfFilter" 
+                [nzFilterFn]="listOfColumns[5].filterFn">
+              {{ listOfColumns[5].name }}
+            </th>
+            <th style="min-width: 120px;" 
+                [nzSortOrder]="listOfColumns[6].sortOrder"
+                [nzSortFn]="listOfColumns[6].sortFn" 
+                [nzSortDirections]="listOfColumns[6].sortDirections"
+                [nzFilterMultiple]="listOfColumns[6].filterMultiple" 
+                [nzFilters]="listOfColumns[6].listOfFilter" 
+                [nzFilterFn]="listOfColumns[6].filterFn">
+              {{ listOfColumns[6].name }}
             </th>
             <th class="sticky-action" style="min-width: 120px;">Actions</th>
           </tr>

@@ -39,21 +39,21 @@ export class DashBoardService {
 
   private handleRetryLogic() {
     return (source: Observable<any>) => source.pipe(
-      retryWhen(errors => 
-        errors.pipe(
-          mergeMap((err: HttpErrorResponse) => {
-            if (err.status === 429) {
-              // Exponential backoff for rate limiting
-              const retryAttempt = parseInt(err.headers.get('X-Retry-After') || '1');
-              const delay = Math.min(1000 * Math.pow(2, retryAttempt), 5000); // Max 5 seconds
-              console.log(`Dashboard API rate limited, retrying in ${delay}ms`);
-              return timer(delay);
-            }
-            return throwError(() => err);
-          }),
-          take(2) // Max 2 retries for dashboard calls
-        )
-      ),
+      // retryWhen(errors => 
+      //   errors.pipe(
+      //     mergeMap((err: HttpErrorResponse) => {
+      //       if (err.status === 429) {
+      //         // Exponential backoff for rate limiting
+      //         const retryAttempt = parseInt(err.headers.get('X-Retry-After') || '1');
+      //         const delay = Math.min(1000 * Math.pow(2, retryAttempt), 5000); // Max 5 seconds
+      //         console.log(`Dashboard API rate limited, retrying in ${delay}ms`);
+      //         return timer(delay);
+      //       }
+      //       return throwError(() => err);
+      //     }),
+      //     take(2) // Max 2 retries for dashboard calls
+      //   )
+      // ),
       catchError((err: HttpErrorResponse) => {
         console.error('Dashboard API error:', err);
         return throwError(() => err);

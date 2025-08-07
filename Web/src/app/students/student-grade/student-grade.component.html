@@ -2,14 +2,17 @@
   <!-- Header Section -->
   <div class="header-section">
     <div class="header-content">
+      <!-- First Row: Title -->
       <div class="page-title">
         <h3 class="title-text">Student Grades</h3>
         <p class="subtitle-text">Manage and view all student grade information</p>
       </div>
-      <div class="header-actions">
+      
+      <!-- Second Row: Search and Action Buttons -->
+      <div class="search-actions-row">
         <div class="search-section">
           <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input type="text" nz-input placeholder="Search grades..." [(ngModel)]="searchKey" (ngModelChange)="clickSearchKey()" />
+            <input type="text" nz-input placeholder="Search by Student Code..." [(ngModel)]="searchKey" (ngModelChange)="applySearchAndFilters()" />
           </nz-input-group>
           <ng-template #suffixIconButton>
             <button nz-button nzType="primary" class="search-btn" nzSearch>
@@ -17,29 +20,83 @@
             </button>
           </ng-template>
         </div>
-        <button
-          routerLink="../import-student-grade"
-          class="add-btn"
-          nz-button
-          nzType="primary"
-        >
-          <i nz-icon nzType="plus" nzTheme="outline"></i>
-          <span>Add Grade</span>
-        </button>
-        <button nz-button class="export-btn" (click)="exportGrades()">
-          <i nz-icon nzType="file-excel" nzTheme="outline"></i>
-          <span>Export</span>
-        </button>
-        <button
-          class="print-btn"
-          nz-button
-          nzType="default"
-          printTitle="Student Grades List"
-          printSectionId="print-section"
-          ngxPrint
-        >
-          <i nz-icon nzType="printer" nzTheme="outline"></i>
-          <span>Print</span>
+        
+        <div class="action-buttons">
+          <button
+            routerLink="../import-student-grade"
+            class="add-btn"
+            nz-button
+            nzType="primary"
+          >
+            <i nz-icon nzType="plus" nzTheme="outline"></i>
+            <span>Add Grade</span>
+          </button>
+          <button nz-button class="export-btn" (click)="exportGrades()">
+            <i nz-icon nzType="file-excel" nzTheme="outline"></i>
+            <span>Export</span>
+          </button>
+          <button
+            class="print-btn"
+            nz-button
+            nzType="default"
+            printTitle="Student Grades List"
+            printSectionId="print-section"
+            ngxPrint
+          >
+            <i nz-icon nzType="printer" nzTheme="outline"></i>
+            <span>Print</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Third Row: Filters -->
+      <div class="filter-section">
+        <nz-select 
+          nzPlaceHolder="Filter by Batch Code" 
+          [(ngModel)]="selectedBatchCode"
+          (ngModelChange)="onBatchCodeFilterChange($event)"
+          style="width: 150px; margin-right: 8px;">
+          <nz-option nzValue="" nzLabel="All Batch Codes"></nz-option>
+          <nz-option 
+            *ngFor="let batchCode of getUniqueBatchCodes()" 
+            [nzValue]="batchCode" 
+            [nzLabel]="batchCode">
+          </nz-option>
+        </nz-select>
+        
+        <nz-select 
+          nzPlaceHolder="Filter by Course" 
+          [(ngModel)]="selectedCourse"
+          (ngModelChange)="onCourseFilterChange($event)"
+          style="width: 200px; margin-right: 8px;">
+          <nz-option nzValue="" nzLabel="All Courses"></nz-option>
+          <nz-option 
+            *ngFor="let course of getUniqueCourses()" 
+            [nzValue]="course" 
+            [nzLabel]="course">
+          </nz-option>
+        </nz-select>
+        
+        <nz-select 
+          nzPlaceHolder="Filter by Academic Term" 
+          [(ngModel)]="selectedAcademicTerm"
+          (ngModelChange)="onAcademicTermFilterChange($event)"
+          style="width: 180px; margin-right: 8px;">
+          <nz-option nzValue="" nzLabel="All Academic Terms"></nz-option>
+          <nz-option 
+            *ngFor="let term of getUniqueAcademicTerms()" 
+            [nzValue]="term" 
+            [nzLabel]="term">
+          </nz-option>
+        </nz-select>
+        
+        <button 
+          nz-button 
+          nzType="default" 
+          (click)="clearFilters()"
+          style="margin-right: 8px;">
+          <i nz-icon nzType="clear" nzTheme="outline"></i>
+          Clear Filters
         </button>
       </div>
     </div>
@@ -50,7 +107,7 @@
     <div id="print-section">
       <nz-table 
         #basicTable 
-        [nzData]="studentGrades!" 
+        [nzData]="filteredStudentGrades" 
         nzBordered
         [nzPageSize]="pageSize"
         [nzPageSizeOptions]="pageSizeOption"
@@ -71,12 +128,15 @@
         <thead>
           <tr>
             <th class="sn-column">S/N</th>
-            <th>Student ID</th>
-            <th>Course Title</th>
+            <th>Student Code</th>
+            <th>Full Name</th>
+            <th>Course</th>
             <th>Instructor</th>
-            <th>Grade Letter</th>
-            <th>Remark</th>
-            <th class="action-column">Actions</th>
+            <th>Grade</th>
+            <th>Total Mark</th>
+            <th>Batch Code</th>
+            <th>Academic Term</th>
+            <th>Submission Date</th>
           </tr>
         </thead>
         <tbody>
@@ -84,44 +144,15 @@
             <td class="sn-column">
               <span class="sn-badge">{{ (pageindex - 1) * pageSize + i + 1 }}</span>
             </td>
-            <td>{{ data.studentID }}</td>
-            <td>{{ data.couse.courseTitle }}</td>
-            <td>{{ data.staff.firstName + " " + data.staff.lastName }}</td>
-            <td>{{ data.gradeLetter }}</td>
-            <td>{{ data.remark }}</td>
-            <td class="action-column">
-              <button 
-                nz-button 
-                nz-dropdown 
-                [nzDropdownMenu]="menu" 
-                nzPlacement="bottomLeft"
-                class="action-button"
-              >
-                <i nz-icon nzType="more" nzTheme="outline"></i>
-              </button>
-              <nz-dropdown-menu #menu="nzDropdownMenu">
-                <ul nz-menu>
-                  <li>
-                    <button nz-button nzType="default" class="action-item detail">
-                      <i nz-icon nzType="eye" nzTheme="fill"></i>
-                      <span>View Details</span>
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      nz-button
-                      nzDanger
-                      nzType="default"
-                      class="action-item delete"
-                      (click)="showDeleteConfirm(data.id)"
-                    >
-                      <i nz-icon nzType="delete" nzTheme="fill"></i>
-                      <span>Delete</span>
-                    </button>
-                  </li>
-                </ul>
-              </nz-dropdown-menu>
-            </td>
+            <td>{{ data.studentCode }}</td>
+            <td>{{ data.fullName }}</td>
+            <td>{{ data.course }}</td>
+            <td>{{ data.instructor }}</td>
+            <td>{{ data.grade }}</td>
+            <td>{{ data.totalMark ? (data.totalMark | number:'1.2-2') : 'N/A' }}</td>
+            <td>{{ data.batchCode }}</td>
+            <td>{{ data.academicTerm }}</td>
+            <td>{{ data.submissionDate | date:'short' }}</td>
           </tr>
         </tbody>
         <ng-template #emptyTpl>

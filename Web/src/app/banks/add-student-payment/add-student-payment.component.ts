@@ -212,7 +212,7 @@ export class AddStudentPaymentComponent implements OnInit, OnDestroy {
     const formModel = this.bankTransactionForm.getRawValue();
     const payment = new StudentPaymentRequest();
     // payment.id = this.progStatusId == undefined ? null : this.progStatusId;
-    payment.studentCourseRegistrationID = this.courseRegistrationId;
+    payment.parentId = this.courseRegistrationId;
     payment.fromBank = formModel.fromBank;
     payment.toBank = formModel.toBank;
     payment.transactionDate = new Date(formModel.transactionDate).toISOString();

@@ -167,20 +167,34 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                     }
                 }
 
-                // Send email verification if required
+                // Send email verification if required (non-blocking)
                 if (command.RequireEmailConfirmation)
                 {
                     try
                     {
                         _logger.LogInformation("Sending email verification to user: {UserId}, Email: {Email}", user.Id, user.Email);
                         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                        await _emailService.SendEmailConfirmationAsync(user.Email, token);
+                        
+                        // Fire and forget email sending to avoid blocking registration
+                        _ = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await _emailService.SendEmailConfirmationAsync(user.Email, token);
+                                _logger.LogInformation("Email verification sent successfully to user: {UserId}", user.Id);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Failed to send email verification to user: {UserId}, Email: {Email}. Error: {ErrorMessage}", 
+                                    user.Id, user.Email, ex.Message);
+                            }
+                        });
+                        
                         verificationSent = true;
-                        _logger.LogInformation("Email verification sent successfully to user: {UserId}", user.Id);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Failed to send email verification to user: {UserId}, Email: {Email}. Error: {ErrorMessage}", 
+                        _logger.LogError(ex, "Failed to generate email verification token for user: {UserId}, Email: {Email}. Error: {ErrorMessage}", 
                             user.Id, user.Email, ex.Message);
                         // Don't fail the user creation, just log the error
                     }

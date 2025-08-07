@@ -38,7 +38,7 @@ export class ApplicantRequestDetailComponent implements OnInit {
   profilePicture = "";
   id: string;
   userId: string;
-  isTabDisabled: boolean[] = [false, true, true, true, true, true,true];
+  isTabDisabled: boolean[] = [false, true, true, true, true, true, true, true];
   otherForm: FormGroup;
   contactPersonLists: ApplicantContactPersonRequest[] = [];
   educationLists: ApplicantEducationBackgroundRequest[] = [];
@@ -106,9 +106,9 @@ export class ApplicantRequestDetailComponent implements OnInit {
 
     if (this.isUserReviewer) {
       this.selectedTabIndex = 0;
-      this.isTabDisabled = [false, false, false, false, false, false, false];
+      this.isTabDisabled = [false, false, false, false, false, false, false, false];
     } else {
-      this.isTabDisabled = [false, false, false, false, false, false, false];
+      this.isTabDisabled = [false, false, false, false, false, false, false, false];
     }
   }
 
@@ -283,7 +283,7 @@ createAcademicProgramRequest() {
    //#region Next previous button method
    nextTab() {
     // For flexible navigation, allow moving to next tab if not at the last tab
-    const maxTabIndex = this.isUserReviewer ? 5 : 6; // Last tab index
+    const maxTabIndex = this.isUserReviewer ? 6 : 7; // Last tab index (updated for new tab order)
     
     if (this.selectedTabIndex < maxTabIndex) {
       this.selectedTabIndex += 1;
@@ -353,7 +353,7 @@ createAcademicProgramRequest() {
   }
 
   isNextDisabled(): boolean {
-    // For reviewers, disable Next on the Academic Program Request tab (index 4)
-    return this.isUserReviewer && this.selectedTabIndex === 4;
+    // For reviewers, disable Next on the Academic Program Request tab (index 6)
+    return this.isUserReviewer && this.selectedTabIndex === 6;
   }
 }

@@ -4,6 +4,7 @@ export class CourseBreakDownOffering {
   public courseCode: string;
   public courseTitle: string;
   public creditHours: number;
+  public id: number;
   public totalAmount: number;
   public isRegistered: boolean;
   public isPaid: boolean;

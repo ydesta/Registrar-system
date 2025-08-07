@@ -8,8 +8,7 @@ import { filter } from 'rxjs/operators';
 import { SessionManagementService } from './services/session-management.service';
 import { Subscription } from 'rxjs';
 import { environment } from '../environments/environment';
-import { SwErrorHandlerService } from './services/sw-error-handler.service';
-import { SwUpdate } from '@angular/service-worker';
+
 
 @Component({
   selector: 'app-root',
@@ -52,25 +51,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     private batchTermService: BatchTermService,
     private _router: Router,
     private sessionManagementService: SessionManagementService,
-    private swErrorHandler: SwErrorHandlerService,
-    private swUpdate: SwUpdate
+
   ) {
-    // Handle service worker updates
-    if (this.swUpdate.isEnabled) {
-      this.swUpdate.available.subscribe(() => {
-        if (confirm('New version available. Load new version?')) {
-          window.location.reload();
-        }
-      });
-
-      // Handle service worker errors
-      this.swUpdate.activated.subscribe(() => {
-        console.log('Service worker activated');
-      });
-
-      // Check for updates
-      this.swUpdate.checkForUpdate();
-    }
   }
 
   ngOnInit(): void {
@@ -86,9 +68,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.getNextAcademicTerm();
     this.initializeUserData();
     
-    // Handle service worker issues that might cause login loops
-    this.handleServiceWorkerIssues();
-    
+    // Subscribe to authentication state changes
     this._authService.isAuthenticated().then(isAuth => {
       this.isUserAuthenticated = isAuth;
       this.currentUser = this._authService.getCurrentUser();
@@ -101,6 +81,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       this.handleAuthFailure();
     });
 
+    // Subscribe to current user changes
     this._authService.currentUser$.subscribe(user => {
       this.isUserAuthenticated = !!user;
       this.currentUser = user;
@@ -111,6 +92,19 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       console.error('User subscription error:', error);
       this.handleAuthFailure();
     });
+
+    // Subscribe to authentication state changes
+    this._authService.isAuthenticated$.subscribe(isAuth => {
+      this.isUserAuthenticated = isAuth;
+      if (isAuth) {
+        this.initializeUserData();
+      } else {
+        this.resetUserData();
+      }
+      this.cdRef.detectChanges();
+    });
+
+    // Monitor route changes
     this._router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
@@ -128,6 +122,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
+    // Handle login success events
     this.sharedDataService.share.subscribe((data: any) => {
       if (data && data.type === 'LOGIN_SUCCESS') {
         this.isCollapsed = false; // Open the sidebar
@@ -154,6 +149,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cdRef.detectChanges();
       }
     });
+
+    // Monitor localStorage changes
     window.addEventListener('storage', (event) => {
       if (event.key === 'isLogin') {
         this.initializeUserData();
@@ -164,6 +161,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cdRef.detectChanges();
       }
     });
+
     this.checkIfAuthRoute();
   }
 
@@ -432,33 +430,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     return this._router.url;
   }
 
-  private clearServiceWorkerCache(): void {
-    // Use the service worker error handler to clear cache
-    this.swErrorHandler.clearServiceWorkerCache();
-    
-    // Also unregister service workers if needed
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (const registration of registrations) {
-          registration.unregister();
-        }
-      });
-    }
-  }
 
-  private handleServiceWorkerIssues(): void {
-    // Check if service worker is enabled and available
-    if (this.swUpdate.isEnabled) {
-      // If service worker is enabled, check for updates
-      this.swUpdate.checkForUpdate();
-    } else {
-      console.warn('Service Worker is not enabled. Cannot check for updates.');
-    }
-  }
 
   private handleAuthFailure(): void {
-    console.warn('Authentication check failed. Clearing cache and retrying.');
-    this.clearServiceWorkerCache();
+    console.warn('Authentication check failed. Retrying.');
     this.initializeUserData(); // Re-initialize user data to force a fresh login attempt
     this.cdRef.detectChanges();
   }

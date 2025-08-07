@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using FluentValidation;
 using SecureAuth.APPLICATION.Mediator;
 using SecureAuth.APPLICATION.Commands.Auth;
@@ -74,7 +75,7 @@ namespace SecureAuth.API.Controllers
         }
 
         [HttpPost("login")]
-        [RateLimit(5, 15)] // 5 login attempts per 15 minutes
+        // [RateLimit(5, 15)] // Temporarily disabled due to 429 errors in production
         public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
         {
             try
@@ -107,7 +108,7 @@ namespace SecureAuth.API.Controllers
         }
 
         [HttpPost("register")]
-        [RateLimit(3, 60)] // 3 registration attempts per hour
+        // [RateLimit(3, 60)] // Temporarily disabled due to 429 errors in production
         public async Task<ActionResult<RegisterResponse>> Register(RegisterRequest request)
         {
             try
@@ -148,7 +149,7 @@ namespace SecureAuth.API.Controllers
         }
 
         [HttpPost("verify-otp")]
-        [RateLimit(3, 5)] // 3 OTP verification attempts per 5 minutes
+        // [RateLimit(3, 5)] // Temporarily disabled due to 429 errors in production
         public async Task<ActionResult<OtpVerifyResponse>> VerifyOtp([FromBody] OtpVerifyRequest request)
         {
             try
@@ -176,7 +177,7 @@ namespace SecureAuth.API.Controllers
         }
 
         [HttpPost("resend-otp")]
-        [RateLimit(3, 5)] // 3 OTP resend attempts per 5 minutes
+        // [RateLimit(3, 5)] // Temporarily disabled due to 429 errors in production
         public async Task<ActionResult<ResendOtpResponse>> ResendOtp([FromBody] ResendOtpRequest request)
         {
             try
@@ -204,7 +205,7 @@ namespace SecureAuth.API.Controllers
 
         [HttpPost("forgot-password")]
         [AllowAnonymous]
-        [RateLimit(3, 60)] // 3 forgot password attempts per hour
+        // [RateLimit(3, 60)] // Temporarily disabled due to 429 errors in production
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
             try
@@ -313,7 +314,14 @@ namespace SecureAuth.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while verifying email" });
+                // Log the exception for debugging
+                var logger = HttpContext.RequestServices.GetRequiredService<ILogger<AuthenticationController>>();
+                logger.LogError(ex, "Error during email verification for email: {Email}", email);
+                
+                return StatusCode(500, new { 
+                    message = "An error occurred while verifying email. Please try again later.",
+                    error = ex.Message 
+                });
             }
         }
 
@@ -741,6 +749,49 @@ namespace SecureAuth.API.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { error = ex.Message, stackTrace = ex.StackTrace });
+            }
+        }
+
+        [HttpGet("debug-email-verification")]
+        [AllowAnonymous]
+        public async Task<ActionResult> DebugEmailVerification([FromQuery] string email)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(email))
+                {
+                    return BadRequest(new { message = "Email is required" });
+                }
+
+                var userManager = HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
+                var user = await userManager.FindByEmailAsync(email);
+
+                if (user == null)
+                {
+                    return NotFound(new { message = "User not found" });
+                }
+
+                return Ok(new
+                {
+                    userId = user.Id,
+                    email = user.Email,
+                    emailConfirmed = user.EmailConfirmed,
+                    userName = user.UserName,
+                    createdAt = user.CreatedAt,
+                    updatedAt = user.UpdatedAt,
+                    isActive = user.IsActive,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                var logger = HttpContext.RequestServices.GetRequiredService<ILogger<AuthenticationController>>();
+                logger.LogError(ex, "Error in debug email verification for email: {Email}", email);
+                
+                return StatusCode(500, new { 
+                    message = "Error retrieving user information", 
+                    error = ex.Message 
+                });
             }
         }
     }

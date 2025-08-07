@@ -24,5 +24,6 @@ namespace SecureAuth.APPLICATION.Interfaces
         Task<bool> RemovePermissionsFromRoleAsync(string roleId, List<string> permissionIds);
         Task<List<string>> GetPermissionsByRoleIdAsync(string roleId);
         Task<List<Permission>> GetPermissionObjectsByRoleIdAsync(string roleId);
+        Task<UserLoginData> GetUserLoginDataAsync(string userId);
     }
 } 

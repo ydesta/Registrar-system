@@ -8,7 +8,7 @@ import { UserStatusUpdate } from '../../../services/user-management.interface';
 import { User } from '../../../types/user-management.types';
 import { CustomNotificationService } from '../../../services/custom-notification.service';
 import { ConfirmationDialogService } from '../../../services/confirmation-dialog.service';
-import { UserCreateComponent } from '../user-create/user-create.component';
+import { CreateUserComponent } from '../create-user/create-user.component';
 
 @Component({
   selector: 'app-user-list',
@@ -18,10 +18,9 @@ import { UserCreateComponent } from '../user-create/user-create.component';
 export class UserListComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
+  private reloadSubject = new Subject<void>();
   Math = Math;
   users: User[] = [];
-  filteredUsers: User[] = [];
-  paginatedUsers: User[] = [];
   loading = false;
   searchKey = '';
   pageIndex = 1;
@@ -31,12 +30,18 @@ export class UserListComponent implements OnInit, OnDestroy {
   statusFilter: 'all' | 'active' | 'inactive' = 'all';
   roleFilter: string = '';
   roles: any[] = [];
+  
+  // Statistics properties
+  totalUsers = 0;
+  activeUsers = 0;
+  inactiveUsers = 0;
+
   get activeUsersCount(): number {
-    return this.users.filter(u => u.isActive).length;
+    return this.activeUsers;
   }
 
   get inactiveUsersCount(): number {
-    return this.users.filter(u => !u.isActive).length;
+    return this.inactiveUsers;
   }
 
   get totalRolesCount(): number {
@@ -54,8 +59,10 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.setupSearch();
+    this.setupReloadDebounce();
     this.loadUsers();
     this.loadRoles();
+    // Remove separate statistics call - will be handled in loadUsers
   }
 
   ngOnDestroy(): void {
@@ -69,7 +76,17 @@ export class UserListComponent implements OnInit, OnDestroy {
       distinctUntilChanged(),
       takeUntil(this.destroy$)
     ).subscribe(searchText => {
-      this.applyFilters();
+      this.pageIndex = 1; // Reset to first page when searching
+      this.loadUsers();
+    });
+  }
+
+  setupReloadDebounce(): void {
+    this.reloadSubject.pipe(
+      debounceTime(100), // Short debounce for reloads
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.reloadUsersOnly();
     });
   }
 
@@ -79,21 +96,58 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   loadUsers(): void {
     this.loading = true;
-    this.userManagementService.getUsers()
-      .pipe(takeUntil(this.destroy$))
+    
+    // Load users first (priority)
+    const usersObservable = this.userManagementService.getUsers(
+      this.pageIndex,
+      this.pageSize,
+      this.searchKey || undefined,
+      this.roleFilter || undefined,
+      this.statusFilter !== 'all' ? (this.statusFilter === 'active') : undefined
+    );
+
+    // Load users with priority
+    usersObservable.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (response) => {
+        console.log("Users response:", response);
+        this.users = response.users;
+        this.total = response.total;
+        this.loading = false;
+        
+        // Load statistics after users are loaded (non-blocking)
+        this.loadStatisticsAsync();
+      },
+      error: (error) => {
+        this.customNotificationService.notification(
+          'error',
+          'Error',
+          error.error?.message || 'Failed to fetch user data. Please check your connection and try again.'
+        );
+        this.loading = false;
+      }
+    });
+  }
+
+  // Load statistics asynchronously to prevent UI blocking
+  private loadStatisticsAsync(): void {
+    this.userManagementService.getUserStatistics()
+      .pipe(
+        takeUntil(this.destroy$)
+      )
       .subscribe({
-        next: (users) => {
-          this.users = users;
-          this.applyFilters();
-          this.loading = false;
+        next: (stats) => {
+          this.totalUsers = stats.totalUsers;
+          this.activeUsers = stats.activeUsers;
+          this.inactiveUsers = stats.inactiveUsers;
         },
         error: (error) => {
-          this.customNotificationService.notification(
-            'error',
-            'Error',
-            error.error?.message || 'Failed to fetch user data. Please check your connection and try again.'
-          );
-          this.loading = false;
+          console.error('Failed to load user statistics:', error);
+          // Fallback to calculating from current page data
+          this.totalUsers = this.total;
+          this.activeUsers = this.users.filter(u => u.isActive).length;
+          this.inactiveUsers = this.users.filter(u => !u.isActive).length;
         }
       });
   }
@@ -110,70 +164,77 @@ export class UserListComponent implements OnInit, OnDestroy {
       });
   }
 
+  // Optimized method to reload only users without statistics for better performance
+  private reloadUsersOnly(): void {
+    this.userManagementService.getUsers(
+      this.pageIndex,
+      this.pageSize,
+      this.searchKey || undefined,
+      this.roleFilter || undefined,
+      this.statusFilter !== 'all' ? (this.statusFilter === 'active') : undefined
+    ).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (response) => {
+        this.users = response.users;
+        this.total = response.total;
+        this.loading = false;
+      },
+      error: (error) => {
+        this.customNotificationService.notification(
+          'error',
+          'Error',
+          error.error?.message || 'Failed to fetch user data. Please check your connection and try again.'
+        );
+        this.loading = false;
+      }
+    });
+  }
+
+  loadUserStatistics(): void {
+    // This method is now called from loadUsers() to avoid duplicate calls
+    // Keeping for backward compatibility but it's no longer used
+  }
+
   applyFilters(): void {
-    let filtered = [...this.users];
-
-    // Search filter
-    if (this.searchKey) {
-      const search = this.searchKey.toLowerCase();
-      filtered = filtered.filter(user => 
-        user.firstName.toLowerCase().includes(search) ||
-        user.lastName.toLowerCase().includes(search) ||
-        user.email.toLowerCase().includes(search) ||
-        (user.phoneNumber && user.phoneNumber.toLowerCase().includes(search))
-      );
-    }
-
-    if (this.statusFilter !== 'all') {
-      filtered = filtered.filter(user => 
-        this.statusFilter === 'active' ? user.isActive : !user.isActive
-      );
-    }
-
-    if (this.roleFilter) {
-      filtered = filtered.filter(user => 
-        user.roles.some(role => role.name === this.roleFilter)
-      );
-    }
-
-    this.filteredUsers = filtered;
-    this.total = filtered.length;
-    this.updatePaginatedUsers();
+    // Server-side filtering is now handled in loadUsers()
+    // This method is kept for compatibility but no longer needed for client-side filtering
   }
 
   updatePaginatedUsers(): void {
-    const startIndex = (this.pageIndex - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.paginatedUsers = this.filteredUsers.slice(startIndex, endIndex);
+    // Server-side pagination is now handled in loadUsers()
+    // This method is kept for compatibility but no longer needed
   }
 
   onPageIndexChange(page: number): void {
     this.pageIndex = page;
-    this.updatePaginatedUsers();
+    this.loadUsers();
   }
   
   onPageSizeChange(size: number): void {
     this.pageSize = size;
     this.pageIndex = 1;  // Reset to first page when changing page size
-    this.updatePaginatedUsers();
+    this.loadUsers();
   }
 
   onStatusFilterChange(value: 'all' | 'active' | 'inactive'): void {
     this.statusFilter = value;
-    this.applyFilters();
+    this.pageIndex = 1; // Reset to first page when filtering
+    this.loadUsers();
   }
 
   onRoleFilterChange(value: string): void {
     this.roleFilter = value;
-    this.applyFilters();
+    this.pageIndex = 1; // Reset to first page when filtering
+    this.loadUsers();
   }
 
   openAddUserModal(): void {
     const modal = this.modal.create({
-      nzTitle: 'Add New User',
-      nzContent: UserCreateComponent,
+      nzTitle: 'Create New User',
+      nzContent: CreateUserComponent,
       nzFooter: null,
-      nzWidth: 700,
+      nzWidth: 900,
       nzMaskClosable: false
     });
     modal.afterClose.subscribe(result => {
@@ -251,15 +312,21 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.confirmationDialogService.showUserDeletion(user)
       .then(confirmed => {
         if (confirmed) {
-          this.userManagementService.deleteUser(user.id)
+          // Show loading state during delete operation
+          this.loading = true;
+          
+          // Use permanent delete to actually remove the user from the database
+          this.userManagementService.deleteUser(user.id, true)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
               next: () => {
-                this.message.success('User deleted successfully');
-                this.loadUsers();
+                this.message.success('User permanently deleted successfully');
+                // Use debounced reload to prevent rapid successive calls
+                this.reloadSubject.next();
               },
               error: (error) => {
                 this.message.error('Failed to delete user: ' + error.message);
+                this.loading = false;
               }
             });
         }

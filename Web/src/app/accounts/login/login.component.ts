@@ -1,17 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { LoginRequest } from 'src/app/services/auth.interface';
 import { AuthService } from 'src/app/services/auth.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { SharedDataService } from 'src/app/services/shared-data.service';
+import { TokenStorageService } from 'src/app/services/token-storage.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
   loginForm: FormGroup;
   incorrectLoginAttempt = '';
   isLoading = false;
@@ -19,13 +24,15 @@ export class LoginComponent implements OnInit {
   emailForOtp = '';
   otpResendCountdown = 0;
   canResendOtp = true;
+  private isProcessingLogin = false;
 
   constructor(
     private _notificationService: CustomNotificationService,
     private _router: Router,
     private _fb: FormBuilder,
     private _authService: AuthService,
-    private _sharedDataService: SharedDataService
+    private _sharedDataService: SharedDataService,
+    private _tokenStorageService: TokenStorageService
   ) {
     this.loginForm = _fb.group({
       email: [null, [Validators.required, Validators.email]],
@@ -35,15 +42,44 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Check if already authenticated and redirect if necessary
     this._authService.isAuthenticated().then(isAuth => {
       if (isAuth) {
         this._router.navigate(['/dashboard']);
       }
     });
+
+    // Production-specific debugging
+    if (environment.production) {
+      console.log('Production Environment Detected');
+      console.log('API Base URL:', environment.secureUrl);
+      
+      // Test network connectivity
+      this.testNetworkConnectivity();
+    }
+  }
+
+  private testNetworkConnectivity(): void {
+    // Test if the API endpoint is reachable
+    fetch(`${environment.secureUrl}/health`, { 
+      method: 'GET',
+      mode: 'cors'
+    }).then(response => {
+      console.log('Network connectivity test successful:', response.status);
+    }).catch(error => {
+      console.error('Network connectivity test failed:', error);
+      console.error('This might indicate a CORS, SSL, or network issue in production');
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   submitForm(): void {
-    if (this.loginForm.valid) {
+    if (this.loginForm.valid && !this.isProcessingLogin) {
+      this.isProcessingLogin = true;
       this.isLoading = true;
       this.incorrectLoginAttempt = '';
 
@@ -52,9 +88,15 @@ export class LoginComponent implements OnInit {
         password: this.loginForm.value.password,
         rememberMe: this.loginForm.value.rememberMe
       };
+
+      console.log('Attempting login with:', { email: loginRequest.email, rememberMe: loginRequest.rememberMe });
+
       this._authService.loginWithCredentials(loginRequest).subscribe({
         next: (response) => {
+          console.log('Login response received:', response);
           this.isLoading = false;
+          this.isProcessingLogin = false;
+          
           if (response.success) {
             if (response.requiresTwoFactor) {
               this.requiresTwoFactor = true;
@@ -66,53 +108,127 @@ export class LoginComponent implements OnInit {
                 'Please check your email for the verification code.'
               );
             } else {
-              localStorage.setItem('isLogin', 'true');
-              if (response.user) {
-                localStorage.setItem('userId', response.user.id || '');
-                localStorage.setItem('firstName', response.user.firstName || '');
-                localStorage.setItem('lastName', response.user.lastName || '');
-                localStorage.setItem('email', response.user.email || loginRequest.email);
-                const userRoles = response.user.roles || [];
-                localStorage.setItem('role', JSON.stringify(userRoles));
-                localStorage.setItem('userType', userRoles[0] || '');
-                localStorage.setItem('access_token', response.token || '');
-                if (response.refreshToken) {
-                  localStorage.setItem('refresh_token', response.refreshToken);
-                }
-              }
-              this._sharedDataService.getLatestValue({
-                type: 'LOGIN_SUCCESS',
-                user: {
-                  ...response.user,
-                  role: Array.isArray(response.user.roles) ? response.user.roles[0] : (response.user.roles || '')
-                }
-              });
-              this._notificationService.notification(
-                'success',
-                'Success',
-                'Login successful!'
-              );
-              this.loginForm.reset();
-              this._router.navigate(['/dashboard']);
+              this.handleSuccessfulLogin(response, loginRequest.email);
             }
           } else {
+            console.error('Login failed:', response.message);
             this.incorrectLoginAttempt = response.message;
             this._notificationService.notification('error', 'Error', response.message);
           }
         },
         error: (error) => {
+          console.error('Login error:', error);
           this.isLoading = false;
-          this.incorrectLoginAttempt = 'An error occurred during login. Please try again.';
-          this._notificationService.notification('error', 'Error', 'An error occurred during login. Please try again.');
+          this.isProcessingLogin = false;
+          
+          // Production-specific error handling
+          let errorMessage = 'An error occurred during login. Please try again.';
+          
+          if (error.message) {
+            if (error.message.includes('Network error')) {
+              errorMessage = 'Network error: Unable to connect to the server. Please check your internet connection and try again.';
+            } else if (error.message.includes('timeout')) {
+              errorMessage = 'Request timeout: The server is taking too long to respond. Please try again.';
+            } else if (error.message.includes('Authentication failed')) {
+              errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+            } else {
+              errorMessage = error.message;
+            }
+          }
+          
+          this.incorrectLoginAttempt = errorMessage;
+          this._notificationService.notification('error', 'Error', errorMessage);
         }
       });
+    } else if (this.isProcessingLogin) {
+      // Prevent multiple login attempts
+      console.log('Login already in progress, ignoring duplicate request');
+      return;
     } else {
+      console.log('Form validation failed');
       Object.values(this.loginForm.controls).forEach((control) => {
         if (control.invalid) {
           control.markAsDirty();
           control.updateValueAndValidity({ onlySelf: true });
         }
       });
+    }
+  }
+
+  private handleSuccessfulLogin(response: any, email: string): void {
+    try {
+      console.log('Processing successful login:', response);
+      
+      // Save user data first
+      this.saveUserData(response, email);
+      
+      // Update shared data service
+      this._sharedDataService.getLatestValue({
+        type: 'LOGIN_SUCCESS',
+        user: {
+          ...response.user,
+          role: Array.isArray(response.user.roles) ? response.user.roles[0] : (response.user.roles || '')
+        }
+      });
+
+      // Show success notification
+      this._notificationService.notification(
+        'success',
+        'Success',
+        'Login successful!'
+      );
+
+      // Reset form
+      this.loginForm.reset();
+
+      // Use setTimeout to ensure state is properly set before navigation
+      setTimeout(() => {
+        console.log('Navigating to dashboard...');
+        this._router.navigate(['/dashboard']).then(() => {
+          console.log('Navigation successful, reloading page...');
+          // Force a page reload to ensure all components are properly initialized
+          window.location.reload();
+        }).catch((error) => {
+          console.error('Navigation failed:', error);
+          // Fallback navigation
+          window.location.href = '/dashboard';
+        });
+      }, 100);
+
+    } catch (error) {
+      console.error('Error during login processing:', error);
+      this._notificationService.notification('error', 'Error', 'Failed to complete login process.');
+    }
+  }
+
+  private saveUserData(response: any, email: string): void {
+    if (response.user && response.user.id) {
+      // Save user data using token storage service
+      this._tokenStorageService.saveUser(response.user);
+      this._tokenStorageService.isLogin('true', response.user.id);
+      
+      // Save tokens
+      if (response.token) {
+        this._tokenStorageService.saveToken(response.token, response.user.id);
+      }
+      
+      // Also save to localStorage for backward compatibility
+      localStorage.setItem('isLogin', 'true');
+      localStorage.setItem('userId', response.user.id || '');
+      localStorage.setItem('firstName', response.user.firstName || '');
+      localStorage.setItem('lastName', response.user.lastName || '');
+      localStorage.setItem('email', response.user.email || email);
+      const userRoles = response.user.roles || [];
+      localStorage.setItem('role', JSON.stringify(userRoles));
+      localStorage.setItem('userType', userRoles[0] || '');
+      localStorage.setItem('access_token', response.token || '');
+      if (response.refreshToken) {
+        localStorage.setItem('refresh_token', response.refreshToken);
+      }
+
+      // Ensure authentication state is properly set
+      this._authService.updateCurrentUser(response.user);
+      this._authService.updateLoginState(true);
     }
   }
 
@@ -127,35 +243,8 @@ export class LoginComponent implements OnInit {
       next: (response) => {
         this.isLoading = false;
         if (response.success) {
-          localStorage.setItem('isLogin', 'true');
-          if (response.user) {
-            localStorage.setItem('userId', response.user.id || '');
-            localStorage.setItem('firstName', response.user.firstName || '');
-            localStorage.setItem('lastName', response.user.lastName || '');
-            localStorage.setItem('email', response.user.email || this.emailForOtp);
-            const userRoles = response.user.roles || [];
-            localStorage.setItem('role', JSON.stringify(userRoles));
-            localStorage.setItem('userType', userRoles[0] || '');
-            localStorage.setItem('access_token', response.token || '');
-            if (response.refreshToken) {
-              localStorage.setItem('refresh_token', response.refreshToken);
-            }
-          }
-          
-          this._notificationService.notification(
-            'success',
-            'Success',
-            'Login successful!'
-          );
+          this.handleSuccessfulLogin(response, this.emailForOtp);
           this.requiresTwoFactor = false;
-          this._sharedDataService.getLatestValue({
-            type: 'LOGIN_SUCCESS',
-            user: {
-              ...response.user,
-              role: Array.isArray(response.user.roles) ? response.user.roles[0] : (response.user.roles || '')
-            }
-          });
-          this._router.navigate(['/dashboard']);
         } else {
           this._notificationService.notification('error', 'Error', response.message);
         }

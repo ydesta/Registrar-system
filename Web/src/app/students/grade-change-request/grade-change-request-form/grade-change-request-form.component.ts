@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { StaticData } from 'src/app/admission-request/model/StaticData';
@@ -9,6 +9,7 @@ import { CustomNotificationService } from 'src/app/services/custom-notification.
 import { StudentService } from '../../services/student.service';
 import { StaffService } from 'src/app/services/staff.service';
 import { GradeChangeRequestService } from 'src/app/services/grade-change-request.service';
+import { StudentSearchComponent } from 'src/app/shared-module/shared/components/student-search/student-search.component';
 
 @Component({
   selector: 'app-grade-change-request-form',
@@ -16,18 +17,24 @@ import { GradeChangeRequestService } from 'src/app/services/grade-change-request
   styleUrls: ['./grade-change-request-form.component.scss']
 })
 export class GradeChangeRequestFormComponent implements OnInit {
+  @ViewChild(StudentSearchComponent) studentSearchComponent!: StudentSearchComponent;
+
   gradeChangeRequestForm: FormGroup;
   yearList: number[] = [];
   listOfTermNumber: StaticData[] = [];
   curricula: any[] = [];
   courses: any[] = [];
   studentList: any[] = [];
-  gradeList: string[] = ['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F', 'RC', 'RA', '-'];
+  gradeList: string[] = ['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F', 'RC', 'RA', , 'NG', '-'];
   userId: string | null = localStorage.getItem('userId');
   staffId: string | null;
   showSearchForm = true;
   // New properties for the form
   loading = false;
+
+  // Student information properties
+  selectedStudent: any = null;
+  studentCourses: any[] = [];
 
   constructor(
     private _route: Router,
@@ -48,8 +55,8 @@ export class GradeChangeRequestFormComponent implements OnInit {
     this.getCurriculumList();
     this.getListOfAcademicTermStatus();
     this.getStudentList();
-    this.getCourseList();
-    
+    // Remove the general course list loading since we'll load courses based on student
+
     if (this.userId) {
       this.staffService.getStaffByUserId(this.userId).subscribe((res: any) => {
         this.staffId = res.data.id;
@@ -64,7 +71,7 @@ export class GradeChangeRequestFormComponent implements OnInit {
     this.gradeChangeRequestForm = this._fb.group({
       staffId: [null, [Validators.required]],
       studentId: [null, [Validators.required]],
-      curriculumId: [null, [Validators.required]],
+      // curriculumId: [null, []],
       courseId: [null, Validators.required],
       academicTermId: [null, [Validators.required]],
       academicYear: [null, []],
@@ -85,6 +92,51 @@ export class GradeChangeRequestFormComponent implements OnInit {
       }
     });
   }
+
+  showSearch(): void {
+    this.showSearchForm = true;
+    this.selectedStudent = null;
+    this.studentCourses = [];
+    this.gradeChangeRequestForm.patchValue({
+      courseId: null,
+      academicTermId: null,
+      academicYear: null,
+      previousGrade: null,
+      newGrade: null,
+      reason: null
+    });
+    this.studentSearchComponent.resetForm();
+  }
+
+  onSearchSubmitted(studentId: string): void {
+    this.studentServices.getStudentInformationWithInstructor(this.userId!, studentId).subscribe({
+      next: (res: any) => {
+        if (res) {
+          this.selectedStudent = res;
+          this.studentCourses = res.courses || [];
+
+          this.gradeChangeRequestForm.patchValue({
+            studentId: res.id,
+            fullName: res.fullName,
+            studentCode: res.studentCode,
+            entryYear: res.entryYear,
+            academicProgram: res.academicProgram,
+            curriculumCode: res.curriculumCode,
+            batchCode: res.batchCode
+          });
+          this.showSearchForm = false;
+        } else {
+          console.warn('Student not found or null response received.');
+        }
+      },
+      error: (err) => {
+        console.error('Error occurred while fetching student information:', err);
+      }
+    });
+  }
+
+
+
 
   getListOfAcademicTermStatus() {
     this.listOfTermNumber = [];
@@ -148,16 +200,24 @@ export class GradeChangeRequestFormComponent implements OnInit {
     this.gradeChangeRequestForm.patchValue({
       courseId: null
     });
-    
-   
+  }
+
+  onCourseChange(courseId: any): void {
+    const selectedCourse = this.studentCourses.find(course => course.courseId === courseId);
+    if (selectedCourse) {
+      this.gradeChangeRequestForm.patchValue({
+        academicTermId: selectedCourse.academicTerm,
+        academicYear: selectedCourse.academicYear,
+        previousGrade: selectedCourse.previousGrade
+      });
+    }
   }
 
   onSubmit(): void {
     if (this.gradeChangeRequestForm.valid) {
       this.loading = true;
-      
+
       const formData = this.gradeChangeRequestForm.value;
-      
       this.gradeChangeRequestService.createGradeChange(formData).subscribe({
         next: (response) => {
           this._customNotificationService.notification('success', 'Success', 'Grade change request submitted successfully');

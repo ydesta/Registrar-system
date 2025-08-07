@@ -153,6 +153,7 @@
 
     .form-item {
       margin-bottom: 0;
+      min-width: 0; // Prevent flex items from overflowing
 
       &.full-width {
         grid-column: 1 / -1;
@@ -201,6 +202,7 @@
   // Ng-Zorro Select Styling
   ::ng-deep .ant-select {
     width: 100%;
+    position: relative !important;
     
     .ant-select-selector {
       height: 44px !important;
@@ -209,6 +211,10 @@
       transition: all 0.3s ease !important;
       background: #fafafa !important;
       padding: 10px 16px !important;
+      min-width: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
       
       &:hover {
         border-color: #40a9ff !important;
@@ -220,16 +226,124 @@
         background: #fff !important;
         box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
       }
+      
+      // When select has a value
+      &.ant-select-focused {
+        .ant-select-selection-placeholder {
+          display: none !important;
+        }
+      }
     }
     
     .ant-select-selection-placeholder {
       color: #bfbfbf !important;
       font-size: 14px !important;
+      white-space: nowrap !important;
+      overflow: visible !important;
+      text-overflow: unset !important;
+      line-height: 1.5 !important;
+      display: flex !important;
+      align-items: center !important;
+      height: 100% !important;
     }
     
     .ant-select-selection-item {
       font-size: 14px !important;
       color: #374151 !important;
+      white-space: nowrap !important;
+      overflow: visible !important;
+      text-overflow: unset !important;
+      line-height: 1.5 !important;
+      display: flex !important;
+      align-items: center !important;
+      height: 100% !important;
+    }
+    
+    // Ensure dropdown has proper width
+    .ant-select-dropdown {
+      min-width: 200px !important;
+      max-width: 400px !important;
+    }
+    
+    // Fix internal alignment issues
+    .ant-select-selection-search {
+      display: flex !important;
+      align-items: center !important;
+      height: 100% !important;
+    }
+    
+    .ant-select-selection-search-input {
+      height: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+    }
+    
+    // Style the dropdown options
+    .ant-select-item {
+      padding: 8px 16px !important;
+      font-size: 14px !important;
+      
+      &:hover {
+        background-color: #f5f5f5 !important;
+      }
+      
+      &.ant-select-item-option-selected {
+        background-color: #e6f7ff !important;
+        color: #1890ff !important;
+      }
+    }
+    
+    // Use ng-zorro's default arrow icons
+    .ant-select-arrow {
+      position: absolute !important;
+      right: 12px !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      color: #bfbfbf !important;
+      transition: color 0.3s ease !important;
+      font-size: 12px !important;
+      pointer-events: none !important;
+    }
+    
+    &:hover .ant-select-arrow {
+      color: #1890ff !important;
+    }
+    
+    // Ensure proper arrow icon display
+    .ant-select-suffix {
+      display: flex !important;
+      align-items: center !important;
+      height: 100% !important;
+    }
+    
+    // Ensure the select has proper positioning for arrow
+    .ant-select-selector {
+      position: relative !important;
+    }
+    
+    // Fix for ng-zorro's built-in arrow icon
+    .ant-select-arrow .anticon {
+      font-size: 12px !important;
+      color: inherit !important;
+    }
+    
+    // Ensure the arrow icon is visible and properly styled
+    .ant-select-arrow .anticon-down {
+      font-size: 12px !important;
+      color: #bfbfbf !important;
+      transition: color 0.3s ease !important;
+    }
+    
+    &:hover .ant-select-arrow .anticon-down {
+      color: #1890ff !important;
+    }
+    
+    // When select is open, rotate the arrow
+    &.ant-select-open .ant-select-arrow .anticon-down {
+      transform: rotate(180deg) !important;
+      transition: transform 0.3s ease !important;
     }
   }
 
@@ -300,60 +414,151 @@
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid #f1f5f9;
+  gap: 16px;
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid #e5e7eb;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, #e5e7eb 50%, transparent 100%);
+  }
 
   .cancel-btn {
-    background: #f1f5f9;
-    color: #374151;
-    border-radius: 10px;
-    font-weight: 500;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    padding: 0 18px;
-    border: 1px solid #e2e8f0;
-    transition: all 0.3s ease;
+    background: #ffffff;
+    color: #6b7280;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.025em;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    padding: 12px 24px;
+    border: 1px solid #d1d5db;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.5s;
+    }
 
     &:hover {
-      background: #e0e7ef;
-      color: #1890ff;
-      border-color: #1890ff;
+      background: #f9fafb;
+      color: #374151;
+      border-color: #9ca3af;
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+      
+      &::before {
+        left: 100%;
+      }
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
     i {
       margin-right: 8px;
       font-size: 16px;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover i {
+      transform: scale(1.1);
     }
   }
 
   .submit-btn {
-    background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
     color: white;
-    border-radius: 10px;
-    font-weight: 500;
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-    padding: 0 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.025em;
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25), 0 2px 4px rgba(59, 130, 246, 0.1);
+    padding: 12px 32px;
     border: none;
-    transition: all 0.3s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
 
     &:hover:not(:disabled) {
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(24, 144, 255, 0.4);
+      box-shadow: 0 8px 12px rgba(59, 130, 246, 0.3), 0 4px 8px rgba(59, 130, 246, 0.15);
+      
+      &::before {
+        left: 100%;
+      }
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25), 0 2px 4px rgba(59, 130, 246, 0.1);
+    }
+
+    &:focus:not(:disabled) {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
     }
 
     &:disabled {
-      background: #d9d9d9;
-      color: #bfbfbf;
-      box-shadow: none;
+      background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+      color: #d1d5db;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       cursor: not-allowed;
+      transform: none;
     }
 
     i {
       margin-right: 8px;
       font-size: 16px;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover:not(:disabled) i {
+      transform: scale(1.1);
     }
   }
 }
@@ -413,16 +618,29 @@
     .form-row {
       grid-template-columns: 1fr;
       gap: 16px;
+      
+      .form-item {
+        min-width: 0;
+      }
     }
 
     .form-actions {
       flex-direction: column;
-      gap: 8px;
+      gap: 12px;
+      margin-top: 32px;
+      padding-top: 24px;
 
       .cancel-btn,
       .submit-btn {
         width: 100%;
         justify-content: center;
+        height: 48px;
+        font-size: 16px;
+        min-width: auto;
+        
+        i {
+          font-size: 18px;
+        }
       }
     }
   }
@@ -573,33 +791,81 @@
   display: flex;
   justify-content: flex-end;
   gap: 16px;
-  padding-top: 20px;
-  border-top: 2px solid #f0f0f0;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
   margin-top: 24px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, #e5e7eb 50%, transparent 100%);
+  }
 
   button {
+    background: #ffffff;
+    color: #6b7280;
     border-radius: 8px;
     font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.025em;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
     padding: 12px 24px;
+    border: 1px solid #d1d5db;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     height: 44px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-    font-size: 14px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    justify-content: center;
+    min-width: 120px;
+    position: relative;
+    overflow: hidden;
 
-    i {
-      font-size: 16px;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.5s;
     }
 
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      background: #f9fafb;
+      color: #374151;
+      border-color: #9ca3af;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+      
+      &::before {
+        left: 100%;
+      }
     }
-    
+
     &:active {
       transform: translateY(0);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    i {
+      margin-right: 8px;
+      font-size: 16px;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover i {
+      transform: scale(1.1);
     }
   }
 }

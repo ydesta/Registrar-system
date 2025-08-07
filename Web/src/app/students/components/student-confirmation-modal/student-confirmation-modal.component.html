@@ -1,0 +1,123 @@
+<nz-modal
+  [(nzVisible)]="isVisible"
+  [nzTitle]="modalTitle"
+  [nzContent]="modalContent"
+  [nzOkText]="modalData?.okText"
+  [nzCancelText]="modalData?.cancelText"
+  [nzOkType]="'primary'"
+  [nzOkDanger]="isDeactivation"
+  [nzWidth]="500"
+  [nzClassName]="'custom-confirm-modal'"
+  (nzOnOk)="onOk()"
+  (nzOnCancel)="onCancel()">
+</nz-modal>
+
+<ng-template #modalTitle>
+  <div class="modal-title">
+    <span nz-icon [nzType]="isActivation ? 'check-circle' : 'exclamation-circle'" 
+          [nzTheme]="'outline'" 
+          [class.activation-icon]="isActivation"
+          [class.deactivation-icon]="isDeactivation"></span>
+    <span class="title-text">{{ modalData?.title }}</span>
+  </div>
+</ng-template>
+
+<ng-template #modalContent>
+  <div class="modal-content">
+    <!-- Student Profile Section -->
+    <div class="student-profile-section">
+      <!-- Decorative background elements -->
+      <div class="decorative-bg decorative-bg-1"></div>
+      <div class="decorative-bg decorative-bg-2"></div>
+      
+      <div class="student-header">
+        <div class="student-avatar" [class.activation-avatar]="isActivation" [class.deactivation-avatar]="isDeactivation">
+          {{ studentName.charAt(0).toUpperCase() }}
+        </div>
+        <div class="student-info">
+          <h3 class="student-name">{{ displayName }}</h3>
+          <div class="student-type">
+            <span nz-icon nzType="user" nzTheme="outline"></span>
+            <span>Student Profile</span>
+          </div>
+        </div>
+        <div class="student-badge">
+          <span nz-icon nzType="idcard" nzTheme="outline"></span>
+        </div>
+      </div>
+      
+      <div class="student-details">
+        <div class="details-grid">
+          <div class="detail-card batch-card" *ngIf="modalData?.student?.batch">
+            <div class="decorative-circle"></div>
+            <div class="detail-content">
+              <div class="detail-icon">
+                <span nz-icon nzType="team" nzTheme="outline"></span>
+              </div>
+              <div class="detail-text">
+                <div class="detail-label">Batch Code</div>
+                <div class="detail-value">{{ modalData.student.batch }}</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="detail-card year-card" *ngIf="modalData?.student?.entryYear">
+            <div class="decorative-circle"></div>
+            <div class="detail-content">
+              <div class="detail-icon">
+                <span nz-icon nzType="calendar" nzTheme="outline"></span>
+              </div>
+              <div class="detail-text">
+                <div class="detail-label">Entry Year</div>
+                <div class="detail-value">{{ modalData.student.entryYear }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Additional student info indicators -->
+        <div class="student-indicators">
+          <div class="indicator active-indicator" *ngIf="isDeactivation">
+            <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+            <span>Active Student</span>
+          </div>
+          <div class="indicator inactive-indicator" *ngIf="isActivation">
+            <span nz-icon nzType="user-delete" nzTheme="outline"></span>
+            <span>Currently Inactive</span>
+          </div>
+          <div class="indicator enrolled-indicator">
+            <span nz-icon nzType="book" nzTheme="outline"></span>
+            <span>Enrolled</span>
+          </div>
+          <div class="indicator verified-indicator">
+            <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+            <span>Verified</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Action Warning Section -->
+    <div class="action-warning-section" [class.activation-warning]="isActivation" [class.deactivation-warning]="isDeactivation">
+      <div class="decorative-bg decorative-bg-3"></div>
+      <div class="warning-content">
+        <div class="warning-icon">
+          <span nz-icon [nzType]="isActivation ? 'check-circle' : 'warning'" nzTheme="outline"></span>
+        </div>
+        <div class="warning-text">
+          <h4 class="warning-title">
+            {{ isActivation ? '✅ Activation Action' : '⚠️ Critical Action' }}
+          </h4>
+          <p class="warning-description">
+            <ng-container *ngIf="isActivation">
+              This action will <strong>reactivate</strong> the student account. The student will regain access to course registration, system login, and all academic activities.
+            </ng-container>
+            <ng-container *ngIf="isDeactivation">
+              This action will <strong>permanently mark</strong> the student as inactive. The student will lose access to course registration, system login, and all academic activities.
+            </ng-container>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template> 

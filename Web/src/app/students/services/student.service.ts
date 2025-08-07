@@ -9,6 +9,8 @@ import { StudentCourseRegistrationView } from '../models/student-course-registra
 import { CourseBreakDownOffering, CourseViewModel } from '../models/course-break-down-offering.model';
 import { CourseTaken } from '../course-registration/course-add/add-course-approval/add-course-approval.component';
 import { StudentTranscriptViewModel } from 'src/app/reports/model/student-transcript-view-model.model';
+import { SpecialCaseManualRegistrationRequest } from '../models/special-case-manual-registration-request .model';
+import { StudentInformationView } from '../models/student-information-view .model';
 
 @Injectable({
   providedIn: 'root',
@@ -231,10 +233,10 @@ export class StudentService {
       .get(endpointUrl)
       .pipe(map((result) => result as StudentRegistrationSlipViewModel[]));
   }
-  getRegisteredNewStudentList(academicProgrameCode: string,entryYear:number, startDate: string, endDate: string): Observable<RegisteredNewStudentViewModel[]> {
+  getRegisteredNewStudentList(academicProgrameCode: string, entryYear: number, startDate: string, endDate: string): Observable<RegisteredNewStudentViewModel[]> {
     const endpointUrl = `${this.getStudentUrlList()}/student/getRegisteredNewStudentList/new`;
     let params = new HttpParams();
-    
+
     if (academicProgrameCode && academicProgrameCode.trim() !== '' || academicProgrameCode != null) {
       params = params.append('academicProgrameCode', academicProgrameCode);
     }
@@ -247,7 +249,7 @@ export class StudentService {
     if (endDate && endDate.trim() !== '') {
       params = params.append('endDate', endDate);
     }
-    
+
     return this.httpClient
       .get(endpointUrl, { params })
       .pipe(map((result) => result as RegisteredNewStudentViewModel[]));
@@ -273,7 +275,7 @@ export class StudentService {
     const endpointUrl = `${this.getStudentUrlList()}/cgpa/${studentId}`;
     return this.httpClient.get<number>(endpointUrl);
   }
-   getStudentsPaginated(
+  getStudentsPaginated(
     studentCode: string = '',
     batchCode: string = '',
     pageIndex: number = 0,
@@ -287,20 +289,25 @@ export class StudentService {
       .append('pageSize', pageSize.toString())
       .append('sortColumn', sortColumn)
       .append('sortOrder', sortOrder);
-    
+
     if (studentCode && studentCode.trim() !== '') {
       params = params.append('studentCode', studentCode);
     }
     if (batchCode && batchCode.trim() !== '') {
       params = params.append('batchCode', batchCode);
     }
-    
+
     return this.httpClient.get<any>(endpointUrl, { params });
   }
 
   deleteStudent(id: string): Observable<any> {
     const endpointUrl = `${this.getStudentUrlList()}/${id}`;
     return this.httpClient.delete<any>(endpointUrl);
+  }
+
+  activateStudent(id: string): Observable<any> {
+    const endpointUrl = `${this.getStudentUrlList()}/activate/${id}`;
+    return this.httpClient.patch<any>(endpointUrl, null);
   }
 
   getStudentById(id: string): Observable<any> {
@@ -322,5 +329,34 @@ export class StudentService {
     const endpointUrl = `${this.getStudentUrlList()}/excel`;
     return this.httpClient.get<any>(endpointUrl);
   }
+  getCoursesNotOnStudentProfile(studentCode: string): Observable<CourseBreakDownOffering[]> {
+    const endpointUrl = `${this.getStudentUrl()}/studentProfile/getUnRegisterCourse/${studentCode}/getCoursesNotOnStudentProfile`;
+    return this.httpClient.get<CourseBreakDownOffering[]>(endpointUrl);
+  }
+  getStudentRegisteredCourseList(studentCode: string): Observable<StudentViewModel> {
+    const endpointUrl = `${this.getStudentUrl()}/${studentCode}/getStudentRegisteredCourseList/registeredCourses`;
+    return this.httpClient.get<StudentViewModel>(endpointUrl);
+  }
+
+  updateTakenCourses(ids: number[], modifiedBy: string): Observable<any> {
+    const payload = { ids, modifiedBy };
+    const endpointUrl = `${this.getStudentUrl()}/updateTakenCourses`;
+    return this.httpClient.post(endpointUrl, payload);
+  }
+  addStudentManualCourseOfferingAsync(request: SpecialCaseManualRegistrationRequest): Observable<any> {
+    const endpointUrl = `${this.getStudentUrl()}/manual/semester-registration`;
+    return this.httpClient.post(endpointUrl, request);
+  }
+
+getStudentInformationWithInstructor(userId: string,studentId:string): Observable<StudentInformationView> {
+    const endpointUrl = `${this.getStudentGradesUrl()}/getStudentInformationWithInstructor/${userId}/${studentId}`;
+    return this.httpClient.get<StudentInformationView>(endpointUrl).pipe(
+      catchError((error) => {
+        console.error('Error occurred while fetching student information with instructor:', error);
+        return throwError(() => new Error(error.message || 'Error fetching student information with instructor'));
+      })
+    );
+  }
 
 }
+

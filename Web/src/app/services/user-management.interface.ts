@@ -101,10 +101,19 @@ export interface IUserManagementService {
 
   // User Management
   createUser(userData: CreateUserRequest): Observable<AdminCreateUserResponse>;
-  getUsers(): Observable<User[]>;
+  getUsers(
+    page?: number,
+    pageSize?: number,
+    searchTerm?: string,
+    roleFilter?: string,
+    isActiveFilter?: boolean,
+    sortBy?: string,
+    sortDescending?: boolean
+  ): Observable<{ users: User[], total: number, page: number, pageSize: number, totalPages: number }>;
   getUserById(userId: string): Observable<User>;
   updateUser(userId: string, userData: Partial<User>): Observable<any>;
-  deleteUser(userId: string): Observable<any>;
+  deleteUser(userId: string, permanentDelete?: boolean): Observable<any>;
+  softDeleteUser(userId: string): Observable<any>;
 
   // User Status Management
   updateUserStatus(statusUpdate: UserStatusUpdate): Observable<any>;
@@ -133,4 +142,7 @@ export interface IUserManagementService {
 
   // Export
   exportUsers(format?: 'csv' | 'excel'): Observable<Blob>;
+  
+  // Statistics
+  getUserStatistics(): Observable<{ totalUsers: number, activeUsers: number, inactiveUsers: number }>;
 } 

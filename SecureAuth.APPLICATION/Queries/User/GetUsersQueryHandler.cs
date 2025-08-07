@@ -19,20 +19,22 @@ namespace SecureAuth.APPLICATION.Queries.User
         {
             try
             {
-                // Get all users with filtering
-                var usersQuery = _unitOfWork.Users.Query();
+                // Get all users with filtering - keep original approach
+                var usersQuery = _unitOfWork.Users.Query()
+                    .AsNoTracking(); // Add performance optimization
 
-                // Apply search filter
+                // Apply search filter - optimized with case-insensitive search
                 if (!string.IsNullOrEmpty(query.SearchTerm))
                 {
+                    var searchTerm = query.SearchTerm.ToLower();
                     usersQuery = usersQuery.Where(u => 
-                        (u.FirstName != null && u.FirstName.Contains(query.SearchTerm)) ||
-                        (u.LastName != null && u.LastName.Contains(query.SearchTerm)) ||
-                        (u.Email != null && u.Email.Contains(query.SearchTerm)) ||
-                        (u.PhoneNumber != null && u.PhoneNumber.Contains(query.SearchTerm)));
+                        (u.FirstName != null && u.FirstName.ToLower().Contains(searchTerm)) ||
+                        (u.LastName != null && u.LastName.ToLower().Contains(searchTerm)) ||
+                        (u.Email != null && u.Email.ToLower().Contains(searchTerm)) ||
+                        (u.PhoneNumber != null && u.PhoneNumber.ToLower().Contains(searchTerm)));
                 }
 
-                // Apply role filter
+                // Apply role filter - keep original approach
                 if (!string.IsNullOrEmpty(query.RoleFilter))
                 {
                     var usersInRole = await _unitOfWork.Users.GetByRoleAsync(query.RoleFilter);
@@ -67,7 +69,7 @@ namespace SecureAuth.APPLICATION.Queries.User
                     .Take(query.PageSize)
                     .ToListAsync();
 
-                // Convert to DTOs
+                // Convert to DTOs - keep original approach for roles
                 var userDetails = new List<UserDetails>();
                 foreach (var user in users)
                 {
@@ -88,7 +90,7 @@ namespace SecureAuth.APPLICATION.Queries.User
                         LockoutEnd = user.LockoutEnd?.DateTime
                     };
 
-                    // Always include roles
+                    // Always include roles - keep original approach
                     var roles = await _unitOfWork.Roles.GetByUserAsync(user.Id);
                     userDetail.Roles = roles.Select(r => r.Name ?? string.Empty).Where(r => !string.IsNullOrEmpty(r)).ToList();
 

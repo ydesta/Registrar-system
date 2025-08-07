@@ -325,6 +325,54 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
             }
         }
 
+        public async Task<UserLoginData> GetUserLoginDataAsync(string userId)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return new UserLoginData();
+                }
+
+                var userRoles = await _userManager.GetRolesAsync(user);
+                
+                var roleIds = await _roleManager.Roles
+                    .Where(r => userRoles.Contains(r.Name))
+                    .Select(r => r.Id)
+                    .ToListAsync();
+
+                var permissions = await _context.RolePermissions
+                    .Where(rp => roleIds.Contains(rp.RoleId))
+                    .Select(rp => rp.Permission.Name)
+                    .Distinct()
+                    .ToListAsync();
+
+                var rolePermissions = await _context.RolePermissions
+                    .Where(rp => roleIds.Contains(rp.RoleId))
+                    .GroupBy(rp => rp.Role.Name)
+                    .Select(g => new { RoleName = g.Key, Permissions = g.Select(rp => rp.Permission.Name).ToList() })
+                    .ToDictionaryAsync(x => x.RoleName, x => x.Permissions);
+
+                var isSuperAdmin = userRoles.Contains("Super Admin");
+                var adminRoles = new[] { "Super Admin", "Admin", "Finance" };
+                var hasAdminAccess = userRoles.Any(r => adminRoles.Contains(r));
+
+                return new UserLoginData
+                {
+                    UserRoles = userRoles.ToList(),
+                    UserPermissions = permissions,
+                    RolePermissions = rolePermissions,
+                    IsSuperAdmin = isSuperAdmin,
+                    HasAdminAccess = hasAdminAccess
+                };
+            }
+            catch (Exception)
+            {
+                return new UserLoginData();
+            }
+        }
+
         public async Task<List<string>> GetAllowedFeaturesAsync(string userId)
         {
             try
@@ -345,55 +393,55 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
                     switch (permission.ToLower())
                     {
                         case "view":
-                            features.Add("dashboard");
-                            features.Add("profile");
-                            features.Add("reports");
+                            features.Add("view-data");
                             break;
-                        case "request":
-                            features.Add("applications");
-                            features.Add("requests");
+                        case "create":
+                            features.Add("create-data");
                             break;
                         case "edit":
-                            features.Add("content-management");
-                            features.Add("user-management");
+                            features.Add("edit-data");
+                            break;
+                        case "delete":
+                            features.Add("delete-data");
                             break;
                         case "approve":
-                            features.Add("approvals");
-                            features.Add("workflow");
+                            features.Add("approve-data");
                             break;
-                        case "pay":
-                            features.Add("payments");
-                            features.Add("billing");
+                        case "reject":
+                            features.Add("reject-data");
                             break;
-                        case "enroll":
-                            features.Add("enrollment");
-                            features.Add("courses");
+                        case "manageusers":
+                            features.Add("user-management");
+                            break;
+                        case "manageroles":
+                            features.Add("role-management");
+                            break;
+                        case "managepermissions":
+                            features.Add("permission-management");
+                            break;
+                        case "viewauditlogs":
+                            features.Add("audit-logs");
                             break;
                     }
                 }
 
-                // Add role-specific features
+                // Map roles to features
                 foreach (var role in userRoles)
                 {
                     switch (role.ToLower())
                     {
+                        case "super admin":
                         case "admin":
-                            features.AddRange(new[] { "admin-dashboard", "system-settings", "user-management", "role-management", "audit-logs" });
-                            break;
-                        case "student":
-                            features.AddRange(new[] { "student-dashboard", "course-enrollment", "assignments", "grades", "academic-calendar" });
-                            break;
-                        case "instructor":
-                            features.AddRange(new[] { "instructor-dashboard", "course-management", "grade-management", "student-progress", "teaching-materials" });
+                            features.Add("admin-panel");
+                            features.Add("system-settings");
                             break;
                         case "finance":
-                            features.AddRange(new[] { "finance-dashboard", "payment-processing", "billing-management", "financial-reports", "fee-management" });
+                            features.Add("financial-reports");
+                            features.Add("payment-management");
                             break;
-                        case "applicant":
-                            features.AddRange(new[] { "application-form", "document-upload", "application-status", "personal-info" });
-                            break;
-                        case "approvedapplicant":
-                            features.AddRange(new[] { "enrollment-process", "course-selection", "payment-setup", "orientation-materials" });
+                        case "registrar":
+                            features.Add("student-records");
+                            features.Add("enrollment-management");
                             break;
                     }
                 }

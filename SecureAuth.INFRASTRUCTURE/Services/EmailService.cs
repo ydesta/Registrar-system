@@ -496,7 +496,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services
             try
             {
                 _logger.LogInformation("Connecting to SMTP server: {SmtpServer}:{Port}", _emailConfiguration.SmtpServer, _emailConfiguration.Port);
-                client.Timeout = 10000; 
+                client.Timeout = 30000; // Increased from 10000 to 30000 for better reliability
                 client.ServerCertificateValidationCallback = (s, c, h, e) => true;
                 if (_emailConfiguration.Port == 587)
                 {

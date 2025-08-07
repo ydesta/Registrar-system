@@ -1,9 +1,10 @@
 <app-admission-tabs [(selectedTabIndex)]="selectedTabIndex" [isTabDisabled]="isTabDisabled"
-    [showSave]="selectedTabIndex === 1" [showSubmit]="selectedTabIndex === 6" [isLastTab]="selectedTabIndex === 6"
-    [saveDisabled]="!form?.valid" [submitDisabled]="!isAllFormsValid" [nextDisabled]="(selectedTabIndex === 1 && !id) || 
+    [showSave]="selectedTabIndex === 1" [showSubmit]="selectedTabIndex === 7" [isLastTab]="selectedTabIndex === 7"
+    [saveDisabled]="!form?.valid" [submitDisabled]="!isAllFormsValid"     [nextDisabled]="(selectedTabIndex === 1 && !id) || 
                     (selectedTabIndex === 2 && countNoOfContact === 0) ||
                     (selectedTabIndex === 3 && countNoOfEducation === 0) ||
-                    (selectedTabIndex === 5 && countSubmitionCourse === 0)" (nextTabClicked)="nextTab()"
+                    (selectedTabIndex === 5 && countSubmitionCourse === 0) ||
+                    (selectedTabIndex === 6 && paymentStatus !== 'Paid')" (nextTabClicked)="nextTab()"
     (previousTabClicked)="previousTab()" (saveClicked)="submitForm()" (submitClicked)="onApplicanFormSubmit()">
 
     <div tabContent="instruction">
@@ -74,7 +75,8 @@
                                         <input nz-input formControlName="firstName"
                                             placeholder="Enter your first name" />
                                         <div *ngIf="firstName?.errors" class="error-message">
-                                            <span *ngIf="firstName?.errors?.['invalidAmharic']">{{firstName?.errors?.['invalidAmharic']?.message}}</span>
+                                            <span
+                                                *ngIf="firstName?.errors?.['invalidAmharic']">{{firstName?.errors?.['invalidAmharic']?.message}}</span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -90,7 +92,8 @@
                                         <input nz-input formControlName="fatherName"
                                             placeholder="Enter your father's name" />
                                         <div *ngIf="fatherName?.errors" class="error-message">
-                                            <span *ngIf="fatherName?.errors?.['invalidEnglish']">{{fatherName?.errors?.['invalidEnglish']?.message}}</span>
+                                            <span
+                                                *ngIf="fatherName?.errors?.['invalidEnglish']">{{fatherName?.errors?.['invalidEnglish']?.message}}</span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -107,7 +110,8 @@
                                         <input nz-input formControlName="firstNameInAmh"
                                             placeholder="Enter your first name In Amh" />
                                         <div *ngIf="firstNameInAmh?.errors" class="error-message">
-                                            <span *ngIf="firstNameInAmh?.errors?.['invalidEnglish']">{{firstNameInAmh?.errors?.['invalidEnglish']?.message}}</span>
+                                            <span
+                                                *ngIf="firstNameInAmh?.errors?.['invalidEnglish']">{{firstNameInAmh?.errors?.['invalidEnglish']?.message}}</span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -123,7 +127,8 @@
                                         <input nz-input formControlName="fatherNameInAmh"
                                             placeholder="Enter your father's name" />
                                         <div *ngIf="fatherNameInAmh?.errors" class="error-message">
-                                            <span *ngIf="fatherNameInAmh?.errors?.['invalidAmharic']">{{fatherNameInAmh?.errors?.['invalidAmharic']?.message}}</span>
+                                            <span
+                                                *ngIf="fatherNameInAmh?.errors?.['invalidAmharic']">{{fatherNameInAmh?.errors?.['invalidAmharic']?.message}}</span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -141,7 +146,8 @@
                                         <input nz-input formControlName="grandFatherNameInAmh"
                                             placeholder="Enter your grandfather's name" />
                                         <div *ngIf="grandFatherNameInAmh?.errors" class="error-message">
-                                            <span *ngIf="grandFatherNameInAmh?.errors?.['invalidAmharic']">{{grandFatherNameInAmh?.errors?.['invalidAmharic']?.message}}</span>
+                                            <span
+                                                *ngIf="grandFatherNameInAmh?.errors?.['invalidAmharic']">{{grandFatherNameInAmh?.errors?.['invalidAmharic']?.message}}</span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -157,7 +163,8 @@
                                         <input nz-input formControlName="grandFatherName"
                                             placeholder="Enter your grandfather's name" />
                                         <div *ngIf="grandFatherName?.errors" class="error-message">
-                                            <span *ngIf="grandFatherName?.errors?.['invalidEnglish']">{{grandFatherName?.errors?.['invalidEnglish']?.message}}</span>
+                                            <span
+                                                *ngIf="grandFatherName?.errors?.['invalidEnglish']">{{grandFatherName?.errors?.['invalidEnglish']?.message}}</span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -176,7 +183,8 @@
                                         <input nz-input formControlName="motherName"
                                             placeholder="Enter your mother's name" />
                                         <div *ngIf="motherName?.errors" class="error-message">
-                                            <span *ngIf="motherName?.errors?.['invalidChars']">{{motherName?.errors?.['invalidChars']?.message}}</span>
+                                            <span
+                                                *ngIf="motherName?.errors?.['invalidChars']">{{motherName?.errors?.['invalidChars']?.message}}</span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -190,7 +198,8 @@
                                     <nz-form-control>
                                         <input nz-input formControlName="sirName" placeholder="Enter your sir name" />
                                         <div *ngIf="sirName?.errors" class="error-message">
-                                            <span *ngIf="sirName?.errors?.['alphabetsOnly']">{{sirName?.errors?.['alphabetsOnly']?.message}}</span>
+                                            <span
+                                                *ngIf="sirName?.errors?.['alphabetsOnly']">{{sirName?.errors?.['alphabetsOnly']?.message}}</span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -240,7 +249,8 @@
                                         <input nz-input formControlName="birthPlace"
                                             placeholder="Enter your birth place" />
                                         <div *ngIf="birthPlace?.errors" class="error-message">
-                                            <span *ngIf="birthPlace?.errors?.['invalidChars']">{{birthPlace?.errors?.['invalidChars']?.message}}</span>
+                                            <span
+                                                *ngIf="birthPlace?.errors?.['invalidChars']">{{birthPlace?.errors?.['invalidChars']?.message}}</span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -255,7 +265,8 @@
                                         <input nz-input formControlName="nationality"
                                             placeholder="Enter your nationality" />
                                         <div *ngIf="nationality?.errors" class="error-message">
-                                            <span *ngIf="nationality?.errors?.['alphabetsOnly']">{{nationality?.errors?.['alphabetsOnly']?.message}}</span>
+                                            <span
+                                                *ngIf="nationality?.errors?.['alphabetsOnly']">{{nationality?.errors?.['alphabetsOnly']?.message}}</span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -301,7 +312,7 @@
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
-                             <div class="form-field"></div>
+                            <div class="form-field"></div>
                         </div>
                     </div>
                 </div>
@@ -330,7 +341,8 @@
                                         <input nz-input formControlName="mobile"
                                             placeholder="Enter your mobile number" />
                                         <div *ngIf="mobile?.errors" class="error-message">
-                                            <span *ngIf="mobile?.errors?.['invalidPhoneNumber']">{{mobile?.errors?.['invalidPhoneNumber']?.message}}</span>
+                                            <span
+                                                *ngIf="mobile?.errors?.['invalidPhoneNumber']">{{mobile?.errors?.['invalidPhoneNumber']?.message}}</span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -372,7 +384,8 @@
                                         <input nz-input formControlName="emailAddress"
                                             placeholder="Enter your email address" />
                                         <div *ngIf="emailAddress?.errors" class="error-message">
-                                            <span *ngIf="emailAddress?.errors?.['invalidEmail']">{{emailAddress?.errors?.['invalidEmail']?.message}}</span>
+                                            <span
+                                                *ngIf="emailAddress?.errors?.['invalidEmail']">{{emailAddress?.errors?.['invalidEmail']?.message}}</span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -430,7 +443,8 @@
                                     <nz-form-control>
                                         <input nz-input formControlName="region" placeholder="Enter your region" />
                                         <div *ngIf="region?.errors" class="error-message">
-                                            <span *ngIf="region?.errors?.['alphabetsOnly']">{{region?.errors?.['alphabetsOnly']?.message}}</span>
+                                            <span
+                                                *ngIf="region?.errors?.['alphabetsOnly']">{{region?.errors?.['alphabetsOnly']?.message}}</span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -474,7 +488,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Debug section -->
                 <!-- <div style="margin-top: 20px; padding: 16px; background: #f5f5f5; border-radius: 8px;">
                     <h4>Debug Information</h4>
@@ -504,7 +518,9 @@
     <div tabContent="academicProgram">
         <app-manage-student-program-requester></app-manage-student-program-requester>
     </div>
-
+    <div tabContent="applicationFee">
+        <app-application-fee [applicantId]="id" (paymentStatusChange)="onPaymentStatusChange($event)" (paymentSuccessful)="onPaymentSuccessful()"></app-application-fee>
+    </div>
     <div tabContent="files">
         <app-school-with-student-agreement (formValidityChange)="onAgreementFormValidityChange($event)"
             (formValueChange)="onAgreementFormValueChange($event)"></app-school-with-student-agreement>

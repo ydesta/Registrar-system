@@ -89,13 +89,16 @@
   -webkit-overflow-scrolling: touch;
   
   .responsive-table {
-    min-width: 800px;
+    min-width: 100%;
+    width: 100%;
   }
 }
 
 ::ng-deep .ant-table {
   border-radius: 6px;
   box-shadow: none;
+  width: 100%;
+  table-layout: fixed;
 
   .ant-table-thead > tr > th {
     background: #f7f7f7;
@@ -105,6 +108,22 @@
     padding: 10px 8px;
     text-align: left;
     white-space: nowrap;
+    position: relative;
+    
+    &.expand-column,
+    &.action-column {
+      position: sticky;
+      background: #f7f7f7;
+      z-index: 20;
+    }
+    
+    &.expand-column {
+      left: 0;
+    }
+    
+    &.action-column {
+      right: 0;
+    }
   }
 
   .ant-table-tbody > tr {
@@ -112,6 +131,11 @@
     
     &:hover {
       background-color: #f5faff;
+      
+      .expand-column,
+      .action-column {
+        background: #f5faff;
+      }
     }
     
     > td {
@@ -120,6 +144,22 @@
       vertical-align: middle;
       word-wrap: break-word;
       max-width: 200px;
+      position: relative;
+      
+      &.expand-column,
+      &.action-column {
+        position: sticky;
+        background: white;
+        z-index: 10;
+      }
+      
+      &.expand-column {
+        left: 0;
+      }
+      
+      &.action-column {
+        right: 0;
+      }
     }
   }
 
@@ -155,25 +195,68 @@
 
 // Column-specific styles
 .expand-column {
-  width: 60px;
+  width: 80px;
+  min-width: 80px;
   text-align: center;
+  position: sticky;
+  left: 0;
+  background: white;
+  z-index: 10;
+}
+
+.custom-expand-icon {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  background: rgba(24, 144, 255, 0.05);
+  border: 1px solid rgba(24, 144, 255, 0.2);
+  
+  &:hover {
+    background: rgba(24, 144, 255, 0.15);
+    border-color: rgba(24, 144, 255, 0.4);
+    transform: scale(1.05);
+  }
+  
+  &.expanded {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+  
+  i[nz-icon] {
+    font-size: 18px;
+    font-weight: bold;
+  }
 }
 
 .batch-column {
   min-width: 120px;
+  width: 15%;
 }
 
 .term-column {
   min-width: 150px;
+  width: 20%;
 }
 
 .date-column {
   min-width: 140px;
+  width: 15%;
 }
 
 .action-column {
-  width: 80px;
+  width: 100px;
+  min-width: 100px;
   text-align: center;
+  position: sticky;
+  right: 0;
+  background: white;
+  z-index: 10;
 }
 
 .course-code-column {
@@ -205,15 +288,27 @@
 }
 
 .action-dropdown-btn {
-  padding: 4px 8px;
-  border: none;
-  background: transparent;
+  padding: 6px 10px;
+  border: 1px solid #e0e0e0;
+  background: white;
   cursor: pointer;
-  border-radius: 4px;
-  transition: background 0.2s;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
   
   &:hover {
-    background: #f0f0f0;
+    background: #f5f5f5;
+    border-color: #1890ff;
+    transform: scale(1.05);
+  }
+  
+  i[nz-icon] {
+    font-size: 16px;
+    color: #1890ff;
   }
 }
 
@@ -441,6 +536,42 @@
 }
 
 // Responsive breakpoints
+@media (min-width: 1400px) {
+  .table-responsive {
+    .responsive-table {
+      min-width: 100%;
+    }
+  }
+  
+  .expand-column {
+    width: 100px;
+    min-width: 100px;
+  }
+  
+  .action-column {
+    width: 120px;
+    min-width: 120px;
+  }
+  
+  .custom-expand-icon {
+    width: 40px;
+    height: 40px;
+    
+    i[nz-icon] {
+      font-size: 20px;
+    }
+  }
+  
+  .action-dropdown-btn {
+    min-width: 44px;
+    height: 44px;
+    
+    i[nz-icon] {
+      font-size: 18px;
+    }
+  }
+}
+
 @media (max-width: 1200px) {
   .content-container {
     padding: 20px;
@@ -491,8 +622,14 @@
   
   .table-responsive {
     .responsive-table {
-      min-width: 700px;
+      min-width: 100%;
     }
+  }
+  
+  .expand-column,
+  .action-column {
+    position: static !important;
+    background: transparent !important;
   }
 }
 
@@ -534,7 +671,7 @@
   
   .table-responsive {
     .responsive-table {
-      min-width: 600px;
+      min-width: 100%;
     }
   }
   
@@ -592,7 +729,7 @@
   
   .table-responsive {
     .responsive-table {
-      min-width: 500px;
+      min-width: 100%;
     }
   }
   
@@ -649,7 +786,7 @@
   
   .table-responsive {
     .responsive-table {
-      min-width: 400px;
+      min-width: 100%;
     }
   }
   

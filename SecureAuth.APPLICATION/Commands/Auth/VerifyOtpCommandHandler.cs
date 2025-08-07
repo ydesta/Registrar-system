@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Identity;
+using SecureAuth.APPLICATION.Commands.Auth;
 using SecureAuth.APPLICATION.DTOs.Authentication;
 using SecureAuth.APPLICATION.Interfaces;
 using SecureAuth.DOMAIN.Models;
+using SecureAuth.DOMAIN.Models.Security;
 
 namespace SecureAuth.APPLICATION.Commands.Auth
 {
@@ -62,12 +64,8 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             var token = await _tokenService.GenerateAccessTokenAsync(user);
             var refreshToken = await _tokenService.GenerateRefreshTokenAsync();
 
-            // Get user roles and permissions
-            var userRoles = await _rolePermissionRepository.GetUserRolesAsync(user.Id);
-            var userPermissions = await _rolePermissionRepository.GetUserPermissionsAsync(user.Id);
-            var rolePermissions = await _rolePermissionRepository.GetUserRolePermissionsAsync(user.Id);
-            var isSuperAdmin = await _rolePermissionRepository.IsSuperAdminAsync(user.Id);
-            var hasAdminAccess = await _rolePermissionRepository.HasAdminAccessAsync(user.Id);
+            // Get user roles and permissions in a single optimized call
+            var userLoginData = await _rolePermissionRepository.GetUserLoginDataAsync(user.Id);
 
             // Log successful OTP verification
             await _activityLogService.LogUserActionAsync(
@@ -75,7 +73,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 "OtpVerification",
                 "User",
                 user.Id,
-                $"OTP verified successfully for {command.Purpose}");
+                "OTP verification successful");
 
             // Record successful login in security events
             await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, true, "127.0.0.1", "Unknown");
@@ -83,9 +81,8 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             return new OtpVerifyResponse
             {
                 Success = true,
-                Message = "OTP verified successfully.",
+                Message = "OTP verification successful",
                 OtpVerified = true,
-                Purpose = command.Purpose,
                 Token = token,
                 RefreshToken = refreshToken,
                 User = new UserInfo
@@ -101,14 +98,14 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                     IsActive = user.IsActive,
                     CreatedAt = user.CreatedAt,
                     LastLoginAt = user.LastLoginAt,
-                    Roles = userRoles.ToList()
+                    Roles = userLoginData.UserRoles
                 },
                 Permissions = new UserPermissions
                 {
-                    Permissions = userPermissions.ToList(),
-                    RolePermissions = rolePermissions,
-                    IsSuperAdmin = isSuperAdmin,
-                    HasAdminAccess = hasAdminAccess
+                    Permissions = userLoginData.UserPermissions,
+                    RolePermissions = userLoginData.RolePermissions,
+                    IsSuperAdmin = userLoginData.IsSuperAdmin,
+                    HasAdminAccess = userLoginData.HasAdminAccess
                 }
             };
         }

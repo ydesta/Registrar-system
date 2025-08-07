@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, debounceTime, filter } from 'rxjs';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzModalRef } from 'ng-zorro-antd/modal';
 import { UserManagementService } from '../../../services/user-management.service';
 import { CreateUserRequest } from '../../../services/user-management.interface';
 import { Role } from '../../../types/user-management.types';
@@ -23,19 +24,19 @@ export class CreateUserComponent implements OnInit, OnDestroy {
   loading = false;
   submitting = false;
   roles: Role[] = [];
-  passwordVisible = false;
-  confirmPasswordVisible = false;
 
   constructor(
     private fb: FormBuilder,
     private userManagementService: UserManagementService,
     private router: Router,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private modalRef: NzModalRef<CreateUserComponent>
   ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.loadRoles();
+    this.setupEmailValidation();
   }
 
   ngOnDestroy(): void {
@@ -52,40 +53,11 @@ export class CreateUserComponent implements OnInit, OnDestroy {
       roleNames: [[], [Validators.required, Validators.minLength(1)]],
       isActive: [true],
       requireEmailConfirmation: [false],
-      requirePhoneConfirmation: [false],
-      password: ['', [Validators.required, Validators.minLength(8), this.passwordPatternValidator()]],
-      confirmPassword: ['', [Validators.required]]
-    }, { validators: this.passwordMatchValidator });
+      requirePhoneConfirmation: [false]
+    });
   }
 
-  passwordPatternValidator() {
-    return (control: any) => {
-      const password = control.value;
-      if (!password) return null;
-      
-      const hasLowercase = /[a-z]/.test(password);
-      const hasUppercase = /[A-Z]/.test(password);
-      const hasNumber = /[0-9]/.test(password);
-      const hasSpecial = /[!@#$%^&*]/.test(password);
-      
-      if (hasLowercase && hasUppercase && hasNumber && hasSpecial) {
-        return null;
-      }
-      
-      return { pattern: true };
-    };
-  }
 
-  passwordMatchValidator(group: FormGroup): { [key: string]: any } | null {
-    const password = group.get('password');
-    const confirmPassword = group.get('confirmPassword');
-    
-    if (password && confirmPassword && password.value !== confirmPassword.value) {
-      return { passwordMismatch: true };
-    }
-    
-    return null;
-  }
 
   loadRoles(): void {
     this.loading = true;
@@ -116,9 +88,7 @@ export class CreateUserComponent implements OnInit, OnDestroy {
         roleNames: formValue.roleNames,
         isActive: formValue.isActive,
         requireEmailConfirmation: formValue.requireEmailConfirmation,
-        requirePhoneConfirmation: formValue.requirePhoneConfirmation,
-        password: formValue.password,
-        confirmPassword: formValue.confirmPassword
+        requirePhoneConfirmation: formValue.requirePhoneConfirmation
       };
 
       this.userManagementService.createUser(createUserRequest)
@@ -138,10 +108,28 @@ export class CreateUserComponent implements OnInit, OnDestroy {
             }
             
             this.message.success(message);
-            this.router.navigate(['/user-management/users']);
+            this.modalRef.close('success');
           },
           error: (error) => {
-            this.message.error('Failed to create user: ' + error.message);
+            let errorMessage = 'Failed to create user';
+            
+            if (error.error?.message) {
+              errorMessage = error.error.message;
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            
+            // Handle specific error cases
+            if (errorMessage.toLowerCase().includes('email already') || 
+                errorMessage.toLowerCase().includes('already registered') ||
+                errorMessage.toLowerCase().includes('duplicate key')) {
+              errorMessage = 'A user with this email address already exists. Please use a different email address.';
+              // Clear the email field to help user enter a different email
+              this.userForm.patchValue({ email: '' });
+              this.userForm.get('email')?.markAsUntouched();
+            }
+            
+            this.message.error(errorMessage);
             this.submitting = false;
           }
         });
@@ -151,36 +139,10 @@ export class CreateUserComponent implements OnInit, OnDestroy {
   }
 
   onCancel(): void {
-    this.router.navigate(['/user-management/users']);
+    this.modalRef.close();
   }
 
-  onGeneratePassword(): void {
-    const password = this.generateSecurePassword();
-    this.userForm.patchValue({
-      password: password,
-      confirmPassword: password
-    });
-  }
 
-  generateSecurePassword(): string {
-    const length = 12;
-    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-    let password = '';
-    
-    // Ensure at least one of each required character type
-    password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)]; // uppercase
-    password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)]; // lowercase
-    password += '0123456789'[Math.floor(Math.random() * 10)]; // number
-    password += '!@#$%^&*'[Math.floor(Math.random() * 8)]; // special char
-    
-    // Fill the rest randomly
-    for (let i = 4; i < length; i++) {
-      password += charset[Math.floor(Math.random() * charset.length)];
-    }
-    
-    // Shuffle the password
-    return password.split('').sort(() => Math.random() - 0.5).join('');
-  }
 
   markFormGroupTouched(): void {
     Object.keys(this.userForm.controls).forEach(key => {
@@ -217,9 +179,7 @@ export class CreateUserComponent implements OnInit, OnDestroy {
       lastName: 'Last name',
       email: 'Email',
       phoneNumber: 'Phone number',
-      roleNames: 'Roles',
-      password: 'Password',
-      confirmPassword: 'Confirm password'
+      roleNames: 'Roles'
     };
     return labels[fieldName] || fieldName;
   }
@@ -234,42 +194,31 @@ export class CreateUserComponent implements OnInit, OnDestroy {
     return !!(field?.valid && field?.touched);
   }
 
-  isRequirementMet(requirement: string): boolean {
-    const password = this.userForm.get('password')?.value || '';
-    
-    switch (requirement) {
-      case 'length':
-        return password.length >= 8;
-      case 'lowercase':
-        return /[a-z]/.test(password);
-      case 'uppercase':
-        return /[A-Z]/.test(password);
-      case 'number':
-        return /[0-9]/.test(password);
-      case 'special':
-        return /[!@#$%^&*]/.test(password);
-      default:
-        return false;
+  setupEmailValidation(): void {
+    // Add email validation with debounce
+    this.userForm.get('email')?.valueChanges
+      .pipe(
+        takeUntil(this.destroy$),
+        debounceTime(500),
+        filter((email: string) => email && this.isValidEmail(email))
+      )
+      .subscribe((email: string) => {
+        // Here you could add an API call to check email availability
+        // For now, we'll just validate the format
+        this.validateEmailFormat(email);
+      });
+  }
+
+  isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  validateEmailFormat(email: string): void {
+    const emailControl = this.userForm.get('email');
+    if (emailControl && !this.isValidEmail(email)) {
+      emailControl.setErrors({ email: true });
     }
   }
 
-  getPasswordStrength(): { score: number; label: string; color: string } {
-    const password = this.userForm.get('password')?.value || '';
-    let score = 0;
-    
-    if (password.length >= 8) score++;
-    if (/[a-z]/.test(password)) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[!@#$%^&*]/.test(password)) score++;
-    
-    const labels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
-    const colors = ['#ff4d4f', '#fa8c16', '#faad14', '#52c41a', '#52c41a'];
-    
-    return {
-      score: Math.min(score, 4),
-      label: labels[Math.min(score, 4)],
-      color: colors[Math.min(score, 4)]
-    };
-  }
 } 

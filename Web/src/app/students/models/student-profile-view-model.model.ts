@@ -13,6 +13,8 @@ export class StudentProfileViewModel {
     public birthPlace: string;
     public email: string;
     public phoneNo: string;
+    public status: string;
+    public isDeleted: boolean;
     public studentAcademicYears: StudentAcademicYears[];
     public studentCoursesTaken: StudentCoursesTaken[]
 }

@@ -71,14 +71,13 @@
               <td class="expand-column">
                 <span
                   class="custom-expand-icon"
+                  [ngClass]="{ 'expanded': expandSet.has(data.id) }"
                   (click)="onExpandChange(data.id, !expandSet.has(data.id))"
-                  style="cursor:pointer;"
                 >
                   <i
                     nz-icon
                     [nzType]="expandSet.has(data.id) ? 'minus-square' : 'plus-square'"
                     [style.color]="expandSet.has(data.id) ? '#ef4444' : '#1890ff'"
-                    style="font-size: 20px;"
                   ></i>
                 </span>
               </td>

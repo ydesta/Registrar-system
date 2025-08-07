@@ -27,10 +27,12 @@ export class VerifyEmailComponent implements OnInit {
     this._route.queryParams.subscribe(params => {
       let email = params['email'];
       let token = params['token'];
+      
       if (email) {
         try {
           email = decodeURIComponent(email);
         } catch (e) {
+          console.error('Error decoding email:', e);
         }
       }
       
@@ -38,6 +40,7 @@ export class VerifyEmailComponent implements OnInit {
         try {
           token = decodeURIComponent(token);
         } catch (e) {
+          console.error('Error decoding token:', e);
         }
       }
       
@@ -55,7 +58,7 @@ export class VerifyEmailComponent implements OnInit {
 
   verifyEmail(email: string, token: string): void {
     this.isLoading = true;
-    const url = `${environment.secureUrl}/authentication/verify-email?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
+    
     this._authService.verifyEmailGet(email, token).subscribe({
       next: (response) => {
         this.isLoading = false;
@@ -75,13 +78,32 @@ export class VerifyEmailComponent implements OnInit {
         }, 1000);
       },
       error: (error) => {
+        console.error('Email verification failed:', {
+          status: error.status,
+          statusText: error.statusText,
+          error: error.error
+        });
+        
         this.isLoading = false;
         this.verificationStatus = 'error';
-        if (error.error && error.error.message) {
+        
+        // Provide more specific error messages based on the error type
+        if (error.status === 0) {
+          this.errorMessage = 'Network error: Unable to connect to the server. Please check your internet connection and try again.';
+        } else if (error.status === 400) {
+          this.errorMessage = error.error?.message || 'Invalid verification link. The link may be expired or incorrect.';
+        } else if (error.status === 401) {
+          this.errorMessage = 'Authentication failed. Please try the verification link again.';
+        } else if (error.status === 404) {
+          this.errorMessage = 'Verification service not found. Please contact support.';
+        } else if (error.status === 500) {
+          this.errorMessage = 'Server error. Please try again later or contact support.';
+        } else if (error.error && error.error.message) {
           this.errorMessage = error.error.message;
         } else {
           this.errorMessage = 'An error occurred while verifying your email. Please try again or contact support.';
         }
+        
         this._notificationService.notification('error', 'Verification Failed', this.errorMessage);
       }
     });
@@ -132,6 +154,7 @@ export class VerifyEmailComponent implements OnInit {
         );
       },
       error: (error) => {
+        console.error('Resend verification failed:', error);
         this.isLoading = false;
         let errorMessage = 'Failed to resend verification email. Please try again.';
         if (error.error && error.error.message) {

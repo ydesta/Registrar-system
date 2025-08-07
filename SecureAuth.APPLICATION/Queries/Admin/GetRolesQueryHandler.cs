@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SecureAuth.APPLICATION.Queries.Admin;
 using SecureAuth.APPLICATION.DTOs.Admin;
 using SecureAuth.DOMAIN.Models;
@@ -19,18 +20,26 @@ namespace SecureAuth.APPLICATION.Queries.Admin
 
         public async Task<List<RoleModel>> HandleAsync(GetRolesQuery query)
         {
-            var roles = _roleManager.Roles.ToList();
+            // Get all roles with AsNoTracking for better performance
+            var roles = await _roleManager.Roles
+                .AsNoTracking()
+                .ToListAsync();
+            
             var roleModels = new List<RoleModel>();
+            
+            // Batch the user count queries to avoid N+1 problem
+            var roleNames = roles.Select(r => r.Name).ToList();
+            var userCounts = await _roleRepository.GetUserCountsForRolesAsync(roleNames);
             
             foreach (var role in roles)
             {
-                var userCount = await _roleRepository.GetUserCountAsync(role.Name);
+                var userCount = userCounts.TryGetValue(role.Name, out var count) ? count : 0;
                 
                 roleModels.Add(new RoleModel
-            {
-                Id = role.Id,
-                Name = role.Name,
-                NormalizedName = role.NormalizedName,
+                {
+                    Id = role.Id,
+                    Name = role.Name,
+                    NormalizedName = role.NormalizedName,
                     ConcurrencyStamp = role.ConcurrencyStamp,
                     UserCount = userCount
                 });

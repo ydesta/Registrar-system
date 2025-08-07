@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable, throwError, BehaviorSubject, of } from 'rxjs';
+import { catchError, map, shareReplay } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { User, Role, Permission } from '../types/user-management.types';
 import { AuthService } from './auth.service';
@@ -28,6 +28,16 @@ export class UserManagementService implements IUserManagementService {
   public roles$ = this.rolesSubject.asObservable();
   public permissions$ = this.permissionsSubject.asObservable();
 
+  // Cache for user statistics
+  private userStatsCache: { data: any, timestamp: number } | null = null;
+  private readonly CACHE_DURATION = 30000; // 30 seconds
+
+  // Cache for roles
+  private rolesCache: { data: Role[], timestamp: number } | null = null;
+
+  // Cache for activity logs
+  private activityLogsCache: { data: any, timestamp: number, params: string } | null = null;
+
   constructor(private http: HttpClient, private authService: AuthService) { }
 
   createUser(userData: CreateUserRequest): Observable<AdminCreateUserResponse> {
@@ -37,8 +47,33 @@ export class UserManagementService implements IUserManagementService {
       );
   }
 
-  getUsers(): Observable<User[]> {
-    return this.http.get<any>(`${this.baseUrl}/UserManagement`)
+  getUsers(
+    page: number = 1,
+    pageSize: number = 10,
+    searchTerm?: string,
+    roleFilter?: string,
+    isActiveFilter?: boolean,
+    sortBy: string = 'CreatedAt',
+    sortDescending: boolean = true
+  ): Observable<{ users: User[], total: number, page: number, pageSize: number, totalPages: number }> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString())
+      .set('sortBy', sortBy)
+      .set('sortDescending', sortDescending.toString())
+      .set('includeRoles', 'true');
+
+    if (searchTerm) {
+      params = params.set('searchTerm', searchTerm);
+    }
+    if (roleFilter) {
+      params = params.set('roleFilter', roleFilter);
+    }
+    if (isActiveFilter !== undefined) {
+      params = params.set('isActiveFilter', isActiveFilter.toString());
+    }
+
+    return this.http.get<any>(`${this.baseUrl}/UserManagement`, { params })
       .pipe(
         map(response => {
           if (response.success) {
@@ -70,7 +105,13 @@ export class UserManagementService implements IUserManagementService {
               }))
             }));
             this.usersSubject.next(users);
-            return users;
+            return {
+              users,
+              total: response.totalCount,
+              page: response.page,
+              pageSize: response.pageSize,
+              totalPages: response.totalPages
+            };
           } else {
             throw new Error(response.message || 'Failed to fetch users');
           }
@@ -133,8 +174,20 @@ export class UserManagementService implements IUserManagementService {
       );
   }
 
-  deleteUser(userId: string): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/UserManagement/users/${userId}`)
+  deleteUser(userId: string, permanentDelete: boolean = false): Observable<any> {
+    let params = new HttpParams();
+    if (permanentDelete) {
+      params = params.set('permanentDelete', 'true');
+    }
+    
+    return this.http.delete(`${this.baseUrl}/UserManagement/${userId}`, { params })
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  softDeleteUser(userId: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/UserManagement/${userId}`)
       .pipe(
         catchError(this.handleError)
       );
@@ -175,13 +228,24 @@ export class UserManagementService implements IUserManagementService {
       );
   }
   getRoles(): Observable<Role[]> {
+    // Check cache first
+    if (this.rolesCache && (Date.now() - this.rolesCache.timestamp) < this.CACHE_DURATION) {
+      return of(this.rolesCache.data);
+    }
+
     return this.http.get<Role[]>(`${this.baseUrl}/RolePermission/roles`)
       .pipe(
         map(roles => {
+          // Cache the result
+          this.rolesCache = {
+            data: roles,
+            timestamp: Date.now()
+          };
           this.rolesSubject.next(roles);
           return roles;
         }),
-        catchError(this.handleError)
+        catchError(this.handleError),
+        shareReplay(1) // Share the result with multiple subscribers
       );
   }
 
@@ -252,6 +316,16 @@ export class UserManagementService implements IUserManagementService {
   }
 
   getAllUserActivity(params: ActivityFilterParams = {}): Observable<ActivityLogResponse> {
+    // Create cache key from parameters
+    const cacheKey = JSON.stringify(params);
+    
+    // Check cache first
+    if (this.activityLogsCache && 
+        (Date.now() - this.activityLogsCache.timestamp) < this.CACHE_DURATION &&
+        this.activityLogsCache.params === cacheKey) {
+      return of(this.activityLogsCache.data);
+    }
+
     let httpParams = new HttpParams();
     Object.keys(params).forEach(key => {
       if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
@@ -274,15 +348,25 @@ export class UserManagementService implements IUserManagementService {
               createdAt: activity.timestamp
             }));
 
-            return {
+            const result = {
               activities: activities,
               total: response.totalCount
             };
+
+            // Cache the result
+            this.activityLogsCache = {
+              data: result,
+              timestamp: Date.now(),
+              params: cacheKey
+            };
+
+            return result;
           } else {
             throw new Error('Invalid response structure from API');
           }
         }),
-        catchError(this.handleError)
+        catchError(this.handleError),
+        shareReplay(1) // Share the result with multiple subscribers
       );
   }
 
@@ -305,6 +389,71 @@ export class UserManagementService implements IUserManagementService {
   updateAdminEmail(id: string, model: any): Observable<any> {
     const url = `${this.baseUrl}/UserManagement/admin/${id}/email`;
     return this.http.put<any>(url, model);
+  }
+  getUserStatistics(): Observable<{ totalUsers: number, activeUsers: number, inactiveUsers: number }> {
+    // Check cache first
+    if (this.userStatsCache && (Date.now() - this.userStatsCache.timestamp) < this.CACHE_DURATION) {
+      return of(this.userStatsCache.data);
+    }
+
+    return this.http.get<any>(`${this.baseUrl}/System/statistics`)
+      .pipe(
+        map(response => {
+          if (response.isSuccess && response.response?.userStatistics) {
+            const stats = response.response.userStatistics;
+            const result = {
+              totalUsers: stats.totalUsers || 0,
+              activeUsers: stats.activeUsers || 0,
+              inactiveUsers: stats.lockedAccounts || 0
+            };
+            
+            // Cache the result
+            this.userStatsCache = {
+              data: result,
+              timestamp: Date.now()
+            };
+            
+            return result;
+          } else {
+            // Fallback to calculating from current page if API fails
+            const fallback = {
+              totalUsers: this.usersSubject.value.length,
+              activeUsers: this.usersSubject.value.filter(u => u.isActive).length,
+              inactiveUsers: this.usersSubject.value.filter(u => !u.isActive).length
+            };
+            
+            // Cache the fallback result
+            this.userStatsCache = {
+              data: fallback,
+              timestamp: Date.now()
+            };
+            
+            return fallback;
+          }
+        }),
+        catchError(error => {
+          console.error('API /System/statistics error:', error);
+          // Fallback to calculating from current page if API fails
+          return this.usersSubject.pipe(
+            map(users => {
+              const fallback = {
+                totalUsers: users.length,
+                activeUsers: users.filter(u => u.isActive).length,
+                inactiveUsers: users.filter(u => !u.isActive).length
+              };
+              
+              // Cache the fallback result
+              this.userStatsCache = {
+                data: fallback,
+                timestamp: Date.now()
+              };
+              
+              return fallback;
+            })
+          );
+        }),
+        shareReplay(1) // Share the result with multiple subscribers
+      );
   }
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An error occurred';

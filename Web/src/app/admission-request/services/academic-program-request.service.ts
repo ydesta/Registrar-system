@@ -3,6 +3,7 @@ import { Injectable } from "@angular/core";
 import { Observable, map } from "rxjs";
 import { environment } from "src/environments/environment";
 import { AcadamicProgramme } from "../model/acadamic-programme.model";
+import { ApplicantFeeViewModel } from "../model/applicant-fee-view-model.model";
 
 @Injectable({
   providedIn: "root"
@@ -50,6 +51,12 @@ export class AcademicProgramRequestService {
       map(data => {
         return data;
       })
+    );
+  }
+  getApplicationFee(id: string): Observable<ApplicantFeeViewModel> {
+    const endpointUrl = `${this.getacadamicPrgramUrl()}/getApplicationFee/applicant/${id}`;
+    return this.httpClient.get<ApplicantFeeViewModel>(endpointUrl).pipe(
+      map(result => result as ApplicantFeeViewModel)
     );
   }
 }

@@ -50,7 +50,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                     return new VerifyEmailResponse { Success = true, Message = "Email is already verified.", EmailVerified = true };
                 }
 
-                // Verify the token
+                // Verify the token using Identity's built-in method
                 _logger.LogInformation("Verifying token for user: {Email}", command.Email);
                 var tokenValidationResult = await _userManager.ConfirmEmailAsync(user, command.Token);
                 if (!tokenValidationResult.Succeeded)
@@ -62,37 +62,49 @@ namespace SecureAuth.APPLICATION.Commands.Auth
 
                 _logger.LogInformation("Token verified successfully. EmailConfirmed after ConfirmEmailAsync: {EmailConfirmed}", user.EmailConfirmed);
 
-                // Refresh the user entity to get the updated EmailConfirmed status
-                await _userManager.UpdateAsync(user);
-                
-                // Save changes to ensure the EmailConfirmed field is updated in the database
-                await _unitOfWork.SaveChangesAsync();
-                _logger.LogInformation("Unit of work changes saved");
-
-                // Verify that the email was actually confirmed by re-fetching the user
+                // Re-fetch the user to get the updated EmailConfirmed status
                 var updatedUser = await _userManager.FindByEmailAsync(command.Email);
-                _logger.LogInformation("Re-fetched user. Final EmailConfirmed status: {EmailConfirmed}", updatedUser?.EmailConfirmed);
+                if (updatedUser == null)
+                {
+                    _logger.LogError("Failed to re-fetch user after email confirmation");
+                    return new VerifyEmailResponse { Success = false, Message = "Failed to verify email status.", EmailVerified = false };
+                }
+
+                _logger.LogInformation("Re-fetched user. Final EmailConfirmed status: {EmailConfirmed}", updatedUser.EmailConfirmed);
                 
-                var isEmailVerified = updatedUser?.EmailConfirmed ?? false;
+                var isEmailVerified = updatedUser.EmailConfirmed;
                 
+                // If EmailConfirmed is still false after ConfirmEmailAsync, try a direct database update
                 if (!isEmailVerified)
                 {
-                    _logger.LogWarning("EmailConfirmed still false after verification, attempting manual update");
+                    _logger.LogWarning("EmailConfirmed still false after verification, attempting direct update");
                     
-                    // Manual update as fallback
-                    updatedUser.EmailConfirmed = true;
-                    var manualUpdateResult = await _userManager.UpdateAsync(updatedUser);
-                    
-                    if (manualUpdateResult.Succeeded)
+                    try
                     {
-                        await _unitOfWork.SaveChangesAsync();
-                        isEmailVerified = true;
-                        _logger.LogInformation("Manual update successful. EmailConfirmed set to true");
+                        // Use a transaction to ensure data consistency
+                        await _unitOfWork.BeginTransactionAsync();
+                        
+                        // Directly update the EmailConfirmed field
+                        updatedUser.EmailConfirmed = true;
+                        var updateResult = await _userManager.UpdateAsync(updatedUser);
+                        
+                        if (updateResult.Succeeded)
+                        {
+                            await _unitOfWork.CommitTransactionAsync();
+                            isEmailVerified = true;
+                            _logger.LogInformation("Direct update successful. EmailConfirmed set to true");
+                        }
+                        else
+                        {
+                            await _unitOfWork.RollbackTransactionAsync();
+                            var updateErrors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+                            _logger.LogError("Direct update failed. Errors: {Errors}", updateErrors);
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        var updateErrors = string.Join(", ", manualUpdateResult.Errors.Select(e => e.Description));
-                        _logger.LogError("Manual update failed. Errors: {Errors}", updateErrors);
+                        await _unitOfWork.RollbackTransactionAsync();
+                        _logger.LogError(ex, "Exception during direct email confirmation update");
                     }
                 }
                 
@@ -114,3 +126,4 @@ namespace SecureAuth.APPLICATION.Commands.Auth
         }
     }
 } 
+

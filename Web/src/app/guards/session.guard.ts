@@ -19,6 +19,17 @@ export class SessionGuard implements CanActivate {
     state: RouterStateSnapshot
   ): Observable<boolean> {
     return new Observable<boolean>(observer => {
+      // Skip session check for auth routes
+      if (state.url.includes('/accounts/login') || 
+          state.url.includes('/accounts/register') ||
+          state.url.includes('/accounts/forgot-password') ||
+          state.url.includes('/accounts/reset-password') ||
+          state.url.includes('/accounts/verify-email')) {
+        observer.next(true);
+        observer.complete();
+        return;
+      }
+
       this.authService.isAuthenticated().then(isAuthenticated => {
         if (!isAuthenticated) {
           this.router.navigate(['/accounts/login'], { 
@@ -28,6 +39,7 @@ export class SessionGuard implements CanActivate {
           observer.complete();
           return;
         }
+
         const sessionInfo = this.sessionManagementService.getSessionInfo();
         if (!sessionInfo.isActive) {
           this.authService.logout();
@@ -40,8 +52,15 @@ export class SessionGuard implements CanActivate {
         }
 
         if (sessionInfo.isWarning) {
+          // Show warning but allow access
+          console.warn('Session warning: Session will expire soon');
         }
 
+        observer.next(true);
+        observer.complete();
+      }).catch(error => {
+        console.error('Session guard error:', error);
+        // On error, allow access but log the issue
         observer.next(true);
         observer.complete();
       });

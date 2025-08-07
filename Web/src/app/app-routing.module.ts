@@ -99,7 +99,14 @@ const routes: Routes = [
         m => m.UserManagementModule
       )
   },
-  { path: "", pathMatch: "full", redirectTo: "/portal" }
+  { path: "", pathMatch: "full", redirectTo: "/portal" },
+   {
+    path: "student-section",
+    loadChildren: () =>
+      import("./student-section-assignments/student-section-assignments.module").then(
+        m => m.StudentSectionAssignmentsModule
+      )
+  }
 ];
 
 @NgModule({

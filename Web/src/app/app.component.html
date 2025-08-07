@@ -1,6 +1,3 @@
-<!-- Session Warning Component -->
-<app-session-warning></app-session-warning>
-
 <!-- Auth routes (login, register, etc.) -->
 <router-outlet *ngIf="isAuthRoute"></router-outlet>
 
@@ -73,10 +70,21 @@
               <!-- <i nz-icon nzType="sliders"></i> -->
               <span> <a routerLink="/students/grade-change-request-for-approval">Grade Change Request</a></span>
             </li>
-
+            <li nz-menu-item>
+              <a routerLink="/students/special-case-manual-registration">Special Case Manual Registration</a>
+            </li>
           </ul>
         </li>
-
+        <li nz-submenu nzOpen nzTitle="Class Section" nzIcon="form">
+          <ul>
+            <li nz-menu-item>
+              <a routerLink="/student-section/student-section-assignments">Generate Section</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/student-section/section-assigned-students">View Sections</a>
+            </li>
+          </ul>
+        </li>
         <li nz-submenu nzTitle="Students" nzIcon="usergroup-add">
           <ul>
             <li nz-menu-item>
@@ -196,9 +204,9 @@
             <li nz-menu-item>
               <a routerLink="/reports/academic-term-registration-slip">Registration Slip Per Term</a>
             </li>
-               <li nz-menu-item>
+            <li nz-menu-item>
               <a routerLink="/reports/transcript-search">Student Transcript</a>
-            </li> 
+            </li>
           </ul>
         </li>
         <li nz-submenu nzTitle="Data Migration" nzIcon="form">
@@ -222,9 +230,9 @@
         <li nz-submenu nzTitle="Student Grade" nzIcon="user">
 
           <ul>
-            <li nz-menu-item>
+            <!-- <li nz-menu-item>
               <a routerLink="/students"> Grade Report</a>
-            </li>
+            </li> -->
             <li nz-menu-item>
               <a routerLink="/students/StudentGrades"> Grade Submit
               </a>
@@ -248,13 +256,13 @@
             <li nz-menu-item>
               <a routerLink="/students/manage-student-course-registration">Semester Course Registration</a>
             </li>
-            <!-- <li nz-menu-item>
-              <a routerLink="/students/register-semester-course">Registered Courses</a>
-            </li> -->
+
             <li nz-menu-item>
               <a routerLink="/students/course-add-request">Course Add and Drop</a>
             </li>
-
+            <!-- <li nz-menu-item>
+              <a routerLink="/students/register-semester-course">Registered Courses</a>
+            </li> -->
           </ul>
         </li>
         <li nz-submenu nzTitle="Profile Detail" nzIcon="user">
@@ -389,8 +397,3 @@
 <div *ngIf="isLogin && isPortalRoute" style="background: white">
   <app-portal></app-portal>
 </div>
-
-<!-- PWA Components -->
-<app-pwa-update></app-pwa-update>
-<app-pwa-install></app-pwa-install>
-<app-pwa-install></app-pwa-install>

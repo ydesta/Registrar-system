@@ -7,7 +7,7 @@ import { Component, Input, Output, EventEmitter, AfterContentInit, ContentChildr
 })
 export class AdmissionTabsComponent implements AfterContentInit {
   @Input() selectedTabIndex = 0;
-  @Input() isTabDisabled: boolean[] = [false, true, true, true, true, true, true];
+  @Input() isTabDisabled: boolean[] = [false, true, true, true, true, true, true, true];
   @Input() showSubmit = false;
   @Input() showSave = false;
   @Input() submitDisabled = false;
@@ -82,8 +82,8 @@ export class AdmissionTabsComponent implements AfterContentInit {
       this.selectedTabIndexChange.emit(this.selectedTabIndex);
     }
     // If user is reviewer and files tab is selected, move to previous tab
-    if (!this.showFilesTab && this.selectedTabIndex === 5) {
-      this.selectedTabIndex = 4;
+    if (!this.showFilesTab && this.selectedTabIndex === 6) {
+      this.selectedTabIndex = 5;
       this.selectedTabIndexChange.emit(this.selectedTabIndex);
     }
   }
@@ -96,11 +96,11 @@ export class AdmissionTabsComponent implements AfterContentInit {
     const isReviewer = this.isUserReviewer();
     
     if (isReviewer) {
-      // For reviewers: Files tab (Review Decision) is at index 5 (since Instruction tab is hidden)
-      return this.selectedTabIndex === 5;
-    } else {
-      // For others: Files tab (Agreement) is at index 6
+      // For reviewers: Files tab (Review Decision) is at index 6 (since Instruction tab is hidden)
       return this.selectedTabIndex === 6;
+    } else {
+      // For others: Files tab (Agreement) is at index 7
+      return this.selectedTabIndex === 7;
     }
   }
 

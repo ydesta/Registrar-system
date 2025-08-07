@@ -35,7 +35,7 @@ export class GeneralInformationComponent implements OnInit {
   selectedDate = null;
   id: string;
   userId: string;
-  isTabDisabled: boolean[] = [false, true, true, true, true, true, true];
+  isTabDisabled: boolean[] = [false, true, true, true, true, true, true, true];
   countNoOfContact = 0;
   countNoOfEducation = 0;
   otherForm: FormGroup;
@@ -43,6 +43,7 @@ export class GeneralInformationComponent implements OnInit {
   countSubmitionCourse = 0;
   agreementFormValid = false;
   agreementFormData: any = null;
+  paymentStatus: string = 'Not Paid';
   @ViewChild(SchoolWithStudentAgreementComponent)
   schoolAgreementComp: SchoolWithStudentAgreementComponent;
 
@@ -424,7 +425,7 @@ export class GeneralInformationComponent implements OnInit {
     return selectedDate > minDate;
   };
   nextTab() {
-    if (this.selectedTabIndex < 6) {
+    if (this.selectedTabIndex < 7) {
       this.selectedTabIndex += 1;
       this.isTabDisabled.fill(true);
       this.isTabDisabled[this.selectedTabIndex] = false;
@@ -506,6 +507,15 @@ export class GeneralInformationComponent implements OnInit {
   }
   onAgreementFormValueChange(data: any) {
     this.agreementFormData = data;
+  }
+
+  onPaymentStatusChange(status: string) {
+    this.paymentStatus = status;
+  }
+
+  onPaymentSuccessful() {
+    // Automatically navigate to the next tab after successful payment
+    this.nextTab();
   }
 
   testValidation() {

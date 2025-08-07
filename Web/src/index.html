@@ -11,6 +11,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="HiLCoE College Registration System - Manage academic programs, student registrations, and administrative tasks">
   
+  <!-- Cache Control Meta Tags -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
+  <!-- Version Meta Tag for Cache Busting -->
+  <meta name="version" content="2024-01-27-v7">
+  
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/icons/icon-32x32.png">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-32x32.png">
@@ -38,12 +46,31 @@
     script-src-attr 'self' 'unsafe-inline';
   ">
   <!-- Cache-busting meta tag to force CSP update -->
-  <meta name="csp-version" content="2024-01-27-v6">
+  <meta name="csp-version" content="2024-01-27-v7">
 </head>
 
 <body>
   <app-root></app-root>
   <noscript>Please enable JavaScript to continue using this application.</noscript>
+  
+  <!-- Cache Busting Script -->
+  <script>
+    // Force cache refresh on version change
+    const currentVersion = '2024-01-27-v7';
+    const storedVersion = localStorage.getItem('app-version');
+    
+    if (storedVersion !== currentVersion) {
+      localStorage.setItem('app-version', currentVersion);
+      // Clear any cached data
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (let name of names) {
+            caches.delete(name);
+          }
+        });
+      }
+    }
+  </script>
 </body>
 
 </html>

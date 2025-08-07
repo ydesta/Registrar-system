@@ -23,49 +23,56 @@ namespace SecureAuth.APPLICATION.Commands.User
 
         public async Task<bool> HandleAsync(DeleteUserCommand command)
         {
-            var user = await _userManager.FindByIdAsync(command.UserId);
-            if (user == null)
-                return false;
-
-            IdentityResult result;
-
-            if (command.PermanentDelete)
+            try
             {
-                result = await _userManager.DeleteAsync(user);
-                if (result.Succeeded)
+                var user = await _userManager.FindByIdAsync(command.UserId);
+                if (user == null)
+                    return false;
+
+                IdentityResult result;
+
+                if (command.PermanentDelete)
                 {
+                    // Log the activity BEFORE deleting the user to avoid FK constraint issues
                     await _activityLogService.LogUserActionAsync(
                         user.Id,
                         "UserPermanentlyDeleted",
                         "User",
                         user.Id,
                         "User permanently deleted");
+                    
+                    result = await _userManager.DeleteAsync(user);
                 }
-            }
-            else
-            {
-                // Soft delete - mark as inactive
-                user.IsActive = false;
-                result = await _userManager.UpdateAsync(user);
-                
+                else
+                {
+                    // Soft delete - mark as inactive
+                    user.IsActive = false;
+                    result = await _userManager.UpdateAsync(user);
+
+                    if (result.Succeeded)
+                    {
+                        await _activityLogService.LogUserActionAsync(
+                            user.Id,
+                            "UserSoftDeleted",
+                            "User",
+                            user.Id,
+                            "User soft deleted (marked as inactive)");
+                    }
+                }
+
                 if (result.Succeeded)
                 {
-                    await _activityLogService.LogUserActionAsync(
-                        user.Id,
-                        "UserSoftDeleted",
-                        "User",
-                        user.Id,
-                        "User soft deleted (marked as inactive)");
+                    await _unitOfWork.SaveChangesAsync();
+                    return true;
                 }
-            }
 
-            if (result.Succeeded)
+                return false;
+            }
+            catch(Exception ex)
             {
-                await _unitOfWork.SaveChangesAsync();
-                return true;
+                throw;
             }
-
-            return false;
+           
         }
     }
 } 

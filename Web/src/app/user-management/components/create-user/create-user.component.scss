@@ -1,284 +1,460 @@
-.create-user-container {
-  .header-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 24px;
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 32px;
+  padding: 24px 0;
+  border-top: 1px solid #f0f0f0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
 
-    .header-left {
-      h2 {
-        margin: 0 0 8px 0;
-        font-size: 24px;
-        font-weight: 600;
-        color: #262626;
+  button {
+    min-width: 120px;
+    height: 44px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    &[nzType="primary"] {
+      background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+      border: none;
+      
+      &:hover {
+        background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%);
       }
+    }
 
-      p {
-        margin: 0;
-        color: #8c8c8c;
+    &[nzType="default"] {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border: 1px solid #d9d9d9;
+      
+      &:hover {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e6f7ff 100%);
+        border-color: #40a9ff;
+        color: #1890ff;
+      }
+    }
+  }
+}
+
+.error-message {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.role-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0;
+
+  .role-name {
+    font-weight: 600;
+    color: #262626;
+    font-size: 14px;
+  }
+
+  .role-description {
+    font-size: 12px;
+    color: #8c8c8c;
+    line-height: 1.4;
+  }
+}
+
+// Form section headers
+.form-section-header {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e5e7eb;
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+    border-radius: 1px;
+  }
+}
+
+// Floating Label Styles
+.float-label-item {
+  margin-bottom: 20px;
+}
+
+.float-label-container {
+  position: relative;
+  display: block;
+}
+
+.float-label {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  font-size: 14px;
+  color: #8c8c8c;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  background: #ffffff;
+  padding: 0 4px;
+  z-index: 1;
+  
+  .required {
+    color: #ff4d4f;
+    font-weight: 600;
+  }
+}
+
+.float-label-container input:focus + .float-label,
+.float-label-container input.filled + .float-label,
+.float-label-container .ant-select.filled + .float-label {
+  top: -6px;
+  left: 10px;
+  font-size: 11px;
+  color: #1890ff;
+  font-weight: 600;
+  background: #ffffff;
+  padding: 0 4px;
+}
+
+.float-label-container .ant-select:focus + .float-label,
+.float-label-container .ant-select.filled + .float-label {
+  top: -6px;
+  left: 10px;
+  font-size: 11px;
+  color: #1890ff;
+  font-weight: 600;
+  background: #ffffff;
+  padding: 0 4px;
+}
+
+// Switch Styles
+.switch-item {
+  margin-bottom: 16px;
+}
+
+.switch-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #fafbfc;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #f0f9ff;
+    border-color: #40a9ff;
+  }
+}
+
+.switch-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.switch-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.switch-status {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+// Required field indicator
+.required-field::after {
+  content: '*';
+  color: #ff4d4f;
+  margin-left: 4px;
+  font-weight: 600;
+}
+
+::ng-deep {
+  .ant-modal-body {
+    padding: 24px;
+    background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
+  }
+
+  .ant-modal-header {
+    padding: 24px 32px;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 0;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+
+    .ant-modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1f2937;
+    }
+  }
+
+  .ant-form-item {
+    margin-bottom: 20px;
+
+    .ant-form-item-label {
+      padding-bottom: 6px;
+
+      label {
+        font-weight: 600;
+        color: #374151;
         font-size: 14px;
       }
     }
-  }
 
-  .form-card {
-    .form-sections {
-      .form-section {
-        margin-bottom: 32px;
+    .ant-form-item-control {
+      .ant-input,
+      .ant-input-textarea,
+      .ant-select-selector,
+      .ant-picker {
+        border-radius: 6px;
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #ffffff;
+        font-size: 14px;
+        padding: 12px 14px;
+        height: auto;
+        min-height: 40px;
 
-        h3 {
-          font-size: 18px;
-          font-weight: 600;
-          color: #262626;
-          margin: 0 0 16px 0;
-          padding-bottom: 8px;
-          border-bottom: 1px solid #f0f0f0;
+        &:hover {
+          border-color: #40a9ff;
+          box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
         }
 
-        .password-requirements {
-          background: #fafafa;
-          border: 1px solid #f0f0f0;
-          border-radius: 6px;
-          padding: 16px;
-          margin-bottom: 20px;
-
-          h4 {
-            margin: 0 0 12px 0;
-            font-size: 14px;
-            font-weight: 600;
-            color: #262626;
-          }
-
-          ul {
-            margin: 0;
-            padding-left: 20px;
-            list-style: none;
-
-            li {
-              margin-bottom: 6px;
-              font-size: 13px;
-              color: #8c8c8c;
-              position: relative;
-
-              &:before {
-                content: '✗';
-                color: #ff4d4f;
-                font-weight: bold;
-                margin-right: 8px;
-              }
-
-              &.requirement-met {
-                color: #52c41a;
-
-                &:before {
-                  content: '✓';
-                  color: #52c41a;
-                }
-              }
-
-              &:last-child {
-                margin-bottom: 0;
-              }
-            }
-          }
-        }
-
-        .password-mismatch-error {
-          margin: 12px 0;
-        }
-
-        .form-row {
-          display: flex;
-          gap: 24px;
-          margin-bottom: 16px;
-
-          .form-col {
-            flex: 1;
-            min-width: 0;
-          }
-        }
-
-        .password-strength {
-          margin-top: 8px;
-          padding: 12px;
-          background: #fafafa;
-          border-radius: 6px;
-
-          .strength-bar {
-            margin-bottom: 8px;
-          }
-
-          .strength-label {
-            font-size: 12px;
-            color: #8c8c8c;
-
-            span {
-              font-weight: 500;
-            }
-          }
-        }
-
-        .role-option {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-
-          .role-name {
-            font-weight: 500;
-            color: #262626;
-          }
-
-          .role-description {
-            font-size: 12px;
-            color: #8c8c8c;
-          }
+        &:focus,
+        &-focused {
+          border-color: #1890ff;
+          box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.15);
+          background: #ffffff;
         }
       }
-    }
 
-    .form-actions {
-      display: flex;
-      justify-content: flex-end;
-      padding-top: 24px;
-      border-top: 1px solid #f0f0f0;
-      margin-top: 32px;
+      .ant-select-selector {
+        padding: 10px 14px;
+        height: auto !important;
+        min-height: 40px;
+      }
 
-      nz-space {
-        gap: 12px;
+      .ant-input-textarea {
+        textarea {
+          min-height: 80px;
+          resize: vertical;
+          padding: 12px 14px;
+        }
       }
     }
   }
 
-  // Form validation styling
-  ::ng-deep {
-    .ant-form-item {
-      margin-bottom: 16px;
+  .ant-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+
+    .ant-card-body {
+      padding: 24px;
+    }
+  }
+
+  // Error styling
+  .error {
+    border-color: #ff4d4f !important;
+    box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.15) !important;
+    background: #fff2f0 !important;
+  }
+
+  // Select dropdown styling
+  .ant-select {
+    width: 100%;
+
+    .ant-select-selector {
+      background: #ffffff;
+    }
+  }
+
+  // Form grid spacing
+  .ant-row {
+    margin: 0 -16px;
+
+    .ant-col {
+      padding: 0 16px;
+    }
+  }
+
+  // Switch styling
+  .ant-switch {
+    margin-right: 12px;
+    background: #d9d9d9;
+    
+    &.ant-switch-checked {
+      background: #1890ff;
+    }
+  }
+
+  // Alert styling
+  .ant-alert {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  // Progress bar styling
+  .ant-progress {
+    margin-bottom: 12px;
+  }
+
+  // Input group styling
+  .ant-input-group {
+    .ant-input-group-addon {
+      background: #f8f9fa;
+      border: 2px solid #e5e7eb;
+      border-right: none;
+      border-radius: 8px 0 0 8px;
+      color: #6b7280;
     }
 
-    .ant-form-item-label {
-      label {
-        font-weight: 500;
-        color: #262626;
+    .ant-input {
+      border-left: none;
+      border-radius: 0 8px 8px 0;
+      
+      &:focus {
+        border-left: none;
       }
     }
+  }
 
-    .ant-input-error {
-      border-color: #ff4d4f;
-      box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
-    }
-
-    .ant-input-success {
-      border-color: #52c41a;
-      box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
-    }
-
-    .ant-select-error {
-      .ant-select-selector {
-        border-color: #ff4d4f;
-        box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+  // Select dropdown options
+  .ant-select-dropdown {
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border: 1px solid #e5e7eb;
+    
+    .ant-select-item {
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin: 2px 8px;
+      
+      &:hover {
+        background: #f0f9ff;
+      }
+      
+      &.ant-select-item-option-selected {
+        background: #e6f7ff;
+        color: #1890ff;
       }
     }
+  }
 
-    .ant-select-success {
-      .ant-select-selector {
-        border-color: #52c41a;
-        box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
-      }
-    }
-
-    .ant-form-item-explain-error {
-      font-size: 12px;
-      color: #ff4d4f;
-      margin-top: 4px;
-    }
-
-    .ant-switch {
-      margin-right: 8px;
-    }
-
-    .ant-alert {
-      margin-bottom: 16px;
+  // Modal styling
+  .ant-modal {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    
+    .ant-modal-content {
+      border-radius: 12px;
+      overflow: hidden;
     }
   }
 }
 
 // Responsive design
 @media (max-width: 768px) {
-  .create-user-container {
-    .header-section {
-      flex-direction: column;
-      gap: 16px;
-      align-items: stretch;
+  .modal-footer {
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px 0;
 
-      .header-right {
-        button {
-          width: 100%;
-        }
-      }
+    button {
+      width: 100%;
+      height: 48px;
+    }
+  }
+
+  ::ng-deep {
+    .ant-modal-body {
+      padding: 24px;
     }
 
-    .form-card {
-      .form-sections {
-        .form-section {
-          .form-row {
-            flex-direction: column;
-            gap: 16px;
+    .ant-card .ant-card-body {
+      padding: 24px;
+    }
 
-            .form-col {
-              width: 100%;
-            }
-          }
-
-          .password-requirements {
-            ul {
-              padding-left: 16px;
-            }
-          }
-        }
-      }
-
-      .form-actions {
-        flex-direction: column;
-        gap: 12px;
-
-        nz-space {
-          width: 100%;
-
-          button {
-            width: 100%;
-          }
-        }
+    .ant-row {
+      .ant-col {
+        margin-bottom: 20px;
       }
     }
+  }
+
+  .form-section-header {
+    font-size: 18px;
+    margin-bottom: 20px;
   }
 }
 
 @media (max-width: 480px) {
-  .create-user-container {
-    .form-card {
-      padding: 16px;
-
-      .form-sections {
-        .form-section {
-          margin-bottom: 24px;
-
-          h3 {
-            font-size: 16px;
-          }
-
-          .password-requirements {
-            padding: 12px;
-
-            h4 {
-              font-size: 13px;
-            }
-
-            ul li {
-              font-size: 12px;
-            }
-          }
-        }
-      }
+  ::ng-deep {
+    .ant-modal-body {
+      padding: 20px;
     }
+
+    .ant-card .ant-card-body {
+      padding: 20px;
+    }
+  }
+
+  .form-section-header {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+}
+
+// Animation for form elements
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ant-form-item {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+// Hover effects for interactive elements
+::ng-deep {
+  .ant-input:hover,
+  .ant-select:hover .ant-select-selector {
+    transform: translateY(-1px);
+    transition: transform 0.2s ease;
   }
 } 

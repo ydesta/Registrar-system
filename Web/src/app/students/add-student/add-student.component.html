@@ -311,11 +311,12 @@
                     <nz-form-item>
                         <nz-form-label nzRequired class="form-label">Batch</nz-form-label>
                         <nz-form-control>
-                            <nz-select nzShowSearch="true" nzAllowClear="true" formControlName="batchCode"
+                            <input nz-input formControlName="batchCode" readonly />
+                            <!-- <nz-select nzShowSearch="true" nzAllowClear="true" formControlName="batchCode"
                                 nzPlaceHolder="Select batch">
                                 <nz-option *ngFor="let item of batchs" [nzValue]="item.batchCode"
                                     [nzLabel]="item.batchCode"></nz-option>
-                            </nz-select>
+                            </nz-select> -->
                         </nz-form-control>
                     </nz-form-item>
                 </div>

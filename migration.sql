@@ -317,7 +317,21 @@ CREATE TABLE [UserTokens] (
     CONSTRAINT [FK_UserTokens_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id]) ON DELETE CASCADE
 );
 
+CREATE INDEX [IX_ActivityLogs_Timestamp] ON [ActivityLogs] ([Timestamp]);
 CREATE INDEX [IX_ActivityLogs_UserId] ON [ActivityLogs] ([UserId]);
+CREATE INDEX [IX_ActivityLogs_Action] ON [ActivityLogs] ([Action]);
+CREATE INDEX [IX_ActivityLogs_EntityType] ON [ActivityLogs] ([EntityType]);
+CREATE INDEX [IX_ActivityLogs_Status] ON [ActivityLogs] ([Status]);
+CREATE INDEX [IX_ActivityLogs_IpAddress] ON [ActivityLogs] ([IpAddress]);
+
+-- Composite indexes for common query patterns
+CREATE INDEX [IX_ActivityLogs_UserId_Timestamp] ON [ActivityLogs] ([UserId], [Timestamp]);
+CREATE INDEX [IX_ActivityLogs_Action_Timestamp] ON [ActivityLogs] ([Action], [Timestamp]);
+CREATE INDEX [IX_ActivityLogs_EntityType_Timestamp] ON [ActivityLogs] ([EntityType], [Timestamp]);
+CREATE INDEX [IX_ActivityLogs_Status_Timestamp] ON [ActivityLogs] ([Status], [Timestamp]);
+
+-- Index for date range queries
+CREATE INDEX [IX_ActivityLogs_Timestamp_Action] ON [ActivityLogs] ([Timestamp], [Action]);
 
 CREATE INDEX [IX_PasswordHistories_UserId] ON [PasswordHistories] ([UserId]);
 
@@ -348,6 +362,51 @@ CREATE INDEX [IX_UserRoles_RoleId] ON [UserRoles] ([RoleId]);
 CREATE INDEX [EmailIndex] ON [Users] ([NormalizedEmail]);
 
 CREATE UNIQUE INDEX [UserNameIndex] ON [Users] ([NormalizedUserName]) WHERE [NormalizedUserName] IS NOT NULL;
+
+-- Add performance indexes for Users table
+CREATE INDEX [IX_Users_IsActive] ON [Users] ([IsActive]);
+CREATE INDEX [IX_Users_CreatedAt] ON [Users] ([CreatedAt]);
+CREATE INDEX [IX_Users_LastLoginAt] ON [Users] ([LastLoginAt]);
+CREATE INDEX [IX_Users_FirstName] ON [Users] ([FirstName]);
+CREATE INDEX [IX_Users_LastName] ON [Users] ([LastName]);
+CREATE INDEX [IX_Users_Email] ON [Users] ([Email]);
+CREATE INDEX [IX_Users_PhoneNumber] ON [Users] ([PhoneNumber]);
+
+-- Composite index for search queries
+CREATE INDEX [IX_Users_Search] ON [Users] ([FirstName], [LastName], [Email], [PhoneNumber]);
+
+-- Add index for UserRoles to improve role filtering
+CREATE INDEX [IX_UserRoles_UserId] ON [UserRoles] ([UserId]);
+CREATE INDEX [IX_UserRoles_RoleId] ON [UserRoles] ([RoleId]);
+
+-- Add composite index for UserRoles to improve role-based queries
+CREATE INDEX [IX_UserRoles_UserId_RoleId] ON [UserRoles] ([UserId], [RoleId]);
+
+-- Add performance indexes for login-related queries
+CREATE INDEX [IX_Users_Email] ON [Users] ([Email]);
+CREATE INDEX [IX_Users_UserName] ON [Users] ([UserName]);
+CREATE INDEX [IX_Users_IsActive] ON [Users] ([IsActive]);
+CREATE INDEX [IX_Users_EmailConfirmed] ON [Users] ([EmailConfirmed]);
+CREATE INDEX [IX_Users_TwoFactorEnabled] ON [Users] ([TwoFactorEnabled]);
+CREATE INDEX [IX_Users_LockoutEnd] ON [Users] ([LockoutEnd]);
+CREATE INDEX [IX_Users_FailedLoginAttempts] ON [Users] ([FailedLoginAttempts]);
+
+-- Indexes for UserRoles table (login performance)
+CREATE INDEX [IX_UserRoles_UserId] ON [UserRoles] ([UserId]);
+CREATE INDEX [IX_UserRoles_RoleId] ON [UserRoles] ([RoleId]);
+CREATE INDEX [IX_UserRoles_UserId_RoleId] ON [UserRoles] ([UserId], [RoleId]);
+
+-- Indexes for RolePermissions table (login performance)
+CREATE INDEX [IX_RolePermissions_RoleId] ON [RolePermissions] ([RoleId]);
+CREATE INDEX [IX_RolePermissions_PermissionId] ON [RolePermissions] ([PermissionId]);
+CREATE INDEX [IX_RolePermissions_RoleId_PermissionId] ON [RolePermissions] ([RoleId], [PermissionId]);
+
+-- Indexes for Permissions table
+CREATE INDEX [IX_Permissions_Name] ON [Permissions] ([Name]);
+
+-- Indexes for Roles table
+CREATE INDEX [IX_Roles_Name] ON [Roles] ([Name]);
+CREATE INDEX [IX_Roles_NormalizedName] ON [Roles] ([NormalizedName]);
 
 INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
 VALUES (N'20250623200755_UpdateSystemEntities', N'9.0.6');

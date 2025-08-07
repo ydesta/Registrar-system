@@ -29,6 +29,17 @@ import { AdmissionTabsComponent } from './shared/admission-tabs/admission-tabs.c
 import { AddressComponent } from "./applicant-profile/address/address.component";
 import { ApplicantProfileComponent } from "./applicant-profile/applicant-profile.component";
 import { StudentsModule } from "../students/students.module";
+import { ApplicationFeeComponent } from './application-fee/application-fee.component';
+import { PaymentModalModule } from '../banks/add-student-payment/payment-modal/payment-modal.module';
+
+// NgZorro imports for application fee component
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 
 @NgModule({
   declarations: [
@@ -51,7 +62,8 @@ import { StudentsModule } from "../students/students.module";
     ApplicantReviewerDecisionComponent,
     AdmissionTabsComponent,
     ApplicantProfileComponent,
-    AddressComponent
+    AddressComponent,
+    ApplicationFeeComponent
   ],
   imports: [
     CommonModule,
@@ -59,7 +71,15 @@ import { StudentsModule } from "../students/students.module";
     ReactiveFormsModule,
     AdmissionRequestRoutingModule,
     SharedModule,
-    StudentsModule
+    StudentsModule,
+    PaymentModalModule,
+    NzCardModule,
+    NzGridModule,
+    NzButtonModule,
+    NzIconModule,
+    NzTagModule,
+    NzAlertModule,
+    NzSpinModule
   ],
   providers: [
     {

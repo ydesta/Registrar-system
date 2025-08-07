@@ -5,7 +5,7 @@
       <div class="stat-icon">
         <span nz-icon nzType="team" nzTheme="outline"></span>
       </div>
-      <div class="stat-number">{{ total }}</div>
+      <div class="stat-number">{{ totalUsers }}</div>
       <div class="stat-label">Total Users</div>
     </div>
     <div class="stat-card">
@@ -86,7 +86,7 @@
     <!-- Desktop/Tablet Table View -->
     <div class="desktop-table-view">
       <nz-table #basicTable 
-                [nzData]="paginatedUsers" 
+                [nzData]="users" 
                 nzBordered
                 [nzPageSize]="pageSize"
                 [nzPageSizeOptions]="pageSizeOption"
@@ -99,7 +99,7 @@
                 [nzShowTotal]="rangeTemplate"
                 [nzLoading]="loading"
                 [nzNoResult]="emptyTpl"
-                [nzScroll]="{ x: '1200px' }"
+                [nzScroll]="{ x: '1400px' }"
                 style="overflow-x: auto;"
                 class="mobile-table-container">
         <ng-template #rangeTemplate let-range="range" let-total>
@@ -109,18 +109,18 @@
         </ng-template>
         <thead>
           <tr>
-            <th style="min-width: 200px;">Full name</th>
-            <th style="min-width: 180px;">Email</th>
-            <th style="min-width: 120px;">Phone number</th>
-            <th style="min-width: 150px;">Roles</th>
-            <th style="min-width: 100px;">Status</th>
-            <th style="min-width: 120px;">Verification</th>
-            <th style="min-width: 150px;">Activity</th>
-            <th class="sticky-action" style="min-width: 80px;">Actions</th>
+            <th style="min-width: 280px;">Full name</th>
+            <th style="min-width: 200px;">Email</th>
+            <th style="min-width: 140px;">Phone number</th>
+            <th style="min-width: 180px;">Roles</th>
+            <th style="min-width: 120px;">Status</th>
+            <th style="min-width: 140px;">Verification</th>
+            <th style="min-width: 180px;">Activity</th>
+            <th class="sticky-action" style="min-width: 100px;">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let user of paginatedUsers; let i = index">
+          <tr *ngFor="let user of users; let i = index">
             <td>
               <div class="user-info">
                 <nz-avatar [nzSize]="40" [nzText]="user.firstName.charAt(0)"></nz-avatar>
@@ -245,7 +245,7 @@
       </div>
       
       <div class="user-cards" *ngIf="!loading; else mobileLoading">
-        <div class="user-card" *ngFor="let user of paginatedUsers">
+        <div class="user-card" *ngFor="let user of users">
           <div class="card-header">
             <div class="user-info">
               <nz-avatar [nzSize]="48" [nzText]="user.firstName.charAt(0)"></nz-avatar>
