@@ -75,8 +75,6 @@ export class WorkExperienceFormComponent implements OnInit {
     return education;
   }
 
-  //#region File upload Function
-
   handleFileInputChange(files: FileList): void {
     this.file_store = files;
     if (files.length) {
@@ -102,13 +100,38 @@ export class WorkExperienceFormComponent implements OnInit {
     }
   }
 
+  removeFile(index: number): void {
+    if (index >= 0 && index < this.file_list.length) {
+      this.file_list.splice(index, 1);
+      if (this.file_store) {
+        const newFileList = new DataTransfer();
+        for (let i = 0; i < this.file_store.length; i++) {
+          if (i !== index) {
+            newFileList.items.add(this.file_store[i]);
+          }
+        }
+        this.file_store = newFileList.files;
+      }
+      if (this.file_list.length === 0) {
+        this.applicantWorkExpForm.patchValue({
+          ActualFile: ""
+        });
+        this.workExpeFile = "";
+      } else {
+        const count = this.file_list.length > 1 ? ` (+${this.file_list.length - 1} files)` : "";
+        this.applicantWorkExpForm.patchValue({
+          ActualFile: `${this.file_list[0]}${count}`
+        });
+      }
+    }
+  }
+
   handleSubmit() {
     var fd = new FormData();
     for (let i = 0; i < this.file_store.length; i++) {
       fd.append("Files", this.file_store[i]);
     }
   }
-  //#endregion
 
   onSave(): void {
     if (this.applicantWorkExpForm.valid) {
@@ -136,9 +159,7 @@ export class WorkExperienceFormComponent implements OnInit {
                 "Education Record is deleted succesfully."
               );
             }
-            // Emit the event when data is successfully saved
             this.dataUpdated.emit();
-            // Close the modal here if needed
             this.modalRef.close();
           });
       } else {
@@ -154,9 +175,7 @@ export class WorkExperienceFormComponent implements OnInit {
                 "Education Record is update succesfully."
               );
             }
-            // Emit the event when data is successfully saved
             this.dataUpdated.emit();
-            // Close the modal here if needed
             this.modalRef.close();
           });
       }

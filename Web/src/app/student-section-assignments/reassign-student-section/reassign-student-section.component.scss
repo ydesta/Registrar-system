@@ -1,0 +1,597 @@
+.content-container {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.header-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .page-title {
+    h1 {
+      margin: 0;
+      color: #1f2937;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin: 8px 0 0 0;
+      color: #6b7280;
+      font-size: 14px;
+    }
+  }
+
+  .header-actions {
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border: 1px solid #e8e8e8;
+      color: #374151;
+      font-weight: 500;
+
+      &:hover {
+        background: linear-gradient(135deg, #e9ecef, #dee2e6);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      i {
+        color: #1890ff;
+      }
+    }
+  }
+}
+
+.search-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+
+  ::ng-deep .ant-collapse {
+    border: none;
+
+    .ant-collapse-item {
+      border: none;
+
+      .ant-collapse-header {
+        background: linear-gradient(135deg, #fafafa, #f5f5f5);
+        padding: 16px 24px;
+        font-weight: 500;
+        color: #1f2937;
+        border-radius: 8px;
+
+        .anticon {
+          margin-right: 8px;
+          color: #1890ff;
+        }
+      }
+
+      .ant-collapse-content {
+        border: none;
+
+        .ant-collapse-content-box {
+          padding: 24px;
+        }
+      }
+    }
+  }
+}
+
+.transfer-section {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  width: 100%;
+  margin-bottom: 24px;
+
+  .transfer-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding: 24px 24px 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    background: linear-gradient(135deg, #fafafa, #f5f5f5);
+
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 14px;
+    }
+  }
+
+  .manual-transfer-controls {
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 1px solid #f0f0f0;
+
+    .transfer-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 16px;
+
+      .transfer-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #1890ff, #096dd9);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+
+        &:hover:not(:disabled) {
+          background: linear-gradient(135deg, #40a9ff, #1890ff);
+          transform: translateY(-1px);
+          box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+        }
+
+        &:disabled {
+          background: linear-gradient(135deg, #d9d9d9, #bfbfbf);
+          box-shadow: none;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        i {
+          font-size: 16px;
+        }
+      }
+    }
+
+    .transfer-info {
+      text-align: center;
+
+      .info-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: #6b7280;
+        font-size: 13px;
+
+        i {
+          color: #1890ff;
+        }
+      }
+    }
+  }
+
+  ::ng-deep .ant-transfer {
+    padding: 0 24px 24px 24px;
+
+    .ant-transfer-list {
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      width: 45%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+      .ant-transfer-list-header {
+        background: linear-gradient(135deg, #fafafa, #f5f5f5);
+        border-bottom: 2px solid #f0f0f0;
+        padding: 16px;
+        font-weight: 600;
+        color: #262626;
+        border-radius: 8px 8px 0 0;
+      }
+
+      .ant-transfer-list-content {
+        .ant-table {
+          border-radius: 0 0 8px 8px;
+          overflow: hidden;
+
+          .ant-table-thead > tr > th {
+            background: linear-gradient(135deg, #fafafa, #f5f5f5);
+            font-weight: 600;
+            color: #262626;
+            padding: 16px;
+            border-bottom: 2px solid #f0f0f0;
+            transition: all 0.3s;
+
+            &:hover {
+              background: linear-gradient(135deg, #f0f0f0, #e6e6e6);
+            }
+          }
+
+          .ant-table-tbody > tr > td {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s;
+          }
+
+          .ant-table-tbody > tr:hover > td {
+            background: #f5f5f5;
+          }
+
+          .ant-table-tbody > tr:nth-child(even) > td {
+            background: #fafafa;
+          }
+
+          .ant-table-tbody > tr:nth-child(even):hover > td {
+            background: #f0f0f0;
+          }
+        }
+      }
+    }
+
+    .ant-transfer-operation {
+      .ant-btn {
+        margin: 8px 0;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #1890ff, #096dd9);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+        transition: all 0.3s ease;
+
+        &:hover {
+          background: linear-gradient(135deg, #40a9ff, #1890ff);
+          transform: translateY(-1px);
+          box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+        }
+
+        &:active {
+          transform: translateY(0);
+          box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+        }
+      }
+    }
+
+    // Section info styling
+    .section-info {
+      background: linear-gradient(135deg, #e6f7ff, #bae7ff);
+      border-bottom: 1px solid #91d5ff;
+      padding: 12px 16px;
+      border-radius: 8px 8px 0 0;
+
+      .section-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #1890ff;
+        font-weight: 600;
+        font-size: 14px;
+
+        i {
+          font-size: 16px;
+        }
+
+        .section-name {
+          color: #0050b3;
+          font-weight: 700;
+        }
+      }
+    }
+  }
+
+  .transfer-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    padding: 24px;
+    border-top: 1px solid #f0f0f0;
+    background: linear-gradient(135deg, #fafafa, #f5f5f5);
+
+    .control-switches {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .ant-switch {
+        margin-right: 8px;
+      }
+
+      .switch-label {
+        font-size: 14px;
+        color: #595959;
+        margin-right: 16px;
+        font-weight: 500;
+      }
+    }
+
+    .student-counts {
+      display: flex;
+      gap: 24px;
+
+      .count-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 12px;
+        border: 1px solid #e8e8e8;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .count-label {
+          font-size: 12px;
+          color: #6c757d;
+          margin-bottom: 4px;
+          font-weight: 500;
+        }
+
+        .count-value {
+          font-size: 18px;
+          font-weight: 600;
+          color: #1890ff;
+        }
+      }
+    }
+
+    .modification-actions {
+      padding: 24px 24px 32px 24px;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border-top: 1px solid #f0f0f0;
+      margin-top: 16px;
+
+      .button-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+      }
+    }
+  }
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 48px 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  ::ng-deep .ant-empty {
+    .ant-empty-description {
+      color: #8c8c8c;
+    }
+  }
+}
+
+// Form styling
+::ng-deep .ant-form-item {
+  margin-bottom: 16px;
+  
+  .ant-form-item-control {
+    width: 100%;
+  }
+  
+  .ant-form-item-label {
+    padding-bottom: 8px;
+    
+    label {
+      font-weight: 500;
+      color: #374151;
+      font-size: 14px;
+    }
+  }
+  
+  nz-input,
+  nz-select {
+    width: 100%;
+    
+    .ant-input,
+    .ant-select-selector {
+      width: 100%;
+      min-width: 200px;
+      height: 44px;
+      padding: 10px 16px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1.5px solid #e8e8e8;
+      transition: all 0.3s ease;
+      background: #fafafa;
+      
+      &:hover {
+        border-color: #40a9ff;
+        background: #fff;
+      }
+      
+      &:focus {
+        border-color: #1890ff;
+        background: #fff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+      }
+      
+      &::placeholder {
+        color: #bfbfbf;
+      }
+    }
+  }
+  
+  // Specific styling for select components
+  nz-select {
+    .ant-select-selector {
+      height: 44px !important;
+      padding: 0 16px !important;
+      border-radius: 8px !important;
+      border: 1.5px solid #e8e8e8 !important;
+      background: #fafafa !important;
+      
+      .ant-select-selection-search-input {
+        height: 42px !important;
+      }
+      
+      .ant-select-selection-item {
+        line-height: 42px !important;
+        color: #262626;
+      }
+    }
+    
+    &:hover .ant-select-selector {
+      border-color: #40a9ff !important;
+      background: #fff !important;
+    }
+    
+    &.ant-select-focused .ant-select-selector {
+      border-color: #1890ff !important;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+      background: #fff !important;
+    }
+    
+    // Green styling when has value
+    &.ant-select-has-value .ant-select-selector {
+      border-color: #52c41a !important;
+      background: #f6ffed !important;
+      
+      &:hover {
+        border-color: #73d13d !important;
+        background: #f6ffed !important;
+      }
+      
+      &:focus {
+        border-color: #52c41a !important;
+        box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2) !important;
+        background: #f6ffed !important;
+      }
+    }
+  }
+}
+
+// Button styling
+::ng-deep .ant-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  height: 44px;
+
+  &.ant-btn-primary {
+    background: linear-gradient(135deg, #1890ff, #096dd9);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+
+    &:hover {
+      background: linear-gradient(135deg, #40a9ff, #1890ff);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+    }
+
+    &:disabled {
+      background: linear-gradient(135deg, #d9d9d9, #bfbfbf);
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+
+  &.ant-btn-default {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: 1px solid #e8e8e8;
+    color: #374151;
+
+    &:hover {
+      background: linear-gradient(135deg, #e9ecef, #dee2e6);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  i {
+    font-size: 16px;
+  }
+}
+
+// Tag styling
+::ng-deep nz-tag {
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .content-container {
+    padding: 16px;
+  }
+
+  .header-section {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+
+    .page-title {
+      h1 {
+        font-size: 20px;
+      }
+    }
+  }
+
+  .transfer-section {
+    .transfer-controls {
+      flex-direction: column;
+      gap: 16px;
+
+      .control-switches {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .student-counts {
+        justify-content: center;
+      }
+    }
+
+    ::ng-deep .ant-transfer {
+      .ant-transfer-list {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+
+      .ant-transfer-operation {
+        display: flex;
+        justify-content: center;
+        margin: 16px 0;
+
+        .ant-btn {
+          margin: 0 4px;
+        }
+      }
+    }
+  }
+}

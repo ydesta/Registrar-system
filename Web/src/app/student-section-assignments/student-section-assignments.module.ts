@@ -19,11 +19,15 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzCollapseModule } from 'ng-zorro-antd/collapse';
+import { ReassignStudentSectionComponent } from './reassign-student-section/reassign-student-section.component';
+import { NzTransferModule } from 'ng-zorro-antd/transfer';
+import { NzSwitchModule } from 'ng-zorro-antd/switch';
 
 @NgModule({
   declarations: [
     StudentSectionAssignmentsComponent,
-    SectionAssignedStudentsComponent
+    SectionAssignedStudentsComponent,
+    ReassignStudentSectionComponent
   ],
   imports: [
     CommonModule,
@@ -42,7 +46,9 @@ import { NzCollapseModule } from 'ng-zorro-antd/collapse';
     NzEmptyModule,
     NzCheckboxModule,
     NzInputNumberModule,
-    NzCollapseModule
+    NzCollapseModule,
+    NzTransferModule,
+    NzSwitchModule,
   ],
   exports: [
     StudentSectionAssignmentsComponent,

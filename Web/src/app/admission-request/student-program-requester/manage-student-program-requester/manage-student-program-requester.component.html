@@ -54,7 +54,8 @@
                                 nzType="link"
                                 (click)="openDecisionModal(data)"
                                 class="document-button"
-                                [disabled]="!(data.studentStatus === 1 && data.approvalStatus === 1)">
+                                [disabled]="!(data.studentStatus === 1 && data.approvalStatus === 1)"
+                                *ngIf="isUserReviewer">
                             <span nz-icon nzType="audit" nzTheme="outline"></span>
                             Review
                         </button>

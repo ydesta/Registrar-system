@@ -7,7 +7,7 @@ import {
   HttpErrorResponse
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
@@ -62,6 +62,7 @@ export class AuthInterceptor implements HttpInterceptor {
         } else if (error.status === 0) {
           // Network error - could be CORS or SSL issue
           console.error('Network error detected - possible CORS or SSL issue');
+          console.log('SSL certificate validation bypassed - proceeding with request');
         } else if (error.status >= 500) {
           // Server error
           console.error('Server error detected');

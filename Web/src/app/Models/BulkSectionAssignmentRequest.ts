@@ -7,3 +7,14 @@ export interface BulkSectionAssignmentRequest {
   numberOfSections?: number;
   courseAssignments: CourseSectionAssignment[];
 } 
+export interface StudentSectionTransferRequest {
+  studentIds: string[];
+  sectionId: number;
+  academicTerm: number;
+  year: number;
+  batchCode: string;
+}
+export interface SectionTransferRequestWrapper {
+  sourceSection: StudentSectionTransferRequest;
+  targetSection: StudentSectionTransferRequest;
+}

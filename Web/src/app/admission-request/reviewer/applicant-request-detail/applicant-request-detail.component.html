@@ -2,9 +2,10 @@
     [(selectedTabIndex)]="selectedTabIndex"
     [isTabDisabled]="isTabDisabled"
     [flexibleNavigation]="true"
+    [tabOrder]="'reviewer'"
+    [academicProgramValid]="isAcademicProgramValid"
     (nextTabClicked)="nextTab()"
-    (previousTabClicked)="previousTab()"
-    [nextDisabled]="isNextDisabled()">
+    (previousTabClicked)="previousTab()">
 
     <div tabContent="generalInfo">
         <div class="professional-header">
@@ -439,11 +440,11 @@
         </nz-table>
     </div>
 
-    <div tabContent="applicationFee">
+    <div tabContent="applicationFeeReviewer">
         <app-application-fee [applicantId]="id"></app-application-fee>
     </div>
 
-    <div tabContent="academicProgram">
+    <div tabContent="academicProgramReviewer">
         <div class="professional-header">
             <h1 class="page-title">Academic Program Applications</h1>
             <p class="page-subtitle">Review applicant's academic program requests and status</p>
@@ -464,6 +465,60 @@
             </thead>
             <tbody>
                 <tr *ngFor="let data of basicsTable.data; let i = index" class="table-row">
+                    <td class="table-cell">{{ getAcademicProgramDescription(data.acadamicProgrammeId) }}</td>
+                    <td class="table-cell">{{ getDivisionStatusDescription(data.division) }}</td>
+                    <td class="table-cell">
+                        <nz-tag [nzColor]="getStatusColor(data.approvalStatus)">
+                            {{ getReguestStatus(data.approvalStatus) }}
+                        </nz-tag>
+                    </td>
+                    <td class="table-cell">
+                        <nz-tag [nzColor]="getStatusColor(data.studentStatus)">
+                            {{ getStudentStatus(data.studentStatus) }}
+                        </nz-tag>
+                    </td>
+                    <td class="table-cell">{{ data.createdDate | date:'dd-MM-yyyy'}}</td>
+                    <td class="table-cell">
+                        <button nz-button 
+                                nzType="link"
+                                (click)="openDecisionModal(data)"
+                                class="document-button"
+                                [disabled]="!(data.studentStatus === 1 && data.approvalStatus === 1)">
+                            <span nz-icon nzType="audit" nzTheme="outline"></span>
+                            Make Decision
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </nz-table>
+    </div>
+
+    <!-- Also include the default tab content selectors for compatibility -->
+    <div tabContent="applicationFee" style="display: none;">
+        <app-application-fee [applicantId]="id"></app-application-fee>
+    </div>
+
+    <div tabContent="academicProgram" style="display: none;">
+        <div class="professional-header">
+            <h1 class="page-title">Academic Program Applications</h1>
+            <p class="page-subtitle">Review applicant's academic program requests and status</p>
+        </div>
+
+        <nz-table #basicsTable2 [nzData]="applicationProgramRequestList" 
+                  nzBordered 
+                  class="professional-table">
+            <thead>
+                <tr>
+                    <th class="table-header">Program</th>
+                    <th class="table-header">Division</th>
+                    <th class="table-header">Request Status</th>
+                    <th class="table-header">Applicant Status</th>
+                    <th class="table-header">Application Date</th>
+                    <th class="table-header">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let data of basicsTable2.data; let i = index" class="table-row">
                     <td class="table-cell">{{ getAcademicProgramDescription(data.acadamicProgrammeId) }}</td>
                     <td class="table-cell">{{ getDivisionStatusDescription(data.division) }}</td>
                     <td class="table-cell">

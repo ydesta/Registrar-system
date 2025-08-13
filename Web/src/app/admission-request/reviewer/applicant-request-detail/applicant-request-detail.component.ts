@@ -3,7 +3,15 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Router, ActivatedRoute } from "@angular/router";
 import { GeneralInformationService } from "../../services/general-information.service";
 import { SharingDataService } from "../../services/sharing-data.service";
-import { alphabetsOnlyValidator, alphabetsWithSpecialCharsValidator, phoneValidator, emailValidator, ACADEMIC_STUDENT_STATUS_DESCRIPTIONS, Division_Status, REQUEST_STATUS_DESCRIPTIONS } from "src/app/common/constant";
+import {
+  alphabetsOnlyValidator,
+  alphabetsWithSpecialCharsValidator,
+  phoneValidator,
+  emailValidator,
+  ACADEMIC_STUDENT_STATUS_DESCRIPTIONS,
+  Division_Status,
+  REQUEST_STATUS_DESCRIPTIONS
+} from "src/app/common/constant";
 import { environment } from "src/environments/environment";
 import { ApplicantContactPersonService } from "../../services/applicant-contact-person.service";
 import { ApplicantContactPersonRequest } from "../../model/applicant-contact-person-request.model";
@@ -28,17 +36,15 @@ import { ApplicantReviewerDecisionComponent } from "../applicant-reviewer-decisi
   styleUrls: ["./applicant-request-detail.component.scss"]
 })
 export class ApplicantRequestDetailComponent implements OnInit {
-  /**
- *
- */
-  selectedTabIndex = 0;
+
+  selectedTabIndex = 1;
   form: FormGroup;
   activeTab = 1;
   formData = new FormData();
   profilePicture = "";
   id: string;
   userId: string;
-  isTabDisabled: boolean[] = [false, true, true, true, true, true, true, true];
+  isTabDisabled: boolean[] = [false, false, false, false, false, false, false, false]; // 8 tabs but only 6 visible for reviewers
   otherForm: FormGroup;
   contactPersonLists: ApplicantContactPersonRequest[] = [];
   educationLists: ApplicantEducationBackgroundRequest[] = [];
@@ -64,11 +70,10 @@ export class ApplicantRequestDetailComponent implements OnInit {
     this.userId = localStorage.getItem('userId');
     this.checkUserRole();
     this.cretaeGeneralInformationForm();
-    
-    // Use take(1) to prevent multiple subscriptions and only get the initial route parameters
+
     this.route.queryParams.pipe(take(1)).subscribe(p => {
       this.id = p["id"];
-      if(this.id != undefined && this.id !== null && this.id !== ''){
+      if (this.id != undefined && this.id !== null && this.id !== '') {
         this.getApplicantById(this.id);
         this.getApplicantContactPersonByApplicantId(this.id);
         this.getApplicantEducationByApplicantId(this.id);
@@ -76,18 +81,14 @@ export class ApplicantRequestDetailComponent implements OnInit {
         this.getApplicantacadamicPrgramtId(this.id);
       }
     });
-    
+
     this.createAcademicProgramRequest();
   }
 
-  /**
-   * Check if the current user is a reviewer
-   */
+
   private checkUserRole(): void {
     const role = localStorage.getItem('role');
     const userType = localStorage.getItem('userType');
-    
-    // Check if role contains "Reviewer"
     if (role) {
       try {
         const roles = JSON.parse(role);
@@ -105,9 +106,10 @@ export class ApplicantRequestDetailComponent implements OnInit {
     }
 
     if (this.isUserReviewer) {
-      this.selectedTabIndex = 0;
-      this.isTabDisabled = [false, false, false, false, false, false, false, false];
+      this.selectedTabIndex = 1;
+      this.isTabDisabled = [true, false, false, false, false, false, false, true];
     } else {
+      this.selectedTabIndex = 1;
       this.isTabDisabled = [false, false, false, false, false, false, false, false];
     }
   }
@@ -116,65 +118,65 @@ export class ApplicantRequestDetailComponent implements OnInit {
     this.getAcademicProgramList();
     this.getListOfDivisionStatus();
   }
- //#region form Intialization
- cretaeGeneralInformationForm() {
-  this.form = this.fb.group({
-    createdBy: ["-"],
-    lastModifiedBy: ["-"],
-    acadamicProgrammeCode: [""],
-    applicantID: [""],
-    firstName: ["", [Validators.required, alphabetsOnlyValidator()]],
-    fatherName: ["", Validators.required],
-    grandFatherName: ["", [Validators.required, alphabetsOnlyValidator()]],
-    firstNameInAmh: ["", [Validators.required]],
-    fatherNameInAmh: ["", [Validators.required]],
-    grandFatherNameInAmh: ["", [Validators.required]],
-    sirName: ["", [alphabetsOnlyValidator()]],
-    motherName: [
-      "",
-      [Validators.required, alphabetsWithSpecialCharsValidator()]
-    ],
-    gender: ["", [Validators.required]],
-    birthDate: [null, [Validators.required]],
-    birthPlace: [
-      "",
-      [Validators.required, alphabetsWithSpecialCharsValidator()]
-    ],
-    nationality: ["", [Validators.required, alphabetsOnlyValidator()]],
-    //vurtual
-    telephonOffice: ["", phoneValidator()],
-    telephonHome: ["", [phoneValidator()]],
-    mobile: ["", [Validators.required, phoneValidator()]],
-    postalAddress: [""],
-    emailAddress: ["", [Validators.required, emailValidator()]],
-    region: ["", [alphabetsOnlyValidator()]],
-    city: [""],
-    woreda: [""],
-    kebele: [""],
-    areaType: ["", []],
-    nationalExaminationId: ["", [Validators.required]],
-    tin: ["", []],
-    nationalId: ["", [Validators.required]],
-    selfConfirmedApplicantInformation: false,
-    dateOfApply: null,
-    sourceOfFinance: [""],
-    howDidYouComeKnow: [""],
-    division: [""],
-    ApplicantUserId: [localStorage.getItem("userId")],
-    ActualFile: ["", []]
-  });
-}
+  //#region form Intialization
+  cretaeGeneralInformationForm() {
+    this.form = this.fb.group({
+      createdBy: ["-"],
+      lastModifiedBy: ["-"],
+      acadamicProgrammeCode: [""],
+      applicantID: [""],
+      firstName: ["", [Validators.required, alphabetsOnlyValidator()]],
+      fatherName: ["", Validators.required],
+      grandFatherName: ["", [Validators.required, alphabetsOnlyValidator()]],
+      firstNameInAmh: ["", [Validators.required]],
+      fatherNameInAmh: ["", [Validators.required]],
+      grandFatherNameInAmh: ["", [Validators.required]],
+      sirName: ["", [alphabetsOnlyValidator()]],
+      motherName: [
+        "",
+        [Validators.required, alphabetsWithSpecialCharsValidator()]
+      ],
+      gender: ["", [Validators.required]],
+      birthDate: [null, [Validators.required]],
+      birthPlace: [
+        "",
+        [Validators.required, alphabetsWithSpecialCharsValidator()]
+      ],
+      nationality: ["", [Validators.required, alphabetsOnlyValidator()]],
+      //vurtual
+      telephonOffice: ["", phoneValidator()],
+      telephonHome: ["", [phoneValidator()]],
+      mobile: ["", [Validators.required, phoneValidator()]],
+      postalAddress: [""],
+      emailAddress: ["", [Validators.required, emailValidator()]],
+      region: ["", [alphabetsOnlyValidator()]],
+      city: [""],
+      woreda: [""],
+      kebele: [""],
+      areaType: ["", []],
+      nationalExaminationId: ["", [Validators.required]],
+      tin: ["", []],
+      nationalId: ["", [Validators.required]],
+      selfConfirmedApplicantInformation: false,
+      dateOfApply: null,
+      sourceOfFinance: [""],
+      howDidYouComeKnow: [""],
+      division: [""],
+      ApplicantUserId: [localStorage.getItem("userId")],
+      ActualFile: ["", []]
+    });
+  }
 
-//#endregion
-createAcademicProgramRequest() {
-  this.otherForm = this.fb.group({
-    sourceOfFinance: ["", [Validators.required]],
-    howDidYouComeKnow: ["", [Validators.required]],
-    selfConfirmedApplicantInformation: [null, [Validators.required]],
-    dateOfApply:["",[]]
-  });
-}
-//#endregion
+  //#endregion
+  createAcademicProgramRequest() {
+    this.otherForm = this.fb.group({
+      sourceOfFinance: ["", [Validators.required]],
+      howDidYouComeKnow: ["", [Validators.required]],
+      selfConfirmedApplicantInformation: [null, [Validators.required]],
+      dateOfApply: ["", []]
+    });
+  }
+  //#endregion
 
   //#region get data from the api
   getApplicantById(id: string) {
@@ -213,7 +215,7 @@ createAcademicProgramRequest() {
     this._academicProgramRequestService
       .getApplicantacadamicPrgramtId(id)
       .subscribe(res => {
-        this.applicationProgramRequestList = res.data;        
+        this.applicationProgramRequestList = res.data;
       });
   }
   //#endregion
@@ -238,9 +240,7 @@ createAcademicProgramRequest() {
     }
   }
 
-  /**
-   * Get status color for professional tag display
-   */
+
   getStatusColor(status: any): string {
     switch (status) {
       case 0:
@@ -280,18 +280,14 @@ createAcademicProgramRequest() {
     const program = this.divisionStatusist.find(item => item.Id == Id);
     return program ? program.Description : "";
   }
-   //#region Next previous button method
-   nextTab() {
-    // For flexible navigation, allow moving to next tab if not at the last tab
-    const maxTabIndex = this.isUserReviewer ? 6 : 7; // Last tab index (updated for new tab order)
-    
+  nextTab() {
+    const maxTabIndex = this.isUserReviewer ? 6 : 5;
     if (this.selectedTabIndex < maxTabIndex) {
       this.selectedTabIndex += 1;
     }
   }
 
   previousTab() {
-    // For flexible navigation, allow moving to previous tab if not at the first tab
     if (this.selectedTabIndex > 0) {
       this.selectedTabIndex -= 1;
     }
@@ -299,7 +295,6 @@ createAcademicProgramRequest() {
   onSelectChange(event: NzTabChangeEvent): void {
     this.activeTab = event.index + 1;
   }
-  //#endregion
   viewFile(data: any) {
     this._modal.create({
       nzTitle: "Work Experience",
@@ -314,9 +309,7 @@ createAcademicProgramRequest() {
   }
 
   openDecisionModal(academicProgramRequest?: AcademicProgramRequest): void {
-    // If no specific request is provided, use the first one or create a default
     const request = academicProgramRequest || this.applicationProgramRequestList[0];
-    
     if (!request) {
       this._customNotificationService.notification(
         "warning",
@@ -338,10 +331,9 @@ createAcademicProgramRequest() {
       nzMaskClosable: false,
       nzFooter: null
     });
-    
+
     modal.afterClose.subscribe((result) => {
       if (result) {
-        // Refresh the data after decision is submitted
         this.getApplicantacadamicPrgramtId(this.id);
         this._customNotificationService.notification(
           "success",
@@ -352,8 +344,8 @@ createAcademicProgramRequest() {
     });
   }
 
-  isNextDisabled(): boolean {
-    // For reviewers, disable Next on the Academic Program Request tab (index 6)
-    return this.isUserReviewer && this.selectedTabIndex === 6;
+
+  get isAcademicProgramValid(): boolean {
+    return false;
   }
 }

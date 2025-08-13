@@ -12,9 +12,12 @@ export class AdmissionTabsComponent implements AfterContentInit {
   @Input() showSave = false;
   @Input() submitDisabled = false;
   @Input() saveDisabled = false;
+  @Input() saveLoading = false;
   @Input() isLastTab = false;
   @Input() nextDisabled = false;
   @Input() flexibleNavigation = false;
+  @Input() tabOrder: 'default' | 'reviewer' = 'default'; // New input for tab order configuration
+  @Input() academicProgramValid: boolean = false; // New input for Academic Program validation
 
   @Output() selectedTabIndexChange = new EventEmitter<number>();
   @Output() nextTabClicked = new EventEmitter<void>();
@@ -82,8 +85,10 @@ export class AdmissionTabsComponent implements AfterContentInit {
       this.selectedTabIndexChange.emit(this.selectedTabIndex);
     }
     // If user is reviewer and files tab is selected, move to previous tab
-    if (!this.showFilesTab && this.selectedTabIndex === 6) {
-      this.selectedTabIndex = 5;
+    const filesTabIndex = this.tabOrder === 'reviewer' ? 7 : 7; // Both orders have files at index 7
+    if (!this.showFilesTab && this.selectedTabIndex === filesTabIndex) {
+      const previousTabIndex = this.tabOrder === 'reviewer' ? 6 : 6; // Both orders have previous tab at index 6
+      this.selectedTabIndex = previousTabIndex;
       this.selectedTabIndexChange.emit(this.selectedTabIndex);
     }
   }
@@ -95,13 +100,37 @@ export class AdmissionTabsComponent implements AfterContentInit {
   public isLastTabForCurrentUser(): boolean {
     const isReviewer = this.isUserReviewer();
     
-    if (isReviewer) {
-      // For reviewers: Files tab (Review Decision) is at index 6 (since Instruction tab is hidden)
-      return this.selectedTabIndex === 6;
-    } else {
-      // For others: Files tab (Agreement) is at index 7
-      return this.selectedTabIndex === 7;
+    // Both tab orders have files tab at index 7
+    return this.selectedTabIndex === 7;
+  }
+
+  /**
+   * Check if the Next button should be disabled based on current tab and validation
+   * @returns boolean indicating if Next button should be disabled
+   */
+  public isNextButtonDisabled(): boolean {
+    // For ApplicationRequestDetail (reviewer tab order) with flexible navigation: Always allow navigation
+    if (this.tabOrder === 'reviewer' && this.flexibleNavigation) {
+      return false; // Always enabled for flexible navigation
     }
+
+    // If nextDisabled is explicitly set, respect it
+    if (this.nextDisabled) {
+      return true;
+    }
+
+    // For General Information (default tab order): Check Academic Program validation on Academic Program tab
+    if (this.tabOrder === 'default' && this.selectedTabIndex === 5) {
+      return !this.academicProgramValid; // Disable if not valid
+    }
+
+    // For ApplicationRequestDetail (reviewer tab order): Check Academic Program validation on Academic Program tab (index 6)
+    if (this.tabOrder === 'reviewer' && this.selectedTabIndex === 6) {
+      return !this.academicProgramValid; // Disable if not valid
+    }
+
+    // For other cases, use the default nextDisabled behavior
+    return false;
   }
 
   onTabIndexChange(index: number) {

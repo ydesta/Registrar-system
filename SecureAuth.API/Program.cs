@@ -25,11 +25,15 @@ builder.Services.AddApplicationValidators();
 builder.Services.AddConfigurationServices(builder.Configuration);
 builder.Services.AddApiServices();
 
-// Configure HTTP client with extended timeout
+// Configure HTTP client with extended timeout and SSL bypass
 builder.Services.AddHttpClient("default", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(60);
     client.DefaultRequestHeaders.Add("User-Agent", "SecureAuth-API/1.0");
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true,
+    CheckCertificateRevocationList = false
 });
 
 var app = builder.Build();

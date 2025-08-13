@@ -47,7 +47,7 @@ export class ContactPersonFormComponent implements OnInit {
       lastModifiedBy: ["-"],
       applicantID: [""],
       fullName: ["", [Validators.required, alphabetsWithSpecialCharsValidator]],
-      telephoneHome: ["", [Validators.required, phoneValidator()]],
+      telephoneHome: ["", [phoneValidator()]],
       telephoneOffice: ["", [phoneValidator()]],
       relation: ["", Validators.required]
     });

@@ -148,17 +148,27 @@ export class EducationFormComponent implements OnInit {
         }
         this.educationBackgroundService
           .createEducation(this.formData)
-          .subscribe(res => {
-            if (res) {
+          .subscribe({
+            next: (res) => {
+              if (res) {
+                this._customNotificationService.notification(
+                  "success",
+                  "Success",
+                  "Applicant Education is saved successfully."
+                );
+                // Emit the event when data is successfully saved
+                this.dataUpdated.emit();
+                // Close the modal here if needed
+                this.modalRef.close();
+              }
+            },
+            error: (error) => {
+              console.error('Error creating education:', error);
               this._customNotificationService.notification(
-                "success",
-                "Success",
-                "Applicant Education  is save succesfully."
+                "error",
+                "Error",
+                "Failed to save education record. Please try again."
               );
-              // Emit the event when data is successfully saved
-              this.dataUpdated.emit();
-              // Close the modal here if needed
-              this.modalRef.close();
             }
           });
       } else {
@@ -166,21 +176,37 @@ export class EducationFormComponent implements OnInit {
         postData.applicantID = this.educationBackground.applicantID;
         this.educationBackgroundService
           .update(this.educationId, postData)
-          .subscribe(res => {
-            if (res) {
+          .subscribe({
+            next: (res) => {
+              if (res) {
+                this._customNotificationService.notification(
+                  "success",
+                  "Success",
+                  "Applicant Education is updated successfully."
+                );
+                // Emit the event when data is successfully saved
+                this.dataUpdated.emit();
+                // Close the modal here if needed
+                this.modalRef.close();
+              }
+            },
+            error: (error) => {
+              console.error('Error updating education:', error);
               this._customNotificationService.notification(
-                "success",
-                "Success",
-                "Applicant Education  is update succesfully."
+                "error",
+                "Error",
+                "Failed to update education record. Please try again."
               );
-              // Emit the event when data is successfully saved
-              this.dataUpdated.emit();
-              // Close the modal here if needed
-              this.modalRef.close();
             }
           });
       }
     } else {
+      // Form is invalid, show validation errors
+      this._customNotificationService.notification(
+        "warning",
+        "Validation Error",
+        "Please fill in all required fields correctly."
+      );
     }
   }
 }

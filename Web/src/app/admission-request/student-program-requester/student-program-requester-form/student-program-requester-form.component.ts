@@ -15,9 +15,7 @@ import { Division_Status } from "src/app/common/constant";
   styleUrls: ["./student-program-requester-form.component.scss"]
 })
 export class StudentProgramRequesterFormComponent implements OnInit {
-  /**
-   *
-   */
+ 
   @Input() applicantId: string;
   @Output() dataUpdated = new EventEmitter<void>();
   @Input() studentProgramRequester: AcademicProgramRequest;
@@ -72,56 +70,99 @@ export class StudentProgramRequesterFormComponent implements OnInit {
   getAcademicProgramList() {
     this._academicProgramRequestService
       .getAacadamicPrgramtList()
-      .subscribe(res => {
-        this.acadamicProgrammes = res.data;
-      });
-  }
-  onSubmit() {
-    const postData = this.getAcademicProgramRequest();
-    if (this.id == undefined) {
-      this._academicProgramRequestService.create(postData).subscribe(res => {
-        if (res != null) {
+      .subscribe({
+        next: (res) => {
+          if (res && res.data) {
+            this.acadamicProgrammes = res.data;
+          } else {
+            this.acadamicProgrammes = [];
+          }
+        },
+        error: (error) => {
+          console.error('Error loading academic programs:', error);
           this._customNotificationService.notification(
-            "success",
-            "Success",
-            "Academic Program Request  is save succesfully."
+            "error",
+            "Error",
+            "Failed to load academic programs. Please try again."
           );
-          // Emit the event when data is successfully saved
-          this.dataUpdated.emit();
-          // Close the modal here if needed
-          this.modalRef.close();
-        } else {
-          this._customNotificationService.notification(
-            "warn",
-            "Warn",
-            "Academic Program Request does not depulicate."
-          );
+          this.acadamicProgrammes = [];
         }
       });
-    } else {
-      postData.id = this.id;
-      postData.applicantId = this.studentProgramRequester.applicantId;
-      this._academicProgramRequestService
-        .update(this.id, postData)
-        .subscribe(res => {
-          if (res != null) {
+  }
+
+  onCancel() {
+    this.modalRef.close();
+  }
+
+  onSubmit() {
+    if (this.academicProgramRequestForm.valid) {
+      const postData = this.getAcademicProgramRequest();
+      if (this.id == undefined) {
+        this._academicProgramRequestService.create(postData).subscribe({
+          next: (res) => {
+            if (res != null) {
+              this._customNotificationService.notification(
+                "success",
+                "Success",
+                "Academic Program Request is saved successfully."
+              );
+              this.dataUpdated.emit();
+              this.modalRef.close();
+            } else {
+              this._customNotificationService.notification(
+                "warn",
+                "Warning",
+                "Academic Program Request already exists."
+              );
+            }
+          },
+          error: (error) => {
+            console.error('Error creating academic program request:', error);
             this._customNotificationService.notification(
-              "success",
-              "Success",
-              "Academic Program Request  is update succesfully."
-            );
-            // Emit the event when data is successfully saved
-            this.dataUpdated.emit();
-            // Close the modal here if needed
-            this.modalRef.close();
-          } else {
-            this._customNotificationService.notification(
-              "warn",
-              "Warn",
-              "Academic Program Request does not depulicate."
+              "error",
+              "Error",
+              "Failed to save academic program request. Please try again."
             );
           }
         });
+      } else {
+        postData.id = this.id;
+        postData.applicantId = this.studentProgramRequester.applicantId;
+        this._academicProgramRequestService
+          .update(this.id, postData)
+          .subscribe({
+            next: (res) => {
+              if (res != null) {
+                this._customNotificationService.notification(
+                  "success",
+                  "Success",
+                  "Academic Program Request is updated successfully."
+                );
+                this.dataUpdated.emit();
+                this.modalRef.close();
+              } else {
+                this._customNotificationService.notification(
+                  "warn",
+                  "Warning",
+                  "Academic Program Request already exists."
+                );
+              }
+            },
+            error: (error) => {
+              this._customNotificationService.notification(
+                "error",
+                "Error",
+                "Failed to update academic program request. Please try again."
+              );
+            }
+          });
+      }
+    } else {
+      this._customNotificationService.notification(
+        "warning",
+        "Validation Error",
+        "Please fill in all required fields correctly."
+      );
     }
   }
   getListOfDivisionStatus() {

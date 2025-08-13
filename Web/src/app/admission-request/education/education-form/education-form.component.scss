@@ -140,6 +140,28 @@
           }
         }
       }
+
+      // Ensure date picker closes properly
+      ::ng-deep .ant-picker-dropdown {
+        z-index: 1050;
+        
+        .ant-picker-panel-container {
+          .ant-picker-panel {
+            .ant-picker-year-panel {
+              .ant-picker-year-panel-cell {
+                &:hover {
+                  background-color: #f0f0f0;
+                }
+                
+                &.ant-picker-year-panel-cell-selected {
+                  background-color: #1890ff;
+                  color: white;
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -215,6 +237,43 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+// Global styles to ensure date picker closes properly
+::ng-deep .ant-picker-dropdown {
+  .ant-picker-panel-container {
+    .ant-picker-panel {
+      .ant-picker-header {
+        .ant-picker-header-super-prev-btn,
+        .ant-picker-header-prev-btn,
+        .ant-picker-header-next-btn,
+        .ant-picker-header-super-next-btn {
+          &:hover {
+            color: #1890ff;
+          }
+        }
+      }
+      
+      .ant-picker-content {
+        .ant-picker-year-panel {
+          .ant-picker-year-panel-cell {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            
+            &:hover {
+              background-color: #f0f0f0;
+            }
+            
+            &.ant-picker-year-panel-cell-selected {
+              background-color: #1890ff;
+              color: white;
+              font-weight: 500;
+            }
+          }
+        }
+      }
+    }
   }
 }
 

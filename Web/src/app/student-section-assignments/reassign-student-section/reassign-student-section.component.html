@@ -1,0 +1,270 @@
+<div class="content-container">
+  <!-- Page Header -->
+  <div class="header-section">
+    <div class="page-title">
+      <h1>Reassign Student Sections</h1>
+      <p class="subtitle">Transfer students between different course sections</p>
+    </div>
+    <div class="header-actions">
+      <button nz-button nzType="default" routerLink="../student-section-assignments" class="back-btn">
+        <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
+        Back to Section Assignments
+      </button>
+    </div>
+  </div>
+
+  <!-- Collapsible Search Form -->
+  <div class="search-section">
+    <nz-collapse>
+      <nz-collapse-panel [nzHeader]="searchHeader" [nzActive]="!isSearchCollapsed">
+
+        <ng-template #searchHeader>
+          <span>
+            <i nz-icon nzType="filter" nzTheme="outline"></i>
+            Search Criteria
+          </span>
+        </ng-template>
+
+        <form nz-form [formGroup]="searchForm">
+          <div nz-row [nzGutter]="24">
+            <!-- Academic Term -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Academic Term</nz-form-label>
+                <nz-form-control nzErrorTip="Academic term is required">
+                  <nz-select formControlName="academicTerm" nzPlaceHolder="Select Academic Term" nzShowSearch nzAllowClear style="width: 100%;">
+                    <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
+                      [nzLabel]="item.Description"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Term Year -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Term Year</nz-form-label>
+                <nz-form-control nzErrorTip="Term year is required">
+                  <nz-select formControlName="year" nzPlaceHolder="Select Term Year" nzShowSearch style="width: 100%;">
+                    <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <div nz-row [nzGutter]="24">
+            <!-- Batch Code -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Batch Code</nz-form-label>
+                <nz-form-control nzErrorTip="Batch code is required">
+                  <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch Code" nzShowSearch nzAllowClear style="width: 100%;">
+                    <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.batchCode"
+                      [nzLabel]="item.batchCode"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <div nz-row [nzGutter]="24">
+            <!-- Left Side Section -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Source Section (Left)</nz-form-label>
+                <nz-form-control nzErrorTip="Source section is required" [nzValidateStatus]="sectionIdL?.errors?.['sameSection'] ? 'error' : ''">
+                  <nz-select formControlName="sectionIdL" nzPlaceHolder="Select source section" nzShowSearch nzAllowClear
+                    [nzLoading]="loadingSections" [nzDisabled]="listOfSections.length === 0" style="width: 100%;">
+                    <nz-option *ngFor="let section of listOfSections" [nzValue]="section.id"
+                      [nzLabel]="section.sectionName">
+                    </nz-option>
+                  </nz-select>
+                  <div *ngIf="sectionIdL?.errors?.['sameSection']" class="ant-form-item-explain ant-form-item-explain-error">
+                    Source and target sections cannot be the same
+                  </div>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Right Side Section -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Target Section (Right)</nz-form-label>
+                <nz-form-control nzErrorTip="Target section is required" [nzValidateStatus]="sectionIdR?.errors?.['sameSection'] ? 'error' : ''">
+                  <nz-select formControlName="sectionIdR" nzPlaceHolder="Select target section" nzShowSearch nzAllowClear
+                    [nzLoading]="loadingSections" [nzDisabled]="listOfSections.length === 0" style="width: 100%;">
+                    <nz-option *ngFor="let section of listOfSections" [nzValue]="section.id"
+                      [nzLabel]="section.sectionName">
+                    </nz-option>
+                  </nz-select>
+                  <div *ngIf="sectionIdR?.errors?.['sameSection']" class="ant-form-item-explain ant-form-item-explain-error">
+                    Source and target sections cannot be the same
+                  </div>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div nz-row>
+            <div nz-col [nzSpan]="24" style="display: flex; justify-content: flex-end; gap: 12px;">
+              <button nz-button nzType="default" (click)="resetSearch()">
+                <i nz-icon nzType="reload" nzTheme="outline"></i>
+                Reset
+              </button>
+              <button nz-button nzType="primary" [nzLoading]="loading" (click)="searchSectionAssignedStudents()" 
+                [disabled]="!searchForm.valid">
+                <i nz-icon nzType="search" nzTheme="outline"></i>
+                Load Students
+              </button>
+            </div>
+          </div>
+        </form>
+      </nz-collapse-panel>
+    </nz-collapse>
+  </div>
+
+  <!-- Student Transfer Interface -->
+  <div class="transfer-section" *ngIf="list.length > 0">
+    <div class="transfer-header">
+      <h3>Student Section Reassignment</h3>
+      <p>Drag students between sections or use the transfer buttons to move them</p>
+    </div>
+
+    <!-- Manual Transfer Controls -->
+    <div class="manual-transfer-controls">
+      <div class="transfer-buttons">
+        <button 
+          nz-button 
+          nzType="default" 
+          (click)="transferStudentsBetweenSections('left', 'right')"
+          [disabled]="getSelectedCount('left') === 0"
+          class="transfer-btn">
+          <i nz-icon nzType="arrow-right" nzTheme="outline"></i>
+          Move Selected to Target ({{ getSelectedCount('left') }})
+        </button>
+        
+        <button 
+          nz-button 
+          nzType="default" 
+          (click)="transferStudentsBetweenSections('right', 'left')"
+          [disabled]="getSelectedCount('right') === 0"
+          class="transfer-btn">
+          <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
+          Move Selected to Source ({{ getSelectedCount('right') }})
+        </button>
+      </div>
+      
+      <div class="transfer-info">
+        <span class="info-text">
+          <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+          Select students using checkboxes, then use these buttons or drag & drop to transfer them
+        </span>
+      </div>
+    </div>
+
+    <nz-transfer
+      [nzDataSource]="list"
+      [nzDisabled]="disabled"
+      [nzShowSearch]="true"
+      [nzShowSelectAll]="false"
+      [nzRenderList]="[renderList, renderList]"
+      (nzSelectChange)="select($event)"
+      (nzChange)="change($event)"
+      [nzTitles]="['Source Section Students', 'Target Section Students']"
+      [nzFilterOption]="filterOption"
+    >
+      <ng-template
+        #renderList
+        let-items
+        let-direction="direction"
+        let-stat="stat"
+        let-disabled="disabled"
+        let-onItemSelectAll="onItemSelectAll"
+        let-onItemSelect="onItemSelect"
+      >
+        <!-- Section Name Display -->
+        <div class="section-info" *ngIf="direction === 'left' && getSectionName('left') || direction === 'right' && getSectionName('right')">
+          <div class="section-label">
+            <i nz-icon nzType="environment" nzTheme="outline"></i>
+            <span class="section-name">{{ direction === 'left' ? getSectionName('left') : getSectionName('right') }}</span>
+          </div>
+        </div>
+
+        <nz-table #t [nzData]="$asTransferItems(items)" nzSize="small">
+          <thead>
+            <tr>
+              <th
+                [nzDisabled]="disabled"
+                [nzChecked]="stat.checkAll"
+                [nzIndeterminate]="stat.checkHalf"
+                (nzCheckedChange)="onItemSelectAll($event)"
+              ></th>
+              <th>Student Code</th>
+              <th>Full Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let data of t.data; trackBy: trackByKey" (click)="onItemSelect(data)">
+              <td
+                [nzChecked]="!!data['checked']"
+                [nzDisabled]="disabled || data['disabled']"
+                (nzCheckedChange)="onItemSelect(data)"
+              ></td>
+              <td>{{ data['description'] }}</td>
+              <td>{{ data['title'] }}</td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </ng-template>
+    </nz-transfer>
+
+    <!-- Transfer Controls -->
+    <div class="transfer-controls">
+      <div class="control-switches">
+        <nz-switch [(ngModel)]="disabled" nzCheckedChildren="Enabled" nzUnCheckedChildren="Disabled"></nz-switch>
+        <span class="switch-label">Transfer Controls</span>
+        
+        <nz-switch [(ngModel)]="showSearch" nzCheckedChildren="Search On" nzUnCheckedChildren="Search Off"></nz-switch>
+        <span class="switch-label">Search Functionality</span>
+      </div>
+      
+      <div class="student-counts">
+        <div class="count-item">
+          <span class="count-label">Source Section:</span>
+          <span class="count-value">{{ leftList.length }}</span>
+        </div>
+        <div class="count-item">
+          <span class="count-label">Target Section:</span>
+          <span class="count-value">{{ rightList.length }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Assignment Modification Button - New Row -->
+    <div class="modification-actions">
+      <div class="button-container">
+        <button 
+          nz-button 
+          nzType="primary" 
+          [nzLoading]="loading" 
+          (click)="modifySectionAssignments()"
+          [disabled]="!searchForm.valid || (leftList.length === 0 && rightList.length === 0)">
+          <i nz-icon nzType="swap" nzTheme="outline"></i>
+          Apply Section Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Data Message -->
+  <div class="no-data-message" *ngIf="!loading && list.length === 0 && searchForm.valid">
+    <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="noDataContent">
+      <ng-template #noDataContent>
+        <span>No students found for the selected criteria</span>
+        <p>Please adjust your search parameters and try again</p>
+      </ng-template>
+    </nz-empty>
+  </div>
+</div>

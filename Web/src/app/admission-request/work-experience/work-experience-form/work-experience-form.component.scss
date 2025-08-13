@@ -1,0 +1,408 @@
+@import '../../styles/common.scss';
+
+// Work Experience Form Container
+.work-experience-form-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: $spacing-xl;
+  background: $background-white;
+  border-radius: $border-radius-xl;
+  box-shadow: $shadow-md;
+  
+  // Section Header Wrapper
+  .section-header-wrapper {
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xl;
+    padding: $spacing-xl;
+    background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+    border-left: 4px solid $primary-dark;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-md;
+    
+    .header-icon {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      i {
+        font-size: 24px;
+        color: white;
+      }
+    }
+    
+    .header-content {
+      flex: 1;
+      
+      .section-title {
+        margin: 0 0 $spacing-sm 0;
+        font-size: $font-size-xxl;
+        font-weight: $font-weight-semibold;
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      
+      .section-subtitle {
+        margin: 0;
+        font-size: $font-size-base;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: $line-height-normal;
+      }
+    }
+  }
+
+  // Content Card
+  .content-card {
+    background: $background-white;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-sm;
+    border: 1px solid $border-color;
+    overflow: hidden;
+    
+    .card-body {
+      padding: $spacing-xl;
+    }
+  }
+
+  // Form Section
+  .form-section {
+    margin-bottom: $spacing-xl;
+    
+    .section-header-wrapper {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-left: 4px solid $primary-color;
+      margin-bottom: $spacing-lg;
+      
+      .header-icon {
+        background: rgba($primary-color, 0.1);
+        
+        i {
+          color: $primary-color;
+        }
+      }
+      
+      .header-content {
+        .section-title {
+          color: $text-primary;
+          font-size: $font-size-lg;
+          text-shadow: none;
+        }
+        
+        .section-subtitle {
+          color: $text-secondary;
+        }
+      }
+    }
+  }
+
+  // Form Grid
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: $spacing-lg;
+    margin-bottom: $spacing-lg;
+  }
+
+  // Form Field
+  .form-field {
+    .ant-form-item {
+      margin-bottom: $spacing-lg;
+      
+      .ant-form-item-label {
+        label {
+          display: flex;
+          align-items: center;
+          gap: $spacing-sm;
+          font-weight: $font-weight-medium;
+          color: $text-primary;
+          margin-bottom: $spacing-sm;
+          
+          i {
+            color: $primary-color;
+            font-size: 16px;
+          }
+          
+          .required {
+            color: $error-color;
+            font-weight: $font-weight-bold;
+          }
+        }
+      }
+      
+      .ant-form-item-control {
+        .ant-input {
+          border-radius: $border-radius-md;
+          border: 1px solid $border-color;
+          padding: $spacing-sm $spacing-md;
+          font-size: $font-size-base;
+          transition: all $transition-normal;
+          
+          &:hover {
+            border-color: $primary-light;
+          }
+          
+          &:focus {
+            border-color: $primary-color;
+            box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+          }
+          
+          &::placeholder {
+            color: $text-muted;
+          }
+        }
+      }
+    }
+  }
+
+  // Custom Error Message
+  .custom-error-message {
+    margin-top: $spacing-xs;
+    color: $error-color;
+    font-size: $font-size-sm;
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    
+    &::before {
+      content: '⚠';
+      font-size: 12px;
+    }
+  }
+
+  // File Upload Section
+  .file-upload-section {
+    .file-upload-container {
+      .file-upload-button {
+        display: inline-flex;
+        align-items: center;
+        gap: $spacing-sm;
+        padding: $spacing-md $spacing-lg;
+        background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+        color: white;
+        border: none;
+        border-radius: $border-radius-md;
+        cursor: pointer;
+        transition: all $transition-normal;
+        font-weight: $font-weight-medium;
+        
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: $shadow-md;
+        }
+        
+        i {
+          font-size: 16px;
+        }
+      }
+      
+      .file-list {
+        margin-top: $spacing-lg;
+        background: $background-light;
+        border-radius: $border-radius-md;
+        border: 1px solid $border-color;
+        overflow: hidden;
+        
+        .file-list-header {
+          display: flex;
+          align-items: center;
+          gap: $spacing-sm;
+          padding: $spacing-md $spacing-lg;
+          background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+          border-bottom: 1px solid $border-color;
+          font-weight: $font-weight-medium;
+          color: $primary-color;
+          
+          i {
+            font-size: 16px;
+          }
+        }
+        
+        .file-items {
+          padding: $spacing-md;
+          
+          .file-item {
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+            padding: $spacing-sm $spacing-md;
+            background: white;
+            border-radius: $border-radius-sm;
+            border: 1px solid $border-color;
+            margin-bottom: $spacing-sm;
+            transition: all $transition-normal;
+            
+            &:hover {
+              border-color: $primary-color;
+              box-shadow: $shadow-sm;
+            }
+            
+            &:last-child {
+              margin-bottom: 0;
+            }
+            
+            i {
+              color: $primary-color;
+              font-size: 16px;
+            }
+            
+            .file-name {
+              flex: 1;
+              color: $text-primary;
+              font-size: $font-size-sm;
+            }
+            
+            .remove-file-btn {
+              background: none;
+              border: none;
+              color: $error-color;
+              cursor: pointer;
+              padding: $spacing-xs;
+              border-radius: $border-radius-sm;
+              transition: all $transition-normal;
+              
+              &:hover {
+                background: rgba($error-color, 0.1);
+                transform: scale(1.1);
+              }
+              
+              i {
+                font-size: 14px;
+                color: $error-color;
+              }
+            }
+          }
+        }
+      }
+      
+      .upload-hint {
+        margin-top: $spacing-md;
+        color: $text-muted;
+        font-size: $font-size-sm;
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        
+        i {
+          color: $primary-color;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+
+  // Form Actions
+  .form-actions {
+    margin-top: $spacing-xl;
+    padding-top: $spacing-lg;
+    border-top: 1px solid $border-color;
+    text-align: center;
+    
+    .save-button {
+      height: 44px;
+      padding: 0 $spacing-xl;
+      font-size: $font-size-base;
+      font-weight: $font-weight-medium;
+      border-radius: $border-radius-md;
+      background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+      border: none;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: $spacing-sm;
+      transition: all $transition-normal;
+      
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: $shadow-md;
+        background: linear-gradient(135deg, lighten($primary-color, 5%) 0%, $primary-color 100%);
+      }
+      
+      &:disabled {
+        background: $text-muted;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+      
+      i {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@include mobile {
+  .work-experience-form-container {
+    padding: $spacing-lg;
+    
+    .section-header-wrapper {
+      flex-direction: column;
+      text-align: center;
+      padding: $spacing-lg;
+      
+      .header-icon {
+        width: 40px;
+        height: 40px;
+        
+        i {
+          font-size: 20px;
+        }
+      }
+      
+      .header-content {
+        .section-title {
+          font-size: $font-size-xl;
+        }
+        
+        .section-subtitle {
+          font-size: $font-size-sm;
+        }
+      }
+    }
+    
+    .content-card .card-body {
+      padding: $spacing-lg;
+    }
+    
+    .form-grid {
+      grid-template-columns: 1fr;
+      gap: $spacing-md;
+    }
+    
+    .form-actions .save-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+@include tablet {
+  .work-experience-form-container {
+    .form-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+// Animation for file upload
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.file-item {
+  animation: slideInUp 0.3s ease-out;
+}

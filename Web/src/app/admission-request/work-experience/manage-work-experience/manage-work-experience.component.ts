@@ -23,41 +23,100 @@ export class ManageWorkExperienceComponent implements OnInit {
   applicantId: string;
   userId: string;
   isSubmittedApplicationForm = 0;
-   isApplicantProfile: boolean = false;
-    private subscription!: Subscription;
+  isApplicantProfile: boolean = false;
+  private subscription!: Subscription;
+
   constructor(
     private modalRef: NzModalRef,
     private _modal: NzModalService,
     private _customNotificationService: CustomNotificationService,
-    route: ActivatedRoute,
+    private route: ActivatedRoute,
     private generalInformationService: GeneralInformationService,
     private workExperienceService: WorkExperienceService,
     private sharingDataService: SharingDataService
   ) {
     this.userId = localStorage.getItem("userId");
-    route.queryParams.subscribe(p => {
-      this.applicantId = p["id"];
-      if (this.applicantId != undefined) {
-        this.getApplicantExperienceByApplicantId(this.applicantId);
-      }
-    });
   }
 
   ngOnInit(): void {
-    const userId = localStorage.getItem('userId');
-    this.generalInformationService.getOrStoreParentApplicantId(userId).subscribe(applicantId => {
-      this.applicantId = applicantId;
-      this.getApplicantExperienceByApplicantId(applicantId);
-    });
+    this.initializeData();
+    
     this.sharingDataService.programCurrentMessage.subscribe(res => {
       this.isSubmittedApplicationForm = res;
     });
+    
     this.subscription = this.sharingDataService.currentApplicantProfile.subscribe(
       status => {
         this.isApplicantProfile = status;        
       }
     );
+
+    this.monitorAuthenticationState();
   }
+
+  private monitorAuthenticationState(): void {
+    setInterval(() => {
+      const currentUserId = localStorage.getItem('userId');
+      if (currentUserId && currentUserId !== this.userId) {
+        this.userId = currentUserId;
+        this.forceRefreshData();
+      }
+    }, 1000);
+
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'userId' && event.newValue) {
+        console.log('Storage event detected, user authentication changed...');
+        this.userId = event.newValue;
+        this.forceRefreshData();
+      }
+    });
+
+    window.addEventListener('focus', () => {
+      const currentUserId = localStorage.getItem('userId');
+      if (currentUserId && currentUserId !== this.userId) {
+        console.log('Tab focus detected, checking authentication state...');
+        this.userId = currentUserId;
+        this.forceRefreshData();
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        const currentUserId = localStorage.getItem('userId');
+        if (currentUserId && currentUserId !== this.userId) {
+          this.userId = currentUserId;
+          this.forceRefreshData();
+        }
+      }
+    });
+  }
+
+  private initializeData(): void {
+    this.route.queryParams.subscribe(params => {
+      const routeApplicantId = params["id"];
+      if (routeApplicantId && routeApplicantId !== this.applicantId) {
+        this.applicantId = routeApplicantId;
+        this.getApplicantExperienceByApplicantId(this.applicantId);
+      } else if (!this.applicantId) {
+        this.loadApplicantIdFromService();
+      }
+    });
+  }
+
+  private loadApplicantIdFromService(): void {
+    this.generalInformationService.getOrStoreParentApplicantId(this.userId).subscribe({
+      next: (applicantId) => {
+        if (applicantId && applicantId !== this.applicantId) {
+          this.applicantId = applicantId;
+          this.getApplicantExperienceByApplicantId(applicantId);
+        }
+      },
+      error: (error) => {
+        setTimeout(() => this.loadApplicantIdFromService(), 3000);
+      }
+    });
+  }
+
   openModal(): void {
     const modal: NzModalRef = this._modal.create({
       nzTitle: "Work Experience",
@@ -66,50 +125,104 @@ export class ManageWorkExperienceComponent implements OnInit {
         applicationId: this.applicantId
       },
       nzMaskClosable: false,
-      nzFooter: null
+      nzFooter: null,
+      nzWidth: "60%"
     });
+    
     modal.afterClose.subscribe(() => {
-      this.getApplicantExperienceByApplicantId(this.applicantId);
+      this.refreshData();
     });
+    
+    const componentInstance = modal.getContentComponent();
+    if (componentInstance) {
+      componentInstance.dataUpdated.subscribe(() => {
+        this.refreshData();
+      });
+    }
   }
+
   closeModal(): void {
     this.modalRef.close();
   }
+
   getApplicantExperienceByApplicantId(applicantId: string) {
+    if (!applicantId) {
+      return;
+    }
+    
     this.workExperienceService
       .getApplicantExperienceByApplicantId(applicantId)
-      .subscribe(res => {
-        this.workExperienceLists = res.data;
+      .subscribe({
+        next: (res) => {
+          if (res && res.data) {
+            this.workExperienceLists = res.data;
+          } else {
+            this.workExperienceLists = [];
+          }
+        },
+        error: (error) => {
+          console.error('Error loading work experience records:', error);
+          this._customNotificationService.notification(
+            "error",
+            "Error",
+            "Failed to load work experience data. Please refresh the page."
+          );
+          this.workExperienceLists = [];
+        }
       });
   }
+
+  refreshData(): void {
+    if (this.applicantId) {
+      this.getApplicantExperienceByApplicantId(this.applicantId);
+    } else {
+      this.loadApplicantIdFromService();
+    }
+  }
+
+  forceRefreshData(): void {
+    this.workExperienceLists = [];
+    this.loadApplicantIdFromService();
+  }
+
   editExperience(index: number) {
     this.workExperienceIndex = index;
-    //this.patchEducationValue(this.educationLists[this.educationIndex]);
     this.exprienceModalVisible = true;
   }
+
   delete(id: string) {
     this._modal.confirm({
-      nzTitle: "Are you sure delete this Education Record?",
+      nzTitle: "Are you sure delete this Work Experience Record?",
       nzOkText: "Yes",
       nzOkType: "primary",
       nzOkDanger: true,
       nzOnOk: () => {
         try {
-          this.workExperienceService.delete(id).subscribe(res => {
-            if (res) {
+          this.workExperienceService.delete(id).subscribe({
+            next: (res) => {
+              if (res) {
+                this._customNotificationService.notification(
+                  "success",
+                  "Success",
+                  "Work Experience Record is deleted successfully."
+                );
+                this.refreshData();
+              }
+            },
+            error: (error) => {
+              console.error('Error deleting work experience:', error);
               this._customNotificationService.notification(
-                "success",
-                "Success",
-                "Education Record is deleted succesfully."
+                "error",
+                "Error",
+                "Failed to delete work experience record. Please try again."
               );
-              this.getApplicantExperienceByApplicantId(this.applicantId);
             }
           });
         } catch (error) {
           this._customNotificationService.notification(
             "error",
             "Error",
-            "Try again."
+            "An unexpected error occurred. Please try again."
           );
         }
       },
@@ -117,8 +230,8 @@ export class ManageWorkExperienceComponent implements OnInit {
       nzOnCancel: () => { }
     });
   }
+
   editModal(experience: ApplicantWorkExperienceRequest): void {
-    // console.log("GGG    ", experience);
     const modal: NzModalRef = this._modal.create({
       nzTitle: "Edit Work Experience",
       nzContent: WorkExperienceFormComponent,
@@ -126,12 +239,21 @@ export class ManageWorkExperienceComponent implements OnInit {
         workExperience: experience
       },
       nzMaskClosable: false,
-      nzFooter: null
+      nzFooter: null,
+      nzWidth: "60%"
     });
+    
     modal.afterClose.subscribe(() => {
-      this.getApplicantExperienceByApplicantId(this.applicantId);
+      this.refreshData();
     });
+    const componentInstance = modal.getContentComponent();
+    if (componentInstance) {
+      componentInstance.dataUpdated.subscribe(() => {
+        this.refreshData();
+      });
+    }
   }
+
   viewFile(data: any) {
     this._modal.create({
       nzTitle: "Work Experience",
@@ -144,6 +266,7 @@ export class ManageWorkExperienceComponent implements OnInit {
       nzWidth: "50%"
     });
   }
+
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();

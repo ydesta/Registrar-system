@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { StudentSectionAssignmentsComponent } from './student-section-assignments.component';
 import { SectionAssignedStudentsComponent } from './section-assigned-students/section-assigned-students.component';
+import { ReassignStudentSectionComponent } from './reassign-student-section/reassign-student-section.component';
 
 const routes: Routes = [
   {
@@ -11,6 +12,10 @@ const routes: Routes = [
   {
     path: 'section-assigned-students',
     component: SectionAssignedStudentsComponent
+  },
+  {
+    path: 'reassigne-student-section',
+    component: ReassignStudentSectionComponent
   }
 ];
 

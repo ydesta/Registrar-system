@@ -17,8 +17,8 @@ import { Subscription } from "rxjs";
 })
 export class ManageEducationComponent implements OnInit {
   /**
- *
- */
+   *
+   */
   educationLists: ApplicantEducationBackgroundRequest[] = [];
   steps = 0;
   educationIndex = -1;
@@ -28,38 +28,120 @@ export class ManageEducationComponent implements OnInit {
   isSubmittedApplicationForm = 0;
   isApplicantProfile: boolean = false;
   private subscription!: Subscription;
+
   constructor(
     private modalRef: NzModalRef,
     private _modal: NzModalService,
     private _customNotificationService: CustomNotificationService,
-    route: ActivatedRoute,
+    private route: ActivatedRoute,
     private educationBackgroundService: EducationBackgroundService,
     private generalInformationService: GeneralInformationService,
     private sharingDataService: SharingDataService    
   ) {
-     this.userId = localStorage.getItem('userId');
-    route.queryParams.subscribe(p => {
-      this.applicantId = p["id"];
-      if (this.applicantId != undefined) {
-        this.getApplicantEducationByApplicantId(this.applicantId);
-      }
-    });
+    this.userId = localStorage.getItem('userId');
   }
+
   ngOnInit(): void {
-    const userId = localStorage.getItem('userId');
-    this.generalInformationService.getOrStoreParentApplicantId(userId).subscribe(applicantId => {
-      this.applicantId = applicantId;
-      this.getApplicantEducationByApplicantId(applicantId);
-    });
+    this.initializeData();
+    
     this.sharingDataService.programCurrentMessage.subscribe(res => {
       this.isSubmittedApplicationForm = res;
     });
+    
     this.subscription = this.sharingDataService.currentApplicantProfile.subscribe(
       status => {
         this.isApplicantProfile = status;        
       }
     );
+
+    // Listen for user authentication changes and data updates
+    this.subscription.add(
+      this.sharingDataService.otherCurrentMessage.subscribe(count => {
+        // If the count changes, it might indicate a new login or data refresh
+        if (count !== this.educationLists.length && this.applicantId) {
+          this.refreshData();
+        }
+      })
+    );
+
+    // Monitor authentication state changes
+    this.monitorAuthenticationState();
   }
+
+  private monitorAuthenticationState(): void {
+    // Check for authentication state changes every 1 second for faster response
+    setInterval(() => {
+      const currentUserId = localStorage.getItem('userId');
+      if (currentUserId && currentUserId !== this.userId) {
+        // User has changed or re-logged in
+        console.log('User authentication state changed, refreshing education data...');
+        this.userId = currentUserId;
+        this.forceRefreshData();
+      }
+    }, 1000);
+
+    // Also listen to storage events (for cross-tab authentication changes)
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'userId' && event.newValue) {
+        console.log('Storage event detected, user authentication changed...');
+        this.userId = event.newValue;
+        this.forceRefreshData();
+      }
+    });
+
+    // Listen to focus events (when user returns to the tab)
+    window.addEventListener('focus', () => {
+      const currentUserId = localStorage.getItem('userId');
+      if (currentUserId && currentUserId !== this.userId) {
+        console.log('Tab focus detected, checking authentication state...');
+        this.userId = currentUserId;
+        this.forceRefreshData();
+      }
+    });
+
+    // Listen to visibility change events (when tab becomes visible)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        const currentUserId = localStorage.getItem('userId');
+        if (currentUserId && currentUserId !== this.userId) {
+          console.log('Page visibility changed, checking authentication state...');
+          this.userId = currentUserId;
+          this.forceRefreshData();
+        }
+      }
+    });
+  }
+
+  private initializeData(): void {
+    // Subscribe to route parameter changes
+    this.route.queryParams.subscribe(params => {
+      const routeApplicantId = params["id"];
+      if (routeApplicantId && routeApplicantId !== this.applicantId) {
+        this.applicantId = routeApplicantId;
+        this.getApplicantEducationByApplicantId(this.applicantId);
+      } else if (!this.applicantId) {
+        // If no route params and no applicantId, get from service
+        this.loadApplicantIdFromService();
+      }
+    });
+  }
+
+  private loadApplicantIdFromService(): void {
+    this.generalInformationService.getOrStoreParentApplicantId(this.userId).subscribe({
+      next: (applicantId) => {
+        if (applicantId && applicantId !== this.applicantId) {
+          this.applicantId = applicantId;
+          this.getApplicantEducationByApplicantId(applicantId);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading applicant ID:', error);
+        // Retry after a delay
+        setTimeout(() => this.loadApplicantIdFromService(), 3000);
+      }
+    });
+  }
+
   educationHandleCancel() {
     this.educationModalVisible = false;
     this.educationIndex = -1;
@@ -68,6 +150,7 @@ export class ManageEducationComponent implements OnInit {
   showAddEducationModal() {
     this.educationModalVisible = true;
   }
+
   deleteEducation(id: string) {
     this._modal.confirm({
       nzTitle: "Are you sure delete this Education Record?",
@@ -76,21 +159,32 @@ export class ManageEducationComponent implements OnInit {
       nzOkDanger: true,
       nzOnOk: () => {
         try {
-          this.educationBackgroundService.delete(id).subscribe(res => {
-            if (res) {
+          this.educationBackgroundService.delete(id).subscribe({
+            next: (res) => {
+              if (res) {
+                this._customNotificationService.notification(
+                  "success",
+                  "Success",
+                  "Education Record is deleted successfully."
+                );
+                this.refreshData();
+              }
+            },
+            error: (error) => {
+              console.error('Error deleting education:', error);
               this._customNotificationService.notification(
-                "success",
-                "Success",
-                "Education Record is deleted succesfully."
+                "error",
+                "Error",
+                "Failed to delete education record. Please try again."
               );
-              this.getApplicantEducationByApplicantId(this.applicantId);
             }
           });
         } catch (error) {
+          console.error('Error in delete operation:', error);
           this._customNotificationService.notification(
             "error",
             "Error",
-            "Try again."
+            "An unexpected error occurred. Please try again."
           );
         }
       },
@@ -98,18 +192,59 @@ export class ManageEducationComponent implements OnInit {
       nzOnCancel: () => {}
     });
   }
+
   editEducation(index: number) {
     this.educationIndex = index;
-    //this.patchEducationValue(this.educationLists[this.educationIndex]);
     this.educationModalVisible = true;
   }
+
   getApplicantEducationByApplicantId(id: string) {
+    if (!id) {
+      console.warn('No applicant ID provided for education lookup');
+      return;
+    }
+    
     this.educationBackgroundService
       .getApplicantEducationByApplicantId(id)
-      .subscribe(res => {
-        this.educationLists = res.data;
-        this.sharingDataService.otherUpdateMessage(this.educationLists.length);
+      .subscribe({
+        next: (res) => {
+          if (res && res.data) {
+            this.educationLists = res.data;
+            this.sharingDataService.otherUpdateMessage(this.educationLists.length);
+          } else {
+            this.educationLists = [];
+            this.sharingDataService.otherUpdateMessage(0);
+          }
+        },
+        error: (error) => {
+          console.error('Error loading education records:', error);
+          this._customNotificationService.notification(
+            "error",
+            "Error",
+            "Failed to load education data. Please refresh the page."
+          );
+          this.educationLists = [];
+          this.sharingDataService.otherUpdateMessage(0);
+        }
       });
+  }
+
+  refreshData(): void {
+    if (this.applicantId) {
+      this.getApplicantEducationByApplicantId(this.applicantId);
+    } else {
+      // If no applicantId, try to load it first
+      this.loadApplicantIdFromService();
+    }
+  }
+
+  forceRefreshData(): void {
+    // Clear current data and force reload
+    this.educationLists = [];
+    this.sharingDataService.otherUpdateMessage(0);
+    
+    // Reload applicantId and data
+    this.loadApplicantIdFromService();
   }
 
   openModal(): void {
@@ -120,11 +255,22 @@ export class ManageEducationComponent implements OnInit {
         applicationId: this.applicantId
       },
       nzMaskClosable: false,
-      nzFooter: null
+      nzFooter: null,
+      nzWidth: "50%"
     });
+    
+    // Listen to modal close and data updates
     modal.afterClose.subscribe(() => {
-      this.getApplicantEducationByApplicantId(this.applicantId);
+      this.refreshData();
     });
+    
+    // Get the component instance to listen to dataUpdated event
+    const componentInstance = modal.getContentComponent();
+    if (componentInstance) {
+      componentInstance.dataUpdated.subscribe(() => {
+        this.refreshData();
+      });
+    }
   }
 
   editModal(education: ApplicantEducationBackgroundRequest): void {
@@ -135,16 +281,28 @@ export class ManageEducationComponent implements OnInit {
         educationBackground: education
       },
       nzMaskClosable: false,
-      nzFooter: null
+      nzFooter: null,
+      nzWidth: "50%"
     });
+    
+    // Listen to modal close and data updates
     modal.afterClose.subscribe(() => {
-      this.getApplicantEducationByApplicantId(this.applicantId);
+      this.refreshData();
     });
+    
+    // Get the component instance to listen to dataUpdated event
+    const componentInstance = modal.getContentComponent();
+    if (componentInstance) {
+      componentInstance.dataUpdated.subscribe(() => {
+        this.refreshData();
+      });
+    }
   }
 
   closeModal(): void {
     this.modalRef.close();
   }
+
   viewFile(data: any) {
     this._modal.create({
       nzTitle: "Education Background",
@@ -157,6 +315,7 @@ export class ManageEducationComponent implements OnInit {
       nzWidth: "50%"
     });
   }
+
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();

@@ -6,7 +6,7 @@ import { StudentCreateModel } from 'src/app/Models/StudentCreateModel';
 import { StudentModel } from 'src/app/Models/StudentModel';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
-import { environment } from 'src/environments/environment.prod';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-assign-batch',

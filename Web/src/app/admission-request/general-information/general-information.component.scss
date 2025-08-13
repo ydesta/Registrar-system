@@ -434,16 +434,8 @@ nz-date-picker {
 
 /* Form Sections */
 .form-section {
-  background: #fff;
-  border-radius: 12px;
-  padding: 24px;
+  padding: 24px 0;
   margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
-  
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
 }
 
 /* Profile Picture Section */
@@ -663,7 +655,7 @@ nz-date-picker {
 .form-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 0 24px;
 }
 
 /* Section Header Wrapper */
@@ -674,9 +666,8 @@ nz-date-picker {
   margin-bottom: 24px;
   padding: 20px 24px;
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-radius: 12px;
   border-left: 4px solid #1890ff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
   
   .header-icon {
     flex-shrink: 0;
@@ -741,15 +732,14 @@ nz-date-picker {
     height: 180px;
     border-radius: 50%;
     overflow: hidden;
-    border: 4px solid #fff;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border: 2px solid #e8e8e8;
     background: #f5f5f5;
     cursor: pointer;
     transition: all 0.3s ease;
     
     &:hover {
       transform: scale(1.02);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+      border-color: #1890ff;
       
       .image-overlay {
         opacity: 1;
@@ -1081,6 +1071,960 @@ nz-date-picker {
   .profile-image-container {
     width: 120px !important;
     height: 120px !important;
+  }
+}
+
+/* Hide Ant Design warning icons */
+::ng-deep .ant-form-item-explain {
+  display: none !important;
+}
+
+::ng-deep .ant-form-item-explain-error {
+  display: none !important;
+}
+
+::ng-deep .ant-form-item-explain-warning {
+  display: none !important;
+}
+
+::ng-deep .ant-form-item-explain-success {
+  display: none !important;
+}
+
+/* Hide the warning triangle icons specifically */
+::ng-deep .ant-form-item-has-error .ant-form-item-explain,
+::ng-deep .ant-form-item-has-warning .ant-form-item-explain,
+::ng-deep .ant-form-item-has-success .ant-form-item-explain {
+  display: none !important;
+}
+
+/* Custom Error Messages - No Warning Icons */
+.custom-error-message {
+  color: #ff4d4f;
+  font-size: 13px;
+  margin-top: 4px;
+  animation: fadeIn 0.3s ease;
+  padding: 4px 8px;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.custom-error-message::before {
+  content: "⚠️";
+  font-size: 12px;
+}
+
+/* Ensure custom error messages don't interfere with Ant Design */
+::ng-deep .ant-form-item-has-error .ant-form-item-explain,
+::ng-deep .ant-form-item-has-warning .ant-form-item-explain,
+::ng-deep .ant-form-item-has-success .ant-form-item-explain {
+  display: none !important;
+}
+
+/* Save Button Disabled State */
+.save-button {
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+/* Full Page Loading Overlay */
+.full-page-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.loading-content {
+  text-align: center;
+  padding: 40px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1890ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 24px;
+}
+
+.loading-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0 0 8px 0;
+}
+
+.loading-subtext {
+  font-size: 14px;
+  color: #8c8c8c;
+  margin: 0;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Modal animation
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Review Summary Modal Styles - Professional Design
+::ng-deep .review-confirmation-modal {
+  .ant-modal-header {
+    background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    
+    .ant-modal-title {
+      color: white;
+      font-size: $font-size-xl;
+      font-weight: $font-weight-semibold;
+      
+      .modal-title {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+        
+        i {
+          font-size: 24px;
+          color: white;
+        }
+      }
+    }
+  }
+  
+  .ant-modal-body {
+    padding: 0;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  .ant-modal-footer {
+    border-top: 1px solid $border-color;
+    padding: $spacing-lg $spacing-xl;
+    background: $background-light;
+    
+    .ant-btn {
+      height: 40px;
+      padding: 0 $spacing-xl;
+      font-weight: $font-weight-medium;
+      border-radius: $border-radius-md;
+      
+      &.ant-btn-primary {
+        background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+        border: none;
+        box-shadow: $shadow-sm;
+        
+        &:hover {
+          background: linear-gradient(135deg, $primary-light 0%, $primary-color 100%);
+          transform: translateY(-1px);
+          box-shadow: $shadow-md;
+        }
+      }
+      
+      &.ant-btn-default {
+        border: 1px solid $border-color;
+        color: $text-secondary;
+        
+        &:hover {
+          border-color: $primary-color;
+          color: $primary-color;
+        }
+      }
+    }
+  }
+}
+
+// Review Summary Modal Content
+::ng-deep .ant-modal-confirm .review-summary-modal {
+  .summary-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    padding: $spacing-xl;
+    border-bottom: 1px solid $border-color;
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+    
+    .header-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+      border-radius: $border-radius-lg;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: $shadow-md;
+      
+      i {
+        font-size: 28px;
+        color: white;
+      }
+    }
+    
+    .header-content {
+      flex: 1;
+      
+      .header-title {
+        margin: 0 0 $spacing-sm 0;
+        font-size: $font-size-xxl;
+        font-weight: $font-weight-bold;
+        color: $text-primary;
+        line-height: $line-height-tight;
+      }
+      
+      .header-subtitle {
+        margin: 0;
+        font-size: $font-size-base;
+        color: $text-secondary;
+        line-height: $line-height-normal;
+      }
+    }
+  }
+  
+  .summary-content {
+    padding: $spacing-xl;
+    
+    .summary-section {
+      margin-bottom: $spacing-xl;
+      background: $background-white;
+      border: 1px solid $border-color;
+      border-radius: $border-radius-lg;
+      overflow: hidden;
+      box-shadow: $shadow-sm;
+      transition: all $transition-bezier;
+      
+      &:hover {
+        box-shadow: $shadow-md;
+        border-color: rgba($primary-color, 0.2);
+      }
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .section-header {
+        background: linear-gradient(135deg, #fafbfc 0%, #f8f9fa 100%);
+        padding: $spacing-lg $spacing-xl;
+        border-bottom: 1px solid $border-color;
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+        
+        i {
+          color: $primary-color;
+          font-size: $font-size-lg;
+        }
+        
+        h4 {
+          margin: 0;
+          font-size: $font-size-lg;
+          font-weight: $font-weight-semibold;
+          color: $text-primary;
+        }
+      }
+      
+      .summary-grid {
+        padding: $spacing-lg $spacing-xl;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: $spacing-md;
+        
+        .summary-item {
+          display: flex;
+          flex-direction: column;
+          gap: $spacing-xs;
+          padding: $spacing-md;
+          background: $background-light;
+          border-radius: $border-radius-md;
+          border: 1px solid rgba($border-color, 0.5);
+          transition: all $transition-bezier;
+          
+          &:hover {
+            background: white;
+            border-color: $border-color;
+            box-shadow: $shadow-sm;
+          }
+          
+          .item-label {
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            color: $text-muted;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+          
+          .item-value {
+            font-size: $font-size-base;
+            font-weight: $font-weight-medium;
+            color: $text-primary;
+            line-height: $line-height-normal;
+            
+            &.status-success {
+              color: $success-color;
+              font-weight: $font-weight-semibold;
+            }
+            
+            &.status-warning {
+              color: $warning-color;
+              font-weight: $font-weight-semibold;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  .summary-notice {
+    margin: $spacing-xl;
+    padding: $spacing-xl;
+    background: linear-gradient(135deg, #fff7e6 0%, #fff2cc 100%);
+    border: 1px solid rgba($warning-color, 0.3);
+    border-radius: $border-radius-lg;
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-lg;
+    
+    .notice-icon {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      background: $warning-color;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: $shadow-sm;
+      
+      i {
+        font-size: 24px;
+        color: white;
+      }
+    }
+    
+    .notice-content {
+      flex: 1;
+      
+      h4 {
+        margin: 0 0 $spacing-sm 0;
+        font-size: $font-size-lg;
+        font-weight: $font-weight-semibold;
+        color: darken($warning-color, 15%);
+      }
+      
+      p {
+        margin: 0;
+        font-size: $font-size-base;
+        color: darken($warning-color, 10%);
+        line-height: $line-height-normal;
+      }
+    }
+  }
+
+  // Submission Loading State
+  .submission-loading {
+    margin: $spacing-xl;
+    padding: $spacing-xl;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid rgba($primary-color, 0.2);
+    border-radius: $border-radius-lg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-in;
+    
+    .loading-content {
+      display: flex;
+      align-items: center;
+      gap: $spacing-lg;
+      text-align: center;
+      
+      span[nz-icon] {
+        font-size: 48px;
+        color: $primary-color;
+        animation: spin 1s linear infinite;
+      }
+      
+      .loading-text {
+        h4 {
+          margin: 0 0 $spacing-sm 0;
+          font-size: $font-size-lg;
+          font-weight: $font-weight-semibold;
+          color: $primary-color;
+        }
+        
+        p {
+          margin: 0;
+          font-size: $font-size-base;
+          color: $text-secondary;
+          line-height: $line-height-normal;
+        }
+      }
+    }
+  }
+}
+
+// Responsive adjustments for review modal
+@media (max-width: 768px) {
+  ::ng-deep .review-confirmation-modal {
+    .ant-modal-body {
+      max-height: 60vh;
+    }
+    
+    .review-summary-modal {
+      .summary-header {
+        padding: $spacing-lg;
+        flex-direction: column;
+        text-align: center;
+        gap: $spacing-md;
+        
+        .header-icon {
+          width: 48px;
+          height: 48px;
+          
+          i {
+            font-size: 24px;
+          }
+        }
+        
+        .header-content {
+          .header-title {
+            font-size: $font-size-xl;
+          }
+          
+          .header-subtitle {
+            font-size: $font-size-sm;
+          }
+        }
+      }
+      
+      .summary-content {
+        padding: $spacing-lg;
+        
+        .summary-section {
+          .section-header {
+            padding: $spacing-md $spacing-lg;
+            
+            h4 {
+              font-size: $font-size-base;
+            }
+          }
+          
+          .summary-grid {
+            padding: $spacing-md $spacing-lg;
+            grid-template-columns: 1fr;
+            gap: $spacing-sm;
+            
+            .summary-item {
+              padding: $spacing-sm;
+              
+              .item-label {
+                font-size: $font-size-xs;
+              }
+              
+              .item-value {
+                font-size: $font-size-sm;
+              }
+            }
+          }
+        }
+      }
+      
+      .summary-notice {
+        margin: $spacing-lg;
+        padding: $spacing-lg;
+        flex-direction: column;
+        text-align: center;
+        gap: $spacing-md;
+        
+        .notice-icon {
+          width: 40px;
+          height: 40px;
+          
+          i {
+            font-size: 20px;
+          }
+        }
+        
+        .notice-content {
+          h4 {
+            font-size: $font-size-base;
+          }
+          
+          p {
+            font-size: $font-size-sm;
+          }
+        }
+      }
+
+      // Submission Loading State - Mobile
+      .submission-loading {
+        margin: $spacing-lg;
+        padding: $spacing-lg;
+        
+        .loading-content {
+          flex-direction: column;
+          gap: $spacing-md;
+          
+          span[nz-icon] {
+            font-size: 36px;
+          }
+          
+          .loading-text {
+            h4 {
+              font-size: $font-size-base;
+            }
+            
+            p {
+              font-size: $font-size-sm;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive adjustments for review modal
+// Large Desktop (1200px and above)
+@media (min-width: 1200px) {
+  ::ng-deep .review-confirmation-modal {
+    .ant-modal {
+      max-width: 1000px;
+    }
+    
+    .review-summary-modal {
+      .summary-content {
+        .summary-grid {
+          grid-template-columns: repeat(3, 1fr);
+          gap: $spacing-lg;
+        }
+      }
+    }
+  }
+}
+
+// Medium Desktop (992px - 1199px)
+@media (min-width: 992px) and (max-width: 1199px) {
+  ::ng-deep .review-confirmation-modal {
+    .ant-modal {
+      max-width: 900px;
+    }
+    
+    .review-summary-modal {
+      .summary-content {
+        .summary-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: $spacing-md;
+        }
+      }
+    }
+  }
+}
+
+// Small Desktop (768px - 991px)
+@media (min-width: 768px) and (max-width: 991px) {
+  ::ng-deep .review-confirmation-modal {
+    .ant-modal {
+      max-width: 800px;
+    }
+    
+    .review-summary-modal {
+      .summary-content {
+        .summary-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: $spacing-sm;
+        }
+      }
+    }
+  }
+}
+
+// Tablet (576px - 767px)
+@media (min-width: 576px) and (max-width: 767px) {
+  ::ng-deep .review-confirmation-modal {
+    .ant-modal {
+      max-width: 95vw;
+      margin: 10px;
+    }
+    
+    .ant-modal-header {
+      .ant-modal-title {
+        font-size: $font-size-lg;
+        
+        .modal-title {
+          gap: $spacing-sm;
+          
+          i {
+            font-size: 20px;
+          }
+        }
+      }
+    }
+    
+    .ant-modal-body {
+      max-height: 65vh;
+    }
+    
+    .ant-modal-footer {
+      padding: $spacing-md $spacing-lg;
+      
+      .ant-btn {
+        height: 36px;
+        padding: 0 $spacing-lg;
+        font-size: $font-size-sm;
+      }
+    }
+    
+    .review-summary-modal {
+      .summary-header {
+        padding: $spacing-md;
+        flex-direction: column;
+        text-align: center;
+        gap: $spacing-md;
+        
+        .header-icon {
+          width: 44px;
+          height: 44px;
+          
+          i {
+            font-size: 22px;
+          }
+        }
+        
+        .header-content {
+          .header-title {
+            font-size: $font-size-lg;
+          }
+          
+          .header-subtitle {
+            font-size: $font-size-sm;
+          }
+        }
+      }
+      
+      .summary-content {
+        padding: $spacing-md;
+        
+        .summary-section {
+          margin-bottom: $spacing-lg;
+          
+          .section-header {
+            padding: $spacing-sm $spacing-md;
+            gap: $spacing-sm;
+            
+            i {
+              font-size: $font-size-base;
+            }
+            
+            h4 {
+              font-size: $font-size-base;
+            }
+          }
+          
+          .summary-grid {
+            padding: $spacing-md;
+            grid-template-columns: 1fr;
+            gap: $spacing-sm;
+          }
+        }
+      }
+      
+      .summary-notice {
+        margin: $spacing-md;
+        padding: $spacing-md;
+        gap: $spacing-md;
+        
+        .notice-icon {
+          width: 44px;
+          height: 44px;
+          
+          i {
+            font-size: 22px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Mobile (up to 575px)
+@media (max-width: 575px) {
+  ::ng-deep .review-confirmation-modal {
+    .ant-modal {
+      max-width: 98vw;
+      margin: 5px;
+      top: 20px;
+    }
+    
+    .ant-modal-header {
+      padding: $spacing-md;
+      
+      .ant-modal-title {
+        font-size: $font-size-base;
+        
+        .modal-title {
+          gap: $spacing-xs;
+          flex-direction: column;
+          text-align: center;
+          
+          i {
+            font-size: 18px;
+          }
+        }
+      }
+    }
+    
+    .ant-modal-body {
+      max-height: 60vh;
+    }
+    
+    .ant-modal-footer {
+      padding: $spacing-sm $spacing-md;
+      flex-direction: column;
+      gap: $spacing-sm;
+      
+      .ant-btn {
+        width: 100%;
+        height: 40px;
+        padding: 0 $spacing-md;
+        font-size: $font-size-sm;
+        border-radius: $border-radius-sm;
+      }
+    }
+    
+    .review-summary-modal {
+      .summary-header {
+        padding: $spacing-sm;
+        flex-direction: column;
+        text-align: center;
+        gap: $spacing-sm;
+        
+        .header-icon {
+          width: 40px;
+          height: 40px;
+          
+          i {
+            font-size: 20px;
+          }
+        }
+        
+        .header-content {
+          .header-title {
+            font-size: $font-size-base;
+            margin-bottom: $spacing-xs;
+          }
+          
+          .header-subtitle {
+            font-size: $font-size-xs;
+          }
+        }
+      }
+      
+      .summary-content {
+        padding: $spacing-sm;
+        
+        .summary-section {
+          margin-bottom: $spacing-md;
+          
+          .section-header {
+            padding: $spacing-sm;
+            gap: $spacing-xs;
+            
+            i {
+              font-size: $font-size-sm;
+            }
+            
+            h4 {
+              font-size: $font-size-sm;
+            }
+          }
+          
+          .summary-grid {
+            padding: $spacing-sm;
+            grid-template-columns: 1fr;
+            gap: $spacing-xs;
+            
+            .summary-item {
+              padding: $spacing-xs;
+              
+              .item-label {
+                font-size: $font-size-xs;
+                letter-spacing: 0.3px;
+              }
+              
+              .item-value {
+                font-size: $font-size-xs;
+              }
+            }
+          }
+        }
+      }
+      
+      .summary-notice {
+        margin: $spacing-sm;
+        padding: $spacing-sm;
+        flex-direction: column;
+        text-align: center;
+        gap: $spacing-sm;
+        
+        .notice-icon {
+          width: 36px;
+          height: 36px;
+          
+          i {
+            font-size: 18px;
+          }
+        }
+        
+        .notice-content {
+          h4 {
+            font-size: $font-size-sm;
+            margin-bottom: $spacing-xs;
+          }
+          
+          p {
+            font-size: $font-size-xs;
+            line-height: $line-height-tight;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Extra Small Mobile (up to 375px)
+@media (max-width: 375px) {
+  ::ng-deep .review-confirmation-modal {
+    .ant-modal {
+      max-width: 99vw;
+      margin: 2px;
+    }
+    
+    .review-summary-modal {
+      .summary-header {
+        .header-icon {
+          width: 36px;
+          height: 36px;
+          
+          i {
+            font-size: 18px;
+          }
+        }
+        
+        .header-content {
+          .header-title {
+            font-size: $font-size-sm;
+          }
+          
+          .header-subtitle {
+            font-size: $font-size-xs;
+          }
+        }
+      }
+      
+      .summary-content {
+        .summary-section {
+          .summary-grid {
+            .summary-item {
+              .item-label {
+                font-size: $font-size-xs;
+                letter-spacing: 0.2px;
+              }
+              
+              .item-value {
+                font-size: $font-size-xs;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Landscape Mobile Orientation
+@media (max-width: 767px) and (orientation: landscape) {
+  ::ng-deep .review-confirmation-modal {
+    .ant-modal-body {
+      max-height: 50vh;
+    }
+    
+    .review-summary-modal {
+      .summary-header {
+        flex-direction: row;
+        text-align: left;
+        gap: $spacing-md;
+        
+        .header-icon {
+          width: 40px;
+          height: 40px;
+        }
+      }
+      
+      .summary-content {
+        .summary-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    }
+  }
+}
+
+// High DPI Displays
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  ::ng-deep .review-confirmation-modal {
+    .review-summary-modal {
+      .summary-header {
+        .header-icon {
+          box-shadow: 0 2px 8px rgba($primary-color, 0.3);
+        }
+      }
+      
+      .summary-notice {
+        .notice-icon {
+          box-shadow: 0 2px 6px rgba($warning-color, 0.3);
+        }
+      }
+    }
   }
 }
 

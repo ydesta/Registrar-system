@@ -49,25 +49,51 @@
         </div>
     </nz-tab>
 
-    <nz-tab [nzTitle]="applicationFeeTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[5]">
-        <ng-template #applicationFeeTemplate>
-            <span nz-icon nzType="credit-card" nzTheme="outline"></span>
-            Application Fee
-        </ng-template>
-        <div class="tab-content">
-            <ng-content select="[tabContent='applicationFee']"></ng-content>
-        </div>
-    </nz-tab>
+    <!-- Default Tab Order (General Information) -->
+    <ng-container *ngIf="tabOrder === 'default'">
+        <nz-tab [nzTitle]="academicTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[5]">
+            <ng-template #academicTemplate>
+                <span nz-icon nzType="read" nzTheme="outline"></span>
+                Academic Program Request
+            </ng-template>
+            <div class="tab-content">
+                <ng-content select="[tabContent='academicProgram']"></ng-content>
+            </div>
+        </nz-tab>
 
-    <nz-tab [nzTitle]="academicTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[6]">
-        <ng-template #academicTemplate>
-            <span nz-icon nzType="read" nzTheme="outline"></span>
-            Academic Program Request
-        </ng-template>
-        <div class="tab-content">
-            <ng-content select="[tabContent='academicProgram']"></ng-content>
-        </div>
-    </nz-tab>
+        <nz-tab [nzTitle]="applicationFeeTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[6]">
+            <ng-template #applicationFeeTemplate>
+                <span nz-icon nzType="credit-card" nzTheme="outline"></span>
+                Application Fee
+            </ng-template>
+            <div class="tab-content">
+                <ng-content select="[tabContent='applicationFee']"></ng-content>
+            </div>
+        </nz-tab>
+    </ng-container>
+
+    <!-- Reviewer Tab Order (ApplicationRequestDetail) -->
+    <ng-container *ngIf="tabOrder === 'reviewer'">
+        <nz-tab [nzTitle]="applicationFeeTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[5]">
+            <ng-template #applicationFeeTemplate>
+                <span nz-icon nzType="credit-card" nzTheme="outline"></span>
+                Application Fee
+            </ng-template>
+            <div class="tab-content">
+                <ng-content select="[tabContent='applicationFeeReviewer']"></ng-content>
+            </div>
+        </nz-tab>
+
+        <nz-tab [nzTitle]="academicTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[6]">
+            <ng-template #academicTemplate>
+                <span nz-icon nzType="read" nzTheme="outline"></span>
+                Academic Program Request
+            </ng-template>
+            <div class="tab-content">
+                <ng-content select="[tabContent='academicProgramReviewer']"></ng-content>
+            </div>
+        </nz-tab>
+    </ng-container>
 
     <nz-tab *ngIf="showFilesTab" [nzTitle]="agreementTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[7]">
         <ng-template #agreementTemplate>
@@ -96,10 +122,11 @@
         nz-button 
         nzType="primary" 
         (click)="onSave()" 
-        [disabled]="saveDisabled"
+        [disabled]="saveDisabled || saveLoading"
         class="custom-button save-button">
-        <span nz-icon nzType="save"></span>
-        Save
+        <span *ngIf="!saveLoading" nz-icon nzType="save"></span>
+        <span *ngIf="saveLoading" nz-icon nzType="loading" nzSpin="true"></span>
+        {{ saveLoading ? 'Saving...' : 'Save' }}
     </button>
 
     <button 
@@ -107,7 +134,7 @@
         nz-button 
         nzType="primary" 
         (click)="nextTab()" 
-        [disabled]="nextDisabled"
+        [disabled]="isNextButtonDisabled()"
         class="custom-button">
         Next
         <span nz-icon nzType="right"></span>
