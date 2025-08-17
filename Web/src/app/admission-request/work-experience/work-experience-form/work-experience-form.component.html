@@ -1,153 +1,150 @@
 <div class="work-experience-form-container">
-  <!-- Section Header -->
-  <div class="section-header-wrapper">
+  <!-- Form Header -->
+  <div class="form-header">
     <div class="header-icon">
       <i nz-icon nzType="briefcase" nzTheme="outline"></i>
     </div>
     <div class="header-content">
-      <h3 class="section-title">Work Experience Information</h3>
-      <p class="section-subtitle">Please provide details about your professional work experience</p>
+      <h2 class="form-title">Work Experience Information</h2>
+      <p class="form-subtitle">Please provide details about your professional work experience</p>
     </div>
   </div>
 
   <!-- Form Content -->
-  <div class="content-card">
-    <div class="card-body">
-      <form nz-form [formGroup]="applicantWorkExpForm" [nzLayout]="'vertical'">
-        
-        <!-- Company Information -->
-        <div class="form-section">
-          <div class="section-header-wrapper">
-            <div class="header-icon">
-              <i nz-icon nzType="bank" nzTheme="outline"></i>
-            </div>
-            <div class="header-content">
-              <h4 class="section-title">Company Details</h4>
-              <p class="section-subtitle">Information about your employer</p>
-            </div>
+  <form nz-form [formGroup]="applicantWorkExpForm" class="work-experience-form">
+    <!-- Company Name Field -->
+    <nz-form-item>
+      <nz-form-control [nzErrorTip]="companyNameErrorTpl">
+        <input 
+          nz-input 
+          formControlName="companyName" 
+          placeholder=" "
+          id="companyName"
+          class="input-with-floating-label"
+          [class.error]="applicantWorkExpForm.get('companyName')?.invalid && (applicantWorkExpForm.get('companyName')?.dirty || applicantWorkExpForm.get('companyName')?.touched)" 
+        />
+        <label for="companyName" class="floating-label">
+          <i nz-icon nzType="bank" nzTheme="outline"></i>
+          Company Name <span class="required">*</span>
+        </label>
+        <ng-template #companyNameErrorTpl let-control>
+          <div class="error-message" *ngIf="control.hasError('required')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            Company name is required
           </div>
-          
-          <div class="form-grid">
-            <div class="form-field">
-              <nz-form-item>
-                <nz-form-label>
-                  <i nz-icon nzType="bank" nzTheme="outline"></i>
-                  Company Name <span class="required">*</span>
-                </nz-form-label>
-                <nz-form-control [nzValidateStatus]="''">
-                  <input nz-input formControlName="companyName" placeholder="Enter company name" />
-                  <div *ngIf="applicantWorkExpForm.get('companyName')?.errors && applicantWorkExpForm.get('companyName')?.touched" class="custom-error-message">
-                    <span *ngIf="applicantWorkExpForm.get('companyName')?.errors?.['required']">
-                      Company name is required
-                    </span>
-                  </div>
-                </nz-form-control>
-              </nz-form-item>
-            </div>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
 
-            <div class="form-field">
-              <nz-form-item>
-                <nz-form-label>
-                  <i nz-icon nzType="user" nzTheme="outline"></i>
-                  Position/Post <span class="required">*</span>
-                </nz-form-label>
-                <nz-form-control [nzValidateStatus]="''">
-                  <input nz-input formControlName="post" placeholder="Enter your position" />
-                  <div *ngIf="applicantWorkExpForm.get('post')?.errors && applicantWorkExpForm.get('post')?.touched" class="custom-error-message">
-                    <span *ngIf="applicantWorkExpForm.get('post')?.errors?.['required']">
-                      Position is required
-                    </span>
-                  </div>
-                </nz-form-control>
-              </nz-form-item>
-            </div>
-
-            <div class="form-field">
-              <nz-form-item>
-                <nz-form-label>
-                  <i nz-icon nzType="calendar" nzTheme="outline"></i>
-                  Total Work Years <span class="required">*</span>
-                </nz-form-label>
-                <nz-form-control [nzValidateStatus]="''">
-                  <input nz-input formControlName="totalWorkYear" placeholder="Enter total work years" type="number" min="0" step="0.1" />
-                  <div *ngIf="applicantWorkExpForm.get('totalWorkYear')?.errors && applicantWorkExpForm.get('totalWorkYear')?.touched" class="custom-error-message">
-                    <span *ngIf="applicantWorkExpForm.get('totalWorkYear')?.errors?.['required']">
-                      Total work years is required
-                    </span>
-                    <span *ngIf="applicantWorkExpForm.get('totalWorkYear')?.errors?.['min']">
-                      Work years cannot be negative
-                    </span>
-                  </div>
-                </nz-form-control>
-              </nz-form-item>
-            </div>
+    <!-- Position/Post Field -->
+    <nz-form-item>
+      <nz-form-control [nzErrorTip]="postErrorTpl">
+        <input 
+          nz-input 
+          formControlName="post" 
+          placeholder=" "
+          id="post"
+          class="input-with-floating-label"
+          [class.error]="applicantWorkExpForm.get('post')?.invalid && (applicantWorkExpForm.get('post')?.dirty || applicantWorkExpForm.get('post')?.touched)" 
+        />
+        <label for="post" class="floating-label">
+          <i nz-icon nzType="user" nzTheme="outline"></i>
+          Position/Post <span class="required">*</span>
+        </label>
+        <ng-template #postErrorTpl let-control>
+          <div class="error-message" *ngIf="control.hasError('required')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            Position is required
           </div>
-        </div>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
 
-        <!-- File Attachment Section -->
-        <div *ngIf="workExperinceId==undefined" class="form-section">
-          <div class="section-header-wrapper">
-            <div class="header-icon">
-              <i nz-icon nzType="paper-clip" nzTheme="outline"></i>
-            </div>
-            <div class="header-content">
-              <h4 class="section-title">Supporting Documents</h4>
-              <p class="section-subtitle">Attach relevant certificates or documents</p>
-            </div>
+    <!-- Total Work Years Field -->
+    <nz-form-item>
+      <nz-form-control [nzErrorTip]="totalWorkYearErrorTpl">
+        <input 
+          nz-input 
+          formControlName="totalWorkYear" 
+          placeholder=" "
+          id="totalWorkYear"
+          type="number" 
+          min="0" 
+          step="0.1"
+          class="input-with-floating-label"
+          [class.error]="applicantWorkExpForm.get('totalWorkYear')?.invalid && (applicantWorkExpForm.get('totalWorkYear')?.dirty || applicantWorkExpForm.get('totalWorkYear')?.touched)" 
+        />
+        <label for="totalWorkYear" class="floating-label">
+          <i nz-icon nzType="calendar" nzTheme="outline"></i>
+          Total Work Years <span class="required">*</span>
+        </label>
+        <ng-template #totalWorkYearErrorTpl let-control>
+          <div class="error-message" *ngIf="control.hasError('required')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            Total work years is required
           </div>
-          
-          <div class="file-upload-section">
-            <nz-form-item>
-              <nz-form-label>
-                <i nz-icon nzType="upload" nzTheme="outline"></i>
-                Attach Files
-              </nz-form-label>
-              <nz-form-control>
-                <div class="file-upload-container">
-                  <label class="file-upload-button">
-                    <i nz-icon nzType="paper-clip" nzTheme="outline"></i>
-                    <span>Choose Files</span>
-                    <input type="file" id="workExperienceFiles" name="data" style="visibility: hidden" #f_input
-                        (change)="handleFileInputChange(f_input.files)" accept=".pdf, .jpg, .jpeg, .png, .gif"
-                        multiple />
-                  </label>
-                  
-                  <!-- File List Display -->
-                  <div *ngIf="file_list && file_list.length > 0" class="file-list">
-                    <div class="file-list-header">
-                      <i nz-icon nzType="file-text" nzTheme="outline"></i>
-                      <span>Selected Files ({{ file_list.length }})</span>
-                    </div>
-                    <div class="file-items">
-                      <div *ngFor="let fileName of file_list; let i = index" class="file-item">
-                        <i nz-icon nzType="file" nzTheme="outline"></i>
-                        <span class="file-name">{{ fileName }}</span>
-                        <button type="button" class="remove-file-btn" (click)="removeFile(i)">
-                          <i nz-icon nzType="close" nzTheme="outline"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p class="upload-hint">
-                    <i nz-icon nzType="info-circle" nzTheme="outline"></i>
-                    Supported formats: PDF, JPG, JPEG, PNG, GIF. Multiple files allowed.
-                  </p>
-                </div>
-              </nz-form-control>
-            </nz-form-item>
+          <div class="error-message" *ngIf="control.hasError('min')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            Work years cannot be negative
+          </div>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!-- File Upload Field -->
+    <nz-form-item *ngIf="workExperinceId==undefined">
+      <nz-form-control>
+        <div class="file-upload-section">
+          <label class="file-upload-label">
+            <i nz-icon nzType="paper-clip" nzTheme="outline"></i>
+            <span class="upload-text">Click to attach documents</span>
+            <input 
+              nz-input 
+              type="file" 
+              style="visibility: hidden" 
+              #f_input
+              (change)="handleFileInputChange(f_input.files)" 
+              accept=".pdf, .jpg, .jpeg, .png, .gif"
+              multiple 
+            />
+          </label>
+          <!-- File List Display -->
+          <div class="file-list" *ngIf="file_list && file_list.length > 0">
+            <div class="file-item" *ngFor="let fileName of file_list; let i = index">
+              <i nz-icon nzType="file" nzTheme="outline"></i>
+              <span class="file-name">{{ fileName }}</span>
+              <button type="button" class="remove-file-btn" (click)="removeFile(i)">
+                <i nz-icon nzType="close" nzTheme="outline"></i>
+              </button>
+            </div>
           </div>
         </div>
+      </nz-form-control>
+    </nz-form-item>
 
-        <!-- Action Buttons -->
-        <div class="form-actions">
-          <button nz-button [nzType]="'primary'" (click)="onSave()"
-              [disabled]="!applicantWorkExpForm.valid" class="save-button">
-            <span nz-icon nzType="save" nzTheme="outline"></span>
-            Save Work Experience
-          </button>
-        </div>
-      </form>
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <div class="action-buttons">
+        <button 
+          nz-button 
+          nzType="default" 
+          (click)="closeModal()"
+          class="cancel-btn"
+        >
+          <i nz-icon nzType="close" nzTheme="outline"></i>
+          Cancel
+        </button>
+        <button 
+          nz-button 
+          nzType="primary" 
+          (click)="onSave()"
+          [disabled]="!applicantWorkExpForm.valid"
+          class="submit-btn"
+        >
+          <i nz-icon nzType="save" nzTheme="outline"></i>
+          {{ workExperinceId ? 'Update' : 'Save' }} Work Experience
+        </button>
+      </div>
     </div>
-  </div>
+  </form>
 </div>

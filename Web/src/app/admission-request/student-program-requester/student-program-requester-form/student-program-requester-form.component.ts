@@ -35,6 +35,7 @@ export class StudentProgramRequesterFormComponent implements OnInit {
     this.getAcademicProgramList();
     this.getListOfDivisionStatus();
     if (this.studentProgramRequester != undefined) {
+      console.log("45    ## ", this.studentProgramRequester);
       this.id = this.studentProgramRequester.id;
       this.academicProgramRequestForm.patchValue(this.studentProgramRequester);
     }
@@ -169,7 +170,7 @@ export class StudentProgramRequesterFormComponent implements OnInit {
     let division: StaticData = new StaticData();
     Division_Status.forEach(pair => {
       division = {
-        Id: pair.Id.toString(),
+        Id: pair.Id,
         Description: pair.Description
       };
       this.divisionStatusist.push(division);

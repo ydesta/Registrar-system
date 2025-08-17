@@ -1,0 +1,62 @@
+<div class="values-page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="container">
+      <h1 class="page-title">Our Values</h1>
+      <p class="page-subtitle">The core principles that guide our mission and shape our community</p>
+      <div class="header-underline"></div>
+    </div>
+  </div>
+
+  <!-- Values Content -->
+  <div class="values-content">
+    <div class="container">
+      <div class="values-grid">
+        <div class="value-item" *ngFor="let value of values">
+          <nz-card class="value-card">
+            <div class="icon-wrapper">
+              <i nz-icon [nzType]="value.icon" nzTheme="outline"></i>
+            </div>
+            <h3 class="value-title">{{ value.title }}</h3>
+            <p class="value-description">{{ value.description }}</p>
+          </nz-card>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mission Statement -->
+  <div class="mission-section">
+    <div class="container">
+      <div class="mission-content">
+        <h2>Our Mission</h2>
+        <p>To provide world-class education in computer science and technology, fostering innovation, critical thinking, and leadership skills that prepare students for successful careers in the digital age.</p>
+        <div class="mission-highlights">
+          <div class="highlight-item">
+            <i nz-icon nzType="check-circle" nzTheme="fill"></i>
+            <span>Excellence in Education</span>
+          </div>
+          <div class="highlight-item">
+            <i nz-icon nzType="check-circle" nzTheme="fill"></i>
+            <span>Industry-Relevant Skills</span>
+          </div>
+          <div class="highlight-item">
+            <i nz-icon nzType="check-circle" nzTheme="fill"></i>
+            <span>Research & Innovation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Call to Action -->
+  <div class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Join Our Community</h2>
+        <p>Be part of an institution that values excellence, innovation, and your success</p>
+        <button class="cta-button" routerLink="/portal">Learn More</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using FluentValidation;
 using SecureAuth.APPLICATION.Mediator;
 using SecureAuth.APPLICATION.Commands.Auth;
@@ -14,7 +13,6 @@ using SecureAuth.APPLICATION.Interfaces;
 using SecureAuth.DOMAIN.Models;
 using System.Security.Claims;
 using SecureAuth.INFRASTRUCTURE.Data;
-using SecureAuth.API.Middleware;
 
 namespace SecureAuth.API.Controllers
 {

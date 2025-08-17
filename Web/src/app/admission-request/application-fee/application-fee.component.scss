@@ -150,17 +150,30 @@
   .application-fee-container {
     padding: 10px;
     
+    .custom-card {
+      ::ng-deep .ant-card-head {
+        .ant-card-head-title {
+          font-size: 16px;
+          padding: 12px 16px;
+        }
+      }
+    }
+    
     .fee-details {
       .fee-info {
         padding: 16px;
+        margin-bottom: 16px;
         
         .fee-row {
           flex-direction: column;
           align-items: flex-start;
           gap: 8px;
+          padding: 16px 0;
           
           .label {
             font-size: 13px;
+            font-weight: 600;
+            color: #495057;
           }
           
           .value {
@@ -168,16 +181,169 @@
             
             &.amount {
               font-size: 15px;
+              font-weight: 700;
             }
+          }
+          
+          .status-tag {
+            align-self: flex-start;
+            font-size: 12px;
+            padding: 6px 10px;
+            margin-top: 4px;
+          }
+        }
+      }
+      
+      .payment-actions {
+        text-align: center;
+        
+        .button-spacer {
+          height: 12px;
+          margin: 6px 0;
+        }
+        
+        .payment-button {
+          width: 100%;
+          height: 48px; // Better touch target
+          padding: 0 20px;
+          font-size: 15px;
+          font-weight: 600;
+          border-radius: 8px;
+          margin-bottom: 12px;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+          
+          .anticon {
+            font-size: 16px;
+            margin-right: 8px;
+          }
+        }
+        
+        .payment-note {
+          margin-top: 16px;
+          
+          .payment-alert {
+            ::ng-deep .ant-alert-message {
+              font-size: 13px;
+              line-height: 1.4;
+            }
+          }
+        }
+      }
+    }
+    
+    .loading-container {
+      padding: 30px 16px;
+      
+      .loading-text {
+        font-size: 13px;
+        margin-top: 12px;
+      }
+    }
+    
+    .error-container {
+      .error-alert {
+        ::ng-deep .ant-alert-message {
+          font-size: 13px;
+          line-height: 1.4;
+        }
+      }
+    }
+  }
+}
+
+// Additional mobile optimizations for very small screens
+@media (max-width: 480px) {
+  .application-fee-container {
+    padding: 8px;
+    
+    .custom-card {
+      ::ng-deep .ant-card-head {
+        .ant-card-head-title {
+          font-size: 15px;
+          padding: 10px 12px;
+        }
+      }
+    }
+    
+    .fee-details {
+      .fee-info {
+        padding: 12px;
+        
+        .fee-row {
+          padding: 12px 0;
+          
+          .label {
+            font-size: 12px;
+          }
+          
+          .value {
+            font-size: 12px;
+            
+            &.amount {
+              font-size: 14px;
+            }
+          }
+          
+          .status-tag {
+            font-size: 11px;
+            padding: 4px 8px;
           }
         }
       }
       
       .payment-actions {
         .payment-button {
-          width: 100%;
           height: 44px;
-          font-size: 15px;
+          font-size: 14px;
+          padding: 0 16px;
+          
+          .anticon {
+            font-size: 15px;
+          }
+        }
+      }
+    }
+    
+    .loading-container {
+      padding: 24px 12px;
+      
+      .loading-text {
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+// Landscape mobile optimization
+@media (max-width: 768px) and (orientation: landscape) {
+  .application-fee-container {
+    .fee-details {
+      .fee-info {
+        .fee-row {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0;
+          
+          .status-tag {
+            align-self: center;
+            margin-top: 0;
+          }
+        }
+      }
+      
+      .payment-actions {
+        .payment-button {
+          width: auto;
+          min-width: 140px;
+          margin: 0 8px 0 0;
+          
+          &:last-child {
+            margin-right: 0;
+          }
         }
       }
     }

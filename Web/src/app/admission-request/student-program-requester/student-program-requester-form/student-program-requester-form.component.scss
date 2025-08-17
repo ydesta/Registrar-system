@@ -1,299 +1,362 @@
-// Import common styles
-@import '../../styles/common.scss';
-
+/* =============================================================================
+   DEBUGGING: Test Primary Color Application
+   ============================================================================= */
 .academic-program-form-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: $spacing-xl;
-  background: $background-white;
-  border-radius: $border-radius-xl;
-  box-shadow: $shadow-md;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Test that primary color can be applied */
+  .test-primary-color {
+    color: #1890ff !important;
+    background-color: #1890ff !important;
+    border-color: #1890ff !important;
+  }
+}
 
-  // Header Section
-  .form-header {
+/* Academic Program Form Container */
+.academic-program-form-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  max-width: 700px;
+  margin: 0 auto;
+  
+  /* Force primary color variables */
+  --primary-color: #1890ff !important;
+  --primary-light: #40a9ff !important;
+  --primary-dark: #096dd9 !important;
+}
+
+/* Form Header */
+.form-header {
+  background: linear-gradient(135deg, #1890ff, #096dd9);
+  color: white;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    gap: $spacing-lg;
-    margin-bottom: $spacing-xl;
-    padding: $spacing-xl;
-    background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
-    border-radius: $border-radius-lg;
-    color: white;
-    box-shadow: $shadow-lg;
+    justify-content: center;
+    font-size: 24px;
+  }
 
-    .header-icon {
-      width: 60px;
-      height: 60px;
-      background: rgba(255, 255, 255, 0.2);
+  .header-content {
+    flex: 1;
+
+    .form-title {
+      margin: 0 0 4px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .form-subtitle {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.9;
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+}
+
+/* Form Content */
+.academic-program-form {
+  padding: 32px 24px 24px;
+
+  /* Form Items */
+  ::ng-deep .ant-form-item {
+    margin-bottom: 24px;
+    position: relative;
+
+    .ant-form-item-label {
+      display: none; // Hide default labels when using floating labels
+    }
+
+    .ant-form-item-control {
+      position: relative; // Added for proper positioning context
+    }
+  }
+}
+
+/* =============================================================================
+   WORKING FLOATING LABEL IMPLEMENTATION
+   ============================================================================= */
+
+/* Working floating label implementation for select fields */
+.select-with-floating-label {
+  position: relative;
+  width: 100%;
+
+  /* Ensure the floating label is positioned relative to the select */
+  & + .floating-label {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 16px;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    background: white;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    z-index: 1;
+
+    .required {
+      color: #ff4d4f;
+      font-weight: 600;
+    }
+
+    i {
+      font-size: 16px;
+      color: #1890ff !important;
+    }
+  }
+
+  /* Float the label when focused, open, or has value */
+  &:focus + .floating-label,
+  &.ant-select-focused + .floating-label,
+  &.ant-select-open + .floating-label,
+  &:not(.ant-select-empty) + .floating-label {
+    top: -8px;
+    left: 12px;
+    font-size: 12px;
+    color: #1890ff !important;
+    background: white;
+    padding: 0 4px;
+  }
+}
+
+/* Ensure proper positioning context for floating labels */
+::ng-deep .ant-form-item .ant-form-item-control {
+  position: relative; /* Added for proper positioning context */
+
+  /* Style the floating labels that are direct children */
+  .floating-label {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 16px;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    background: white;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    z-index: 1;
+
+    .required {
+      color: #ff4d4f;
+      font-weight: 600;
+    }
+
+    i {
+      font-size: 16px;
+      color: #1890ff !important;
+    }
+  }
+}
+
+/* ULTIMATE Primary Color Overrides - Most Specific */
+::ng-deep .academic-program-form-container .ant-select.select-with-floating-label {
+  .ant-select-selector {
+    border-radius: 8px !important;
+    border: 1.5px solid #e8e8e8 !important;
+    background: #fafafa !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    
+    &:hover {
+      border-color: #40a9ff !important;
+      background: #fff !important;
+    }
+  }
+  
+  &.ant-select-focused .ant-select-selector {
+    border-color: #1890ff !important;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+    background: #fff !important;
+  }
+  
+  &.ant-select-open .ant-select-selector {
+    border-color: #1890ff !important;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+    background: #fff !important;
+  }
+}
+
+/* Additional Override for Global Select Styles */
+::ng-deep .academic-program-form-container .ant-select {
+  &:hover .ant-select-selector {
+    border-color: #40a9ff !important;
+    background: #fff !important;
+  }
+  
+  &.ant-select-focused .ant-select-selector {
+    border-color: #1890ff !important;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+    background: #fff !important;
+  }
+  
+  &.ant-select-open .ant-select-selector {
+    border-color: #1890ff !important;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+    background: #fff !important;
+  }
+}
+
+/* Override Global Floating Label Colors */
+::ng-deep .academic-program-form-container .floating-label {
+  i {
+    color: #1890ff !important;
+  }
+  
+  &.floating-label-float {
+    color: #1890ff !important;
+  }
+}
+
+/* Override Any Global Select Focus States */
+::ng-deep .academic-program-form-container .ant-select.ant-select-focused .ant-select-selector,
+::ng-deep .academic-program-form-container .ant-select.ant-select-open .ant-select-selector {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Override Global Hover States */
+::ng-deep .academic-program-form-container .ant-select:hover .ant-select-selector {
+  border-color: #40a9ff !important;
+}
+
+/* NUCLEAR OPTION - Override Everything */
+::ng-deep .academic-program-form-container {
+  .ant-select {
+    .ant-select-selector {
+      &:hover {
+        border-color: #40a9ff !important;
+      }
+    }
+    
+    &.ant-select-focused .ant-select-selector,
+    &.ant-select-open .ant-select-selector {
+      border-color: #1890ff !important;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+    }
+  }
+  
+  .floating-label {
+    i {
+      color: #1890ff !important;
+    }
+    
+    &.floating-label-float,
+    &:not(.floating-label-float) {
+      color: #1890ff !important;
+    }
+  }
+}
+
+/* Information Cards */
+.info-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 32px 0;
+
+  .info-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #1890ff, #40a9ff);
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(24, 144, 255, 0.15);
+      border-color: #1890ff;
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      margin-bottom: 16px;
 
-      span {
-        font-size: 28px;
+      i {
         color: white;
+        font-size: 20px;
       }
     }
 
-    .header-content {
-      flex: 1;
-
-      .form-title {
-        margin: 0 0 $spacing-sm 0;
-        font-size: $font-size-xxxl;
-        font-weight: $font-weight-bold;
-        color: white;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    .card-content {
+      h4 {
+        margin: 0 0 8px 0;
+        color: #262626;
+        font-size: 16px;
+        font-weight: 600;
       }
 
-      .form-subtitle {
+      p {
         margin: 0;
-        font-size: $font-size-base;
-        color: rgba(255, 255, 255, 0.9);
-        font-weight: $font-weight-normal;
-      }
-    }
-  }
-
-  // Form Section - Using standard ng-zorro styling
-  .form-section {
-    margin-bottom: $spacing-xl;
-
-    // Standard ng-zorro form styling
-    ::ng-deep {
-      .ant-form-item {
-        margin-bottom: $spacing-lg;
-        
-        .ant-form-item-label {
-          label {
-            font-weight: $font-weight-semibold;
-            color: $text-primary;
-            font-size: $font-size-base;
-            display: flex;
-            align-items: center;
-            gap: $spacing-sm;
-            
-            span[nz-icon] {
-              color: $primary-color;
-              font-size: $font-size-lg;
-            }
-          }
-        }
-
-        .ant-form-item-control {
-          .ant-select {
-            width: 100%;
-          }
-
-          .error-message {
-            margin-top: $spacing-sm;
-            color: $error-color;
-            font-size: $font-size-sm;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: $spacing-sm $spacing-md;
-            background: #fdf2f2;
-            border: 1px solid #fecaca;
-            border-radius: $border-radius-sm;
-            animation: slideIn 0.3s ease;
-
-            &::before {
-              content: "⚠️";
-              font-size: 12px;
-            }
-          }
-        }
-      }
-    }
-
-    // Information Cards
-    .info-cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: $spacing-lg;
-      margin-top: $spacing-xl;
-
-      .info-card {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        border: 1px solid #e2e8f0;
-        border-radius: $border-radius-lg;
-        padding: $spacing-lg;
-        transition: all $transition-normal;
-        position: relative;
-        overflow: hidden;
-
-        &::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 4px;
-          background: linear-gradient(90deg, $primary-color, $primary-light);
-        }
-
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: $shadow-md;
-          border-color: $primary-color;
-        }
-
-        .card-icon {
-          width: 40px;
-          height: 40px;
-          background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: $spacing-md;
-
-          span {
-            color: white;
-            font-size: $font-size-lg;
-          }
-        }
-
-        .card-content {
-          h4 {
-            margin: 0 0 $spacing-sm 0;
-            color: $text-primary;
-            font-size: $font-size-base;
-            font-weight: $font-weight-semibold;
-          }
-
-          p {
-            margin: 0;
-            color: $text-secondary;
-            font-size: $font-size-sm;
-            line-height: $line-height-normal;
-          }
-        }
-      }
-    }
-  }
-
-  // Action Buttons
-  .action-buttons {
-    display: flex;
-    gap: $spacing-md;
-    justify-content: flex-end;
-    padding-top: $spacing-xl;
-    border-top: 1px solid #e2e8f0;
-
-    .cancel-btn, .submit-btn {
-      height: 48px;
-      padding: 0 $spacing-xl;
-      border-radius: $border-radius-md;
-      font-weight: $font-weight-semibold;
-      font-size: $font-size-base;
-      display: flex;
-      align-items: center;
-      gap: $spacing-sm;
-      transition: all $transition-normal;
-      border: 2px solid transparent;
-
-      span {
-        font-size: $font-size-base;
-      }
-    }
-
-    .cancel-btn {
-      background: #f8fafc;
-      border-color: #e2e8f0;
-      color: $text-secondary;
-
-      &:hover {
-        background: #f1f5f9;
-        border-color: #cbd5e1;
-        color: $text-primary;
-        transform: translateY(-1px);
-        box-shadow: $shadow-sm;
-      }
-    }
-
-    .submit-btn {
-      background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
-      border-color: $primary-color;
-      color: white;
-      box-shadow: 0 4px 15px rgba($primary-color, 0.3);
-
-      &:hover:not(:disabled) {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba($primary-color, 0.4);
-      }
-
-      &:disabled {
-        background: #cbd5e1;
-        border-color: #cbd5e1;
-        color: #94a3b8;
-        cursor: not-allowed;
-        box-shadow: none;
+        color: #595959;
+        font-size: 14px;
+        line-height: 1.5;
       }
     }
   }
 }
 
-// Responsive Design
-@media (max-width: 768px) {
-  .academic-program-form-container {
-    padding: $spacing-md;
-    margin: $spacing-md;
-
-    .form-header {
-      flex-direction: column;
-      text-align: center;
-      gap: $spacing-md;
-      padding: $spacing-lg;
-
-      .header-icon {
-        width: 50px;
-        height: 50px;
-
-        span {
-          font-size: $font-size-xxl;
-        }
-      }
-
-      .header-content {
-        .form-title {
-          font-size: $font-size-xxl;
-        }
-
-        .form-subtitle {
-          font-size: $font-size-sm;
-        }
-      }
-    }
-
-    .form-section {
-      .info-cards {
-        grid-template-columns: 1fr;
-        gap: $spacing-md;
-      }
-    }
-
-    .action-buttons {
-      flex-direction: column;
-
-      .cancel-btn, .submit-btn {
-        width: 100%;
-        justify-content: center;
-      }
-    }
+/* Enhanced Error Message Styling */
+.error-message {
+  color: #ff4d4f;
+  font-size: 13px;
+  margin-top: 6px;
+  padding: 6px 12px;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: fadeIn 0.3s ease;
+  
+  i {
+    font-size: 14px;
+    flex-shrink: 0;
   }
 }
 
-// Animations
-@keyframes slideIn {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
@@ -301,103 +364,114 @@
   }
 }
 
-// Modal Override Styling to align with project design
-::ng-deep .ant-modal {
-  .ant-modal-content {
-    border-radius: $border-radius-xl;
-    overflow: hidden;
-    box-shadow: $shadow-lg;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-  }
+/* Form Actions */
+.form-actions {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
 
-  .ant-modal-header {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    border-bottom: 1px solid #e8e8e8;
-    padding: $spacing-lg $spacing-xl;
-    border-radius: $border-radius-xl $border-radius-xl 0 0;
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
 
-    .ant-modal-title {
-      font-weight: $font-weight-semibold;
-      color: $text-primary;
-      font-size: $font-size-lg;
-    }
-  }
+    .cancel-btn {
+      height: 40px;
+      padding: 0 24px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 6px;
+      border: 1px solid #d9d9d9;
+      background: #fff;
+      color: #595959;
+      transition: all 0.3s ease;
 
-  .ant-modal-body {
-    padding: $spacing-xl;
-    background: white;
-  }
-
-  .ant-modal-footer {
-    background: #fafafa;
-    border-top: 1px solid #e8e8e8;
-    padding: $spacing-md $spacing-xl;
-    border-radius: 0 0 $border-radius-xl $border-radius-xl;
-
-    .ant-btn {
-      border-radius: $border-radius-md;
-      font-weight: $font-weight-medium;
-      padding: $spacing-sm $spacing-md;
-      height: 36px;
-      transition: all $transition-normal;
-
-      &.ant-btn-primary {
-        background: linear-gradient(135deg, $primary-color, $primary-light);
-        border: none;
-        box-shadow: 0 4px 12px rgba($primary-color, 0.3);
-
-        &:hover {
-          background: linear-gradient(135deg, $primary-light, $primary-color);
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba($primary-color, 0.4);
-        }
-
-        &:active {
-          transform: translateY(0);
-        }
+      &:hover {
+        color: #1890ff;
+        border-color: #1890ff;
+        background: #f8f9fa;
       }
 
-      &.ant-btn-default {
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        border: 1px solid #d9d9d9;
-        color: $text-secondary;
-
-        &:hover {
-          background: linear-gradient(135deg, #e9ecef, #dee2e6);
-          border-color: $primary-color;
-          color: $primary-color;
-          transform: translateY(-1px);
-        }
+      i {
+        margin-right: 8px;
       }
     }
-  }
 
-  .ant-modal-close {
-    color: $text-secondary;
-    transition: all $transition-normal;
+    .submit-btn {
+      height: 40px;
+      padding: 0 24px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #1890ff, #096dd9);
+      border: none;
+      color: white;
+      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);
+      transition: all 0.3s ease;
 
-    &:hover {
-      color: $text-primary;
-      transform: scale(1.1);
+      &:hover {
+        background: linear-gradient(135deg, #40a9ff, #1890ff);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.45);
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(24, 144, 255, 0.35);
+      }
+
+      i {
+        margin-right: 8px;
+      }
     }
   }
 }
 
-// Animation for modal appearance
-::ng-deep .ant-modal-content {
-  animation: modalSlideIn 0.3s ease-out;
-}
-
-// Modal animation
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .academic-program-form-container {
+    margin: 0 16px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+
+  .form-header {
+    padding: 20px;
+    
+    .header-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+    }
+
+    .header-content {
+      .form-title {
+        font-size: 18px;
+      }
+
+      .form-subtitle {
+        font-size: 13px;
+      }
+    }
+  }
+
+  .academic-program-form {
+    padding: 24px 20px 20px;
+  }
+
+  .info-cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .form-actions {
+    .action-buttons {
+      flex-direction: column;
+      
+      .cancel-btn,
+      .submit-btn {
+        width: 100%;
+      }
+    }
   }
 }
 

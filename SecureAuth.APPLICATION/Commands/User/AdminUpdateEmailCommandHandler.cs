@@ -38,8 +38,6 @@ namespace SecureAuth.APPLICATION.Commands.User
                         EmailConfirmed = false
                     };
                 }
-
-                // Check if new email is already in use
                 var existingUser = await _userManager.FindByEmailAsync(command.NewEmail);
                 if (existingUser != null && existingUser.Id != user.Id)
                 {
@@ -63,7 +61,6 @@ namespace SecureAuth.APPLICATION.Commands.User
                 user.Email = command.NewEmail;
                 user.UserName = command.NewEmail; 
                 user.EmailConfirmed = true;
-
                 var result = await _userManager.UpdateAsync(user);
                 if (!result.Succeeded)
                 {
@@ -74,8 +71,6 @@ namespace SecureAuth.APPLICATION.Commands.User
                         EmailConfirmed = false
                     };
                 }
-
-                // Send updated credentials email
                 try
                 {
                     await _emailService.SendUpdatedCredentialsAsync(
@@ -90,8 +85,6 @@ namespace SecureAuth.APPLICATION.Commands.User
                     // Log the error but don't fail the update
                     // The admin can manually send notification later
                 }
-
-                // Log the activity
                 await _activityLogService.LogUserActionAsync(
                     user.Id,
                     "EmailUpdatedByAdmin",

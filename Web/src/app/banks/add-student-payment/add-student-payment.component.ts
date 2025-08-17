@@ -213,8 +213,8 @@ export class AddStudentPaymentComponent implements OnInit, OnDestroy {
     const payment = new StudentPaymentRequest();
     // payment.id = this.progStatusId == undefined ? null : this.progStatusId;
     payment.parentId = this.courseRegistrationId;
-    payment.fromBank = formModel.fromBank;
-    payment.toBank = formModel.toBank;
+    payment.fromBank = formModel.fromBank !== null && formModel.fromBank !== undefined && formModel.fromBank !== '' ? formModel.fromBank : null;
+    payment.toBank = formModel.toBank !== null && formModel.toBank !== undefined && formModel.toBank !== '' ? formModel.toBank : null;
     payment.transactionDate = new Date(formModel.transactionDate).toISOString();
     payment.remark = formModel.remark;
     payment.bankTransactionID = formModel.bankTransactionID;
@@ -240,7 +240,11 @@ export class AddStudentPaymentComponent implements OnInit, OnDestroy {
 
       for (const key in payment) {
         if (Object.prototype.hasOwnProperty.call(payment, key)) {
-          formData.append(key, (payment as any)[key]);
+          const value = (payment as any)[key];
+          // Only append non-null and non-undefined values
+          if (value !== null && value !== undefined && value !== '') {
+            formData.append(key, value);
+          }
         }
       }
 

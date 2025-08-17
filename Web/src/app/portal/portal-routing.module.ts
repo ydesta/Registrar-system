@@ -1,10 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { PortalComponent } from './portal.component';
-import { RegisterComponent } from '../register/register.component';
 import { AboutCollegeComponent } from './components/about-college/about-college.component';
 import { ContactComponent } from './components/contact/contact.component';
-import { ProgramsComponent } from './components/programs/programs.component';
+import { ProgramsPageComponent } from './components/programs/programs-page.component';
+import { ServicesPageComponent } from './components/services/services-page.component';
+import { CompanyValuesPageComponent } from './components/company-values/company-values-page.component';
 
 const routes: Routes = [
   { 
@@ -25,7 +26,15 @@ const routes: Routes = [
   // },
   { 
     path: 'programs', 
-    component: ProgramsComponent 
+    component: ProgramsPageComponent 
+  },
+  { 
+    path: 'services', 
+    component: ServicesPageComponent 
+  },
+  { 
+    path: 'values', 
+    component: CompanyValuesPageComponent 
   },
 ];
 

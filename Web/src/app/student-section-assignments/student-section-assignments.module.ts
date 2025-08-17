@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { StudentSectionAssignmentsComponent } from './student-section-assignments.component';
 import { SectionAssignedStudentsComponent } from './section-assigned-students/section-assigned-students.component';
 import { StudentSectionAssignmentsRoutingModule } from './student-section-assignments-routing.module';
@@ -19,20 +20,25 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzCollapseModule } from 'ng-zorro-antd/collapse';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzInputModule } from 'ng-zorro-antd/input';
 import { ReassignStudentSectionComponent } from './reassign-student-section/reassign-student-section.component';
 import { NzTransferModule } from 'ng-zorro-antd/transfer';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
+import { StudentLabSectionComponent } from './student-lab-section/student-lab-section.component';
 
 @NgModule({
   declarations: [
     StudentSectionAssignmentsComponent,
     SectionAssignedStudentsComponent,
-    ReassignStudentSectionComponent
+    ReassignStudentSectionComponent,
+    StudentLabSectionComponent
   ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    RouterModule,
     StudentSectionAssignmentsRoutingModule,
     NzCardModule,
     NzFormModule,
@@ -47,6 +53,8 @@ import { NzSwitchModule } from 'ng-zorro-antd/switch';
     NzCheckboxModule,
     NzInputNumberModule,
     NzCollapseModule,
+    NzGridModule,
+    NzInputModule,
     NzTransferModule,
     NzSwitchModule,
   ],

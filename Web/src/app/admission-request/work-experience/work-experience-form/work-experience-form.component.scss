@@ -1,401 +1,274 @@
-@import '../../styles/common.scss';
-
-// Work Experience Form Container
+/* Work Experience Form Container */
 .work-experience-form-container {
-  max-width: 1000px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  max-width: 700px;
   margin: 0 auto;
-  padding: $spacing-xl;
-  background: $background-white;
-  border-radius: $border-radius-xl;
-  box-shadow: $shadow-md;
-  
-  // Section Header Wrapper
-  .section-header-wrapper {
+}
+
+/* Form Header */
+.form-header {
+  background: linear-gradient(135deg, #1890ff, #096dd9);
+  color: white;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    gap: $spacing-lg;
-    margin-bottom: $spacing-xl;
-    padding: $spacing-xl;
-    background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
-    border-left: 4px solid $primary-dark;
-    border-radius: $border-radius-lg;
-    box-shadow: $shadow-md;
-    
-    .header-icon {
-      flex-shrink: 0;
-      width: 48px;
-      height: 48px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .header-content {
+    flex: 1;
+
+    .form-title {
+      margin: 0 0 4px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .form-subtitle {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.9;
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+}
+
+/* Form Content */
+.work-experience-form {
+  padding: 32px 24px 24px;
+
+  /* Form Items */
+  ::ng-deep .ant-form-item {
+    margin-bottom: 24px;
+    position: relative;
+
+    .ant-form-item-label {
+      display: none; // Hide default labels when using floating labels
+    }
+
+    .ant-form-item-control {
+      position: relative; // Added for proper positioning context
+    }
+  }
+}
+
+/* =============================================================================
+   WORKING FLOATING LABEL IMPLEMENTATION
+   ============================================================================= */
+
+/* Working floating label implementation for input fields */
+.input-with-floating-label {
+  position: relative;
+  width: 100%;
+  padding: 12px 8px;
+  font-size: 16px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.3s;
+  height: 44px;
+  background: #fafafa;
+
+  &:focus {
+    border-color: #6c757d;
+    box-shadow: 0 0 0 2px rgba(108, 117, 125, 0.2);
+    background: #fff;
+  }
+
+  &:hover {
+    border-color: #868e96;
+    background: #fff;
+  }
+
+  &.error {
+    border-color: #ff4d4f;
+    background: #fff1f0;
+
+    &:hover, &:focus {
+      border-color: #ff7875;
+    }
+  }
+
+  /* Ensure the floating label is positioned relative to the input */
+  & + .floating-label {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 16px;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    background: white;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    z-index: 1;
+
+    .required {
+      color: #ff4d4f;
+      font-weight: 600;
+    }
+
+    i {
+      font-size: 16px;
+      color: #6c757d;
+    }
+  }
+
+  /* Float the label when focused or has content */
+  &:focus + .floating-label,
+  &:not(:placeholder-shown) + .floating-label {
+    top: -8px;
+    left: 6px;
+    font-size: 12px;
+    color: #6c757d;
+    background: white;
+    padding: 0 4px;
+  }
+}
+
+/* Ensure proper positioning context for floating labels */
+::ng-deep .ant-form-item .ant-form-item-control {
+  position: relative; /* Added for proper positioning context */
+
+  /* Style the floating labels that are direct children */
+  .floating-label {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 16px;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    background: white;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    z-index: 1;
+
+    .required {
+      color: #ff4d4f;
+      font-weight: 600;
+    }
+
+    i {
+      font-size: 16px;
+      color: #6c757d;
+    }
+  }
+}
+
+/* File Upload Section */
+.file-upload-section {
+  .file-upload-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: 2px dashed #d9d9d9;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #595959;
+
+    &:hover {
+      border-color: #52c41a;
+      background: #f6ffed;
+      color: #52c41a;
+    }
+
+    .upload-text {
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+
+  .file-list {
+    margin-top: 12px;
+
+    .file-item {
       display: flex;
       align-items: center;
-      justify-content: center;
-      
+      gap: 8px;
+      padding: 8px 12px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      border: 1px solid #e8e8e8;
+
       i {
-        font-size: 24px;
-        color: white;
-      }
-    }
-    
-    .header-content {
-      flex: 1;
-      
-      .section-title {
-        margin: 0 0 $spacing-sm 0;
-        font-size: $font-size-xxl;
-        font-weight: $font-weight-semibold;
-        color: white;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      
-      .section-subtitle {
-        margin: 0;
-        font-size: $font-size-base;
-        color: rgba(255, 255, 255, 0.9);
-        line-height: $line-height-normal;
-      }
-    }
-  }
-
-  // Content Card
-  .content-card {
-    background: $background-white;
-    border-radius: $border-radius-lg;
-    box-shadow: $shadow-sm;
-    border: 1px solid $border-color;
-    overflow: hidden;
-    
-    .card-body {
-      padding: $spacing-xl;
-    }
-  }
-
-  // Form Section
-  .form-section {
-    margin-bottom: $spacing-xl;
-    
-    .section-header-wrapper {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border-left: 4px solid $primary-color;
-      margin-bottom: $spacing-lg;
-      
-      .header-icon {
-        background: rgba($primary-color, 0.1);
-        
-        i {
-          color: $primary-color;
-        }
-      }
-      
-      .header-content {
-        .section-title {
-          color: $text-primary;
-          font-size: $font-size-lg;
-          text-shadow: none;
-        }
-        
-        .section-subtitle {
-          color: $text-secondary;
-        }
-      }
-    }
-  }
-
-  // Form Grid
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: $spacing-lg;
-    margin-bottom: $spacing-lg;
-  }
-
-  // Form Field
-  .form-field {
-    .ant-form-item {
-      margin-bottom: $spacing-lg;
-      
-      .ant-form-item-label {
-        label {
-          display: flex;
-          align-items: center;
-          gap: $spacing-sm;
-          font-weight: $font-weight-medium;
-          color: $text-primary;
-          margin-bottom: $spacing-sm;
-          
-          i {
-            color: $primary-color;
-            font-size: 16px;
-          }
-          
-          .required {
-            color: $error-color;
-            font-weight: $font-weight-bold;
-          }
-        }
-      }
-      
-      .ant-form-item-control {
-        .ant-input {
-          border-radius: $border-radius-md;
-          border: 1px solid $border-color;
-          padding: $spacing-sm $spacing-md;
-          font-size: $font-size-base;
-          transition: all $transition-normal;
-          
-          &:hover {
-            border-color: $primary-light;
-          }
-          
-          &:focus {
-            border-color: $primary-color;
-            box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
-          }
-          
-          &::placeholder {
-            color: $text-muted;
-          }
-        }
-      }
-    }
-  }
-
-  // Custom Error Message
-  .custom-error-message {
-    margin-top: $spacing-xs;
-    color: $error-color;
-    font-size: $font-size-sm;
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
-    
-    &::before {
-      content: '⚠';
-      font-size: 12px;
-    }
-  }
-
-  // File Upload Section
-  .file-upload-section {
-    .file-upload-container {
-      .file-upload-button {
-        display: inline-flex;
-        align-items: center;
-        gap: $spacing-sm;
-        padding: $spacing-md $spacing-lg;
-        background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
-        color: white;
-        border: none;
-        border-radius: $border-radius-md;
-        cursor: pointer;
-        transition: all $transition-normal;
-        font-weight: $font-weight-medium;
-        
-        &:hover {
-          transform: translateY(-1px);
-          box-shadow: $shadow-md;
-        }
-        
-        i {
-          font-size: 16px;
-        }
-      }
-      
-      .file-list {
-        margin-top: $spacing-lg;
-        background: $background-light;
-        border-radius: $border-radius-md;
-        border: 1px solid $border-color;
-        overflow: hidden;
-        
-        .file-list-header {
-          display: flex;
-          align-items: center;
-          gap: $spacing-sm;
-          padding: $spacing-md $spacing-lg;
-          background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-          border-bottom: 1px solid $border-color;
-          font-weight: $font-weight-medium;
-          color: $primary-color;
-          
-          i {
-            font-size: 16px;
-          }
-        }
-        
-        .file-items {
-          padding: $spacing-md;
-          
-          .file-item {
-            display: flex;
-            align-items: center;
-            gap: $spacing-sm;
-            padding: $spacing-sm $spacing-md;
-            background: white;
-            border-radius: $border-radius-sm;
-            border: 1px solid $border-color;
-            margin-bottom: $spacing-sm;
-            transition: all $transition-normal;
-            
-            &:hover {
-              border-color: $primary-color;
-              box-shadow: $shadow-sm;
-            }
-            
-            &:last-child {
-              margin-bottom: 0;
-            }
-            
-            i {
-              color: $primary-color;
-              font-size: 16px;
-            }
-            
-            .file-name {
-              flex: 1;
-              color: $text-primary;
-              font-size: $font-size-sm;
-            }
-            
-            .remove-file-btn {
-              background: none;
-              border: none;
-              color: $error-color;
-              cursor: pointer;
-              padding: $spacing-xs;
-              border-radius: $border-radius-sm;
-              transition: all $transition-normal;
-              
-              &:hover {
-                background: rgba($error-color, 0.1);
-                transform: scale(1.1);
-              }
-              
-              i {
-                font-size: 14px;
-                color: $error-color;
-              }
-            }
-          }
-        }
-      }
-      
-      .upload-hint {
-        margin-top: $spacing-md;
-        color: $text-muted;
-        font-size: $font-size-sm;
-        display: flex;
-        align-items: center;
-        gap: $spacing-sm;
-        
-        i {
-          color: $primary-color;
-          font-size: 14px;
-        }
-      }
-    }
-  }
-
-  // Form Actions
-  .form-actions {
-    margin-top: $spacing-xl;
-    padding-top: $spacing-lg;
-    border-top: 1px solid $border-color;
-    text-align: center;
-    
-    .save-button {
-      height: 44px;
-      padding: 0 $spacing-xl;
-      font-size: $font-size-base;
-      font-weight: $font-weight-medium;
-      border-radius: $border-radius-md;
-      background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
-      border: none;
-      color: white;
-      display: inline-flex;
-      align-items: center;
-      gap: $spacing-sm;
-      transition: all $transition-normal;
-      
-      &:hover {
-        transform: translateY(-1px);
-        box-shadow: $shadow-md;
-        background: linear-gradient(135deg, lighten($primary-color, 5%) 0%, $primary-color 100%);
-      }
-      
-      &:disabled {
-        background: $text-muted;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-      }
-      
-      i {
+        color: #1890ff;
         font-size: 16px;
       }
-    }
-  }
-}
 
-// Responsive Design
-@include mobile {
-  .work-experience-form-container {
-    padding: $spacing-lg;
-    
-    .section-header-wrapper {
-      flex-direction: column;
-      text-align: center;
-      padding: $spacing-lg;
-      
-      .header-icon {
-        width: 40px;
-        height: 40px;
-        
-        i {
-          font-size: 20px;
-        }
+      .file-name {
+        flex: 1;
+        color: #262626;
+        font-size: 14px;
       }
-      
-      .header-content {
-        .section-title {
-          font-size: $font-size-xl;
-        }
+
+      .remove-file-btn {
+        background: none;
+        border: none;
+        color: #ff4d4f;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
         
-        .section-subtitle {
-          font-size: $font-size-sm;
+        &:hover {
+          background: rgba(255, 77, 79, 0.1);
         }
       }
     }
-    
-    .content-card .card-body {
-      padding: $spacing-lg;
-    }
-    
-    .form-grid {
-      grid-template-columns: 1fr;
-      gap: $spacing-md;
-    }
-    
-    .form-actions .save-button {
-      width: 100%;
-      justify-content: center;
-    }
   }
 }
 
-@include tablet {
-  .work-experience-form-container {
-    .form-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
+/* Enhanced Error Message Styling */
+.error-message {
+  color: #ff4d4f;
+  font-size: 13px;
+  margin-top: 6px;
+  padding: 6px 12px;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: fadeIn 0.3s ease;
+  
+  i {
+    font-size: 14px;
+    flex-shrink: 0;
   }
 }
 
-// Animation for file upload
-@keyframes slideInUp {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
@@ -403,6 +276,107 @@
   }
 }
 
-.file-item {
-  animation: slideInUp 0.3s ease-out;
+/* Form Actions */
+.form-actions {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+
+    .cancel-btn {
+      height: 40px;
+      padding: 0 24px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 6px;
+      border: 1px solid #d9d9d9;
+      background: #fff;
+      color: #595959;
+      transition: all 0.3s ease;
+
+      &:hover {
+        color: #6c757d;
+        border-color: #6c757d;
+        background: #f8f9fa;
+      }
+
+      i {
+        margin-right: 8px;
+      }
+    }
+
+    .submit-btn {
+      height: 40px;
+      padding: 0 24px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #1890ff, #096dd9);
+      border: none;
+      color: white;
+      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: linear-gradient(135deg, #40a9ff, #1890ff);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.45);
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(24, 144, 255, 0.35);
+      }
+
+      i {
+        margin-right: 8px;
+      }
+    }
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .work-experience-form-container {
+    margin: 0 16px;
+  }
+
+  .form-header {
+    padding: 20px;
+    
+    .header-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+    }
+
+    .header-content {
+      .form-title {
+        font-size: 18px;
+      }
+
+      .form-subtitle {
+        font-size: 13px;
+      }
+    }
+  }
+
+  .work-experience-form {
+    padding: 24px 20px 20px;
+  }
+
+  .form-actions {
+    .action-buttons {
+      flex-direction: column;
+      
+      .cancel-btn,
+      .submit-btn {
+        width: 100%;
+      }
+    }
+  }
 }

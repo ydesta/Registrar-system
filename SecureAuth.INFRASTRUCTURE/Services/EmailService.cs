@@ -291,49 +291,50 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                 Best regards,
                 The SecureAuth Team";
 
-            var htmlContent = $@"
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset='utf-8'>
-                    <title>Account {updateType} Updated</title>
-                    <style>
-                        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                        .header {{ background-color: #28a745; color: #fff; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
-                        .content {{ background-color: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }}
-                        .credentials {{ background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0; }}
-                        .button {{ display: inline-block; background-color: #28a745; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }}
-                        .footer {{ text-align: center; margin-top: 20px; color: #6c757d; font-size: 0.9em; }}
-                    </style>
-                </head>
-                <body>
-                    <div class='container'>
-                        <div class='header'>
-                            <h1>Account {updateType} Updated</h1>
-                        </div>
-                        <div class='content'>
-                            <p>Dear {firstName} {lastName},</p>
-                            <p>Your account {updateType.ToLower()} has been updated by the system administrator. Here are your updated login credentials:</p>
-                            
-                            <div class='credentials'>
-                                <p><strong>Username:</strong> {username}</p>
-                            </div>
-                            
-                            <div style='text-align: center;'>
-                                <a href='{loginUrl}' class='button'>Login to Your Account</a>
-                            </div>
-                            
-                            <p>If you have any questions, please contact the system administrator.</p>
-                            
-                            <p>Best regards,<br>The SecureAuth Team</p>
-                        </div>
-                        <div class='footer'>
-                            <p>This is an automated message, please do not reply to this email.</p>
-                        </div>
-                    </div>
-                </body>
-                </html>";
+                var htmlContent = $@"
+<!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <meta charset='utf-8'>
+                                    <title>Application Approved</title>
+                                    <style>
+                                        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                                        .header {{ background-color: #007BFF; color: #fff; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+                                        .content {{ background-color: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }}
+                                        .credentials {{ background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+                                        .button {{ display: inline-block; background-color: #007BFF; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }}
+                                        .footer {{ text-align: center; margin-top: 20px; color: #6c757d; font-size: 0.9em; }}
+                                    </style>
+                                </head>
+                                <body>
+                                    <div class='container'>
+                                        <div class='header'>
+                                            <h1>Application Approved</h1>
+                                        </div>
+                                        <div class='content'>
+                                            <p>Dear {firstName} {lastName},</p>
+                                            <p>Congratulations! 🎉 Your student application has been <strong>approved</strong>.</p>
+            
+                                            <p>Your account credentials have been updated. Please use the following username to log in:</p>
+                                            <div class='credentials'>
+                                                <p><strong>Username:</strong> {username}</p>
+                                            </div>
+
+                                            <div style='text-align: center;'>
+                                                <a href='{loginUrl}' class='button'>Login to Your Account</a>
+                                            </div>
+
+                                            <p>If you have any questions, please contact the registrar’s office.</p>
+            
+                                            <p>Best regards,<br>The Admissions Team</p>
+                                        </div>
+                                        <div class='footer'>
+                                            <p>This is an automated message, please do not reply to this email.</p>
+                                        </div>
+                                    </div>
+                                </body>
+                                </html>";
 
                 var message = new Message(new[] { email }, subject, content, htmlContent);
                 await SendEmailAsync(message);

@@ -160,8 +160,8 @@ export const ACADEMIC_STUDENT_STATUS_DESCRIPTIONS: {
   [REQUEST_STATUS.Rejected]: "Rejected"
 };
 export const Division_Status: any[] = [
-  { Id: 1, Description: "Day" },
-  { Id: 2, Description: "Night" }
+  { Id: 1, Description: "Regular" },
+  { Id: 2, Description: "Evening" }
 ];
 export const ACADEMIC_TERM_STATUS: any[] = [
   { Id: 1, Description: "Winter" },

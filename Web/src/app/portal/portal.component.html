@@ -6,99 +6,255 @@
         <img src="assets/images/logo2.png" alt="HiLCoE Logo">
         <!-- <span class="school-name">School of Computer Science & Technology</span> -->
       </div>
-      <nav class="main-nav">
-        <!-- <a routerLink="/about">About us</a> -->
-        <!-- <a routerLink="/contact">Contact</a> -->
-        <!-- <a routerLink="/register">Sign Up</a> -->
-        <ng-container *ngIf="!isAuthenticated; else authenticatedUser">
-          <button class="register-btn" (click)="register()">Register</button>
-        <button class="login-btn" (click)="login()">Login</button>
-        </ng-container>
-        <ng-template #authenticatedUser>
-          <div class="user-menu">
-            <span class="welcome-text">Welcome, {{ currentUser?.firstName || 'User' }}!</span>
-            <button class="dashboard-btn" (click)="goToDashboard()">Dashboard</button>
-            <button class="logout-btn" (click)="logout()">Logout</button>
-          </div>
-        </ng-template>
+      
+      <!-- Mobile Menu Toggle Button -->
+      <button class="mobile-menu-toggle" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen">
+        <i nz-icon [nzType]="isMobileMenuOpen ? 'close' : 'menu'" nzTheme="outline"></i>
+      </button>
+      
+      <nav class="main-nav" [class.mobile-open]="isMobileMenuOpen">
+        <!-- Navigation Links - Always Visible -->
+        <div class="nav-links">
+          <a routerLink="/portal" 
+             routerLinkActive="active" 
+             [routerLinkActiveOptions]="{exact: true}"
+             (click)="closeMobileMenu()">Home</a>
+          <a routerLink="/portal/about" 
+             routerLinkActive="active" 
+             [routerLinkActiveOptions]="{exact: false}"
+             (click)="closeMobileMenu()">About us</a> 
+          <a routerLink="/portal/programs" 
+             routerLinkActive="active" 
+             [routerLinkActiveOptions]="{exact: false}"
+             (click)="closeMobileMenu()">Programs</a>
+          <a routerLink="/portal/services" 
+             routerLinkActive="active" 
+             [routerLinkActiveOptions]="{exact: false}"
+             (click)="closeMobileMenu()">Services</a>
+          <a routerLink="/portal/values" 
+             routerLinkActive="active" 
+             [routerLinkActiveOptions]="{exact: false}"
+             (click)="closeMobileMenu()">Company Values</a>
+          <!-- <a routerLink="/portal/contact">Contact</a> -->
+        </div>
+        
+        <!-- Authentication Buttons - Conditional -->
+        <div class="auth-buttons">
+          <ng-container *ngIf="!isAuthenticated; else authenticatedUser">
+            <button class="register-btn" (click)="register(); closeMobileMenu()">Register</button>
+            <button class="login-btn" (click)="login(); closeMobileMenu()">Login</button>
+          </ng-container>
+          <ng-template #authenticatedUser>
+            <div class="user-menu">
+              <span class="welcome-text">Welcome, {{ currentUser?.firstName || 'User' }}!</span>
+              <button class="dashboard-btn" (click)="goToDashboard(); closeMobileMenu()">Dashboard</button>
+              <button class="logout-btn" (click)="logout(); closeMobileMenu()">Logout</button>
+            </div>
+          </ng-template>
+        </div>
       </nav>
     </div>
   </header>
 
   <!-- Main Content -->
   <main class="main-content">
-    <!-- Hero Slider -->
-    <!-- <div class="hero-slider">
-      <app-home-slider></app-home-slider>
-    </div> -->
-    <!-- Attractive Hero Image Section -->
-    <section class="hero-image-section">
-      <div class="hero-container">
-        <!-- Left Column - Text Content -->
-        <div class="hero-text-column">
-          <div class="hero-text-content">
-            <h1 class="hero-title">Shaping the Future of</h1>
-            <h2 class="hero-subtitle">Computer Science & <span class="highlight">Engineering</span></h2>
-            <h3 class="hero-description">Technology Education</h3>
-            <p class="hero-paragraph">Join HiLCoE School of Computer Science & Technology and become a tech leader of tomorrow.</p>
-            <ng-container *ngIf="!isAuthenticated; else authenticatedCta">
-              <button class="hero-cta-btn" (click)="login()">
-                Get Started
-                <i nz-icon nzType="arrow-right" nzTheme="outline"></i>
-              </button>
-            </ng-container>
-            <ng-template #authenticatedCta>
-              <button class="hero-cta-btn" (click)="goToDashboard()">
-                Go to Dashboard
-                <i nz-icon nzType="arrow-right" nzTheme="outline"></i>
-              </button>
-            </ng-template>
+    <!-- Default Portal Content - Only show when on main portal route -->
+    <ng-container *ngIf="isOnMainPortalRoute()">
+      <!-- Hero Slider -->
+      <!-- <div class="hero-slider">
+        <app-home-slider></app-home-slider>
+      </div> -->
+      <!-- Attractive Hero Image Section -->
+      <section class="hero-image-section">
+        <div class="hero-container">
+          <!-- Left Column - Text Content -->
+          <div class="hero-text-column">
+            <div class="hero-text-content">
+              <h1 class="hero-title">Shaping the Future of</h1>
+              <h2 class="hero-subtitle">Computer Science & <span class="highlight">Engineering</span></h2>
+              <h3 class="hero-description">Technology Education</h3>
+              <p class="hero-paragraph">Join HiLCoE School of Computer Science & Technology and become a tech leader of tomorrow.</p>
+              <ng-container *ngIf="!isAuthenticated; else authenticatedCta">
+                <button class="hero-cta-btn" (click)="login()">
+                  Get Started
+                  <i nz-icon nzType="arrow-right" nzTheme="outline"></i>
+                </button>
+              </ng-container>
+              <ng-template #authenticatedCta>
+                <button class="hero-cta-btn" (click)="goToDashboard()">
+                  Go to Dashboard
+                  <i nz-icon nzType="arrow-right" nzTheme="outline"></i>
+                </button>
+              </ng-template>
+            </div>
+          </div>
+          
+          <!-- Right Column - Visual Elements -->
+          <div class="hero-visual-column">
+            <div class="hero-visual-container">
+              <img src="assets/images/hero.png" alt="Computer Science Education" class="hero-image">
+            </div>
           </div>
         </div>
-        
-        <!-- Right Column - Visual Elements -->
-        <div class="hero-visual-column">
-          <div class="hero-visual-container">
-            <img src="assets/images/hero.png" alt="Computer Science Education" class="hero-image">
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- About Section -->
-    <section class="info-section">
-      <div class="container">
-        <div class="about-header">
-          <h2>About Us</h2>
-          <p class="about-subtitle">Discover our commitment to excellence in computer science education and innovation
-          </p>
-          <div class="header-underline"></div>
-        </div>
-        <div class="row">
-          <div class="col-half" data-aos="fade-up" data-aos-duration="1000">
-            <app-about-college></app-about-college>
+      <!-- About Section -->
+      <section class="info-section">
+        <div class="container">
+          <div class="about-header">
+            <h2>About Us</h2>
+            <p class="about-subtitle">Discover our commitment to excellence in computer science education and innovation
+            </p>
+            <div class="header-underline"></div>
           </div>
-          <div class="col-half" data-aos="fade-left" data-aos-duration="1000">
-            <app-event-slider></app-event-slider>
+          <div class="row">
+            <div class="col-half" data-aos="fade-up" data-aos-duration="1000">
+              <div class="about-preview">
+                <div class="about-header">
+                  <h3>Welcome to HiLCoE</h3>
+                  <div class="founded-badge">Est. 1999</div>
+                </div>
+                <p>HiLCoE (HiLCoE College) is a premier institution dedicated to excellence in technology and engineering education. Founded in 1999, our institution has been at the forefront of computer science education in Ethiopia for over two decades.</p>
+                <div class="about-highlights">
+                  <div class="highlight-item">
+                    <i nz-icon nzType="check-circle" nzTheme="outline"></i>
+                    <span>25+ Years of Excellence</span>
+                  </div>
+                  <div class="highlight-item">
+                    <i nz-icon nzType="check-circle" nzTheme="outline"></i>
+                    <span>Industry-Focused Programs</span>
+                  </div>
+                  <div class="highlight-item">
+                    <i nz-icon nzType="check-circle" nzTheme="outline"></i>
+                    <span>State-of-the-Art Facilities</span>
+                  </div>
+                </div>
+                <button class="learn-more-btn" routerLink="/portal/about">Learn More</button>
+              </div>
+            </div>
+            <div class="col-half" data-aos="fade-left" data-aos-duration="1000">
+              <app-event-slider></app-event-slider>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
-    <section class="values-section">
-      <div class="container">
-        <app-programs></app-programs>
-      </div>
-    </section>
-    <section class="services-section">
-      <div class="container">
-        <app-services></app-services>
-      </div>
-    </section>
-    <section class="values-section">
-      <div class="container">
-        <app-company-values></app-company-values>
-      </div>
-    </section>
+      </section>
+
+      <!-- Programs Preview Section -->
+      <section class="values-section">
+        <div class="container">
+          <div class="section-header">
+            <h2>Our Programs</h2>
+            <p>Explore our comprehensive range of computer science and technology programs designed to prepare you for the digital future</p>
+            <div class="header-underline"></div>
+          </div>
+          <div class="programs-preview-grid">
+            <div class="program-preview-card">
+              <div class="program-icon">
+                <i nz-icon nzType="code" nzTheme="outline"></i>
+              </div>
+              <h3>Computer Science</h3>
+              <p>Comprehensive program covering software development, algorithms, and computer systems.</p>
+            </div>
+            <div class="program-preview-card">
+              <div class="program-icon">
+                <i nz-icon nzType="database" nzTheme="outline"></i>
+              </div>
+              <h3>Information Technology</h3>
+              <p>Focus on IT infrastructure, networking, and information systems management.</p>
+            </div>
+            <div class="program-preview-card">
+              <div class="program-icon">
+                <i nz-icon nzType="safety" nzTheme="outline"></i>
+              </div>
+              <h3>Cybersecurity</h3>
+              <p>Specialized training in protecting digital assets and information security.</p>
+            </div>
+          </div>
+          <div class="text-center">
+            <button class="view-all-programs-btn" routerLink="/portal/programs">View All Programs</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Services Preview Section -->
+      <section class="services-section">
+        <div class="container">
+          <div class="section-header">
+            <h2>Our Services</h2>
+            <p>Discover the comprehensive services we offer to support your educational journey and career development</p>
+            <div class="header-underline"></div>
+          </div>
+          <div class="services-preview-grid">
+            <div class="service-preview-card">
+              <div class="service-icon">
+                <i nz-icon nzType="team" nzTheme="outline"></i>
+              </div>
+              <h3>Career Counseling</h3>
+              <p>Professional guidance to help you choose the right career path in technology.</p>
+            </div>
+            <div class="service-preview-card">
+              <div class="service-icon">
+                <i nz-icon nzType="global" nzTheme="outline"></i>
+              </div>
+              <h3>Industry Partnerships</h3>
+              <p>Connect with leading tech companies for internships and job opportunities.</p>
+            </div>
+            <div class="service-preview-card">
+              <div class="service-icon">
+                <i nz-icon nzType="experiment" nzTheme="outline"></i>
+              </div>
+              <h3>Research Opportunities</h3>
+              <p>Access to cutting-edge research projects and innovation labs.</p>
+            </div>
+          </div>
+          <div class="text-center">
+            <button class="view-all-services-btn" routerLink="/portal/services">View All Services</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Company Values Preview Section -->
+      <section class="values-section">
+        <div class="container">
+          <div class="section-header">
+            <h2>Our Values</h2>
+            <p>The core principles that guide our mission and shape the future of technology education</p>
+            <div class="header-underline"></div>
+          </div>
+          <div class="values-preview-grid">
+            <div class="value-preview-card">
+              <div class="value-icon">
+                <i nz-icon nzType="star" nzTheme="outline"></i>
+              </div>
+              <h3>Excellence</h3>
+              <p>Commitment to the highest standards in education and research.</p>
+            </div>
+            <div class="value-preview-card">
+              <div class="value-icon">
+                <i nz-icon nzType="bulb" nzTheme="outline"></i>
+              </div>
+              <h3>Innovation</h3>
+              <p>Fostering creativity and pushing boundaries in technology.</p>
+            </div>
+            <div class="value-preview-card">
+              <div class="value-icon">
+                <i nz-icon nzType="heart" nzTheme="outline"></i>
+              </div>
+              <h3>Integrity</h3>
+              <p>Maintaining ethical standards and academic honesty.</p>
+            </div>
+          </div>
+          <div class="text-center">
+            <button class="view-all-values-btn" routerLink="/portal/values">View All Values</button>
+          </div>
+        </div>
+      </section>
+    </ng-container>
+
+    <!-- Router Outlet for Child Routes - Show when NOT on main portal route -->
+    <ng-container *ngIf="!isOnMainPortalRoute()">
+      <router-outlet></router-outlet>
+    </ng-container>
     
   </main>
 

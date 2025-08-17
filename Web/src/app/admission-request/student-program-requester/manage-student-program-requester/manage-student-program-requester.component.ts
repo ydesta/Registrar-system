@@ -312,7 +312,8 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
         studentProgramRequester: request
       },
       nzMaskClosable: false,
-      nzFooter: null
+      nzFooter: null,
+      nzWidth: "60%"
     });
     
     modal.afterClose.subscribe(() => {

@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl } from "@angular/forms";
 import { NzTabChangeEvent } from "ng-zorro-antd/tabs";
 import { NzModalService } from "ng-zorro-antd/modal";
 import {
@@ -89,6 +89,8 @@ export class GeneralInformationComponent implements OnInit {
     }
     this.disabledDate;
     
+
+    
     this.sharingDataService.currentMessage.pipe(distinctUntilChanged()).subscribe(res => {
       this.countNoOfContact = res;
       this.updateTabDisabledStateOptimized();
@@ -126,27 +128,27 @@ export class GeneralInformationComponent implements OnInit {
       firstName: ["", [Validators.required, englishOnlyValidator()]],
       fatherName: ["", [Validators.required, englishOnlyValidator()]],
       grandFatherName: ["", [Validators.required, englishOnlyValidator()]],
-      firstNameInAmh: ["", [Validators.required, amharicOnlyValidator()]],
-      fatherNameInAmh: ["", [Validators.required, amharicOnlyValidator()]],
-      grandFatherNameInAmh: ["", [Validators.required, amharicOnlyValidator()]],
+      firstNameInAmh: ["", [amharicOnlyValidator()]],
+      fatherNameInAmh: ["", [amharicOnlyValidator()]],
+      grandFatherNameInAmh: ["", [amharicOnlyValidator()]],
       sirName: ["", [alphabetsOnlyValidator()]],
       motherName: [
         "",
         [Validators.required, alphabetsWithSpecialCharsValidator()]
       ],
       gender: ["", [Validators.required]],
-      birthDate: [null, [Validators.required]],
+      birthDate: [null, [Validators.required, this.birthDateValidator()]],
       birthPlace: [
         "",
         [Validators.required, alphabetsWithSpecialCharsValidator()]
       ],
-      nationality: ["", [Validators.required, alphabetsOnlyValidator()]],
+      nationality: ["", [Validators.required]],
       telephonOffice: ["", phoneValidator()],
       telephonHome: ["", [phoneValidator()]],
       mobile: ["", [Validators.required, phoneValidator()]],
       postalAddress: ["", []],
       emailAddress: ["", [Validators.required, emailValidator()]],
-      region: ["", [alphabetsOnlyValidator()]],
+      region: ["", [Validators.required, alphabetsOnlyValidator()]],
       city: ["", []],
       woreda: ["", []],
       kebele: ["", []],
@@ -158,7 +160,7 @@ export class GeneralInformationComponent implements OnInit {
       division: ["", []],
       applicantUserId: [localStorage.getItem("userId")],
       ActualFile: ["", []],
-      nationalExaminationId: ["", [Validators.required]],
+      nationalExaminationId: ["", []],
       tin: ["", []],
       nationalId: ["", []]
     });
@@ -728,14 +730,222 @@ export class GeneralInformationComponent implements OnInit {
     });
   }
 
+
+
+  // Countries list with flags and nationalities
+  countries = [
+    { name: 'Afghanistan', nationality: 'Afghan', flag: '🇦🇫' },
+    { name: 'Albania', nationality: 'Albanian', flag: '🇦🇱' },
+    { name: 'Algeria', nationality: 'Algerian', flag: '🇩🇿' },
+    { name: 'Argentina', nationality: 'Argentine', flag: '🇦🇷' },
+    { name: 'Australia', nationality: 'Australian', flag: '🇦🇺' },
+    { name: 'Austria', nationality: 'Austrian', flag: '🇦🇹' },
+    { name: 'Bangladesh', nationality: 'Bangladeshi', flag: '🇧🇩' },
+    { name: 'Belgium', nationality: 'Belgian', flag: '🇧🇪' },
+    { name: 'Brazil', nationality: 'Brazilian', flag: '🇧🇷' },
+    { name: 'Bulgaria', nationality: 'Bulgarian', flag: '🇧🇬' },
+    { name: 'Cambodia', nationality: 'Cambodian', flag: '🇰🇭' },
+    { name: 'Cameroon', nationality: 'Cameroonian', flag: '🇨🇲' },
+    { name: 'Canada', nationality: 'Canadian', flag: '🇨🇦' },
+    { name: 'Chile', nationality: 'Chilean', flag: '🇨🇱' },
+    { name: 'China', nationality: 'Chinese', flag: '🇨🇳' },
+    { name: 'Colombia', nationality: 'Colombian', flag: '🇨🇴' },
+    { name: 'Costa Rica', nationality: 'Costa Rican', flag: '🇨🇷' },
+    { name: 'Croatia', nationality: 'Croatian', flag: '🇭🇷' },
+    { name: 'Cuba', nationality: 'Cuban', flag: '🇨🇺' },
+    { name: 'Czech Republic', nationality: 'Czech', flag: '🇨🇿' },
+    { name: 'Denmark', nationality: 'Danish', flag: '🇩🇰' },
+    { name: 'Dominican Republic', nationality: 'Dominican', flag: '🇩🇴' },
+    { name: 'Ecuador', nationality: 'Ecuadorian', flag: '🇪🇨' },
+    { name: 'Egypt', nationality: 'Egyptian', flag: '🇪🇬' },
+    { name: 'El Salvador', nationality: 'Salvadoran', flag: '🇸🇻' },
+    { name: 'Eritrea', nationality: 'Eritrean', flag: '🇪🇷' },
+    { name: 'Estonia', nationality: 'Estonian', flag: '🇪🇪' },
+    { name: 'Ethiopia', nationality: 'Ethiopian', flag: '🇪🇹' },
+    { name: 'Finland', nationality: 'Finnish', flag: '🇫🇮' },
+    { name: 'France', nationality: 'French', flag: '🇫🇷' },
+    { name: 'Germany', nationality: 'German', flag: '🇩🇪' },
+    { name: 'Ghana', nationality: 'Ghanaian', flag: '🇬🇭' },
+    { name: 'Greece', nationality: 'Greek', flag: '🇬🇷' },
+    { name: 'Guatemala', nationality: 'Guatemalan', flag: '🇬🇹' },
+    { name: 'Haiti', nationality: 'Haitian', flag: '🇭🇹' },
+    { name: 'Honduras', nationality: 'Honduran', flag: '🇭🇳' },
+    { name: 'Hong Kong', nationality: 'Hong Konger', flag: '🇭🇰' },
+    { name: 'Hungary', nationality: 'Hungarian', flag: '🇭🇺' },
+    { name: 'Iceland', nationality: 'Icelandic', flag: '🇮🇸' },
+    { name: 'India', nationality: 'Indian', flag: '🇮🇳' },
+    { name: 'Indonesia', nationality: 'Indonesian', flag: '🇮🇩' },
+    { name: 'Iran', nationality: 'Iranian', flag: '🇮🇷' },
+    { name: 'Iraq', nationality: 'Iraqi', flag: '🇮🇶' },
+    { name: 'Ireland', nationality: 'Irish', flag: '🇮🇪' },
+    { name: 'Israel', nationality: 'Israeli', flag: '🇮🇱' },
+    { name: 'Italy', nationality: 'Italian', flag: '🇮🇹' },
+    { name: 'Jamaica', nationality: 'Jamaican', flag: '🇯🇲' },
+    { name: 'Japan', nationality: 'Japanese', flag: '🇯🇵' },
+    { name: 'Jordan', nationality: 'Jordanian', flag: '🇯🇴' },
+    { name: 'Kazakhstan', nationality: 'Kazakh', flag: '🇰🇿' },
+    { name: 'Kenya', nationality: 'Kenyan', flag: '🇰🇪' },
+    { name: 'Kuwait', nationality: 'Kuwaiti', flag: '🇰🇼' },
+    { name: 'Latvia', nationality: 'Latvian', flag: '🇱🇻' },
+    { name: 'Lebanon', nationality: 'Lebanese', flag: '🇱🇧' },
+    { name: 'Libya', nationality: 'Libyan', flag: '🇱🇾' },
+    { name: 'Lithuania', nationality: 'Lithuanian', flag: '🇱🇹' },
+    { name: 'Luxembourg', nationality: 'Luxembourgish', flag: '🇱🇺' },
+    { name: 'Malaysia', nationality: 'Indonesian', flag: '🇲🇾' },
+    { name: 'Mali', nationality: 'Malian', flag: '🇲🇱' },
+    { name: 'Malta', nationality: 'Maltese', flag: '🇲🇹' },
+    { name: 'Mauritania', nationality: 'Mauritanian', flag: '🇲🇷' },
+    { name: 'Mauritius', nationality: 'Mauritian', flag: '🇲🇺' },
+    { name: 'Mexico', nationality: 'Mexican', flag: '🇲🇽' },
+    { name: 'Monaco', nationality: 'Monacan', flag: '🇲🇨' },
+    { name: 'Mongolia', nationality: 'Mongolian', flag: '🇲🇳' },
+    { name: 'Morocco', nationality: 'Moroccan', flag: '🇲🇦' },
+    { name: 'Mozambique', nationality: 'Mozambican', flag: '🇲🇿' },
+    { name: 'Myanmar', nationality: 'Burmese', flag: '🇲🇲' },
+    { name: 'Namibia', nationality: 'Namibian', flag: '🇳🇦' },
+    { name: 'Nepal', nationality: 'Nepalese', flag: '🇳🇵' },
+    { name: 'Netherlands', nationality: 'Dutch', flag: '🇳🇱' },
+    { name: 'New Zealand', nationality: 'New Zealander', flag: '🇳🇿' },
+    { name: 'Nigeria', nationality: 'Nigerian', flag: '🇳🇬' },
+    { name: 'North Korea', nationality: 'North Korean', flag: '🇰🇵' },
+    { name: 'Norway', nationality: 'Norwegian', flag: '🇳🇴' },
+    { name: 'Oman', nationality: 'Omani', flag: '🇴🇲' },
+    { name: 'Pakistan', nationality: 'Pakistani', flag: '🇵🇰' },
+    { name: 'Panama', nationality: 'Panamanian', flag: '🇵🇦' },
+    { name: 'Paraguay', nationality: 'Paraguayan', flag: '🇵🇾' },
+    { name: 'Peru', nationality: 'Peruvian', flag: '🇵🇪' },
+    { name: 'Philippines', nationality: 'Filipino', flag: '🇵🇭' },
+    { name: 'Poland', nationality: 'Polish', flag: '🇵🇱' },
+    { name: 'Portugal', nationality: 'Portuguese', flag: '🇵🇹' },
+    { name: 'Qatar', nationality: 'Qatari', flag: '🇶🇦' },
+    { name: 'Romania', nationality: 'Romanian', flag: '🇷🇴' },
+    { name: 'Russia', nationality: 'Russian', flag: '🇷🇺' },
+    { name: 'Rwanda', nationality: 'Rwandan', flag: '🇷🇼' },
+    { name: 'Saudi Arabia', nationality: 'Saudi', flag: '🇸🇦' },
+    { name: 'Senegal', nationality: 'Senegalese', flag: '🇸🇳' },
+    { name: 'Serbia', nationality: 'Serbian', flag: '🇷🇸' },
+    { name: 'Singapore', nationality: 'Singaporean', flag: '🇸🇬' },
+    { name: 'Slovakia', nationality: 'Slovak', flag: '🇸🇰' },
+    { name: 'Slovenia', nationality: 'Slovenian', flag: '🇸🇮' },
+    { name: 'Somalia', nationality: 'Somali', flag: '🇸🇴' },
+    { name: 'South Africa', nationality: 'South African', flag: '🇿🇦' },
+    { name: 'South Korea', nationality: 'South Korean', flag: '🇰🇷' },
+    { name: 'Spain', nationality: 'Spanish', flag: '🇪🇸' },
+    { name: 'Sri Lanka', nationality: 'Sri Lankan', flag: '🇱🇰' },
+    { name: 'Sudan', nationality: 'Sudanese', flag: '🇸🇩' },
+    { name: 'Sweden', nationality: 'Swedish', flag: '🇸🇪' },
+    { name: 'Switzerland', nationality: 'Swiss', flag: '🇨🇭' },
+    { name: 'Syria', nationality: 'Syrian', flag: '🇸🇾' },
+    { name: 'Taiwan', nationality: 'Taiwanese', flag: '🇹🇼' },
+    { name: 'Tanzania', nationality: 'Tanzanian', flag: '🇹🇿' },
+    { name: 'Thailand', nationality: 'Thai', flag: '🇹🇭' },
+    { name: 'Tunisia', nationality: 'Tunisian', flag: '🇹🇳' },
+    { name: 'Turkey', nationality: 'Turkish', flag: '🇹🇷' },
+    { name: 'Uganda', nationality: 'Ugandan', flag: '🇺🇬' },
+    { name: 'Ukraine', nationality: 'Ukrainian', flag: '🇺🇦' },
+    { name: 'United Arab Emirates', nationality: 'Emirati', flag: '🇦🇪' },
+    { name: 'United Kingdom', nationality: 'British', flag: '🇬🇧' },
+    { name: 'United States', nationality: 'American', flag: '🇺🇸' },
+    { name: 'Uruguay', nationality: 'Uruguayan', flag: '🇺🇾' },
+    { name: 'Venezuela', nationality: 'Venezuelan', flag: '🇻🇪' },
+    { name: 'Vietnam', nationality: 'Vietnamese', flag: '🇻🇳' },
+    { name: 'Yemen', nationality: 'Yemeni', flag: '🇾🇪' },
+    { name: 'Zimbabwe', nationality: 'Zimbabwean', flag: '🇿🇼' }
+  ];
+
+  // Filter function for nationality search
+  filterNationality = (input: string, option: any): boolean => {
+    const searchTerm = input.toLowerCase();
+    const countryName = option.nzLabel.toLowerCase();
+    const nationality = option.nzValue.toLowerCase();
+    
+    return countryName.includes(searchTerm) || nationality.includes(searchTerm);
+  };
+
+
+
+  // Custom validator for birth date
+  private birthDateValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      if (!control.value) {
+        return null; // Let required validator handle empty values
+      }
+
+      // Handle both Date objects and string dates
+      let selectedDate: Date;
+      if (control.value instanceof Date) {
+        selectedDate = new Date(control.value);
+      } else {
+        selectedDate = new Date(control.value);
+      }
+
+      // Check if the date is valid
+      if (isNaN(selectedDate.getTime())) {
+        return {
+          invalidDate: {
+            valid: false,
+            message: 'Please enter a valid date'
+          }
+        };
+      }
+
+      const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+
+      // Check minimum age (13 years)
+      const minDate = new Date(currentDate);
+      minDate.setFullYear(currentDate.getFullYear() - 13);
+
+      // Debug logging
+      console.log('Birth Date Validation Debug:');
+      console.log('Input value:', control.value);
+      console.log('Parsed date:', selectedDate);
+      console.log('Current date:', currentDate);
+      console.log('Min date (13 years ago):', minDate);
+      console.log('Is selected date > min date?', selectedDate > minDate);
+
+      // Check if date is in the future
+      if (selectedDate > currentDate) {
+        return {
+          futureDate: {
+            valid: false,
+            message: 'Birth date cannot be in the future'
+          }
+        };
+      }
+      
+      // If selected date is after minDate, user is too young
+      if (selectedDate > minDate) {
+        return {
+          minAge: {
+            valid: false,
+            message: 'You must be at least 13 years old to apply'
+          }
+        };
+      }
+
+      return null; // Date is valid
+    };
+  }
+
   disabledDate = (current: Date): boolean => {
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
+    
+    // Maximum date: today (can't select future dates)
+    const maxDate = new Date(currentDate);
+    
+    // Minimum date: 13 years ago (minimum age requirement)
     const minDate = new Date(currentDate);
-    minDate.setFullYear(currentDate.getFullYear() - 18);
+    minDate.setFullYear(currentDate.getFullYear() - 13);
+    
     const selectedDate = new Date(current);
     selectedDate.setHours(0, 0, 0, 0);
-    return selectedDate > minDate;
+    
+    // Disable dates that are in the future OR would make someone younger than 13
+    // selectedDate > minDate means the person would be younger than 13
+    return selectedDate > maxDate || selectedDate > minDate;
   };
 
   nextTab() {

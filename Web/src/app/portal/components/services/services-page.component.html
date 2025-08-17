@@ -1,0 +1,38 @@
+<div class="services-page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="container">
+      <h1 class="page-title">Our Services</h1>
+      <p class="page-subtitle">Discover the comprehensive range of services we offer to empower your educational journey</p>
+      <div class="header-underline"></div>
+    </div>
+  </div>
+
+  <!-- Services Content -->
+  <div class="services-content">
+    <div class="container">
+      <div class="services-grid">
+        <div class="service-item" *ngFor="let service of services">
+          <nz-card [nzHoverable]="true" class="service-card">
+            <div class="service-icon-wrapper">
+              <i nz-icon [nzType]="service.icon" nzTheme="outline" class="service-icon"></i>
+            </div>
+            <h3 class="service-title">{{ service.title }}</h3>
+            <p class="service-description">{{ service.description }}</p>
+          </nz-card>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Call to Action -->
+  <div class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Ready to Get Started?</h2>
+        <p>Join our community and experience the best in computer science education</p>
+        <button class="cta-button" routerLink="/portal">Explore Programs</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,161 @@
+// Floating Label Input Component Styles
+// This component uses the global floating label styles
+
+.floating-label-container {
+  position: relative;
+  margin: 16px 0;
+  display: block;
+}
+
+.floating-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #fafafa;
+  height: 44px;
+  
+  &:hover {
+    border-color: #40a9ff;
+    background: #fff;
+  }
+  
+  &:focus {
+    border-color: #1890ff;
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
+  
+  &::placeholder {
+    color: transparent;
+  }
+  
+  &.error {
+    border-color: #ff4d4f !important;
+    box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
+    background: #fff2f0 !important;
+  }
+  
+  &.success {
+    border-color: #52c41a !important;
+    box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2) !important;
+    background: #f6ffed !important;
+  }
+  
+  &:disabled {
+    background: #f5f5f5 !important;
+    border-color: #d9d9d9 !important;
+    color: #bfbfbf !important;
+    cursor: not-allowed;
+  }
+}
+
+.floating-label {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  font-size: 14px;
+  color: #8c8c8c;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  background: #ffffff;
+  padding: 0 4px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  .required {
+    color: #ff4d4f;
+    font-weight: 600;
+  }
+  
+  i {
+    font-size: 16px;
+    color: #1890ff;
+  }
+}
+
+// Floating label animation states
+.floating-label-container .floating-input:focus + .floating-label,
+.floating-label-container .floating-input:not(:placeholder-shown) + .floating-label,
+.floating-label-container .floating-input.filled + .floating-label {
+  top: -8px;
+  left: 12px;
+  font-size: 12px;
+  color: #1890ff;
+  font-weight: 600;
+  background: #ffffff;
+  padding: 0 4px;
+}
+
+// Error state label styling
+.floating-label-container .floating-input.error + .floating-label {
+  color: #ff4d4f;
+}
+
+// Success state label styling
+.floating-label-container .floating-input.success + .floating-label {
+  color: #52c41a;
+}
+
+// Disabled state label styling
+.floating-label-container .floating-input:disabled + .floating-label {
+  color: #bfbfbf;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .floating-label-container {
+    margin: 12px 0;
+  }
+  
+  .floating-input {
+    height: 40px;
+    padding: 10px 14px;
+    font-size: 16px; // Prevents zoom on iOS
+  }
+  
+  .floating-label {
+    top: 12px;
+    left: 14px;
+    font-size: 13px;
+  }
+  
+  .floating-label-container .floating-input:focus + .floating-label,
+  .floating-label-container .floating-input:not(:placeholder-shown) + .floating-label,
+  .floating-label-container .floating-input.filled + .floating-label {
+    top: -6px;
+    left: 10px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-label-container {
+    margin: 8px 0;
+  }
+  
+  .floating-input {
+    height: 36px;
+    padding: 8px 12px;
+  }
+  
+  .floating-label {
+    top: 10px;
+    left: 12px;
+    font-size: 12px;
+  }
+  
+  .floating-label-container .floating-input:focus + .floating-label,
+  .floating-label-container .floating-input:not(:placeholder-shown) + .floating-label,
+  .floating-label-container .floating-input.filled + .floating-label {
+    top: -5px;
+    left: 8px;
+    font-size: 10px;
+  }
+}

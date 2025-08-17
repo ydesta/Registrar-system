@@ -90,10 +90,11 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
         .applicantReviewerDecision(postData.id, postData)
         .subscribe(res => {
           if (res.status=="success") {
-            const userId = res.data;
+            const userId = res.data.applicantUserId;
+            const email = res.data.emailAddress;
             if (postData.approvalStatus == 3) {
               if (userId) {
-                this.userManagementService.updateUserRole(String(userId), "ApprovedApplicant")
+                this.userManagementService.updateUserRole(String(userId), "ApprovedApplicant", email)
                   .subscribe(() => {
                     this._customNotificationService.notification(
                       "success",

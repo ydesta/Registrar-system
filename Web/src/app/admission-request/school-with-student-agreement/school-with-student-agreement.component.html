@@ -65,13 +65,14 @@
           <div class="form-group">
             <label>
               <i nz-icon nzType="search" nzTheme="outline"></i>
-              How did you learn about HilcoE?
+              <span class="label-text">How did you learn about HilcoE? <span class="required-asterisk">*</span></span>
             </label>
             <nz-select 
               formControlName="howDidYouComeKnow" 
               nzPlaceHolder="Select how you learned about HilcoE" 
               nzShowSearch
-              nzAllowClear>
+              nzAllowClear
+              class="mobile-select">
               <nz-option nzValue="Colleague" nzLabel="Colleague"></nz-option>
               <nz-option nzValue="Former Student" nzLabel="Former Student"></nz-option>
               <nz-option nzValue="Brochure" nzLabel="Brochure"></nz-option>
@@ -88,13 +89,14 @@
           <div class="form-group">
             <label>
               <i nz-icon nzType="bank" nzTheme="outline"></i>
-              Source of Finance
+              <span class="label-text">Source of Finance <span class="required-asterisk">*</span></span>
             </label>
             <nz-select 
               formControlName="sourceOfFinance" 
               nzPlaceHolder="Select your source of finance" 
               nzShowSearch
-              nzAllowClear>
+              nzAllowClear
+              class="mobile-select">
               <nz-option nzValue="Personal" nzLabel="Personal Savings"></nz-option>
               <nz-option nzValue="Employer" nzLabel="Employer Sponsorship"></nz-option>
               <nz-option nzValue="Family" nzLabel="Family Support"></nz-option>

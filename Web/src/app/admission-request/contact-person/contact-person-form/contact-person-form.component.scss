@@ -95,128 +95,179 @@
   /* Form Items */
   ::ng-deep .ant-form-item {
     margin-bottom: 24px;
+    position: relative;
 
     .ant-form-item-label {
-      label {
-        font-size: 14px;
-        font-weight: 500;
-        color: #262626;
-        height: auto;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        
-        &.ant-form-item-required::before {
-          display: none;
-        }
-        
-        &.ant-form-item-required::after {
-          content: '*';
-          display: inline-block;
-          margin-left: 4px;
-          font-size: 14px;
-          color: #ff4d4f;
-          line-height: 1;
-        }
-
-        .field-icon {
-          color: #1890ff;
-          font-size: 16px;
-        }
-      }
+      display: none; // Hide default labels when using floating labels
     }
 
     .ant-form-item-control {
-      .form-input {
-        height: 44px;
-        padding: 8px 16px;
-        font-size: 14px;
-        border-radius: 8px;
-        border: 2px solid #e8e8e8;
-        transition: all 0.3s ease;
-        background: #fafafa;
-
-        &:hover {
-          border-color: #40a9ff;
-          background: #fff;
-        }
-
-        &:focus {
-          border-color: #1890ff;
-          background: #fff;
-          box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
-        }
-
-        &.error {
-          border-color: #ff4d4f;
-          background: #fff1f0;
-
-          &:hover, &:focus {
-            border-color: #ff7875;
-          }
-        }
-      }
-
-      .form-select {
-        .ant-select-selector {
-          height: 44px;
-          padding: 8px 16px;
-          border-radius: 8px;
-          border: 2px solid #e8e8e8;
-          background: #fafafa;
-
-          .ant-select-selection-item {
-            line-height: 26px;
-          }
-        }
-
-        &:hover .ant-select-selector {
-          border-color: #40a9ff;
-          background: #fff;
-        }
-
-        &.ant-select-focused .ant-select-selector {
-          border-color: #1890ff;
-          box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
-          background: #fff;
-        }
-
-        &.error .ant-select-selector {
-          border-color: #ff4d4f;
-          background: #fff1f0;
-        }
-      }
+      position: relative; // Added for proper positioning context
     }
   }
 }
 
-/* Error Messages */
-.error-message {
-  color: #ff4d4f;
-  font-size: 13px;
-  margin-top: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  animation: fadeIn 0.3s ease;
-  padding: 4px 8px;
-  background: #fff1f0;
+/* =============================================================================
+   WORKING FLOATING LABEL IMPLEMENTATION
+   ============================================================================= */
+
+/* Working floating label implementation for input fields */
+.input-with-floating-label {
+  position: relative;
+  width: 100%;
+  padding: 12px 8px;
+  font-size: 16px;
+  border: 1px solid #d9d9d9;
   border-radius: 4px;
-  border-left: 3px solid #ff4d4f;
+  outline: none;
+  transition: border-color 0.3s;
+  height: 44px;
+  background: #fafafa;
+
+  &:focus {
+    border-color: #6c757d;
+    box-shadow: 0 0 0 2px rgba(108, 117, 125, 0.2);
+    background: #fff;
+  }
+
+  &:hover {
+    border-color: #868e96;
+    background: #fff;
+  }
+
+  &.error {
+    border-color: #ff4d4f;
+    background: #fff1f0;
+
+    &:hover, &:focus {
+      border-color: #ff7875;
+    }
+  }
+
+  /* Ensure the floating label is positioned relative to the input */
+  & + .floating-label {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 16px;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    background: white;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    z-index: 1;
+
+    .required {
+      color: #ff4d4f;
+      font-weight: 600;
+    }
+
+    i {
+      font-size: 16px;
+      color: #6c757d;
+    }
+  }
+
+  /* Float the label when focused or has content */
+  &:focus + .floating-label,
+  &:not(:placeholder-shown) + .floating-label {
+    top: -8px;
+    left: 6px;
+    font-size: 12px;
+    color: #6c757d;
+    background: white;
+    padding: 0 4px;
+  }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
+/* Working floating label implementation for select fields */
+.select-with-floating-label {
+  position: relative;
+  width: 100%;
+
+  /* Ensure the floating label is positioned relative to the select */
+  & + .floating-label {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 16px;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    background: white;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    z-index: 1;
+
+    .required {
+      color: #ff4d4f;
+      font-weight: 600;
+    }
+
+    i {
+      font-size: 16px;
+      color: #6c757d;
+    }
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  /* Float the label when focused, open, or has value */
+  &:focus + .floating-label,
+  &.ant-select-focused + .floating-label,
+  &.ant-select-open + .floating-label,
+  &:not(.ant-select-empty) + .floating-label {
+    top: -8px;
+    left: 12px;
+    font-size: 12px;
+    color: #6c757d;
+    background: white;
+    padding: 0 4px;
   }
 }
 
-/* Form Actions - Buttons aligned to the right */
+/* Ensure proper positioning context for floating labels */
+::ng-deep .ant-form-item .ant-form-item-control {
+  position: relative; /* Added for proper positioning context */
+
+  /* Style the floating labels that are direct children */
+  .floating-label {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 16px;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    background: white;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    z-index: 1;
+
+    .required {
+      color: #ff4d4f;
+      font-weight: 600;
+    }
+
+    i {
+      font-size: 16px;
+      color: #6c757d;
+    }
+  }
+}
+
+/* Form Actions */
 .form-actions {
   margin-top: 32px;
   padding-top: 24px;
@@ -224,75 +275,62 @@
 
   .action-buttons {
     display: flex;
-    justify-content: flex-end;
     gap: 12px;
+    justify-content: flex-end;
 
     .cancel-btn {
-      min-width: 100px;
       height: 40px;
+      padding: 0 24px;
       font-size: 14px;
       font-weight: 500;
       border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all 0.3s ease;
       border: 1px solid #d9d9d9;
       background: #fff;
       color: #595959;
+      transition: all 0.3s ease;
 
       &:hover {
-        border-color: #40a9ff;
-        color: #1890ff;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        color: #6c757d;
+        border-color: #6c757d;
+        background: #f8f9fa;
       }
 
-      &:active {
-        transform: translateY(0);
+      i {
+        margin-right: 8px;
       }
     }
 
     .submit-btn {
-      min-width: 140px;
       height: 40px;
+      padding: 0 24px;
       font-size: 14px;
       font-weight: 500;
       border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all 0.3s ease;
       background: linear-gradient(135deg, #1890ff, #096dd9);
       border: none;
       color: white;
       box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);
+      transition: all 0.3s ease;
 
-      &:hover:not(:disabled) {
+      &:hover {
         background: linear-gradient(135deg, #40a9ff, #1890ff);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(24, 144, 255, 0.45);
       }
 
-      &:active:not(:disabled) {
+      &:active {
         transform: translateY(0);
         box-shadow: 0 2px 4px rgba(24, 144, 255, 0.35);
       }
 
-      &:disabled {
-        background: #f5f5f5;
-        color: #bfbfbf;
-        cursor: not-allowed;
-        box-shadow: none;
-        transform: none;
+      i {
+        margin-right: 8px;
       }
     }
   }
 }
 
-/* Responsive Design */
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .contact-person-form-container {
     margin: 0 16px;
@@ -311,6 +349,10 @@
       .form-title {
         font-size: 18px;
       }
+
+      .form-subtitle {
+        font-size: 13px;
+      }
     }
   }
 
@@ -327,12 +369,5 @@
         width: 100%;
       }
     }
-  }
-
-  ::ng-deep .ant-form-item-label,
-  ::ng-deep .ant-form-item-control {
-    flex: 0 0 100%;
-    max-width: 100%;
-    text-align: left;
   }
 }

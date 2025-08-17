@@ -379,10 +379,11 @@ export class UserManagementService implements IUserManagementService {
       );
   }
 
-  updateUserRole(userId: string, role: string): Observable<any> {
+  updateUserRole(userId: string, role: string,email): Observable<any> {
     const payload: any = {
       UserId: userId,
-      Role: role
+      Role: role,
+      Email: email
     };
     return this.http.post(`${this.baseUrl}/UserManagement/UpdateRole/user-role`, payload);
   }

@@ -245,12 +245,8 @@
     <!-- Section Assignment Modification Button - New Row -->
     <div class="modification-actions">
       <div class="button-container">
-        <button 
-          nz-button 
-          nzType="primary" 
-          [nzLoading]="loading" 
-          (click)="modifySectionAssignments()"
-          [disabled]="!searchForm.valid || (leftList.length === 0 && rightList.length === 0)">
+        <button nz-button nzType="primary" [nzLoading]="loading" (click)="modifySectionAssignments()" 
+          [disabled]="!searchForm.valid || leftList.length === 0 || rightList.length === 0" style="float: right;">
           <i nz-icon nzType="swap" nzTheme="outline"></i>
           Apply Section Changes
         </button>

@@ -1,7 +1,7 @@
 export class StudentPaymentRequest {
     parentId: string;
-    fromBank: string;
-    toBank: number
+    fromBank: string | null;  // GUID as string
+    toBank: number | null;    // int as number
     transactionDate: string
     bankTransactionID: string
     amount: number

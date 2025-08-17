@@ -5,31 +5,21 @@
     <div nz-row [nzGutter]="24">
       <div nz-col nzSpan="12">
         <nz-form-item>
-          <nz-form-label [nzSpan]="24" nzRequired class="required-field">From Bank</nz-form-label>
+          <nz-form-label [nzSpan]="24">From Bank</nz-form-label>
           <nz-form-control>
-            <nz-select formControlName="fromBank" nzPlaceHolder="Select Bank" nzShowSearch
-              [class.error]="bankTransactionForm.controls['fromBank'].invalid && (bankTransactionForm.controls['fromBank'].dirty || bankTransactionForm.controls['fromBank'].touched)">
+            <nz-select formControlName="fromBank" nzPlaceHolder="Select Bank" nzShowSearch>
               <nz-option *ngFor="let item of banks" [nzValue]="item.id" [nzLabel]="item.bankName"></nz-option>
             </nz-select>
-            <div nz-form-explain
-              *ngIf="bankTransactionForm.controls['fromBank'].invalid && (bankTransactionForm.controls['fromBank'].dirty || bankTransactionForm.controls['fromBank'].touched)">
-              <span class="error-message">From Bank is required.</span>
-            </div>
           </nz-form-control>
         </nz-form-item>
 
         <nz-form-item>
-          <nz-form-label [nzSpan]="24" nzRequired class="required-field">To Bank</nz-form-label>
+          <nz-form-label [nzSpan]="24">To Bank</nz-form-label>
           <nz-form-control>
-            <nz-select formControlName="toBank" nzPlaceHolder="Select to bank" nzShowSearch
-              [class.error]="bankTransactionForm.controls['toBank'].invalid && (bankTransactionForm.controls['toBank'].dirty || bankTransactionForm.controls['toBank'].touched)">
+            <nz-select formControlName="toBank" nzPlaceHolder="Select to bank" nzShowSearch>
               <nz-option *ngFor="let item of listOfBankTo" [nzValue]="item.Id"
                 [nzLabel]="item.Description"></nz-option>
             </nz-select>
-            <div nz-form-explain
-              *ngIf="bankTransactionForm.controls['toBank'].invalid && (bankTransactionForm.controls['toBank'].dirty || bankTransactionForm.controls['toBank'].touched)">
-              <span class="error-message">To Bank is required.</span>
-            </div>
           </nz-form-control>
         </nz-form-item>
 
@@ -37,7 +27,7 @@
           <nz-form-label [nzSpan]="24">Remark</nz-form-label>
           <nz-form-control>
             <nz-textarea-count [nzMaxCharacterCount]="250">
-              <textarea rows="4" formControlName="remark" nz-input placeholder="Enter any additional remarks here..."></textarea>
+              <textarea rows="6" formControlName="remark" nz-input placeholder="Enter any additional remarks here..."></textarea>
             </nz-textarea-count>
           </nz-form-control>
         </nz-form-item>
@@ -45,7 +35,7 @@
 
       <div nz-col nzSpan="12">
         <nz-form-item>
-          <nz-form-label [nzSpan]="24" nzRequired class="required-field">Bank Transaction No.</nz-form-label>
+          <nz-form-label [nzSpan]="24" nzRequired>Bank Transaction(Receipt) No.</nz-form-label>
           <nz-form-control>
             <input nz-input formControlName="bankTransactionID" placeholder="Enter transaction ID"
               [class.error]="bankTransactionForm.controls['bankTransactionID'].invalid && (bankTransactionForm.controls['bankTransactionID'].dirty || bankTransactionForm.controls['bankTransactionID'].touched)" />

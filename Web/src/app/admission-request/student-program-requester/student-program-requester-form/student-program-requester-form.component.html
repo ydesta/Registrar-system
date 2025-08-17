@@ -1,119 +1,123 @@
 <div class="academic-program-form-container">
-    <!-- Header Section -->
-    <div class="form-header">
-        <div class="header-icon">
-            <span nz-icon nzType="read" nzTheme="outline"></span>
+  <!-- Form Header -->
+  <div class="form-header">
+    <div class="header-icon">
+      <i nz-icon nzType="read" nzTheme="outline"></i>
+    </div>
+    <div class="header-content">
+      <h2 class="form-title">Academic Program Request</h2>
+      <p class="form-subtitle">Select your preferred academic program and division</p>
+    </div>
+  </div>
+
+  <!-- Form Content -->
+  <form nz-form [formGroup]="academicProgramRequestForm" class="academic-program-form">
+    
+    <!-- Academic Programme Field -->
+    <nz-form-item>
+      <nz-form-control [nzErrorTip]="academicProgrammeErrorTpl">
+        <nz-select 
+          formControlName="acadamicProgrammeId" 
+          placeholder=" "
+          id="acadamicProgrammeId"
+          class="select-with-floating-label"
+          nzShowSearch="true" 
+          nzAllowClear="true">
+          <nz-option 
+            *ngFor="let item of acadamicProgrammes" 
+            [nzValue]="item.id"
+            [nzLabel]="item.acadamicProgrammeTitle">
+          </nz-option>
+        </nz-select>
+        <label for="acadamicProgrammeId" class="floating-label">
+          <i nz-icon nzType="book" nzTheme="outline"></i>
+          Academic Programme <span class="required">*</span>
+        </label>
+        <ng-template #academicProgrammeErrorTpl let-control>
+          <div class="error-message" *ngIf="control.hasError('required')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            Academic Programme is required
+          </div>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!-- Division Field -->
+    <nz-form-item>
+      <nz-form-control [nzErrorTip]="divisionErrorTpl">
+        <nz-select 
+          formControlName="division" 
+          placeholder=" "
+          id="division"
+          class="select-with-floating-label"
+          nzShowSearch="true" 
+          nzAllowClear="true">
+          <nz-option 
+            *ngFor="let item of divisionStatusist" 
+            [nzValue]="item.Id"
+            [nzLabel]="item.Description">
+          </nz-option>
+        </nz-select>
+        <label for="division" class="floating-label">
+          <i nz-icon nzType="apartment" nzTheme="outline"></i>
+          Division <span class="required">*</span>
+        </label>
+        <ng-template #divisionErrorTpl let-control>
+          <div class="error-message" *ngIf="control.hasError('required')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            Division is required
+          </div>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!-- Information Cards -->
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="card-icon">
+          <i nz-icon nzType="info-circle" nzTheme="outline"></i>
         </div>
-        <div class="header-content">
-            <h2 class="form-title">Academic Program Request</h2>
-            <p class="form-subtitle">Select your preferred academic program and division</p>
+        <div class="card-content">
+          <h4>Important Note</h4>
+          <p>Please ensure you have selected the correct academic program and division. This selection will determine your course of study.</p>
         </div>
+      </div>
+      
+      <div class="info-card">
+        <div class="card-icon">
+          <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
+        </div>
+        <div class="card-content">
+          <h4>Processing Time</h4>
+          <p>Your request will be reviewed within 2-3 business days. You'll receive a notification once processed.</p>
+        </div>
+      </div>
     </div>
 
-    <!-- Form Section -->
-    <div class="form-section">
-        <form nz-form [formGroup]="academicProgramRequestForm" [nzLayout]="'horizontal'">
-            
-            <!-- First Row: Academic Programme Field -->
-            <nz-row>
-                <nz-col [nzSpan]="24">
-                    <nz-form-item>
-                        <nz-form-label [nzRequired]="true" [nzSpan]="8">
-                            <span nz-icon nzType="book" nzTheme="outline"></span>
-                            Academic Programme
-                        </nz-form-label>
-                        <nz-form-control [nzSpan]="16" [nzValidateStatus]="acadamicProgrammeId?.invalid && acadamicProgrammeId?.touched ? 'error' : ''">
-                            <nz-select 
-                                formControlName="acadamicProgrammeId" 
-                                nzPlaceHolder="Select your academic programme"
-                                nzShowSearch="true" 
-                                nzAllowClear="true">
-                                <nz-option 
-                                    *ngFor="let item of acadamicProgrammes" 
-                                    [nzValue]="item.id"
-                                    [nzLabel]="item.acadamicProgrammeTitle">
-                                </nz-option>
-                            </nz-select>
-                            <div *ngIf="acadamicProgrammeId?.errors && acadamicProgrammeId?.touched" class="error-message">
-                                <span *ngIf="acadamicProgrammeId?.errors?.['required']">Academic Programme is required</span>
-                            </div>
-                        </nz-form-control>
-                    </nz-form-item>
-                </nz-col>
-            </nz-row>
-
-            <!-- Second Row: Division Field -->
-            <nz-row>
-                <nz-col [nzSpan]="24">
-                    <nz-form-item>
-                        <nz-form-label [nzRequired]="true" [nzSpan]="8">
-                            <span nz-icon nzType="apartment" nzTheme="outline"></span>
-                            Division
-                        </nz-form-label>
-                        <nz-form-control [nzSpan]="16" [nzValidateStatus]="division?.invalid && division?.touched ? 'error' : ''">
-                            <nz-select 
-                                formControlName="division" 
-                                nzPlaceHolder="Select your division"
-                                nzShowSearch="true" 
-                                nzAllowClear="true">
-                                <nz-option 
-                                    *ngFor="let item of divisionStatusist" 
-                                    [nzValue]="item.Id"
-                                    [nzLabel]="item.Description">
-                                </nz-option>
-                            </nz-select>
-                            <div *ngIf="division?.errors && division?.touched" class="error-message">
-                                <span *ngIf="division?.errors?.['required']">Division is required</span>
-                            </div>
-                        </nz-form-control>
-                    </nz-form-item>
-                </nz-col>
-            </nz-row>
-
-            <!-- Information Cards -->
-            <div class="info-cards">
-                <div class="info-card">
-                    <div class="card-icon">
-                        <span nz-icon nzType="info-circle" nzTheme="outline"></span>
-                    </div>
-                    <div class="card-content">
-                        <h4>Important Note</h4>
-                        <p>Please ensure you have selected the correct academic program and division. This selection will determine your course of study.</p>
-                    </div>
-                </div>
-                
-                <div class="info-card">
-                    <div class="card-icon">
-                        <span nz-icon nzType="clock-circle" nzTheme="outline"></span>
-                    </div>
-                    <div class="card-content">
-                        <h4>Processing Time</h4>
-                        <p>Your request will be reviewed within 2-3 business days. You'll receive a notification once processed.</p>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="action-buttons">
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <div class="action-buttons">
         <button 
-            nz-button 
-            nzType="default" 
-            class="cancel-btn"
-            (click)="onCancel()">
-            <span nz-icon nzType="close"></span>
-            Cancel
+          nz-button 
+          nzType="default" 
+          (click)="onCancel()"
+          class="cancel-btn"
+        >
+          <i nz-icon nzType="close" nzTheme="outline"></i>
+          Cancel
         </button>
         
         <button 
-            nz-button 
-            nzType="primary" 
-            class="submit-btn"
-            [disabled]="academicProgramRequestForm.invalid"
-            (click)="onSubmit()">
-            <span nz-icon nzType="save"></span>
-            Save Request
+          nz-button 
+          nzType="primary" 
+          (click)="onSubmit()"
+          [disabled]="academicProgramRequestForm.invalid"
+          class="submit-btn"
+        >
+          <i nz-icon nzType="save" nzTheme="outline"></i>
+          {{ id ? 'Update' : 'Save' }} Request
         </button>
+      </div>
     </div>
+  </form>
 </div>

@@ -1,0 +1,220 @@
+<div class="content-container">
+  <!-- Page Header -->
+  <div class="header-section">
+    <div class="page-title">
+      <h1>Lab Section Assigned Students</h1>
+      <p class="subtitle">View and manage students assigned to lab sections</p>
+    </div>
+  </div>
+
+  <!-- Collapsible Search Form -->
+  <div class="search-section">
+    <nz-collapse>
+      <nz-collapse-panel [nzHeader]="searchHeader" [nzActive]="!isSearchCollapsed">
+
+        <ng-template #searchHeader>
+          <span>
+            <i nz-icon nzType="filter" nzTheme="outline"></i>
+            Section Criteria
+          </span>
+        </ng-template>
+
+        <form nz-form [formGroup]="searchForm">
+          <div nz-row [nzGutter]="24">
+            <!-- Academic Term -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Academic Term</nz-form-label>
+                <nz-form-control nzErrorTip="Academic term is required">
+                  <nz-select formControlName="academicTerm" nzPlaceHolder="Select Academic Term" nzShowSearch nzAllowClear style="width: 100%;">
+                    <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
+                      [nzLabel]="item.Description"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Term Year -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Term Year</nz-form-label>
+                <nz-form-control nzErrorTip="Term year is required">
+                  <nz-select formControlName="year" nzPlaceHolder="Select Term Year" nzShowSearch style="width: 100%;">
+                    <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <div nz-row [nzGutter]="24">
+            <!-- Batch Code -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Batch Code</nz-form-label>
+                <nz-form-control nzErrorTip="Batch code is required">
+                  <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch Code" nzShowSearch nzAllowClear 
+                    [nzDisabled]="!searchForm.get('academicTerm')?.value || !searchForm.get('year')?.value" 
+                    style="width: 100%;">
+                    <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.batchCode"
+                      [nzLabel]="item.batchCode"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div nz-row>
+            <div nz-col [nzSpan]="24" style="text-align: right;">
+              <button nz-button nzType="default" (click)="clearSearch()">
+                <i nz-icon nzType="reload" nzTheme="outline"></i>
+                Reset
+              </button>
+            </div>
+          </div>
+        </form>
+      </nz-collapse-panel>
+    </nz-collapse>
+  </div>
+
+  <!-- Messages -->
+  <nz-alert *ngIf="errorMessage" nzType="error" [nzMessage]="errorMessage" class="mb-3">
+  </nz-alert>
+  <nz-alert *ngIf="successMessage" nzType="success" [nzMessage]="successMessage" class="mb-3">
+  </nz-alert>
+
+  <!-- Export Actions -->
+  <div class="export-section" *ngIf="labSectionAssignedStudents.length > 0">
+    <div class="export-buttons">
+      <button nz-button nzType="default" (click)="exportLabSectionList()" class="export-btn">
+        <i nz-icon nzType="download" nzTheme="outline"></i>
+        Export Lab Section List
+      </button>
+    </div>
+  </div>
+
+  <!-- Results Table -->
+  <div class="table-container" *ngIf="labSectionAssignedStudents.length > 0">
+    <div class="table-header">
+      <div class="page-info">
+        <span class="text-muted">
+          Found {{ labSectionAssignedStudents.length }} students in lab sections
+        </span>
+      </div>
+      <div class="search-box">
+        <input nz-input placeholder="Search by name, code, or section..." [(ngModel)]="searchValue" (ngModelChange)="search()" />
+        <i nz-icon nzType="search"></i>
+      </div>
+    </div>
+
+    <nz-table #basicTable [nzData]="listOfDisplayData" [nzLoading]="loading" [nzShowPagination]="false"
+      [nzPageSize]="9999" [nzNoResult]="emptyTpl" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;">
+
+      <thead>
+        <tr>
+          <th style="min-width: 50px; width: 60px;">#</th>
+          <th style="min-width: 120px;">Student Code</th>
+          <th style="min-width: 100px;">Batch Code</th>
+          <th style="min-width: 200px;">Full Name</th>
+          <th style="min-width: 100px;">Section</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let student of basicTable.data; let i = index">
+          <td>
+            <span class="serial-number">
+              {{ i + 1 }}
+            </span>
+          </td>
+          <td>
+            <strong>{{ student.studentCode }}</strong>
+          </td>
+          <td>
+            <nz-tag nzColor="blue">{{ student.batchCode }}</nz-tag>
+          </td>
+          <td>{{ student.fullName }}</td>
+          <td>
+            <nz-tag nzColor="green">{{ student.section }}</nz-tag>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+
+    <!-- Empty State Template -->
+    <ng-template #emptyTpl>
+      <div class="no-data">
+        <span nz-icon nzType="user" nzTheme="outline"></span>
+        <p>No students found in lab sections</p>
+        <p class="text-muted">Try adjusting your search criteria or check if students are assigned to lab sections.</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Summary and Actions Section -->
+  <div class="summary-section" *ngIf="labSectionAssignedStudents.length > 0">
+    <nz-card nzTitle="Summary & Actions" class="summary-card">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="summary-item">
+            <div class="summary-icon">
+              <i nz-icon nzType="team" nzTheme="outline"></i>
+            </div>
+            <div class="summary-content">
+              <h4>{{ getTotalStudents() }}</h4>
+              <p>Total Students</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="summary-item">
+            <div class="summary-icon">
+              <i nz-icon nzType="setting" nzTheme="outline"></i>
+            </div>
+            <div class="summary-content">
+              <label class="form-label">Number of Sections</label>
+              <nz-input-number [(ngModel)]="numberOfSections" [nzMin]="1"
+                [nzPlaceHolder]="'Enter number of sections'" [nzSize]="'default'" 
+                (ngModelChange)="onNumberOfSectionsChange()" style="width: 150px;">
+              </nz-input-number>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="summary-item">
+            <div class="summary-icon">
+              <i nz-icon nzType="calculator" nzTheme="outline"></i>
+            </div>
+            <div class="summary-content">
+              <h4>{{ studentsPerSection }}</h4>
+              <p>Students per Section</p>
+              <small class="text-muted">({{ numberOfSections }} sections)</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-5">
+        <div class="col-md-12" style="display: flex; justify-content: flex-end;">
+          <button nz-button nzType="primary" nzSize="large" [nzLoading]="generatingAssignments"
+            (click)="generateLabSectionAssignments()" [disabled]="labSectionAssignedStudents.length === 0"
+            class="generate-btn">
+            <i nz-icon nzType="team" nzTheme="outline"></i>
+            Generate Lab Section Assignments
+          </button>
+        </div>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && labSectionAssignedStudents.length === 0 && searchForm.get('batchCode')?.value">
+    <nz-card class="empty-card">
+      <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="notFoundContent">
+        <ng-template #notFoundContent>
+          <span class="text-muted">No lab section assigned students found for the specified criteria.</span>
+        </ng-template>
+      </nz-empty>
+    </nz-card>
+  </div>
+</div>

@@ -5,7 +5,8 @@ namespace SecureAuth.APPLICATION.Commands.User
 {
     public class UpdateUserRoleCommand : ICommand<Result>
     {
-        public string UserId { get; set; }
-        public string Role { get; set; }
+        public required string UserId { get; set; }
+        public required string Role { get; set; }
+        public required string Email { get; set; }
     }
 } 

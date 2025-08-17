@@ -41,6 +41,10 @@ export class WorkExperienceFormComponent implements OnInit {
     }
   }
 
+  closeModal(): void {
+    this.modalRef.close();
+  }
+
   haveWorkExpe() {
     this.haveWorkExperience = !this.haveWorkExperience;
   }

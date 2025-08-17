@@ -60,6 +60,7 @@ namespace SecureAuth.INFRASTRUCTURE.DependencyInjection
                             "https://www.hilcoe.edu.et",   // Production domain with www
                             "https://hilcoe.edu.et:80",    // HTTP port
                             "https://hilcoe.edu.et:443",   // HTTPS port
+                            "https://hilcoe.edu.et:5001",  // API port (main domain)
                             "https://hilcoe.edu.et:7123",  // API port (main domain)
                             "https://staging.hilcoe.edu.et:7123"   // Staging API port (if needed)
                         )

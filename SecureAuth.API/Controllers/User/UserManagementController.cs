@@ -195,7 +195,6 @@ namespace SecureAuth.API.Controllers.User
             }
         }
 
-        // ==================== SELF-SERVICE OPERATIONS ====================
 
         [HttpGet("profile")]
         public async Task<ActionResult<UserProfileResponseModel>> GetProfile()
@@ -488,8 +487,16 @@ namespace SecureAuth.API.Controllers.User
                 var result = await _mediator.SendAsync<UpdateUserRoleCommand, Result>(command);
                 if (!result.IsSuccess)
                     return StatusCode(500, new { message = result.ErrorMessage });
+                var commandUserupdate = new AdminUpdateEmailCommand
+                {
+                    UserId = command.UserId,
+                    NewEmail = command.Email
+                };
 
-                return Ok(new { success = true, message = "User role updated successfully." });
+                var resultUserUpdate = await _mediator.SendAsync<AdminUpdateEmailCommand, UpdateEmailResponse>(commandUserupdate);
+                if (!resultUserUpdate.Success)
+                    return StatusCode(500, new { message = result.ErrorMessage });
+                return Ok(new { success = true, message = "User role and User Name updated successfully." });
             }
             catch (Exception ex)
             {

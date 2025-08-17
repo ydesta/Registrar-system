@@ -1,113 +1,113 @@
 <div class="content-container">
-    <!-- Header Section -->
-    <div class="header-section">
-        <div class="header-content">
-            <div class="page-title">
-                <h2 class="title">Applicant Requests</h2>
-                <p class="subtitle">Review and manage applicant admission requests</p>
-            </div>
-            
-            <div class="search-section">
-                <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton" class="search-input">
-                    <input type="text" nz-input placeholder="Search applicants..." [(ngModel)]="searchText"
-                        (ngModelChange)="onSearchTextChanged()" />
-                </nz-input-group>
-                <ng-template #suffixIconButton>
-                    <button nz-button nzType="primary" nzSearch class="search-button">
-                        <i nz-icon nzType="search"></i>
-                    </button>
-                </ng-template>
-            </div>
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">Applicant Requests</h2>
+        <p class="subtitle-text">Review and manage applicant admission requests</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-section">
+          <nz-input-group [nzSuffix]="suffixIconSearch">
+            <input type="text" nz-input placeholder="Search applicants..." [(ngModel)]="searchText" (ngModelChange)="onSearchTextChanged()"/>
+          </nz-input-group>
+          <ng-template #suffixIconSearch>
+            <span nz-icon nzType="search"></span>
+          </ng-template>
         </div>
+        <button nz-button nzType="default" (click)="exportApplicants()" class="export-btn">
+          <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+          Export
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- Table Container -->
-    <div class="table-container">
-        <nz-table 
-            [nzLoading]="tableLoading" 
-            #basicTable 
-            [nzData]="applicantsList!" 
-            nzBordered
-            [nzPageSize]="pageSize"
-            [nzPageSizeOptions]="pageSizeOption"
-            [nzShowSizeChanger]="true"
-            [nzTotal]="total"
-            [nzPageIndex]="pageIndex"
-            (nzPageIndexChange)="onPageIndexChange($event)"
-            (nzPageSizeChange)="onPageSizeChange($event)"
-            [nzFrontPagination]="false"
-            [nzShowTotal]="rangeTemplate"
-            [nzNoResult]="emptyTpl">
-            
-            <ng-template #rangeTemplate let-range="range" let-total>
-                <span style="color: #6b7280; font-weight: 500;">
-                    {{ getCurrentPageInfo().start }}-{{ getCurrentPageInfo().end }} of {{ getCurrentPageInfo().total }} applicants
-                </span>
-            </ng-template>
-            
-            <ng-template #emptyTpl>
-                <nz-empty nzNotFoundImage="simple">
-                    <ng-template #nzNotFoundTitle>
-                        <span>{{ searchText ? 'No matching applicants found' : 'No applicants found' }}</span>
-                    </ng-template>
-                    <ng-template #nzNotFoundContent>
-                        <span>{{ searchText ? 'Try adjusting your search criteria' : 'No applicant requests have been submitted yet' }}</span>
-                    </ng-template>
-                </nz-empty>
-            </ng-template>
-                  <thead class="table-header-row">
-        <tr class="table-header-row">
-          <th class="th-row serial-header">#</th>
-          <th class="th-row">Academic Programme</th>
-          <th class="th-row">Applicant ID</th>
-          <th class="th-row">Applicant</th>
-          <th class="th-row">Gender</th>
-          <th class="th-row">Mobile</th>
-          <th class="th-row">Email</th>
-          <th class="th-row">Nationality</th>
-          <th class="th-row sticky-action">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr tabindex="0" *ngFor="let data of basicTable.data; let i = index" class="table-row">
-          <td class="serial-cell">
-            <span class="serial-number">{{ (pageIndex - 1) * pageSize + i + 1 }}</span>
-          </td>
-          <td class="programme-cell">{{ data.academicProgramme }}</td>
-          <td class="id-cell">{{ data.applicantId }}</td>
-          <td class="applicant-cell">
-            <div class="applicant-info">
-              <nz-avatar nzSize="small" [nzText]="data.fullName.charAt(0).toUpperCase()"></nz-avatar>
-              <span class="applicant-name">{{ data.fullName }}</span>
-            </div>
-          </td>
-          <td class="gender-cell">
-            <nz-tag [nzColor]="data.gender === 'Male' ? 'blue' : 'pink'">
-              {{ data.gender }}
-            </nz-tag>
-          </td>
-          <td class="mobile-cell">{{ data.mobile }}</td>
-          <td class="email-cell">{{ data.email }}</td>
-          <td class="nationality-cell">{{ data.nationality }}</td>
-          <td class="action-cell sticky-action">
-                        <ng-container>
-                            <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomLeft" class="action-button">
-                                <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
-                            </button>
-                            <nz-dropdown-menu #menu="nzDropdownMenu">
-                                <ul nz-menu class="action-menu">
-                                    <li>
-                                        <button class="action-item" (click)="getApplicantRequestDetail(data.id,data.requestId)">
-                                            <i nz-icon nzType="eye" nzTheme="fill"></i>
-                                            <span>Review</span>
-                                        </button>
-                                    </li>
-                                </ul>
-                            </nz-dropdown-menu>
-                        </ng-container>
-                    </td>
-                </tr>
-            </tbody>
-        </nz-table>
+  <!-- Table Card Container -->
+  <div class="table-card">
+    <div class="table-wrapper">
+      <nz-table #basicTable 
+                [nzData]="applicantsList!" 
+                nzBordered
+                [nzPageSize]="pageSize"
+                [nzPageSizeOptions]="pageSizeOption"
+                [nzShowSizeChanger]="true"
+                [nzTotal]="total"
+                [nzPageIndex]="pageIndex"
+                (nzPageIndexChange)="onPageIndexChange($event)"
+                (nzPageSizeChange)="onPageSizeChange($event)"
+                [nzFrontPagination]="false"
+                [nzShowTotal]="rangeTemplate"
+                [nzLoading]="tableLoading"
+                [nzNoResult]="emptyTpl"
+                class="applicant-table">
+        <ng-template #rangeTemplate let-range="range" let-total>
+          <span style="color: #6b7280; font-weight: 500;">
+            {{ getCurrentPageInfo().start }}-{{ getCurrentPageInfo().end }} of {{ getCurrentPageInfo().total }} applicants
+          </span>
+        </ng-template>
+        <thead>
+          <tr>
+            <th style="min-width: 60px;">S/N</th>
+            <th style="min-width: 180px;">Academic Programme</th>
+            <th style="min-width: 140px;">Applicant ID</th>
+            <th style="min-width: 160px;">Applicant</th>
+            <th style="min-width: 100px;">Gender</th>
+            <th style="min-width: 140px;">Mobile</th>
+            <th style="min-width: 200px;">Email</th>
+            <th style="min-width: 120px;">Nationality</th>
+            <th class="sticky-action" style="min-width: 120px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of basicTable.data; let i = index">
+            <td><span class="sn-badge">{{ (pageIndex - 1) * pageSize + i + 1 }}</span></td>
+            <td>{{ data.academicProgramme }}</td>
+            <td>{{ data.applicantId }}</td>
+            <td>
+              <div class="applicant-info">
+                <nz-avatar nzSize="small" [nzText]="data.fullName.charAt(0).toUpperCase()"></nz-avatar>
+                <span class="applicant-name">{{ data.fullName }}</span>
+              </div>
+            </td>
+            <td>
+              <nz-tag [nzColor]="data.gender === 'Male' ? 'blue' : 'pink'">
+                {{ data.gender }}
+              </nz-tag>
+            </td>
+            <td>{{ data.mobile }}</td>
+            <td>{{ data.email }}</td>
+            <td>{{ data.nationality }}</td>
+            <td class="sticky-action" [class.sticky-action-even]="i % 2 === 1">
+              <button nz-button 
+                      nz-dropdown 
+                      [nzDropdownMenu]="menu" 
+                      nzPlacement="bottomRight"
+                      nzTrigger="click"
+                      class="action-button">
+                <span nz-icon nzType="more" nzTheme="outline"></span>
+              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li nz-menu-item>
+                    <button nz-button nzType="default" class="action-item" (click)="getApplicantRequestDetail(data.id,data.requestId)">
+                      <span nz-icon nzType="eye" nzTheme="outline"></span>
+                      Review Request
+                    </button>
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </td>
+          </tr>
+        </tbody>
+        <ng-template #emptyTpl>
+          <div class="no-data">
+            <span nz-icon nzType="user" nzTheme="outline"></span>
+            <p>{{ searchText ? 'No matching applicants found' : 'No applicant requests available' }}</p>
+          </div>
+        </ng-template>
+      </nz-table>
     </div>
+  </div>
 </div>
+

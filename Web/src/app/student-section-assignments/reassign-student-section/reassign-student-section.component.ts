@@ -4,20 +4,11 @@ import { TransferChange, TransferItem, TransferSelectChange, TransferDirection }
 import { StaticData } from 'src/app/admission-request/model/StaticData';
 import { TermCourseOfferingService } from 'src/app/colleges/services/term-course-offering.service';
 import { ACADEMIC_TERM_STATUS } from 'src/app/common/constant';
+import { SectionAssignedStudentInfo } from 'src/app/Models/SectionAssignedStudentModel';
 import { SectionViewModel } from 'src/app/Models/SectionViewModel';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { StudentSectionAssignmentService } from 'src/app/services/student-section-assignment.service';
 
-// Interface for section assigned student information
-export interface SectionAssignedStudentInfo {
-  studentCode: string;
-  batchCode: string;
-  fullName: string;
-  section: string;
-  courseCode: string;
-  courseTitle: string;
-  courseId: string;
-}
 
 @Component({
   selector: 'app-reassign-student-section',

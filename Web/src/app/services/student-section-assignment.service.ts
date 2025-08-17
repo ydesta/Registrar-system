@@ -7,6 +7,7 @@ import { SectionAssignedStudentInfo, SectionAssignedStudentsResponse } from '../
 import { SectionViewModel } from '../Models/SectionViewModel';
 import { StudentRegisteredCoursesResult } from '../Models/StudentRegisteredCoursesModel';
 import { ResponseDtos } from '../admission-request/model/response-dtos.model';
+import { LabSectionAssignedStudentsResponse } from '../Models/LabSectionAssignedStudentModel';
 
 @Injectable({
   providedIn: 'root'
@@ -103,5 +104,7 @@ export class StudentSectionAssignmentService {
   getListOfSectionAssignedStudentsBySectionId(batchCode: string, academicTerm: number, year: number, sectionId: number): Observable<ResponseDtos> {
     return this.http.get<ResponseDtos>(`${this.apiUrl}/${batchCode}/${academicTerm}/${year}/${sectionId}`);
   }
-
+  getListOfSectionAssignedStudentsForLab(batchCode: string, academicTerm: number, year: number): Observable<LabSectionAssignedStudentsResponse> {
+    return this.http.get<LabSectionAssignedStudentsResponse>(`${this.apiUrl}/getListOfSectionAssigned/lab/${batchCode}/${academicTerm}/${year}`);
+  }
 } 

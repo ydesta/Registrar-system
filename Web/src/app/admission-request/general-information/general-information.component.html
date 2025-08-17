@@ -6,21 +6,11 @@
     </div>
 </div>
 
-<app-admission-tabs
-    [(selectedTabIndex)]="selectedTabIndex"
-    [isTabDisabled]="isTabDisabled"
-    [showSave]="selectedTabIndex === 1"
-    [showSubmit]="selectedTabIndex === 7"
-    [isLastTab]="selectedTabIndex === 7"
-    [saveDisabled]="isSaveButtonDisabled"
-    [saveLoading]="saveLoading"
-    [submitDisabled]="isSubmitButtonDisabled"
-    [nextDisabled]="isNextButtonDisabled()"
-    [tabOrder]="'default'"
-    [academicProgramValid]="isAcademicProgramValid"
-    (nextTabClicked)="nextTab()"
-    (previousTabClicked)="previousTab()"
-    (saveClicked)="submitForm()"
+<app-admission-tabs [(selectedTabIndex)]="selectedTabIndex" [isTabDisabled]="isTabDisabled"
+    [showSave]="selectedTabIndex === 1" [showSubmit]="selectedTabIndex === 7" [isLastTab]="selectedTabIndex === 7"
+    [saveDisabled]="isSaveButtonDisabled" [saveLoading]="saveLoading" [submitDisabled]="isSubmitButtonDisabled"
+    [nextDisabled]="isNextButtonDisabled()" [tabOrder]="'default'" [academicProgramValid]="isAcademicProgramValid"
+    (nextTabClicked)="nextTab()" (previousTabClicked)="previousTab()" (saveClicked)="submitForm()"
     (submitClicked)="onApplicanFormSubmit()">
 
     <div tabContent="instruction">
@@ -37,7 +27,7 @@
                         <span>Saving form data...</span>
                     </div>
                 </div>
-                
+
                 <!-- Form success indicator -->
                 <div *ngIf="saveSuccess" class="form-success-indicator">
                     <div class="success-content">
@@ -78,7 +68,8 @@
                                 </label>
                                 <p class="upload-hint">JPG, PNG, SVG up to 5MB</p>
                             </div>
-                            <div *ngIf="form.get('profilePicture')?.errors && form.get('profilePicture')?.touched" class="custom-error-message">
+                            <div *ngIf="form.get('profilePicture')?.errors && form.get('profilePicture')?.touched"
+                                class="custom-error-message">
                                 <span *ngIf="form.get('profilePicture')?.errors?.['required']">
                                     Profile Photo is required
                                 </span>
@@ -100,17 +91,21 @@
                     </div>
 
                     <div class="form-grid">
+                        <!-- Row 1: First Name, Father Name, Grand Father Name -->
                         <div class="form-row">
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="user" nzTheme="outline"></i>
-                                        First Name <span style="color: red;">*</span>
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="firstName"
-                                            placeholder="Enter your first name" />
-                                        <div *ngIf="firstName?.errors && firstName?.touched" class="custom-error-message">
+                                        <div class="floating-label-container">
+                                            <input nz-input formControlName="firstName"
+                                                placeholder=" " id="firstName" />
+                                            <label for="firstName" class="floating-label">
+                                                <i nz-icon nzType="user" nzTheme="outline"></i>
+                                                First Name <span class="required">*</span>
+                                            </label>
+                                        </div>
+                                        <div *ngIf="firstName?.errors && firstName?.touched"
+                                            class="custom-error-message">
                                             <span *ngIf="firstName?.errors?.['invalidAmharic']">
                                                 {{firstName?.errors?.['invalidAmharic']?.message}}
                                             </span>
@@ -121,17 +116,19 @@
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
-
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="user" nzTheme="outline"></i>
-                                        Father Name <span style="color: red;">*</span>
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="fatherName"
-                                            placeholder="Enter your father's name" />
-                                        <div *ngIf="fatherName?.errors && fatherName?.touched" class="custom-error-message">
+                                        <div class="floating-label-container">
+                                            <input nz-input formControlName="fatherName"
+                                                placeholder=" " id="fatherName" />
+                                            <label for="fatherName" class="floating-label">
+                                                <i nz-icon nzType="user" nzTheme="outline"></i>
+                                                Father Name <span class="required">*</span>
+                                            </label>
+                                        </div>
+                                        <div *ngIf="fatherName?.errors && fatherName?.touched"
+                                            class="custom-error-message">
                                             <span *ngIf="fatherName?.errors?.['invalidEnglish']">
                                                 {{fatherName?.errors?.['invalidEnglish']?.message}}
                                             </span>
@@ -142,83 +139,19 @@
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
-                        </div>
-                        <div class="form-row">
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="user" nzTheme="outline"></i>
-                                        First Name In Amh <span style="color: red;">*</span>
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="firstNameInAmh"
-                                            placeholder="Enter your first name In Amh" />
-                                        <div *ngIf="firstNameInAmh?.errors && firstNameInAmh?.touched" class="custom-error-message">
-                                            <span *ngIf="firstNameInAmh?.errors?.['invalidEnglish']">
-                                                {{firstNameInAmh?.errors?.['invalidEnglish']?.message}}
-                                            </span>
-                                            <span *ngIf="firstNameInAmh?.errors?.['required']">
-                                                First Name In Amh is required
-                                            </span>
+                                        <div class="floating-label-container">
+                                            <input nz-input formControlName="grandFatherName"
+                                                placeholder=" " id="grandFatherName" />
+                                            <label for="grandFatherName" class="floating-label">
+                                                <i nz-icon nzType="user" nzTheme="outline"></i>
+                                                Grand Father Name <span class="required">*</span>
+                                            </label>
                                         </div>
-                                    </nz-form-control>
-                                </nz-form-item>
-                            </div>
-
-                            <div class="form-field">
-                                <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="user" nzTheme="outline"></i>
-                                        Father Name In Amh <span style="color: red;">*</span>
-                                    </nz-form-label>
-                                    <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="fatherNameInAmh"
-                                            placeholder="Enter your father's name" />
-                                        <div *ngIf="fatherNameInAmh?.errors && fatherNameInAmh?.touched" class="custom-error-message">
-                                            <span *ngIf="fatherNameInAmh?.errors?.['invalidAmharic']">
-                                                {{fatherNameInAmh?.errors?.['invalidAmharic']?.message}}
-                                            </span>
-                                            <span *ngIf="fatherNameInAmh?.errors?.['required']">
-                                                Father Name In Amh is required
-                                            </span>
-                                        </div>
-                                    </nz-form-control>
-                                </nz-form-item>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-field">
-                                <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="user" nzTheme="outline"></i>
-                                        Grand Father Name In Amh <span style="color: red;">*</span>
-                                    </nz-form-label>
-                                    <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="grandFatherNameInAmh"
-                                            placeholder="Enter your grandfather's name" />
-                                        <div *ngIf="grandFatherNameInAmh?.errors && grandFatherNameInAmh?.touched" class="custom-error-message">
-                                            <span *ngIf="grandFatherNameInAmh?.errors?.['invalidAmharic']">
-                                                {{grandFatherNameInAmh?.errors?.['invalidAmharic']?.message}}
-                                            </span>
-                                            <span *ngIf="grandFatherNameInAmh?.errors?.['required']">
-                                                Grand Father Name In Amh is required
-                                            </span>
-                                        </div>
-                                    </nz-form-control>
-                                </nz-form-item>
-                            </div>
-
-                            <div class="form-field">
-                                <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="user" nzTheme="outline"></i>
-                                        Grand Father Name <span style="color: red;">*</span>
-                                    </nz-form-label>
-                                    <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="grandFatherName"
-                                            placeholder="Enter your grandfather's name" />
-                                        <div *ngIf="grandFatherName?.errors && grandFatherName?.touched" class="custom-error-message">
+                                        <div *ngIf="grandFatherName?.errors && grandFatherName?.touched"
+                                            class="custom-error-message">
                                             <span *ngIf="grandFatherName?.errors?.['invalidEnglish']">
                                                 {{grandFatherName?.errors?.['invalidEnglish']?.message}}
                                             </span>
@@ -229,20 +162,87 @@
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
-
                         </div>
 
+                        <!-- Row 2: First Name(Amharic), Father Name(Amharic), Grand Father Name(Amharic) -->
                         <div class="form-row">
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="user" nzTheme="outline"></i>
-                                        Mother Name <span style="color: red;">*</span>
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="motherName"
-                                            placeholder="Enter your mother's name" />
-                                        <div *ngIf="motherName?.errors && motherName?.touched" class="custom-error-message">
+                                        <div class="floating-label-container">
+                                            <input nz-input formControlName="firstNameInAmh"
+                                                placeholder=" " id="firstNameInAmh" />
+                                            <label for="firstNameInAmh" class="floating-label">
+                                                <i nz-icon nzType="user" nzTheme="outline"></i>
+                                                First Name(Amharic)
+                                            </label>
+                                        </div>
+                                        <div *ngIf="firstNameInAmh?.errors && firstNameInAmh?.touched"
+                                            class="custom-error-message">
+                                            <span *ngIf="firstNameInAmh?.errors?.['invalidEnglish']">
+                                                {{firstNameInAmh?.errors?.['invalidEnglish']?.message}}
+                                            </span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-control [nzValidateStatus]="''">
+                                        <div class="floating-label-container">
+                                            <input nz-input formControlName="fatherNameInAmh"
+                                                placeholder=" " id="fatherNameInAmh" />
+                                            <label for="fatherNameInAmh" class="floating-label">
+                                                <i nz-icon nzType="user" nzTheme="outline"></i>
+                                                Father Name(Amharic)
+                                            </label>
+                                        </div>
+                                        <div *ngIf="fatherNameInAmh?.errors && fatherNameInAmh?.touched"
+                                            class="custom-error-message">
+                                            <span *ngIf="fatherNameInAmh?.errors?.['invalidAmharic']">
+                                                {{fatherNameInAmh?.errors?.['invalidAmharic']?.message}}
+                                            </span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-control [nzValidateStatus]="''">
+                                        <div class="floating-label-container">
+                                            <input nz-input formControlName="grandFatherNameInAmh"
+                                                placeholder=" " id="grandFatherNameInAmh" />
+                                            <label for="grandFatherNameInAmh" class="floating-label">
+                                                <i nz-icon nzType="user" nzTheme="outline"></i>
+                                                Grand Father Name(Amharic)
+                                            </label>
+                                        </div>
+                                        <div *ngIf="grandFatherNameInAmh?.errors && grandFatherNameInAmh?.touched"
+                                            class="custom-error-message">
+                                            <span *ngIf="grandFatherNameInAmh?.errors?.['invalidAmharic']">
+                                                {{grandFatherNameInAmh?.errors?.['invalidAmharic']?.message}}
+                                            </span>
+                                        </div>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Mother Name, Sir Name, Gender -->
+                        <div class="form-row">
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-control [nzValidateStatus]="''">
+                                        <div class="floating-label-container">
+                                            <input nz-input formControlName="motherName"
+                                                placeholder=" " id="motherName" />
+                                            <label for="motherName" class="floating-label">
+                                                <i nz-icon nzType="user" nzTheme="outline"></i>
+                                                Mother Name <span class="required">*</span>
+                                            </label>
+                                        </div>
+                                        <div *ngIf="motherName?.errors && motherName?.touched"
+                                            class="custom-error-message">
                                             <span *ngIf="motherName?.errors?.['invalidChars']">
                                                 {{motherName?.errors?.['invalidChars']?.message}}
                                             </span>
@@ -255,12 +255,14 @@
                             </div>
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="user" nzTheme="outline"></i>
-                                        Sir Name
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="sirName" placeholder="Enter your sir name" />
+                                        <div class="floating-label-container">
+                                            <input nz-input formControlName="sirName" placeholder=" " id="sirName" />
+                                            <label for="sirName" class="floating-label">
+                                                <i nz-icon nzType="user" nzTheme="outline"></i>
+                                                Sir Name
+                                            </label>
+                                        </div>
                                         <div *ngIf="sirName?.errors && sirName?.touched" class="custom-error-message">
                                             <span *ngIf="sirName?.errors?.['alphabetsOnly']">
                                                 {{sirName?.errors?.['alphabetsOnly']?.message}}
@@ -269,51 +271,69 @@
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
-
-                        </div>
-
-                        <div class="form-row">
-
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="team" nzTheme="outline"></i>
-                                        Gender <span style="color: red;">*</span>
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <nz-select formControlName="gender" nzPlaceHolder="Select your gender">
-                                            <nz-option nzValue="Male" nzLabel="Male"></nz-option>
-                                            <nz-option nzValue="Female" nzLabel="Female"></nz-option>
-                                        </nz-select>
+                                        <div class="floating-label-container">
+                                            <nz-select formControlName="gender" nzPlaceHolder="Select your gender">
+                                                <nz-option nzValue="Male" nzLabel="Male"></nz-option>
+                                                <nz-option nzValue="Female" nzLabel="Female"></nz-option>
+                                            </nz-select>
+                                            <label class="floating-label">
+                                                <i nz-icon nzType="user" nzTheme="outline"></i>
+                                                Gender <span class="required">*</span>
+                                            </label>
+                                        </div>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
+                        </div>
+
+                        <!-- Row 4: Birth Date, Birth Place, Nationality -->
+                        <div class="form-row">
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="calendar" nzTheme="outline"></i>
-                                        Birth Date <span style="color: red;">*</span>
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
                                         <nz-date-picker formControlName="birthDate" [nzDisabledDate]="disabledDate"
-                                            style="width: 100%"></nz-date-picker>
+                                            [nzInputReadOnly]="false" [nzAllowClear]="true"
+                                            nzPlaceHolder=" "
+                                            class="date-picker-with-floating-label"
+                                            style="width: 100%">
+                                        </nz-date-picker>
+                                        <label class="floating-label">
+                                            <i nz-icon nzType="calendar" nzTheme="outline"></i>
+                                            Birth Date <span class="required">*</span>
+                                        </label>
+                                        <div *ngIf="birthDate?.errors && birthDate?.touched"
+                                            class="custom-error-message">
+                                            <span *ngIf="birthDate?.errors?.['required']">
+                                                Birth Date is required
+                                            </span>
+                                            <span *ngIf="birthDate?.errors?.['invalidDate']">
+                                                {{birthDate?.errors?.['invalidDate']?.message}}
+                                            </span>
+                                            <span *ngIf="birthDate?.errors?.['minAge']">
+                                                {{birthDate?.errors?.['minAge']?.message}}
+                                            </span>
+                                            <span *ngIf="birthDate?.errors?.['futureDate']">
+                                                {{birthDate?.errors?.['futureDate']?.message}}
+                                            </span>
+                                        </div>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
-                        </div>
-
-                        <div class="form-row">
-
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="environment" nzTheme="outline"></i>
-                                        Birth Place <span style="color: red;">*</span>
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
                                         <input nz-input formControlName="birthPlace"
-                                            placeholder="Enter your birth place" />
-                                        <div *ngIf="birthPlace?.errors && birthPlace?.touched" class="custom-error-message">
+                                            placeholder=" " id="birthPlace" 
+                                            class="input-with-floating-label" />
+                                        <label for="birthPlace" class="floating-label">
+                                            <i nz-icon nzType="environment" nzTheme="outline"></i>
+                                            Birth Place <span class="required">*</span>
+                                        </label>
+                                        <div *ngIf="birthPlace?.errors && birthPlace?.touched"
+                                            class="custom-error-message">
                                             <span *ngIf="birthPlace?.errors?.['invalidChars']">
                                                 {{birthPlace?.errors?.['invalidChars']?.message}}
                                             </span>
@@ -326,17 +346,26 @@
                             </div>
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="flag" nzTheme="outline"></i>
-                                        Nationality <span style="color: red;">*</span>
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="nationality"
-                                            placeholder="Enter your nationality" />
-                                        <div *ngIf="nationality?.errors && nationality?.touched" class="custom-error-message">
-                                            <span *ngIf="nationality?.errors?.['alphabetsOnly']">
-                                                {{nationality?.errors?.['alphabetsOnly']?.message}}
-                                            </span>
+                                        <nz-select formControlName="nationality" nzPlaceHolder=" "
+                                            [nzShowSearch]="true" [nzShowArrow]="true"
+                                            [nzFilterOption]="filterNationality"
+                                            class="select-with-floating-label">
+                                            <nz-option *ngFor="let country of countries" [nzValue]="country.nationality"
+                                                [nzLabel]="country.name">
+                                                <div class="country-option">
+                                                    <span class="flag-emoji">{{country.flag}}</span>
+                                                    <span class="country-name">{{country.name}}</span>
+                                                    <span class="nationality-name">({{country.nationality}})</span>
+                                                </div>
+                                            </nz-option>
+                                        </nz-select>
+                                        <label class="floating-label">
+                                            <i nz-icon nzType="global" nzTheme="outline"></i>
+                                            Nationality <span class="required">*</span>
+                                        </label>
+                                        <div *ngIf="nationality?.errors && nationality?.touched"
+                                            class="custom-error-message">
                                             <span *ngIf="nationality?.errors?.['required']">
                                                 Nationality is required
                                             </span>
@@ -349,25 +378,29 @@
                         <div class="form-row">
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="environment" nzTheme="outline"></i>
-                                        National Examination ID <span style="color: red;">*</span>
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="nationalExaminationId"
-                                            placeholder="Enter your national examination id" />
+                                        <div class="floating-label-container">
+                                            <input nz-input formControlName="nationalExaminationId"
+                                                placeholder=" " id="nationalExaminationId" />
+                                            <label for="nationalExaminationId" class="floating-label">
+                                                <i nz-icon nzType="environment" nzTheme="outline"></i>
+                                                National Examination ID 
+                                            </label>
+                                        </div>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="environment" nzTheme="outline"></i>
-                                        National Id
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="nationalId"
-                                            placeholder="Enter your national id" />
+                                        <div class="floating-label-container">
+                                            <input nz-input formControlName="nationalId"
+                                                placeholder=" " id="nationalId" />
+                                            <label for="nationalId" class="floating-label">
+                                                <i nz-icon nzType="environment" nzTheme="outline"></i>
+                                                National Id
+                                            </label>
+                                        </div>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
@@ -403,16 +436,18 @@
                     </div>
 
                     <div class="form-grid">
+                        <!-- Row 1: Cell Phone, Office Phone, Home Phone -->
                         <div class="form-row">
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="mobile" nzTheme="outline"></i>
-                                        Cell Phone <span style="color: red;">*</span>
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
                                         <input nz-input formControlName="mobile"
-                                            placeholder="Enter your mobile number" />
+                                            placeholder=" " id="mobile" 
+                                            class="input-with-floating-label" />
+                                        <label for="mobile" class="floating-label">
+                                            <i nz-icon nzType="mobile" nzTheme="outline"></i>
+                                            Cell Phone <span class="required">*</span>
+                                        </label>
                                         <div *ngIf="mobile?.errors && mobile?.touched" class="custom-error-message">
                                             <span *ngIf="mobile?.errors?.['invalidPhoneNumber']">
                                                 {{mobile?.errors?.['invalidPhoneNumber']?.message}}
@@ -426,41 +461,46 @@
                             </div>
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="phone" nzTheme="outline"></i>
-                                        Office Phone
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
                                         <input nz-input formControlName="telephonOffice"
-                                            placeholder="Enter your office phone" />
+                                            placeholder=" " id="telephonOffice" 
+                                            class="input-with-floating-label" />
+                                        <label for="telephonOffice" class="floating-label">
+                                            <i nz-icon nzType="phone" nzTheme="outline"></i>
+                                            Office Phone
+                                        </label>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            <div class="form-field">
+                                <nz-form-item>
+                                    <nz-form-control [nzValidateStatus]="''">
+                                        <input nz-input formControlName="telephonHome"
+                                            placeholder=" " id="telephonHome" 
+                                            class="input-with-floating-label" />
+                                        <label for="telephonHome" class="floating-label">
+                                            <i nz-icon nzType="phone" nzTheme="outline"></i>
+                                            Home Phone
+                                        </label>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
                         </div>
 
+                        <!-- Row 2: Email, Postal Address, Area Type -->
                         <div class="form-row">
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="phone" nzTheme="outline"></i>
-                                        Home Phone
-                                    </nz-form-label>
-                                    <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="telephonHome"
-                                            placeholder="Enter your home phone" />
-                                    </nz-form-control>
-                                </nz-form-item>
-                            </div>
-                            <div class="form-field">
-                                <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="mail" nzTheme="outline"></i>
-                                        Email <span style="color: red;">*</span>
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
                                         <input nz-input formControlName="emailAddress"
-                                            placeholder="Enter your email address" />
-                                        <div *ngIf="emailAddress?.errors && emailAddress?.touched" class="custom-error-message">
+                                            placeholder=" " id="emailAddress" 
+                                            class="input-with-floating-label" />
+                                        <label for="emailAddress" class="floating-label">
+                                            <i nz-icon nzType="mail" nzTheme="outline"></i>
+                                            Email <span class="required">*</span>
+                                        </label>
+                                        <div *ngIf="emailAddress?.errors && emailAddress?.touched"
+                                            class="custom-error-message">
                                             <span *ngIf="emailAddress?.errors?.['invalidEmail']">
                                                 {{emailAddress?.errors?.['invalidEmail']?.message}}
                                             </span>
@@ -471,29 +511,29 @@
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
-                        </div>
-
-                        <div class="form-row">
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="home" nzTheme="outline"></i>
-                                        Postal Address
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
                                         <input nz-input formControlName="postalAddress"
-                                            placeholder="Enter your complete postal address" />
+                                            placeholder=" " id="postalAddress" 
+                                            class="input-with-floating-label" />
+                                        <label for="postalAddress" class="floating-label">
+                                            <i nz-icon nzType="home" nzTheme="outline"></i>
+                                            Postal Address
+                                        </label>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="home" nzTheme="outline"></i>
-                                        Area Type
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="areaType" placeholder="Enter your area type" />
+                                        <input nz-input formControlName="areaType" 
+                                            placeholder=" " id="areaType" 
+                                            class="input-with-floating-label" />
+                                        <label for="areaType" class="floating-label">
+                                            <i nz-icon nzType="home" nzTheme="outline"></i>
+                                            Area Type
+                                        </label>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
@@ -514,18 +554,39 @@
                     </div>
 
                     <div class="form-grid">
+                        <!-- Row 1: Region, City, Sub City -->
                         <div class="form-row">
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="global" nzTheme="outline"></i>
-                                        Region
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="region" placeholder="Enter your region" />
+                                        <nz-select formControlName="region" nzPlaceHolder=" "
+                                            class="select-with-floating-label">
+                                            <nz-option nzValue="Addis Ababa" nzLabel="Addis Ababa"></nz-option>
+                                            <nz-option nzValue="Afar Region" nzLabel="Afar Region"></nz-option>
+                                            <nz-option nzValue="Amhara Region" nzLabel="Amhara Region"></nz-option>
+                                            <nz-option nzValue="Benishangul-Gumuz Region"
+                                                nzLabel="Benishangul-Gumuz Region"></nz-option>
+                                            <nz-option nzValue="Central Ethiopia Region"
+                                                nzLabel="Central Ethiopia Region"></nz-option>
+                                            <nz-option nzValue="Dire Dawa" nzLabel="Dire Dawa"></nz-option>
+                                            <nz-option nzValue="Gambela Region" nzLabel="Gambela Region"></nz-option>
+                                            <nz-option nzValue="Harari Region" nzLabel="Harari Region"></nz-option>
+                                            <nz-option nzValue="Oromia Region" nzLabel="Oromia Region"></nz-option>
+                                            <nz-option nzValue="Sidama Region" nzLabel="Sidama Region"></nz-option>
+                                            <nz-option nzValue="Somali Region" nzLabel="Somali Region"></nz-option>
+                                            <nz-option nzValue="South Ethiopia Region"
+                                                nzLabel="South Ethiopia Region"></nz-option>
+                                            <nz-option nzValue="Southwest Ethiopia Peoples' Region"
+                                                nzLabel="Southwest Ethiopia Peoples' Region"></nz-option>
+                                            <nz-option nzValue="Tigray Region" nzLabel="Tigray Region"></nz-option>
+                                        </nz-select>
+                                        <label class="floating-label">
+                                            <i nz-icon nzType="environment" nzTheme="outline"></i>
+                                            Region <span class="required">*</span>
+                                        </label>
                                         <div *ngIf="region?.errors && region?.touched" class="custom-error-message">
-                                            <span *ngIf="region?.errors?.['alphabetsOnly']">
-                                                {{region?.errors?.['alphabetsOnly']?.message}}
+                                            <span *ngIf="region?.errors?.['required']">
+                                                Region is required
                                             </span>
                                         </div>
                                     </nz-form-control>
@@ -533,40 +594,46 @@
                             </div>
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="bank" nzTheme="outline"></i>
-                                        City
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="city" placeholder="Enter your city" />
+                                        <input nz-input formControlName="city" placeholder=" " id="city" 
+                                            class="input-with-floating-label" />
+                                        <label for="city" class="floating-label">
+                                            <i nz-icon nzType="bank" nzTheme="outline"></i>
+                                            City
+                                        </label>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
+                            
                         </div>
 
+                        <!-- Row 2: Woreda, Kebele, House Number -->
                         <div class="form-row">
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="cluster" nzTheme="outline"></i>
-                                        Woreda
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="woreda" placeholder="Enter your woreda" />
+                                        <input nz-input formControlName="woreda" placeholder=" " id="woreda" 
+                                            class="input-with-floating-label" />
+                                        <label for="woreda" class="floating-label">
+                                            <i nz-icon nzType="cluster" nzTheme="outline"></i>
+                                            Woreda
+                                        </label>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
                             <div class="form-field">
                                 <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="home" nzTheme="outline"></i>
-                                        Kebele
-                                    </nz-form-label>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="kebele" placeholder="Enter your kebele" />
+                                        <input nz-input formControlName="kebele" placeholder=" " id="kebele" 
+                                            class="input-with-floating-label" />
+                                        <label for="kebele" class="floating-label">
+                                            <i nz-icon nzType="home" nzTheme="outline"></i>
+                                            Kebele
+                                        </label>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -601,7 +668,8 @@
         <app-manage-student-program-requester></app-manage-student-program-requester>
     </div>
     <div tabContent="applicationFee">
-        <app-application-fee [applicantId]="id" (paymentStatusChange)="onPaymentStatusChange($event)" (paymentSuccessful)="onPaymentSuccessful()"></app-application-fee>
+        <app-application-fee [applicantId]="id" (paymentStatusChange)="onPaymentStatusChange($event)"
+            (paymentSuccessful)="onPaymentSuccessful()"></app-application-fee>
     </div>
     <div tabContent="files">
         <app-school-with-student-agreement (formValidityChange)="onAgreementFormValidityChange($event)"

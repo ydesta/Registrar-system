@@ -1,0 +1,277 @@
+// =============================================================================
+// CORE FLOATING LABEL STYLES
+// =============================================================================
+
+// Base floating label container
+.floating-label-container {
+  position: relative;
+  margin: 16px 0;
+  display: block;
+}
+
+// Floating label base styles
+.floating-label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 16px;
+  pointer-events: none;
+  transition: 0.2s ease all;
+  background: white;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  z-index: 1;
+
+  .required {
+    color: #ff4d4f;
+    font-weight: 600;
+  }
+
+  i {
+    font-size: 16px;
+    color: #1890ff;
+  }
+}
+
+// Input field floating label behavior
+.floating-label-container {
+  input,
+  textarea {
+    width: 100%;
+    padding: 12px 8px;
+    font-size: 16px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.3s;
+    height: 44px;
+    background: #fafafa;
+
+    &:hover {
+      border-color: #40a9ff;
+      background: #fff;
+    }
+
+    &:focus {
+      border-color: #1890ff;
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    }
+
+    &::placeholder {
+      color: transparent;
+    }
+  }
+
+  // Float label when focused or has content
+  input:focus + .floating-label,
+  input:not(:placeholder-shown) + .floating-label,
+  textarea:focus + .floating-label,
+  textarea:not(:placeholder-shown) + .floating-label {
+    top: -8px;
+    left: 6px;
+    font-size: 12px;
+    color: #1890ff;
+    background: white;
+    padding: 0 4px;
+  }
+}
+
+// Select field floating label behavior
+.floating-label-container {
+  .ant-select {
+    width: 100%;
+
+    .ant-select-selector {
+      height: 44px;
+      border-radius: 4px;
+      border: 1px solid #d9d9d9;
+      background: #fafafa;
+      transition: all 0.3s ease;
+
+      .ant-select-selection-search-input {
+        height: 42px;
+      }
+
+      .ant-select-selection-item {
+        line-height: 42px;
+      }
+    }
+
+    &:hover .ant-select-selector {
+      border-color: #40a9ff;
+      background: #fff;
+    }
+
+    &.ant-select-focused .ant-select-selector {
+      border-color: #1890ff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+      background: #fff;
+    }
+  }
+
+  // Float label when select is focused, open, or has value
+  .ant-select:focus + .floating-label,
+  .ant-select.ant-select-focused + .floating-label,
+  .ant-select.ant-select-open + .floating-label,
+  .ant-select:not(.ant-select-empty) + .floating-label {
+    top: -8px;
+    left: 6px;
+    font-size: 12px;
+    color: #1890ff;
+    background: white;
+    padding: 0 4px;
+  }
+}
+
+// Date picker floating label behavior
+.floating-label-container {
+  .ant-picker {
+    width: 100%;
+    height: 44px;
+    border-radius: 4px;
+    border: 1px solid #d9d9d9;
+    background: #fafafa;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: #40a9ff;
+      background: #fff;
+    }
+
+    &.ant-picker-focused {
+      border-color: #1890ff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+      background: #fff;
+    }
+  }
+
+  // Float label when date picker is focused or has value
+  .ant-picker:focus + .floating-label,
+  .ant-picker.ant-picker-focused + .floating-label,
+  .ant-picker:not(.ant-picker-empty) + .floating-label {
+    top: -8px;
+    left: 6px;
+    font-size: 12px;
+    color: #1890ff;
+    background: white;
+    padding: 0 4px;
+  }
+}
+
+// Error state styling
+.floating-label-container {
+  &.error {
+    input,
+    textarea,
+    .ant-select .ant-select-selector,
+    .ant-picker {
+      border-color: #ff4d4f;
+      background: #fff1f0;
+
+      &:hover, &:focus {
+        border-color: #ff7875;
+      }
+    }
+
+    .floating-label {
+      color: #ff4d4f;
+    }
+  }
+}
+
+// Animation keyframes
+@keyframes floatLabelUp {
+  from {
+    top: 14px;
+    font-size: 14px;
+    color: #8c8c8c;
+  }
+  to {
+    top: -8px;
+    font-size: 12px;
+    color: #1890ff;
+  }
+}
+
+@keyframes floatLabelDown {
+  from {
+    top: -8px;
+    font-size: 12px;
+    color: #1890ff;
+  }
+  to {
+    top: 14px;
+    font-size: 14px;
+    color: #8c8c8c;
+  }
+}
+
+// Hover effects for floating labels
+.floating-label-container:hover input:not(:focus),
+.floating-label-container:hover textarea:not(:focus),
+.floating-label-container:hover .ant-input:not(:focus),
+.floating-label-container:hover .ant-input-textarea textarea:not(:focus) {
+  border-color: #40a9ff;
+  background: #fff;
+}
+
+// Focus ring animation
+@keyframes focusRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .floating-label-container {
+    input,
+    textarea,
+    .ant-select .ant-select-selector,
+    .ant-picker {
+      height: 40px;
+      font-size: 16px; // Prevents zoom on iOS
+    }
+
+    .ant-select .ant-select-selection-search-input {
+      height: 38px;
+    }
+
+    .ant-select .ant-select-selection-item {
+      line-height: 38px;
+    }
+
+    .floating-label {
+      font-size: 16px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-label-container {
+    input,
+    textarea,
+    .ant-select .ant-select-selector,
+    .ant-picker {
+      height: 44px;
+      padding: 12px 16px;
+    }
+
+    .ant-select .ant-select-selection-search-input {
+      height: 42px;
+    }
+
+    .ant-select .ant-select-selection-item {
+      line-height: 42px;
+    }
+  }
+}

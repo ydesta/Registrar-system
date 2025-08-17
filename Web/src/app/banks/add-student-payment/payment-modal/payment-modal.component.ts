@@ -63,8 +63,8 @@ export class PaymentModalComponent implements OnInit {
 
   paymentForm() {
     this.bankTransactionForm = this._fb.group({
-      fromBank: ['', Validators.required],
-      toBank: ['', Validators.required],
+      fromBank: [null, []],
+      toBank: [null, []],
       transactionDate: [new Date(), Validators.required],
       remark: ['', []],
       bankTransactionID: [null, Validators.required],
@@ -76,10 +76,11 @@ export class PaymentModalComponent implements OnInit {
 
   private getStudentPayment(): StudentPaymentRequest {
     const formModel = this.bankTransactionForm.getRawValue();
+    console.log("$$$    ", formModel);
     const payment = new StudentPaymentRequest();
     payment.parentId = this.studentCourseRegistrationID;
-    payment.fromBank = formModel.fromBank;
-    payment.toBank = formModel.toBank;
+    payment.fromBank = formModel.fromBank !== null && formModel.fromBank !== undefined && formModel.fromBank !== '' ? formModel.fromBank : null;
+    payment.toBank = formModel.toBank !== null && formModel.toBank !== undefined && formModel.toBank !== '' ? formModel.toBank : null;
     payment.transactionDate = new Date(formModel.transactionDate).toISOString();
     payment.remark = formModel.remark;
     payment.bankTransactionID = formModel.bankTransactionID;
@@ -115,7 +116,11 @@ export class PaymentModalComponent implements OnInit {
 
       for (const key in payment) {
         if (Object.prototype.hasOwnProperty.call(payment, key)) {
-          formData.append(key, (payment as any)[key]);
+          const value = (payment as any)[key];
+          // Only append non-null and non-undefined values
+          if (value !== null && value !== undefined && value !== '') {
+            formData.append(key, value);
+          }
         }
       }
 

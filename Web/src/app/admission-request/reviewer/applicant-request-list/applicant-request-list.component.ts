@@ -105,4 +105,11 @@ export class ApplicantRequestListComponent implements OnInit {
       `/student-application/applicant-request-detail?id=${applicantId}&&request-id=${requestId}`
     );
   }
+  
+  exportApplicants() {
+    // TODO: Implement export functionality
+    console.log('Export applicants functionality to be implemented');
+    // You can implement CSV/Excel export here
+    // Example: this.exportService.exportToExcel(this.applicantsList, 'applicants');
+  }
 }

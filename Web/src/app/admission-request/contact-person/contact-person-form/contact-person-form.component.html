@@ -14,18 +14,19 @@
   <form nz-form [formGroup]="applicantContactPersonForm" class="contact-form">
     <!-- Full Name Field -->
     <nz-form-item>
-      <nz-form-label [nzSpan]="8">
-        <i nz-icon nzType="user" nzTheme="outline" class="field-icon"></i>
-        Full Name <span style="color: red;">*</span>
-      </nz-form-label>
-      <nz-form-control [nzSpan]="16" [nzValidateStatus]="''" [nzErrorTip]="fullNameErrorTpl">
+      <nz-form-control [nzValidateStatus]="''" [nzErrorTip]="fullNameErrorTpl">
         <input 
           nz-input 
           formControlName="fullName" 
-          placeholder="Enter the full name of your contact person"
-          class="form-input"
+          placeholder=" "
+          id="fullName"
+          class="input-with-floating-label"
           [class.error]="fullName.invalid && (fullName.dirty || fullName.touched)" 
         />
+        <label for="fullName" class="floating-label">
+          <i nz-icon nzType="user" nzTheme="outline"></i>
+          Full Name <span class="required">*</span>
+        </label>
         <ng-template #fullNameErrorTpl let-control>
           <div class="error-message" *ngIf="control.hasError('required')">
             <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
@@ -45,18 +46,19 @@
 
     <!-- Telephone Office Field -->
     <nz-form-item>
-      <nz-form-label [nzSpan]="8">
-        <i nz-icon nzType="phone" nzTheme="outline" class="field-icon"></i>
-        Cell Phone <span style="color: red;">*</span>
-      </nz-form-label>
-      <nz-form-control [nzSpan]="16" [nzValidateStatus]="''" [nzErrorTip]="officePhoneErrorTpl">
+      <nz-form-control [nzValidateStatus]="''" [nzErrorTip]="officePhoneErrorTpl">
         <input 
           nz-input 
           formControlName="telephoneOffice" 
-          placeholder="Enter office phone number"
-          class="form-input"
+          placeholder=" "
+          id="telephoneOffice"
+          class="input-with-floating-label"
           [class.error]="telephoneOffice.invalid && (telephoneOffice.dirty || telephoneOffice.touched)" 
         />
+        <label for="telephoneOffice" class="floating-label">
+          <i nz-icon nzType="phone" nzTheme="outline"></i>
+          Cell Phone <span class="required">*</span>
+        </label>
         <ng-template #officePhoneErrorTpl let-control>
           <div class="error-message" *ngIf="control.hasError('required')">
             <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
@@ -76,18 +78,19 @@
 
     <!-- Telephone Home Field -->
     <nz-form-item>
-      <nz-form-label [nzSpan]="8">
-        <i nz-icon nzType="home" nzTheme="outline" class="field-icon"></i>
-        Home Phone
-      </nz-form-label>
-      <nz-form-control [nzSpan]="16" [nzValidateStatus]="''" [nzErrorTip]="homePhoneErrorTpl">
+      <nz-form-control [nzValidateStatus]="''" [nzErrorTip]="homePhoneErrorTpl">
         <input 
           nz-input 
           formControlName="telephoneHome" 
-          placeholder="Enter home phone number"
-          class="form-input"
+          placeholder=" "
+          id="telephoneHome"
+          class="input-with-floating-label"
           [class.error]="telephoneHome.invalid && (telephoneHome.dirty || telephoneHome.touched)" 
         />
+        <label for="telephoneHome" class="floating-label">
+          <i nz-icon nzType="home" nzTheme="outline"></i>
+          Home Phone
+        </label>
         <ng-template #homePhoneErrorTpl let-control>
           <div class="error-message" *ngIf="control.hasError('invalidPhoneNumber')">
             <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
@@ -103,17 +106,13 @@
 
     <!-- Relation Field -->
     <nz-form-item>
-      <nz-form-label [nzSpan]="8">
-        <i nz-icon nzType="team" nzTheme="outline" class="field-icon"></i>
-        Relationship <span style="color: red;">*</span>
-      </nz-form-label>
-      <nz-form-control [nzSpan]="16" [nzValidateStatus]="''" [nzErrorTip]="relationErrorTpl">
+      <nz-form-control [nzValidateStatus]="''" [nzErrorTip]="relationErrorTpl">
         <nz-select 
           formControlName="relation" 
-          nzPlaceHolder="Select relationship to applicant"
+          nzPlaceHolder=" "
           nzShowSearch="true"
           nzAllowClear="true"
-          class="form-select"
+          class="select-with-floating-label"
           [class.error]="relation.invalid && (relation.dirty || relation.touched)"
         >
           <nz-option nzValue="Relative" nzLabel="Relative">
@@ -129,6 +128,10 @@
             Other
           </nz-option>
         </nz-select>
+        <label class="floating-label">
+          <i nz-icon nzType="team" nzTheme="outline"></i>
+          Relationship <span class="required">*</span>
+        </label>
         <ng-template #relationErrorTpl let-control>
           <div class="error-message" *ngIf="control.hasError('required')">
             <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
