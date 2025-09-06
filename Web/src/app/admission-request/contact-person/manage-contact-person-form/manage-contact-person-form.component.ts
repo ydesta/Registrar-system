@@ -7,6 +7,7 @@ import { GeneralInformationService } from "../../services/general-information.se
 import { ApplicantContactPersonService } from "../../services/applicant-contact-person.service";
 import { ContactPersonFormComponent } from "../contact-person-form/contact-person-form.component";
 import { SharingDataService } from "../../services/sharing-data.service";
+import { AuthService } from "src/app/services/auth.service";
 import { Subscription } from "rxjs";
 
 @Component({
@@ -22,7 +23,10 @@ export class ManageContactPersonFormComponent {
   noumberOfContact = 0;
   isSubmittedApplicationForm = 0;
   isApplicantProfile: boolean = false;
-    private subscription!: Subscription;
+  private subscription!: Subscription;
+  private authSubscription!: Subscription;
+  private isInitialized = false;
+
   constructor(
     private modalRef: NzModalRef,
     private _modal: NzModalService,
@@ -30,14 +34,82 @@ export class ManageContactPersonFormComponent {
     private route: ActivatedRoute,
     private generalInformationService: GeneralInformationService,
     private applicantContactPersonService: ApplicantContactPersonService,
-    private sharingDataService: SharingDataService
+    private sharingDataService: SharingDataService,
+    private authService: AuthService
   ) {
     this.userId = localStorage.getItem('userId');
   }
   
   ngOnInit(): void {
-    this.initializeData();
+    // Subscribe to authentication state changes first
+    this.setupAuthenticationMonitoring();
     
+    // Initialize data only after authentication is confirmed
+    this.authService.isAuthenticated().then(isAuth => {
+      if (isAuth) {
+        this.initializeData();
+        this.isInitialized = true;
+      } else {
+        console.log('User not authenticated, waiting for login...');
+      }
+    });
+
+    // Set up other subscriptions
+    this.setupDataSubscriptions();
+  }
+
+  private setupAuthenticationMonitoring(): void {
+    // Monitor authentication state changes
+    this.authSubscription = this.authService.isAuthenticated$.subscribe(isAuth => {
+      if (isAuth && !this.isInitialized) {
+        console.log('User authenticated, initializing component...');
+        this.userId = localStorage.getItem('userId');
+        this.clearCachedData();
+        this.initializeData();
+        this.isInitialized = true;
+      } else if (!isAuth && this.isInitialized) {
+        console.log('User logged out, clearing component state...');
+        this.clearComponentState();
+        this.isInitialized = false;
+      }
+    });
+
+    // Monitor login changes
+    this.authSubscription.add(
+      this.authService.loginChanged.subscribe(isLoggedIn => {
+        if (isLoggedIn && !this.isInitialized) {
+          console.log('Login detected, initializing component...');
+          this.userId = localStorage.getItem('userId');
+          this.clearCachedData();
+          this.initializeData();
+          this.isInitialized = true;
+        } else if (!isLoggedIn) {
+          console.log('Logout detected, clearing component state...');
+          this.clearComponentState();
+          this.isInitialized = false;
+        }
+      })
+    );
+
+    // Monitor current user changes
+    this.authSubscription.add(
+      this.authService.currentUser$.subscribe(user => {
+        if (user && user.id !== this.userId) {
+          console.log('User changed, updating component...');
+          this.userId = user.id;
+          this.clearCachedData();
+          if (this.isInitialized) {
+            this.refreshData();
+          } else {
+            this.initializeData();
+            this.isInitialized = true;
+          }
+        }
+      })
+    );
+  }
+
+  private setupDataSubscriptions(): void {
     this.sharingDataService.programCurrentMessage.subscribe(res => {
       this.isSubmittedApplicationForm = res;
     });
@@ -57,53 +129,27 @@ export class ManageContactPersonFormComponent {
         }
       })
     );
-
-    // Monitor authentication state changes
-    this.monitorAuthenticationState();
   }
 
-  private monitorAuthenticationState(): void {
-    // Check for authentication state changes every 1 second for faster response
-    setInterval(() => {
-      const currentUserId = localStorage.getItem('userId');
-      if (currentUserId && currentUserId !== this.userId) {
-        // User has changed or re-logged in
-        console.log('User authentication state changed, refreshing data...');
-        this.userId = currentUserId;
-        this.forceRefreshData();
-      }
-    }, 1000);
+  private clearCachedData(): void {
+    // Clear cached applicant ID from localStorage
+    localStorage.removeItem('parent_applicant_id');
+    
+    // Clear cached data from the service
+    this.generalInformationService.clearParentApplicantIdCache();
+    
+    // Clear component data
+    this.contactPersonLists = [];
+    this.noumberOfContact = 0;
+    this.applicantId = null;
+  }
 
-    // Also listen to storage events (for cross-tab authentication changes)
-    window.addEventListener('storage', (event) => {
-      if (event.key === 'userId' && event.newValue) {
-        console.log('Storage event detected, user authentication changed...');
-        this.userId = event.newValue;
-        this.forceRefreshData();
-      }
-    });
-
-    // Listen to focus events (when user returns to the tab)
-    window.addEventListener('focus', () => {
-      const currentUserId = localStorage.getItem('userId');
-      if (currentUserId && currentUserId !== this.userId) {
-        console.log('Tab focus detected, checking authentication state...');
-        this.userId = currentUserId;
-        this.forceRefreshData();
-      }
-    });
-
-    // Listen to visibility change events (when tab becomes visible)
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        const currentUserId = localStorage.getItem('userId');
-        if (currentUserId && currentUserId !== this.userId) {
-          console.log('Page visibility changed, checking authentication state...');
-          this.userId = currentUserId;
-          this.forceRefreshData();
-        }
-      }
-    });
+  private clearComponentState(): void {
+    this.contactPersonLists = [];
+    this.noumberOfContact = 0;
+    this.applicantId = null;
+    this.isSubmittedApplicationForm = 0;
+    this.isApplicantProfile = false;
   }
 
   private initializeData(): void {
@@ -121,20 +167,45 @@ export class ManageContactPersonFormComponent {
   }
 
   private loadApplicantIdFromService(): void {
+    if (!this.userId) {
+      console.warn('No userId available, cannot load applicant ID');
+      return;
+    }
+
     this.generalInformationService.getOrStoreParentApplicantId(this.userId).subscribe({
       next: (applicantId) => {
+        console.log("contact person applicantId    ", applicantId);
         if (applicantId && applicantId !== this.applicantId) {
           this.applicantId = applicantId;
           this.getApplicantContactPersonByApplicantId(applicantId);
+        } else if (!applicantId) {
+          console.warn('No applicant found for user:', this.userId);
         }
       },
       error: (error) => {
         console.error('Error loading applicant ID:', error);
-        // Retry after a delay
+        
+        // Handle cooldown error specifically
+        if (error.message && error.message.includes('Fetch cooldown active')) {
+          console.log('Fetch cooldown active, waiting for cached value...');
+          // Wait a bit longer and try again, or check if there's a cached value
+          setTimeout(() => this.loadApplicantIdFromService(), 1000);
+          return;
+        }
+        
+        this.handleAuthError(error);
+        
+        // Don't retry automatically on authentication errors
+        if (error.status === 401 || error.status === 403) {
+          console.log('Authentication error, user may need to login again');
+          return;
+        }
+        // Retry for other errors after a delay
         setTimeout(() => this.loadApplicantIdFromService(), 3000);
       }
     });
   }
+
 
   deleteContact(id: string) {
     this._modal.confirm({
@@ -200,11 +271,7 @@ export class ManageContactPersonFormComponent {
         },
         error: (error) => {
           console.error('Error loading contact persons:', error);
-          this._customNotificationService.notification(
-            "error",
-            "Error",
-            "Failed to load contact person data. Please refresh the page."
-          );
+          this.handleAuthError(error);
           this.contactPersonLists = [];
           this.noumberOfContact = 0;
           this.sharingDataService.updateMessage(0);
@@ -227,8 +294,36 @@ export class ManageContactPersonFormComponent {
     this.noumberOfContact = 0;
     this.sharingDataService.updateMessage(0);
     
+    // Clear cached data first
+    this.clearCachedData();
+    
     // Reload applicantId and data
     this.loadApplicantIdFromService();
+  }
+
+  // Add method to handle authentication errors gracefully
+  private handleAuthError(error: any): void {
+    console.error('Authentication error in component:', error);
+    
+    if (error.status === 401 || error.status === 403) {
+      // User is not authenticated, clear state and wait for login
+      this.clearComponentState();
+      this.isInitialized = false;
+      
+      // Show user-friendly message
+      this._customNotificationService.notification(
+        "warning",
+        "Authentication Required",
+        "Please log in to view your contact person data."
+      );
+    } else if (error.status === 0 || error.status >= 500) {
+      // Network or server error
+      this._customNotificationService.notification(
+        "error",
+        "Connection Error",
+        "Unable to connect to the server. Please check your connection and try again."
+      );
+    }
   }
 
   openModal(): void {
@@ -287,6 +382,9 @@ export class ManageContactPersonFormComponent {
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
     }
   }
 }

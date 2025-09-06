@@ -3,7 +3,8 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { NzModalRef } from "ng-zorro-antd/modal";
 import {
   alphabetsOnlyValidator,
-  alphabetsWithSpecialCharsValidator
+  alphabetsWithSpecialCharsValidator,
+  EDUCATION_LEVEL_OPTIONS
 } from "src/app/common/constant";
 import { ApplicantEducationBackgroundRequest } from "../../model/applicant-education-background-request.model";
 import { EducationBackgroundService } from "../../services/education-background.service";
@@ -24,6 +25,9 @@ export class EducationFormComponent implements OnInit {
   file_list: Array<string> = [];
   @Output() dataUpdated = new EventEmitter<void>();
   educationId: string;
+  
+  // Education level options for the select dropdown
+  educationLevelOptions = EDUCATION_LEVEL_OPTIONS;
   constructor(
     private modalRef: NzModalRef,
     private _fb: FormBuilder,
@@ -37,6 +41,12 @@ export class EducationFormComponent implements OnInit {
     if (this.educationBackground != undefined) {
       this.educationId = this.educationBackground.id;
       this.applicantEducationBacgroundForm.patchValue(this.educationBackground);
+    } else {
+      // Clear file-related data for new records
+      this.file_store = undefined;
+      this.file_list = [];
+      this.educationFile = "";
+      this.formData = new FormData();
     }
   }
   closeModal(): void {
@@ -57,11 +67,11 @@ export class EducationFormComponent implements OnInit {
       ],
       programmeLevel: [
         "",
-        [Validators.required, alphabetsWithSpecialCharsValidator()]
+        [Validators.required]
       ],
       graduatedYear: ["", Validators.required],
       remark: [""],
-      ActualFile: [""]
+      ActualFile: ["",Validators.required]
     });
   }
   private getApplicantEducationBackground(): ApplicantEducationBackgroundRequest {
@@ -88,14 +98,29 @@ export class EducationFormComponent implements OnInit {
   get graduatedYear() {
     return this.applicantEducationBacgroundForm.get("graduatedYear");
   }
+  
+  get actualFile() {
+    return this.applicantEducationBacgroundForm.get("ActualFile");
+  }
+  
   remark() {
     return this.applicantEducationBacgroundForm.get("remark");
+  }
+
+  getFileUploadStatus() {
+    const fileControl = this.applicantEducationBacgroundForm.get("ActualFile");
+    if (fileControl && fileControl.invalid && (fileControl.dirty || fileControl.touched)) {
+      return 'error';
+    }
+    return '';
   }
 
   //#region File upload Function
 
   handleFileInputChange(files: FileList): void {
     this.file_store = files;
+    const fileControl = this.applicantEducationBacgroundForm.get("ActualFile");
+    
     if (files.length) {
       const count = files.length > 1 ? ` (+${files.length - 1} files)` : "";
       this.applicantEducationBacgroundForm.patchValue({
@@ -117,6 +142,11 @@ export class EducationFormComponent implements OnInit {
       });
       this.file_list = []; // Clear files if no selection
     }
+    
+    // Mark the control as touched to trigger validation
+    if (fileControl) {
+      fileControl.markAsTouched();
+    }
   }
 
   handleSubmit() {
@@ -134,6 +164,16 @@ export class EducationFormComponent implements OnInit {
     if (this.applicantEducationBacgroundForm.valid) {
       const postData = this.getApplicantEducationBackground();
       if (this.educationId == undefined) {
+        // Check if files are uploaded for new records
+        if (!this.file_store || this.file_store.length === 0) {
+          this._customNotificationService.notification(
+            "warning",
+            "File Required",
+            "Please upload at least one document before saving."
+          );
+          return;
+        }
+        
         Object.keys(postData).forEach(key => {
           if (key !== "ActualFile") {
             if (this.formData.get(key) != postData[key]) {

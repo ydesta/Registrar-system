@@ -89,9 +89,13 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
       this._generalInformationService
         .applicantReviewerDecision(postData.id, postData)
         .subscribe(res => {
-          if (res.status=="success") {
-            const userId = res.data.applicantUserId;
-            const email = res.data.emailAddress;
+          // Use helper method to extract data safely
+          const responseData = this.extractResponseData<any>(res);
+          
+          if (responseData && responseData.status === "success") {
+            const userId = responseData.data?.applicantUserId;
+            const email = responseData.data?.emailAddress;
+            
             if (postData.approvalStatus == 3) {
               if (userId) {
                 this.userManagementService.updateUserRole(String(userId), "ApprovedApplicant", email)
@@ -121,6 +125,13 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
               this.decisionSubmitted.emit(postData);
               this.modalRef.close(postData);
             }
+          } else {
+            // Handle case where status is not success
+            this._customNotificationService.notification(
+              "error",
+              "Error",
+              "Failed to save decision. Please try again."
+            );
           }
         });
     } else {
@@ -134,5 +145,21 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
   
   cancel() {
     this.modalRef.close();
+  }
+
+  // Helper method to extract data from different response structures
+  // This handles both ApiResponse<T> format (with data wrapper) and direct object format
+  private extractResponseData<T>(res: any): T | null {
+    if (res && typeof res === 'object') {
+      // Check if response has data property (ApiResponse<T> structure)
+      if ('data' in res && res.data) {
+        return res.data;
+      }
+      // Check if response is the data directly
+      else if ('id' in res) {
+        return res;
+      }
+    }
+    return null;
   }
 }

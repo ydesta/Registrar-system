@@ -5,7 +5,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { RegisterRequest } from 'src/app/services/auth.interface';
 import { AuthService } from 'src/app/services/auth.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
-import { phoneValidator } from 'src/app/common/constant';
+import { phoneValidator, phoneValidator9To14 } from 'src/app/common/constant';
 import { RegistrationSuccessDialogComponent } from './registration-success-dialog/registration-success-dialog.component';
 
 @Component({
@@ -32,7 +32,7 @@ export class UserRegisterComponent implements OnInit {
       email: [null, [Validators.required, Validators.email]],
       password: [null, [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)]],
       confirmPassword: [null, [Validators.required]],
-      phoneNumber: [null, [Validators.required, phoneValidator()]],
+      phoneNumber: [null, [Validators.required, phoneValidator9To14()]],
       acceptTerms: [false, [Validators.requiredTrue]]
     }, { validators: this.passwordMatchValidator });
   }

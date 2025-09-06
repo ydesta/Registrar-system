@@ -8,6 +8,7 @@ import { WorkExperienceService } from "../../services/work-experience.service";
 import { ApplicantWorkExperienceRequest } from "../../model/applicant-work-experience-request.model";
 import { ManageFilesComponent } from "../../file-management/manage-files/manage-files.component";
 import { SharingDataService } from "../../services/sharing-data.service";
+import { AuthService } from "src/app/services/auth.service";
 import { Subscription } from "rxjs";
 
 @Component({
@@ -25,6 +26,8 @@ export class ManageWorkExperienceComponent implements OnInit {
   isSubmittedApplicationForm = 0;
   isApplicantProfile: boolean = false;
   private subscription!: Subscription;
+  private authSubscription!: Subscription;
+  private isInitialized = false;
 
   constructor(
     private modalRef: NzModalRef,
@@ -33,14 +36,82 @@ export class ManageWorkExperienceComponent implements OnInit {
     private route: ActivatedRoute,
     private generalInformationService: GeneralInformationService,
     private workExperienceService: WorkExperienceService,
-    private sharingDataService: SharingDataService
+    private sharingDataService: SharingDataService,
+    private authService: AuthService
   ) {
     this.userId = localStorage.getItem("userId");
   }
 
   ngOnInit(): void {
-    this.initializeData();
+    // Subscribe to authentication state changes first
+    this.setupAuthenticationMonitoring();
     
+    // Initialize data only after authentication is confirmed
+    this.authService.isAuthenticated().then(isAuth => {
+      if (isAuth) {
+        this.initializeData();
+        this.isInitialized = true;
+      } else {
+        console.log('User not authenticated, waiting for login...');
+      }
+    });
+
+    // Set up other subscriptions
+    this.setupDataSubscriptions();
+  }
+
+  private setupAuthenticationMonitoring(): void {
+    // Monitor authentication state changes
+    this.authSubscription = this.authService.isAuthenticated$.subscribe(isAuth => {
+      if (isAuth && !this.isInitialized) {
+        console.log('User authenticated, initializing work experience component...');
+        this.userId = localStorage.getItem('userId');
+        this.clearCachedData();
+        this.initializeData();
+        this.isInitialized = true;
+      } else if (!isAuth && this.isInitialized) {
+        console.log('User logged out, clearing work experience component state...');
+        this.clearComponentState();
+        this.isInitialized = false;
+      }
+    });
+
+    // Monitor login changes
+    this.authSubscription.add(
+      this.authService.loginChanged.subscribe(isLoggedIn => {
+        if (isLoggedIn && !this.isInitialized) {
+          console.log('Login detected, initializing work experience component...');
+          this.userId = localStorage.getItem('userId');
+          this.clearCachedData();
+          this.initializeData();
+          this.isInitialized = true;
+        } else if (!isLoggedIn) {
+          console.log('Logout detected, clearing work experience component state...');
+          this.clearComponentState();
+          this.isInitialized = false;
+        }
+      })
+    );
+
+    // Monitor current user changes
+    this.authSubscription.add(
+      this.authService.currentUser$.subscribe(user => {
+        if (user && user.id !== this.userId) {
+          console.log('User changed, updating work experience component...');
+          this.userId = user.id;
+          this.clearCachedData();
+          if (this.isInitialized) {
+            this.refreshData();
+          } else {
+            this.initializeData();
+            this.isInitialized = true;
+          }
+        }
+      })
+    );
+  }
+
+  private setupDataSubscriptions(): void {
     this.sharingDataService.programCurrentMessage.subscribe(res => {
       this.isSubmittedApplicationForm = res;
     });
@@ -50,45 +121,27 @@ export class ManageWorkExperienceComponent implements OnInit {
         this.isApplicantProfile = status;        
       }
     );
-
-    this.monitorAuthenticationState();
   }
 
-  private monitorAuthenticationState(): void {
-    setInterval(() => {
-      const currentUserId = localStorage.getItem('userId');
-      if (currentUserId && currentUserId !== this.userId) {
-        this.userId = currentUserId;
-        this.forceRefreshData();
-      }
-    }, 1000);
+  private clearCachedData(): void {
+    // Clear cached applicant ID from localStorage
+    localStorage.removeItem('parent_applicant_id');
+    
+    // Clear cached data from the service
+    this.generalInformationService.clearParentApplicantIdCache();
+    
+    // Clear component data
+    this.workExperienceLists = [];
+    this.applicantId = null;
+  }
 
-    window.addEventListener('storage', (event) => {
-      if (event.key === 'userId' && event.newValue) {
-        console.log('Storage event detected, user authentication changed...');
-        this.userId = event.newValue;
-        this.forceRefreshData();
-      }
-    });
-
-    window.addEventListener('focus', () => {
-      const currentUserId = localStorage.getItem('userId');
-      if (currentUserId && currentUserId !== this.userId) {
-        console.log('Tab focus detected, checking authentication state...');
-        this.userId = currentUserId;
-        this.forceRefreshData();
-      }
-    });
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        const currentUserId = localStorage.getItem('userId');
-        if (currentUserId && currentUserId !== this.userId) {
-          this.userId = currentUserId;
-          this.forceRefreshData();
-        }
-      }
-    });
+  private clearComponentState(): void {
+    this.workExperienceLists = [];
+    this.applicantId = null;
+    this.isSubmittedApplicationForm = 0;
+    this.isApplicantProfile = false;
+    this.workExperienceIndex = 0;
+    this.exprienceModalVisible = false;
   }
 
   private initializeData(): void {
@@ -104,6 +157,11 @@ export class ManageWorkExperienceComponent implements OnInit {
   }
 
   private loadApplicantIdFromService(): void {
+    if (!this.userId) {
+      console.warn('No userId available, cannot load applicant ID');
+      return;
+    }
+
     this.generalInformationService.getOrStoreParentApplicantId(this.userId).subscribe({
       next: (applicantId) => {
         if (applicantId && applicantId !== this.applicantId) {
@@ -112,9 +170,52 @@ export class ManageWorkExperienceComponent implements OnInit {
         }
       },
       error: (error) => {
+        console.error('Error loading applicant ID:', error);
+        
+        // Handle cooldown error specifically
+        if (error.message && error.message.includes('Fetch cooldown active')) {
+          console.log('Fetch cooldown active, waiting for cached value...');
+          // Wait a bit longer and try again, or check if there's a cached value
+          setTimeout(() => this.loadApplicantIdFromService(), 1000);
+          return;
+        }
+        
+        this.handleAuthError(error);
+        
+        // Don't retry automatically on authentication errors
+        if (error.status === 401 || error.status === 403) {
+          console.log('Authentication error, user may need to login again');
+          return;
+        }
+        // Retry for other errors after a delay
         setTimeout(() => this.loadApplicantIdFromService(), 3000);
       }
     });
+  }
+
+  // Add method to handle authentication errors gracefully
+  private handleAuthError(error: any): void {
+    console.error('Authentication error in work experience component:', error);
+    
+    if (error.status === 401 || error.status === 403) {
+      // User is not authenticated, clear state and wait for login
+      this.clearComponentState();
+      this.isInitialized = false;
+      
+      // Show user-friendly message
+      this._customNotificationService.notification(
+        "warning",
+        "Authentication Required",
+        "Please log in to view your work experience data."
+      );
+    } else if (error.status === 0 || error.status >= 500) {
+      // Network or server error
+      this._customNotificationService.notification(
+        "error",
+        "Connection Error",
+        "Unable to connect to the server. Please check your connection and try again."
+      );
+    }
   }
 
   openModal(): void {
@@ -162,11 +263,7 @@ export class ManageWorkExperienceComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error loading work experience records:', error);
-          this._customNotificationService.notification(
-            "error",
-            "Error",
-            "Failed to load work experience data. Please refresh the page."
-          );
+          this.handleAuthError(error);
           this.workExperienceLists = [];
         }
       });
@@ -182,6 +279,10 @@ export class ManageWorkExperienceComponent implements OnInit {
 
   forceRefreshData(): void {
     this.workExperienceLists = [];
+    
+    // Clear cached data first
+    this.clearCachedData();
+    
     this.loadApplicantIdFromService();
   }
 
@@ -270,6 +371,9 @@ export class ManageWorkExperienceComponent implements OnInit {
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
     }
   }
 }

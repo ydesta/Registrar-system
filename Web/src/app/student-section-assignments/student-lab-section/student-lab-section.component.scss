@@ -450,6 +450,22 @@
   margin-bottom: 16px;
 }
 
+.text-info {
+  color: #1890ff !important;
+}
+
+.text-muted {
+  color: #9ca3af !important;
+}
+
+.text-warning {
+  color: #faad14 !important;
+}
+
+.text-danger {
+  color: #ff4d4f !important;
+}
+
 // Responsive design
 @media (max-width: 768px) {
   .content-container {
@@ -594,6 +610,44 @@
       margin-bottom: 8px;
       display: block;
     }
+
+    // Styling for the suggestion button
+    button {
+      background: linear-gradient(135deg, #52c41a, #389e0d);
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(82, 196, 26, 0.3);
+      transition: all 0.3s ease;
+      color: white;
+      font-weight: 500;
+      min-width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background: linear-gradient(135deg, #73d13d, #52c41a);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(82, 196, 26, 0.4);
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(82, 196, 26, 0.3);
+      }
+
+      &:disabled {
+        background: linear-gradient(135deg, #d9d9d9, #bfbfbf);
+        box-shadow: none;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      i {
+        font-size: 14px;
+      }
+    }
   }
 }
 
@@ -646,5 +700,219 @@
   i {
     margin-right: 8px;
     font-size: 16px;
+  }
+}
+
+.clear-btn {
+  background: linear-gradient(135deg, #ff4d4f, #cf1322);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3);
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 0 32px;
+  height: 48px;
+  position: relative;
+  overflow: hidden;
+  color: white;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover {
+    background: linear-gradient(135deg, #ff7875, #ff4d4f);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 77, 79, 0.4);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
+  }
+
+  &:disabled {
+    background: linear-gradient(135deg, #d9d9d9, #bfbfbf);
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  i {
+    margin-right: 8px;
+    font-size: 16px;
+  }
+}
+
+// Professional Remove Button Styling (exact match with StudentSectionAssignmentsComponent)
+.professional-remove-btn {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border: 2px solid #ff4d4f;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(255, 77, 79, 0.12);
+  transition: all 0.4s cubic-bezier(0.645, 0.045, 0.355, 1);
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  padding: 0 28px;
+  height: 64px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 240px;
+  gap: 16px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 77, 79, 0.08), transparent);
+    transition: left 0.6s;
+  }
+
+  &:hover {
+    background: linear-gradient(135deg, #fff2f0, #ffccc7);
+    border-color: #ff7875;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(255, 77, 79, 0.25);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(255, 77, 79, 0.2);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(255, 77, 79, 0.15);
+  }
+
+  .btn-icon-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #ff4d4f, #ff7875);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
+    transition: all 0.3s ease;
+
+    i {
+      color: white;
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+
+    .icon-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ff4d4f;
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  .btn-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex: 1;
+  }
+
+  .btn-text {
+    color: #ff4d4f;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 2px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-subtitle {
+    color: #8c8c8c;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+  }
+
+  &:hover {
+    .btn-icon-container {
+      background: linear-gradient(135deg, #ff7875, #ffa39e);
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(255, 77, 79, 0.4);
+    }
+    
+    .btn-text {
+      color: #ff7875;
+    }
+    
+    .btn-subtitle {
+      color: #595959;
+    }
+  }
+
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    min-width: 200px;
+    padding: 0 20px;
+    height: 56px;
+    
+    .btn-icon-container {
+      width: 36px;
+      height: 36px;
+      
+      i {
+        font-size: 16px;
+      }
+      
+      .icon-badge {
+        width: 18px;
+        height: 18px;
+        font-size: 9px;
+      }
+    }
+    
+    .btn-text {
+      font-size: 13px;
+    }
+    
+    .btn-subtitle {
+      font-size: 10px;
+    }
   }
 }

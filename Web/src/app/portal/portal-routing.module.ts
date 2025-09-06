@@ -20,10 +20,6 @@ const routes: Routes = [
     path: 'contact', 
     component: ContactComponent 
   },
-  // { 
-  //   path: 'register', 
-  //   component: RegisterComponent 
-  // },
   { 
     path: 'programs', 
     component: ProgramsPageComponent 
@@ -36,6 +32,11 @@ const routes: Routes = [
     path: 'values', 
     component: CompanyValuesPageComponent 
   },
+  // Add a catch-all route to prevent portal routes from interfering with other routes
+  { 
+    path: '**', 
+    redirectTo: '' 
+  }
 ];
 
 @NgModule({

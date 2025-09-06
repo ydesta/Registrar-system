@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors }
 import { TransferChange, TransferItem, TransferSelectChange, TransferDirection } from 'ng-zorro-antd/transfer';
 import { StaticData } from 'src/app/admission-request/model/StaticData';
 import { TermCourseOfferingService } from 'src/app/colleges/services/term-course-offering.service';
-import { ACADEMIC_TERM_STATUS } from 'src/app/common/constant';
+import { ACADEMIC_TERM_STATUS, SECTION_TYPE } from 'src/app/common/constant';
 import { SectionAssignedStudentInfo } from 'src/app/Models/SectionAssignedStudentModel';
 import { SectionViewModel } from 'src/app/Models/SectionViewModel';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
@@ -24,6 +24,7 @@ export class ReassignStudentSectionComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   listOfTermNumber: StaticData[] = [];
+  listOfSectionType: StaticData[] = [];
   yearList: number[] = [];
   listOfBatch: any[] = [];
   listOfSections: SectionViewModel[] = [];
@@ -52,11 +53,12 @@ export class ReassignStudentSectionComponent implements OnInit {
   ) {
     const currentYear = new Date().getFullYear();
     this.yearList = this.getYearRange(currentYear);
-    this.getListOfAcademicTermStatus();
     this.createSearchForm();
   }
 
   ngOnInit(): void {
+    this.getListOfSectionType();
+    this.getListOfAcademicTermStatus();
     this.academicTerm.valueChanges.subscribe(res => {
       if (res && this.year.value) {
         this.getListOfBatch(res, this.year.value);
@@ -69,9 +71,9 @@ export class ReassignStudentSectionComponent implements OnInit {
       }
     });
 
-    // Subscribe to batchCode changes to load available sections
-    this.batchCode.valueChanges.subscribe(batchCode => {
-      if (batchCode && this.academicTerm.value && this.year.value) {
+   
+    this.sectionType.valueChanges.subscribe(batchCode => {
+      if (this.batchCode.value && this.academicTerm.value && this.year.value) {
         this.loadAvailableSections();
       }
     });
@@ -80,13 +82,23 @@ export class ReassignStudentSectionComponent implements OnInit {
   private createSearchForm() {
     this.searchForm = this.fb.group({
       academicTerm: [null, Validators.required],
+      sectionType: [null, Validators.required],
       year: [null, Validators.required],
       batchCode: [null, Validators.required],
       sectionIdR: [null, [Validators.required, this.sectionValidator.bind(this)]],
       sectionIdL: [null, [Validators.required, this.sectionValidator.bind(this)]]
     });
   }
-
+  getListOfSectionType() {
+    let division: StaticData = new StaticData();
+    SECTION_TYPE.forEach(pair => {
+      division = {
+        Id: pair.Id,
+        Description: pair.Description
+      };
+      this.listOfSectionType.push(division);
+    });
+  }
   // Custom validator to ensure source and target sections are different
   private sectionValidator(control: AbstractControl): ValidationErrors | null {
     if (!control.parent) {
@@ -113,6 +125,9 @@ export class ReassignStudentSectionComponent implements OnInit {
 
   get batchCode() {
     return this.searchForm.get("batchCode");
+  }
+  get sectionType() {
+    return this.searchForm.get("sectionType");
   }
 
   get sectionIdL() {
@@ -159,7 +174,7 @@ export class ReassignStudentSectionComponent implements OnInit {
     this.listOfSections = [];
 
     this.studentSectionAssignmentService
-      .getListOfSectionBasedOnBatch(this.batchCode.value, this.academicTerm.value, this.year.value)
+      .getListOfSectionBasedOnBatch(this.batchCode.value, this.academicTerm.value, this.year.value, this.sectionType.value)
       .subscribe({
         next: (sections: any) => {
           this.loadingSections = false;
@@ -177,7 +192,7 @@ export class ReassignStudentSectionComponent implements OnInit {
   searchSectionAssignedStudents(): void {
     if (this.searchForm.valid) {
       // Check if source and target sections are different
-      const { batchCode, academicTerm, year, sectionIdR, sectionIdL } = this.searchForm.value;
+      const { batchCode, academicTerm, year, sectionType, sectionIdR, sectionIdL } = this.searchForm.value;
 
       if (sectionIdL === sectionIdR) {
         this.notificationService.notification('error', 'Validation Error', 'Source section and target section cannot be the same. Please select different sections.');
@@ -189,8 +204,8 @@ export class ReassignStudentSectionComponent implements OnInit {
       this.successMessage = '';
 
       // Load students for both sections
-      this.loadStudentsForSection(batchCode, academicTerm, year, sectionIdL, 'left');
-      this.loadStudentsForSection(batchCode, academicTerm, year, sectionIdR, 'right');
+      this.loadStudentsForSection(batchCode, academicTerm, year, sectionType, sectionIdL, 'left');
+      this.loadStudentsForSection(batchCode, academicTerm, year, sectionType, sectionIdR, 'right');
 
       // Collapse the search form after successful search
       this.isSearchCollapsed = true;
@@ -199,12 +214,11 @@ export class ReassignStudentSectionComponent implements OnInit {
     }
   }
 
-  private loadStudentsForSection(batchCode: string, academicTerm: number, year: number, sectionId: number, side: 'left' | 'right'): void {
+  private loadStudentsForSection(batchCode: string, academicTerm: number, year: number, sectionType: number, sectionId: number, side: 'left' | 'right'): void {
     this.studentSectionAssignmentService
-      .getListOfSectionAssignedStudentsBySectionId(batchCode, academicTerm, year, sectionId)
+      .getListOfSectionAssignedStudentsBySectionId(batchCode, academicTerm, year, sectionId, sectionType)
       .subscribe({
         next: (response) => {
-          console.log("&&&         ", response);
           if (response.status === 'success' && response.data) {
             const students = response.data.map((student: any, index: number) => ({
               key: `${side}_${student.studentCode || student.id || index}`,
@@ -388,7 +402,7 @@ export class ReassignStudentSectionComponent implements OnInit {
     });
   }
 
-  
+
   getSelectedCount(section: 'left' | 'right'): number {
     const list = section === 'left' ? this.leftList : this.rightList;
     return list.filter(student => student['checked']).length;
@@ -400,7 +414,7 @@ export class ReassignStudentSectionComponent implements OnInit {
       return;
     }
 
-    const { academicTerm, year, batchCode, sectionIdL, sectionIdR } = this.searchForm.value;
+    const { academicTerm, year, batchCode,sectionType, sectionIdL, sectionIdR } = this.searchForm.value;
 
 
     const sourceStudents = this.leftList
@@ -427,6 +441,7 @@ export class ReassignStudentSectionComponent implements OnInit {
         academicTerm: academicTerm,
         year: year,
         batchCode: batchCode,
+        sectionType: sectionType,
         sectionId: sectionIdL,
         studentIds: sourceStudents
       },
@@ -434,6 +449,7 @@ export class ReassignStudentSectionComponent implements OnInit {
         academicTerm: academicTerm,
         year: year,
         batchCode: batchCode,
+         sectionType: sectionType,
         sectionId: sectionIdR,
         studentIds: targetStudents
       }

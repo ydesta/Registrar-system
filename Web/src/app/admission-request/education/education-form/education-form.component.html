@@ -25,7 +25,7 @@
         />
         <label for="schoollName" class="floating-label">
           <i nz-icon nzType="bank" nzTheme="outline"></i>
-          Institution Name <span class="required">*</span>
+          Institution Name(School Name) <span class="required">*</span>
         </label>
         <ng-template #schoolNameErrorTpl let-control>
           <div class="error-message" *ngIf="control.hasError('required')">
@@ -71,26 +71,29 @@
     <!-- Degree Obtained Field -->
     <nz-form-item>
       <nz-form-control [nzErrorTip]="programmeLevelErrorTpl">
-        <input 
-          nz-input 
+        <nz-select 
           formControlName="programmeLevel" 
-          placeholder=" "
+          placeholder="Select Education Level"
           id="programmeLevel"
-          class="input-with-floating-label"
-          [class.error]="programmeLevel.invalid && (programmeLevel.dirty || programmeLevel.touched)" 
-        />
+          class="select-with-floating-label"
+          [class.error]="programmeLevel.invalid && (programmeLevel.dirty || programmeLevel.touched)"
+          nzShowSearch
+          nzAllowClear
+        >
+          <nz-option 
+            *ngFor="let option of educationLevelOptions" 
+            [nzValue]="option.value" 
+            [nzLabel]="option.label">
+          </nz-option>
+        </nz-select>
         <label for="programmeLevel" class="floating-label">
           <i nz-icon nzType="trophy" nzTheme="outline"></i>
-          Degree Level <span class="required">*</span>
+          Education Level <span class="required">*</span>
         </label>
         <ng-template #programmeLevelErrorTpl let-control>
           <div class="error-message" *ngIf="control.hasError('required')">
             <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
-            Degree level is required
-          </div>
-          <div class="error-message" *ngIf="control.hasError('alphabetsOnly')">
-            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
-            {{ control.getError('alphabetsOnly').message }}
+            Education level is required
           </div>
         </ng-template>
       </nz-form-control>
@@ -138,11 +141,12 @@
 
     <!-- File Upload Field -->
     <nz-form-item *ngIf="educationId==undefined">
-      <nz-form-control>
-        <div class="file-upload-section">
+      <nz-form-control [nzErrorTip]="fileUploadErrorTpl" [nzValidateStatus]="actualFile.invalid && (actualFile.dirty || actualFile.touched) ? 'error' : ''">
+        <div class="file-upload-section" [class.error]="actualFile.invalid && (actualFile.dirty || actualFile.touched)">
           <label class="file-upload-label">
             <i nz-icon nzType="paper-clip" nzTheme="outline"></i>
             <span class="upload-text">Click to attach documents</span>
+            <span class="required">*</span>
             <input 
               nz-input 
               type="file" 
@@ -151,6 +155,7 @@
               (change)="handleFileInputChange(f_input.files)" 
               accept=".pdf, .jpg, .jpeg, .png, .gif"
               multiple 
+              required
             />
           </label>
           <!-- File List Display -->
@@ -161,6 +166,12 @@
             </div>
           </div>
         </div>
+        <ng-template #fileUploadErrorTpl let-control>
+          <div class="error-message" *ngIf="control.hasError('required')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            Document upload is required
+          </div>
+        </ng-template>
       </nz-form-control>
     </nz-form-item>
 
@@ -180,7 +191,7 @@
           nz-button 
           nzType="primary" 
           (click)="onSave()"
-          [disabled]="!applicantEducationBacgroundForm.valid"
+          [disabled]="!applicantEducationBacgroundForm.valid || (educationId == undefined && (!file_store || file_store.length === 0))"
           class="submit-btn"
         >
           <i nz-icon nzType="save" nzTheme="outline"></i>

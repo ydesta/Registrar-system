@@ -22,17 +22,7 @@ export class AuthGuard implements CanActivate {
     const hasToken = localStorage.getItem('access_token');
     const hasRefreshToken = localStorage.getItem('refresh_token');
     
-    // Additional check for token storage service
-    const tokenStorageIsLogin = this.authService.isAuthenticated();
-    
     if (isLoggedIn && hasToken) {
-      // Double-check with token storage service
-      tokenStorageIsLogin.then(isAuth => {
-        if (!isAuth) {
-          this.clearAuthData();
-          this.router.navigate(['/accounts/login']);
-        }
-      });
       return true;
     }
     

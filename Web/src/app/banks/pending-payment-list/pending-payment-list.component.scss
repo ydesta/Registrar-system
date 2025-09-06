@@ -1,43 +1,121 @@
 .pending-payments-container {
   padding: 24px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  will-change: transform;
+  contain: layout style paint;
 
   .header-section {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
+    background: #fff;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+    contain: layout style paint;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: #1890ff;
+    }
 
     .title-section {
-      h3 {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 600;
-        color: #262626;
+      .title-with-icon {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+
+        .title-icon {
+          font-size: 24px;
+          color: #1890ff;
+        }
+
+        h3 {
+          margin: 0;
+          font-size: 24px;
+          font-weight: 700;
+          color: #1890ff;
+        }
       }
 
       .subtitle {
-        margin-top: 4px;
-        color: #8c8c8c;
-        font-size: 14px;
+        color: #595959;
+        font-size: 16px;
+        font-weight: 500;
       }
     }
 
     .total-amount {
-      background: #f5f5f5;
-      padding: 16px 24px;
-      border-radius: 8px;
-      text-align: right;
+      .amount-card {
+        background: linear-gradient(135deg, #f6ffed 0%, #e6f7ff 100%);
+        padding: 24px;
+        border-radius: 12px;
+        border: 1px solid #b7eb8f;
+        text-align: center;
+        min-width: 200px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
 
-      .label {
-        font-size: 14px;
-        color: #8c8c8c;
-        margin-bottom: 4px;
-      }
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(24, 144, 255, 0.15);
+        }
 
-      .amount {
-        font-size: 24px;
-        font-weight: 600;
-        color: #262626;
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: #1890ff;
+        }
+
+        .amount-header {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          margin-bottom: 12px;
+
+          .amount-icon {
+            font-size: 18px;
+            color: #52c41a;
+          }
+
+          .label {
+            font-size: 14px;
+            color: #595959;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+        }
+
+        .amount {
+          font-size: 28px;
+          font-weight: 700;
+          color: #262626;
+          margin-bottom: 8px;
+        }
+
+        .amount-subtitle {
+          font-size: 12px;
+          color: #8c8c8c;
+          font-weight: 500;
+        }
       }
     }
   }
@@ -101,146 +179,554 @@
 ::ng-deep {
   .ant-table {
     background: #fff;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f0f0f0;
 
     .ant-table-thead > tr > th {
-      background: #fafafa;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
       color: #262626;
-      font-weight: 600;
-      padding: 16px;
-      border-bottom: 2px solid #f0f0f0;
+      font-weight: 700;
+      padding: 20px 16px;
+      border-bottom: 2px solid #dee2e6;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #1890ff;
+      }
     }
 
-    .ant-table-tbody > tr > td {
-      padding: 16px;
-      border-bottom: 1px solid #f0f0f0;
+    .ant-table-tbody > tr {
+      transition: all 0.3s ease;
+      position: relative;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        z-index: 1;
+      }
+
+      > td {
+        padding: 20px 16px;
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: middle;
+        transition: all 0.3s ease;
+      }
+
+      &:hover > td {
+        background: linear-gradient(135deg, #f6ffed 0%, #e6f7ff 100%);
+      }
     }
 
-    .ant-table-tbody > tr:hover > td {
-      background: #f5f5f5;
+    .ant-table-tbody > tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    .ant-table-tbody > tr:nth-child(even):hover > td {
+      background: linear-gradient(135deg, #f6ffed 0%, #e6f7ff 100%);
     }
   }
 
   .action-button {
     button {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
-      height: 32px;
-      padding: 0 16px;
-      border-radius: 6px;
+      height: 40px;
+      padding: 0 24px;
+      border-radius: 8px;
       transition: all 0.3s ease;
-      font-weight: 500;
+      font-weight: 600;
+      font-size: 14px;
+      position: relative;
+      overflow: hidden;
 
-      .currency-symbol {
-        font-size: 14px;
-        font-weight: 600;
-        color: inherit;
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+      }
+
+      &:hover::before {
+        left: 100%;
       }
 
       &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(24, 144, 255, 0.3);
       }
 
       &:active {
         transform: translateY(0);
       }
+
+      span[nz-icon] {
+        font-size: 16px;
+      }
     }
   }
 
   .status-badge {
-    padding: 4px 12px;
-    border-radius: 12px;
+    padding: 8px 16px;
+    border-radius: 20px;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+      transform: translateX(-100%);
+      transition: transform 0.6s;
+    }
+
+    &:hover::before {
+      transform: translateX(100%);
+    }
 
     &.pending {
-      background: #fff7e6;
+      background: linear-gradient(135deg, #fff7e6 0%, #ffd591 100%);
       color: #d46b08;
       border: 1px solid #ffd591;
+      box-shadow: 0 2px 8px rgba(212, 107, 8, 0.2);
     }
 
     &.approved {
-      background: #f6ffed;
+      background: linear-gradient(135deg, #f6ffed 0%, #b7eb8f 100%);
       color: #389e0d;
       border: 1px solid #b7eb8f;
+      box-shadow: 0 2px 8px rgba(56, 158, 13, 0.2);
     }
 
     &.rejected {
-      background: #fff1f0;
+      background: linear-gradient(135deg, #fff1f0 0%, #ffa39e 100%);
       color: #cf1322;
       border: 1px solid #ffa39e;
+      box-shadow: 0 2px 8px rgba(207, 19, 34, 0.2);
     }
   }
 
   .amount-cell {
-    font-weight: 500;
+    font-weight: 700;
     color: #262626;
+    font-size: 16px;
   }
 
   .date-cell {
-    color: #8c8c8c;
+    color: #595959;
+    font-weight: 500;
   }
+}
+
+.table-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-top: 24px;
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+  contain: layout style paint;
 
   .empty-state {
     text-align: center;
-    padding: 48px 24px;
+    padding: 80px 24px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-top: 24px;
+    position: relative;
+    overflow: hidden;
 
-    .empty-icon {
-      font-size: 48px;
-      color: #d9d9d9;
-      margin-bottom: 16px;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: #1890ff;
+    }
+
+    .empty-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .empty-icon-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 32px;
+
+      .empty-icon {
+        font-size: 80px;
+        color: #1890ff;
+        display: block;
+        animation: float 3s ease-in-out infinite;
+      }
+
+      .empty-icon-bg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%);
+        border-radius: 50%;
+        z-index: -1;
+        animation: pulse 2s ease-in-out infinite;
+      }
     }
 
     .empty-text {
-      color: #8c8c8c;
-      font-size: 16px;
+      color: #1890ff;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
     }
+
+    .empty-subtitle {
+      color: #595959;
+      font-size: 16px;
+      line-height: 1.6;
+      max-width: 500px;
+      margin: 0 auto 32px;
+    }
+
+    .empty-actions {
+      button {
+        height: 48px;
+        padding: 0 32px;
+        border-radius: 8px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(24, 144, 255, 0.2);
+        }
+
+        span[nz-icon] {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0.7;
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.1);
+      opacity: 0.4;
+    }
+  }
+
+  // Performance optimizations
+  .empty-icon {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+
+  .empty-icon-bg {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+
+  // Optimize hover effects
+  .amount-card,
+  .action-button button,
+  .status-badge {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+
+  // Optimize table performance
+  .ant-table-tbody > tr {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
   }
 }
 
 // Responsive adjustments
+@media (max-width: 1200px) {
+  .pending-payments-container {
+    padding: 20px;
+
+    .header-section {
+      padding: 24px;
+      margin-bottom: 24px;
+
+      .title-section {
+        .title-with-icon {
+          h3 {
+            font-size: 20px;
+          }
+        }
+      }
+
+      .total-amount {
+        .amount-card {
+          min-width: 180px;
+          padding: 20px;
+
+          .amount {
+            font-size: 24px;
+          }
+        }
+      }
+    }
+
+    .table-section {
+      padding: 20px;
+    }
+  }
+}
+
 @media (max-width: 768px) {
   .pending-payments-container {
     padding: 16px;
 
     .header-section {
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+
+      .title-section {
+        .title-with-icon {
+          h3 {
+            font-size: 18px;
+          }
+        }
+
+        .subtitle {
+          font-size: 14px;
+        }
+      }
 
       .total-amount {
         width: 100%;
-        text-align: left;
-      }
-    }
 
-    .instruction-section {
-      padding: 16px;
+        .amount-card {
+          min-width: auto;
+          padding: 16px;
 
-      .steps {
-        .step {
-          gap: 12px;
-
-          .step-number {
-            width: 28px;
-            height: 28px;
-            font-size: 14px;
-          }
-
-          .step-content {
-            .step-title {
-              font-size: 14px;
-            }
-
-            .step-description {
-              font-size: 13px;
-            }
+          .amount {
+            font-size: 20px;
           }
         }
       }
+    }
+
+    .table-section {
+      padding: 16px;
+      margin-top: 16px;
+
+      .empty-state {
+        padding: 60px 16px;
+
+        .empty-icon-wrapper {
+          .empty-icon {
+            font-size: 60px;
+          }
+
+          .empty-icon-bg {
+            width: 100px;
+            height: 100px;
+          }
+        }
+
+        .empty-text {
+          font-size: 20px;
+        }
+
+        .empty-subtitle {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+
+  ::ng-deep {
+    .ant-table {
+      .ant-table-thead > tr > th {
+        padding: 12px 8px;
+        font-size: 12px;
+      }
+
+      .ant-table-tbody > tr > td {
+        padding: 12px 8px;
+        font-size: 13px;
+      }
+    }
+
+    .action-button button {
+      height: 36px;
+      padding: 0 16px;
+      font-size: 12px;
+    }
+
+    .status-badge {
+      padding: 6px 12px;
+      font-size: 11px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .pending-payments-container {
+    padding: 12px;
+
+    .header-section {
+      padding: 16px;
+      margin-bottom: 16px;
+
+      .title-section {
+        .title-with-icon {
+          gap: 8px;
+
+          .title-icon {
+            font-size: 20px;
+          }
+
+          h3 {
+            font-size: 16px;
+          }
+        }
+
+        .subtitle {
+          font-size: 13px;
+        }
+      }
+
+      .total-amount {
+        .amount-card {
+          padding: 12px;
+
+          .amount-header {
+            .amount-icon {
+              font-size: 16px;
+            }
+
+            .label {
+              font-size: 12px;
+            }
+          }
+
+          .amount {
+            font-size: 18px;
+          }
+
+          .amount-subtitle {
+            font-size: 11px;
+          }
+        }
+      }
+    }
+
+    .table-section {
+      padding: 12px;
+
+      .empty-state {
+        padding: 40px 12px;
+
+        .empty-icon-wrapper {
+          .empty-icon {
+            font-size: 50px;
+          }
+
+          .empty-icon-bg {
+            width: 80px;
+            height: 80px;
+          }
+        }
+
+        .empty-text {
+          font-size: 18px;
+        }
+
+        .empty-subtitle {
+          font-size: 13px;
+        }
+
+        .empty-actions button {
+          height: 40px;
+          padding: 0 20px;
+          font-size: 13px;
+        }
+      }
+    }
+  }
+
+  ::ng-deep {
+    .ant-table {
+      .ant-table-thead > tr > th {
+        padding: 8px 4px;
+        font-size: 11px;
+      }
+
+      .ant-table-tbody > tr > td {
+        padding: 8px 4px;
+        font-size: 12px;
+      }
+    }
+
+    .action-button button {
+      height: 32px;
+      padding: 0 12px;
+      font-size: 11px;
+    }
+
+    .status-badge {
+      padding: 4px 8px;
+      font-size: 10px;
     }
   }
 }

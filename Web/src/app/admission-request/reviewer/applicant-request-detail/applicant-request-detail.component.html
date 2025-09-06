@@ -441,7 +441,10 @@
     </div>
 
     <div tabContent="applicationFeeReviewer">
-        <app-application-fee [applicantId]="id"></app-application-fee>
+        <app-application-fee 
+            [applicantId]="id"
+            [isTabActive]="selectedTabIndex === 5">
+        </app-application-fee>
     </div>
 
     <div tabContent="academicProgramReviewer">
@@ -495,7 +498,10 @@
 
     <!-- Also include the default tab content selectors for compatibility -->
     <div tabContent="applicationFee" style="display: none;">
-        <app-application-fee [applicantId]="id"></app-application-fee>
+        <app-application-fee 
+            [applicantId]="id"
+            [isTabActive]="false">
+        </app-application-fee>
     </div>
 
     <div tabContent="academicProgram" style="display: none;">

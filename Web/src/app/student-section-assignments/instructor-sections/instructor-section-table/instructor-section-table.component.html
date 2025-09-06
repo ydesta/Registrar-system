@@ -1,0 +1,182 @@
+<div class="content-container">
+  <!-- Page Header -->
+  <div class="header-section">
+    <div class="page-title">
+      <h1>Manage Instructor Sections</h1>
+      <p class="subtitle">Assign and manage instructors to course sections</p>
+    </div>
+    <div class="header-actions">
+      <button nz-button nzType="primary" class="add-btn" (click)="navigateToForm()">
+        <i nz-icon nzType="plus" nzTheme="outline"></i>
+        Add Instructor Section
+      </button>
+    </div>
+  </div>
+
+  <!-- Collapsible Search Form -->
+  <div class="search-section">
+    <nz-collapse>
+      <nz-collapse-panel [nzHeader]="searchHeader" [nzActive]="!isSearchCollapsed">
+
+        <ng-template #searchHeader>
+          <span>
+            <i nz-icon nzType="filter" nzTheme="outline"></i>
+            Search Criteria
+          </span>
+        </ng-template>
+
+        <form nz-form [formGroup]="searchForm">
+          <div nz-row [nzGutter]="24">
+            <!-- Academic Term -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Academic Term</nz-form-label>
+                <nz-form-control nzErrorTip="Academic term is required">
+                  <nz-select formControlName="academicTerm" nzPlaceHolder="Select Academic Term" nzShowSearch
+                    nzAllowClear style="width: 100%;">
+                    <nz-option *ngFor="let term of academicTermList" [nzValue]="term.Id" [nzLabel]="term.Description">
+                    </nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Year -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Term Year</nz-form-label>
+                <nz-form-control nzErrorTip="Term year is required">
+                  <nz-select formControlName="year" nzPlaceHolder="Select Term Year" nzShowSearch style="width: 100%;">
+                    <nz-option *ngFor="let year of yearList" [nzValue]="year" [nzLabel]="year">
+                    </nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <div nz-row [nzGutter]="24">
+            <!-- Batch Code -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Batch Code</nz-form-label>
+                <nz-form-control nzErrorTip="Batch code is required">
+                  <nz-select formControlName="batchId" nzPlaceHolder="Select Batch Code" nzShowSearch nzAllowClear
+                    [nzLoading]="isLoadingBatches"
+                    [nzDisabled]="!searchForm.get('academicTerm')?.value || !searchForm.get('year')?.value"
+                    style="width: 100%;">
+                    <nz-option *ngFor="let batch of batchList" [nzValue]="batch.batchId" [nzLabel]="batch.batchCode">
+                    </nz-option>
+                  </nz-select>
+                  <div *ngIf="!searchForm.get('academicTerm')?.value || !searchForm.get('year')?.value"
+                    class="field-hint">
+                    Please select Academic Term and Year first
+                  </div>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div nz-row>
+            <div nz-col [nzSpan]="24" style="display: flex; justify-content: flex-end; gap: 12px;">
+              <button nz-button nzType="default" (click)="clearFilters()">
+                <i nz-icon nzType="reload" nzTheme="outline"></i>
+                Reset
+              </button>
+              <button nz-button nzType="primary" (click)="applySearch()" [disabled]="!searchForm.valid">
+                <i nz-icon nzType="search" nzTheme="outline"></i>
+                Search
+              </button>
+            </div>
+          </div>
+        </form>
+      </nz-collapse-panel>
+    </nz-collapse>
+  </div>
+
+  <!-- Data Table -->
+  <div *ngIf="filteredInstructorSections.length > 0">
+    <nz-table #instructorSectionsTable [nzData]="filteredInstructorSections" [nzLoading]="loading" [nzPageSize]="10"
+      [nzShowSizeChanger]="true" [nzShowQuickJumper]="true" [nzShowTotal]="totalTemplate">
+
+      <thead>
+        <tr>
+          <th style="min-width: 60px;">S/N</th>
+          <th>Full Name</th>
+          <th>Section</th>
+          <th>Academic Term</th>
+          <th>Year</th>
+          <th>Course</th>
+          <th>Batch Code</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let item of instructorSectionsTable.data; let i = index">
+          <td><span class="sn-badge">{{ i + 1 }}</span></td>
+          <td>{{ item.fullName }}</td>
+          <td>{{ item.section }}</td>
+          <td>
+            <nz-tag [nzColor]="getTermColor(item.academicTerm)">
+              {{ getTermDescription(item.academicTerm) }}
+            </nz-tag>
+          </td>
+          <td>{{ item.year }}</td>
+          <td>{{ item.course }}</td>
+          <td>{{ item.batchCode }}</td>
+
+
+          <td class="action-column">
+            <ng-container>
+              <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomLeft"
+                class="action-dropdown-btn">
+                <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
+              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu style="padding-right: 50px">
+                  <li>
+                    <button style="border-style: none" (click)="onEdit(item)" nz-button nzType="default">
+                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                      <span>Edit</span>
+                    </button>
+                  </li>
+                  <li>
+                    <button nz-button nzType="default" (click)="onDelete(item.id)">
+                      <i nz-icon nzType="delete" nzTheme="fill"></i>
+                      <span>Delete</span>
+                    </button>
+                  </li>
+
+                </ul>
+              </nz-dropdown-menu>
+            </ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+
+    <ng-template #totalTemplate let-total>
+      Total {{ total }} items
+    </ng-template>
+  </div>
+
+  <!-- No Data Message -->
+  <div *ngIf="filteredInstructorSections.length === 0 && !loading" class="no-data-message">
+    <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="noDataContent">
+    </nz-empty>
+
+    <ng-template #noDataContent>
+      <div class="no-data-content">
+        <h3>No Instructor Sections Found</h3>
+        <p>No instructor sections match your search criteria. Try adjusting your filters or add a new instructor
+          section.</p>
+        <button nz-button nzType="primary" (click)="navigateToForm()" class="add-first-btn">
+          <i nz-icon nzType="plus" nzTheme="outline"></i>
+          Add First Instructor Section
+        </button>
+      </div>
+    </ng-template>
+  </div>
+</div>

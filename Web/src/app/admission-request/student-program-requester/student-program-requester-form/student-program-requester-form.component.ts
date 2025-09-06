@@ -32,10 +32,21 @@ export class StudentProgramRequesterFormComponent implements OnInit {
     this.createAcademicProgramRequest();
   }
   ngOnInit(): void {
+    console.log("StudentProgramRequesterFormComponent - applicantId:", this.applicantId);
+    console.log("StudentProgramRequesterFormComponent - studentProgramRequester:", this.studentProgramRequester);
+    
+    // Validate that we have an applicantId
+    if (!this.applicantId) {
+      console.warn("Warning: applicantId is null or undefined in StudentProgramRequesterFormComponent");
+      if (this.studentProgramRequester?.applicantId) {
+        console.log("Using applicantId from studentProgramRequester:", this.studentProgramRequester.applicantId);
+        this.applicantId = this.studentProgramRequester.applicantId;
+      }
+    }
+    
     this.getAcademicProgramList();
     this.getListOfDivisionStatus();
     if (this.studentProgramRequester != undefined) {
-      console.log("45    ## ", this.studentProgramRequester);
       this.id = this.studentProgramRequester.id;
       this.academicProgramRequestForm.patchValue(this.studentProgramRequester);
     }
@@ -53,6 +64,13 @@ export class StudentProgramRequesterFormComponent implements OnInit {
   private getAcademicProgramRequest(): AcademicProgramRequest {
     const formModel = this.academicProgramRequestForm.getRawValue();
     const request = new AcademicProgramRequest();
+    
+    // Ensure we have a valid applicantId
+    if (!this.applicantId) {
+      console.error("Error: applicantId is required but not available");
+      throw new Error("Applicant ID is required but not available");
+    }
+    
     request.applicantId = this.applicantId;
     request.createdBy = "";
     request.acadamicProgrammeId = formModel.acadamicProgrammeId;
@@ -98,6 +116,7 @@ export class StudentProgramRequesterFormComponent implements OnInit {
   onSubmit() {
     if (this.academicProgramRequestForm.valid) {
       const postData = this.getAcademicProgramRequest();
+      console.log("object         ", postData);
       if (this.id == undefined) {
         this._academicProgramRequestService.create(postData).subscribe({
           next: (res) => {
@@ -128,7 +147,7 @@ export class StudentProgramRequesterFormComponent implements OnInit {
         });
       } else {
         postData.id = this.id;
-        postData.applicantId = this.studentProgramRequester.applicantId;
+        postData.applicantId = this.applicantId || this.studentProgramRequester?.applicantId;
         this._academicProgramRequestService
           .update(this.id, postData)
           .subscribe({

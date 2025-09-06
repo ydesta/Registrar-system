@@ -278,7 +278,7 @@
 }
 
 .nested-action-column {
-  min-width: 150px;
+  min-width: 80px;
   text-align: center;
 }
 
@@ -358,6 +358,22 @@
       color: #d48806;
     }
   }
+  
+  .activate button {
+    color: #52c41a;
+    &:hover, &:focus {
+      background: #f6ffed;
+      color: #389e0d;
+    }
+  }
+  
+  .assign-instructor button {
+    color: #1890ff;
+    &:hover, &:focus {
+      background: #e6f4ff;
+      color: #1476cc;
+    }
+  }
 }
 
 .course-details-container {
@@ -433,6 +449,8 @@
       display: none;
     }
   }
+  
+
 }
 
 .no-data {

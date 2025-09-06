@@ -22,17 +22,31 @@ import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzCollapseModule } from 'ng-zorro-antd/collapse';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+
 import { ReassignStudentSectionComponent } from './reassign-student-section/reassign-student-section.component';
 import { NzTransferModule } from 'ng-zorro-antd/transfer';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { StudentLabSectionComponent } from './student-lab-section/student-lab-section.component';
+import { InstructorSectionFormComponent } from './instructor-sections/instructor-section-form/instructor-section-form.component';
+import { InstructorSectionsComponent } from './instructor-sections/instructor-sections.component';
+import { ManageInstructorTableComponent } from './instructor-sections/instructor-section-table/instructor-section-table.component';
+import { ViewAssignedInstructorSectionsComponent } from './instructor-sections/view-assigned-instructor-sections/view-assigned-instructor-sections.component';
+import { StudentCourseSectionAssignmentComponent } from './student-course-section-assignment/student-course-section-assignment.component';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 
 @NgModule({
   declarations: [
     StudentSectionAssignmentsComponent,
     SectionAssignedStudentsComponent,
     ReassignStudentSectionComponent,
-    StudentLabSectionComponent
+    StudentLabSectionComponent,
+    InstructorSectionsComponent,
+    InstructorSectionFormComponent,
+    ManageInstructorTableComponent,
+    ViewAssignedInstructorSectionsComponent,
+    StudentCourseSectionAssignmentComponent
   ],
   imports: [
     CommonModule,
@@ -57,6 +71,9 @@ import { StudentLabSectionComponent } from './student-lab-section/student-lab-se
     NzInputModule,
     NzTransferModule,
     NzSwitchModule,
+    NzModalModule,
+    NzDropDownModule,
+    NzSpinModule
   ],
   exports: [
     StudentSectionAssignmentsComponent,

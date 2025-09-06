@@ -10,16 +10,16 @@
 // =============================================================================
 
 // Colors
-$primary-color: #6c757d;
-$primary-light: #868e96;
-$primary-dark: #495057;
+$primary-color: #1890ff;
+$primary-light: #40a9ff;
+$primary-dark: #096dd9;
 $success-color: #52c41a;
 $warning-color: #fa8c16;
 $error-color: #f5222d;
 $text-primary: #262626;
 $text-secondary: #595959;
 $text-muted: #8c8c8c;
-$border-color: rgba(108, 117, 125, 0.1);
+$border-color: rgba(24, 144, 255, 0.1);
 $background-light: #f8f9fa;
 $background-white: #ffffff;
 
@@ -40,8 +40,8 @@ $border-radius-xl: 16px;
 // Shadows
 $shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
 $shadow-md: 0 4px 24px rgba(0, 0, 0, 0.08);
-$shadow-lg: 0 8px 32px rgba(108, 117, 125, 0.15);
-$shadow-hover: 0 8px 32px rgba(108, 117, 125, 0.12);
+$shadow-lg: 0 8px 32px rgba(24, 144, 255, 0.15);
+$shadow-hover: 0 8px 32px rgba(24, 144, 255, 0.12);
 
 // Transitions
 $transition-fast: 0.2s ease;

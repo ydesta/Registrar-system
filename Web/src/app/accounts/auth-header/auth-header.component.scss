@@ -6,8 +6,9 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 100; /* Reduced z-index to prevent interference */
   height: 70px;
+  pointer-events: auto; /* Ensure clicks work properly */
 }
 
 .header-content {

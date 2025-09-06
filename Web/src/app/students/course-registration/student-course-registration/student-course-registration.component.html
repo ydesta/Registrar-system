@@ -23,32 +23,59 @@
         </div>
       </div>
 
-      <div class="credit-hours-summary" style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e8e8e8;">
-        <div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center;">
-          <div style="font-size: 16px; flex: 1; min-width: 250px;">
-            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
-              <span style="font-weight: bold;">Total Selected Credit Hours:</span>
-              <span [style.color]="totalSelectedCreditHours > getMaxAllowedCreditHours() ? '#ff4d4f' : '#52c41a'" 
-                    style="font-size: 20px; display: inline-block;">
-                {{ totalSelectedCreditHours }}
-              </span>
+      <div class="credit-hours-summary" 
+           role="region" 
+           aria-label="Credit hours summary"
+           [attr.aria-live]="totalSelectedCreditHours > getMaxAllowedCreditHours() ? 'assertive' : 'polite'">
+        <div class="summary-grid">
+          <div class="summary-card selected-credits">
+            <div class="card-header">
+              <span nz-icon nzType="book" nzTheme="outline"></span>
+              <span class="card-title">Selected Credits</span>
             </div>
-          </div>
-          <div style="font-size: 16px; flex: 1; min-width: 250px;">
-            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
-              <span style="font-weight: bold;">Maximum Allowed Credit Hours:</span>
-              <span style="font-size: 20px; color: #1890ff; display: inline-block;">
-                {{ getMaxAllowedCreditHours() }}
-              </span>
+            <div class="card-value" 
+                 [class.value-exceeded]="totalSelectedCreditHours > getMaxAllowedCreditHours()"
+                 [class.value-normal]="totalSelectedCreditHours <= getMaxAllowedCreditHours()"
+                 [attr.aria-label]="'Total selected credit hours: ' + totalSelectedCreditHours">
+              {{ totalSelectedCreditHours }}
             </div>
+            <div class="card-subtitle">out of {{ getMaxAllowedCreditHours() }} max</div>
           </div>
-          <div style="font-size: 16px; flex: 1; min-width: 250px;">
-            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
-              <span style="font-weight: bold;">CGPA:</span>
-              <span [style.color]="studentTermCourseReg?.cgpa >= 1.5 ? '#52c41a' : '#ff4d4f'" 
-                    style="font-size: 20px; display: inline-block;">
-                {{ studentTermCourseReg?.cgpa | number:'1.2-2' }}
-              </span>
+          
+          <div class="summary-card max-credits">
+            <div class="card-header">
+              <span nz-icon nzType="trophy" nzTheme="outline"></span>
+              <span class="card-title">Max Allowed</span>
+            </div>
+            <div class="card-value max-value">{{ getMaxAllowedCreditHours() }}</div>
+            <div class="card-subtitle">based on CGPA</div>
+          </div>
+          
+          <div class="summary-card cgpa">
+            <div class="card-header">
+              <span nz-icon nzType="star" nzTheme="outline"></span>
+              <span class="card-title">Current CGPA</span>
+            </div>
+            <div class="card-value" 
+                 [class.value-good]="studentTermCourseReg?.cgpa >= 1.5"
+                 [class.value-poor]="studentTermCourseReg?.cgpa < 1.5"
+                 [attr.aria-label]="'Current CGPA: ' + (studentTermCourseReg?.cgpa || 'Not available')">
+              {{ studentTermCourseReg?.cgpa | number:'1.2-2' }}
+            </div>
+            <div class="card-subtitle">academic standing</div>
+          </div>
+        </div>
+        
+        <div class="credit-breakdown" *ngIf="totalSelectedCreditHours > 0">
+          <div class="breakdown-title">Credit Breakdown</div>
+          <div class="breakdown-items">
+            <div class="breakdown-item" *ngIf="totalSelectedCreditHours > 0">
+              <span class="breakdown-label">Total Selected:</span>
+              <span class="breakdown-value">{{ totalSelectedCreditHours }}</span>
+            </div>
+            <div class="breakdown-item" *ngIf="getMaxAllowedCreditHours() > 0">
+              <span class="breakdown-label">Max Allowed:</span>
+              <span class="breakdown-value">{{ getMaxAllowedCreditHours() }}</span>
             </div>
           </div>
         </div>
@@ -69,35 +96,54 @@
           </button>
         </div>
 
-        <nz-spin [nzSpinning]="isLoadingRegularCourses">
+        <nz-spin [nzSpinning]="isLoadingRegularCourses" [nzTip]="'Loading courses...'">
           <div class="responsive-table-wrapper">
-            <nz-table #basicTable [nzData]="studentTermCourseReg?.courseTermOfferings" nzShowSizeChanger
-              (nzCurrentPageDataChange)="onCurrentPageDataChange($event)" nzBordered [nzShowPagination]="false">
+            <nz-table #basicTable 
+              [nzData]="studentTermCourseReg?.courseTermOfferings" 
+              nzShowSizeChanger
+              (nzCurrentPageDataChange)="onCurrentPageDataChange($event)" 
+              nzBordered 
+              [nzShowPagination]="false"
+              [nzLoading]="isLoadingRegularCourses"
+              nzSize="middle"
+              [nzScroll]="{ x: '800px' }">
               <thead class="table-header-row">
                 <tr class="table-header-row">
-                  <th class="paginate" [nzChecked]="checkedRegularCourses"
-                    [nzIndeterminate]="indeterminateRegularCourses" (nzCheckedChange)="onAllChecked($event, 'regular')">
+                  <th class="paginate" 
+                    [nzChecked]="checkedRegularCourses"
+                    [nzIndeterminate]="indeterminateRegularCourses" 
+                    (nzCheckedChange)="onAllChecked($event, 'regular')">
                   </th>
-                  <th class="th-row">Course Code</th>
-                  <th class="th-row">Course Title</th>
-                  <th class="th-row">Status</th>
-                  <th class="th-row">Grade</th>
-                  <th class="th-row">Credit Hour</th>
-                  <th class="th-row">Total Amount</th>
+                  <th class="th-row">
+                    Course Code
+                  </th>
+                  <th class="th-row">
+                    Course Title
+                  </th>
+                  <th class="th-row">
+                    Status
+                  </th>
+                  <th class="th-row">
+                    Grade
+                  </th>
+                  <th class="th-row">
+                    Credit Hour
+                  </th>
+                  <th class="th-row">
+                    Total Amount
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <ng-container tabindex="0" *ngFor="let data of basicTable.data; let i = index">
+                <ng-container *ngFor="let data of basicTable.data; let i = index; trackBy: trackByCourseId">
                   <tr [class.disabled-row]="!setOfCheckedId.has(data.courseId)"
+                    [class.selected-row]="setOfCheckedId.has(data.courseId)"
                     [style.background-color]="isRegularCourseDisabled(data) ? '#fff1f0' : '#ffffff'"
                     [style.color]="isRegularCourseDisabled(data) ? '#595959' : ''">
                     <td class="paginate">
                       <ng-container *ngIf="isRegularCourseDisabled(data); else regularCheckbox">
                         <span nz-icon nzType="lock" nzTheme="outline" style="color: #ff4d4f; font-size: 20px;"
-                          nz-tooltip [nzTooltipTitle]="data.currentGrade === 'RA' ? 'Course is not available for regular registration' : 
-                            (data.courseStatus === 'Taken' && (['A+', 'A', 'B', 'B+', 'C', 'D', ''].includes(data.currentGrade))) ? 
-                            'Course has already been taken ' : 
-                            'Course is not available for selection'" nzTooltipPlacement="right"
+                          nz-tooltip [nzTooltipTitle]="getCourseLockTooltipMessage(data)" nzTooltipPlacement="right"
                           [nzTooltipColor]="'#1890ff'">
                         </span>
                       </ng-container>
@@ -171,10 +217,7 @@
                     <td class="paginate">
                       <ng-container *ngIf="isRegularCourseDisabled(data); else addCheckbox">
                         <span nz-icon nzType="lock" nzTheme="outline" style="color: #ff4d4f; font-size: 20px;"
-                          nz-tooltip [nzTooltipTitle]="data.currentGrade === 'RA' ? 'Course is not available for add request' : 
-                            (data.courseStatus === 'Taken' && (['A+', 'A', 'B', 'B+', 'C', 'D', ''].includes(data.currentGrade))) ? 
-                            'Course has already been taken ' : 
-                            'Course is not available for selection'" nzTooltipPlacement="right"
+                          nz-tooltip [nzTooltipTitle]="getCourseLockTooltipMessage(data, 'add')" nzTooltipPlacement="right"
                           [nzTooltipColor]="'#1890ff'">
                         </span>
                       </ng-container>
@@ -304,13 +347,186 @@
 
     </div>
     <ng-template #elseBlock>
-      <img src="assets/images/r.jpg" alt="HiLCoE Logo" height="400" width="850">
-      <!-- <nz-alert nzShowIcon nzType="info" nzMessage="info" [nzDescription]="descriptionTemplate1"></nz-alert> -->
-      <!-- <ng-template #descriptionTemplate1> -->
-        <!-- <h3>So far, there hasn't been any course offering prepared yet. </h3> -->
-         <!-- <img src="assets/images/r.jpg" alt="HiLCoE Logo" height="400" width="850">  -->
-      <!-- </ng-template> -->
+      <div class="course-registration-status-container">
+        <!-- No Course Offerings Prepared -->
+        <div *ngIf="!havePreparedCourseOffering" class="status-card no-offerings">
+          <div class="status-icon">
+            <span nz-icon nzType="file-search" nzTheme="outline"></span>
+          </div>
+          <div class="status-content">
+            <h3 class="status-title">Course Offerings Not Available</h3>
+            <p class="status-description">
+              The course offerings for your batch have not been prepared yet. This usually happens when:
+            </p>
+            <ul class="status-list">
+              <li>The academic calendar hasn't been finalized</li>
+              <li>Course schedules are still being updated</li>
+              <li>Faculty assignments are pending</li>
+            </ul>
+            <p class="status-description">
+              Please check back later or contact the academic office for more information about when course offerings will be available.
+            </p>
+          </div>
+        </div>
 
+        <!-- Registration Period Expired -->
+        <div *ngIf="havePreparedCourseOffering && studentTermCourseReg.isAllowedToRegister == 0" class="status-card expired">
+          <div class="status-icon">
+            <span nz-icon nzType="clock-circle" nzTheme="outline"></span>
+          </div>
+          <div class="status-content">
+            <h3 class="status-title">Registration Period Expired</h3>
+            <p class="status-description">
+              The course registration period has ended. You can no longer register for courses for this term. 
+              This typically occurs when:
+            </p>
+            <ul class="status-list">
+              <li>The registration deadline has passed</li>
+              <li>Late registration period is not available</li>
+              <li>Administrative processing has begun</li>
+            </ul>
+            <p class="status-description">
+              If you believe this is an error or need to make changes, please contact the academic office immediately.
+            </p>
+            <div class="status-actions">
+              <button nz-button nzType="default" (click)="contactAcademicOffice()">
+                <span nz-icon nzType="phone"></span>
+                Contact Academic Office
+              </button>
+              <button nz-button nzType="link" (click)="viewRegistrationHistory()">
+                <span nz-icon nzType="history"></span>
+                View Registration History
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Registration Not Yet Open -->
+        <div *ngIf="havePreparedCourseOffering && studentTermCourseReg.isAllowedToRegister == 2" class="status-card upcoming">
+          <div class="status-icon">
+            <span nz-icon nzType="calendar" nzTheme="outline"></span>
+          </div>
+          <div class="status-content">
+            <h3 class="status-title">Registration Not Yet Open</h3>
+            <p class="status-description">
+              Course registration for this term has not yet opened. Registration typically opens:
+            </p>
+            <ul class="status-list">
+              <li>2-3 weeks before the start of classes</li>
+              <li>After all course offerings are finalized</li>
+              <li>Once student accounts are verified</li>
+            </ul>
+            <p class="status-description">
+              Please check back at the scheduled registration time or contact the academic office for the exact registration dates.
+            </p>
+            <div class="status-actions">
+              <button nz-button nzType="primary" nzGhost (click)="refreshPage()">
+                <span nz-icon nzType="reload"></span>
+                Refresh Page
+              </button>
+              <button nz-button nzType="default" (click)="contactAcademicOffice()">
+                <span nz-icon nzType="phone"></span>
+                Contact Academic Office
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Maintenance -->
+        <div *ngIf="havePreparedCourseOffering && studentTermCourseReg.isAllowedToRegister == 3" class="status-card maintenance">
+          <div class="status-icon">
+            <span nz-icon nzType="tool" nzTheme="outline"></span>
+          </div>
+          <div class="status-content">
+            <h3 class="status-title">System Under Maintenance</h3>
+            <p class="status-description">
+              The course registration system is currently undergoing scheduled maintenance. This usually includes:
+            </p>
+            <ul class="status-list">
+              <li>System updates and improvements</li>
+              <li>Database maintenance</li>
+              <li>Security patches and updates</li>
+            </ul>
+            <p class="status-description">
+              Please try again later. If the issue persists, contact the IT support team.
+            </p>
+            <div class="status-actions">
+              <button nz-button nzType="primary" nzGhost (click)="refreshPage()">
+                <span nz-icon nzType="reload"></span>
+                Try Again
+              </button>
+              <button nz-button nzType="default" (click)="contactITSupport()">
+                <span nz-icon nzType="customer-service"></span>
+                Contact IT Support
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Issues -->
+        <div *ngIf="havePreparedCourseOffering && studentTermCourseReg.isAllowedToRegister == 4" class="status-card account-issue">
+          <div class="status-icon">
+            <span nz-icon nzType="exclamation-circle" nzTheme="outline"></span>
+          </div>
+          <div class="status-content">
+            <h3 class="status-title">Account Verification Required</h3>
+            <p class="status-description">
+              Your student account requires verification before you can register for courses. This may be due to:
+            </p>
+            <ul class="status-list">
+              <li>Incomplete profile information</li>
+              <li>Missing required documents</li>
+              <li>Account security verification</li>
+              <li>Academic standing review</li>
+            </ul>
+            <p class="status-description">
+              Please complete your profile or contact the registrar's office for assistance.
+            </p>
+            <div class="status-actions">
+              <button nz-button nzType="primary" (click)="completeProfile()">
+                <span nz-icon nzType="user"></span>
+                Complete Profile
+              </button>
+              <button nz-button nzType="default" (click)="contactRegistrar()">
+                <span nz-icon nzType="phone"></span>
+                Contact Registrar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Default Message for Other Cases -->
+        <div *ngIf="havePreparedCourseOffering && studentTermCourseReg.isAllowedToRegister != 0 && studentTermCourseReg.isAllowedToRegister != 1 && studentTermCourseReg.isAllowedToRegister != 2 && studentTermCourseReg.isAllowedToRegister != 3 && studentTermCourseReg.isAllowedToRegister != 4" class="status-card">
+          <div class="status-icon">
+            <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+          </div>
+          <div class="status-content">
+            <h3 class="status-title">Course Registration Unavailable</h3>
+            <p class="status-description">
+              Course registration is currently unavailable. This may be due to:
+            </p>
+            <ul class="status-list">
+              <li>System maintenance or updates</li>
+              <li>Administrative processing</li>
+              <li>Technical difficulties</li>
+              <li>Policy changes</li>
+            </ul>
+            <p class="status-description">
+              Please try again later or contact the academic office for assistance.
+            </p>
+            <div class="status-actions">
+              <button nz-button nzType="primary" nzGhost (click)="refreshPage()">
+                <span nz-icon nzType="reload"></span>
+                Refresh Page
+              </button>
+              <button nz-button nzType="default" (click)="contactAcademicOffice()">
+                <span nz-icon nzType="phone"></span>
+                Contact Academic Office
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </ng-template>
   </nz-tab>
 

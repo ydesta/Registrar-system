@@ -1,0 +1,152 @@
+<div class="content-container">
+  <div class="header-section">
+    <div class="page-title">
+      <h1>{{ getPageTitle() }}</h1>
+      <p class="subtitle">Create or edit instructor section assignments</p>
+    </div>
+    <div class="header-actions">
+      <button nz-button nzType="default" (click)="handleCancel()" class="back-button">
+        <i nz-icon nzType="arrow-left"></i>
+        Back to Instructor Sections
+      </button>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <form nz-form [formGroup]="form" nz-row [nzGutter]="16">
+      <!-- Academic Term -->
+      <div nz-col [nzXs]="24" [nzSm]="24" [nzMd]="12" [nzLg]="12" [nzXl]="12">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="8" nzRequired>Academic Term</nz-form-label>
+          <nz-form-control [nzSpan]="16" nzErrorTip="Please select academic term!">
+            <nz-select formControlName="academicTerm" placeholder="Select Academic Term">
+              <nz-option *ngFor="let term of listOfTermNumber" [nzValue]="term.Id" [nzLabel]="term.Description">
+              </nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <!-- Year -->
+      <div nz-col [nzXs]="24" [nzSm]="24" [nzMd]="12" [nzLg]="12" [nzXl]="12">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="8" nzRequired>Year</nz-form-label>
+          <nz-form-control [nzSpan]="16" nzErrorTip="Please select year!">
+            <nz-select formControlName="year" placeholder="Select Year">
+              <nz-option *ngFor="let year of yearList" [nzValue]="year" [nzLabel]="year.toString()">
+              </nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <!-- Batch Code -->
+      <div nz-col [nzXs]="24" [nzSm]="24" [nzMd]="12" [nzLg]="12" [nzXl]="12">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="8" nzRequired>Batch Code</nz-form-label>
+          <nz-form-control [nzSpan]="16" nzErrorTip="Please select batch!">
+            <nz-select formControlName="batchId" placeholder="Select Batch" [nzLoading]="loadingSections"
+              [nzDisabled]="!academicTerm.value || !year.value">
+              <nz-option *ngFor="let batch of listOfBatch" [nzValue]="batch.batchId" [nzLabel]="batch.batchCode">
+              </nz-option>
+            </nz-select>
+            <div *ngIf="!academicTerm.value || !year.value" class="field-hint">
+              Please select Academic Term and Year first
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <!-- Section Type -->
+      <div nz-col [nzXs]="24" [nzSm]="24" [nzMd]="12" [nzLg]="12" [nzXl]="12">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="8" nzRequired>Section Type</nz-form-label>
+          <nz-form-control [nzSpan]="16" nzErrorTip="Please select section type!">
+            <nz-select formControlName="sectionType" placeholder="Select Section Type"
+              [nzDisabled]="!academicTerm.value || !year.value || !batchId.value">
+              <nz-option *ngFor="let type of listOfSectionType" [nzValue]="type.Id" [nzLabel]="type.Description">
+              </nz-option>
+            </nz-select>
+            <div *ngIf="!academicTerm.value || !year.value || !batchId.value" class="field-hint">
+              Please select Academic Term, Year, and Batch first
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <!-- Section -->
+      <div nz-col [nzXs]="24" [nzSm]="24" [nzMd]="12" [nzLg]="12" [nzXl]="12">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="8" nzRequired>Section</nz-form-label>
+          <nz-form-control [nzSpan]="16" nzErrorTip="Please select section!">
+            <nz-select formControlName="sectionId" placeholder="Select Section" [nzLoading]="loadingSections"
+              [nzDisabled]="!academicTerm.value || !year.value || !batchId.value">
+              <nz-option *ngFor="let section of listOfSections" [nzValue]="section.id" [nzLabel]="section.sectionName">
+              </nz-option>
+            </nz-select>
+            <div *ngIf="!academicTerm.value || !year.value || !batchId.value" class="field-hint">
+              Please select Academic Term, Year, and Batch first
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <!-- Course -->
+      <div nz-col [nzXs]="24" [nzSm]="24" [nzMd]="12" [nzLg]="12" [nzXl]="12">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="8" nzRequired>Course</nz-form-label>
+          <nz-form-control [nzSpan]="16" nzErrorTip="Please select course!">
+            <nz-select formControlName="courseId" placeholder="Select Course" [nzLoading]="loadingCourses"
+              [nzDisabled]="!academicTerm.value || !year.value || !batchId.value">
+              <nz-option *ngFor="let course of registeredCourses" [nzValue]="course.courseId"
+                [nzLabel]="course.courseCode + ' - ' + course.courseTitle">
+              </nz-option>
+            </nz-select>
+            <div *ngIf="!academicTerm.value || !year.value || !batchId.value" class="field-hint">
+              Please select Academic Term, Year, and Batch first
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <!-- Instructor Name -->
+      <div nz-col [nzXs]="24" [nzSm]="24" [nzMd]="12" [nzLg]="12" [nzXl]="12">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="8" nzRequired>Instructor Name</nz-form-label>
+          <nz-form-control [nzSpan]="16" nzErrorTip="Please select staff!">
+            <nz-select formControlName="staffId" placeholder="Select Staff"
+              [nzDisabled]="!academicTerm.value || !year.value || !batchId.value || !courseId.value">
+              <nz-option *ngFor="let staff of staffList" [nzValue]="staff.id"
+                [nzLabel]="staff.firstName + ' ' + staff.lastName">
+              </nz-option>
+            </nz-select>
+            <div *ngIf="!academicTerm.value || !year.value || !batchId.value || !courseId.value" class="field-hint">
+              Please select Academic Term, Year, Batch, and Course first
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <!-- Form Actions -->
+      <div nz-col [nzXs]="24" [nzSm]="24" [nzMd]="24" [nzLg]="24" [nzXl]="24">
+        <div class="form-actions">
+          <nz-space>
+            <button nz-button nzType="default" (click)="handleCancel()" [disabled]="loading">
+              Cancel
+            </button>
+            <button 
+              nz-button 
+              nzType="primary" 
+              (click)="handleSubmit()"
+              [nzLoading]="loading"
+              [disabled]="!isFormValid() || loading">
+              {{ getSubmitButtonText() }}
+            </button>
+          </nz-space>
+        </div>
+      </div>
+    </form>
+    
+    
+  </div>
+</div>

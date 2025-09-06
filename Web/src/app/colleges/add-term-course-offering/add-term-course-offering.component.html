@@ -101,6 +101,40 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
+                  <nz-form-label [nzSpan]="10" nzRequired>Registration Start Date</nz-form-label>
+                  <nz-form-control>
+                    <nz-date-picker class="ant-calendar-picker"
+                      formControlName="RegistrationStartDate"></nz-date-picker>
+                    <div nz-form-explain
+                      *ngIf="termCourseOfferingForm.controls['RegistrationStartDate'].invalid && (termCourseOfferingForm.controls['RegistrationStartDate'].dirty || termCourseOfferingForm.controls['RegistrationStartDate'].touched)">
+                      <span class="error-message">Registration Start Date is required.</span>
+                    </div>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label [nzSpan]="10" nzRequired>Registration End Date</nz-form-label>
+                  <nz-form-control>
+                    <nz-date-picker class="ant-calendar-picker" formControlName="RegistrationEndDate"
+                      [class.error]="termCourseOfferingForm.controls['RegistrationEndDate'].invalid && (termCourseOfferingForm.controls['RegistrationEndDate'].dirty || termCourseOfferingForm.controls['RegistrationEndDate'].touched)"></nz-date-picker>
+                    <!-- <div nz-form-explain
+              *ngIf="termCourseOfferingForm.controls['RegistrationEndDate'].invalid && (termCourseOfferingForm.controls['RegistrationEndDate'].dirty || termCourseOfferingForm.controls['RegistrationEndDate'].touched)">
+              <span class="error-message">Registration End Date is required.</span>
+            </div> -->
+                    <div
+                      *ngIf="termCourseOfferingForm.hasError('dateRangeError', ['RegistrationStartDate', 'RegistrationEndDate'])">
+                      <p class="error-message">Start date must be before end date.</p>
+                    </div>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
                   <nz-form-label>Curriculum</nz-form-label>
                   <nz-form-control>
                     <input nz-input formControlName="curriculumCode" readonly class="form-input readonly"
@@ -133,7 +167,7 @@
           <span nz-icon nzType="check-square" nzTheme="outline"></span>
           Select Term Course Offering
         </h3>
-        <p class="selection-description">Choose courses to include in this term offering</p>
+        <p class="selection-description">Choose courses to include in this term offering (optional)</p>
       </div>
 
       <div class="course-tabs">
@@ -146,7 +180,7 @@
                   <span nz-icon nzType="book" nzTheme="outline"></span>
                   Curriculum Course Breakdown
                 </h4>
-                <p class="card-description">Select courses from the curriculum breakdown</p>
+                <p class="card-description">Select courses from the curriculum breakdown (optional)</p>
               </div>
               <div class="header-stats">
                 <div class="stat-item">
@@ -157,7 +191,7 @@
                 <div class="stat-item">
                   <span nz-icon nzType="check-square" nzTheme="outline"></span>
                   <span class="stat-label">Selected Credits:</span>
-                  <span class="stat-value">{{getSelectedCreditHours()}}</span>
+                  <span class="stat-value">{{selectedCreditHours}}</span>
                 </div>
               </div>
             </div>
@@ -166,7 +200,7 @@
               <nz-input-group nzSearch class="search-input">
                 <input nz-input placeholder="Search courses..." [(ngModel)]="searchTextB"
                   (ngModelChange)="onSearchBreak()" class="search-field">
-                <span nz-icon nzType="search" nzTheme="outline"></span>
+                <!-- <span nz-icon nzType="search" nzTheme="outline"></span> -->
               </nz-input-group>
             </div>
 
@@ -210,7 +244,7 @@
                   <span nz-icon nzType="plus-circle" nzTheme="outline"></span>
                   Additional Courses (Not in Curriculum)
                 </h4>
-                <p class="card-description">Select additional courses not part of the curriculum</p>
+                <p class="card-description">Select additional courses not part of the curriculum (optional)</p>
               </div>
               <div class="header-stats">
                 <div class="stat-item">
@@ -221,7 +255,7 @@
                 <div class="stat-item">
                   <span nz-icon nzType="check-square" nzTheme="outline"></span>
                   <span class="stat-label">Selected Credits:</span>
-                  <span class="stat-value">{{getSelectedAdditionalCreditHours()}}</span>
+                  <span class="stat-value">{{selectedAdditionalCreditHours}}</span>
                 </div>
               </div>
             </div>
@@ -230,13 +264,22 @@
               <nz-input-group nzSearch class="search-input">
                 <input nz-input placeholder="Search courses..." [(ngModel)]="searchText" (ngModelChange)="onSearch()"
                   class="search-field">
-                <span nz-icon nzType="search" nzTheme="outline"></span>
+                <!-- <span nz-icon nzType="search" nzTheme="outline"></span> -->
               </nz-input-group>
             </div>
 
             <div class="table-container">
-              <nz-table nzBordered #basicTableA [nzData]="courses || []" [nzShowPagination]="true" nzShowPagination
-                nzShowSizeChanger (nzCurrentPageDataChange)="onCurrentPageDataChangeA($event)" class="course-table">
+              <!-- Show message when no additional courses are available -->
+              <div *ngIf="!courses || courses.length === 0" class="no-courses-message">
+                <nz-empty nzNotFoundImage="simple" 
+                          [nzNotFoundContent]="'No additional courses available for this batch/curriculum combination. You can still proceed with creating the term course offering using only the curriculum breakdown courses.'">
+                </nz-empty>
+              </div>
+              
+              <!-- Show table when courses are available -->
+              <nz-table *ngIf="courses && courses.length > 0" nzBordered #basicTableA [nzData]="courses" 
+                        [nzShowPagination]="true" nzShowPagination nzShowSizeChanger 
+                        (nzCurrentPageDataChange)="onCurrentPageDataChangeA($event)" class="course-table">
                 <thead>
                   <tr>
                     <th class="checkbox-column" [nzChecked]="checkedA" [nzIndeterminate]="indeterminateA"
@@ -272,7 +315,8 @@
           <span nz-icon nzType="close" nzTheme="outline"></span>
           Cancel
         </button>
-        <button nz-button nzType="primary" class="submit-btn" (click)="submitForm()" [nzLoading]="loading">
+        <button nz-button nzType="primary" class="submit-btn" (click)="submitForm()" 
+                [nzLoading]="loading" [disabled]="isSubmitDisabled">
           <span nz-icon nzType="save" nzTheme="outline"></span>
           {{ submit }}
         </button>

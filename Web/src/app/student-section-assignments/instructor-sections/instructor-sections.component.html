@@ -1,0 +1,20 @@
+<!-- <div class="instructor-sections-container"> -->
+<!-- <nz-card nzTitle="Instructor Section Management" class="main-card"> -->
+<!-- <div class="card-header">
+      <button 
+        nz-button 
+        nzType="primary" 
+        (click)="navigateToForm()"
+        class="add-button">
+        <i nz-icon nzType="plus"></i>
+        Add Instructor Section
+      </button> -->
+<!-- </div> -->
+
+<app-instructor-section-table [loading]="loading"
+  (editInstructorSection)="navigateToForm($event)" 
+  (deleteInstructorSection)="deleteInstructorSection($event)"
+  (dataRefreshed)="onDataRefreshed()">
+</app-instructor-section-table>
+<!-- </nz-card> -->
+<!-- </div> -->

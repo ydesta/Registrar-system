@@ -15,6 +15,7 @@ import { AcadamicProgramme } from "../../model/acadamic-programme.model";
 import { AcademicProgramRequest } from "../../model/academic-program-request.model";
 import { StaticData } from "../../model/StaticData";
 import { SharingDataService } from "../../services/sharing-data.service";
+import { AuthService } from "src/app/services/auth.service";
 import { Subscription } from "rxjs";
 
 @Component({
@@ -38,6 +39,8 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
   isApplicantProfile: boolean = false;
   isUserReviewer: boolean = false;
   private subscription!: Subscription;
+  private authSubscription!: Subscription;
+  private isInitialized = false;
 
   constructor(
     private modalRef: NzModalRef,
@@ -46,25 +49,123 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
     private _academicProgramRequestService: AcademicProgramRequestService,
     private route: ActivatedRoute,
     private generalInformationService: GeneralInformationService,
-    private sharedDataService: SharingDataService
+    private sharedDataService: SharingDataService,
+    private authService: AuthService
   ) {
     this.userId = localStorage.getItem("userId");
   }
 
   ngOnInit(): void {
-    this.initializeData();
-    this.checkUserRole();
-    this.getAcademicProgramList();
-    this.getListOfDivisionStatus();
+    // Subscribe to authentication state changes first
+    this.setupAuthenticationMonitoring();
     
+    // Initialize data only after authentication is confirmed
+    this.authService.isAuthenticated().then(isAuth => {
+      if (isAuth) {
+        this.initializeData();
+        this.checkUserRole();
+        this.getAcademicProgramList();
+        this.getListOfDivisionStatus();
+        this.isInitialized = true;
+      } else {
+        console.log('User not authenticated, waiting for login...');
+      }
+    });
+
+    // Set up other subscriptions
+    this.setupDataSubscriptions();
+  }
+
+  private setupAuthenticationMonitoring(): void {
+    // Monitor authentication state changes
+    this.authSubscription = this.authService.isAuthenticated$.subscribe(isAuth => {
+      if (isAuth && !this.isInitialized) {
+        console.log('User authenticated, initializing student program requester component...');
+        this.userId = localStorage.getItem('userId');
+        this.clearCachedData();
+        this.initializeData();
+        this.checkUserRole();
+        this.getAcademicProgramList();
+        this.getListOfDivisionStatus();
+        this.isInitialized = true;
+      } else if (!isAuth && this.isInitialized) {
+        console.log('User logged out, clearing student program requester component state...');
+        this.clearComponentState();
+        this.isInitialized = false;
+      }
+    });
+
+    // Monitor login changes
+    this.authSubscription.add(
+      this.authService.loginChanged.subscribe(isLoggedIn => {
+        if (isLoggedIn && !this.isInitialized) {
+          console.log('Login detected, initializing student program requester component...');
+          this.userId = localStorage.getItem('userId');
+          this.clearCachedData();
+          this.initializeData();
+          this.checkUserRole();
+          this.getAcademicProgramList();
+          this.getListOfDivisionStatus();
+          this.isInitialized = true;
+        } else if (!isLoggedIn) {
+          console.log('Logout detected, clearing student program requester component state...');
+          this.clearComponentState();
+          this.isInitialized = false;
+        }
+      })
+    );
+
+    // Monitor current user changes
+    this.authSubscription.add(
+      this.authService.currentUser$.subscribe(user => {
+        if (user && user.id !== this.userId) {
+          console.log('User changed, updating student program requester component...');
+          this.userId = user.id;
+          this.clearCachedData();
+          if (this.isInitialized) {
+            this.refreshData();
+          } else {
+            this.initializeData();
+            this.checkUserRole();
+            this.getAcademicProgramList();
+            this.getListOfDivisionStatus();
+            this.isInitialized = true;
+          }
+        }
+      })
+    );
+  }
+
+  private setupDataSubscriptions(): void {
     this.subscription = this.sharedDataService.currentApplicantProfile.subscribe(
       status => {
         this.isApplicantProfile = status;        
       }
     );
-    this.monitorAuthenticationState();
   }
 
+  private clearCachedData(): void {
+    // Clear cached applicant ID from localStorage
+    localStorage.removeItem('parent_applicant_id');
+    
+    // Clear cached data from the service
+    this.generalInformationService.clearParentApplicantIdCache();
+    
+    // Clear component data
+    this.applicationProgramRequestList = [];
+    this.applicantId = null;
+  }
+
+  private clearComponentState(): void {
+    this.applicationProgramRequestList = [];
+    this.applicantId = null;
+    this.noOfApplicantProgramRequest = 0;
+    this.isSubmittedApplicationForm = 0;
+    this.countSubmitionCourse = 0;
+    this.isApplicantProfile = false;
+    this.applicationProgramRequestIndex = -1;
+    this.applicationProgramRequestModalVisible = false;
+  }
 
   private checkUserRole(): void {
     const role = localStorage.getItem('role');
@@ -86,39 +187,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
     }
   }
 
-  private monitorAuthenticationState(): void {
-    setInterval(() => {
-      const currentUserId = localStorage.getItem('userId');
-      if (currentUserId && currentUserId !== this.userId) {
-        this.userId = currentUserId;
-        this.forceRefreshData();
-      }
-    }, 1000);
-    window.addEventListener('storage', (event) => {
-      if (event.key === 'userId' && event.newValue) {
-        this.userId = event.newValue;
-        this.forceRefreshData();
-      }
-    });
-    window.addEventListener('focus', () => {
-      const currentUserId = localStorage.getItem('userId');
-      if (currentUserId && currentUserId !== this.userId) {
-        this.userId = currentUserId;
-        this.forceRefreshData();
-      }
-    });
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        const currentUserId = localStorage.getItem('userId');
-        if (currentUserId && currentUserId !== this.userId) {
-          this.userId = currentUserId;
-          this.forceRefreshData();
-        }
-      }
-    });
-  }
-
   private initializeData(): void {
     this.route.queryParams.subscribe(params => {
       const routeApplicantId = params["id"];
@@ -131,18 +199,69 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
     });
   }
 
-  private loadApplicantIdFromService(): void {
-    this.generalInformationService.getOrStoreParentApplicantId(this.userId).subscribe({
-      next: (applicantId) => {
-        if (applicantId && applicantId !== this.applicantId) {
-          this.applicantId = applicantId;
-          this.getApplicantacadamicPrgramtId(applicantId);
-        }
-      },
-      error: (error) => {
-        setTimeout(() => this.loadApplicantIdFromService(), 3000);
+ private loadApplicantIdFromService(): void {
+  if (!this.userId) {
+    console.warn('No userId available, cannot load applicant ID');
+    return;
+  }
+
+  this.generalInformationService.getOrStoreParentApplicantId(this.userId).subscribe({
+    next: (applicantId) => {
+      if (applicantId && applicantId !== this.applicantId) {
+        this.applicantId = applicantId;
+        console.log("Applicant ID loaded successfully:", this.applicantId);
+        this.getApplicantacadamicPrgramtId(applicantId);
+      } else if (!applicantId) {
+        console.warn('No applicant found for user:', this.userId);
       }
-    });
+    },
+    error: (error) => {
+      console.error('Error loading applicant ID:', error);
+      
+      // Handle cooldown error specifically
+      if (error.message && error.message.includes('Fetch cooldown active')) {
+        console.log('Fetch cooldown active, waiting for cached value...');
+        // Wait a bit longer and try again, or check if there's a cached value
+        setTimeout(() => this.loadApplicantIdFromService(), 1000);
+        return;
+      }
+      
+      this.handleAuthError(error);
+      
+      // Don't retry automatically on authentication errors
+      if (error.status === 401 || error.status === 403) {
+        console.log('Authentication error, user may need to login again');
+        return;
+      }
+      // Retry for other errors after a delay
+      setTimeout(() => this.loadApplicantIdFromService(), 3000);
+    }
+  });
+}
+
+  // Add method to handle authentication errors gracefully
+  private handleAuthError(error: any): void {
+    console.error('Authentication error in student program requester component:', error);
+    
+    if (error.status === 401 || error.status === 403) {
+      // User is not authenticated, clear state and wait for login
+      this.clearComponentState();
+      this.isInitialized = false;
+      
+      // Show user-friendly message
+      this._customNotificationService.notification(
+        "warning",
+        "Authentication Required",
+        "Please log in to view your academic program data."
+      );
+    } else if (error.status === 0 || error.status >= 500) {
+      // Network or server error
+      this._customNotificationService.notification(
+        "error",
+        "Connection Error",
+        "Unable to connect to the server. Please check your connection and try again."
+      );
+    }
   }
 
   getApplicantacadamicPrgramtId(id: string) {
@@ -193,11 +312,7 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error loading academic program requests:', error);
-          this._customNotificationService.notification(
-            "error",
-            "Error",
-            "Failed to load academic program data. Please refresh the page."
-          );
+          this.handleAuthError(error);
           this.applicationProgramRequestList = [];
           this.countSubmitionCourse = 0;
           this.noOfApplicantProgramRequest = 0;
@@ -223,6 +338,10 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
     this.isSubmittedApplicationForm = 0;
     this.sharedDataService.programUpdateMessage(0);
     this.sharedDataService.numberOfRequestUpdateMessage(0);
+    
+    // Clear cached data first
+    this.clearCachedData();
+    
     this.loadApplicantIdFromService();
   }
 
@@ -281,6 +400,19 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
   }
 
   openModal(): void {
+    // Validate that we have an applicantId before opening the modal
+    if (!this.applicantId) {
+      console.error("Cannot open modal: applicantId is not available");
+      this._customNotificationService.notification(
+        "error",
+        "Error",
+        "Cannot create program request: Applicant information not loaded. Please refresh the page and try again."
+      );
+      return;
+    }
+
+    console.log("Opening modal with applicantId:", this.applicantId);
+    
     const modal: NzModalRef = this._modal.create({
       nzTitle: "Student Program Request",
       nzContent: StudentProgramRequesterFormComponent,
@@ -305,11 +437,31 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
   }
 
   editModal(request: AcademicProgramRequest): void {
+    // Validate that we have the required data before opening the modal
+    if (!request) {
+      console.error("Cannot edit: request object is null or undefined");
+      return;
+    }
+
+    const applicantId = request.applicantId || this.applicantId;
+    if (!applicantId) {
+      console.error("Cannot edit: applicantId is not available");
+      this._customNotificationService.notification(
+        "error",
+        "Error",
+        "Cannot edit program request: Applicant information not available. Please refresh the page and try again."
+      );
+      return;
+    }
+
+    console.log("Opening edit modal with applicantId:", applicantId);
+    
     const modal: NzModalRef = this._modal.create({
       nzTitle: "Edit Academic Program Request",
       nzContent: StudentProgramRequesterFormComponent,
       nzComponentParams: {
-        studentProgramRequester: request
+        studentProgramRequester: request,
+        applicantId: applicantId
       },
       nzMaskClosable: false,
       nzFooter: null,
@@ -423,6 +575,9 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
     }
   }
 }

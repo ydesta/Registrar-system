@@ -26,7 +26,8 @@
               <nz-form-item>
                 <nz-form-label nzRequired>Academic Term</nz-form-label>
                 <nz-form-control nzErrorTip="Academic term is required">
-                  <nz-select formControlName="academicTerm" nzPlaceHolder="Select Academic Term" nzShowSearch nzAllowClear style="width: 100%;">
+                  <nz-select formControlName="academicTerm" nzPlaceHolder="Select Academic Term" nzShowSearch
+                    nzAllowClear style="width: 100%;">
                     <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
                       [nzLabel]="item.Description"></nz-option>
                   </nz-select>
@@ -53,8 +54,8 @@
               <nz-form-item>
                 <nz-form-label nzRequired>Batch Code</nz-form-label>
                 <nz-form-control nzErrorTip="Batch code is required">
-                  <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch Code" nzShowSearch nzAllowClear 
-                    [nzDisabled]="!searchForm.get('academicTerm')?.value || !searchForm.get('year')?.value" 
+                  <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch Code" nzShowSearch nzAllowClear
+                    [nzDisabled]="!searchForm.get('academicTerm')?.value || !searchForm.get('year')?.value"
                     style="width: 100%;">
                     <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.batchCode"
                       [nzLabel]="item.batchCode"></nz-option>
@@ -79,9 +80,21 @@
   </div>
 
   <!-- Messages -->
-  <nz-alert *ngIf="errorMessage" nzType="error" [nzMessage]="errorMessage" class="mb-3">
+  <nz-alert *ngIf="errorMessage" nzType="error" [nzMessage]="errorMessage" class="mb-3" [nzShowIcon]="true"
+    [nzCloseable]="true" (nzOnClose)="clearErrorMessage()">
   </nz-alert>
-  <nz-alert *ngIf="successMessage" nzType="success" [nzMessage]="successMessage" class="mb-3">
+
+  <nz-alert *ngIf="successMessage" nzType="success" [nzMessage]="successMessage" class="mb-3" [nzShowIcon]="true"
+    [nzCloseable]="true" (nzOnClose)="clearSuccessMessage()">
+  </nz-alert>
+
+  <!-- Loading Indicator for Lab Section Generation -->
+  <nz-alert *ngIf="generatingAssignments" nzType="info" nzMessage="Generating lab section assignments..."
+    [nzDescription]="'Please wait while we process your request. This may take a few moments.'" class="mb-3"
+    [nzShowIcon]="true">
+    <ng-template #nzIcon>
+      <i nz-icon nzType="loading" nzSpin="true"></i>
+    </ng-template>
   </nz-alert>
 
   <!-- Export Actions -->
@@ -103,7 +116,8 @@
         </span>
       </div>
       <div class="search-box">
-        <input nz-input placeholder="Search by name, code, or section..." [(ngModel)]="searchValue" (ngModelChange)="search()" />
+        <input nz-input placeholder="Search by name, code, or section..." [(ngModel)]="searchValue"
+          (ngModelChange)="search()" />
         <i nz-icon nzType="search"></i>
       </div>
     </div>
@@ -173,10 +187,17 @@
             </div>
             <div class="summary-content">
               <label class="form-label">Number of Sections</label>
-              <nz-input-number [(ngModel)]="numberOfSections" [nzMin]="1"
-                [nzPlaceHolder]="'Enter number of sections'" [nzSize]="'default'" 
-                (ngModelChange)="onNumberOfSectionsChange()" style="width: 150px;">
-              </nz-input-number>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <nz-input-number [(ngModel)]="numberOfSections" [nzMin]="1" [nzPlaceHolder]="'Enter number of sections'"
+                  [nzSize]="'default'" (ngModelChange)="onNumberOfSectionsChange()" [nzDisabled]="generatingAssignments"
+                  style="width: 120px;">
+                </nz-input-number>
+                <button nz-button nzType="default" nzSize="small" (click)="suggestOptimalSections()"
+                  [disabled]="labSectionAssignedStudents.length === 0 || generatingAssignments"
+                  title="Get optimal section suggestion">
+                  <i nz-icon nzType="bulb" nzTheme="outline"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -189,18 +210,57 @@
               <h4>{{ studentsPerSection }}</h4>
               <p>Students per Section</p>
               <small class="text-muted">({{ numberOfSections }} sections)</small>
+              <div *ngIf="labSectionAssignedStudents.length > 0" style="margin-top: 8px;">
+                <small class="text-info">
+                  Distribution: {{ Math.ceil(labSectionAssignedStudents.length / numberOfSections) }} students per
+                  section
+                </small>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- Section Generation Status -->
+      <div class="row mt-3" *ngIf="labSectionAssignedStudents[0].numberOfGeneratedSections>0">
+        <!-- Show info when lab sections are generated -->
+        <div class="col-md-12" *ngIf="isSectionGenerated">
+          <nz-alert nzType="info" [nzMessage]="'Lab Sections Generated'"
+            [nzDescription]="'Number of sections: ' + labSectionAssignedStudents[0].numberOfGeneratedSections " class="mb-3" [nzShowIcon]="true">
+          </nz-alert>
+        </div>
+
+        <!-- Show warning when no lab sections are generated -->
+        <div class="col-md-12" *ngIf="!isSectionGenerated">
+          <nz-alert nzType="warning" [nzMessage]="'No Lab Sections Generated'"
+            [nzDescription]="'Click the Generate button below to create lab section assignments for students.'"
+            class="mb-3" [nzShowIcon]="true">
+          </nz-alert>
+        </div>
+      </div>
+
       <div class="row mt-5">
-        <div class="col-md-12" style="display: flex; justify-content: flex-end;">
+        <div class="col-md-12" style="display: flex; justify-content: flex-end; gap: 10px;">
+          <!-- Remove Generated Lab Sections Button - Only shown when sections are generated -->
+          <button nz-button nzType="default" nzSize="large" (click)="removeGeneratedAssignments()"
+            *ngIf="numberOfGeneratedSections > 0 && isSectionGenerated" class="remove-btn professional-remove-btn">
+            <div class="btn-icon-container">
+              <i nz-icon nzType="delete" nzTheme="outline"></i>
+              <div class="icon-badge">{{ numberOfGeneratedSections }}</div>
+            </div>
+            <div class="btn-content">
+              <span class="btn-text">Reset Generated Lab Sections</span>
+              <span class="btn-subtitle">Clear all assignments</span>
+            </div>
+          </button>
+
+          <!-- Generate Lab Section Assignments Button - Disabled when sections are already generated -->
           <button nz-button nzType="primary" nzSize="large" [nzLoading]="generatingAssignments"
-            (click)="generateLabSectionAssignments()" [disabled]="labSectionAssignedStudents.length === 0"
+            (click)="generateLabSectionAssignments()"
+            [disabled]="labSectionAssignedStudents.length === 0 || (numberOfGeneratedSections > 0 && isSectionGenerated)"
             class="generate-btn">
             <i nz-icon nzType="team" nzTheme="outline"></i>
-            Generate Lab Section Assignments
+            {{ generatingAssignments ? 'Generating...' : 'Generate Lab Section Assignments' }}
           </button>
         </div>
       </div>
@@ -208,7 +268,8 @@
   </div>
 
   <!-- Empty State -->
-  <div class="empty-state" *ngIf="!loading && labSectionAssignedStudents.length === 0 && searchForm.get('batchCode')?.value">
+  <div class="empty-state"
+    *ngIf="!loading && labSectionAssignedStudents.length === 0 && searchForm.get('batchCode')?.value">
     <nz-card class="empty-card">
       <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="notFoundContent">
         <ng-template #notFoundContent>

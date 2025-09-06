@@ -22,6 +22,7 @@ export class PaymentModalComponent implements OnInit {
   totalAmount: number;
   type: number;
   paidFor: number = 0;
+  shouldNavigate: boolean = true; // New parameter to control navigation
   constructor(
     private modalRef: NzModalRef,
     private _fb: FormBuilder,
@@ -35,7 +36,8 @@ export class PaymentModalComponent implements OnInit {
     this.totalAmount = data['totalAmount'];
     this.type = data['type'];
     this.paidFor = data['paidFor'];
-    console.log("###       ", this.studentCourseRegistrationID, this.totalAmount, this.type, this.paidFor);
+    this.shouldNavigate = data['shouldNavigate'] !== undefined ? data['shouldNavigate'] : true; // Default to true for backward compatibility
+    console.log("###       ", this.studentCourseRegistrationID, this.totalAmount, this.type, this.paidFor, this.shouldNavigate);
     this.paymentForm();
   }
 
@@ -131,7 +133,9 @@ export class PaymentModalComponent implements OnInit {
       this.bankService.create(formData).subscribe((res: any) => {
         this._customNotificationService.notification('success', 'Success', res.data);
         this.modalRef.close(true);
-        this._route.navigateByUrl('students/manage-student-course-registration');
+        if (this.shouldNavigate) {
+          this._route.navigateByUrl('students/manage-student-course-registration');
+        }
       });
     } else {
       this._customNotificationService.notification('error', 'error', 'Enter valid data.');

@@ -29,7 +29,7 @@
               {{ isPaymentButtonDisabled ? 'Payment Completed' : 'Make Payment' }}
             </button>
             <div class="button-spacer" *ngIf="isPaymentButtonDisabled"></div>
-            <button *ngIf="isPaymentButtonDisabled" nz-button nzType="primary" nzSize="large"
+            <button *ngIf="shouldShowReceipt()" nz-button nzType="primary" nzSize="large"
                (click)="getFileName()" class="payment-button">
               <span nz-icon nzType="file-text"></span>
               Receipt

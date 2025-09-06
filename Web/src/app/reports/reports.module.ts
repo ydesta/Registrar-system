@@ -24,6 +24,7 @@ import { CourseOfferedPerAcademicTermComponent } from './course-offered-per-acad
 import { AcademicTermRegistrationSlipComponent } from './academic-term-registration-slip/academic-term-registration-slip.component';
 import { TranscriptSearchComponent } from './transcript-search/transcript-search.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { StudentSemsterCourseRegistrationSlipComponent } from './student-semster-course-registration-slip/student-semster-course-registration-slip.component';
 @NgModule({
   declarations: [
     ReportsComponent,
@@ -34,6 +35,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     CourseOfferedPerAcademicTermComponent,
     AcademicTermRegistrationSlipComponent,
      TranscriptSearchComponent,
+     StudentSemsterCourseRegistrationSlipComponent,
   ],
   imports: [
     CommonModule,

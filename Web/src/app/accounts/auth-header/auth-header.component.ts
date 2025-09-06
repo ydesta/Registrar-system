@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-auth-header',
@@ -8,9 +7,18 @@ import { Router } from '@angular/router';
 })
 export class AuthHeaderComponent {
 
-  constructor(private router: Router) {}
-
   goToHome(): void {
-    this.router.navigate(['/']);
+    // Use window.location to avoid routing conflicts
+    window.location.href = '/portal';
+  }
+
+  goToLogin(): void {
+    // Use window.location to avoid routing conflicts
+    window.location.href = '/accounts/login';
+  }
+
+  goToRegister(): void {
+    // Use window.location to avoid routing conflicts
+    window.location.href = '/accounts/register';
   }
 } 

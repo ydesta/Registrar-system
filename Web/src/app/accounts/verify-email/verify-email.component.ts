@@ -1,20 +1,23 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router, ActivatedRoute, NavigationStart, NavigationEnd } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { environment } from 'src/environments/environment';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-verify-email',
   templateUrl: './verify-email.component.html',
   styleUrls: ['./verify-email.component.scss']
 })
-export class VerifyEmailComponent implements OnInit {
+export class VerifyEmailComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   isLoading = false;
   verificationStatus: 'pending' | 'success' | 'error' = 'pending';
   errorMessage = '';
   userEmail = '';
   redirectCountdown = 0;
+  private countdownIntervalId: any; // To store the interval ID
 
   constructor(
     private _notificationService: CustomNotificationService,
@@ -24,66 +27,96 @@ export class VerifyEmailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this._route.queryParams.subscribe(params => {
-      let email = params['email'];
-      let token = params['token'];
-      
-      if (email) {
-        try {
-          email = decodeURIComponent(email);
-        } catch (e) {
-          console.error('Error decoding email:', e);
+    const paramsSubscription = this._route.queryParams.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (params) => {
+        let email = params['email'];
+        let token = params['token'];
+        
+        if (email) {
+          try {
+            email = decodeURIComponent(email);
+          } catch (e) {
+            // Error decoding email
+          }
         }
-      }
-      
-      if (token) {
-        try {
-          token = decodeURIComponent(token);
-        } catch (e) {
-          console.error('Error decoding token:', e);
+        
+        if (token) {
+          try {
+            token = decodeURIComponent(token);
+          } catch (e) {
+            // Error decoding token
+          }
         }
-      }
-      
-      this.userEmail = email;
-      
-      if (!email || !token) {
-        this.verificationStatus = 'error';
-        this.errorMessage = 'Invalid verification link. Please check your email for the correct link.';
-        return;
-      }
+        
+        this.userEmail = email;
+        
+        if (!email || !token) {
+          this.verificationStatus = 'error';
+          this.errorMessage = 'Invalid verification link. Please check your email for the correct link.';
+          return;
+        }
 
-      this.verifyEmail(email, token);
+        this.verifyEmail(email, token);
+      },
+      error: (error) => {
+        // Error in route params subscription
+      },
+      complete: () => {
+        // Route params subscription completed
+      }
     });
+    
+    // Monitor route changes to see if navigation is working
+    this._router.events.pipe(takeUntil(this.destroy$)).subscribe(event => {
+      if (event instanceof NavigationStart) {
+        // Navigation started
+      } else if (event instanceof NavigationEnd) {
+        // Navigation completed
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Clean up any running intervals
+    if (this.countdownIntervalId) {
+      clearInterval(this.countdownIntervalId);
+      this.countdownIntervalId = null;
+    }
+    
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   verifyEmail(email: string, token: string): void {
     this.isLoading = true;
     
-    this._authService.verifyEmailGet(email, token).subscribe({
+    // Add error handling for the subscription
+    const subscription = this._authService.verifyEmailGet(email, token).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
         this.isLoading = false;
         this.verificationStatus = 'success';
-        this._notificationService.notification(
-          'success',
-          'Email Verified',
-          'Your email has been verified successfully. You can now login to your account.'
-        );
-        this.redirectCountdown = 3;
-        const countdownInterval = setInterval(() => {
-          this.redirectCountdown--;
-          if (this.redirectCountdown <= 0) {
-            clearInterval(countdownInterval);
-            this._router.navigate(['/accounts/login']);
+        
+        // Check if the response indicates success
+        if (response && (response.success === true || response.message)) {
+          // Show notification but don't wait for it
+          try {
+            this._notificationService.notification(
+              'success',
+              'Email Verified',
+              'Your email has been verified successfully. You can now login to your account.'
+            );
+          } catch (notificationError) {
+            // Notification failed, but continuing with redirect
           }
-        }, 1000);
+          
+          // Start countdown and redirect
+          this.startRedirectCountdown();
+        } else {
+          // Still treat as success if we got here without error
+          this.startRedirectCountdown();
+        }
       },
       error: (error) => {
-        console.error('Email verification failed:', {
-          status: error.status,
-          statusText: error.statusText,
-          error: error.error
-        });
-        
         this.isLoading = false;
         this.verificationStatus = 'error';
         
@@ -104,13 +137,78 @@ export class VerifyEmailComponent implements OnInit {
           this.errorMessage = 'An error occurred while verifying your email. Please try again or contact support.';
         }
         
-        this._notificationService.notification('error', 'Verification Failed', this.errorMessage);
+        // Show notification but don't wait for it
+        try {
+          this._notificationService.notification('error', 'Verification Failed', this.errorMessage);
+        } catch (notificationError) {
+          // Error notification failed
+        }
+      },
+      complete: () => {
+        // Email verification subscription completed
       }
     });
   }
 
+  private startRedirectCountdown(): void {
+    // Clear any existing countdown
+    if (this.countdownIntervalId) {
+      clearInterval(this.countdownIntervalId);
+      this.countdownIntervalId = null;
+    }
+    
+    this.redirectCountdown = 2; // Reduced to 2 seconds for very fast navigation
+    
+    const countdownInterval = setInterval(() => {
+      this.redirectCountdown--;
+      
+      if (this.redirectCountdown <= 0) {
+        clearInterval(countdownInterval);
+        this.countdownIntervalId = null;
+        
+        // Use setTimeout to ensure the navigation happens after the current component state is processed
+        setTimeout(() => {
+          this.navigateToLogin();
+        }, 100);
+      }
+    }, 1000);
+    
+    // Store the interval ID so we can clear it if needed
+    this.countdownIntervalId = countdownInterval;
+  }
+
+  private navigateToLogin(): void {
+    if (this._router.url === '/accounts/login') {
+      return;
+    }
+    
+    // Check if component is still active
+    if (this.destroy$.closed) {
+      return;
+    }
+    
+    // Navigate to login page and then refresh it
+    try {
+      // Method 1: Navigate to login page first
+      window.location.href = '/accounts/login';
+      
+      // Method 2: After navigation, force a refresh to ensure proper loading
+      setTimeout(() => {
+        // Refresh the login page to ensure it loads completely
+        window.location.reload();
+      }, 500); // Wait 500ms for navigation to complete
+      
+    } catch (error) {
+      // Fallback: Force navigation and refresh
+      window.location.replace('/accounts/login');
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    }
+  }
+
   goToLogin(): void {
-    this._router.navigate(['/accounts/login']);
+    this.navigateToLogin();
   }
 
   goToHome(): void {

@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
-// import { StudentSectionAssignmentService } from '../services/student-section-assignment.service';
-// import { StudentRegisteredCoursesModel, StudentRegisteredCoursesResult } from '../Models/StudentRegisteredCoursesModel';
-import { BulkSectionAssignmentRequest } from '../Models/BulkSectionAssignmentRequest';
-import { CourseSectionAssignment } from '../Models/CourseSectionAssignment';
-import { ACADEMIC_TERM_STATUS } from 'src/app/common/constant';
-import { TermCourseOfferingService } from 'src/app/colleges/services/term-course-offering.service';
-import { StaticData } from 'src/app/admission-request/model/StaticData';
-import { StudentRegisteredCoursesModel, StudentRegisteredCoursesResult } from '../Models/StudentRegisteredCoursesModel';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { BulkSectionAssignmentRequest, CourseSectionAssignmentRequest } from '../Models/BulkSectionAssignmentRequest';
+import { StudentRegisteredCoursesResult, StudentRegisteredCoursesModel } from '../Models/StudentRegisteredCoursesModel';
 import { StudentSectionAssignmentService } from '../services/student-section-assignment.service';
+import { CustomNotificationService } from '../services/custom-notification.service';
+import { ACADEMIC_TERM_STATUS } from '../common/constant';
+import { TermCourseOfferingService } from '../colleges/services/term-course-offering.service';
+import { StaticData } from '../admission-request/model/StaticData';
+import { CourseSectionAssignment } from '../Models/CourseSectionAssignment';
+import { NzModalService } from 'ng-zorro-antd/modal';
 
 @Component({
   selector: 'app-student-section-assignments',
@@ -17,7 +17,7 @@ import { StudentSectionAssignmentService } from '../services/student-section-ass
 })
 export class StudentSectionAssignmentsComponent implements OnInit {
   // Component data
-  registeredCourses: StudentRegisteredCoursesResult = { totalDistinctCount: 0, courses: [] };
+  registeredCourses: StudentRegisteredCoursesResult = { totalDistinctCount: 0, courses: [], numberOfGeneratedSections: 0, isSectionGenerated: false };
   loading = false;
   generatingAssignments = false;
   studentsPerSection = 45; // Default value
@@ -33,14 +33,15 @@ export class StudentSectionAssignmentsComponent implements OnInit {
 
   // Math utility for template
   Math = Math;
-  
+
   // Collapse state
   isSearchCollapsed = false;
 
   constructor(
     private fb: FormBuilder,
     private studentSectionAssignmentService: StudentSectionAssignmentService,
-    private courseTermOfferingService: TermCourseOfferingService
+    private courseTermOfferingService: TermCourseOfferingService,
+    private modalService: NzModalService
   ) {
     const currentYear = new Date().getFullYear();
     this.yearList = this.getYearRange(currentYear);
@@ -66,7 +67,7 @@ export class StudentSectionAssignmentsComponent implements OnInit {
     this.batchCode.valueChanges.subscribe(res => {
       // console.log("%%     ", res);
       // if (res) {
-        this.onSearch(res);
+      this.onSearch(res);
       // }
 
     })
@@ -137,20 +138,15 @@ export class StudentSectionAssignmentsComponent implements OnInit {
       this.successMessage = '';
 
       const { academicTerm, year } = this.searchForm.value;
-      console.log("Batch Code  ", batchCode);
       this.studentSectionAssignmentService
-        .getStudentRegisteredCourses(batchCode, academicTerm, year)
+        .getStudentRegisteredCourses(batchCode, academicTerm, year, 0)
         .subscribe({
           next: (res: StudentRegisteredCoursesResult) => {
             this.registeredCourses = res;
-            console.log("objects ", this.registeredCourses);
             this.loading = false;
             if (res.courses.length > 0) {
-              // Automatically set numberOfSections based on calculated sections
               this.numberOfSections = this.getCalculatedNumberOfSections();
-              // Collapse the search section when data is returned
               this.isSearchCollapsed = true;
-              // this.successMessage = `Found ${res.courses.length} registered courses for batch ${batchCode} (Total students: ${res.totalDistinctCount})`;
             } else {
               this.successMessage = 'No registered courses found for the specified criteria';
             }
@@ -166,14 +162,63 @@ export class StudentSectionAssignmentsComponent implements OnInit {
     }
   }
 
+  removeGeneratedAssignments(): void {
+    // Show confirmation dialog before removing sections
+    this.showRemoveConfirmation();
+  }
+
+  private showRemoveConfirmation(): void {
+    this.modalService.confirm({
+      nzTitle: 'Remove Generated Sections',
+      nzContent: 'Are you sure you want to remove all generated section assignments? This action cannot be undone.',
+      nzOkText: 'Yes, Remove',
+      nzOkType: 'primary',
+      nzOkDanger: true,
+      nzCancelText: 'Cancel',
+      nzOnOk: () => {
+        this.executeRemoveGeneratedAssignments();
+      }
+    });
+  }
+
+  private executeRemoveGeneratedAssignments(): void {
+    const { batchCode, academicTerm, year } = this.searchForm.value;
+    this.studentSectionAssignmentService.deleteStudentSectionAssignment(academicTerm, year, batchCode, 0).subscribe({
+      next: (res) => {
+        this.successMessage = 'Successfully removed generated section assignments.';
+        this.registeredCourses.isSectionGenerated = false;
+        this.registeredCourses.numberOfGeneratedSections = 0;
+        this.numberOfSections = this.getCalculatedNumberOfSections();
+      },
+      error: (error) => {
+        this.errorMessage = 'Error removing generated section assignments. Please try again.';
+        console.error('Error removing section assignments:', error);
+      }
+    });
+  }
+
   /**
    * Clear the search results
    */
   clearSearch(): void {
-    this.registeredCourses = { totalDistinctCount: 0, courses: [] };
+    this.registeredCourses = { totalDistinctCount: 0, courses: [], numberOfGeneratedSections: 0, isSectionGenerated: false };
     this.errorMessage = '';
     this.successMessage = '';
     this.searchForm.reset();
+  }
+
+  /**
+   * Clear error message manually
+   */
+  clearErrorMessage(): void {
+    this.errorMessage = '';
+  }
+
+  /**
+   * Clear success message manually
+   */
+  clearSuccessMessage(): void {
+    this.successMessage = '';
   }
 
   /**
@@ -197,6 +242,20 @@ export class StudentSectionAssignmentsComponent implements OnInit {
       return 'Default Section';
     }
     return `Regular Sections (${course.numberOfSections})`;
+  }
+
+  /**
+   * Get the currently selected default course
+   */
+  getDefaultCourse(): StudentRegisteredCoursesModel | null {
+    return this.registeredCourses.courses.find(course => course.isDefaultSection) || null;
+  }
+
+  /**
+   * Check if any course is selected as default
+   */
+  hasDefaultCourse(): boolean {
+    return this.registeredCourses.courses.some(course => course.isDefaultSection);
   }
 
   /**
@@ -259,7 +318,18 @@ export class StudentSectionAssignmentsComponent implements OnInit {
   }
 
   toggleDefaultSection(course: StudentRegisteredCoursesModel, isDefault: boolean): void {
-    course.isDefaultSection = isDefault;
+    if (isDefault) {
+      // If user is trying to set this course as default, uncheck all other courses first
+      this.registeredCourses.courses.forEach(c => {
+        if (c !== course) {
+          c.isDefaultSection = false;
+        }
+      });
+      course.isDefaultSection = true;
+    } else {
+      // If user is unchecking, just set to false
+      course.isDefaultSection = false;
+    }
   }
 
 
@@ -274,9 +344,20 @@ export class StudentSectionAssignmentsComponent implements OnInit {
       return;
     }
 
+    // Validate that only one course is selected as default
+    const defaultCourses = this.registeredCourses.courses.filter(course => course.isDefaultSection);
+    if (defaultCourses.length > 1) {
+      this.errorMessage = 'Only one course can be selected as the default section. Please review your selection.';
+      return;
+    }
+
+    // Clear previous messages and start loading
     this.generatingAssignments = true;
     this.errorMessage = '';
     this.successMessage = '';
+    
+    // Show initial loading message
+    console.log('Starting section assignment generation...');
 
     const { academicTerm, year, batchCode } = this.searchForm.value;
 
@@ -289,7 +370,7 @@ export class StudentSectionAssignmentsComponent implements OnInit {
       isDefaultSection: course.isDefaultSection
     }));
 
-    const request: BulkSectionAssignmentRequest = {
+    const request: CourseSectionAssignmentRequest = {
       batchCode: batchCode,
       academicTerm: academicTerm,
       year: year,
@@ -297,19 +378,64 @@ export class StudentSectionAssignmentsComponent implements OnInit {
       courseAssignments: courseAssignments
     };
 
+    // Validate that we have course assignments data
+    if (!request.courseAssignments || request.courseAssignments.length === 0) {
+      this.errorMessage = 'No course assignments data available.';
+      this.generatingAssignments = false;
+      return;
+    }
+
     console.log('Generating student course section assignments with request: ', request);
 
     // Call the API to generate student course section assignments
     this.studentSectionAssignmentService.assignStudentsToSections(request).subscribe({
       next: (response) => {
         this.generatingAssignments = false;
-        this.successMessage = `Successfully generated section assignments for ${this.registeredCourses.courses.length} courses with ${this.numberOfSections} sections`;
-        console.log('Section assignments generated:', response);
+        
+        // Create detailed success message
+        const totalStudents = this.getTotalStudents();
+        this.successMessage = `✅ Successfully generated section assignments! 
+          ${this.registeredCourses.courses.length} courses processed, 
+          ${this.numberOfSections} sections created, 
+          ${totalStudents} students assigned (approximately ${Math.ceil(totalStudents / this.numberOfSections)} students per section)`;
+        
+        // Update the section generation status
+        this.registeredCourses.isSectionGenerated = true;
+        this.registeredCourses.numberOfGeneratedSections = this.numberOfSections;
+        
+        console.log('Section assignments generated successfully:', response);
+        
+        // Auto-hide success message after 8 seconds
+        setTimeout(() => {
+          if (this.successMessage.includes('✅ Successfully generated')) {
+            this.successMessage = '';
+          }
+        }, 8000);
       },
       error: (error) => {
         this.generatingAssignments = false;
-        this.errorMessage = 'Error generating section assignments. Please try again.';
+        
+        // Create detailed error message
+        let errorMsg = 'Error generating section assignments. ';
+        if (error.status === 400) {
+          errorMsg += 'Invalid request data. Please check your input and try again.';
+        } else if (error.status === 500) {
+          errorMsg += 'Server error. Please try again later or contact support.';
+        } else if (error.status === 0) {
+          errorMsg += 'Network error. Please check your connection and try again.';
+        } else {
+          errorMsg += 'Please try again.';
+        }
+        
+        this.errorMessage = errorMsg;
         console.error('Error generating section assignments:', error);
+        
+        // Auto-hide error message after 10 seconds
+        setTimeout(() => {
+          if (this.errorMessage === errorMsg) {
+            this.errorMessage = '';
+          }
+        }, 10000);
       }
     });
   }

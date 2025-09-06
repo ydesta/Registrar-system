@@ -1,13 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PendingPaymentListComponent } from './pending-payment-list.component';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 
 @NgModule({
   declarations: [
-    PendingPaymentListComponent
+    // PendingPaymentListComponent is declared in BanksModule
   ],
   imports: [
     CommonModule,
@@ -16,7 +15,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
     NzIconModule
   ],
   exports: [
-    PendingPaymentListComponent
+    // No exports needed since component is declared in BanksModule
   ]
 })
 export class PendingPaymentListModule { } 

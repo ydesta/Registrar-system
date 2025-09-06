@@ -39,7 +39,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   listOfYearNumber: StaticData[] = [];
   expandSet = new Set<string>();
   tbLoading = true;
-  
+
   constructor(
     private _customNotificationService: CustomNotificationService,
     private _crudService: CrudService,
@@ -77,10 +77,8 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
     console.log('Fetching with pageindex:', this.pageindex, 'pageSize:', this.pageSize);
     this._crudService
       .getList(
-        `/TermCourseOfferings/paginated?searchKey=${this.searchKey}&pageindex=${
-          this.pageindex - 1  // Convert 1-based UI index to 0-based API index
-        }&pageSize=${this.pageSize}&sortColumn=${this.sortColumn}&sortOrder=${
-          this.sortOrder
+        `/TermCourseOfferings/paginated?searchKey=${this.searchKey}&pageindex=${this.pageindex - 1  // Convert 1-based UI index to 0-based API index
+        }&pageSize=${this.pageSize}&sortColumn=${this.sortColumn}&sortOrder=${this.sortOrder
         }`
       )
       .subscribe((res: any) => {
@@ -89,7 +87,6 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
         console.log('Data length:', res.data ? res.data.length : 0);
         this.termCourseOfferings = res.data.map((item: any) => {
           const term = this.listOfTermNumber.find(t => t.Id === item.academicTermSeason);
-          // Precompute course details and totals
           let courseDetails: any[] = [];
           let totalCreditHours = 0;
           let totalAssignedInstructors = 0;
@@ -97,15 +94,25 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
             courseDetails = item.couse.map((c: any, index: number) => {
               totalCreditHours += c.creditHours || 0;
               totalAssignedInstructors += c.noOfAssignedInstructor || 0;
-              return {
+              
+              // Debug: Log the original course object to see available properties
+              console.log('Original course object:', c);
+              console.log('Available properties in course:', Object.keys(c));
+              console.log('Course ID type:', typeof c.id, 'Value:', c.id);
+              console.log('Course offering ID type:', typeof c.courseOfferingId, 'Value:', c.courseOfferingId);
+              
+              const courseDetail = {
                 number: index + 1,
                 title: c.courseTitle,
                 code: c.courseCode,
                 creditHours: c.creditHours,
                 noOfAssignedInstructor: c.noOfAssignedInstructor,
                 courseId: c.id,
-                termCourseOfferingId: c.termCourseOfferingId
+                courseOfferingId: c.courseOfferingId || c.id, // Try to use courseOfferingId if available, fallback to course ID
+                isActive: c.isActive !== undefined ? c.isActive : true // Default to true if not provided
               };
+              console.log('Course detail mapped:', courseDetail);
+              return courseDetail;
             });
           }
           return {
@@ -154,7 +161,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
         this.termCourseOfferingService
           .delete(this.reqId)
           .subscribe((res: any) => {
-            
+
             this.fetchProgram();
             if (res.status == "success") {
               this._customNotificationService.notification(
@@ -209,6 +216,74 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
       nzOnCancel: () => console.log("Cancel")
     });
   }
+
+
+  showActivateCourseOffering(id: number): void {
+    this.modal.confirm({
+      nzTitle: "Are you sure activate this Course Offering?",
+      nzOkText: "Yes",
+      nzOkType: "primary",
+      nzOkDanger: false,
+      nzOnOk: () => {
+        this.termCourseOfferingService
+          .activateCourseOffering(id)
+          .subscribe((res: any) => {
+            this.fetchProgram();
+            if (res.status == "success") {
+              this._customNotificationService.notification(
+                "success",
+                "Success",
+                res.data
+              );
+            }
+            if (res.status == "error") {
+              this._customNotificationService.notification(
+                "error",
+                "Error",
+                res.data
+              );
+            }
+          });
+      },
+      nzCancelText: "No",
+      nzOnCancel: () => console.log("Cancel")
+    });
+  }
+
+  showDeactivateCourseOffering(id: number): void {
+    console.log("%%$$      id", id);
+    this.modal.confirm({
+      nzTitle: "Are you sure deactivate this Course Offering?",
+      nzOkText: "Yes",
+      nzOkType: "primary",
+      nzOkDanger: true,
+      nzOnOk: () => {
+        this.termCourseOfferingService
+          .deactivateCourseOfering(id)
+          .subscribe((res: any) => {
+            this.fetchProgram();
+            if (res.status == "success") {
+              this._customNotificationService.notification(
+                "success",
+                "Success",
+                res.data
+              );
+            }
+            if (res.status == "error") {
+              this._customNotificationService.notification(
+                "error",
+                "Error",
+                res.data
+              );
+            }
+              });
+      },
+      nzCancelText: "No",
+      nzOnCancel: () => console.log("Cancel")
+    });
+  }
+
+
   clickSearchKey() {
     this.fetchProgram();
   }
@@ -218,11 +293,11 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
       this._crudService
         .getList(
           "/TermCourseOfferings/academicTerm/" +
-            this.gradeQueryForm.value["termCode"]
+          this.gradeQueryForm.value["termCode"]
         )
         .subscribe((res: BaseModel<TermCourseOfferingModel[]>) => {
           this.termCourseOfferings = res.data;
-          
+
         });
     } else {
       alert("Please select query!");
@@ -311,7 +386,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
           creditHours: c.creditHours,
           noOfAssignedInstructor: c.noOfAssignedInstructor,
           courseId: c.id,
-          termCourseOfferingId: c.termCourseOfferingId
+          courseOfferingId: c.id // Use the course ID (should be integer)
         };
       });
     }
@@ -338,7 +413,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
       nzContent: CourseOfferingInstructorAssignmentComponent,
       nzComponentParams: {
         courseId: data.courseId,
-        courseOfferingId: data.termCourseOfferingId
+        courseOfferingId: data.courseOfferingId
       },
       nzMaskClosable: false,
       nzFooter: null,

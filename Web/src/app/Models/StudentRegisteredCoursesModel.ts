@@ -6,8 +6,10 @@ export interface StudentRegisteredCoursesModel {
   numberOfSections: number;
   maxStudentsPerSection: number;
   isDefaultSection: boolean;
-} 
+}
 export interface StudentRegisteredCoursesResult {
   totalDistinctCount: number;
+  numberOfGeneratedSections: number;
+  isSectionGenerated: boolean;
   courses: StudentRegisteredCoursesModel[];
 }

@@ -57,6 +57,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { AddCourseApprovalComponent } from './course-registration/course-add/add-course-approval/add-course-approval.component';
 import { AddCourseRequestComponent } from "./course-registration/course-add/add-course-request/add-course-request.component";
 import { RegisteredNewStudentListComponent } from './registered-new-student-list/registered-new-student-list.component';
@@ -143,7 +144,9 @@ const routes: Routes = [
     NzIconModule,
     NzRadioModule,
     NzCheckboxModule,
-    NzCardModule
+    NzCardModule,
+    NzTabsModule,
+    NzEmptyModule
   ],
   exports: [StudentProfileSummaryComponent, RegistrarStudentProfileSummaryComponent, ProfileSummaryComponent, AddCourseApprovalComponent]
 })

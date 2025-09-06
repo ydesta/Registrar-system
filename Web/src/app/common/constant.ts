@@ -89,6 +89,44 @@ export function phoneValidator(): ValidatorFn {
   };
 }
 
+export function phoneValidator9To14(): ValidatorFn {
+  return (control: AbstractControl): { [key: string]: any } | null => {
+    if (control.value === null || control.value === "") {
+      return null; // No validation for empty input
+    }
+
+    const phoneNumber = control.value.toString().trim();
+    
+    // Remove any spaces, dashes, or parentheses for validation
+    const cleanPhoneNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
+    
+    // Check if it's a valid phone number with 9-14 digits
+    const phoneRegex = /^(\+[1-9]\d{1,14}|(09|07)\d{8}|0\d{9}|\d{9,14})$/;
+    
+    if (!phoneRegex.test(cleanPhoneNumber)) {
+      return {
+        invalidPhoneNumber: {
+          valid: false,
+          message: 'Phone number must be 9-14 digits. Supported formats: +251xxxxxxxxx, 09xxxxxxxx, 07xxxxxxxx, or 0xxxxxxxxx'
+        }
+      };
+    }
+
+    // Additional length validation for 9-14 digits
+    const digitCount = cleanPhoneNumber.replace(/[^0-9]/g, '').length;
+    if (digitCount < 9 || digitCount > 14) {
+      return {
+        invalidPhoneNumber: {
+          valid: false,
+          message: `Phone number must be 9-14 digits. Current length: ${digitCount} digits`
+        }
+      };
+    }
+
+    return null;
+  };
+}
+
 export function emailValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
     if (control.value === null || control.value === "") {
@@ -187,6 +225,11 @@ export const APPROVAL_STATUS: any[] = [
   { Id: 2, Description: "Approved" },
   { Id: 3, Description: "Rejected" }
 ];
+export const SECTION_TYPE: any[] = [
+  { Id: 0, Description: "Class" },
+  { Id: 1, Description: "Lab" },
+  { Id: 2, Description: "Manual" }
+];
 export const REGISTARAR_APPROVAL_STATUS: any[] = [
   { Id: 0, Description: "Draft" },
   { Id: 2, Description: "Rejected" },
@@ -206,10 +249,10 @@ export const PROGRAM_TYPE: any[] = [
 ];
 export const BANK_TO: any[] = [
   { Id: 1, Description: "Dashen: 7938725387911" },
-  { Id: 2, Description: "CBE:  1000004662249" },
-  { Id: 3, Description: "Hibret:  1601816158019019" },
-  { Id: 4, Description: "Awash: 130402166400" },
-  { Id: 5, Description: "ZamZam: 0000007110301" }
+  // { Id: 2, Description: "CBE:  1000004662249" },
+  // { Id: 3, Description: "Hibret:  1601816158019019" },
+  // { Id: 4, Description: "Awash: 130402166400" },
+  // { Id: 5, Description: "ZamZam: 0000007110301" }
 ];
 export const DATA_MIGRATION: any[] = [
 
@@ -277,6 +320,36 @@ export function etEnAlphabetValidator(): ValidatorFn {
   };
 }
 
+export function flexibleNameValidator(): ValidatorFn {
+  return (control: AbstractControl): { [key: string]: any } | null => {
+    if (control.value === null || control.value === "") {
+      return null;
+    }
+
+    const value = control.value.toString();
+    
+    // More flexible regex for names that might contain:
+    // - Amharic characters (Unicode range \u1200-\u137F)
+    // - English letters (a-zA-Z)
+    // - Spaces (\u0020)
+    // - Common name punctuation: hyphens (-), apostrophes ('), periods (.)
+    // - Numbers (0-9) which are sometimes part of names
+    const flexibleNameRegex = /^[\u1200-\u137F\u0020a-zA-Z0-9\-'\.]+$/;
+    const isValid = flexibleNameRegex.test(value);
+    
+    if (!isValid) {
+      return {
+        invalidName: {
+          valid: false,
+          message: "Only letters, numbers, spaces, hyphens, apostrophes, and periods are allowed in names."
+        }
+      };
+    }
+    
+    return null;
+  };
+}
+
 export function amharicOnlyValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
     if (control.value === null || control.value === "") {
@@ -340,3 +413,142 @@ export function englishOnlyValidator(): ValidatorFn {
     return null;
   };
 }
+
+// Country interface
+export interface Country {
+  name: string;
+  nationality: string;
+  flag: string;
+}
+
+// Countries list with flags and nationalities
+export const COUNTRIES: Country[] = [
+  { name: 'Afghanistan', nationality: 'Afghan', flag: '🇦🇫' },
+  { name: 'Albania', nationality: 'Albanian', flag: '🇦🇱' },
+  { name: 'Algeria', nationality: 'Algerian', flag: '🇩🇿' },
+  { name: 'Argentina', nationality: 'Argentine', flag: '🇦🇷' },
+  { name: 'Australia', nationality: 'Australian', flag: '🇦🇺' },
+  { name: 'Austria', nationality: 'Austrian', flag: '🇦🇹' },
+  { name: 'Bangladesh', nationality: 'Bangladeshi', flag: '🇧🇩' },
+  { name: 'Belgium', nationality: 'Belgian', flag: '🇧🇪' },
+  { name: 'Brazil', nationality: 'Brazilian', flag: '🇧🇷' },
+  { name: 'Bulgaria', nationality: 'Bulgarian', flag: '🇧🇬' },
+  { name: 'Cambodia', nationality: 'Cambodian', flag: '🇰🇭' },
+  { name: 'Cameroon', nationality: 'Cameroonian', flag: '🇨🇲' },
+  { name: 'Canada', nationality: 'Canadian', flag: '🇨🇦' },
+  { name: 'Chile', nationality: 'Chilean', flag: '🇨🇱' },
+  { name: 'China', nationality: 'Chinese', flag: '🇨🇳' },
+  { name: 'Colombia', nationality: 'Colombian', flag: '🇨🇴' },
+  { name: 'Costa Rica', nationality: 'Costa Rican', flag: '🇨🇷' },
+  { name: 'Croatia', nationality: 'Croatian', flag: '🇭🇷' },
+  { name: 'Cuba', nationality: 'Cuban', flag: '🇨🇺' },
+  { name: 'Czech Republic', nationality: 'Czech', flag: '🇨🇿' },
+  { name: 'Denmark', nationality: 'Danish', flag: '🇩🇰' },
+  { name: 'Dominican Republic', nationality: 'Dominican', flag: '🇩🇴' },
+  { name: 'Ecuador', nationality: 'Ecuadorian', flag: '🇪🇨' },
+  { name: 'Egypt', nationality: 'Egyptian', flag: '🇪🇬' },
+  { name: 'El Salvador', nationality: 'Salvadoran', flag: '🇸🇻' },
+  { name: 'Eritrea', nationality: 'Eritrean', flag: '🇪🇷' },
+  { name: 'Estonia', nationality: 'Estonian', flag: '🇪🇪' },
+  { name: 'Ethiopia', nationality: 'Ethiopian', flag: '🇪🇹' },
+  { name: 'Finland', nationality: 'Finnish', flag: '🇫🇮' },
+  { name: 'France', nationality: 'French', flag: '🇫🇷' },
+  { name: 'Germany', nationality: 'German', flag: '🇩🇪' },
+  { name: 'Ghana', nationality: 'Ghanaian', flag: '🇬🇭' },
+  { name: 'Greece', nationality: 'Greek', flag: '🇬🇷' },
+  { name: 'Guatemala', nationality: 'Guatemalan', flag: '🇬🇹' },
+  { name: 'Haiti', nationality: 'Haitian', flag: '🇭🇹' },
+  { name: 'Honduras', nationality: 'Honduran', flag: '🇭🇳' },
+  { name: 'Hong Kong', nationality: 'Hong Konger', flag: '🇭🇰' },
+  { name: 'Hungary', nationality: 'Hungarian', flag: '🇭🇺' },
+  { name: 'Iceland', nationality: 'Icelandic', flag: '🇮🇸' },
+  { name: 'India', nationality: 'Indian', flag: '🇮🇳' },
+  { name: 'Indonesia', nationality: 'Indonesian', flag: '🇮🇩' },
+  { name: 'Iran', nationality: 'Iranian', flag: '🇮🇷' },
+  { name: 'Iraq', nationality: 'Iraqi', flag: '🇮🇶' },
+  { name: 'Ireland', nationality: 'Irish', flag: '🇮🇪' },
+  { name: 'Israel', nationality: 'Israeli', flag: '🇮🇱' },
+  { name: 'Italy', nationality: 'Italian', flag: '🇮🇹' },
+  { name: 'Jamaica', nationality: 'Jamaican', flag: '🇯🇲' },
+  { name: 'Japan', nationality: 'Japanese', flag: '🇯🇵' },
+  { name: 'Jordan', nationality: 'Jordanian', flag: '🇯🇴' },
+  { name: 'Kazakhstan', nationality: 'Kazakh', flag: '🇰🇿' },
+  { name: 'Kenya', nationality: 'Kenyan', flag: '🇰🇪' },
+  { name: 'Kuwait', nationality: 'Kuwaiti', flag: '🇰🇼' },
+  { name: 'Latvia', nationality: 'Latvian', flag: '🇱🇻' },
+  { name: 'Lebanon', nationality: 'Lebanese', flag: '🇱🇧' },
+  { name: 'Libya', nationality: 'Libyan', flag: '🇱🇾' },
+  { name: 'Lithuania', nationality: 'Lithuanian', flag: '🇱🇹' },
+  { name: 'Luxembourg', nationality: 'Luxembourgish', flag: '🇱🇺' },
+  { name: 'Malaysia', nationality: 'Indonesian', flag: '🇲🇾' },
+  { name: 'Mali', nationality: 'Malian', flag: '🇲🇱' },
+  { name: 'Malta', nationality: 'Maltese', flag: '🇲🇹' },
+  { name: 'Mauritania', nationality: 'Mauritanian', flag: '🇲🇷' },
+  { name: 'Mauritius', nationality: 'Mauritian', flag: '🇲🇺' },
+  { name: 'Mexico', nationality: 'Mexican', flag: '🇲🇽' },
+  { name: 'Monaco', nationality: 'Monacan', flag: '🇲🇨' },
+  { name: 'Mongolia', nationality: 'Mongolian', flag: '🇲🇳' },
+  { name: 'Morocco', nationality: 'Moroccan', flag: '🇲🇦' },
+  { name: 'Mozambique', nationality: 'Mozambican', flag: '🇲🇿' },
+  { name: 'Myanmar', nationality: 'Burmese', flag: '🇲🇲' },
+  { name: 'Namibia', nationality: 'Namibian', flag: '🇳🇦' },
+  { name: 'Nepal', nationality: 'Nepalese', flag: '🇳🇵' },
+  { name: 'Netherlands', nationality: 'Dutch', flag: '🇳🇱' },
+  { name: 'New Zealand', nationality: 'New Zealander', flag: '🇳🇿' },
+  { name: 'Nigeria', nationality: 'Nigerian', flag: '🇳🇬' },
+  { name: 'North Korea', nationality: 'North Korean', flag: '🇰🇵' },
+  { name: 'Norway', nationality: 'Norwegian', flag: '🇳🇴' },
+  { name: 'Oman', nationality: 'Omani', flag: '🇴🇲' },
+  { name: 'Pakistan', nationality: 'Pakistani', flag: '🇵🇰' },
+  { name: 'Panama', nationality: 'Panamanian', flag: '🇵🇦' },
+  { name: 'Paraguay', nationality: 'Paraguayan', flag: '🇵🇾' },
+  { name: 'Peru', nationality: 'Peruvian', flag: '🇵🇪' },
+  { name: 'Philippines', nationality: 'Filipino', flag: '🇵🇭' },
+  { name: 'Poland', nationality: 'Polish', flag: '🇵🇱' },
+  { name: 'Portugal', nationality: 'Portuguese', flag: '🇵🇹' },
+  { name: 'Qatar', nationality: 'Qatari', flag: '🇶🇦' },
+  { name: 'Romania', nationality: 'Romanian', flag: '🇷🇴' },
+  { name: 'Russia', nationality: 'Russian', flag: '🇷🇺' },
+  { name: 'Rwanda', nationality: 'Rwandan', flag: '🇷🇼' },
+  { name: 'Saudi Arabia', nationality: 'Saudi', flag: '🇸🇦' },
+  { name: 'Senegal', nationality: 'Senegalese', flag: '🇸🇳' },
+  { name: 'Serbia', nationality: 'Serbian', flag: '🇷🇸' },
+  { name: 'Singapore', nationality: 'Singaporean', flag: '🇸🇬' },
+  { name: 'Slovakia', nationality: 'Slovak', flag: '🇸🇰' },
+  { name: 'Slovenia', nationality: 'Slovenian', flag: '🇸🇮' },
+  { name: 'Somalia', nationality: 'Somali', flag: '🇸🇴' },
+  { name: 'South Africa', nationality: 'South African', flag: '🇿🇦' },
+  { name: 'South Korea', nationality: 'South Korean', flag: '🇰🇷' },
+  { name: 'Spain', nationality: 'Spanish', flag: '🇪🇸' },
+  { name: 'Sri Lanka', nationality: 'Sri Lankan', flag: '🇱🇰' },
+  { name: 'Sudan', nationality: 'Sudanese', flag: '🇸🇩' },
+  { name: 'Sweden', nationality: 'Swedish', flag: '🇸🇪' },
+  { name: 'Switzerland', nationality: 'Swiss', flag: '🇨🇭' },
+  { name: 'Syria', nationality: 'Syrian', flag: '🇸🇾' },
+  { name: 'Taiwan', nationality: 'Taiwanese', flag: '🇹🇼' },
+  { name: 'Tanzania', nationality: 'Tanzanian', flag: '🇹🇿' },
+  { name: 'Thailand', nationality: 'Thai', flag: '🇹🇭' },
+  { name: 'Tunisia', nationality: 'Tunisian', flag: '🇹🇳' },
+  { name: 'Turkey', nationality: 'Turkish', flag: '🇹🇷' },
+  { name: 'Uganda', nationality: 'Ugandan', flag: '🇺🇬' },
+  { name: 'Ukraine', nationality: 'Ukrainian', flag: '🇺🇦' },
+  { name: 'United Arab Emirates', nationality: 'Emirati', flag: '🇦🇪' },
+  { name: 'United Kingdom', nationality: 'British', flag: '🇬🇧' },
+  { name: 'United States', nationality: 'American', flag: '🇺🇸' },
+  { name: 'Uruguay', nationality: 'Uruguayan', flag: '🇺🇾' },
+  { name: 'Venezuela', nationality: 'Venezuelan', flag: '🇻🇪' },
+  { name: 'Vietnam', nationality: 'Vietnamese', flag: '🇻🇳' },
+  { name: 'Yemen', nationality: 'Yemeni', flag: '🇾🇪' },
+  { name: 'Zimbabwe', nationality: 'Zimbabwean', flag: '🇿🇼' }
+];
+
+// Education level options for the select dropdown
+export const EDUCATION_LEVEL_OPTIONS = [
+  { label: 'High School Complete', value: 'High School Complete' },
+  { label: 'Certificate/Diploma', value: 'Certificate/Diploma' },
+  { label: 'Associate\'s Degree', value: 'Associate\'s Degree' },
+  { label: 'Bachelor\'s Degree', value: 'Bachelor\'s Degree' },
+  { label: 'Master\'s Degree', value: 'Master\'s Degree' },
+  { label: 'Doctorate (Ph.D.)', value: 'Doctorate (Ph.D.)' },
+  { label: 'Other', value: 'Other' }
+];

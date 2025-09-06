@@ -18,6 +18,7 @@ export class StudentCourseRegistrationView {
     public year: string;
     public batchCode: string;
     public isAllowedToRegister: number;
+    public ignoreGradeLevelValidation: boolean;
     public courseTermOfferings: CourseBreakDownOffering[];
     public coursePayment: CoursePaymentViewModel[]
 }

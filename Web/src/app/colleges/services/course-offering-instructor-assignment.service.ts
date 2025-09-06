@@ -13,7 +13,7 @@ export class CourseOfferingInstructorAssignmentService {
   getCourseOfferingInstructorAssignmentUrl() {
     return this.baseUrl + this._courseOfferingInstructorAssignment;
   }
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient) { }
   create(postData: CourseOfferingInstructorAssignment): Observable<any> {
     const endPointUrl = `${this.getCourseOfferingInstructorAssignmentUrl()}`;
     return this.httpClient.post<any>(endPointUrl, postData).pipe(
@@ -35,6 +35,14 @@ export class CourseOfferingInstructorAssignmentService {
   }
   getListOfAssignedCourses(staffId: string): Observable<any> {
     const endPointUrl = `${this.getCourseOfferingInstructorAssignmentUrl()}/getListOfAssignedCourses/${staffId}`;
+    return this.httpClient.get<any>(endPointUrl).pipe(
+      map(data => {
+        return data;
+      })
+    );
+  }
+  getAssignedInstructors(academicTerm: number, year: number, batchId: string, courseId: string): Observable<any> {
+    const endPointUrl = `${this.getCourseOfferingInstructorAssignmentUrl()}/getAssignedInstructors/${academicTerm}/${year}/${batchId}/${courseId}`;
     return this.httpClient.get<any>(endPointUrl).pipe(
       map(data => {
         return data;

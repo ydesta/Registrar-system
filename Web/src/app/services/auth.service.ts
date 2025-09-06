@@ -104,6 +104,10 @@ export class AuthService {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('currentUserId');
     
+    // Clear application-specific cached data
+    localStorage.removeItem('parent_applicant_id');
+    localStorage.removeItem('isApplicantProfile');
+    
     window.location.href = '/accounts/login';
   };
 

@@ -1,0 +1,192 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <button nz-button nzType="default" class="back-btn" (click)="onCancel()">
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Course Exemptions
+    </button>
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">{{ isEditMode ? 'Edit Course Exemption' : 'Add Course Exemption' }}</h2>
+        <p class="subtitle-text">Create and manage course exemptions for students</p>
+        <div class="exemption-info" *ngIf="isEditMode">
+          <span nz-icon nzType="edit" nzTheme="outline"></span>
+          <span class="edit-mode">Editing existing exemption</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Container -->
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="file-text" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>Course Exemption</h3>
+          <p>Configure the course exemption details and student information</p>
+        </div>
+      </div>
+
+      <form nz-form [formGroup]="form" class="course-exemption-form" (ngSubmit)="onSubmit()">
+        <div class="form-sections">
+          <!-- Student Information Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="user" nzTheme="outline"></span>
+                Student Information
+              </h4>
+              <p class="section-description">Select the student and exemption course for exemption</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Student</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select a student">
+                    <nz-select formControlName="studentId" nzPlaceHolder="Select a student" nzShowSearch nzAllowClear
+                      [nzLoading]="loading" class="professional-select">
+                      <nz-option *ngFor="let student of students" [nzValue]="student.value" [nzLabel]="student.label">
+                      </nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Exemption Course</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select an exemption course">
+                    <nz-select formControlName="exemptionCourseId" nzPlaceHolder="Select exemption course" nzShowSearch
+                      nzAllowClear [nzLoading]="loading" class="professional-select">
+                      <nz-option *ngFor="let course of courses" [nzValue]="course.value" [nzLabel]="course.label">
+                      </nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+
+          <!-- Exemption Course Information Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="book" nzTheme="outline"></span>
+                Course Exemption Information
+              </h4>
+              <p class="section-description">Provide details about the exempted course and institution</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Exempted Course Code</nz-form-label>
+                  <nz-form-control nzErrorTip="Course exemption code is required">
+                    <input nz-input formControlName="exemptedCourseCode" placeholder="Enter exempted course code"
+                      class="form-input" />
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Exempted Course Name</nz-form-label>
+                  <nz-form-control nzErrorTip="Course exemption name is required">
+                    <input nz-input formControlName="exemptedCourseName" placeholder="Enter exempted course name"
+                      class="form-input" />
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Exempted Course Credit</nz-form-label>
+                  <nz-form-control nzErrorTip="Completion year is required">
+                    <input nz-input type="number" formControlName="exemptedCourseCredit"
+                      placeholder="Enter completion year" class="form-input" />
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Grade </nz-form-label>
+                  <nz-form-control nzErrorTip="Grade is required">
+                    <nz-select formControlName="grade" nzPlaceHolder="Select grade letter" nzAllowClear
+                      class="professional-select">
+                      <nz-option nzValue="A" nzLabel="A"></nz-option>
+                      <nz-option nzValue="B" nzLabel="B"></nz-option>
+                      <nz-option nzValue="C" nzLabel="C"></nz-option>
+                      <nz-option nzValue="D" nzLabel="D"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Exempted College Name</nz-form-label>
+                  <nz-form-control nzErrorTip="Exempted College Name is required">
+                    <input nz-input formControlName="exemptedCollegeName" placeholder="Enter college name" class="form-input" />
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div class="form-col">
+
+              </div>
+
+
+            </div>
+          </div>
+
+          <!-- Approval Information Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+                Reason Information
+              </h4>
+              <p class="section-description">Provide reason for exemption</p>
+            </div>
+
+
+
+            <div class="form-row">
+              <div class="form-col form-col-full">
+                <nz-form-item>
+                  <nz-form-label>Reason for Exemption</nz-form-label>
+                  <nz-form-control>
+                    <nz-textarea-count [nzMaxCharacterCount]="500">
+                      <textarea rows="4" formControlName="reason" nz-input class="form-textarea"
+                        placeholder="Enter the reason for course exemption">
+                      </textarea>
+                    </nz-textarea-count>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button nz-button nzType="default" class="cancel-btn" (click)="onCancel()" [disabled]="submitting">
+        <span nz-icon nzType="close" nzTheme="outline"></span>
+        Cancel
+      </button>
+      <button nz-button nzType="primary" class="submit-btn" (click)="onSubmit()" [nzLoading]="submitting"
+        [disabled]="form.invalid">
+        <span nz-icon nzType="save" nzTheme="outline"></span>
+        {{ isEditMode ? 'Update Exemption' : 'Save Exemption' }}
+      </button>
+    </div>
+  </div>
+</div>

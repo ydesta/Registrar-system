@@ -56,9 +56,9 @@
         <li nz-submenu nzTitle="Semester Registration" nzIcon="plus-circle">
           <ul>
 
-            <li nz-menu-item>
+            <!-- <li nz-menu-item>
               <a routerLink="/students/course-registration-approval">Course Registration Approval</a>
-            </li>
+            </li> -->
 
             <!-- <li nz-menu-item>
               <a routerLink="/Semester/CourseAddandDrop">Course Add and Drop</a>
@@ -71,23 +71,27 @@
               <span> <a routerLink="/students/grade-change-request-for-approval">Grade Change Request</a></span>
             </li>
             <li nz-menu-item>
-              <a routerLink="/students/special-case-manual-registration">Special Case Manual Registration</a>
+              <a routerLink="/students/special-case-manual-registration">Manual Registration</a>
             </li>
           </ul>
         </li>
-        <li nz-submenu nzTitle="Class Section" nzIcon="form">
+        <li nz-submenu nzTitle="Section Management" nzIcon="form">
           <ul>
             <li nz-menu-item>
-              <a routerLink="/student-section/student-section-assignments">Generate Section</a>
+              <a routerLink="/student-section/student-section-assignments">Auto-Generate Class Sections</a>
             </li>
             <li nz-menu-item>
-              <a routerLink="/student-section/student-lab-section">Generate Lab Section</a>
+              <a routerLink="/student-section/student-lab-section">Auto-Generate Lab Sections</a>
             </li>
             <li nz-menu-item>
-              <a routerLink="/student-section/section-assigned-students">View Sections</a>
+              <a routerLink="/student-section/reassigne-student-section">Reassign Student Sections</a>
             </li>
             <li nz-menu-item>
-              <a routerLink="/student-section/reassigne-student-section">Reassign Section</a>
+              <a routerLink="/student-section/section-assigned-students">View Generated Sections</a>
+            </li>
+
+            <li nz-menu-item>
+              <a routerLink="/student-section/instructor-sections">Assign Instructors to Sections</a>
             </li>
           </ul>
         </li>
@@ -95,6 +99,9 @@
           <ul>
             <li nz-menu-item>
               <a routerLink="/students">View Students</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/course/course-exemption-list">Course Exemptions</a>
             </li>
             <!-- <li nz-menu-item>
               <a routerLink="/applicants">Review Applicants</a>
@@ -157,14 +164,19 @@
             <li nz-menu-item>
               <a routerLink="/staffs">New Staff</a>
             </li>
-            <li nz-menu-item>
-              <a routerLink="/course">Course</a>
-            </li>
-            <li nz-menu-item>
-              <a routerLink="/course/course-prerequisite">Course Prerequisite</a>
-            </li>
-            <li nz-menu-item>
-              <a routerLink="/course/course-equivalent">Course Equivalent</a>
+            <li nz-submenu nzTitle="Course Management" nzIcon="book">
+              <ul>
+                <li nz-menu-item>
+                  <a routerLink="/course">Courses</a>
+                </li>
+                <li nz-menu-item>
+                  <a routerLink="/course/course-prerequisite">Course Prerequisites</a>
+                </li>
+                <li nz-menu-item>
+                  <a routerLink="/course/course-equivalent">Course Equivalents</a>
+                </li>
+
+              </ul>
             </li>
             <li nz-menu-item>
               <a routerLink="/colleges/academic-term">Academic Terms</a>
@@ -250,6 +262,11 @@
           <span> <a routerLink="/students/grade-change-request">Grade Change Request</a></span>
         </li>
 
+        <li nz-menu-item>
+          <i nz-icon nzType="sliders"></i>
+          <span> <a routerLink="/student-section/assigned-instructor-section">Assigned Section</a></span>
+        </li>
+
       </div>
       <!-- userType == 'Student' -->
       <div *ngIf="isUserStudent || isUserApprovedApplicant">
@@ -266,9 +283,9 @@
             <li nz-menu-item>
               <a routerLink="/students/course-add-request">Course Add and Drop</a>
             </li>
-            <!-- <li nz-menu-item>
-              <a routerLink="/students/register-semester-course">Registered Courses</a>
-            </li> -->
+            <li nz-menu-item>
+              <a routerLink="/reports/registration-slip">Course Registration Slip</a>
+            </li>
           </ul>
         </li>
         <li nz-submenu nzTitle="Profile Detail" nzIcon="user">
@@ -279,9 +296,10 @@
             <li nz-menu-item>
               <a routerLink="/student-application/applicant-profile">Applicant Profile</a>
             </li>
-            <!-- <li nz-menu-item>
+            <li nz-menu-item>
               <a routerLink="/students/register-semester-course">Enrollment Details</a>
-            </li> -->
+            </li>
+
             <!-- <li nz-menu-item>
               <a routerLink="#">Academic History</a>
             </li> -->
@@ -294,6 +312,13 @@
             <a routerLink="/banks/pending-payment">Registration Payment </a>
           </span>
         </li>
+        <li nz-menu-item>
+          <i nz-icon nzType="ordered-list" nzTheme="outline"></i>
+          <span>
+            <a routerLink="/student-section/course-section-assignment">Course Section</a>
+          </span>
+        </li>
+
       </div>
 
       <div *ngIf="isUserReviewer">

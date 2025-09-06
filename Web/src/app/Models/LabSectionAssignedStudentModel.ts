@@ -4,6 +4,8 @@ export interface LabSectionAssignedStudentInfo {
   batchCode: string;
   fullName: string;
   section: string;
+  sectionId: number; 
+  numberOfGeneratedSections: number;
 }
 
 export interface LabSectionAssignedStudentsResponse {

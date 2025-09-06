@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SectionAssignedStudentInfo } from '../../Models/SectionAssignedStudentModel';
 import { SectionViewModel } from '../../Models/SectionViewModel';
 import { CustomNotificationService } from '../../services/custom-notification.service';
-import { ACADEMIC_TERM_STATUS } from '../../common/constant';
+import { ACADEMIC_TERM_STATUS, SECTION_TYPE } from '../../common/constant';
 import { TermCourseOfferingService } from '../../colleges/services/term-course-offering.service';
 import { StaticData } from '../../admission-request/model/StaticData';
 import { StudentSectionAssignmentService } from 'src/app/services/student-section-assignment.service';
@@ -31,6 +31,7 @@ export class SectionAssignedStudentsComponent implements OnInit {
 
   // Form data - same as StudentSectionAssignmentsComponent
   listOfTermNumber: StaticData[] = [];
+  listOfSectionType: StaticData[] = [];
   yearList: number[] = [];
   listOfBatch: any[] = [];
   listOfSections: SectionViewModel[] = [];
@@ -49,6 +50,7 @@ export class SectionAssignedStudentsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.getListOfSectionType();
     this.academicTerm.valueChanges.subscribe(res => {
       if (res && this.year.value) {
         this.getListOfBatch(res, this.year.value);
@@ -62,8 +64,17 @@ export class SectionAssignedStudentsComponent implements OnInit {
     });
 
     // Subscribe to batchCode changes to load available sections
-    this.batchCode.valueChanges.subscribe(batchCode => {
-      if (batchCode && this.academicTerm.value && this.year.value) {
+    // this.batchCode.valueChanges.subscribe(batchCode => {
+    //   if (batchCode && this.academicTerm.value && this.year.value) {
+    //     this.loadAvailableSections();
+    //     this.getListOfCourse();
+    //   }
+
+    // });
+
+    this.sectionType.valueChanges.subscribe(sectionType => {
+
+      if (this.academicTerm.value && this.year.value && this.batchCode.value) {
         this.loadAvailableSections();
         this.getListOfCourse();
       }
@@ -76,6 +87,7 @@ export class SectionAssignedStudentsComponent implements OnInit {
       academicTerm: [null, Validators.required],
       year: [null, Validators.required],
       batchCode: [null, Validators.required],
+      sectionType: [null, Validators.required],
       courseId: [null, Validators.required],
       sectionId: [null, Validators.required]
     });
@@ -87,6 +99,9 @@ export class SectionAssignedStudentsComponent implements OnInit {
 
   get year() {
     return this.searchForm.get("year");
+  }
+  get sectionType() {
+    return this.searchForm.get("sectionType");
   }
 
   get batchCode() {
@@ -140,6 +155,16 @@ export class SectionAssignedStudentsComponent implements OnInit {
       default: return `Term ${term}`;
     }
   }
+  getListOfSectionType() {
+    let division: StaticData = new StaticData();
+    SECTION_TYPE.forEach(pair => {
+      division = {
+        Id: pair.Id,
+        Description: pair.Description
+      };
+      this.listOfSectionType.push(division);
+    });
+  }
   getListOfCourse() {
     if (!this.batchCode.value || !this.academicTerm.value || !this.year.value) {
       return;
@@ -153,14 +178,14 @@ export class SectionAssignedStudentsComponent implements OnInit {
     const academicTerm = this.academicTerm.value;
     const year = this.year.value;
     const batchCode = this.batchCode.value;
-    // console.log("Course loading with values:", { academicTerm, year, batchCode });
+    const sectionType = this.sectionType.value;
     this.studentSectionAssignmentService
-      .getStudentRegisteredCourses(batchCode, academicTerm, year)
+      .getStudentRegisteredCourses(batchCode, academicTerm, year, sectionType)
       .subscribe({
         next: (res: StudentRegisteredCoursesResult) => {
           this.loadingCourses = false;
           this.registeredCourses = res.courses || [];
-         
+
         },
         error: (error) => {
           this.loadingCourses = false;
@@ -173,23 +198,17 @@ export class SectionAssignedStudentsComponent implements OnInit {
     if (!this.batchCode.value || !this.academicTerm.value || !this.year.value) {
       return;
     }
-
     this.loadingSections = true;
     this.availableSections = [];
     this.listOfSections = [];
 
     this.studentSectionAssignmentService
-      .getListOfSectionBasedOnBatch(this.batchCode.value, this.academicTerm.value, this.year.value)
+      .getListOfSectionBasedOnBatch(this.batchCode.value, this.academicTerm.value, this.year.value, this.sectionType.value)
       .subscribe({
         next: (sections: any) => {
           this.loadingSections = false;
           this.availableSections = sections.data || [];
           this.listOfSections = sections.data;
-          // if (sections.data.length > 0) {
-          //   this.notificationService.notification('success', 'Success', `Found ${sections.length} available sections`);
-          // } else {
-          //   this.notificationService.notification('info', 'Info', 'No sections found for the selected criteria');
-          // }
         },
         error: (error) => {
           this.loadingSections = false;
@@ -205,10 +224,10 @@ export class SectionAssignedStudentsComponent implements OnInit {
       this.errorMessage = '';
       this.successMessage = '';
 
-      const { batchCode, academicTerm, year, courseId, sectionId } = this.searchForm.value;
+      const { batchCode, academicTerm, year, sectionType, courseId, sectionId } = this.searchForm.value;
 
       this.studentSectionAssignmentService
-        .getListOfSectionAssignedStudents(batchCode, academicTerm, year, courseId || undefined, sectionId || undefined)
+        .getListOfSectionAssignedStudents(batchCode, academicTerm, year, sectionType, courseId || undefined, sectionId || undefined)
         .subscribe({
           next: (response) => {
             this.loading = false;
@@ -357,7 +376,7 @@ export class SectionAssignedStudentsComponent implements OnInit {
                 <th class="no-col">No.</th>
                 <th class="name-col">Name</th>
                 <th class="batch-col">Batch</th>
-                ${Array.from({length: 24}, (_, i) => `<th class="attendance-col">${i + 1}</th>`).join('')}
+                ${Array.from({ length: 24 }, (_, i) => `<th class="attendance-col">${i + 1}</th>`).join('')}
               </tr>
             </thead>
             <tbody>
@@ -366,7 +385,7 @@ export class SectionAssignedStudentsComponent implements OnInit {
                   <td class="no-col">${index + 1}</td>
                   <td class="name-col">${student.fullName}</td>
                   <td class="batch-col">${student.batchCode}</td>
-                  ${Array.from({length: 24}, () => '<td class="attendance-col"></td>').join('')}
+                  ${Array.from({ length: 24 }, () => '<td class="attendance-col"></td>').join('')}
                 </tr>
               `).join('')}
             </tbody>
@@ -497,7 +516,7 @@ export class SectionAssignedStudentsComponent implements OnInit {
 
     // Create CSV content with proper formatting for Excel
     const csvRows = [];
-    
+
     // Add header information
     csvRows.push(['HILCoE School of Computer Science & Technology', '', '', '', '', '', '', '', '', '']);
     csvRows.push(['Result Submission Sheet', '', '', '', '', '', '', '', '', '']);
@@ -530,7 +549,7 @@ export class SectionAssignedStudentsComponent implements OnInit {
     });
 
     // Convert to CSV string
-    const csvContent = csvRows.map(row => 
+    const csvContent = csvRows.map(row =>
       row.map(cell => {
         // Escape quotes and wrap in quotes if contains comma or newline
         const escaped = cell.replace(/"/g, '""');

@@ -1,0 +1,140 @@
+<div class="content-container">
+  <!-- Page Header -->
+  <div class="header-section">
+    <div class="page-title">
+      <h1>Course Exemptions</h1>
+      <p class="subtitle">Manage and view all course exemption requests and approvals</p>
+    </div>
+    <div class="header-actions">
+      <button nz-button nzType="primary" class="add-btn" (click)="addCourseExemption()">
+        <i nz-icon nzType="plus" nzTheme="outline"></i>
+        Add Course Exemption
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="search-section">
+    <div class="search-header">
+      <h3>Search</h3>
+      <button nz-button nzType="default" nzSize="small" (click)="reset()" class="clear-search-btn" *ngIf="searchValue">
+        <i nz-icon nzType="clear" nzTheme="outline"></i>
+        Clear
+      </button>
+    </div>
+
+    <div class="search-controls">
+      <div class="search-group">
+        <label>Search All Fields</label>
+        <nz-input-group [nzSuffix]="suffixIconSearch">
+          <input type="text" nz-input placeholder="Search by student name, course, college, or grade..."
+            [(ngModel)]="searchValue" (input)="search()" />
+          <ng-template #suffixIconSearch>
+            <i nz-icon nzType="search" nzTheme="outline"></i>
+          </ng-template>
+        </nz-input-group>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div id="print-section">
+      <nz-table #basicTable [nzData]="listOfDisplayData" nzBordered [nzPageSize]="10" [nzShowPagination]="true"
+        [nzShowSizeChanger]="true" [nzShowQuickJumper]="true" [nzLoading]="loading" [nzNoResult]="emptyTpl"
+        class="exemptions-table">
+        <thead>
+          <tr>
+            <th class="sn-column">S/N</th>
+            <th nzSortKey="studentName" (nzSortOrderChange)="sort($event)" nzShowSort>
+              Student Name
+            </th>
+            <th nzSortKey="exemptionCourseName" (nzSortOrderChange)="sort($event)" nzShowSort>
+              Course Exemption
+            </th>
+            <th nzSortKey="exemptionCourseName" (nzSortOrderChange)="sort($event)" nzShowSort>
+              Exempted Course
+            </th>
+            <th nzSortKey="exemptionCourseName" (nzSortOrderChange)="sort($event)" nzShowSort>
+              Exempted Course Credit
+            </th>
+            <th nzSortKey="exemptedCollegeName" (nzSortOrderChange)="sort($event)" nzShowSort>
+             Exempted College
+            </th>
+            <th nzSortKey="grade" (nzSortOrderChange)="sort($event)" nzShowSort>
+              Grade
+            </th>
+          
+            <th class="action-column">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of basicTable.data; let i = index">
+            <td class="sn-column">
+              <span class="sn-badge">{{ i + 1 }}</span>
+            </td>
+            <td>
+              <div class="student-info">
+                <strong>{{ data.studentName || 'N/A' }}</strong>
+              </div>
+            </td>
+            <td>
+              <div class="course-info">
+                <strong>{{ data.exemptionCourse || 'N/A' }}</strong>
+               
+              </div>
+            </td>
+            <td>
+              <div class="course-info">
+                <strong>{{ data.exemptedCourseCode || 'N/A' }}</strong>
+                <br>
+                <small class="course-title">{{ data.exemptedCourseName || 'N/A' }} </small>
+              </div>
+            </td>
+            <td>
+              <span class="college-name">{{ data.exemptedCourseCredit || 'N/A' }}</span>
+            </td>
+            <td>
+              <span class="college-name">{{ data.exemptedCollegeName || 'N/A' }}</span>
+            </td>
+            <td>
+              <nz-tag [nzColor]="getGradeColor(data.grade)" class="grade-tag">
+                {{ data.grade || 'N/A' }}
+              </nz-tag>
+            </td>
+           
+            <td class="action-column">
+              <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomLeft" class="action-button">
+                <i nz-icon nzType="more" nzTheme="outline"></i>
+              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li>
+                    <a [routerLink]="['/course/course-exemption-form', data.id]" nz-button nzType="default"
+                      class="action-item edit">
+                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                      <span>Edit</span>
+                    </a>
+                  </li>
+                  <li>
+                    <button nz-button nzDanger nzType="default" class="action-item delete"
+                      (click)="showDeleteConfirm(data.id!)">
+                      <i nz-icon nzType="delete" nzTheme="fill"></i>
+                      <span>Delete</span>
+                    </button>
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </td>
+          </tr>
+        </tbody>
+        <ng-template #emptyTpl>
+          <div class="no-data">
+            <i nz-icon nzType="file-text" nzTheme="outline"></i>
+            <p>No course exemption records available</p>
+          </div>
+        </ng-template>
+      </nz-table>
+    </div>
+  </div>
+</div>

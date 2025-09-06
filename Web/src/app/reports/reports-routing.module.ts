@@ -9,6 +9,7 @@ import { RegisteredStudentPerBatchComponent } from './registered-student-per-bat
 import { CourseOfferedPerAcademicTermComponent } from './course-offered-per-academic-term/course-offered-per-academic-term.component';
 import { AcademicTermRegistrationSlipComponent } from './academic-term-registration-slip/academic-term-registration-slip.component';
 import { TranscriptSearchComponent } from './transcript-search/transcript-search.component';
+import { StudentSemsterCourseRegistrationSlipComponent } from './student-semster-course-registration-slip/student-semster-course-registration-slip.component';
 
 const routes: Routes = [
   { path: '', component: ReportsComponent },
@@ -19,6 +20,7 @@ const routes: Routes = [
   { path: 'course-offered-per-term', component: CourseOfferedPerAcademicTermComponent },
   { path: 'academic-term-registration-slip', component: AcademicTermRegistrationSlipComponent },
   { path: 'transcript-search', component: TranscriptSearchComponent },
+  { path: 'registration-slip', component: StudentSemsterCourseRegistrationSlipComponent },
 ];
 
 @NgModule({

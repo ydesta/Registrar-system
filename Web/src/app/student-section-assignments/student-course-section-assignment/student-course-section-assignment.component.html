@@ -1,0 +1,172 @@
+<div class="content-container">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+        <nz-spin nzSize="large"></nz-spin>
+        <p>Loading profile information...</p>
+    </div>
+
+    <ng-container *ngIf="studentProfile">
+        <nz-card nzType="inner" nzTitle="Student Details" class="student-card">
+            <div nz-row nzGutter="16">
+                <div nz-col nzSpan="8">
+                    <div class="photo-container">
+                        <ng-container
+                            *ngIf="(isValidProfilePicture(profilePicture) || profilePicture); else defaultAvatar">
+                            <img class="custom-avatar" [src]="profilePicture" alt="Profile Photo" />
+                        </ng-container>
+                        <ng-template #defaultAvatar>
+                            <div class="default-avatar">
+                                {{ initials }}
+                            </div>
+                        </ng-template>
+                        <h2 class="student-name">{{ studentProfile.fullName }}</h2>
+                        <h4 class="student-program">{{ studentProfile.academicProgram }}</h4>
+                    </div>
+                </div>
+
+                <div nz-col nzSpan="10">
+                    <div class="info-container">
+                        <div class="info-row">
+                            <i nz-icon nzType="idcard" class="icon"></i>
+                            <p><strong>Student Code:</strong> {{ studentProfile.studentCode }}</p>
+                        </div>
+
+                        <div class="info-row">
+                            <i nz-icon nzType="calendar" class="icon"></i>
+                            <p><strong>Birth Date:</strong> {{ studentProfile.birthDate | date }}</p>
+                        </div>
+
+                        <div class="info-row">
+                            <i nz-icon nzType="home" class="icon"></i>
+                            <p><strong>Birth Place:</strong> {{ studentProfile.birthPlace }}</p>
+                        </div>
+                        <div class="info-row">
+                            <i nz-icon nzType="file-markdown" class="icon"></i>
+                            <p><strong>Email:</strong> {{ studentProfile.email }}</p>
+                        </div>
+                        <div class="info-row">
+                            <i nz-icon nzType="phone" class="icon"></i>
+                            <p><strong>Phone Number:</strong> {{studentProfile.phoneNo}}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div nz-col nzSpan="6">
+                    <div class="info-container">
+                        <div class="info-row">
+                            <i nz-icon nzType="book" class="icon"></i>
+                            <p><strong>Batch:</strong> {{ studentProfile.batch }}</p>
+                        </div>
+                        <div class="info-row">
+                            <i nz-icon nzType="bg-colors" class="icon"></i>
+                            <p><strong>Nationality:</strong> {{studentProfile.nationality}}</p>
+                        </div>
+
+                        <div class="info-row">
+                            <i nz-icon nzType="team" class="icon"></i>
+                            <p><strong>Gender:</strong> {{ studentProfile.gender }}</p>
+                        </div>
+                        <div class="info-row">
+                            <i nz-icon nzType="calendar" class="icon"></i>
+                            <p><strong>Entry Year:</strong> {{ studentProfile.entryYear }}</p>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </nz-card>
+
+
+        <!-- <nz-tabset class="custom-tabset" nzType="card" style="margin-top: 10px; text-align: left">
+      <nz-tab [nzTitle]="titleTemplate" class="custom-tab"
+        *ngFor="let academicYear of studentProfile?.studentAcademicYears">
+        <ng-template #titleTemplate>
+          <span nz-icon nzType="calendar"></span>
+          {{ academicYear.year.toString() }}
+        </ng-template>
+
+        <div class="academic-year-container">
+          <div *ngFor="let academicTerm of academicYear?.studentAcademicTerms" class="academic-term">
+
+            <div style="float: left">
+              <h2>
+                Registration Date:- {{ academicTerm.registrationDate | date }} -
+                {{ getAcademicTermStatusDescription(academicTerm.academicTerm) }}
+              </h2>
+            </div>
+            <nz-table [nzData]="academicTerm.studentCoursesTaken" [nzSize]="'middle'" [nzShowPagination]="false"
+              class="table-container">
+              <thead>
+                <tr>
+                  <th>Course Name</th>
+                  <th>Credit Hours</th>
+                  <th>Grade</th>
+                  <th>Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let course of academicTerm.studentCoursesTaken">
+                  <td>{{ course.courseName }}</td>
+                  <td>{{ course.creditHours }}</td>
+                  <td>{{ course.grade }}</td>
+                  <td>{{ course.points }}</td>
+                </tr>
+              </tbody>
+              <tfoot class="footer-total">
+                <tr>
+                  <td>Total</td>
+                  <td>{{ getTotalCreditHours(academicTerm.studentCoursesTaken) }}</td>
+                  <td></td>
+                  <td>{{ getTotalPoints(academicTerm.studentCoursesTaken) }}</td>
+                </tr>
+                <tr>
+                  <td>GPA</td>
+                  <td></td>
+                  <td></td>
+                  <td>{{ getGPA(academicTerm.studentCoursesTaken) | number: '1.2-2' }}</td>
+                </tr>
+              </tfoot>
+            </nz-table>
+          </div>
+        </div>
+      </nz-tab>
+    </nz-tabset> -->
+        <nz-collapse class="custom-collapse" nzAccordion>
+            <nz-collapse-panel *ngFor="let academicYear of studentProfile?.studentSectionYear"
+                [nzHeader]="academicYear.year.toString()" [nzActive]="false">
+                <div class="academic-year-container">
+                    <div *ngFor="let academicTerm of academicYear?.studentSection" class="academic-term">
+                        <div style="float: left">
+                            <h2>
+                                {{ academicTerm.academicTerm }} - {{
+                                academicYear.year.toString() }}
+                            </h2>
+                        </div>
+                        <nz-table [nzData]="academicTerm.courseSections" [nzSize]="'middle'" [nzShowPagination]="false"
+                            class="table-container">
+                            <thead>
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Course Title</th>
+                                    <th>Section</th>
+                                    <th>Instructor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let course of academicTerm.courseSections">
+                                    <td>{{ course.courseCode }}</td>
+                                    <td>{{ course.courseTitle }}</td>
+                                    <td>{{ course.sectionName }}</td>
+                                    <td>{{course.instructor}}</td>
+                                </tr>
+                            </tbody>
+
+                        </nz-table>
+                    </div>
+                </div>
+            </nz-collapse-panel>
+        </nz-collapse>
+
+    </ng-container>
+</div>

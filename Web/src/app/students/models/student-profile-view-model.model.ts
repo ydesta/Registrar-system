@@ -16,7 +16,8 @@ export class StudentProfileViewModel {
     public status: string;
     public isDeleted: boolean;
     public studentAcademicYears: StudentAcademicYears[];
-    public studentCoursesTaken: StudentCoursesTaken[]
+    public studentCoursesTaken: StudentCoursesTaken[];
+    public studentSectionYear: SectionYearResult[];
 }
 export class StudentAcademicYears {
     public academicYear: number;
@@ -69,16 +70,31 @@ export class CourseViewModel {
     public creditHours: number;
     public totalAmount: number;
 }
-export class RegisteredNewStudentViewModel
-{
-    public id:string
-    public fullName:string
+export class RegisteredNewStudentViewModel {
+    public id: string
+    public fullName: string
     public academicProgram: string;
     public registeredDate: Date;
-    public currentEmail :string;
-    public previousEmail:string;
+    public currentEmail: string;
+    public previousEmail: string;
     public phoneNumber: string;
     public applicationUserId: string;
-    public isEmailChanged:boolean;
-    public entryYear:number
+    public isEmailChanged: boolean;
+    public entryYear: number
+}
+export interface CourseSectionAssignmentViewModel {
+    courseCode: string;
+    courseTitle: string;
+    sectionName: string;
+    instructor: string;
+}
+
+export interface StudentSectionResult {
+    academicTerm: string;
+    courseSections: CourseSectionAssignmentViewModel[];
+}
+
+export interface SectionYearResult {
+    year: number;
+    studentSection: StudentSectionResult[];
 }

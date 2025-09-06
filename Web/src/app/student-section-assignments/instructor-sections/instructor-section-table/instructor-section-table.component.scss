@@ -1,0 +1,754 @@
+// Content Container - matching ReassignmentStudentSectionComponent
+.content-container {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+// Header Section - matching ReassignmentStudentSectionComponent
+.header-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .page-title {
+    h1 {
+      margin: 0;
+      color: #1f2937;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin: 8px 0 0 0;
+      color: #6b7280;
+      font-size: 14px;
+    }
+  }
+
+  .header-actions {
+    .add-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #1890ff, #096dd9);
+      border: none;
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+
+      &:hover {
+        background: linear-gradient(135deg, #40a9ff, #1890ff);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+      }
+
+      i {
+        color: white;
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+// Search Section Styles - Updated to match ReassignmentStudentSectionComponent
+.search-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+
+  ::ng-deep .ant-collapse {
+    border: none;
+
+    .ant-collapse-item {
+      border: none;
+
+      .ant-collapse-header {
+        background: linear-gradient(135deg, #fafafa, #f5f5f5);
+        padding: 16px 24px;
+        font-weight: 500;
+        color: #1f2937;
+        border-radius: 8px;
+
+        .anticon {
+          margin-right: 8px;
+          color: #1890ff;
+        }
+      }
+
+      .ant-collapse-content {
+        border: none;
+
+        .ant-collapse-content-box {
+          padding: 24px;
+        }
+      }
+    }
+  }
+
+  // Form styles - matching ReassignStudentSectionComponent
+  form {
+    .ant-form-item {
+      margin-bottom: 20px;
+
+      .ant-form-item-label {
+        label {
+          font-weight: 500;
+          color: #374151;
+          font-size: 14px;
+
+          &::before {
+            color: #ff4d4f;
+            margin-right: 4px;
+          }
+        }
+      }
+
+      .ant-form-item-control {
+        .ant-input,
+        .ant-select-selector {
+          width: 100%;
+          min-width: 200px;
+          height: 44px;
+          padding: 10px 16px;
+          font-size: 14px;
+          border-radius: 8px;
+          border: 1.5px solid #e8e8e8;
+          transition: all 0.3s ease;
+          background: #fafafa;
+
+          &:hover {
+            border-color: #40a9ff;
+            background: #fff;
+          }
+
+          &:focus {
+            border-color: #1890ff;
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+          }
+
+          &::placeholder {
+            color: #bfbfbf;
+          }
+        }
+
+        .ant-select-selector {
+          height: 44px !important;
+          padding: 0 16px !important;
+          border-radius: 8px !important;
+          border: 1.5px solid #e8e8e8 !important;
+          background: #fafafa !important;
+
+          .ant-select-selection-search-input {
+            height: 42px !important;
+          }
+
+          .ant-select-selection-item {
+            line-height: 42px !important;
+            color: #262626;
+          }
+        }
+
+        // Field hint styling
+        .field-hint {
+          margin-top: 4px;
+          font-size: 12px;
+          color: #8c8c8c;
+          font-style: italic;
+        }
+      }
+    }
+
+    // Action buttons styling - matching ReassignStudentSectionComponent
+    .ant-row:last-child {
+      .ant-col {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+
+        button {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          border-radius: 8px;
+          transition: all 0.3s ease;
+          font-weight: 500;
+          height: 44px;
+
+          &.ant-btn-default {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 1px solid #e8e8e8;
+            color: #374151;
+
+            &:hover {
+              background: linear-gradient(135deg, #e9ecef, #dee2e6);
+              transform: translateY(-1px);
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            i {
+              font-size: 16px;
+            }
+          }
+
+          &.ant-btn-primary {
+            background: linear-gradient(135deg, #1890ff, #096dd9);
+            border: none;
+            color: white;
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+
+            &:hover {
+              background: linear-gradient(135deg, #40a9ff, #1890ff);
+              transform: translateY(-1px);
+              box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+            }
+
+            &:active {
+              transform: translateY(0);
+              box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+            }
+
+            &:disabled {
+              background: linear-gradient(135deg, #d9d9d9, #bfbfbf);
+              box-shadow: none;
+              cursor: not-allowed;
+              transform: none;
+            }
+
+            i {
+              font-size: 16px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Table Styles - Updated to match modern design
+nz-table {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+
+  .ant-table-thead > tr > th {
+    background: linear-gradient(135deg, #fafafa, #f5f5f5);
+    font-weight: 600;
+    color: #262626;
+    padding: 16px;
+    border-bottom: 2px solid #f0f0f0;
+    transition: all 0.3s;
+
+    &:hover {
+      background: linear-gradient(135deg, #f0f0f0, #e6e6e6);
+    }
+  }
+
+  .ant-table-tbody > tr > td {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.3s;
+  }
+
+  .ant-table-tbody > tr:hover > td {
+    background: #f5f5f5;
+  }
+
+  .ant-table-tbody > tr:nth-child(even) > td {
+    background: #fafafa;
+  }
+
+  .ant-table-tbody > tr:nth-child(even):hover > td {
+    background: #f0f0f0;
+  }
+
+  .actions-column {
+    width: 120px;
+    text-align: center;
+  }
+}
+
+// Tag styles for academic terms - Updated
+::ng-deep nz-tag {
+  border-radius: 4px;
+  font-weight: 500;
+  padding: 4px 8px;
+}
+
+// Button styles - Updated to match ReassignStudentSectionComponent
+::ng-deep .ant-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  height: 44px;
+
+  &.ant-btn-primary {
+    background: linear-gradient(135deg, #1890ff, #096dd9);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+
+    &:hover {
+      background: linear-gradient(135deg, #40a9ff, #1890ff);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+    }
+
+    &:disabled {
+      background: linear-gradient(135deg, #d9d9d9, #bfbfbf);
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+
+  &.ant-btn-dangerous {
+    background: linear-gradient(135deg, #ff4d4f, #cf1322);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3);
+
+    &:hover {
+      background: linear-gradient(135deg, #ff7875, #ff4d4f);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(255, 77, 79, 0.4);
+    }
+  }
+
+  i {
+    font-size: 16px;
+  }
+}
+
+// Space component styles
+.ant-space {
+  gap: 8px;
+}
+
+// Action button styles
+.action-btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  min-width: 70px;
+  height: 32px;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  &.edit-btn {
+    background: linear-gradient(135deg, #1890ff, #096dd9);
+    border: none;
+    color: white;
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+
+    &:hover {
+      background: linear-gradient(135deg, #40a9ff, #1890ff);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+    }
+
+    i {
+      color: white;
+      font-size: 14px;
+    }
+  }
+
+  &.delete-btn {
+    background: linear-gradient(135deg, #ff4d4f, #cf1322);
+    border: none;
+    color: white;
+    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
+
+    &:hover {
+      background: linear-gradient(135deg, #ff7875, #ff4d4f);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 77, 79, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
+    }
+
+    i {
+      color: white;
+      font-size: 14px;
+    }
+  }
+}
+
+// Professional Dropdown Menu Styling
+::ng-deep .ant-dropdown {
+  .ant-dropdown-menu {
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border: 1px solid #f0f0f0;
+    padding: 8px;
+    min-width: 140px;
+    background: white;
+
+    .ant-dropdown-menu-item {
+      padding: 0;
+      margin: 4px 0;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: transparent;
+      }
+
+      button {
+        width: 100%;
+        height: 40px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        padding: 0 16px;
+        transition: all 0.2s ease;
+        text-align: left;
+
+        i {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        span {
+          font-weight: 500;
+        }
+
+        &:hover {
+          transform: translateX(4px);
+        }
+      }
+
+      // Edit button styling
+      button[ng-reflect-nz-type="default"] {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        color: #1890ff;
+        border: 1px solid #e8e8e8;
+
+        &:hover {
+          background: linear-gradient(135deg, #e6f7ff, #bae7ff);
+          border-color: #91d5ff;
+          color: #0050b3;
+          box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+        }
+
+        i {
+          color: #1890ff;
+        }
+      }
+
+      // Delete button styling
+      button[nz-button][nzDanger] {
+        background: linear-gradient(135deg, #fff2f0, #ffebe8);
+        color: #ff4d4f;
+        border: 1px solid #ffccc7;
+
+        &:hover {
+          background: linear-gradient(135deg, #ffebe8, #ffd6e7);
+          border-color: #ffadd2;
+          color: #cf1322;
+          box-shadow: 0 4px 12px rgba(255, 77, 79, 0.15);
+        }
+
+        i {
+          color: #ff4d4f;
+        }
+      }
+    }
+  }
+}
+
+// Action column and dropdown button styling
+.action-column {
+  width: 80px;
+  text-align: center;
+
+  .action-dropdown-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid #e8e8e8;
+    background: linear-gradient(135deg, #fafafa, #f5f5f5);
+    color: #595959;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+
+    &:hover {
+      background: linear-gradient(135deg, #f0f0f0, #e6e6e6);
+      border-color: #40a9ff;
+      color: #1890ff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    .more {
+      font-size: 16px;
+      color: inherit;
+    }
+  }
+}
+
+// Serial Number Badge Styling
+.sn-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 4px 8px;
+  background: #1890ff;
+  color: white;
+  border: 1px solid #1890ff;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #40a9ff;
+    border-color: #40a9ff;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+  }
+}
+
+// No Data Message - matching ReassignmentStudentSectionComponent
+.no-data-message {
+  text-align: center;
+  padding: 48px 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 24px;
+
+  ::ng-deep .ant-empty {
+    .ant-empty-description {
+      color: #8c8c8c;
+    }
+  }
+
+  .no-data-content {
+    h3 {
+      margin: 16px 0 8px 0;
+      color: #1f2937;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0 0 24px 0;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .add-first-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 auto;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #1890ff, #096dd9);
+      border: none;
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+
+      &:hover {
+        background: linear-gradient(135deg, #40a9ff, #1890ff);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+      }
+
+      i {
+        color: white;
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+// Responsive design for search section
+@media (max-width: 768px) {
+  .content-container {
+    padding: 16px;
+  }
+
+  .header-section {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+
+    .page-title {
+      h1 {
+        font-size: 20px;
+      }
+    }
+  }
+
+  .search-section {
+    padding: 16px;
+    margin-bottom: 16px;
+
+    .ant-collapse {
+      .ant-collapse-item {
+        .ant-collapse-header {
+          padding: 12px 16px;
+
+          .ant-collapse-header-text {
+            font-size: 14px;
+          }
+        }
+
+        .ant-collapse-content-box {
+          padding: 16px;
+        }
+      }
+    }
+
+    form {
+      .ant-col {
+        margin-bottom: 16px;
+      }
+
+      .ant-form-item-label {
+        label {
+          font-size: 13px;
+        }
+      }
+
+      .ant-row:last-child {
+        .ant-col {
+          justify-content: center;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .content-container {
+    padding: 12px;
+  }
+
+  .header-section {
+    padding: 16px;
+
+    .page-title {
+      h1 {
+        font-size: 18px;
+      }
+
+      .subtitle {
+        font-size: 13px;
+      }
+    }
+  }
+
+  .search-section {
+    padding: 12px;
+    margin-bottom: 12px;
+
+    .ant-collapse {
+      .ant-collapse-item {
+        .ant-collapse-header {
+          padding: 10px 12px;
+
+          .ant-collapse-header-text {
+            font-size: 13px;
+          }
+        }
+
+        .ant-collapse-content-box {
+          padding: 12px;
+        }
+      }
+    }
+
+    form {
+      .ant-row:last-child {
+        .ant-col {
+          flex-direction: column;
+          gap: 8px;
+
+          button {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      }
+    }
+  }
+}

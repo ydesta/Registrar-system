@@ -1,0 +1,584 @@
+// Content Container - matching InstructorSectionTable
+.content-container {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+// Header Section - matching InstructorSectionTable
+.header-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .page-title {
+    h1 {
+      margin: 0;
+      color: #1f2937;
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 8px 0 0 0;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+  }
+
+  .header-actions {
+    .back-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border: 1px solid #e8e8e8;
+      color: #374151;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      white-space: nowrap;
+
+      &:hover {
+        background: linear-gradient(135deg, #e9ecef, #dee2e6);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        color: #1890ff;
+        border-color: #40a9ff;
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      i {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+// Form Section Styles - matching InstructorSectionTable
+.form-section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+
+  // Form styles - matching InstructorSectionTable
+  form {
+    .ant-form-item {
+      margin-bottom: 20px;
+
+      .ant-form-item-label {
+        label {
+          font-weight: 500;
+          color: #374151;
+          font-size: 14px;
+          line-height: 1.4;
+
+          &::before {
+            color: #ff4d4f;
+            margin-right: 4px;
+          }
+        }
+      }
+
+      .ant-form-item-control {
+        .ant-input,
+        .ant-select-selector {
+          width: 100%;
+          min-width: 200px;
+          height: 44px;
+          padding: 10px 16px;
+          font-size: 14px;
+          border-radius: 8px;
+          border: 1.5px solid #e8e8e8;
+          transition: all 0.3s ease;
+          background: #fafafa;
+
+          &:hover {
+            border-color: #40a9ff;
+            background: #fff;
+          }
+
+          &:focus {
+            border-color: #1890ff;
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+          }
+
+          &::placeholder {
+            color: #bfbfbf;
+          }
+        }
+
+        .ant-select-selector {
+          height: 44px !important;
+          padding: 0 16px !important;
+          border-radius: 8px !important;
+          border: 1.5px solid #e8e8e8 !important;
+          background: #fafafa !important;
+
+          .ant-select-selection-search-input {
+            height: 42px !important;
+          }
+
+          .ant-select-selection-item {
+            line-height: 42px !important;
+            color: #262626;
+          }
+        }
+
+        // Field hint styling
+        .field-hint {
+          margin-top: 4px;
+          font-size: 12px;
+          color: #8c8c8c;
+          font-style: italic;
+          line-height: 1.4;
+        }
+      }
+    }
+
+    // Action buttons styling - matching InstructorSectionTable
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #f0f0f0;
+      flex-wrap: wrap;
+
+      button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        height: 44px;
+        min-width: 100px;
+
+        &.ant-btn-default {
+          background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+          border: 1px solid #e8e8e8;
+          color: #374151;
+
+          &:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          }
+
+          i {
+            font-size: 16px;
+          }
+        }
+
+        &.ant-btn-primary {
+          background: linear-gradient(135deg, #1890ff, #096dd9);
+          border: none;
+          color: white;
+          box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+
+          &:hover {
+            background: linear-gradient(135deg, #40a9ff, #1890ff);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+          }
+
+          &:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+          }
+
+          &:disabled {
+            background: linear-gradient(135deg, #d9d9d9, #bfbfbf);
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+            color: #8c8c8c;
+            border: 1px solid #d9d9d9;
+
+            &:hover {
+              background: linear-gradient(135deg, #d9d9d9, #bfbfbf);
+              transform: none;
+              box-shadow: none;
+            }
+          }
+
+          i {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Button styles - Updated to match InstructorSectionTable
+::ng-deep .ant-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  height: 44px;
+
+  &.ant-btn-primary {
+    background: linear-gradient(135deg, #1890ff, #096dd9);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+
+    &:hover {
+      background: linear-gradient(135deg, #40a9ff, #1890ff);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+    }
+
+    &:disabled {
+      background: linear-gradient(135deg, #d9d9d9, #bfbfbf);
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+
+  i {
+    font-size: 16px;
+  }
+}
+
+// Space component styles
+.ant-space {
+  gap: 8px;
+}
+
+// Enhanced Responsive Design - Mobile First Approach
+
+// Large Desktop (1200px and above)
+@media (min-width: 1200px) {
+  .content-container {
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .form-section {
+    padding: 32px;
+  }
+}
+
+// Desktop (992px - 1199px)
+@media (max-width: 1199px) and (min-width: 992px) {
+  .content-container {
+    padding: 28px;
+  }
+
+  .form-section {
+    padding: 28px;
+  }
+}
+
+// Tablet Landscape (768px - 991px)
+@media (max-width: 991px) and (min-width: 768px) {
+  .content-container {
+    padding: 20px;
+  }
+
+  .header-section {
+    padding: 18px;
+    margin-bottom: 20px;
+
+    .page-title {
+      h1 {
+        font-size: 22px;
+      }
+
+      .subtitle {
+        font-size: 13px;
+      }
+    }
+  }
+
+  .form-section {
+    padding: 20px;
+
+    form {
+      .ant-form-item {
+        margin-bottom: 18px;
+      }
+
+      .form-actions {
+        margin-top: 28px;
+        padding-top: 20px;
+      }
+    }
+  }
+}
+
+// Tablet Portrait (576px - 767px)
+@media (max-width: 767px) and (min-width: 576px) {
+  .content-container {
+    padding: 16px;
+  }
+
+  .header-section {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+    padding: 16px;
+    margin-bottom: 16px;
+
+    .page-title {
+      h1 {
+        font-size: 20px;
+      }
+
+      .subtitle {
+        font-size: 13px;
+      }
+    }
+
+    .header-actions {
+      .back-button {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 20px;
+        height: 48px;
+      }
+    }
+  }
+
+  .form-section {
+    padding: 16px;
+
+    form {
+      .ant-col {
+        margin-bottom: 16px;
+      }
+
+      .ant-form-item {
+        margin-bottom: 16px;
+
+        .ant-form-item-label {
+          label {
+            font-size: 13px;
+          }
+        }
+
+        .ant-form-item-control {
+          .ant-input,
+          .ant-select-selector {
+            height: 40px;
+            font-size: 13px;
+            padding: 8px 14px;
+          }
+        }
+      }
+
+      .form-actions {
+        justify-content: center;
+        margin-top: 24px;
+        padding-top: 16px;
+        gap: 10px;
+
+        button {
+          min-width: 120px;
+          height: 40px;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}
+
+// Mobile (320px - 575px)
+@media (max-width: 575px) {
+  .content-container {
+    padding: 12px;
+  }
+
+  .header-section {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+
+    .page-title {
+      h1 {
+        font-size: 18px;
+        line-height: 1.3;
+      }
+
+      .subtitle {
+        font-size: 12px;
+        line-height: 1.4;
+      }
+    }
+
+    .header-actions {
+      .back-button {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 20px;
+        height: 48px;
+        font-size: 14px;
+      }
+    }
+  }
+
+  .form-section {
+    padding: 16px;
+    border-radius: 12px;
+
+    form {
+      .ant-col {
+        margin-bottom: 12px;
+      }
+
+      .ant-form-item {
+        margin-bottom: 12px;
+
+        .ant-form-item-label {
+          label {
+            font-size: 13px;
+            line-height: 1.3;
+          }
+        }
+
+        .ant-form-item-control {
+          .ant-input,
+          .ant-select-selector {
+            height: 40px;
+            font-size: 13px;
+            padding: 8px 12px;
+            min-width: 100%;
+          }
+
+          .field-hint {
+            font-size: 11px;
+            line-height: 1.3;
+          }
+        }
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 20px;
+        padding-top: 16px;
+
+        button {
+          width: 100%;
+          justify-content: center;
+          height: 44px;
+          font-size: 14px;
+          min-width: auto;
+        }
+      }
+    }
+  }
+}
+
+// Extra Small Mobile (below 320px)
+@media (max-width: 319px) {
+  .content-container {
+    padding: 8px;
+  }
+
+  .header-section {
+    padding: 12px;
+    margin-bottom: 12px;
+
+    .page-title {
+      h1 {
+        font-size: 16px;
+      }
+
+      .subtitle {
+        font-size: 11px;
+      }
+    }
+  }
+
+  .form-section {
+    padding: 12px;
+
+    form {
+      .ant-form-item {
+        margin-bottom: 10px;
+      }
+
+      .ant-form-item-control {
+        .ant-input,
+        .ant-select-selector {
+          height: 36px;
+          font-size: 12px;
+          padding: 6px 10px;
+        }
+      }
+
+      .form-actions {
+        margin-top: 16px;
+        padding-top: 12px;
+
+        button {
+          height: 40px;
+          font-size: 13px;
+        }
+      }
+    }
+  }
+}
+
+// Print styles for better printing
+@media print {
+  .content-container {
+    background: white;
+    padding: 0;
+  }
+
+  .header-section,
+  .form-section {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    break-inside: avoid;
+  }
+
+  .form-actions {
+    display: none;
+  }
+}
+

@@ -28,40 +28,83 @@ export class PortalComponent implements OnInit {
       if (localStorage.getItem('role') == '"Applicant"') {
         this.isUserApplicant = true;
       }
+    }).catch((error) => {
+      // Set default state on error
+      this.isAuthenticated = false;
+      this.currentUser = null;
+      this.isUserApplicant = false;
     });
   }
 
   public login = () => {
-    // Use the new API-based login
-    this._router.navigate(['/accounts/login']);
+    // Close mobile menu first
+    this.closeMobileMenu();
+    
+    // Use absolute navigation to ensure it works from any portal route
+    this._router.navigate(['/accounts/login']).then(() => {
+      // Navigation successful
+    }).catch((error) => {
+      // Fallback: try using window.location
+      window.location.href = '/accounts/login';
+    });
   };
 
   public register = () => {
-    this._router.navigate(['/accounts/register']);
+    // Close mobile menu first
+    this.closeMobileMenu();
+    
+    // Use absolute navigation to ensure it works from any portal route
+    this._router.navigate(['/accounts/register']).then(() => {
+      // Navigation successful
+    }).catch((error) => {
+      // Fallback: try using window.location
+      window.location.href = '/accounts/register';
+    });
   };
 
   public logout = () => {
+    this.closeMobileMenu();
+    
     this._authService.logout();
+    
+    // Reset component state
+    this.isAuthenticated = false;
+    this.currentUser = null;
+    this.isUserApplicant = false;
+    
+    // Navigate to portal home
+    this.goToHome();
   };
 
   public goToHome = () => {
-    this._router.navigate(['/portal']);
+    this._router.navigate(['/portal']).then(() => {
+      // Navigation successful
+    }).catch((error) => {
+      // Navigation failed
+    });
   };
 
   public goToDashboard = () => {
-    this._router.navigate(['/dashboard']);
+    this._router.navigate(['/dashboard']).then(() => {
+      // Navigation successful
+    }).catch((error) => {
+      // Navigation failed
+    });
   };
 
   public isOnMainPortalRoute(): boolean {
     const currentUrl = this._router.url;
+    
     // Only show main portal content when on exact /portal route
     // Don't show it when on child routes like /portal/about, /portal/programs, etc.
-    return currentUrl === '/portal' || currentUrl === '/portal/';
+    const isMainRoute = currentUrl === '/portal' || currentUrl === '/portal/';
+    return isMainRoute;
   }
 
   public isLinkActive(route: string): boolean {
     const currentUrl = this._router.url;
-    return currentUrl.includes(route);
+    const isActive = currentUrl.includes(route);
+    return isActive;
   }
 
   public toggleMobileMenu(): void {

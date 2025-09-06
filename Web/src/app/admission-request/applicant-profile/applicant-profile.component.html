@@ -1,36 +1,78 @@
-<!-- profile.component.html -->
-<app-profile-summary></app-profile-summary>
-<nz-card [nzExtra]="editButtonTemplate" style="margin-top: 10px;">
-  <nz-tabset class="custom-tabset" nzType="card" style="padding: 20px;">
-    <nz-tab nzTitle="Address" class="custom-tab">
-      <app-address></app-address>
-    </nz-tab>
+<!-- Applicant Profile Component -->
+<div class="applicant-profile-container">
+  <!-- Profile Summary Section -->
+  <div class="profile-summary-section">
+    <app-profile-summary></app-profile-summary>
+  </div>
 
-    <nz-tab nzTitle="Education Background" class="custom-tab">
-      <app-manage-education></app-manage-education>
-    </nz-tab>
+  <!-- Main Content Card -->
+  <div class="main-content-card">
+    <div class="card-header">
+      <div class="header-content">
+        <div class="title-section">
+          <span nz-icon nzType="user" nzTheme="outline" class="title-icon"></span>
+          <h2 class="page-title">Applicant Profile</h2>
+        </div>
+        <div class="subtitle">Manage your personal information and application details</div>
+      </div>
+      <div class="header-actions">
+        <button 
+          nz-button 
+          nzType="primary" 
+          nzGhost
+          class="edit-button"
+          (click)="editProfile()"
+          aria-label="Edit profile information">
+          <span nz-icon nzType="edit" nzTheme="outline"></span>
+          Edit Profile
+        </button>
+      </div>
+    </div>
 
-    <nz-tab nzTitle="Work Experience" class="custom-tab">
-      <app-manage-work-experience></app-manage-work-experience>
-    </nz-tab>
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <nz-tabset 
+        class="custom-tabset" 
+        nzType="card" 
+        [nzSelectedIndex]="selectedIndex"
+        (nzSelectedIndexChange)="onTabChange($event)"
+        [nzAnimated]="true">
+        
+        <nz-tab 
+          *ngFor="let tab of tabs; trackBy: trackByTabKey"
+          [nzTitle]="tab.title"
+          [nzDisabled]="false"
+          [attr.aria-label]="tab.ariaLabel"
+          class="custom-tab">
+          
+          <div class="tab-content" [attr.aria-labelledby]="'tab-' + tab.key">
+            <!-- Address Tab -->
+            <ng-container *ngIf="tab.key === 'address'">
+              <app-address></app-address>
+            </ng-container>
 
-    <nz-tab nzTitle="Emergency Contact" class="custom-tab">
-      <app-manage-contact-person-form></app-manage-contact-person-form>
-    </nz-tab>
+            <!-- Education Background Tab -->
+            <ng-container *ngIf="tab.key === 'education'">
+              <app-manage-education></app-manage-education>
+            </ng-container>
 
-    <nz-tab nzTitle="Program" class="custom-tab">
-      <app-manage-student-program-requester></app-manage-student-program-requester>
-    </nz-tab>
-  </nz-tabset>
-</nz-card>
+            <!-- Work Experience Tab -->
+            <ng-container *ngIf="tab.key === 'work'">
+              <app-manage-work-experience></app-manage-work-experience>
+            </ng-container>
 
-<ng-template #editButtonTemplate>
-  <!-- <button 
-    nz-button 
-    class="edit-button"
-    (click)="editProfile()"
-  >
-    <i nz-icon nzType="edit" nzTheme="outline"></i>
-    Edit Profile
-  </button> -->
-</ng-template>
+            <!-- Emergency Contact Tab -->
+            <ng-container *ngIf="tab.key === 'emergency'">
+              <app-manage-contact-person-form></app-manage-contact-person-form>
+            </ng-container>
+
+            <!-- Program Request Tab -->
+            <ng-container *ngIf="tab.key === 'program'">
+              <app-manage-student-program-requester></app-manage-student-program-requester>
+            </ng-container>
+          </div>
+        </nz-tab>
+      </nz-tabset>
+    </div>
+  </div>
+</div>

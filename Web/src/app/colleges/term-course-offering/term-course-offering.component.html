@@ -136,10 +136,34 @@
                           <td class="credit-column">{{ course.creditHours }}</td>
                           <td class="instructor-column">{{ course.noOfAssignedInstructor }}</td>
                           <td class="nested-action-column">
-                            <button class="assign-instructor-btn" (click)="openModal(course)"> 
-                              <span nz-icon nzType="user-add" nzTheme="outline"></span>
-                              <span class="btn-text">Assign Instructor</span>
-                            </button>
+                            <!-- Debug: courseOfferingId={{ course.courseOfferingId }}, isActive={{ course.isActive }} -->
+                            <ng-container>
+                              <button nz-button nz-dropdown [nzDropdownMenu]="courseMenu" nzPlacement="bottomLeft" class="action-dropdown-btn">
+                                <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
+                              </button>
+                              <nz-dropdown-menu #courseMenu="nzDropdownMenu">
+                                <ul nz-menu style="padding-right: 50px">
+                                  <li class="assign-instructor">
+                                    <button nz-button nzType="default" (click)="openModal(course)">
+                                      <i nz-icon nzType="user-add" nzTheme="outline"></i>
+                                      <span>Assign Instructor</span>
+                                    </button>
+                                  </li>
+                                  <li [class]="course.isActive ? 'deactivate' : 'activate'">
+                                    <button 
+                                      nz-button 
+                                      [nzDanger]="course.isActive == true"
+                                      nzType="default" 
+                                      (click)="course.isActive == true ? showDeactivateCourseOffering(course.courseOfferingId) : showActivateCourseOffering(course.courseOfferingId)">
+                                      <i nz-icon 
+                                         [nzType]="course.isActive == true ? 'stop' : 'play-circle'" 
+                                         [nzTheme]="course.isActive == true ? 'fill' : 'outline'"></i>
+                                      <span>{{ course.isActive == true ? 'Deactivate' : 'Activate' }}</span>
+                                    </button>
+                                  </li>
+                                </ul>
+                              </nz-dropdown-menu>
+                            </ng-container>
                           </td>
                         </tr>
                       </tbody>

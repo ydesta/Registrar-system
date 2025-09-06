@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TrackByFunction, OnDestroy } from '@angular/core';
 import { StaticData } from 'src/app/admission-request/model/StaticData';
 import { ACADEMIC_TERM_STATUS } from 'src/app/common/constant';
 import { StudentProfileViewModel } from 'src/app/students/models/student-profile-view-model.model';
 import { StudentService } from 'src/app/students/services/student.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { Subject } from 'rxjs';
+import { takeUntil, finalize, catchError } from 'rxjs/operators';
 
 
 
@@ -12,7 +14,9 @@ import { NzMessageService } from 'ng-zorro-antd/message';
   templateUrl: './add-course-request.component.html',
   styleUrls: ['./add-course-request.component.scss']
 })
-export class AddCourseRequestComponent implements OnInit {
+export class AddCourseRequestComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
   listOfOfAddDropCourse: StudentProfileViewModel;
   nextAcademicTerm: any;
   nextTerm = '';
@@ -59,17 +63,20 @@ export class AddCourseRequestComponent implements OnInit {
   getListOfAddDropCourse(applicationId: string, academicTermId: number): void {
     this.loading = true;
     this.courseApprovalService.getListOfAddDropCourse(applicationId, academicTermId)
-      .subscribe({
-        next: (response) => {
-          this.listOfOfAddDropCourse = response;
-          this.calculateTotals();
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
           this.loading = false;
-        },
-        error: (error) => {
+        }),
+        catchError((error) => {
           console.error('Error fetching course data:', error);
           this.message.error('Failed to fetch course data');
-          this.loading = false;
-        }
+          return [];
+        })
+      )
+      .subscribe((response) => {
+        this.listOfOfAddDropCourse = response;
+        this.calculateTotals();
       });
   }
 
@@ -113,5 +120,16 @@ export class AddCourseRequestComponent implements OnInit {
   refreshData(): void {
     this.loading = true;
     this.getListOfAddDropCourse(this.applicantId, this.academicTermId);
+  }
+
+  // TrackBy functions for better performance
+  trackByCourseId: TrackByFunction<any> = (index: number, course: any) => 
+    course?.id || course?.courseCode || index;
+
+  trackByIndex: TrackByFunction<any> = (index: number) => index;
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

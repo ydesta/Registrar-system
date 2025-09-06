@@ -7,198 +7,268 @@
     </div>
   </div>
 
-  <!-- Collapsible Search Form -->
-  <div class="search-section">
-    <nz-collapse>
-      <nz-collapse-panel [nzHeader]="searchHeader" [nzActive]="!isSearchCollapsed">
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Collapsible Search Form -->
+    <div class="search-section">
+      <nz-collapse>
+        <nz-collapse-panel [nzHeader]="searchHeader" [nzActive]="!isSearchCollapsed">
 
-        <ng-template #searchHeader>
-          <span>
-            <i nz-icon nzType="filter" nzTheme="outline"></i>
-            Section Criteria
-          </span>
-        </ng-template>
-
-        <form nz-form [formGroup]="searchForm">
-          <div nz-row [nzGutter]="24">
-            <!-- Academic Term -->
-            <div nz-col [nzSpan]="12">
-              <nz-form-item>
-                <nz-form-label>Academic Term</nz-form-label>
-                <nz-form-control nzErrorTip="Academic term is required">
-                  <nz-select formControlName="academicTerm" nzPlaceHolder="Select Academic Term" nzShowSearch
-                    nzAllowClear style="width: 100%;">
-                    <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
-                      [nzLabel]="item.Description"></nz-option>
-                  </nz-select>
-                </nz-form-control>
-              </nz-form-item>
-            </div>
-
-            <!-- Term Year -->
-            <div nz-col [nzSpan]="12">
-              <nz-form-item>
-                <nz-form-label>Term Year</nz-form-label>
-                <nz-form-control nzErrorTip="Term year is required">
-                  <nz-select formControlName="year" nzPlaceHolder="Select Term Year" nzShowSearch style="width: 100%;">
-                    <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item"></nz-option>
-                  </nz-select>
-                </nz-form-control>
-              </nz-form-item>
-            </div>
-          </div>
-
-          <div nz-row [nzGutter]="24">
-            <!-- Batch Code -->
-            <div nz-col [nzSpan]="12">
-              <nz-form-item>
-                <nz-form-label>Batch Code</nz-form-label>
-                <nz-form-control nzErrorTip="Batch code is required">
-                  <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch Code" nzShowSearch nzAllowClear 
-                    [nzDisabled]="!searchForm.get('academicTerm')?.value || !searchForm.get('year')?.value" 
-                    style="width: 100%;">
-                    <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.batchCode"
-                      [nzLabel]="item.batchCode"></nz-option>
-                  </nz-select>
-                </nz-form-control>
-              </nz-form-item>
-            </div>
-          </div>
-
-          <!-- Action Buttons -->
-          <div nz-row>
-            <div nz-col [nzSpan]="24" style="text-align: right;">
-              <button nz-button nzType="default" (click)="clearSearch()">
-                <i nz-icon nzType="reload" nzTheme="outline"></i>
-                Reset
-              </button>
-            </div>
-          </div>
-        </form>
-      </nz-collapse-panel>
-    </nz-collapse>
-  </div>
-
-  <!-- Messages -->
-  <nz-alert *ngIf="errorMessage" nzType="error" [nzMessage]="errorMessage" class="mb-3">
-  </nz-alert>
-
-  <!-- Results Summary -->
-  <!-- <div class="table-header" *ngIf="registeredCourses.courses.length > 0">
-    <div class="page-info">
-      <span class="text-muted">
-        Found {{ registeredCourses.courses.length }} courses with {{ getTotalStudents() }} total students
-      </span>
-    </div>
-    <div class="page-info">
-      <span class="text-muted">
-        Batch: {{ searchForm.get('batchCode')?.value }} |
-        Term: {{ getAcademicTermName(searchForm.get('academicTerm')?.value) }} |
-        Year: {{ searchForm.get('year')?.value }}
-      </span>
-    </div>
-  </div> -->
-
-  <!-- Registered Courses Table -->
-  <div class="table-container" *ngIf="registeredCourses.courses.length > 0">
-    <nz-table #basicTable [nzData]="registeredCourses.courses" [nzLoading]="loading" [nzShowPagination]="false"
-      [nzNoResult]="emptyTpl" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;" class="mobile-table-container">
-
-      <thead>
-        <tr>
-          <th style="min-width: 50px; width: 60px;">#</th>
-          <th style="min-width: 120px;">Course Code</th>
-          <th style="min-width: 200px;">Course Title</th>
-          <th class="text-center" style="min-width: 100px;">Students</th>
-          <th class="text-center" style="min-width: 120px;">Default Section</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let course of basicTable.data; let i = index">
-          <td>
-            <span class="serial-number">
-              {{ i + 1 }}
+          <ng-template #searchHeader>
+            <span>
+              <i nz-icon nzType="filter" nzTheme="outline"></i>
+              Section Criteria
             </span>
-          </td>
-          <td>
-            <strong>{{ course.courseCode }}</strong>
-          </td>
-          <td>{{ course.courseTitle }}</td>
-          <td class="text-center">
-            <nz-tag nzColor="blue">{{ course.numberOfStudents }}</nz-tag>
-          </td>
-          <td class="text-center">
-            <label nz-checkbox [nzChecked]="course.isDefaultSection"
-              (nzCheckedChange)="toggleDefaultSection(course, $event)" [nzDisabled]="loading">
-            </label>
-          </td>
-        </tr>
-      </tbody>
-    </nz-table>
+          </ng-template>
 
-    <!-- Empty State Template -->
-    <ng-template #emptyTpl>
-      <div class="no-data">
-        <span nz-icon nzType="book" nzTheme="outline"></span>
-        <p>No registered courses found</p>
-        <p class="text-muted">Use the search form above to find registered courses for section assignments.</p>
+          <form nz-form [formGroup]="searchForm">
+            <div nz-row [nzGutter]="24">
+              <!-- Academic Term -->
+              <div nz-col [nzSpan]="12">
+                <nz-form-item>
+                  <nz-form-label>Academic Term</nz-form-label>
+                  <nz-form-control nzErrorTip="Academic term is required">
+                    <nz-select formControlName="academicTerm" nzPlaceHolder="Select Academic Term" nzShowSearch
+                      nzAllowClear style="width: 100%;">
+                      <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
+                        [nzLabel]="item.Description"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <!-- Term Year -->
+              <div nz-col [nzSpan]="12">
+                <nz-form-item>
+                  <nz-form-label>Term Year</nz-form-label>
+                  <nz-form-control nzErrorTip="Term year is required">
+                    <nz-select formControlName="year" nzPlaceHolder="Select Term Year" nzShowSearch style="width: 100%;">
+                      <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div nz-row [nzGutter]="24">
+              <!-- Batch Code -->
+              <div nz-col [nzSpan]="12">
+                <nz-form-item>
+                  <nz-form-label>Batch Code</nz-form-label>
+                  <nz-form-control nzErrorTip="Batch code is required">
+                    <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch Code" nzShowSearch nzAllowClear 
+                      [nzDisabled]="!searchForm.get('academicTerm')?.value || !searchForm.get('year')?.value" 
+                      style="width: 100%;">
+                      <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.batchCode"
+                        [nzLabel]="item.batchCode"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div nz-row>
+              <div nz-col [nzSpan]="24" style="text-align: right;">
+                <button nz-button nzType="default" (click)="clearSearch()">
+                  <i nz-icon nzType="reload" nzTheme="outline"></i>
+                  Reset
+                </button>
+              </div>
+            </div>
+          </form>
+        </nz-collapse-panel>
+      </nz-collapse>
+    </div>
+
+    <!-- Messages -->
+    <nz-alert *ngIf="errorMessage" nzType="error" [nzMessage]="errorMessage" class="mb-3" [nzShowIcon]="true" 
+      [nzCloseable]="true" (nzOnClose)="clearErrorMessage()">
+    </nz-alert>
+    
+    <nz-alert *ngIf="successMessage" nzType="success" [nzMessage]="successMessage" class="mb-3" [nzShowIcon]="true"
+      [nzCloseable]="true" (nzOnClose)="clearSuccessMessage()">
+    </nz-alert>
+    
+    <!-- Loading Indicator for Section Generation -->
+    <nz-alert *ngIf="generatingAssignments" nzType="info" 
+      nzMessage="Generating section assignments..." 
+      [nzDescription]="'Please wait while we process your request. This may take a few moments.'"
+      class="mb-3" [nzShowIcon]="true">
+      <ng-template #nzIcon>
+        <i nz-icon nzType="loading" nzSpin="true"></i>
+      </ng-template>
+    </nz-alert>
+
+    <!-- Results Summary -->
+    <!-- <div class="table-header" *ngIf="registeredCourses.courses.length > 0">
+      <div class="page-info">
+        <span class="text-muted">
+          Found {{ registeredCourses.courses.length }} courses with {{ getTotalStudents() }} total students
+        </span>
       </div>
-    </ng-template>
-  </div>
+      <div class="page-info">
+        <span class="text-muted">
+          Batch: {{ searchForm.get('batchCode')?.value }} |
+          Term: {{ getAcademicTermName(searchForm.get('academicTerm')?.value) }} |
+          Year: {{ searchForm.get('year')?.value }}
+        </span>
+      </div>
+    </div> -->
 
-  <!-- Summary and Actions Section -->
-  <div class="summary-section" *ngIf="registeredCourses.courses.length > 0">
-    <nz-card nzTitle="Summary & Actions" class="summary-card">
-      <div class="row">
-        <div class="col-md-4">
-          <div class="summary-item">
-            <div class="summary-icon">
+    <!-- Registered Courses Table -->
+    <div class="table-container" *ngIf="registeredCourses.courses.length > 0">
+      <nz-table #basicTable [nzData]="registeredCourses.courses" [nzLoading]="loading" [nzShowPagination]="false"
+        [nzNoResult]="emptyTpl" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;" class="mobile-table-container">
+
+        <thead>
+          <tr>
+            <th style="min-width: 50px; width: 60px;">#</th>
+            <th style="min-width: 120px;">Course Code</th>
+            <th style="min-width: 200px;">Course Title</th>
+            <th class="text-center" style="min-width: 100px;">Students</th>
+            <th class="text-center" style="min-width: 120px;">
+              Default Section
+              <br>
+              <small class="text-muted">(Only one allowed)</small>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let course of basicTable.data; let i = index">
+            <td>
+              <span class="serial-number">
+                {{ i + 1 }}
+              </span>
+            </td>
+            <td>
+              <strong>{{ course.courseCode }}</strong>
+            </td>
+            <td>{{ course.courseTitle }}</td>
+            <td class="text-center">
+              <nz-tag nzColor="blue">{{ course.numberOfStudents }}</nz-tag>
+            </td>
+            <td class="text-center">
+              <label nz-checkbox [nzChecked]="course.isDefaultSection"
+                (nzCheckedChange)="toggleDefaultSection(course, $event)" 
+                [nzDisabled]="loading || generatingAssignments">
+              </label>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+
+      <!-- Empty State Template -->
+      <ng-template #emptyTpl>
+        <div class="no-data">
+          <span nz-icon nzType="book" nzTheme="outline"></span>
+          <p>No registered courses found</p>
+          <p class="text-muted">Use the search form above to find registered courses for section assignments.</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Default Section Selection Summary -->
+    <div class="default-section-summary" *ngIf="registeredCourses.courses.length > 0">
+      <!-- Show info when default course is selected -->
+      <nz-alert *ngIf="hasDefaultCourse()" nzType="info" 
+        [nzMessage]="'Default Section Selected'"
+        [nzDescription]="'Course: ' + getDefaultCourse()?.courseCode + ' - ' + getDefaultCourse()?.courseTitle"
+        class="mb-3" [nzShowIcon]="true">
+      </nz-alert>
+      
+      <!-- Show warning when no default course is selected -->
+      <nz-alert *ngIf="!hasDefaultCourse()" nzType="warning" 
+        [nzMessage]="'No Default Section Selected'"
+        [nzDescription]="'You can optionally select one course as the default section. If none is selected, all courses will use regular sections.'"
+        class="mb-3" [nzShowIcon]="true">
+      </nz-alert>
+    </div>
+
+    <!-- Summary and Actions Section -->
+    <div class="summary-section" *ngIf="registeredCourses.courses.length > 0">
+      <nz-card nzTitle="Summary & Actions" class="summary-card">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="summary-item">
+              <div class="summary-icon">
+                <i nz-icon nzType="team" nzTheme="outline"></i>
+              </div>
+              <div class="summary-content">
+                <h4>{{ getTotalStudents() }}</h4>
+                <p>Total Students</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="summary-item">
+              <div class="summary-icon">
+                <i nz-icon nzType="setting" nzTheme="outline"></i>
+              </div>
+              <div class="summary-content">
+                <label class="form-label">Number of Sections</label>
+                <nz-input-number [(ngModel)]="numberOfSections" [nzMin]="1"
+                  [nzPlaceHolder]="'Enter number of sections'" [nzSize]="'default'" 
+                  (ngModelChange)="onNumberOfSectionsChange()" 
+                  [nzDisabled]="generatingAssignments"
+                  style="width: 150px;">
+                </nz-input-number>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="summary-item">
+              <div class="summary-icon">
+                <i nz-icon nzType="calculator" nzTheme="outline"></i>
+              </div>
+              <div class="summary-content">
+                <h4>{{ getCalculatedNumberOfSections() }}</h4>
+                <p>Calculated Sections</p>
+                <small class="text-muted">({{ studentsPerSection }} students per section)</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Generation Status -->
+        <div class="row mt-3" *ngIf="registeredCourses.numberOfGeneratedSections > 0 && registeredCourses.isSectionGenerated">
+          <div class="col-md-12">
+            <nz-alert nzType="info" 
+              [nzMessage]="'Sections have been generated for this batch. You can remove them to generate new ones.'"
+              [nzDescription]="'Generated Sections: ' + registeredCourses.numberOfGeneratedSections"
+              class="mb-3">
+            </nz-alert>
+          </div>
+        </div>
+
+        <div class="row mt-5">
+          <div class="col-md-12" style="display: flex; justify-content: flex-end; gap: 10px;">
+            <!-- Generate Section Assignments Button - Disabled when sections are already generated -->
+            <button nz-button nzType="primary" nzSize="large" [nzLoading]="generatingAssignments"
+              (click)="generateStudentCourseSectionAssignment()" 
+              [disabled]="registeredCourses.courses.length === 0 || (registeredCourses.numberOfGeneratedSections > 0 && registeredCourses.isSectionGenerated)"
+              class="generate-btn">
               <i nz-icon nzType="team" nzTheme="outline"></i>
-            </div>
-            <div class="summary-content">
-              <h4>{{ getTotalStudents() }}</h4>
-              <p>Total Students</p>
-            </div>
+              {{ generatingAssignments ? 'Generating...' : 'Generate Section Assignments' }}
+            </button>
+            
+            <!-- Remove Generated Sections Button - Only shown when sections are generated -->
+            <button nz-button nzType="default" nzSize="large"
+              (click)="removeGeneratedAssignments()" 
+              *ngIf="registeredCourses.numberOfGeneratedSections > 0 && registeredCourses.isSectionGenerated"
+              class="remove-btn professional-remove-btn">
+              <div class="btn-icon-container">
+                <i nz-icon nzType="delete" nzTheme="outline"></i>
+                <div class="icon-badge">{{ registeredCourses.numberOfGeneratedSections }}</div>
+              </div>
+              <div class="btn-content">
+                <span class="btn-text">Remove Generated Sections</span>
+                <span class="btn-subtitle">Clear all assignments</span>
+              </div>
+            </button>
           </div>
         </div>
-        <div class="col-md-4">
-          <div class="summary-item">
-            <div class="summary-icon">
-              <i nz-icon nzType="setting" nzTheme="outline"></i>
-            </div>
-            <div class="summary-content">
-              <label class="form-label">Number of Sections</label>
-                                <nz-input-number [(ngModel)]="numberOfSections" [nzMin]="1"
-                    [nzPlaceHolder]="'Enter number of sections'" [nzSize]="'default'" 
-                    (ngModelChange)="onNumberOfSectionsChange()" style="width: 150px;">
-                  </nz-input-number>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="summary-item">
-            <div class="summary-icon">
-              <i nz-icon nzType="calculator" nzTheme="outline"></i>
-            </div>
-            <div class="summary-content">
-              <h4>{{ getCalculatedNumberOfSections() }}</h4>
-              <p>Calculated Sections</p>
-              <small class="text-muted">({{ studentsPerSection }} students per section)</small>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row mt-5">
-        <div class="col-md-12" style="display: flex; justify-content: flex-end;">
-          <button nz-button nzType="primary" nzSize="large" [nzLoading]="generatingAssignments"
-            (click)="generateStudentCourseSectionAssignment()" [disabled]="registeredCourses.courses.length === 0"
-            class="generate-btn">
-            <i nz-icon nzType="team" nzTheme="outline"></i>
-            Generate Section Assignments
-          </button>
-        </div>
-      </div>
-    </nz-card>
+      </nz-card>
+    </div>
   </div>
 </div>

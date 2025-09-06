@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit, ViewChild, OnDestroy } from "@angular/core";
 import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl } from "@angular/forms";
 import { NzTabChangeEvent } from "ng-zorro-antd/tabs";
 import { NzModalService } from "ng-zorro-antd/modal";
@@ -6,9 +6,10 @@ import {
   alphabetsOnlyValidator,
   alphabetsWithSpecialCharsValidator,
   emailValidator,
-  amharicOnlyValidator,
+  flexibleNameValidator,
   englishOnlyValidator,
-  phoneValidator
+  phoneValidator9To14,
+  COUNTRIES
 } from "src/app/common/constant";
 import { ApplicationRequest } from "../model/application-request.model";
 import { GeneralInformationService } from "../services/general-information.service";
@@ -21,12 +22,13 @@ import { SchoolWithStudentAgreementComponent } from '../school-with-student-agre
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 import { ReviewSummaryService, ReviewSummaryData } from "../services/review-summary.service";
 
+
 @Component({
   selector: "app-general-information",
   templateUrl: "./general-information.component.html",
   styleUrls: ["./general-information.component.scss"]
 })
-export class GeneralInformationComponent implements OnInit {
+export class GeneralInformationComponent implements OnInit, OnDestroy {
   selectedTabIndex = 0;
   form: FormGroup;
   activeTab = 1;
@@ -56,6 +58,11 @@ export class GeneralInformationComponent implements OnInit {
   schoolAgreementComp: SchoolWithStudentAgreementComponent;
   currentModalRef: any;
 
+  // Add flag to prevent recursive calls
+  private isHandlingApplicantError = false;
+  private hasAttemptedApplicantFetch = false;
+// Countries list with flags and nationalities
+  countries = COUNTRIES;
   constructor(
     private fb: FormBuilder,
     private generalInformationService: GeneralInformationService,
@@ -70,7 +77,7 @@ export class GeneralInformationComponent implements OnInit {
     this.createGeneralInformationForm();
     this.createAcademicProgramRequest();
     this.setInitialTabState();
-    
+
     route.queryParams.subscribe(p => {
       this.id = p["id"];
       if (this.id != undefined) {
@@ -80,17 +87,48 @@ export class GeneralInformationComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.id == undefined && this.userId != null) {
-      const userId = localStorage.getItem('userId');
-      this.generalInformationService.getOrStoreParentApplicantId(userId).subscribe(applicantId => {
-        this.id = applicantId;
-        this.getApplicantById(applicantId);
-      });
-    }
-    this.disabledDate;
-    
 
-    
+    if (this.id == undefined && this.userId != null && !this.hasAttemptedApplicantFetch) {
+      const userId = localStorage.getItem('userId');
+      this.hasAttemptedApplicantFetch = true;
+      this.generalInformationService.getOrStoreParentApplicantId(userId).subscribe({
+        next: (applicantId) => {
+          if (!applicantId) {
+            this._customNotificationService.notification(
+              "warning",
+              "No Application Found",
+              "We couldn’t find any application data for you."
+            );
+            return; // stop further execution
+          }
+
+          this.id = applicantId;
+          this.getApplicantById(applicantId);
+        },
+        error: (error) => {
+          let errorMessage = 'Unable to load your application data. ';
+          if (error.message?.includes('404')) {
+            errorMessage += 'The application service is not available. Please try again later.';
+          } else if (error.message?.includes('Network error')) {
+            errorMessage += 'Please check your internet connection and try again.';
+          } else if (error.message?.includes('Server error')) {
+            errorMessage += 'The server is experiencing issues. Please try again later.';
+          } else {
+            errorMessage += 'Please refresh the page or try again later.';
+          }
+
+          // this._customNotificationService.notification(
+          //   "error",
+          //   "Application Loading Error",
+          //   errorMessage
+          // );
+        }
+      });
+
+    }
+
+    this.disabledDate;
+
     this.sharingDataService.currentMessage.pipe(distinctUntilChanged()).subscribe(res => {
       this.countNoOfContact = res;
       this.updateTabDisabledStateOptimized();
@@ -128,9 +166,9 @@ export class GeneralInformationComponent implements OnInit {
       firstName: ["", [Validators.required, englishOnlyValidator()]],
       fatherName: ["", [Validators.required, englishOnlyValidator()]],
       grandFatherName: ["", [Validators.required, englishOnlyValidator()]],
-      firstNameInAmh: ["", [amharicOnlyValidator()]],
-      fatherNameInAmh: ["", [amharicOnlyValidator()]],
-      grandFatherNameInAmh: ["", [amharicOnlyValidator()]],
+      firstNameInAmh: ["", [flexibleNameValidator()]],
+      fatherNameInAmh: ["", [flexibleNameValidator()]],
+      grandFatherNameInAmh: ["", [flexibleNameValidator()]],
       sirName: ["", [alphabetsOnlyValidator()]],
       motherName: [
         "",
@@ -143,9 +181,9 @@ export class GeneralInformationComponent implements OnInit {
         [Validators.required, alphabetsWithSpecialCharsValidator()]
       ],
       nationality: ["", [Validators.required]],
-      telephonOffice: ["", phoneValidator()],
-      telephonHome: ["", [phoneValidator()]],
-      mobile: ["", [Validators.required, phoneValidator()]],
+      telephonOffice: ["", [phoneValidator9To14()]],
+      telephonHome: ["", [phoneValidator9To14()]],
+      mobile: ["", [Validators.required, phoneValidator9To14()]],
       postalAddress: ["", []],
       emailAddress: ["", [Validators.required, emailValidator()]],
       region: ["", [Validators.required, alphabetsOnlyValidator()]],
@@ -223,11 +261,11 @@ export class GeneralInformationComponent implements OnInit {
     const educationValid = this.countNoOfEducation > 0;
     const academicProgramValid = this.isAcademicProgramValid;
     const agreementValid = this.agreementFormValid;
-    
+
     if (this.paymentStatus === 'Paid') {
       return true;
     }
-    
+
     return generalInfoValid && contactPersonValid && educationValid && academicProgramValid && agreementValid;
   }
 
@@ -263,11 +301,11 @@ export class GeneralInformationComponent implements OnInit {
     if (this.isApplicationSubmitted) {
       return true;
     }
-    
+
     if (this.isSubmittedApplicationForm === 1) {
       return true;
     }
-    
+
     return this.selectedTabIndex !== 7 || !this.agreementFormValid;
   }
 
@@ -276,7 +314,7 @@ export class GeneralInformationComponent implements OnInit {
   }
 
   get isSaveButtonDisabled(): boolean {
-    return !this.form?.valid || this.isAcademicProgramProcessed;
+    return this.isAcademicProgramProcessed;
   }
 
   private collectReviewSummaryData(): ReviewSummaryData {
@@ -371,7 +409,7 @@ export class GeneralInformationComponent implements OnInit {
     ];
 
     const hasChanged = this.isTabDisabled.some((disabled, index) => disabled !== newTabDisabled[index]);
-    
+
     if (hasChanged) {
       this.isTabDisabled = newTabDisabled;
     }
@@ -402,6 +440,15 @@ export class GeneralInformationComponent implements OnInit {
   get nationalId() {
     return this.form.get("nationalId");
   }
+  get city() {
+    return this.form.get("city");
+  }
+  get woreda() {
+    return this.form.get("woreda");
+  }
+  get kebele() {
+    return this.form.get("kebele");
+  }
 
   private safeDateConversion(dateValue: any): Date | null {
     if (!dateValue) return null;
@@ -428,10 +475,10 @@ export class GeneralInformationComponent implements OnInit {
 
   private formatDateForBackend(dateValue: any): string | null {
     if (!dateValue) return null;
-    
+
     try {
       let dateObj: Date;
-      
+
       if (dateValue instanceof Date) {
         dateObj = dateValue;
       } else if (typeof dateValue === 'string' || typeof dateValue === 'number') {
@@ -439,14 +486,14 @@ export class GeneralInformationComponent implements OnInit {
       } else {
         dateObj = new Date(dateValue);
       }
-      
+
       if (!isNaN(dateObj.getTime())) {
         return dateObj.toISOString().split('T')[0];
       }
     } catch (error) {
       return null;
     }
-    
+
     return null;
   }
 
@@ -497,91 +544,157 @@ export class GeneralInformationComponent implements OnInit {
   }
 
   getApplicantById(id: string) {
-    this.generalInformationService.getApplicantById(id).subscribe(res => {
-      const formData = { ...res.data };
-
-      if (formData.birthDate && typeof formData.birthDate === 'string') {
-        try {
-          const dateObj = new Date(formData.birthDate);
-          if (!isNaN(dateObj.getTime()) && dateObj.getFullYear() > 1900) {
-            formData.birthDate = dateObj;
-          } else {
+    if (this.isHandlingApplicantError) {
+      return;
+    }
+    this.generalInformationService.getApplicantById(id).subscribe({
+      next: (res) => {
+        const applicantData = this.extractResponseData<any>(res);
+        if (!applicantData) {
+          this._customNotificationService.notification(
+            "error",
+            "Data Error",
+            "Invalid data received from server. Please try again."
+          );
+          return;
+        }
+        const formData = { ...applicantData };
+        if (formData.birthDate && typeof formData.birthDate === 'string') {
+          try {
+            const dateObj = new Date(formData.birthDate);
+            if (!isNaN(dateObj.getTime()) && dateObj.getFullYear() > 1900) {
+              formData.birthDate = dateObj;
+            } else {
+              formData.birthDate = null;
+            }
+          } catch (error) {
             formData.birthDate = null;
           }
-        } catch (error) {
-          formData.birthDate = null;
         }
-      }
 
-      if (formData.dateOfApply && typeof formData.dateOfApply === 'string') {
-        try {
-          const dateObj = new Date(formData.dateOfApply);
-          if (!isNaN(dateObj.getTime()) && dateObj.getFullYear() > 1900) {
-            formData.dateOfApply = dateObj;
-          } else {
+        if (formData.dateOfApply && typeof formData.dateOfApply === 'string') {
+          try {
+            const dateObj = new Date(formData.dateOfApply);
+            if (!isNaN(dateObj.getTime()) && dateObj.getFullYear() > 1900) {
+              formData.dateOfApply = dateObj;
+            } else {
+              formData.dateOfApply = new Date();
+            }
+          } catch (error) {
             formData.dateOfApply = new Date();
           }
-        } catch (error) {
+        } else if (!formData.dateOfApply || formData.dateOfApply === null) {
           formData.dateOfApply = new Date();
         }
-      } else if (!formData.dateOfApply || formData.dateOfApply === null) {
-        formData.dateOfApply = new Date();
-      }
 
-      this.form.patchValue(formData);
+        this.form.patchValue(formData);
 
-      const academicProgramData = {
-        sourceOfFinance: res.data.sourceOfFinance || res.data.sourceOfFinanceId || res.data.financeSource || '',
-        howDidYouComeKnow: res.data.howDidYouComeKnow || res.data.howDidYouComeKnowId || res.data.referralSource || '',
-        selfConfirmedApplicantInformation: res.data.selfConfirmedApplicantInformation === true ||
-          res.data.selfConfirmedApplicantInformation === 'true' ||
-          res.data.selfConfirmedApplicantInformation === 1 ||
-          false
-      };
+        const academicProgramData = {
+          sourceOfFinance: applicantData.sourceOfFinance || applicantData.sourceOfFinanceId || applicantData.financeSource || '',
+          howDidYouComeKnow: applicantData.howDidYouComeKnow || applicantData.howDidYouComeKnowId || applicantData.referralSource || '',
+          selfConfirmedApplicantInformation: applicantData.selfConfirmedApplicantInformation === true ||
+            applicantData.selfConfirmedApplicantInformation === 'true' ||
+            applicantData.selfConfirmedApplicantInformation === 1 ||
+            false
+        };
 
-      this.otherForm.patchValue(academicProgramData);
-      this.otherForm.markAsTouched();
+        this.otherForm.patchValue(academicProgramData);
+        this.otherForm.markAsTouched();
 
-      this.profilePicture =
-        environment.fileUrl +
-        "/Resources/profile/" +
-        res.data.files[0]?.fileName;
+        this.profilePicture =
+          environment.fileUrl +
+          "/Resources/profile/" +
+          applicantData.files[0]?.fileName;
 
-      if (res.data.files && res.data.files.length > 0 && res.data.files[0]?.fileName) {
-        this.form.patchValue({
-          profilePicture: res.data.files[0].fileName
-        });
-      }
-
-      this.updateTabDisabledStateOptimized();
-
-      setTimeout(() => {
-        if (this.schoolAgreementComp && res.data) {
-          this.schoolAgreementComp.agreementForm.patchValue({
-            sourceOfFinance: res.data.sourceOfFinance,
-            howDidYouComeKnow: res.data.howDidYouComeKnow,
-            selfConfirmedApplicantInformation: res.data.selfConfirmedApplicantInformation
+        if (applicantData.files && applicantData.files.length > 0 && applicantData.files[0]?.fileName) {
+          this.form.patchValue({
+            profilePicture: applicantData.files[0].fileName
           });
         }
-      });
+
+        this.updateTabDisabledStateOptimized();
+
+        setTimeout(() => {
+          if (this.schoolAgreementComp && applicantData) {
+            this.schoolAgreementComp.agreementForm.patchValue({
+              sourceOfFinance: applicantData.sourceOfFinance,
+              howDidYouComeKnow: applicantData.howDidYouComeKnow,
+              selfConfirmedApplicantInformation: applicantData.selfConfirmedApplicantInformation
+            });
+          }
+        });
+
+        console.log('Applicant data successfully loaded and form updated');
+      },
+      error: (error) => {
+        console.error('Error fetching applicant data:', error);
+
+        // Prevent recursive calls
+        if (this.isHandlingApplicantError) {
+          console.log('Already handling applicant error, skipping recursive call');
+          return;
+        }
+
+        this.isHandlingApplicantError = true;
+
+        let errorMessage = 'Unable to load your application data. ';
+
+        if (error.status === 404) {
+          errorMessage += 'Application not found. Please check your login or contact support.';
+        } else if (error.status === 0) {
+          errorMessage += 'Network error. Please check your internet connection.';
+        } else if (error.status >= 500) {
+          errorMessage += 'Server error. Please try again later.';
+        } else {
+          errorMessage += 'Please refresh the page or try again later.';
+        }
+
+        // this._customNotificationService.notification(
+        //   "error",
+        //   "Application Loading Error",
+        //   errorMessage
+        // );
+
+        // Redirect to login if we can't load the application
+        setTimeout(() => {
+          console.log('Redirecting to login due to applicant data fetch failure');
+          this.router.navigate(['/accounts/login']);
+        }, 3000);
+      }
     });
   }
 
   submitForm() {
+    this.validateAllFormFields(this.form);
+    setTimeout(() => {
+      this.form.updateValueAndValidity();
+      if (!this.form.valid) {
+        this._customNotificationService.notification(
+          "warn",
+          "Validation Error",
+          "Please fix the validation errors before saving."
+        );
+        return;
+      }
+      this.continueFormSubmission();
+    }, 100);
+  }
+
+  private continueFormSubmission(): void {
     this.saveLoading = true;
 
     const formData = new FormData();
-    
+
     const postData = this.getApplicantGeneralInfo();
     postData.applicantUserId = this.userId;
     if (this.id != undefined) {
       postData.id = this.id;
     }
-    
+
     Object.keys(postData).forEach(key => {
       if (key !== "ActualFile") {
         let value = postData[key];
-        
+
         if (key === 'birthDate' || key === 'dateOfApply') {
           if (value instanceof Date) {
             if (!isNaN(value.getTime())) {
@@ -615,97 +728,94 @@ export class GeneralInformationComponent implements OnInit {
             }
           }
         }
-        
+
         formData.append(key, value);
       }
     });
-    
+
     if (this.agreementFormData && Object.keys(this.agreementFormData).length > 0) {
       Object.keys(this.agreementFormData).forEach(key => {
         formData.append(key, this.agreementFormData[key]);
       });
     }
-    
+
     if (this.file_store != undefined) {
       for (let i = 0; i < this.file_store.length; i++) {
         formData.append("ActualFile", this.file_store[i]);
       }
     }
-    
-    if (this.form.valid) {
-      if (this.id == undefined) {
-        this.generalInformationService
-          .createGeneralInformation(formData)
-          .subscribe({
-            next: (res) => {
-              this.saveLoading = false;
-              if (res.data != null) {
-                this._customNotificationService.notification(
-                  "success",
-                  "Success",
-                  "Admission request is saved successfully."
-                );
-                this.id = res.data.id;
-                this.saveSuccess = true;
-                setTimeout(() => {
-                  this.saveSuccess = false;
-                }, 2000);
-                this.autoNavigateToNextTab();
-              } else {
-                this._customNotificationService.notification(
-                  "warn",
-                  "Warning",
-                  "Admission request does not duplicate."
-                );
-              }
-            },
-            error: (error) => {
-              this.saveLoading = false;
+
+    if (this.id == undefined) {
+      this.generalInformationService
+        .createGeneralInformation(formData)
+        .subscribe({
+          next: (res) => {
+            this.saveLoading = false;
+            const responseData = this.extractResponseData<any>(res);
+            if (responseData != null) {
               this._customNotificationService.notification(
-                "error",
-                "Error",
-                "Failed to save admission request. Please try again."
+                "success",
+                "Success",
+                "Admission request is saved successfully."
+              );
+              this.id = responseData.id;
+              this.saveSuccess = true;
+              setTimeout(() => {
+                this.saveSuccess = false;
+              }, 2000);
+              this.autoNavigateToNextTab();
+            } else {
+              this._customNotificationService.notification(
+                "warn",
+                "Warning",
+                "Admission request does not duplicate."
               );
             }
-          });
-      } else {
-        this.generalInformationService
-          .updateApplicant(this.id, formData)
-          .subscribe({
-            next: (res) => {
-              this.saveLoading = false;
-              if (res.data != null) {
-                this._customNotificationService.notification(
-                  "success",
-                  "Success",
-                  "Admission request is updated successfully."
-                );
-                this.saveSuccess = true;
-                setTimeout(() => {
-                  this.saveSuccess = false;
-                }, 2000);
-                this.autoNavigateToNextTab();
-              } else {
-                this._customNotificationService.notification(
-                  "warn",
-                  "Warning",
-                  "Admission request does not update."
-                );
-              }
-            },
-            error: (error) => {
-              this.saveLoading = false;
-              this._customNotificationService.notification(
-                "error",
-                "Error",
-                "Failed to update admission request. Please try again."
-              );
-            }
-          });
-      }
+          },
+          error: (error) => {
+            this.saveLoading = false;
+            this._customNotificationService.notification(
+              "error",
+              "Error",
+              "Failed to save admission request. Please try again."
+            );
+          }
+        });
     } else {
-      this.saveLoading = false;
-      this.validateAllFormFields(this.form);
+      this.generalInformationService
+        .updateApplicant(this.id, formData)
+        .subscribe({
+          next: (res) => {
+            this.saveLoading = false;
+            const responseData = this.extractResponseData<any>(res);
+            if (responseData != null) {
+              this._customNotificationService.notification(
+                "success",
+                "Success",
+                "Admission request is updated successfully."
+              );
+              this.saveSuccess = true;
+              setTimeout(() => {
+                this.saveSuccess = false;
+              }, 2000);
+              this.autoNavigateToNextTab();
+            } else {
+              this._customNotificationService.notification(
+                "warn",
+                "Warning",
+                "Admission request does not update."
+              );
+            }
+          },
+          error: (error) => {
+            this.saveLoading = false;
+            this._customNotificationService.notification(
+              "error",
+              "Error",
+              "Failed to update admission request. Please try again."
+            );
+          }
+        });
     }
   }
 
@@ -726,139 +836,17 @@ export class GeneralInformationComponent implements OnInit {
         this.validateAllFormFields(control);
       } else {
         control.markAsDirty();
+        control.markAsTouched(); // Mark as touched to show validation errors
       }
     });
   }
-
-
-
-  // Countries list with flags and nationalities
-  countries = [
-    { name: 'Afghanistan', nationality: 'Afghan', flag: '🇦🇫' },
-    { name: 'Albania', nationality: 'Albanian', flag: '🇦🇱' },
-    { name: 'Algeria', nationality: 'Algerian', flag: '🇩🇿' },
-    { name: 'Argentina', nationality: 'Argentine', flag: '🇦🇷' },
-    { name: 'Australia', nationality: 'Australian', flag: '🇦🇺' },
-    { name: 'Austria', nationality: 'Austrian', flag: '🇦🇹' },
-    { name: 'Bangladesh', nationality: 'Bangladeshi', flag: '🇧🇩' },
-    { name: 'Belgium', nationality: 'Belgian', flag: '🇧🇪' },
-    { name: 'Brazil', nationality: 'Brazilian', flag: '🇧🇷' },
-    { name: 'Bulgaria', nationality: 'Bulgarian', flag: '🇧🇬' },
-    { name: 'Cambodia', nationality: 'Cambodian', flag: '🇰🇭' },
-    { name: 'Cameroon', nationality: 'Cameroonian', flag: '🇨🇲' },
-    { name: 'Canada', nationality: 'Canadian', flag: '🇨🇦' },
-    { name: 'Chile', nationality: 'Chilean', flag: '🇨🇱' },
-    { name: 'China', nationality: 'Chinese', flag: '🇨🇳' },
-    { name: 'Colombia', nationality: 'Colombian', flag: '🇨🇴' },
-    { name: 'Costa Rica', nationality: 'Costa Rican', flag: '🇨🇷' },
-    { name: 'Croatia', nationality: 'Croatian', flag: '🇭🇷' },
-    { name: 'Cuba', nationality: 'Cuban', flag: '🇨🇺' },
-    { name: 'Czech Republic', nationality: 'Czech', flag: '🇨🇿' },
-    { name: 'Denmark', nationality: 'Danish', flag: '🇩🇰' },
-    { name: 'Dominican Republic', nationality: 'Dominican', flag: '🇩🇴' },
-    { name: 'Ecuador', nationality: 'Ecuadorian', flag: '🇪🇨' },
-    { name: 'Egypt', nationality: 'Egyptian', flag: '🇪🇬' },
-    { name: 'El Salvador', nationality: 'Salvadoran', flag: '🇸🇻' },
-    { name: 'Eritrea', nationality: 'Eritrean', flag: '🇪🇷' },
-    { name: 'Estonia', nationality: 'Estonian', flag: '🇪🇪' },
-    { name: 'Ethiopia', nationality: 'Ethiopian', flag: '🇪🇹' },
-    { name: 'Finland', nationality: 'Finnish', flag: '🇫🇮' },
-    { name: 'France', nationality: 'French', flag: '🇫🇷' },
-    { name: 'Germany', nationality: 'German', flag: '🇩🇪' },
-    { name: 'Ghana', nationality: 'Ghanaian', flag: '🇬🇭' },
-    { name: 'Greece', nationality: 'Greek', flag: '🇬🇷' },
-    { name: 'Guatemala', nationality: 'Guatemalan', flag: '🇬🇹' },
-    { name: 'Haiti', nationality: 'Haitian', flag: '🇭🇹' },
-    { name: 'Honduras', nationality: 'Honduran', flag: '🇭🇳' },
-    { name: 'Hong Kong', nationality: 'Hong Konger', flag: '🇭🇰' },
-    { name: 'Hungary', nationality: 'Hungarian', flag: '🇭🇺' },
-    { name: 'Iceland', nationality: 'Icelandic', flag: '🇮🇸' },
-    { name: 'India', nationality: 'Indian', flag: '🇮🇳' },
-    { name: 'Indonesia', nationality: 'Indonesian', flag: '🇮🇩' },
-    { name: 'Iran', nationality: 'Iranian', flag: '🇮🇷' },
-    { name: 'Iraq', nationality: 'Iraqi', flag: '🇮🇶' },
-    { name: 'Ireland', nationality: 'Irish', flag: '🇮🇪' },
-    { name: 'Israel', nationality: 'Israeli', flag: '🇮🇱' },
-    { name: 'Italy', nationality: 'Italian', flag: '🇮🇹' },
-    { name: 'Jamaica', nationality: 'Jamaican', flag: '🇯🇲' },
-    { name: 'Japan', nationality: 'Japanese', flag: '🇯🇵' },
-    { name: 'Jordan', nationality: 'Jordanian', flag: '🇯🇴' },
-    { name: 'Kazakhstan', nationality: 'Kazakh', flag: '🇰🇿' },
-    { name: 'Kenya', nationality: 'Kenyan', flag: '🇰🇪' },
-    { name: 'Kuwait', nationality: 'Kuwaiti', flag: '🇰🇼' },
-    { name: 'Latvia', nationality: 'Latvian', flag: '🇱🇻' },
-    { name: 'Lebanon', nationality: 'Lebanese', flag: '🇱🇧' },
-    { name: 'Libya', nationality: 'Libyan', flag: '🇱🇾' },
-    { name: 'Lithuania', nationality: 'Lithuanian', flag: '🇱🇹' },
-    { name: 'Luxembourg', nationality: 'Luxembourgish', flag: '🇱🇺' },
-    { name: 'Malaysia', nationality: 'Indonesian', flag: '🇲🇾' },
-    { name: 'Mali', nationality: 'Malian', flag: '🇲🇱' },
-    { name: 'Malta', nationality: 'Maltese', flag: '🇲🇹' },
-    { name: 'Mauritania', nationality: 'Mauritanian', flag: '🇲🇷' },
-    { name: 'Mauritius', nationality: 'Mauritian', flag: '🇲🇺' },
-    { name: 'Mexico', nationality: 'Mexican', flag: '🇲🇽' },
-    { name: 'Monaco', nationality: 'Monacan', flag: '🇲🇨' },
-    { name: 'Mongolia', nationality: 'Mongolian', flag: '🇲🇳' },
-    { name: 'Morocco', nationality: 'Moroccan', flag: '🇲🇦' },
-    { name: 'Mozambique', nationality: 'Mozambican', flag: '🇲🇿' },
-    { name: 'Myanmar', nationality: 'Burmese', flag: '🇲🇲' },
-    { name: 'Namibia', nationality: 'Namibian', flag: '🇳🇦' },
-    { name: 'Nepal', nationality: 'Nepalese', flag: '🇳🇵' },
-    { name: 'Netherlands', nationality: 'Dutch', flag: '🇳🇱' },
-    { name: 'New Zealand', nationality: 'New Zealander', flag: '🇳🇿' },
-    { name: 'Nigeria', nationality: 'Nigerian', flag: '🇳🇬' },
-    { name: 'North Korea', nationality: 'North Korean', flag: '🇰🇵' },
-    { name: 'Norway', nationality: 'Norwegian', flag: '🇳🇴' },
-    { name: 'Oman', nationality: 'Omani', flag: '🇴🇲' },
-    { name: 'Pakistan', nationality: 'Pakistani', flag: '🇵🇰' },
-    { name: 'Panama', nationality: 'Panamanian', flag: '🇵🇦' },
-    { name: 'Paraguay', nationality: 'Paraguayan', flag: '🇵🇾' },
-    { name: 'Peru', nationality: 'Peruvian', flag: '🇵🇪' },
-    { name: 'Philippines', nationality: 'Filipino', flag: '🇵🇭' },
-    { name: 'Poland', nationality: 'Polish', flag: '🇵🇱' },
-    { name: 'Portugal', nationality: 'Portuguese', flag: '🇵🇹' },
-    { name: 'Qatar', nationality: 'Qatari', flag: '🇶🇦' },
-    { name: 'Romania', nationality: 'Romanian', flag: '🇷🇴' },
-    { name: 'Russia', nationality: 'Russian', flag: '🇷🇺' },
-    { name: 'Rwanda', nationality: 'Rwandan', flag: '🇷🇼' },
-    { name: 'Saudi Arabia', nationality: 'Saudi', flag: '🇸🇦' },
-    { name: 'Senegal', nationality: 'Senegalese', flag: '🇸🇳' },
-    { name: 'Serbia', nationality: 'Serbian', flag: '🇷🇸' },
-    { name: 'Singapore', nationality: 'Singaporean', flag: '🇸🇬' },
-    { name: 'Slovakia', nationality: 'Slovak', flag: '🇸🇰' },
-    { name: 'Slovenia', nationality: 'Slovenian', flag: '🇸🇮' },
-    { name: 'Somalia', nationality: 'Somali', flag: '🇸🇴' },
-    { name: 'South Africa', nationality: 'South African', flag: '🇿🇦' },
-    { name: 'South Korea', nationality: 'South Korean', flag: '🇰🇷' },
-    { name: 'Spain', nationality: 'Spanish', flag: '🇪🇸' },
-    { name: 'Sri Lanka', nationality: 'Sri Lankan', flag: '🇱🇰' },
-    { name: 'Sudan', nationality: 'Sudanese', flag: '🇸🇩' },
-    { name: 'Sweden', nationality: 'Swedish', flag: '🇸🇪' },
-    { name: 'Switzerland', nationality: 'Swiss', flag: '🇨🇭' },
-    { name: 'Syria', nationality: 'Syrian', flag: '🇸🇾' },
-    { name: 'Taiwan', nationality: 'Taiwanese', flag: '🇹🇼' },
-    { name: 'Tanzania', nationality: 'Tanzanian', flag: '🇹🇿' },
-    { name: 'Thailand', nationality: 'Thai', flag: '🇹🇭' },
-    { name: 'Tunisia', nationality: 'Tunisian', flag: '🇹🇳' },
-    { name: 'Turkey', nationality: 'Turkish', flag: '🇹🇷' },
-    { name: 'Uganda', nationality: 'Ugandan', flag: '🇺🇬' },
-    { name: 'Ukraine', nationality: 'Ukrainian', flag: '🇺🇦' },
-    { name: 'United Arab Emirates', nationality: 'Emirati', flag: '🇦🇪' },
-    { name: 'United Kingdom', nationality: 'British', flag: '🇬🇧' },
-    { name: 'United States', nationality: 'American', flag: '🇺🇸' },
-    { name: 'Uruguay', nationality: 'Uruguayan', flag: '🇺🇾' },
-    { name: 'Venezuela', nationality: 'Venezuelan', flag: '🇻🇪' },
-    { name: 'Vietnam', nationality: 'Vietnamese', flag: '🇻🇳' },
-    { name: 'Yemen', nationality: 'Yemeni', flag: '🇾🇪' },
-    { name: 'Zimbabwe', nationality: 'Zimbabwean', flag: '🇿🇼' }
-  ];
 
   // Filter function for nationality search
   filterNationality = (input: string, option: any): boolean => {
     const searchTerm = input.toLowerCase();
     const countryName = option.nzLabel.toLowerCase();
     const nationality = option.nzValue.toLowerCase();
-    
+
     return countryName.includes(searchTerm) || nationality.includes(searchTerm);
   };
 
@@ -897,14 +885,6 @@ export class GeneralInformationComponent implements OnInit {
       const minDate = new Date(currentDate);
       minDate.setFullYear(currentDate.getFullYear() - 13);
 
-      // Debug logging
-      console.log('Birth Date Validation Debug:');
-      console.log('Input value:', control.value);
-      console.log('Parsed date:', selectedDate);
-      console.log('Current date:', currentDate);
-      console.log('Min date (13 years ago):', minDate);
-      console.log('Is selected date > min date?', selectedDate > minDate);
-
       // Check if date is in the future
       if (selectedDate > currentDate) {
         return {
@@ -914,7 +894,7 @@ export class GeneralInformationComponent implements OnInit {
           }
         };
       }
-      
+
       // If selected date is after minDate, user is too young
       if (selectedDate > minDate) {
         return {
@@ -932,17 +912,17 @@ export class GeneralInformationComponent implements OnInit {
   disabledDate = (current: Date): boolean => {
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
-    
+
     // Maximum date: today (can't select future dates)
     const maxDate = new Date(currentDate);
-    
+
     // Minimum date: 13 years ago (minimum age requirement)
     const minDate = new Date(currentDate);
     minDate.setFullYear(currentDate.getFullYear() - 13);
-    
+
     const selectedDate = new Date(current);
     selectedDate.setHours(0, 0, 0, 0);
-    
+
     // Disable dates that are in the future OR would make someone younger than 13
     // selectedDate > minDate means the person would be younger than 13
     return selectedDate > maxDate || selectedDate > minDate;
@@ -965,6 +945,7 @@ export class GeneralInformationComponent implements OnInit {
   }
 
   onSelectChange(event: NzTabChangeEvent): void {
+    this.selectedTabIndex = event.index;
     this.activeTab = event.index + 1;
     this.updateTabDisabledStateOptimized();
   }
@@ -1007,14 +988,14 @@ export class GeneralInformationComponent implements OnInit {
       howDidYouComeKnow: ["", [Validators.required]],
       selfConfirmedApplicantInformation: [false, [Validators.required]]
     });
-    
+
     this.otherForm.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged()
     ).subscribe(() => {
       this.updateTabDisabledStateOptimized();
     });
-    
+
     this.updateTabDisabledStateOptimized();
   }
 
@@ -1030,17 +1011,18 @@ export class GeneralInformationComponent implements OnInit {
 
   onApplicanFormSubmit() {
     this.reviewSummaryData = this.collectReviewSummaryData();
-    
+
     const modalRef = this.modal.confirm({
       nzTitle: '<div class="modal-title"><i nz-icon nzType="file-text" nzTheme="outline"></i> Application Review & Confirmation</div>',
       nzContent: this.reviewSummaryService.generateReviewSummaryContent(this.reviewSummaryData),
       nzWidth: 900,
-      nzOkText: 'Submit Application',
+      nzOkText: 'Submit',
       nzCancelText: 'Review & Edit',
       nzOkType: 'primary',
       nzOkDanger: false,
       nzClassName: 'review-confirmation-modal',
       nzOkLoading: false,
+      nzStyle: { top: '5%' },
       nzOnOk: () => {
         this.submitFinalApplication();
         return false;
@@ -1056,7 +1038,7 @@ export class GeneralInformationComponent implements OnInit {
   private submitFinalApplication() {
     const postData = this.getApplicantOtherInfo();
     postData.applicantID = this.id;
-    
+
     if (this.currentModalRef) {
       this.currentModalRef.updateConfig({
         nzOkLoading: true,
@@ -1065,18 +1047,18 @@ export class GeneralInformationComponent implements OnInit {
         nzCancelDisabled: true
       });
     }
-    
+    console.log("$$      ", postData);
     this.reviewSubmissionLoading = true;
-    
+
     this.generalInformationService.finalSubmit(this.id, postData).subscribe({
       next: (res) => {
         this.reviewSubmissionLoading = false;
         this.isApplicationSubmitted = true;
-        
+
         if (this.currentModalRef) {
           this.currentModalRef.close();
         }
-        
+
         this._customNotificationService.notification(
           "success",
           "Success",
@@ -1088,7 +1070,7 @@ export class GeneralInformationComponent implements OnInit {
       },
       error: (error) => {
         this.reviewSubmissionLoading = false;
-        
+
         if (this.currentModalRef) {
           this.currentModalRef.updateConfig({
             nzOkLoading: false,
@@ -1097,7 +1079,7 @@ export class GeneralInformationComponent implements OnInit {
             nzCancelDisabled: false
           });
         }
-        
+
         this._customNotificationService.notification(
           "error",
           "Error",
@@ -1121,10 +1103,53 @@ export class GeneralInformationComponent implements OnInit {
   }
 
   onPaymentSuccessful() {
-    this.nextTab();
+    // This method is no longer used since we removed the paymentSuccessful event
+    // The application-fee component now handles successful payments internally
+    // without navigating to the next tab, following the ManageEducationComponent pattern
+    console.log('Payment successful - staying on current tab');
   }
 
   checkPaymentStatusAndUpdateTabs(): void {
     this.updateTabDisabledStateOptimized();
+  }
+
+  // Add method to reset error flags
+  private resetErrorFlags() {
+    this.isHandlingApplicantError = false;
+    this.hasAttemptedApplicantFetch = false;
+  }
+
+  // Add cleanup method
+  ngOnDestroy() {
+    this.resetErrorFlags();
+  }
+
+  // Add retry method for manual retry
+  retryApplicantFetch() {
+    console.log('Manual retry requested for applicant fetch');
+    this.resetErrorFlags();
+
+    if (this.userId) {
+      this.ngOnInit();
+    } else {
+      console.log('No userId available for retry');
+      this.router.navigate(['/accounts/login']);
+    }
+  }
+
+  // Helper method to extract data from different response structures
+  // This handles both ApiResponse<T> format (with data wrapper) and direct object format
+  private extractResponseData<T>(res: any): T | null {
+    if (res && typeof res === 'object') {
+      // Check if response has data property (ApiResponse<T> structure)
+      if ('data' in res && res.data) {
+        return res.data;
+      }
+      // Check if response is the data directly
+      else if ('id' in res) {
+        return res;
+      }
+    }
+    return null;
   }
 }

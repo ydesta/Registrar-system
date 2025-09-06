@@ -6,6 +6,8 @@ import { AddCourseComponent } from './add-course/add-course.component';
 import { CourseEquivalentComponent } from './course-equivalent/course-equivalent.component';
 import { CoursePrerequisiteComponent } from './course-prerequisite/course-prerequisite.component';
 import { CourseComponent } from './course.component';
+import { CourseExemptionListComponent } from './course-exemption-list/course-exemption-list.component';
+import { CourseExemptionFormComponent } from './course-exemption-form/course-exemption-form.component';
 
 const routes: Routes = [
   { path: '', component: CourseComponent },
@@ -13,7 +15,10 @@ const routes: Routes = [
 { path: 'course-equivalent', component: CourseEquivalentComponent },
 { path: 'add-course-equivalent/:id', component: AddCourseEquivalentComponent },
 { path: 'course-prerequisite', component: CoursePrerequisiteComponent },
-{ path: 'add-course-prerequisite/:id', component: AddCoursePrerequisiteComponent }
+{ path: 'add-course-prerequisite/:id', component: AddCoursePrerequisiteComponent },
+{ path: 'course-exemption-list', component: CourseExemptionListComponent },
+{ path: 'course-exemption-form', component: CourseExemptionFormComponent },
+{ path: 'course-exemption-form/:id', component: CourseExemptionFormComponent }
 ];
 
 @NgModule({

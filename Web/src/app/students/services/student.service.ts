@@ -348,7 +348,7 @@ export class StudentService {
     return this.httpClient.post(endpointUrl, request);
   }
 
-getStudentInformationWithInstructor(userId: string,studentId:string): Observable<StudentInformationView> {
+  getStudentInformationWithInstructor(userId: string, studentId: string): Observable<StudentInformationView> {
     const endpointUrl = `${this.getStudentGradesUrl()}/getStudentInformationWithInstructor/${userId}/${studentId}`;
     return this.httpClient.get<StudentInformationView>(endpointUrl).pipe(
       catchError((error) => {
@@ -357,6 +357,11 @@ getStudentInformationWithInstructor(userId: string,studentId:string): Observable
       })
     );
   }
-
+  getListOfCourseRegistrationSlipList(applicationUserId: string): Observable<StudentRegistrationSlipViewModel[]> {
+    const endpointUrl = `${this.getStudentUrl()}/student/getListOfCourseRegistrationSlipList/${applicationUserId}`;
+    return this.httpClient
+      .get(endpointUrl)
+      .pipe(map((result) => result as StudentRegistrationSlipViewModel[]));
+  }
 }
 

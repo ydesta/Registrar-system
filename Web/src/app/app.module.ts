@@ -21,7 +21,6 @@ import { SignoutRedirectCallbackComponent } from './signout-redirect-callback/si
 import { SigninRedirectCallbackComponent } from './signin-redirect-callback/signin-redirect-callback.component';
 import { AuthInterceptorService } from './services/auth-interceptor.service';
 import { RouterModule } from '@angular/router';
-import { RegisterComponent } from './register/register.component';
 import { PortalModule } from './portal/portal.module';
 import { environment } from '../environments/environment';
 
@@ -34,8 +33,6 @@ registerLocaleData(en);
     SignoutRedirectCallbackComponent,
     SigninRedirectCallbackComponent,
     UnauthorizedComponent,
-    RegisterComponent,
-
   ],
   imports: [
     BrowserModule,

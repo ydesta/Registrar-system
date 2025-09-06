@@ -1,21 +1,61 @@
-<app-profile-summary></app-profile-summary>
-<nz-card style="margin-top: 10px;">
-    <nz-tabset class="custom-tabset" nzType="card" style="padding: 20px;">
-        <nz-tab nzTitle="Registered Courses" class="custom-tab">
-            <app-registered-semester-courses></app-registered-semester-courses>
-        </nz-tab>
+<!-- Course Enrollment Details Component -->
+<div class="enrollment-details-container">
+  <!-- Profile Summary Section -->
+  <div class="profile-summary-section">
+    <app-profile-summary></app-profile-summary>
+  </div>
 
-        <nz-tab nzTitle="Add-Drop Courses" class="custom-tab">
-            <app-add-drop-course-list></app-add-drop-course-list>
-        </nz-tab>
+  <!-- Main Content Card -->
+  <div class="main-content-card">
+    <div class="card-header">
+      <div class="header-content">
+        <div class="title-section">
+          <span nz-icon nzType="book" nzTheme="outline" class="title-icon"></span>
+          <h2 class="page-title">Enrollment Details</h2>
+        </div>
+        <div class="subtitle">Manage your course enrollment and academic information</div>
+      </div>
+    </div>
 
-        <nz-tab nzTitle="Transfered Courses" class="custom-tab">
-            <app-transfred-courses></app-transfred-courses>
-        </nz-tab>
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <nz-tabset 
+        class="custom-tabset" 
+        nzType="card" 
+        [nzSelectedIndex]="selectedIndex"
+        (nzSelectedIndexChange)="onTabChange($event)"
+        [nzAnimated]="true">
+        
+        <nz-tab 
+          *ngFor="let tab of tabs; trackBy: trackByTabKey"
+          [nzTitle]="tab.title"
+          [nzDisabled]="false"
+          [attr.aria-label]="tab.ariaLabel"
+          class="custom-tab">
+          
+          <div class="tab-content" [attr.aria-labelledby]="'tab-' + tab.key">
+            <!-- Registered Courses Tab -->
+            <ng-container *ngIf="tab.key === 'registered'">
+              <app-registered-semester-courses></app-registered-semester-courses>
+            </ng-container>
 
-        <nz-tab nzTitle="Withdrawal" class="custom-tab">
-            <app-withdrawal></app-withdrawal>
-        </nz-tab>
+            <!-- Add-Drop Courses Tab -->
+            <ng-container *ngIf="tab.key === 'adddrop'">
+              <app-add-drop-course-list></app-add-drop-course-list>
+            </ng-container>
 
-    </nz-tabset>
-</nz-card>
+            <!-- Transferred Courses Tab -->
+            <ng-container *ngIf="tab.key === 'transferred'">
+              <app-transfred-courses></app-transfred-courses>
+            </ng-container>
+
+            <!-- Withdrawal Tab -->
+            <ng-container *ngIf="tab.key === 'withdrawal'">
+              <app-withdrawal></app-withdrawal>
+            </ng-container>
+          </div>
+        </nz-tab>
+      </nz-tabset>
+    </div>
+  </div>
+</div>

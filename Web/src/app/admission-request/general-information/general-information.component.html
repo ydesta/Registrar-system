@@ -106,8 +106,8 @@
                                         </div>
                                         <div *ngIf="firstName?.errors && firstName?.touched"
                                             class="custom-error-message">
-                                            <span *ngIf="firstName?.errors?.['invalidAmharic']">
-                                                {{firstName?.errors?.['invalidAmharic']?.message}}
+                                            <span *ngIf="firstName?.errors?.['invalidEnglish']">
+                                                {{firstName?.errors?.['invalidEnglish']?.message}}
                                             </span>
                                             <span *ngIf="firstName?.errors?.['required']">
                                                 First Name is required
@@ -165,7 +165,7 @@
                         </div>
 
                         <!-- Row 2: First Name(Amharic), Father Name(Amharic), Grand Father Name(Amharic) -->
-                        <div class="form-row">
+                        <!-- <div class="form-row">
                             <div class="form-field">
                                 <nz-form-item>
                                     <nz-form-control [nzValidateStatus]="''">
@@ -179,8 +179,8 @@
                                         </div>
                                         <div *ngIf="firstNameInAmh?.errors && firstNameInAmh?.touched"
                                             class="custom-error-message">
-                                            <span *ngIf="firstNameInAmh?.errors?.['invalidEnglish']">
-                                                {{firstNameInAmh?.errors?.['invalidEnglish']?.message}}
+                                            <span *ngIf="firstNameInAmh?.errors?.['invalidName']">
+                                                {{firstNameInAmh?.errors?.['invalidName']?.message}}
                                             </span>
                                         </div>
                                     </nz-form-control>
@@ -199,8 +199,8 @@
                                         </div>
                                         <div *ngIf="fatherNameInAmh?.errors && fatherNameInAmh?.touched"
                                             class="custom-error-message">
-                                            <span *ngIf="fatherNameInAmh?.errors?.['invalidAmharic']">
-                                                {{fatherNameInAmh?.errors?.['invalidAmharic']?.message}}
+                                            <span *ngIf="fatherNameInAmh?.errors?.['invalidName']">
+                                                {{fatherNameInAmh?.errors?.['invalidName']?.message}}
                                             </span>
                                         </div>
                                     </nz-form-control>
@@ -219,14 +219,14 @@
                                         </div>
                                         <div *ngIf="grandFatherNameInAmh?.errors && grandFatherNameInAmh?.touched"
                                             class="custom-error-message">
-                                            <span *ngIf="grandFatherNameInAmh?.errors?.['invalidAmharic']">
-                                                {{grandFatherNameInAmh?.errors?.['invalidAmharic']?.message}}
+                                            <span *ngIf="grandFatherNameInAmh?.errors?.['invalidName']">
+                                                {{grandFatherNameInAmh?.errors?.['invalidName']?.message}}
                                             </span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
-                        </div>
+                        </div> -->
 
                         <!-- Row 3: Mother Name, Sir Name, Gender -->
                         <div class="form-row">
@@ -283,6 +283,11 @@
                                                 <i nz-icon nzType="user" nzTheme="outline"></i>
                                                 Gender <span class="required">*</span>
                                             </label>
+                                        </div>
+                                        <div *ngIf="gender?.errors && gender?.touched" class="custom-error-message">
+                                            <span *ngIf="gender?.errors?.['required']">
+                                                Gender is required
+                                            </span>
                                         </div>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -407,16 +412,14 @@
                         </div>
                         <!-- <div class="form-row">
                             <div class="form-field">
-                                <nz-form-item>
-                                    <nz-form-label>
-                                        <i nz-icon nzType="environment" nzTheme="outline"></i>
-                                        Tax Identification Number (TIN)
-                                    </nz-form-label>
-                                    <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="tin"
-                                            placeholder="Enter your tax identification number" />
-                                    </nz-form-control>
-                                </nz-form-item>
+                                <nz-form-label>
+                                    <i nz-icon nzType="environment" nzTheme="outline"></i>
+                                    Tax Identification Number (TIN)
+                                </nz-form-label>
+                                <nz-form-control [nzValidateStatus]="''">
+                                    <input nz-input formControlName="tin"
+                                        placeholder="Enter your tax identification number" />
+                                </nz-form-control>
                             </div>
                             <div class="form-field"></div>
                         </div> -->
@@ -469,6 +472,11 @@
                                             <i nz-icon nzType="phone" nzTheme="outline"></i>
                                             Office Phone
                                         </label>
+                                        <div *ngIf="telephonOffice?.errors && telephonOffice?.touched" class="custom-error-message">
+                                            <span *ngIf="telephonOffice?.errors?.['invalidPhoneNumber']">
+                                                {{telephonOffice?.errors?.['invalidPhoneNumber']?.message}}
+                                            </span>
+                                        </div>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
@@ -482,6 +490,11 @@
                                             <i nz-icon nzType="phone" nzTheme="outline"></i>
                                             Home Phone
                                         </label>
+                                        <div *ngIf="telephonHome?.errors && telephonHome?.touched" class="custom-error-message">
+                                            <span *ngIf="telephonHome?.errors?.['invalidPhoneNumber']">
+                                                {{telephonHome?.errors?.['invalidPhoneNumber']?.message}}
+                                            </span>
+                                        </div>
                                     </nz-form-control>
                                 </nz-form-item>
                             </div>
@@ -668,8 +681,11 @@
         <app-manage-student-program-requester></app-manage-student-program-requester>
     </div>
     <div tabContent="applicationFee">
-        <app-application-fee [applicantId]="id" (paymentStatusChange)="onPaymentStatusChange($event)"
-            (paymentSuccessful)="onPaymentSuccessful()"></app-application-fee>
+        <app-application-fee 
+            [applicantId]="id" 
+            [isTabActive]="selectedTabIndex === 5"
+            (paymentStatusChange)="onPaymentStatusChange($event)">
+        </app-application-fee>
     </div>
     <div tabContent="files">
         <app-school-with-student-agreement (formValidityChange)="onAgreementFormValidityChange($event)"

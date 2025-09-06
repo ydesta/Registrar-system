@@ -4,15 +4,15 @@
       <img src="../../../assets/images/logo2.png" height="50" alt="HiLCoE Logo" (click)="goToHome()" style="cursor: pointer;" />
     </div>
     <div class="navigation-section">
-      <a routerLink="/" class="nav-link">
+      <a (click)="goToHome()" class="nav-link" style="cursor: pointer;">
         <i nz-icon nzType="home" nzTheme="outline"></i>
         <span>Home</span>
       </a>
-      <a routerLink="/accounts/login" class="nav-link">
+      <a (click)="goToLogin()" class="nav-link" style="cursor: pointer;">
         <i nz-icon nzType="login" nzTheme="outline"></i>
         <span>Login</span>
       </a>
-      <a routerLink="/accounts/register" class="nav-link">
+      <a (click)="goToRegister()" class="nav-link" style="cursor: pointer;">
         <i nz-icon nzType="user-add" nzTheme="outline"></i>
         <span>Register</span>
       </a>

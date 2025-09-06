@@ -88,7 +88,7 @@
         </nz-form-control>
         <ng-template #phoneErrorTpl let-control>
           <ng-container *ngIf="control.hasError('required')">Phone number is required</ng-container>
-          <ng-container *ngIf="control.hasError('pattern')">Please enter a valid phone number</ng-container>
+          <ng-container *ngIf="control.hasError('invalidPhoneNumber')">{{control.getError('invalidPhoneNumber').message}}</ng-container>
         </ng-template>
       </nz-form-item>
       </div>

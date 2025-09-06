@@ -46,7 +46,6 @@ import { ContactComponent } from './components/contact/contact.component';
 import { ProgramsComponent } from './components/programs/programs.component';
 import { ProgramsPageComponent } from './components/programs/programs-page.component';
 import { LoginComponent } from '../accounts/login/login.component';
-import { RegisterComponent } from '../register/register.component';
 import { SharedModule } from '../shared-module/shared/shared.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 

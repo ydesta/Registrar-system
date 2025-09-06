@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectorRef, AfterViewInit, OnDestroy } from "@angular/core";
 import { AbstractControl, FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { CurriculumQuadrantBreakdownService } from "src/app/graduation-requirement/services/curriculum-quadrant-breakdown.service";
@@ -21,7 +21,7 @@ import { BatchTermService } from "../services/batch-term.service";
   styleUrls: ["./add-term-course-offering.component.scss"],
   encapsulation: ViewEncapsulation.None
 })
-export class AddTermCourseOfferingComponent implements OnInit {
+export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, OnDestroy {
   action = "Add Term Course Offering";
   termCourseOfferingForm: FormGroup;
   curricula: any;
@@ -58,6 +58,13 @@ export class AddTermCourseOfferingComponent implements OnInit {
   curriculumCodes: string;
   coursesId: string[] = []
   savedAdditionalCourseIds: string[] = []
+  
+  // Caching properties to prevent change detection issues
+  private _cachedAdditionalCreditHours: number | undefined;
+  private _cachedAdditionalCreditHoursTimestamp: number | undefined;
+  private _cachedCreditHours: number | undefined;
+  private _cachedCreditHoursTimestamp: number | undefined;
+  private _lastChangeDetectionTimestamp: number = Date.now();
 
   searchText = '';
   originalCourses: any;
@@ -75,9 +82,7 @@ export class AddTermCourseOfferingComponent implements OnInit {
   endDate: any;
   isUpdate = false;
   
-  // Add flags to track data loading state
-  private isDataLoaded = false;
-  private isFormInitialized = false;
+  // Add flag to track pending batch selection
   private pendingBatchSelection: string | null = null;
 
   constructor(
@@ -88,7 +93,8 @@ export class AddTermCourseOfferingComponent implements OnInit {
     private _curriculumQuadrantBreakdownService: CurriculumQuadrantBreakdownService,
     private _termCourseOfferingService: TermCourseOfferingService,
     private router: Router,
-    private batchTermService: BatchTermService
+    private batchTermService: BatchTermService,
+    private cdr: ChangeDetectorRef
   ) {
     this.getBatchList();
     this.getListOfAcademicTermStatus();
@@ -135,7 +141,52 @@ export class AddTermCourseOfferingComponent implements OnInit {
 
   ngAfterViewInit(): void {
     //  this.getCourseList();
+    
+    // If we're in update mode and have pending course data, restore it now
+    if (this.isUpdate && this.coursesId && this.coursesId.length > 0) {
+      // Use setTimeout to ensure this runs after the current change detection cycle
+      setTimeout(() => {
+        this.restoreCourseSelections();
+        this.cdr.detectChanges();
+      });
+    }
   }
+  
+  private restoreCourseSelections(): void {
+    // Restore breakdown course selections
+    if (this.listOfCourseBreakDown && this.listOfCourseBreakDown.length > 0) {
+      this.setOfCheckedId.clear();
+      this.coursesId.forEach(courseId => {
+        const matchingCourse = this.listOfCourseBreakDown.find(course => course.courseId === courseId);
+        if (matchingCourse) {
+          this.setOfCheckedId.add(courseId);
+        }
+      });
+    }
+    
+    // Restore additional course selections
+    if (this.courses && this.courses.length > 0) {
+      this.setOfCheckedIdA.clear();
+      this.savedAdditionalCourseIds.forEach(courseId => {
+        const matchingCourse = this.courses.find(course => course.courseId === courseId);
+        if (matchingCourse) {
+          this.setOfCheckedIdA.add(courseId);
+        }
+      });
+    }
+    
+    this.invalidateCache();
+  }
+  
+  ngOnDestroy(): void {
+    // Clean up any pending operations
+    this.loading = false;
+    this.setOfCheckedId.clear();
+    this.setOfCheckedIdA.clear();
+    this.invalidateCache();
+  }
+  
+
   
   getCurrentAcademicTerm() {
     this.batchTermService.getCurrentAcademicTerm().subscribe((res: any) => {
@@ -161,68 +212,103 @@ export class AddTermCourseOfferingComponent implements OnInit {
   getCourseBreakDownListByBatch(curriculumCode: string, termId: number, batchId: string, isUpdate: boolean) {
     this.batchTermService
       .getCourseBreakDownList(curriculumCode, termId, batchId, isUpdate)
-      .subscribe((res: any) => {
-        this.listOfCourseBreakDown = res.courseBreakDownOffering;
-        this.originalBCourses = [...this.listOfCourseBreakDown];
-        this.numberOfCourseBreakDown = this.listOfCourseBreakDown.length;
-        
-        // Handle course selection for update mode
-        if (isUpdate && this.coursesId && this.coursesId.length > 0) {
-          // Filter courses that are in the breakdown
-          const breakdownCourseIds = this.listOfCourseBreakDown.map(x => x.courseId);
-          const selectedBreakdownCourses = this.coursesId.filter(id => 
-            breakdownCourseIds.includes(id)
-          );
+      .subscribe({
+        next: (res: any) => {
+          this.listOfCourseBreakDown = res.courseBreakDownOffering;
+          this.originalBCourses = [...this.listOfCourseBreakDown];
+          this.numberOfCourseBreakDown = this.listOfCourseBreakDown.length;
           
-          // Set checked state for breakdown courses
-          selectedBreakdownCourses.forEach(courseId => {
-            this.setOfCheckedId.add(courseId);
+          // Handle course selection for update mode
+          if (isUpdate && this.coursesId && this.coursesId.length > 0) {
+            // Clear previous selections
+            this.setOfCheckedId.clear();
+            
+            // Check courses that are in the breakdown and were previously selected
+            this.listOfCourseBreakDown.forEach(course => {
+              if (this.coursesId.includes(course.courseId)) {
+                this.setOfCheckedId.add(course.courseId);
+              }
+            });
+            
+            // Update saved additional course IDs to exclude breakdown courses
+            this.savedAdditionalCourseIds = this.coursesId.filter(courseId => 
+              !this.listOfCourseBreakDown.some(breakdown => breakdown.courseId === courseId)
+            );
+          }
+          
+          // Patch form with breakdown courses (this is for display purposes only)
+          let course = this.listOfCourseBreakDown.map(x => x.courseId);
+          this.courseId.patchValue(course);
+          
+          this.termCourseOfferingForm.patchValue({
+            AcademicTermSeason: res.currentTerm,
+            AcademicTermYear: res.academicYear
           });
           
-          // Update saved additional course IDs to exclude breakdown courses
-          this.savedAdditionalCourseIds = this.coursesId.filter(courseId => 
-            !breakdownCourseIds.includes(courseId)
+          this.invalidateCache();
+          this.refreshCheckedStatus();
+        },
+        error: (error) => {
+          console.error('Error fetching course breakdown:', error);
+          this._customNotificationService.notification(
+            "error",
+            "Error",
+            "Failed to load course breakdown data. Please try again."
           );
         }
-        
-        // Patch form with breakdown courses
-        let course = this.listOfCourseBreakDown.map(x => x.courseId);
-        this.courseId.patchValue(course);
-        
-        this.termCourseOfferingForm.patchValue({
-          AcademicTermSeason: res.currentTerm,
-          AcademicTermYear: res.academicYear
-        });
-        
-        this.refreshCheckedStatus();
       });
   }
   
   getTermCourseOfferingById(id: string) {
     this._termCourseOfferingService
       .getTermCourseOfferingById(id)
-      .subscribe((res: any) => {
-        console.log("Course Offering", res.data);
-        this.coursesId = res.data.courseId || [];
-        this.savedAdditionalCourseIds = [...this.coursesId];
-        
-        // Patch form values first
-        this.patchValues(res.data);
-        
-        // If batch is already selected, load course data
-        if (this.batchCode.value) {
-          this.loadCourseData();
-        } else {
-          // Store pending batch selection
-          this.pendingBatchSelection = res.data.batchCode;
+      .subscribe({
+        next: (res: any) => {
+          this.coursesId = res.data.courseId || [];
+          this.savedAdditionalCourseIds = [...this.coursesId];
+          
+          // Patch form values first
+          this.patchValues(res.data);
+          
+          // If batch is already selected, load course data
+          if (this.batchCode.value) {
+            this.loadCourseData();
+          } else {
+            // Store pending batch selection
+            this.pendingBatchSelection = res.data.batchCode;
+          }
+          
+          // Delay course selection restoration to avoid change detection issues
+          setTimeout(() => {
+            this.cdr.detectChanges();
+          });
+        },
+        error: (error) => {
+          console.error('Error fetching course offering:', error);
+          this._customNotificationService.notification(
+            "error",
+            "Error",
+            "Failed to load course offering data. Please try again."
+          );
         }
       });
   }
 
   private loadCourseData() {
+    console.log('loadCourseData called with:', {
+      curriculumCodes: this.curriculumCodes,
+      batchId: this.batchId,
+      academicTermId: this.academicTermId,
+      isUpdate: this.isUpdate
+    });
+    
     if (this.curriculumCodes && this.batchId && this.academicTermId !== undefined) {
+      console.log('Loading course data...');
       this.getCourseBreakDownListByBatch(this.curriculumCodes, this.academicTermId, this.batchId, this.isUpdate);
-      this.getAllCourseByBatchId(this.curriculumCodes, this.batchId, this.isUpdate, this.academicTermId);
+      // For additional courses, always pass isUpdate as true to get all available courses
+      this.getAllCourseByBatchId(this.curriculumCodes, this.batchId, true, this.academicTermId);
+    } else {
+      console.log('Missing required data for loading course data');
     }
   }
 
@@ -235,7 +321,7 @@ export class AddTermCourseOfferingComponent implements OnInit {
       academicTermCode: ["", []],
       entryCode: ["", [Validators.required]],
       batchCode: ["", [Validators.required]],
-      courseId: ["", [Validators.required]],
+      courseId: ["", []], // Course selection is optional
       addtionalCourseId: ["", []],
       approvedDate: [null, []],
       Year: [this.currentYear.getFullYear(), []],
@@ -248,7 +334,10 @@ export class AddTermCourseOfferingComponent implements OnInit {
         Validators: this.dateRangeValidator('RegistrationStartDate', 'RegistrationEndDate')
       }
     );
+    
   }
+  
+
   
   private getTermCourseOffering(): TermCourseOfferingRequest {
     const formModel = this.termCourseOfferingForm.getRawValue();
@@ -300,71 +389,50 @@ export class AddTermCourseOfferingComponent implements OnInit {
     return this.termCourseOfferingForm.get("RegistrationEndDate");
   }
 
-  // Getter to check if submit button should be disabled
+  // Getter to check if submit button should be enabled
   get isSubmitDisabled(): boolean {
-    // Check if form is valid
-    const isFormValid = this.termCourseOfferingForm.valid;
-    
-    // Check if any courses are selected (either breakdown or additional courses)
-    const hasSelectedBreakdownCourses = this.setOfCheckedId.size > 0;
-    const hasSelectedAdditionalCourses = this.setOfCheckedIdA.size > 0;
-    const hasSelectedCourses = hasSelectedBreakdownCourses || hasSelectedAdditionalCourses;
-    
-    // Check if required form fields are filled
-    const hasRequiredFields = this.batchCode?.value && 
-                             this.AcademicTermSeason?.value && 
-                             this.AcademicTermYear?.value &&
-                             this.RegistrationStartDate?.value &&
-                             this.RegistrationEndDate?.value;
-    
-    // Button is disabled if form is invalid OR no courses selected OR required fields missing
-    return !isFormValid || !hasSelectedCourses || !hasRequiredFields;
+    try {
+      // Check if form is valid
+      const isFormValid = this.termCourseOfferingForm.valid;
+      
+      // Check if required form fields are filled
+      const hasRequiredFields = this.batchCode?.value && 
+                               this.AcademicTermSeason?.value && 
+                               this.AcademicTermYear?.value &&
+                               this.RegistrationStartDate?.value &&
+                               this.RegistrationEndDate?.value;
+      
+      // Button is disabled if form is invalid OR required fields missing
+      // Note: Course selection is optional - users can submit without selecting courses
+      return !isFormValid || !hasRequiredFields;
+    } catch (error) {
+      console.warn('Error in isSubmitDisabled getter:', error);
+      return true; // Default to disabled if there's an error
+    }
   }
 
-  // Getter to provide feedback about why the button is disabled
-  get submitButtonTooltip(): string {
-    if (!this.termCourseOfferingForm.valid) {
-      return 'Please fill in all required fields';
-    }
-    
-    const hasSelectedBreakdownCourses = this.setOfCheckedId.size > 0;
-    const hasSelectedAdditionalCourses = this.setOfCheckedIdA.size > 0;
-    const hasSelectedCourses = hasSelectedBreakdownCourses || hasSelectedAdditionalCourses;
-    
-    if (!hasSelectedCourses) {
-      return 'Please select at least one course from the breakdown or additional courses';
-    }
-    
-    const hasRequiredFields = this.batchCode?.value && 
-                             this.AcademicTermSeason?.value && 
-                             this.AcademicTermYear?.value &&
-                             this.RegistrationStartDate?.value &&
-                             this.RegistrationEndDate?.value;
-    
-    if (!hasRequiredFields) {
-      return 'Please fill in all required fields (Batch, Academic Term Season, Academic Term Year, Registration Start Date, Registration End Date)';
-    }
-    
-    return '';
-  }
 
-  // Getter to check if courses are selected
-  get hasSelectedCourses(): boolean {
-    const hasSelectedBreakdownCourses = this.setOfCheckedId.size > 0;
-    const hasSelectedAdditionalCourses = this.setOfCheckedIdA.size > 0;
-    return hasSelectedBreakdownCourses || hasSelectedAdditionalCourses;
-  }
 
-  // Getter to check if required fields are filled
-  get hasRequiredFields(): boolean {
-    return this.batchCode?.value && 
-           this.AcademicTermSeason?.value && 
-           this.AcademicTermYear?.value &&
-           this.RegistrationStartDate?.value &&
-           this.RegistrationEndDate?.value;
-  }
+
+
+
 
   submitForm() {
+    // Prevent multiple submissions
+    if (this.loading) {
+      return;
+    }
+    
+    // Validate form (course selection is optional)
+    if (!this.termCourseOfferingForm.valid) {
+      this._customNotificationService.notification(
+        "error",
+        "Validation Error",
+        "Please fill in all required fields"
+      );
+      return;
+    }
+    
     const selectedCourseBreakDownIds = this.listOfCourseBreakDown
       .filter(data => this.setOfCheckedId.has(data.courseId))
       .map(data => data.courseId);
@@ -377,26 +445,18 @@ export class AddTermCourseOfferingComponent implements OnInit {
     const listOfSelectedCouresOffering = selectedCourseBreakDownIds.concat(
       ...uniqueCourseId
     );
+    
+    // Note: Course selection is optional - users can submit without selecting courses
+    // If no courses are selected, an empty array will be sent
+    
+    this.loading = true;
     const postData = this.getTermCourseOffering();
     postData.CourseId = listOfSelectedCouresOffering;
 
     if (this.progStatusId == "null") {
-      this._termCourseOfferingService.create(postData).subscribe(res => {
-        if (res.status == "success") {
-          this._customNotificationService.notification(
-            "success",
-            "Success",
-            res.data
-          );
-          this._route.navigateByUrl("colleges/term-course-offering");
-        } else if (res.status == "depulicate") {
-
-        }
-      });
-    } else if (this.progStatusId != "null") {
-      this._termCourseOfferingService
-        .update(this.progStatusId, postData)
-        .subscribe(res => {
+      this._termCourseOfferingService.create(postData).subscribe({
+        next: (res) => {
+          this.loading = false;
           if (res.status == "success") {
             this._customNotificationService.notification(
               "success",
@@ -404,11 +464,52 @@ export class AddTermCourseOfferingComponent implements OnInit {
               res.data
             );
             this._route.navigateByUrl("colleges/term-course-offering");
-          } else {
+          } else if (res.status == "depulicate") {
+            this._customNotificationService.notification(
+              "warning",
+              "Duplicate Entry",
+              "This course offering already exists"
+            );
+          }
+        },
+        error: (error) => {
+          this.loading = false;
+          console.error('Error creating course offering:', error);
+          this._customNotificationService.notification(
+            "error",
+            "Error",
+            "Failed to create course offering. Please try again."
+          );
+        }
+      });
+    } else if (this.progStatusId != "null") {
+      this._termCourseOfferingService
+        .update(this.progStatusId, postData)
+        .subscribe({
+          next: (res) => {
+            this.loading = false;
+            if (res.status == "success") {
+              this._customNotificationService.notification(
+                "success",
+                "Success",
+                res.data
+              );
+              this._route.navigateByUrl("colleges/term-course-offering");
+            } else {
+              this._customNotificationService.notification(
+                "error",
+                "Error",
+                res.data
+              );
+            }
+          },
+          error: (error) => {
+            this.loading = false;
+            console.error('Error updating course offering:', error);
             this._customNotificationService.notification(
               "error",
               "Error",
-              res.data
+              "Failed to update course offering. Please try again."
             );
           }
         });
@@ -416,6 +517,7 @@ export class AddTermCourseOfferingComponent implements OnInit {
   }
   
   patchValues(data: any) {
+    // First patch the basic form values
     this.termCourseOfferingForm.patchValue({
       academicTermCode: data.academicTermCode,
       curriculumCode: data.curriculumCode,
@@ -429,6 +531,22 @@ export class AddTermCourseOfferingComponent implements OnInit {
       RegistrationStartDate: data.registrationStartDate,
       RegistrationEndDate: data.registrationEndDate
     });
+
+    // Handle courseId array properly - this should be an array of course IDs
+    if (data.courseId && Array.isArray(data.courseId)) {
+      this.coursesId = [...data.courseId];
+      this.savedAdditionalCourseIds = [...data.courseId];
+    } else if (data.courseId) {
+      // Fallback: if courseId is not an array, convert it to one
+      this.coursesId = [data.courseId];
+      this.savedAdditionalCourseIds = [data.courseId];
+    } else {
+      this.coursesId = [];
+      this.savedAdditionalCourseIds = [];
+    }
+
+    // Store the original course IDs for comparison
+    this.savedAdditionalCourseIds = [...this.coursesId];
   }
   
   getCourseList() {
@@ -540,10 +658,25 @@ export class AddTermCourseOfferingComponent implements OnInit {
     );
   }
 
-  getSelectedCreditHours() {
-    return this.listOfCourseBreakDown
-      .filter(data => this.setOfCheckedId.has(data.courseId))
-      .reduce((total, data) => total + data.creditHours, 0);
+  get selectedCreditHours(): number {
+    try {
+      // Cache the result to prevent multiple evaluations during the same change detection cycle
+      if (this._cachedCreditHours !== undefined && 
+          this._cachedCreditHoursTimestamp === this._lastChangeDetectionTimestamp) {
+        return this._cachedCreditHours;
+      }
+      
+      const result = this.listOfCourseBreakDown
+        .filter(data => this.setOfCheckedId.has(data.courseId))
+        .reduce((total, data) => total + (data.creditHours || 0), 0);
+      
+      this._cachedCreditHours = result;
+      this._cachedCreditHoursTimestamp = this._lastChangeDetectionTimestamp;
+      return result;
+    } catch (error) {
+      console.warn('Error in selectedCreditHours getter:', error);
+      return 0;
+    }
   }
 
   getTotalCreditsForCourses() {
@@ -553,17 +686,28 @@ export class AddTermCourseOfferingComponent implements OnInit {
     ) || 0;
   }
 
-  getSelectedAdditionalCreditHours() {
-    return this.courses
-      ?.filter(course => this.setOfCheckedIdA.has(course.courseId))
-      .reduce((total, course) => total + (course.creditHours || 0), 0) || 0;
+  get selectedAdditionalCreditHours(): number {
+    try {
+      // Cache the result to prevent multiple evaluations during the same change detection cycle
+      if (this._cachedAdditionalCreditHours !== undefined && 
+          this._cachedAdditionalCreditHoursTimestamp === this._lastChangeDetectionTimestamp) {
+        return this._cachedAdditionalCreditHours;
+      }
+      
+      const result = this.courses
+        ?.filter(course => this.setOfCheckedIdA.has(course.courseId))
+        .reduce((total, course) => total + (course.creditHours || 0), 0) || 0;
+      
+      this._cachedAdditionalCreditHours = result;
+      this._cachedAdditionalCreditHoursTimestamp = this._lastChangeDetectionTimestamp;
+      return result;
+    } catch (error) {
+      console.warn('Error in selectedAdditionalCreditHours getter:', error);
+      return 0;
+    }
   }
 
-  getDefaultEndDate(): Date {
-    const currentDate = new Date();
-    currentDate.setDate(currentDate.getDate() + 7);
-    return currentDate;
-  }
+
   
   dateRangeValidator(startControlName: string, endControlName: string) {
     return (control: AbstractControl): { [key: string]: boolean } | null => {
@@ -584,6 +728,13 @@ export class AddTermCourseOfferingComponent implements OnInit {
     } else {
       this.setOfCheckedIdA.delete(id);
     }
+    this.invalidateCache();
+  }
+  
+  private invalidateCache(): void {
+    this._lastChangeDetectionTimestamp = Date.now();
+    this._cachedAdditionalCreditHours = undefined;
+    this._cachedCreditHours = undefined;
   }
 
   refreshCheckedStatusA(): void {
@@ -595,6 +746,7 @@ export class AddTermCourseOfferingComponent implements OnInit {
   onItemCheckedA(id: string, checked: boolean): void {
     this.updateCheckedSetA(id, checked);
     this.refreshCheckedStatusA();
+    this.cdr.detectChanges();
   }
 
   onAllCheckedA(checked: boolean): void {
@@ -602,13 +754,14 @@ export class AddTermCourseOfferingComponent implements OnInit {
       .filter(({ disabled }) => !disabled)
       .forEach(({ id }) => this.updateCheckedSetA(id, checked));
     this.refreshCheckedStatusA();
+    this.cdr.detectChanges();
   }
 
   onCurrentPageDataChangeA(listOfCurrentPageData: readonly any[]): void {
     this.listOfCurrentPageDataA = listOfCurrentPageData;
     
     // Check saved additional courses when in update mode
-    if (this.isUpdate && this.savedAdditionalCourseIds.length > 0) {
+    if (this.isUpdate && this.savedAdditionalCourseIds && this.savedAdditionalCourseIds.length > 0) {
       this.setOfCheckedIdA.clear();
       this.savedAdditionalCourseIds.forEach(courseId => {
         const matchingItem = listOfCurrentPageData.find(item => item.courseId == courseId);
@@ -616,8 +769,11 @@ export class AddTermCourseOfferingComponent implements OnInit {
           this.setOfCheckedIdA.add(matchingItem.courseId);
         }
       });
+    } else {
+      this.setOfCheckedIdA.clear();
     }
     
+    this.invalidateCache();
     this.refreshCheckedStatusA();
   }
 
@@ -627,6 +783,7 @@ export class AddTermCourseOfferingComponent implements OnInit {
     } else {
       this.setOfCheckedId.delete(id);
     }
+    this.invalidateCache();
   }
 
   refreshCheckedStatus(): void {
@@ -638,6 +795,7 @@ export class AddTermCourseOfferingComponent implements OnInit {
   onItemChecked(id: string, checked: boolean): void {
     this.updateCheckedSet(id, checked);
     this.refreshCheckedStatus();
+    this.cdr.detectChanges();
   }
 
   onAllChecked(checked: boolean): void {
@@ -645,22 +803,32 @@ export class AddTermCourseOfferingComponent implements OnInit {
       .filter(({ disabled }) => !disabled)
       .forEach(({ courseId }) => this.updateCheckedSet(courseId, checked));
     this.refreshCheckedStatus();
+    this.cdr.detectChanges();
   }
   
   onCurrentPageDataChange(listOfCurrentPageData: readonly any[]): void {
     this.listOfCurrentPageData = listOfCurrentPageData;
-    this.setOfCheckedId.clear();
     
     // In update mode, check courses that were previously selected
     if (this.isUpdate && this.coursesId && this.coursesId.length > 0) {
-      this.coursesId.forEach(courseId => {
+      // Only check courses that are in the breakdown list
+      const breakdownCourseIds = this.listOfCourseBreakDown.map(x => x.courseId);
+      const selectedBreakdownCourses = this.coursesId.filter(id => 
+        breakdownCourseIds.includes(id)
+      );
+      
+      this.setOfCheckedId.clear();
+      selectedBreakdownCourses.forEach(courseId => {
         const matchingItem = listOfCurrentPageData.find(item => item.courseId == courseId);
         if (matchingItem) {
           this.setOfCheckedId.add(matchingItem.courseId);
         }
       });
+    } else {
+      this.setOfCheckedId.clear();
     }
     
+    this.invalidateCache();
     this.refreshCheckedStatus();
   }
   
@@ -688,14 +856,15 @@ export class AddTermCourseOfferingComponent implements OnInit {
     if (this.searchText.trim() === '') {
       this.courses = [...this.originalCourses];
     } else {
-      this.courses = this.courses.filter(item =>
+      this.courses = this.originalCourses.filter(item =>
         item.courseCode.includes(this.searchText) ||
         item.courseTitle.toLowerCase().includes(this.searchText.toLowerCase())
       );
     }
     
     // If in update mode, ensure saved courses remain checked after search
-    if (this.isUpdate && this.savedAdditionalCourseIds.length > 0) {
+    if (this.isUpdate && this.savedAdditionalCourseIds && this.savedAdditionalCourseIds.length > 0) {
+      this.setOfCheckedIdA.clear();
       this.savedAdditionalCourseIds.forEach(courseId => {
         const matchingItem = this.courses.find(item => item.courseId == courseId);
         if (matchingItem) {
@@ -704,6 +873,7 @@ export class AddTermCourseOfferingComponent implements OnInit {
       });
     }
     
+    this.invalidateCache();
     this.refreshCheckedStatusA();
   }
   
@@ -711,38 +881,68 @@ export class AddTermCourseOfferingComponent implements OnInit {
     if (this.searchTextB.trim() === '') {
       this.listOfCourseBreakDown = [...this.originalBCourses];
     } else {
-      this.listOfCourseBreakDown = this.listOfCourseBreakDown.filter(item =>
+      this.listOfCourseBreakDown = this.originalBCourses.filter(item =>
         item.courseCode.includes(this.searchTextB) ||
         item.courseTitle.toLowerCase().includes(this.searchTextB.toLowerCase())
       );
     }
+    
+    // If in update mode, ensure saved courses remain checked after search
+    if (this.isUpdate && this.coursesId && this.coursesId.length > 0) {
+      this.setOfCheckedId.clear();
+      this.coursesId.forEach(courseId => {
+        const matchingItem = this.listOfCourseBreakDown.find(item => item.courseId == courseId);
+        if (matchingItem) {
+          this.setOfCheckedId.add(matchingItem.courseId);
+        }
+      });
+    }
+    
+    this.invalidateCache();
     this.refreshCheckedStatus();
   }
   
   getAllCourseByBatchId(curriculumId: string, batchId: string, isUpdate: boolean, seasonTerm: number) {
     this.batchTermService
       .getAllCourseByBatchId(curriculumId, batchId, isUpdate, seasonTerm)
-      .subscribe((res: any) => {
-        this.courses = res;
-        this.originalCourses = [...this.courses];
-        
-        // If in update mode and we have saved additional course IDs, check them
-        if (isUpdate && this.savedAdditionalCourseIds.length > 0) {
-          // Filter out courses that are already in the breakdown list
-          const additionalCourses = this.savedAdditionalCourseIds.filter(courseId => {
-            return !this.listOfCourseBreakDown.some(breakdown => breakdown.courseId === courseId);
-          });
+      .subscribe({
+        next: (res: any) => {
+          this.courses = res;
+          this.originalCourses = [...this.courses];
           
-          // Update the saved additional course IDs to only include those not in breakdown
-          this.savedAdditionalCourseIds = additionalCourses;
+          // If in update mode and we have saved additional course IDs, check them
+          if (isUpdate && this.savedAdditionalCourseIds && this.savedAdditionalCourseIds.length > 0) {
+            // Clear previous selections
+            this.setOfCheckedIdA.clear();
+            
+            // Filter out courses that are already in the breakdown list
+            const additionalCourses = this.savedAdditionalCourseIds.filter(courseId => {
+              return !this.listOfCourseBreakDown.some(breakdown => breakdown.courseId === courseId);
+            });
+            
+            // Update the saved additional course IDs to only include those not in breakdown
+            this.savedAdditionalCourseIds = additionalCourses;
+            
+            // Set checked state for additional courses
+            this.savedAdditionalCourseIds.forEach(courseId => {
+              const matchingCourse = this.courses.find(course => course.courseId === courseId);
+              if (matchingCourse) {
+                this.setOfCheckedIdA.add(courseId);
+              }
+            });
+          }
           
-          // Set checked state for additional courses
-          this.savedAdditionalCourseIds.forEach(courseId => {
-            this.setOfCheckedIdA.add(courseId);
-          });
+          this.invalidateCache();
+          this.refreshCheckedStatusA();
+        },
+        error: (error) => {
+          console.error('Error fetching additional courses:', error);
+          this._customNotificationService.notification(
+            "error",
+            "Error",
+            "Failed to load additional course data. Please try again."
+          );
         }
-        
-        this.refreshCheckedStatusA();
       });
   }
 }

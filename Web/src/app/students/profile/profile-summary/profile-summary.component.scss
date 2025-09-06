@@ -31,10 +31,12 @@
   border: 5px solid #1890ff;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+  background: #1890ff;
 
   &:hover {
     transform: scale(1.05) rotate(2deg);
     border-color: #40a9ff;
+    background: #40a9ff;
   }
 }
 
@@ -47,13 +49,14 @@
   font-size: 48px;
   font-weight: bold;
   color: #ffffff;
-  background: #F8F8FF;
+  background: #1890ff;
   border-radius: 50%;
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
   transition: all 0.3s ease;
 
   &:hover {
     transform: scale(1.05);
+    background: #40a9ff;
   }
 }
 

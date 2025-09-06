@@ -1,23 +1,23 @@
 import { UnauthorizedComponent } from "./unauthorized/unauthorized.component";
 import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
-import { RegisterComponent } from "./register/register.component";
 
 const routes: Routes = [
-  {
-    path: 'portal',
-    loadChildren: () => import('./portal/portal.module').then((m) => m.PortalModule),
-  },
-  { path: "unauthorized", component: UnauthorizedComponent },
-  { path: "register", component: RegisterComponent },
-  { path: "forgot-password", redirectTo: "/accounts/forgot-password" },
-  { path: "reset-password", redirectTo: "/accounts/reset-password" },
-  { path: "verify-email", redirectTo: "/accounts/verify-email", pathMatch: "prefix" },
+  // Load accounts module first to ensure authentication routes work properly
   {
     path: "accounts",
     loadChildren: () =>
       import("./accounts/accounts.module").then(m => m.AccountsModule)
   },
+  // Then load portal module
+  {
+    path: 'portal',
+    loadChildren: () => import('./portal/portal.module').then((m) => m.PortalModule),
+  },
+  { path: "unauthorized", component: UnauthorizedComponent },
+  { path: "forgot-password", redirectTo: "/accounts/forgot-password" },
+  { path: "reset-password", redirectTo: "/accounts/reset-password" },
+  { path: "verify-email", redirectTo: "/accounts/verify-email", pathMatch: "prefix" },
   {
     path: "acadamic-programme",
     loadChildren: () =>
@@ -99,14 +99,18 @@ const routes: Routes = [
         m => m.UserManagementModule
       )
   },
-  { path: "", pathMatch: "full", redirectTo: "/portal" },
-   {
+  {
     path: "student-section",
     loadChildren: () =>
       import("./student-section-assignments/student-section-assignments.module").then(
         m => m.StudentSectionAssignmentsModule
       )
-  }
+  },
+  { path: "", pathMatch: "full", redirectTo: "/portal" },
+  // Add a more specific root route to prevent conflicts
+  { path: "home", redirectTo: "/portal" },
+  // Add a catch-all route at the end to handle any unmatched routes
+  { path: "**", redirectTo: "/portal" }
 ];
 
 @NgModule({

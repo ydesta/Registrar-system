@@ -21,10 +21,10 @@ export class AddressComponent {
   }
   ngOnInit(): void {
     const userId = localStorage.getItem('user_id');
-    this.generalInformationService.getOrStoreParentApplicantId(userId).subscribe(applicantId => {
-      this.id = applicantId;
-      this.getApplicantById(applicantId);
-    });
+    // this.generalInformationService.getOrStoreParentApplicantId(userId).subscribe(applicantId => {
+    //   this.id = applicantId;
+    //   this.getApplicantById(applicantId);
+    // });
   }
   createForm() {
     this.form = this.fb.group({
@@ -41,11 +41,33 @@ export class AddressComponent {
   }
   getApplicantById(id: string) {
     this.generalInformationService.getApplicantById(id).subscribe(res => {
-      this.form.patchValue(res.data);
-      this.profilePicture =
-        environment.fileUrl +
-        "/Resources/profile/" +
-        res.data.files[0]?.fileName;
+      // Use helper method to extract data
+      const applicantData = this.extractResponseData<any>(res);
+      
+      if (applicantData) {
+        this.form.patchValue(applicantData);
+        this.profilePicture =
+          environment.fileUrl +
+          "/Resources/profile/" +
+          applicantData.files[0]?.fileName;
+      } else {
+        console.error('Invalid response structure:', res);
+      }
     });
+  }
+
+  // Helper method to extract data from different response structures
+  private extractResponseData<T>(res: any): T | null {
+    if (res && typeof res === 'object') {
+      // Check if response has data property (ApiResponse<T> structure)
+      if ('data' in res && res.data) {
+        return res.data;
+      }
+      // Check if response is the applicant object directly
+      else if ('id' in res) {
+        return res;
+      }
+    }
+    return null;
   }
 }

@@ -1,0 +1,690 @@
+// Content Container
+.content-container {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+// Header Section - matching Manage Instructor Sections
+.header-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .page-title {
+    h1 {
+      margin: 0;
+      color: #1f2937;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin: 8px 0 0 0;
+      color: #6b7280;
+      font-size: 14px;
+    }
+  }
+
+  .header-actions {
+    .add-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+      border: none;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 16px rgba(24, 144, 255, 0.25);
+      position: relative;
+      overflow: hidden;
+      min-width: 180px;
+      height: 48px;
+
+      // Professional gradient overlay
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: 12px;
+      }
+
+      // Professional hover effects
+      &:hover {
+        background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(24, 144, 255, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+
+        &::before {
+          opacity: 1;
+        }
+
+        i {
+          transform: rotate(90deg) scale(1.1);
+        }
+      }
+
+      // Professional active state
+      &:active {
+        transform: translateY(-1px) scale(1.01);
+        box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3);
+        transition: all 0.1s ease;
+      }
+
+      // Professional focus state
+      &:focus {
+        outline: none;
+        box-shadow: 0 4px 16px rgba(24, 144, 255, 0.25), 0 0 0 3px rgba(24, 144, 255, 0.15);
+      }
+
+      // Professional disabled state
+      &:disabled {
+        background: linear-gradient(135deg, #d9d9d9 0%, #bfbfbf 100%);
+        color: rgba(255, 255, 255, 0.6);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        &:hover {
+          transform: none;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+      }
+
+      // Professional icon styling
+      i {
+        color: white;
+        font-size: 18px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+      }
+
+      // Professional text styling
+      span {
+        font-weight: 600;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+}
+
+// Search Section
+.search-section {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 24px;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+
+  .search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f1f5f9;
+
+    h3 {
+      margin: 0;
+      color: #1f2937;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .clear-search-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      color: #6b7280;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+        color: #374151;
+        transform: translateY(-1px);
+      }
+
+      i {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .search-controls {
+    .search-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #374151;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 0;
+      }
+
+      nz-input-group {
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+
+        &:hover {
+          border-color: #d1d5db;
+        }
+
+        &:focus-within {
+          border-color: #1890ff;
+          box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+        }
+
+        input {
+          border: none;
+          background: transparent;
+          padding: 12px 16px;
+          font-size: 14px;
+
+          &::placeholder {
+            color: #9ca3af;
+            font-size: 13px;
+          }
+
+          &:focus {
+            outline: none;
+            box-shadow: none;
+          }
+        }
+
+        .ant-input-suffix {
+          color: #9ca3af;
+          padding-right: 16px;
+        }
+      }
+    }
+  }
+}
+
+// Table Card
+.table-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  padding: 0 0 24px 0;
+}
+
+// Table Styling
+.exemptions-table {
+  background: transparent;
+  font-size: 15px;
+
+  ::ng-deep .ant-table {
+    background: transparent;
+
+    .ant-table-thead > tr > th {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-bottom: 2px solid #e2e8f0;
+      font-weight: 600;
+      color: #374151;
+      padding: 16px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      &.sn-column {
+        width: 80px;
+        text-align: center;
+      }
+
+      &.action-column {
+        position: sticky !important;
+        right: 0;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+        z-index: 10;
+        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .ant-table-tbody > tr > td {
+      border-bottom: 1px solid #f1f5f9;
+      padding: 16px;
+      transition: all 0.3s ease;
+
+      &.sn-column {
+        text-align: center;
+        width: 80px;
+      }
+
+      &.action-column {
+        position: sticky !important;
+        right: 0;
+        background: white !important;
+        z-index: 5;
+        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .ant-table-tbody > tr:hover > td {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      transform: scale(1.01);
+
+      &.action-column {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+      }
+    }
+
+    .ant-table-tbody > tr:nth-child(even) > td {
+      background: #fafbfc;
+
+      &.action-column {
+        background: #fafbfc !important;
+      }
+    }
+
+    .ant-table-tbody > tr:nth-child(even):hover > td {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+
+      &.action-column {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+      }
+    }
+
+    .ant-table-pagination {
+      margin: 16px 24px 0 24px;
+      padding: 0;
+    }
+  }
+}
+
+// S/N Badge
+.sn-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+}
+
+// Student Info
+.student-info {
+  strong {
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 14px;
+  }
+}
+
+// Course Info
+.course-info {
+  strong {
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 14px;
+    font-family: 'Courier New', monospace;
+  }
+
+  .course-title {
+    color: #6b7280;
+    font-size: 12px;
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+}
+
+// College Name
+.college-name {
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+// Grade Tag
+.grade-tag {
+  font-weight: 600;
+  font-size: 12px;
+  border-radius: 6px;
+  padding: 4px 8px;
+  border: none;
+
+  &.ant-tag-green {
+    background: #f6ffed;
+    color: #52c41a;
+    border: 1px solid #b7eb8f;
+  }
+
+  &.ant-tag-blue {
+    background: #e6f7ff;
+    color: #1890ff;
+    border: 1px solid #91d5ff;
+  }
+
+  &.ant-tag-orange {
+    background: #fff7e6;
+    color: #fa8c16;
+    border: 1px solid #ffd591;
+  }
+
+  &.ant-tag-red {
+    background: #fff2f0;
+    color: #ff4d4f;
+    border: 1px solid #ffccc7;
+  }
+}
+
+// Status Tag
+.status-tag {
+  font-weight: 600;
+  font-size: 12px;
+  border-radius: 6px;
+  padding: 4px 8px;
+  border: none;
+
+  &.ant-tag-green {
+    background: #f6ffed;
+    color: #52c41a;
+    border: 1px solid #b7eb8f;
+  }
+
+  &.ant-tag-orange {
+    background: #fff7e6;
+    color: #fa8c16;
+    border: 1px solid #ffd591;
+  }
+}
+
+// Action Button
+.action-button {
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #6b7280;
+  transition: all 0.3s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    border-color: #1890ff;
+    color: #1890ff;
+    background: #f0f9ff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+  }
+
+  i {
+    font-size: 16px;
+  }
+}
+
+// Action Items
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  justify-content: flex-start;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  transition: all 0.3s ease;
+
+  &.edit {
+    color: #1890ff;
+
+    &:hover {
+      background: #f0f9ff;
+      color: #40a9ff;
+    }
+  }
+
+  &.delete {
+    color: #ff4d4f;
+
+    &:hover {
+      background: #fff2f0;
+      color: #ff7875;
+    }
+  }
+
+  i {
+    font-size: 14px;
+  }
+
+  span {
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+// No Data State
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #9ca3af;
+
+  i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #d1d5db;
+  }
+
+  p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #6b7280;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .content-container {
+    padding: 16px;
+  }
+
+  .header-section {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+
+    .page-title {
+      h1 {
+        font-size: 20px;
+      }
+    }
+
+    .header-actions {
+      .add-btn {
+        min-width: 160px;
+        height: 44px;
+        padding: 10px 20px;
+        font-size: 13px;
+        gap: 8px;
+
+        i {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+
+  .search-section {
+    padding: 16px;
+
+    .search-header {
+      flex-direction: column;
+      gap: 12px;
+      text-align: center;
+
+      h3 {
+        font-size: 16px;
+      }
+
+      .clear-search-btn {
+        align-self: center;
+      }
+    }
+
+    .search-controls {
+      .search-group {
+        label {
+          font-size: 12px;
+        }
+      }
+    }
+  }
+
+  .table-card {
+    overflow-x: auto;
+
+    .exemptions-table {
+      ::ng-deep .ant-table {
+        min-width: 800px;
+
+        .ant-table-thead > tr > th,
+        .ant-table-tbody > tr > td {
+          padding: 12px 8px;
+          font-size: 13px;
+        }
+
+        .ant-table-thead > tr > th {
+          font-size: 12px;
+        }
+      }
+    }
+  }
+
+  .sn-badge {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .action-button {
+    width: 28px;
+    height: 28px;
+
+    i {
+      font-size: 14px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .content-container {
+    padding: 12px;
+  }
+
+  .header-section {
+    padding: 16px;
+
+    .page-title {
+      h1 {
+        font-size: 18px;
+      }
+
+      .subtitle {
+        font-size: 13px;
+      }
+    }
+
+    .header-actions {
+      .add-btn {
+        min-width: 140px;
+        height: 40px;
+        padding: 8px 16px;
+        font-size: 12px;
+        gap: 6px;
+        letter-spacing: 0.3px;
+
+        i {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+
+  .search-section {
+    padding: 12px;
+
+    .search-header {
+      h3 {
+        font-size: 14px;
+      }
+
+      .clear-search-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+        gap: 4px;
+
+        i {
+          font-size: 12px;
+        }
+      }
+    }
+
+    .search-controls {
+      .search-group {
+        label {
+          font-size: 11px;
+        }
+      }
+    }
+  }
+
+  .table-card {
+    .exemptions-table {
+      ::ng-deep .ant-table {
+        .ant-table-thead > tr > th,
+        .ant-table-tbody > tr > td {
+          padding: 8px 6px;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+}

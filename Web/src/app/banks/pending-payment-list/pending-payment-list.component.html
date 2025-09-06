@@ -1,19 +1,30 @@
 <div class="pending-payments-container">
   <div class="header-section">
     <div class="title-section">
-      <h3>Pending Payments</h3>
+      <div class="title-with-icon">
+        <span nz-icon nzType="wallet" nzTheme="outline" class="title-icon"></span>
+        <h3>Pending Payments</h3>
+      </div>
       <div class="subtitle">View and manage your pending course payments</div>
     </div>
-    <div class="total-amount">
-      <div class="label">Total Pending Amount</div>
-      <div class="amount">{{ getTotalAmount() | currency:'ETB ' }}</div>
+    <div class="total-amount" *ngIf="listOfPendingPayments.length > 0">
+      <div class="amount-card">
+        <div class="amount-header">
+          <span nz-icon nzType="dollar-circle" nzTheme="outline" class="amount-icon"></span>
+          <div class="label">Total Pending Amount</div>
+        </div>
+        <div class="amount">{{ getTotalAmount() | currency:'ETB ' }}</div>
+        <div class="amount-subtitle">{{ listOfPendingPayments.length }} payment{{ listOfPendingPayments.length > 1 ? 's' : '' }}</div>
+      </div>
     </div>
   </div>
 
   <app-payment-instructions></app-payment-instructions>
 
   <div class="table-section">
+    <!-- Show table only when there's data or loading -->
     <nz-table 
+      *ngIf="listOfPendingPayments.length > 0 || isLoading"
       #basicTable 
       [nzData]="listOfPendingPayments" 
       [nzShowPagination]="false"
@@ -31,7 +42,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let data of basicTable.data">
+        <tr *ngFor="let data of basicTable.data; trackBy: trackByPaymentId">
           <td>{{ data.batchCode }}</td>
           <td>{{ data.requestType }}</td>
           <td>{{ data.numberOfRegistered }}</td>
@@ -47,17 +58,29 @@
               (click)="goToPaymentPage(data)" 
               [disabled]="data.status === 'Paid'"
               [nzLoading]="data.isProcessing">
-              <!-- <span class="currency-symbol">ETB</span> -->
-             Payment 
+              Payment 
             </button>
           </td>
         </tr>
       </tbody>
     </nz-table>
 
-    <div *ngIf="listOfPendingPayments.length === 0" class="empty-state">
-      <em nz-icon nzType="inbox" nzTheme="outline" class="empty-icon"></em>
-      <div class="empty-text">No pending payments found</div>
+    <!-- Show custom empty state only when not loading and no data -->
+    <div *ngIf="!isLoading && listOfPendingPayments.length === 0" class="empty-state">
+      <div class="empty-content">
+        <div class="empty-icon-wrapper">
+          <span nz-icon nzType="wallet" nzTheme="outline" class="empty-icon"></span>
+          <div class="empty-icon-bg"></div>
+        </div>
+        <div class="empty-text">No Pending Payments</div>
+        <div class="empty-subtitle">You don't have any pending course payments at the moment. All your payments are up to date!</div>
+        <div class="empty-actions">
+          <button nz-button nzType="primary" nzGhost (click)="getStudentCoursePendingPayment()">
+            <span nz-icon nzType="reload"></span>
+            Refresh
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

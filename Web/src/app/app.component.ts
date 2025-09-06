@@ -167,6 +167,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private checkIfAuthRoute() {
     const currentUrl = this._router.url;
+    
     this.isAuthRoute = currentUrl.includes('/accounts/login') ||
       currentUrl.includes('/accounts/register') ||
       currentUrl.includes('/accounts/forgot-password') ||
@@ -176,6 +177,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       currentUrl.includes('/forgot-password') ||
       currentUrl.includes('/reset-password');
     this.isPortalRoute = currentUrl.includes('/portal');
+    
   }
 
   ngAfterViewInit(): void {
@@ -376,15 +378,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private redirectReviewerToApplicantRequestList() {
     const currentUrl = this._router.url;
-    console.log('Current URL:', currentUrl);
-    console.log('isUserReviewer:', this.isUserReviewer);
     
     const shouldRedirect = !currentUrl.includes('/student-application/applicant-request-list') && 
                           !currentUrl.includes('/student-application/applicant-request-detail') &&
                           !currentUrl.includes('/accounts') &&
                           !currentUrl.includes('/portal');
-    
-    console.log('Should redirect:', shouldRedirect);
     
     if (shouldRedirect) {
       this._router.navigate(['/student-application/applicant-request-list']);

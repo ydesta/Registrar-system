@@ -1,0 +1,858 @@
+// Professional Header Section
+.registration-header {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  padding: 1rem 0;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.3);
+
+  .header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+
+    .header-title {
+      text-align: center;
+
+      .title-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+
+        .title-icon {
+          background: rgba(255, 255, 255, 0.2);
+          padding: 8px;
+          border-radius: 50%;
+          margin-right: 0.75rem;
+
+          span {
+            color: white;
+            font-size: 20px;
+          }
+        }
+
+        h1 {
+          color: white;
+          font-size: 1.8rem;
+          font-weight: 700;
+          margin: 0;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      p {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.9rem;
+        font-weight: 400;
+        margin: 0;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+}
+
+// Student Information Header
+.academic-header {
+  background: white;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  // border-left: 3px solid #1890ff;
+
+  .academic-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem;
+      background: #f8f9fa;
+      border-radius: 4px;
+      border-left: 2px solid #1890ff;
+
+      .info-icon {
+        color: #1890ff;
+        margin-right: 0.5rem;
+        font-size: 14px;
+      }
+
+      .info-content {
+        .info-label {
+          display: block;
+          font-size: 0.75rem;
+          color: #6c757d;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .info-value {
+          display: block;
+          font-size: 0.95rem;
+          color: #2c3e50;
+          font-weight: 600;
+          margin-top: 0.1rem;
+        }
+      }
+    }
+  }
+}
+
+// Summary Statistics
+.summary-section {
+  background: #f5f7fa;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+
+    .summary-card {
+      border-radius: 6px;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e8e8e8;
+
+      &.total-registrations,
+      &.total-courses,
+      &.total-credits,
+      &.total-amount {
+        background: #f5f7fa;
+        color: #1890ff;
+
+        .icon-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 0.5rem;
+
+          .icon-background {
+            background: #1890ff;
+            padding: 6px;
+            border-radius: 50%;
+
+            span {
+              color: white;
+              font-size: 16px;
+            }
+          }
+        }
+
+        .summary-number {
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin-bottom: 0.25rem;
+          color: #1890ff;
+        }
+
+        .summary-label {
+          font-size: 0.75rem;
+          font-weight: 500;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+    }
+  }
+}
+
+// Main Content Card
+.main-content-card {
+  ::ng-deep .ant-card-body {
+    background-color: #f5f7fa;
+  }
+}
+
+// Table Section
+.table-section {
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    .table-title {
+      display: flex;
+      align-items: center;
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2c3e50;
+
+      span {
+        margin-right: 0.5rem;
+        color: #1890ff;
+      }
+    }
+
+    .table-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .search-input {
+        width: 300px;
+      }
+    }
+  }
+
+  .responsive-table-wrapper {
+    .professional-table {
+      &.modern-datatable {
+        .table-header-row {
+          .paginate {
+            width: 60px;
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background: white;
+          }
+
+          .th-row {
+            font-weight: 600;
+            color: #2c3e50;
+            background: #fafafa;
+
+            &.actions-header {
+              text-align: center;
+            }
+          }
+        }
+
+        .ant-table-tbody {
+          .selected-row {
+            background-color: #f0f9ff;
+          }
+
+          .paginate {
+            width: 60px;
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background: white;
+            text-align: center;
+
+            .expand-button {
+              border: none;
+              background: transparent;
+              padding: 4px 8px;
+              border-radius: 4px;
+              transition: all 0.2s;
+
+              &:hover {
+                background: #f0f0f0;
+              }
+            }
+          }
+
+          .actions-cell {
+            text-align: center;
+          }
+
+          .action-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            .action-button {
+              &.modern-action-btn {
+                border: none;
+                background: transparent;
+                padding: 4px 8px;
+                border-radius: 4px;
+                transition: all 0.2s;
+
+                &:hover {
+                  background: #f0f0f0;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Course Details
+.course-details-cell {
+  padding: 0 !important;
+  background: #fafafa;
+
+  .course-details-container {
+    padding: 1rem;
+
+    .course-details-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e8e8e8;
+
+      .course-details-title {
+        display: flex;
+        align-items: center;
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2c3e50;
+
+        span {
+          margin-right: 0.5rem;
+          color: #1890ff;
+        }
+      }
+
+      .course-summary {
+        display: flex;
+        gap: 1rem;
+
+        .summary-item {
+          display: flex;
+          align-items: center;
+          font-size: 0.85rem;
+          color: #666;
+
+          span {
+            margin-right: 0.25rem;
+            color: #1890ff;
+          }
+        }
+      }
+    }
+
+    .course-table-wrapper {
+      .course-table {
+        &.modern-subtable {
+          .table-header-row {
+            .paginate {
+              width: 50px;
+              position: sticky;
+              left: 0;
+              z-index: 10;
+              background: white;
+            }
+
+            .th-row {
+              font-weight: 600;
+              color: #2c3e50;
+              background: #fafafa;
+            }
+          }
+
+          .ant-table-tbody {
+            .paginate {
+              width: 50px;
+              position: sticky;
+              left: 0;
+              z-index: 10;
+              background: white;
+              text-align: center;
+            }
+          }
+
+          .footer-row {
+            background: #f8f9fa;
+            font-weight: 600;
+
+            td {
+              border-top: 2px solid #e8e8e8;
+
+              &.total-label {
+                font-weight: bold;
+              }
+
+              &.total-value {
+                font-weight: bold;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Action Menu
+.action-menu {
+  .ant-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+
+    span {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+
+  .empty-icon {
+    margin-bottom: 1rem;
+
+    span {
+      font-size: 4rem;
+      color: #d9d9d9;
+    }
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-description {
+    color: #666;
+    margin-bottom: 2rem;
+  }
+
+  .empty-actions {
+    button {
+      display: inline-flex;
+      align-items: center;
+
+      span {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}
+
+// Pagination
+.pagination-info {
+  .pagination-text {
+    color: #666;
+    font-size: 0.9rem;
+  }
+}
+
+// Utility Classes
+.text-center {
+  text-align: center;
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .registration-header {
+    .header-content {
+      padding: 0 0.5rem;
+
+      .header-title {
+        .title-container {
+          flex-direction: column;
+          text-align: center;
+
+          .title-icon {
+            margin-right: 0;
+            margin-bottom: 0.5rem;
+          }
+
+          h1 {
+            font-size: 1.5rem;
+          }
+        }
+
+        p {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+
+  .academic-header {
+    .academic-info {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+  }
+
+  .summary-section {
+    .summary-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+
+      .summary-card {
+        padding: 0.75rem;
+
+        .summary-number {
+          font-size: 1.25rem;
+        }
+
+        .summary-label {
+          font-size: 0.7rem;
+        }
+      }
+    }
+  }
+
+  .table-section {
+    .table-header {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+
+      .table-actions {
+        justify-content: center;
+
+        .search-input {
+          width: 100%;
+          max-width: 300px;
+        }
+      }
+    }
+
+    .responsive-table-wrapper {
+      overflow-x: auto;
+    }
+  }
+
+  .course-details-container {
+    .course-details-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+
+      .course-summary {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .summary-section {
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// Enhanced Responsive Table Styles
+.responsive-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  position: relative;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  
+  // Add shadow effect for sticky column
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 60px;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0,0,0,0.1), transparent);
+    pointer-events: none;
+    z-index: 15;
+  }
+  
+  // Ensure sticky column is always visible
+  .ant-table {
+    position: relative;
+  }
+}
+
+nz-table {
+  min-width: 600px;
+}
+
+// Tablet and smaller desktop screens
+@media (max-width: 1024px) {
+  nz-table {
+    min-width: 550px;
+    font-size: 14px;
+  }
+  
+  .responsive-table-wrapper {
+    &::after {
+      left: 55px;
+    }
+  }
+
+  ::ng-deep {
+    .ant-table-wrapper {
+      .ant-table {
+        .ant-table-thead > tr > th {
+          padding: 12px 8px;
+          
+          &:first-child {
+            min-width: 55px;
+            width: 55px;
+            padding: 12px 6px;
+            z-index: 100;
+          }
+        }
+
+        .ant-table-tbody > tr > td {
+          padding: 12px 8px;
+          
+          &:first-child {
+            min-width: 55px;
+            width: 55px;
+            padding: 12px 6px;
+            z-index: 99;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Tablet screens
+@media (max-width: 768px) {
+  nz-table {
+    min-width: 500px;
+    font-size: 13px;
+  }
+  
+  .th-row, .paginate {
+    padding: 6px 4px;
+  }
+
+  .responsive-table-wrapper {
+    &::after {
+      left: 50px;
+    }
+  }
+
+  // Adjust sticky column for mobile
+  ::ng-deep {
+    .ant-table-wrapper {
+      .ant-table {
+        .ant-table-thead > tr > th {
+          padding: 10px 6px;
+          font-size: 13px;
+          
+          &:first-child {
+            min-width: 50px;
+            width: 50px;
+            padding: 10px 4px;
+            z-index: 100;
+          }
+        }
+
+        .ant-table-tbody > tr > td {
+          padding: 10px 6px;
+          font-size: 13px;
+          
+          &:first-child {
+            min-width: 50px;
+            width: 50px;
+            padding: 10px 4px;
+            z-index: 99;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Mobile screens
+@media (max-width: 480px) {
+  nz-table {
+    min-width: 400px;
+    font-size: 12px;
+  }
+  
+  .responsive-table-wrapper {
+    &::after {
+      left: 45px;
+    }
+  }
+
+  ::ng-deep {
+    .ant-table-wrapper {
+      .ant-table {
+        .ant-table-thead > tr > th {
+          padding: 8px 4px;
+          font-size: 12px;
+          
+          &:first-child {
+            min-width: 45px;
+            width: 45px;
+            padding: 8px 2px;
+            z-index: 100;
+          }
+        }
+
+        .ant-table-tbody > tr > td {
+          padding: 8px 4px;
+          font-size: 12px;
+          
+          &:first-child {
+            min-width: 45px;
+            width: 45px;
+            padding: 8px 2px;
+            z-index: 99;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Small mobile screens
+@media (max-width: 360px) {
+  nz-table {
+    min-width: 350px;
+    font-size: 11px;
+  }
+  
+  .responsive-table-wrapper {
+    &::after {
+      left: 40px;
+    }
+  }
+
+  ::ng-deep {
+    .ant-table-wrapper {
+      .ant-table {
+        .ant-table-thead > tr > th {
+          padding: 6px 3px;
+          font-size: 11px;
+          
+          &:first-child {
+            min-width: 40px;
+            width: 40px;
+            padding: 6px 1px;
+            z-index: 100;
+          }
+        }
+
+        .ant-table-tbody > tr > td {
+          padding: 6px 3px;
+          font-size: 11px;
+          
+          &:first-child {
+            min-width: 40px;
+            width: 40px;
+            padding: 6px 1px;
+            z-index: 99;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Extra small mobile screens
+@media (max-width: 320px) {
+  nz-table {
+    min-width: 300px;
+    font-size: 10px;
+  }
+  
+  .responsive-table-wrapper {
+    &::after {
+      left: 35px;
+    }
+  }
+
+  ::ng-deep {
+    .ant-table-wrapper {
+      .ant-table {
+        .ant-table-thead > tr > th {
+          padding: 5px 2px;
+          font-size: 10px;
+          
+          &:first-child {
+            min-width: 35px;
+            width: 35px;
+            padding: 5px 1px;
+            z-index: 100;
+          }
+        }
+
+        .ant-table-tbody > tr > td {
+          padding: 5px 2px;
+          font-size: 10px;
+          
+          &:first-child {
+            min-width: 35px;
+            width: 35px;
+            padding: 5px 1px;
+            z-index: 99;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Enhanced Table Styles
+.table-header-row {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  
+  th {
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    padding: 16px 12px;
+    white-space: nowrap;
+    
+    span[nz-icon] {
+      margin-right: 8px;
+      color: #6c757d;
+    }
+  }
+}
+
+tbody tr {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: #f8f9fa !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  &.selected-row {
+    background-color: #e6f7ff !important;
+    border-left: 4px solid #1890ff;
+  }
+  
+  td {
+    padding: 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+  }
+}
+
+// Improved footer row styling
+.footer-row {
+  background-color: #f8f9fa !important;
+  
+  td {
+    padding: 12px 16px !important;
+    border-top: 2px solid #e8e8e8 !important;
+    font-weight: 600 !important;
+    
+    &:first-child {
+      text-align: left !important;
+    }
+    
+    &:not(:first-child) {
+      text-align: center !important;
+    }
+  }
+}

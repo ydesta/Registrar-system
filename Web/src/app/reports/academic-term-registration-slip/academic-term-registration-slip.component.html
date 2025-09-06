@@ -128,7 +128,7 @@
               </button>
               <nz-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu style="padding-right: 50px">
-                  <li>
+                  <li *ngIf="data.fileName">
                     <a style="border-style: none" (click)="getFileName(data.fileName)">
                       <i nz-icon nzType="edit" nzTheme="fill"></i>
                       <span>View File</span>

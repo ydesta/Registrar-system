@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { NzMessageModule } from 'ng-zorro-antd/message';
+import { NzSpaceModule } from 'ng-zorro-antd/space';
 
 import { CourseRoutingModule } from './course-routing.module';
 import { CourseComponent } from './course.component';
@@ -16,6 +17,8 @@ import { CourseService } from 'src/app/services/course.service';
 import { CoursePrerequisiteService } from 'src/app/services/course-prerequisite.service';
 import { DropCoursesComponent } from './add-drop/drop-courses/drop-courses.component';
 import { AddCoursesComponent } from './add-drop/add-courses/add-courses.component';
+import { CourseExemptionListComponent } from './course-exemption-list/course-exemption-list.component';
+import { CourseExemptionFormComponent } from './course-exemption-form/course-exemption-form.component';
 
 @NgModule({
   declarations: [
@@ -26,15 +29,18 @@ import { AddCoursesComponent } from './add-drop/add-courses/add-courses.componen
     AddCoursePrerequisiteComponent,
     CoursePrerequisiteComponent,
     DropCoursesComponent,
-    AddCoursesComponent
+    AddCoursesComponent,
+    CourseExemptionListComponent,
+    CourseExemptionFormComponent
   ],
   imports: [
     CommonModule,
     CourseRoutingModule,
-    SharedModule,   
+    SharedModule,
     NgxPrintModule,
     HttpClientModule,
-    NzMessageModule
+    NzMessageModule,
+    NzSpaceModule
   ],
   providers: [
     CourseService,

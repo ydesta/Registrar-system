@@ -66,6 +66,18 @@
                 </nz-form-control>
               </nz-form-item>
             </div>
+               <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Section Type</nz-form-label>
+                <nz-form-control nzErrorTip="Section Type is required">
+                  <nz-select formControlName="sectionType" nzPlaceHolder="Select Section Type" nzShowSearch nzAllowClear
+                    style="width: 100%;">
+                    <nz-option *ngFor="let item of listOfSectionType" [nzValue]="item.Id"
+                      [nzLabel]="item.Description"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
           </div>
 
           <div nz-row [nzGutter]="24">

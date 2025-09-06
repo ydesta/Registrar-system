@@ -60,6 +60,15 @@ export class TermCourseOfferingService {
     const url = `${this.getTermCourseOfferingsUrl()}/${id}`;
     return this.httpClient.put<any>(url, {}).pipe(map(response => response));
   }
+  deactivateCourseOfering(id: number): Observable<any> {
+    const url = `${this.getTermCourseOfferingsUrl()}/deactivate/${id}`;
+    return this.httpClient.put<any>(url, {}).pipe(map(response => response));
+  }
+
+  activateCourseOffering(id: number): Observable<any> {
+    const url = `${this.getTermCourseOfferingsUrl()}/activate/${id}`;
+    return this.httpClient.put<any>(url, {}).pipe(map(response => response));
+  }
 
 
   delete(id: string): Observable<any> {

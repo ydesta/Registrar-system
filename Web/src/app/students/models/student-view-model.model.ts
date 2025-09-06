@@ -17,6 +17,7 @@ export class StudentViewModel {
   public cgpa: number;
   public year: string;
   public isAllowedToRegister: number;
+  public ignoreGradeLevelValidation: boolean;
   public batchCode: string;
   public courseTermOfferings: CourseBreakDownOffering[];
   public coursePayment: CoursePaymentViewModel[]

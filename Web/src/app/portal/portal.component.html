@@ -41,14 +41,14 @@
         <!-- Authentication Buttons - Conditional -->
         <div class="auth-buttons">
           <ng-container *ngIf="!isAuthenticated; else authenticatedUser">
-            <button class="register-btn" (click)="register(); closeMobileMenu()">Register</button>
-            <button class="login-btn" (click)="login(); closeMobileMenu()">Login</button>
+            <button class="register-btn" (click)="register()" type="button">Register</button>
+            <button class="login-btn" (click)="login()" type="button">Login</button>
           </ng-container>
           <ng-template #authenticatedUser>
             <div class="user-menu">
               <span class="welcome-text">Welcome, {{ currentUser?.firstName || 'User' }}!</span>
-              <button class="dashboard-btn" (click)="goToDashboard(); closeMobileMenu()">Dashboard</button>
-              <button class="logout-btn" (click)="logout(); closeMobileMenu()">Logout</button>
+              <button class="dashboard-btn" (click)="goToDashboard(); closeMobileMenu()" type="button">Dashboard</button>
+              <button class="logout-btn" (click)="logout(); closeMobileMenu()" type="button">Logout</button>
             </div>
           </ng-template>
         </div>
