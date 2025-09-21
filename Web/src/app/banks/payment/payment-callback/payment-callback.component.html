@@ -1,0 +1,91 @@
+<div class="callback-container">
+  <div class="callback-card">
+    <div class="callback-header">
+      <div class="status-icon" [ngClass]="{
+        'success': paymentStatus === 'success',
+        'error': paymentStatus === 'error',
+        'pending': paymentStatus === 'pending'
+      }">
+        <i *ngIf="paymentStatus === 'success'" class="fas fa-check-circle"></i>
+        <i *ngIf="paymentStatus === 'error'" class="fas fa-times-circle"></i>
+        <i *ngIf="paymentStatus === 'pending'" class="fas fa-spinner fa-spin"></i>
+      </div>
+      
+      <h2 [ngClass]="{
+        'success': paymentStatus === 'success',
+        'error': paymentStatus === 'error',
+        'pending': paymentStatus === 'pending'
+      }">
+        {{ paymentStatus === 'success' ? 'Payment Successful!' : 
+           paymentStatus === 'error' ? 'Payment Failed' : 
+           'Processing Payment...' }}
+      </h2>
+    </div>
+
+    <div class="callback-content">
+      <p class="status-message">{{ message }}</p>
+      
+      <div *ngIf="orderId" class="order-info">
+        <p><strong>Order ID:</strong> {{ orderId }}</p>
+        <p><strong>Status:</strong> 
+          <span [ngClass]="{
+            'status-success': paymentStatus === 'success',
+            'status-error': paymentStatus === 'error',
+            'status-pending': paymentStatus === 'pending'
+          }">
+            {{ paymentStatus === 'success' ? 'Completed' : 
+               paymentStatus === 'error' ? 'Failed' : 
+               'Processing' }}
+          </span>
+        </p>
+      </div>
+
+      <div *ngIf="isProcessing" class="processing-info">
+        <p>Please wait while we process your payment...</p>
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+      </div>
+
+      <div *ngIf="!isProcessing" class="action-buttons">
+        <button 
+          class="btn btn-primary" 
+          (click)="goToPayment()"
+        >
+          Make Another Payment
+        </button>
+        
+        <button 
+          class="btn btn-secondary" 
+          (click)="goToDashboard()"
+        >
+          Go to Dashboard
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="!isProcessing && paymentStatus === 'success'" class="success-details">
+      <h3>What's Next?</h3>
+      <ul>
+        <li>Your payment has been recorded in the system</li>
+        <li>You will receive a confirmation email shortly</li>
+        <li>Your course registration is now complete</li>
+        <li>You can view your payment history in the dashboard</li>
+      </ul>
+    </div>
+
+    <div *ngIf="!isProcessing && paymentStatus === 'error'" class="error-details">
+      <h3>Need Help?</h3>
+      <ul>
+        <li>Check your payment method and try again</li>
+        <li>Contact support if the problem persists</li>
+        <li>Verify your payment details are correct</li>
+        <li>Check your bank account for any issues</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+
+

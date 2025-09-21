@@ -37,6 +37,7 @@ namespace SecureAuth.INFRASTRUCTURE.Data
         public DbSet<SecurityEvent> SecurityEvents { get; set; }
         public DbSet<SecurityThreat> SecurityThreats { get; set; }
         public DbSet<SecuritySettings> SecuritySettings { get; set; }
+        public DbSet<UserCredential> UserCredential { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

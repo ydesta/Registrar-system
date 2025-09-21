@@ -557,5 +557,63 @@ namespace SecureAuth.API.Controllers.User
                 return StatusCode(500, new { message = "An error occurred while updating email", error = ex.Message });
             }
         }
+
+        [HttpGet("health")]
+        public IActionResult HealthCheck()
+        {
+            return Ok(new { 
+                message = "UserManagement API is running", 
+                timestamp = DateTime.Now,
+                version = "1.0.0"
+            });
+        }
+
+        [HttpGet("credentials")]
+        // [Authorize(Roles = "Super Admin, Academic Director")] // Temporarily disabled for testing
+        public async Task<IActionResult> GetUserCredentials(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? emailFilter = null,
+            [FromQuery] string? sortBy = "CreatedAt",
+            [FromQuery] bool sortDescending = true)
+        {
+            try
+            {
+                Console.WriteLine($"GetUserCredentials called with params: page={page}, pageSize={pageSize}, sortBy={sortBy}");
+                Console.WriteLine($"User.Identity.IsAuthenticated: {User.Identity?.IsAuthenticated}");
+                Console.WriteLine($"User.Identity.Name: {User.Identity?.Name}");
+                
+                // Log user claims
+                foreach (var claim in User.Claims)
+                {
+                    Console.WriteLine($"Claim: {claim.Type} = {claim.Value}");
+                }
+                var query = new GetUserCredentialsQuery
+                {
+                    FromDate = fromDate,
+                    ToDate = toDate,
+                    Page = page,
+                    PageSize = pageSize,
+                    EmailFilter = emailFilter,
+                    SortBy = sortBy,
+                    SortDescending = sortDescending
+                };
+
+                var result = await _mediator.QueryAsync<GetUserCredentialsQuery, GetUserCredentialsResponse>(query);
+                
+                if (result.Success)
+                {
+                    return Ok(result);
+                }
+                
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving user credentials", error = ex.Message });
+            }
+        }
     }
 } 

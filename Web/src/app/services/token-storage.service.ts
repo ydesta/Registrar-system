@@ -10,7 +10,7 @@ export class TokenStorageService {
     return `user_${userId}_${key}`;
   }
 
-  private getCurrentUserId(): string {
+  public getCurrentUserId(): string {
     return localStorage.getItem('currentUserId') || '';
   }
 
@@ -52,10 +52,19 @@ export class TokenStorageService {
 
   public getToken(): string | null {
     const userId = this.getCurrentUserId();
-    if (!userId) return null;
+    console.log('TokenStorageService.getToken() called');
+    console.log('Current user ID:', userId);
+    
+    if (!userId) {
+      console.log('No user ID found, returning null');
+      return null;
+    }
     
     const key = this.getUserKey(userId, 'token');
-    return localStorage.getItem(key);
+    console.log('Token key:', key);
+    const token = localStorage.getItem(key);
+    console.log('Token from localStorage:', token ? 'Token exists' : 'No token found');
+    return token;
   }
 
   public saveUser(user: any) {

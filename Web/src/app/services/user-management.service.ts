@@ -456,6 +456,94 @@ export class UserManagementService implements IUserManagementService {
         shareReplay(1) // Share the result with multiple subscribers
       );
   }
+
+  testApiConnection(): Observable<any> {
+    console.log('Testing API connection to:', `${this.baseUrl}/UserManagement/health`);
+    return this.http.get<any>(`${this.baseUrl}/UserManagement/health`)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  getUserCredentials(params: {
+    fromDate?: Date | null;
+    toDate?: Date | null;
+    page?: number;
+    pageSize?: number;
+    emailFilter?: string | null;
+    sortBy?: string;
+    sortDescending?: boolean;
+  }): Observable<any> {
+    let httpParams = new HttpParams();
+    
+    if (params.fromDate) {
+      httpParams = httpParams.set('fromDate', params.fromDate.toISOString());
+    }
+    if (params.toDate) {
+      httpParams = httpParams.set('toDate', params.toDate.toISOString());
+    }
+    if (params.page) {
+      httpParams = httpParams.set('page', params.page.toString());
+    }
+    if (params.pageSize) {
+      httpParams = httpParams.set('pageSize', params.pageSize.toString());
+    }
+    if (params.emailFilter) {
+      httpParams = httpParams.set('emailFilter', params.emailFilter);
+    }
+    if (params.sortBy) {
+      httpParams = httpParams.set('sortBy', params.sortBy);
+    }
+    if (params.sortDescending !== undefined) {
+      httpParams = httpParams.set('sortDescending', params.sortDescending.toString());
+    }
+
+    console.log('Making request to:', `${this.baseUrl}/UserManagement/credentials`);
+    console.log('With params:', httpParams.toString());
+    
+    return this.http.get<any>(`${this.baseUrl}/UserManagement/credentials`, { params: httpParams })
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  getUserCredentialsForExport(params: {
+    fromDate?: Date | null;
+    toDate?: Date | null;
+    emailFilter?: string | null;
+    sortBy?: string;
+    sortDescending?: boolean;
+  }): Observable<any> {
+    let httpParams = new HttpParams();
+    
+    if (params.fromDate) {
+      httpParams = httpParams.set('fromDate', params.fromDate.toISOString());
+    }
+    if (params.toDate) {
+      httpParams = httpParams.set('toDate', params.toDate.toISOString());
+    }
+    if (params.emailFilter) {
+      httpParams = httpParams.set('emailFilter', params.emailFilter);
+    }
+    if (params.sortBy) {
+      httpParams = httpParams.set('sortBy', params.sortBy);
+    }
+    if (params.sortDescending !== undefined) {
+      httpParams = httpParams.set('sortDescending', params.sortDescending.toString());
+    }
+    // Set a very large page size to get all data
+    httpParams = httpParams.set('pageSize', '10000');
+    httpParams = httpParams.set('page', '1');
+
+    console.log('Making export request to:', `${this.baseUrl}/UserManagement/credentials`);
+    console.log('With export params:', httpParams.toString());
+
+    return this.http.get<any>(`${this.baseUrl}/UserManagement/credentials`, { params: httpParams })
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An error occurred';
     if (error.error instanceof ErrorEvent) {

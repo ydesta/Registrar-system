@@ -15,13 +15,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public isUserAuthenticated: boolean = false;
   public isUserApprovedApplicant: boolean = false;
   public isUserAlreadyApplied: boolean = false;
-  
+  public isUserAcademicDirector: boolean = false;
+  public isUserReception: boolean = false;
   constructor(private _http: HttpClient) {
     this.getLoggedRole();
   }
 
   ngOnInit(): void {
-   
+
   }
 
   ngOnDestroy(): void {
@@ -37,7 +38,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.isUserReviewer = effectiveRole === 'Reviewer';
     this.isUserApplicant = effectiveRole === 'Applicant';
     this.isUserApprovedApplicant = effectiveRole === 'ApprovedApplicant';
-    
-    
+    this.isUserAcademicDirector = effectiveRole === 'Academic Director';
+    this.isUserReception = effectiveRole === 'Reception';
+
   }
 }

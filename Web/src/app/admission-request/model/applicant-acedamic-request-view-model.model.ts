@@ -8,4 +8,20 @@ export class ApplicantAcedamicRequestViewModel {
   public email: string;
   public academicProgramme: string;
   public nationality: string;
+  public approvalStatus: number;
+  public appliedDate: number;
 }
+
+export interface ApplicantIncompleteResponse {
+  applicantId: string;
+  fullName: string;
+  requestDate: string;
+  mobile: string;
+  educationBackground: string;
+  personalContact: string;
+  applicantWorkExperiences: string;
+  academicProgramRequest: string;
+  studentPayments: string;
+  finalSubmit: string;
+}
+

@@ -160,6 +160,7 @@ namespace SecureAuth.INFRASTRUCTURE.DependencyInjection
             services.AddScoped<IPasswordHistoryRepository, PasswordHistoryRepository>();
             services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
             services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
+            services.AddScoped<IUserCredentialRepository, UserCredentialRepository>();
             services.AddScoped<IPasswordPolicyRepository, PasswordPolicyRepository>();
             services.AddScoped<ISystemConfigurationRepository, SystemConfigurationRepository>();
             services.AddScoped<ISystemBackupRepository, SystemBackupRepository>();
@@ -252,6 +253,7 @@ namespace SecureAuth.INFRASTRUCTURE.DependencyInjection
             // Register Query Handlers (User)
             services.AddScoped<IQueryHandler<GetUsersQuery, UsersListResponse>, GetUsersQueryHandler>();
             services.AddScoped<IQueryHandler<GetUserByIdQuery, UserDetailsResponse>, GetUserByIdQueryHandler>();
+            services.AddScoped<IQueryHandler<GetUserCredentialsQuery, GetUserCredentialsResponse>, GetUserCredentialsQueryHandler>();
 
             // Register Query Handlers (Security)
             services.AddScoped<IQueryHandler<GetSecuritySettingsQuery, SecuritySettingsModel>, GetSecuritySettingsQueryHandler>();

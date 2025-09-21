@@ -6,6 +6,132 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+// Search Section
+.search-section {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+
+  ::ng-deep .ant-collapse {
+    border: none;
+    background: transparent;
+    
+    .ant-collapse-item {
+      border: none;
+      
+      .ant-collapse-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: none;
+        padding: 16px 24px;
+        font-weight: 600;
+        color: #374151;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        .ant-collapse-arrow {
+          color: #1890ff;
+          font-size: 14px;
+        }
+      }
+      
+      .ant-collapse-content {
+        border: none;
+        background: white;
+        
+        .ant-collapse-content-box {
+          padding: 24px;
+        }
+      }
+    }
+  }
+
+  // Form styling to match Registered Student Per Course
+  ::ng-deep .ant-form {
+    .ant-form-item {
+      margin-bottom: 16px;
+      
+      .ant-form-item-label {
+        padding-bottom: 8px;
+        
+        label {
+          font-weight: 500;
+          color: #374151;
+          font-size: 14px;
+        }
+      }
+      
+      .ant-form-item-control {
+        .ant-form-item-control-input {
+          .ant-select {
+            width: 100%;
+            
+            .ant-select-selector {
+              height: 40px;
+              border-radius: 8px;
+              border: 1px solid #d1d5db;
+              transition: all 0.3s ease;
+              
+              &:hover {
+                border-color: #1890ff;
+              }
+              
+              .ant-select-selection-item {
+                line-height: 38px;
+                font-size: 14px;
+              }
+              
+              .ant-select-selection-placeholder {
+                line-height: 38px;
+                font-size: 14px;
+                color: #9ca3af;
+              }
+            }
+            
+            &.ant-select-focused .ant-select-selector {
+              border-color: #1890ff;
+              box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 16px;
+    
+    button {
+      border-radius: 8px;
+      font-weight: 500;
+      height: 40px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+      
+      &.mr-2 {
+        margin-right: 8px;
+      }
+      
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
+}
+
 // Header Section
 .header-section {
   background: white;
@@ -35,6 +161,7 @@
     .page-title {
       flex: 1;
       min-width: 0;
+      order: 1; // Ensure it comes first
       .title-text {
         margin: 0 0 8px 0;
         font-size: 28px;
@@ -55,7 +182,7 @@
       gap: 12px;
       flex-shrink: 0; // Prevent shrinking
       margin-left: auto; // Push to the right
-      float: right; // Float to the right corner
+      order: 2; // Ensure it comes after page title
       
       .search-section {
         max-width: 260px;
@@ -101,6 +228,66 @@
           color: #1890ff;
         }
       }
+    }
+  }
+}
+
+// Table Actions (Search and Export)
+.table-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 16px;
+  
+  .search-section {
+    flex: 1;
+    max-width: 400px;
+    
+    nz-input-group {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      
+      input {
+        border: none;
+        padding: 12px 16px;
+        font-size: 14px;
+        
+        &:focus {
+          box-shadow: none;
+        }
+      }
+      
+      .ant-input-suffix {
+        padding-right: 16px;
+        
+        span[nz-icon] {
+          color: #9ca3af;
+          font-size: 16px;
+        }
+      }
+    }
+  }
+  
+  .export-btn {
+    background: #f1f5f9;
+    color: #374151;
+    border-radius: 10px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 0 18px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    
+    &:hover {
+      background: #e0e7ef;
+      color: #1890ff;
     }
   }
 }
@@ -312,6 +499,31 @@
     background: linear-gradient(135deg, #eb2f96 0%, #c41d7f 100%);
     color: white;
   }
+
+  &.ant-tag-orange {
+    background: linear-gradient(135deg, #fa8c16 0%, #d46b08 100%);
+    color: white;
+  }
+
+  &.ant-tag-yellow {
+    background: linear-gradient(135deg, #fadb14 0%, #d4b106 100%);
+    color: #333;
+  }
+
+  &.ant-tag-green {
+    background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+    color: white;
+  }
+
+  &.ant-tag-red {
+    background: linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%);
+    color: white;
+  }
+
+  &.ant-tag-default {
+    background: linear-gradient(135deg, #d9d9d9 0%, #bfbfbf 100%);
+    color: #333;
+  }
 }
 
 // No Data State
@@ -351,25 +563,26 @@
       flex-direction: column;
       align-items: flex-start;
       gap: 10px;
-      .header-actions {
-        width: 100%;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: flex-end; // Keep buttons on the right
-        float: right; // Maintain float on mobile
-        margin-left: auto; // Push to the right
-        .search-section {
-          width: 100%;
-          max-width: 100%;
-          order: 1; // Search first
-        }
-        .export-btn {
-          flex: 1;
-          min-width: 120px;
-          justify-content: center;
-          order: 2; // Buttons second
-        }
+      
+      .page-title {
+        order: 1; // Ensure page title comes first
       }
+    }
+  }
+  
+  .table-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    
+    .search-section {
+      max-width: 100%;
+      order: 1;
+    }
+    
+    .export-btn {
+      align-self: flex-end;
+      order: 2;
     }
   }
   .table-card {

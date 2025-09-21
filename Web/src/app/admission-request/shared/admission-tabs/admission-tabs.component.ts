@@ -46,45 +46,45 @@ export class AdmissionTabsComponent implements AfterContentInit {
   }
 
   /**
-   * Check if the current user is a reviewer
-   * @returns boolean indicating if user is a reviewer
+   * Check if the current user is a reviewer or academic director
+   * @returns boolean indicating if user is a reviewer or academic director
    */
   public isUserReviewer(): boolean {
     const role = localStorage.getItem('role');
     const userType = localStorage.getItem('userType');
     
-    // Check if role contains "Reviewer"
+    // Check if role contains "Reviewer" or "Academic Director"
     if (role) {
       try {
         const roles = JSON.parse(role);
         if (Array.isArray(roles)) {
-          return roles.includes('Reviewer');
+          return roles.includes('Reviewer') || roles.includes('Academic Director');
         } else {
-          return role === 'Reviewer';
+          return role === 'Reviewer' || role === 'Academic Director';
         }
       } catch {
-        return role === 'Reviewer';
+        return role === 'Reviewer' || role === 'Academic Director';
       }
     }
     
     // Check userType
-    return userType === 'Reviewer';
+    return userType === 'Reviewer' || userType === 'Academic Director';
   }
 
   /**
    * Check user role and set tab visibility
    */
   private checkUserRole(): void {
-    const isReviewer = this.isUserReviewer();
-    this.showInstructionTab = !isReviewer;
-    // Hide files tab for reviewers
-    this.showFilesTab = !isReviewer;
-    // If user is reviewer and instruction tab is selected, move to next tab
+    const isReviewerOrAcademicDirector = this.isUserReviewer();
+    this.showInstructionTab = !isReviewerOrAcademicDirector;
+    // Hide files tab for reviewers and academic directors
+    this.showFilesTab = !isReviewerOrAcademicDirector;
+    // If user is reviewer/academic director and instruction tab is selected, move to next tab
     if (!this.showInstructionTab && this.selectedTabIndex === 0) {
       this.selectedTabIndex = 1;
       this.selectedTabIndexChange.emit(this.selectedTabIndex);
     }
-    // If user is reviewer and files tab is selected, move to previous tab
+    // If user is reviewer/academic director and files tab is selected, move to previous tab
     const filesTabIndex = this.tabOrder === 'reviewer' ? 7 : 7; // Both orders have files at index 7
     if (!this.showFilesTab && this.selectedTabIndex === filesTabIndex) {
       const previousTabIndex = this.tabOrder === 'reviewer' ? 6 : 6; // Both orders have previous tab at index 6
@@ -98,7 +98,7 @@ export class AdmissionTabsComponent implements AfterContentInit {
    * @returns boolean indicating if current tab is the last tab
    */
   public isLastTabForCurrentUser(): boolean {
-    const isReviewer = this.isUserReviewer();
+    const isReviewerOrAcademicDirector = this.isUserReviewer();
     
     // Both tab orders have files tab at index 7
     return this.selectedTabIndex === 7;

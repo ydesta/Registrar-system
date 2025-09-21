@@ -28,6 +28,7 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
   sortColumn = "";
   listOdRegisteredStudent: StudentRegistrationSlipViewModel[] = [];
   isFormCollapsed = false;
+  hasSearched = false;
 
   constructor(private courseTermOfferingService: TermCourseOfferingService,
     private _pdfExportService: PdfExportService,
@@ -57,6 +58,8 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
       termId: [null, [Validators.required]],
       termYear: [null, [Validators.required]],
       batchCode: [null, [Validators.required]],
+      startDate: [null],
+      endDate: [null],
     });
   }
   get termId() {
@@ -68,6 +71,13 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
   get batchCode() {
     return this.formCourseOffered.get("batchCode");
   }
+  get startDate() {
+    return this.formCourseOffered.get("startDate");
+  }
+  get endDate() {
+    return this.formCourseOffered.get("endDate");
+  }
+
   getListOfBatch(termId: number = 0, termYear: number = 0) {
     this.courseTermOfferingService.getListOfBatchCodeByAcademicTerm(termId, termYear).subscribe(res => {
       this.listOfBatch = res;
@@ -105,7 +115,10 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
     const formModel = this.formCourseOffered.getRawValue();
     if (formModel.termId && formModel.termYear && formModel.batchCode) {
       this.tbLoading = true;
-      this._studentService.getListOfTermRegisteredCourseList(formModel.batchCode)
+      this.hasSearched = true;
+      const startDate = formModel.startDate ? this.formatDate(formModel.startDate) : '';
+      const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
+      this._studentService.getListOfTermRegisteredCourseList(formModel.batchCode, startDate, endDate)
         .subscribe({
           next: (res) => {
             this.listOdRegisteredStudent = res;
@@ -118,6 +131,14 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
           }
         });
     }
+  }
+
+  public resetData(): void {
+    this.formCourseOffered.reset();
+    this.listOdRegisteredStudent = [];
+    this.totalRecord = 0;
+    this.hasSearched = false;
+    this.isFormCollapsed = false;
   }
 
   getYearRange(currentYear: number): number[] {
@@ -147,13 +168,17 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
   }
   generatePdf(): void {
     const formModel = this.formCourseOffered.getRawValue();
-    if (formModel.termId && formModel.termYear && formModel.batchCode) {
+    //if (formModel.termId && formModel.termYear && formModel.batchCode) {
       this.tbLoading = true;
-      this._studentService.getListOfTermRegisteredCourseList(formModel.batchCode)
+      this.hasSearched = true;
+      const startDate = formModel.startDate ? this.formatDate(formModel.startDate) : '';
+      const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
+      console.log("%%%%           ", formModel.batchCode);
+      this._studentService.getListOfTermRegisteredCourseList(formModel.batchCode, startDate, endDate)
         .subscribe({
           next: (res) => {
             this.listOdRegisteredStudent = res;
-           
+
             this.totalRecord = res.length;
             this.tbLoading = false;
             this.isFormCollapsed = true;
@@ -164,9 +189,15 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
             this.tbLoading = false;
           }
         });
-    } else {
-      console.error('Please select all required fields before generating PDF.');
-    }
+    // } else {
+    //   console.error('Please select all required fields before generating PDF.');
+    // }
+  }
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
   getCourseDetails(data: any): any[] {
     if (data.courses && data.courses.length > 0) {

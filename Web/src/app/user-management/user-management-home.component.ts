@@ -58,6 +58,12 @@ export class UserManagementHomeComponent implements OnInit, OnDestroy {
       description: 'Monitor user activity logs',
       route: '/user-management/activity',
       icon: 'audit'
+    },
+    {
+      title: 'User Credentials',
+      description: 'View and manage user credentials',
+      route: '/user-management/credentials',
+      icon: 'database'
     }
   ];
 

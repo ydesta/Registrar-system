@@ -1,0 +1,158 @@
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">Incomplete Applications</h2>
+        <p class="subtitle-text">Review and manage incomplete applicant applications</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Statistics -->
+  <div class="summary-section">
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="summary-icon">
+          <span nz-icon nzType="user" nzTheme="outline"></span>
+        </div>
+        <div class="summary-content">
+          <div class="summary-number">{{ total }}</div>
+          <div class="summary-label">Total Applications</div>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="summary-icon">
+          <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+        </div>
+        <div class="summary-content">
+          <div class="summary-number">{{ getCompletedCount() }}</div>
+          <div class="summary-label">Completed Sections</div>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="summary-icon">
+          <span nz-icon nzType="exclamation-circle" nzTheme="outline"></span>
+        </div>
+        <div class="summary-content">
+          <div class="summary-number">{{ getIncompleteCount() }}</div>
+          <div class="summary-label">Incomplete Sections</div>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="summary-icon">
+          <span nz-icon nzType="percentage" nzTheme="outline"></span>
+        </div>
+        <div class="summary-content">
+          <div class="summary-number">{{ getCompletionPercentage() }}%</div>
+          <div class="summary-label">Overall Completion</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Action -->
+  <div class="export-section">
+    <div class="export-actions">
+      <button nz-button nzType="default" (click)="exportToExcel()" class="export-btn">
+        <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+        Export to Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- Table Card Container -->
+  <div class="table-card">
+    <div class="table-wrapper">
+      <nz-table #basicTable 
+                [nzData]="incompleteApplicantsList!" 
+                nzBordered
+                [nzPageSize]="pageSize"
+                [nzPageSizeOptions]="pageSizeOption"
+                [nzShowSizeChanger]="true"
+                [nzTotal]="total"
+                [nzPageIndex]="pageIndex"
+                (nzPageIndexChange)="onPageIndexChange($event)"
+                (nzPageSizeChange)="onPageSizeChange($event)"
+                [nzFrontPagination]="false"
+                [nzShowTotal]="rangeTemplate"
+                [nzLoading]="tableLoading"
+                [nzNoResult]="emptyTpl"
+                class="incomplete-table">
+        <ng-template #rangeTemplate let-range="range" let-total>
+          <span style="color: #6b7280; font-weight: 500;">
+            {{ getCurrentPageInfo().start }}-{{ getCurrentPageInfo().end }} of {{ getCurrentPageInfo().total }} incomplete applications
+          </span>
+        </ng-template>
+        <thead>
+          <tr>
+            <th style="min-width: 60px;">S/N</th>
+            <th style="min-width: 140px;">Applicant ID</th>
+            <th style="min-width: 160px;">Applicant</th>
+            <th style="min-width: 140px;">Mobile</th>
+            <th style="min-width: 120px;">Request Date</th>
+            <th style="min-width: 120px;">Education</th>
+            <th style="min-width: 120px;">Contact</th>
+            <th style="min-width: 120px;">Work Exp.</th>
+            <th style="min-width: 120px;">Program</th>
+            <th style="min-width: 120px;">Payment</th>
+            <th style="min-width: 120px;">Final Submit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of basicTable.data; let i = index">
+            <td><span class="sn-badge">{{ (pageIndex - 1) * pageSize + i + 1 }}</span></td>
+            <td>{{ data.applicantId }}</td>
+            <td>
+              <div class="applicant-info">
+                <nz-avatar nzSize="small" [nzText]="data.fullName.charAt(0).toUpperCase()"></nz-avatar>
+                <span class="applicant-name">{{ data.fullName }}</span>
+              </div>
+            </td>
+            <td>{{ data.mobile }}</td>
+            <td>{{ data.requestDate | date:'short' }}</td>
+            <td>
+              <nz-tag [nzColor]="getCompletionStatusColor(data.educationBackground)">
+                {{ getCompletionStatusText(data.educationBackground) }}
+              </nz-tag>
+            </td>
+            <td>
+              <nz-tag [nzColor]="getCompletionStatusColor(data.personalContact)">
+                {{ getCompletionStatusText(data.personalContact) }}
+              </nz-tag>
+            </td>
+            <td>
+              <nz-tag [nzColor]="getCompletionStatusColor(data.applicantWorkExperiences)">
+                {{ getCompletionStatusText(data.applicantWorkExperiences) }}
+              </nz-tag>
+            </td>
+            <td>
+              <nz-tag [nzColor]="getCompletionStatusColor(data.academicProgramRequest)">
+                {{ getCompletionStatusText(data.academicProgramRequest) }}
+              </nz-tag>
+            </td>
+            <td>
+              <nz-tag [nzColor]="getCompletionStatusColor(data.studentPayments)">
+                {{ getCompletionStatusText(data.studentPayments) }}
+              </nz-tag>
+            </td>
+            <td>
+              <nz-tag [nzColor]="getCompletionStatusColor(data.finalSubmit)">
+                {{ getCompletionStatusText(data.finalSubmit) }}
+              </nz-tag>
+            </td>
+          </tr>
+        </tbody>
+        <ng-template #emptyTpl>
+          <div class="no-data">
+            <span nz-icon nzType="user" nzTheme="outline"></span>
+            <p>No incomplete applications available</p>
+          </div>
+        </ng-template>
+      </nz-table>
+    </div>
+  </div>
+</div>

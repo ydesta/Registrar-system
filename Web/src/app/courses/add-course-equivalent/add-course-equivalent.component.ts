@@ -17,6 +17,9 @@ export class AddCourseEquivalentComponent implements OnInit {
   curricula: any;
   submit = 'Submit';
   courses?: CourseModel[];
+  loading = false;
+  submitting = false;
+  isEditMode = false;
 
   constructor(
     public aciveRoute: ActivatedRoute,
@@ -26,8 +29,8 @@ export class AddCourseEquivalentComponent implements OnInit {
     private _customNotificationService: CustomNotificationService
   ) {
     this.acadamicProgramForm = this._fb.group({
-      courseCode: ['', Validators.required],
-      equivalentCourseCode: ['', Validators.required],
+      courseId: ['', Validators.required],
+      equivalentCourseId: ['', Validators.required],
       createdBy: [''],
       lastModifiedBy: [''],
       remark: ['']
@@ -39,7 +42,10 @@ export class AddCourseEquivalentComponent implements OnInit {
     if (this.progId != "null") {
       this.action = "Edit Course Equivalent";
       this.submit = 'Update';
+      this.isEditMode = true;
       this._crudService.getList('/CourseEquivalents' + '/' + this.progId).subscribe((res: any) => {
+
+        console.log("###   ", res);
         this.patchValues(res.data);
       });
     }
@@ -49,35 +55,47 @@ export class AddCourseEquivalentComponent implements OnInit {
   }
 
   submitForm() {
-    if (this.progId == "null") {
-      if (this.acadamicProgramForm.valid) {
-        this._crudService.add('/CourseEquivalents', this.acadamicProgramForm.value).subscribe((res: any) => {
-          this._customNotificationService.notification('success', 'Success', res.data);
-          this._route.navigateByUrl('course/course-equivalent');
-        });
-      } else {
-        this._customNotificationService.notification('error', 'error', 'Enter valid data.');
-      }
-    } else if (this.progId != "null") {
-      if (this.acadamicProgramForm.valid) {
-        this._crudService.update('/CourseEquivalents', this.progId, this.acadamicProgramForm.value).subscribe((res: any) => {
-          if (res.status == 'success') {
+    if (this.acadamicProgramForm.valid) {
+      this.submitting = true;
+      
+      if (this.progId == "null") {
+        this._crudService.add('/CourseEquivalents', this.acadamicProgramForm.value).subscribe({
+          next: (res: any) => {
             this._customNotificationService.notification('success', 'Success', res.data);
-            this._route.navigateByUrl('course/course-equivalent');
-          } else {
-            this._customNotificationService.notification('error', 'Error', res.data);
+            this._route.navigateByUrl('/course/course-equivalent');
+            this.submitting = false;
+          },
+          error: (error) => {
+            this._customNotificationService.notification('error', 'Error', 'Failed to create course equivalent');
+            this.submitting = false;
           }
         });
       } else {
-        this._customNotificationService.notification('error', 'error', 'Enter valid data.');
+        this._crudService.update('/CourseEquivalents', this.progId, this.acadamicProgramForm.value).subscribe({
+          next: (res: any) => {
+            if (res.status == 'success') {
+              this._customNotificationService.notification('success', 'Success', res.data);
+              this._route.navigateByUrl('/course/course-equivalent');
+            } else {
+              this._customNotificationService.notification('error', 'Error', res.data);
+            }
+            this.submitting = false;
+          },
+          error: (error) => {
+            this._customNotificationService.notification('error', 'Error', 'Failed to update course equivalent');
+            this.submitting = false;
+          }
+        });
       }
+    } else {
+      this._customNotificationService.notification('error', 'Error', 'Please fill in all required fields.');
     }
   }
 
   patchValues(data: any) {
     this.acadamicProgramForm.patchValue({
-      courseCode: data.courseCode,
-      equivalentCourseCode: data.equivalentCourseCode,
+      courseId: data.courseID,
+      equivalentCourseId: data.equivalentCourseID,
       createdBy: data.createdBy,
       lastModifiedBy: data.lastModifiedBy,
       remark: data.remark

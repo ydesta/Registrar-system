@@ -5,7 +5,7 @@
     <p>Loading profile information...</p>
   </div>
 
-  <form nz-form [formGroup]="studentProfileForm" *ngIf="isUserAdmin || isUserInstructor">
+  <form nz-form [formGroup]="studentProfileForm" *ngIf="isUserAdmin || isUserInstructor || isUserAcademicDirector">
     <nz-collapse nzAccordion tyle="margin-bottom: -36px;">
       <nz-collapse-panel nzHeader="Search Student Profile" [nzActive]="searchCollapse">
         <div nz-row [nzGutter]="24">
@@ -95,7 +95,7 @@
 
             <div class="info-row">
               <i nz-icon nzType="check-circle" class="icon"></i>
-              <strong>CGPA: {{ getCGPA(studentProfile.studentAcademicYears) | number: '1.2-2' }}</strong>
+              <strong>CGPA: {{ studentProfile.cgpa | number: '1.2-2' }}</strong>
             </div>
           </div>
         </div>

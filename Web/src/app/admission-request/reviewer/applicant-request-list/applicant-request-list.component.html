@@ -6,49 +6,106 @@
         <h2 class="title-text">Applicant Requests</h2>
         <p class="subtitle-text">Review and manage applicant admission requests</p>
       </div>
-      <div class="header-actions">
-        <div class="search-section">
-          <nz-input-group [nzSuffix]="suffixIconSearch">
-            <input type="text" nz-input placeholder="Search applicants..." [(ngModel)]="searchText" (ngModelChange)="onSearchTextChanged()"/>
-          </nz-input-group>
-          <ng-template #suffixIconSearch>
-            <span nz-icon nzType="search"></span>
-          </ng-template>
-        </div>
-        <button nz-button nzType="default" (click)="exportApplicants()" class="export-btn">
-          <span nz-icon nzType="file-excel" nzTheme="outline"></span>
-          Export
-        </button>
-      </div>
     </div>
+  </div>
+
+  <!-- Collapsible Search Form -->
+  <div class="search-section">
+    <nz-collapse>
+      <nz-collapse-panel [nzHeader]="searchHeader" [nzActive]="!isFormCollapsed"
+        (nzActiveChange)="isFormCollapsed = !$event">
+
+        <ng-template #searchHeader>
+          <span>
+            <i nz-icon nzType="search" nzTheme="outline"></i>
+            Search Filters
+          </span>
+        </ng-template>
+
+        <form nz-form [formGroup]="academicProgramRequestForm" (ngSubmit)="onSearch()">
+          <div nz-row [nzGutter]="24">
+            <!-- Academic Program -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="10">Academic Program</nz-form-label>
+                <nz-form-control [nzSpan]="14">
+                  <nz-select formControlName="acadamicProgrammeId" nzPlaceHolder="Select Academic Program" nzShowSearch
+                    nzAllowClear style="width: 100%;">
+                    <nz-option *ngFor="let program of acadamicProgrammes" [nzValue]="program.id"
+                      [nzLabel]="program.acadamicProgrammeTitle"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Approval Status -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="10">Approval Status</nz-form-label>
+                <nz-form-control [nzSpan]="14">
+                  <nz-select formControlName="approvalStatus" nzPlaceHolder="Select Approval Status" nzShowSearch
+                    nzAllowClear style="width: 100%;">
+                    <nz-option *ngFor="let status of requestStatusOptions" [nzValue]="status.value"
+                      [nzLabel]="status.label"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div nz-row>
+            <div nz-col [nzSpan]="24" class="form-actions">
+              <button nz-button nzType="default" (click)="onReset()" class="mr-2">
+                <i nz-icon nzType="reload" nzTheme="outline"></i>
+                Reset
+              </button>
+              <button nz-button nzType="primary" (click)="onSearch()">
+                <i nz-icon nzType="search" nzTheme="outline"></i>
+                Search
+              </button>
+            </div>
+          </div>
+        </form>
+      </nz-collapse-panel>
+    </nz-collapse>
+  </div>
+
+  <!-- Search and Export Actions -->
+  <div class="table-actions">
+    <div class="search-section">
+      <nz-input-group [nzSuffix]="suffixIconSearch">
+        <input type="text" nz-input placeholder="Search applicants..." [(ngModel)]="searchText"
+          (ngModelChange)="onSearchTextChanged()" />
+      </nz-input-group>
+      <ng-template #suffixIconSearch>
+        <span nz-icon nzType="search"></span>
+      </ng-template>
+    </div>
+    <button nz-button nzType="default" (click)="exportApplicants()" class="export-btn">
+      <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+      Export
+    </button>
   </div>
 
   <!-- Table Card Container -->
   <div class="table-card">
     <div class="table-wrapper">
-      <nz-table #basicTable 
-                [nzData]="applicantsList!" 
-                nzBordered
-                [nzPageSize]="pageSize"
-                [nzPageSizeOptions]="pageSizeOption"
-                [nzShowSizeChanger]="true"
-                [nzTotal]="total"
-                [nzPageIndex]="pageIndex"
-                (nzPageIndexChange)="onPageIndexChange($event)"
-                (nzPageSizeChange)="onPageSizeChange($event)"
-                [nzFrontPagination]="false"
-                [nzShowTotal]="rangeTemplate"
-                [nzLoading]="tableLoading"
-                [nzNoResult]="emptyTpl"
-                class="applicant-table">
+      <nz-table #basicTable [nzData]="applicantsList!" nzBordered [nzPageSize]="pageSize"
+        [nzPageSizeOptions]="pageSizeOption" [nzShowSizeChanger]="true" [nzTotal]="total" [nzPageIndex]="pageIndex"
+        (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)"
+        [nzFrontPagination]="false" [nzShowTotal]="rangeTemplate" [nzLoading]="tableLoading" [nzNoResult]="emptyTpl"
+        class="applicant-table">
         <ng-template #rangeTemplate let-range="range" let-total>
           <span style="color: #6b7280; font-weight: 500;">
-            {{ getCurrentPageInfo().start }}-{{ getCurrentPageInfo().end }} of {{ getCurrentPageInfo().total }} applicants
+            {{ getCurrentPageInfo().start }}-{{ getCurrentPageInfo().end }} of {{ getCurrentPageInfo().total }}
+            applicants
           </span>
         </ng-template>
         <thead>
           <tr>
             <th style="min-width: 60px;">S/N</th>
+            <th style="min-width: 60px;">Applied Date</th>
             <th style="min-width: 180px;">Academic Programme</th>
             <th style="min-width: 140px;">Applicant ID</th>
             <th style="min-width: 160px;">Applicant</th>
@@ -56,13 +113,16 @@
             <th style="min-width: 140px;">Mobile</th>
             <th style="min-width: 200px;">Email</th>
             <th style="min-width: 120px;">Nationality</th>
+            <th style="min-width: 120px;">Status</th>
             <th class="sticky-action" style="min-width: 120px;">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let data of basicTable.data; let i = index">
             <td><span class="sn-badge">{{ (pageIndex - 1) * pageSize + i + 1 }}</span></td>
+            <td>{{ data.appliedDate }}</td>
             <td>{{ data.academicProgramme }}</td>
+
             <td>{{ data.applicantId }}</td>
             <td>
               <div class="applicant-info">
@@ -78,19 +138,21 @@
             <td>{{ data.mobile }}</td>
             <td>{{ data.email }}</td>
             <td>{{ data.nationality }}</td>
+            <td>
+              <nz-tag [nzColor]="getStatusColor(data.approvalStatus)">
+                {{ getStatusDescription(data.approvalStatus) }}
+              </nz-tag>
+            </td>
             <td class="sticky-action" [class.sticky-action-even]="i % 2 === 1">
-              <button nz-button 
-                      nz-dropdown 
-                      [nzDropdownMenu]="menu" 
-                      nzPlacement="bottomRight"
-                      nzTrigger="click"
-                      class="action-button">
+              <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomRight" nzTrigger="click"
+                class="action-button">
                 <span nz-icon nzType="more" nzTheme="outline"></span>
               </button>
               <nz-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
                   <li nz-menu-item>
-                    <button nz-button nzType="default" class="action-item" (click)="getApplicantRequestDetail(data.id,data.requestId)">
+                    <button nz-button nzType="default" class="action-item"
+                      (click)="getApplicantRequestDetail(data.id,data.requestId)">
                       <span nz-icon nzType="eye" nzTheme="outline"></span>
                       Review Request
                     </button>
@@ -110,4 +172,3 @@
     </div>
   </div>
 </div>
-

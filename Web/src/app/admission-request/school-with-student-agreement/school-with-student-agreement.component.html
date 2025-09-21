@@ -64,8 +64,28 @@
         <div class="card-body">
           <div class="form-group">
             <label>
+              <i nz-icon nzType="bank" nzTheme="outline"></i>
+              <span class="label-text">Source of Finance <span class="required-asterisk">*</span></span>
+            </label>
+            <nz-select 
+              formControlName="sourceOfFinance" 
+              nzPlaceHolder="Select your source of finance" 
+              nzShowSearch
+              nzAllowClear
+              class="mobile-select">
+              <nz-option nzValue="Personal" nzLabel="Personal Savings"></nz-option>
+              <nz-option nzValue="Employer" nzLabel="Employer Sponsorship"></nz-option>
+              <nz-option nzValue="Family" nzLabel="Family Support"></nz-option>
+              <nz-option nzValue="Scholarship" nzLabel="Scholarship"></nz-option>
+              <nz-option nzValue="Loan" nzLabel="Student Loan"></nz-option>
+              <nz-option nzValue="Other" nzLabel="Other"></nz-option>
+            </nz-select>
+          </div>
+
+          <div class="form-group">
+            <label>
               <i nz-icon nzType="search" nzTheme="outline"></i>
-              <span class="label-text">How did you learn about HiLCoE? <span class="required-asterisk">*</span></span>
+              <span class="label-text">How did you learn about HiLCoE?</span>
             </label>
             <nz-select 
               formControlName="howDidYouComeKnow" 
@@ -82,26 +102,6 @@
               <nz-option nzValue="Poster" nzLabel="Poster"></nz-option>
               <nz-option nzValue="Website" nzLabel="Website"></nz-option>
               <nz-option nzValue="Social Media" nzLabel="Social Media"></nz-option>
-              <nz-option nzValue="Other" nzLabel="Other"></nz-option>
-            </nz-select>
-          </div>
-
-          <div class="form-group">
-            <label>
-              <i nz-icon nzType="bank" nzTheme="outline"></i>
-              <span class="label-text">Source of Finance <span class="required-asterisk">*</span></span>
-            </label>
-            <nz-select 
-              formControlName="sourceOfFinance" 
-              nzPlaceHolder="Select your source of finance" 
-              nzShowSearch
-              nzAllowClear
-              class="mobile-select">
-              <nz-option nzValue="Personal" nzLabel="Personal Savings"></nz-option>
-              <nz-option nzValue="Employer" nzLabel="Employer Sponsorship"></nz-option>
-              <nz-option nzValue="Family" nzLabel="Family Support"></nz-option>
-              <nz-option nzValue="Scholarship" nzLabel="Scholarship"></nz-option>
-              <nz-option nzValue="Loan" nzLabel="Student Loan"></nz-option>
               <nz-option nzValue="Other" nzLabel="Other"></nz-option>
             </nz-select>
           </div>

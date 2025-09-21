@@ -24,13 +24,16 @@ export class AuthInterceptorService implements HttpInterceptor {
   ): Observable<HttpEvent<any>> {
     // Only intercept API requests
     if (req.url.startsWith(Constants.apiRoot)) {
+      console.log('AuthInterceptorService: Intercepting API request to:', req.url);
       return from(
         this._authService.getAccessToken().then((token) => {
+          console.log('AuthInterceptorService: Token received:', token ? 'Token exists' : 'No token');
           const headers = new HttpHeaders().set(
             'Authorization',
             `Bearer ${token}`
           );
           const authRequest = req.clone({ headers });
+          console.log('AuthInterceptorService: Making authenticated request to:', authRequest.url);
           
           return next.handle(authRequest).pipe(
             catchError((err: HttpErrorResponse) => {
@@ -47,6 +50,20 @@ export class AuthInterceptorService implements HttpInterceptor {
 
               if (err && (err.status === 401 || err.status === 403)) {
                 console.log('Unauthorized/Forbidden - redirecting to unauthorized page');
+                console.log('Error details:', {
+                  status: err.status,
+                  url: err.url,
+                  userRole: localStorage.getItem('role'),
+                  userType: localStorage.getItem('userType'),
+                  isLogin: localStorage.getItem('isLogin')
+                });
+                
+                // Don't redirect for UserManagement credentials endpoint - let component handle it
+                if (err.url && err.url.includes('/UserManagement/credentials')) {
+                  console.log('Skipping redirect for UserManagement credentials endpoint');
+                  return throwError(() => err);
+                }
+                
                 this._router.navigate(['/unauthorized']);
               } else if (err?.status === 0) {
                 console.error('Network error detected - possible CORS or SSL issue');

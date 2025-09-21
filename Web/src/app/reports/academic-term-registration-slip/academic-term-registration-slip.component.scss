@@ -1,5 +1,122 @@
-/* Custom styles for the academic term registration slip datatable */
+.content-container {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
+.header-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+
+  .page-title {
+    h1 {
+      margin: 0;
+      color: #1f2937;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin: 8px 0 0 0;
+      color: #6b7280;
+      font-size: 14px;
+    }
+  }
+}
+
+.search-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.table-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  width: 100%;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+
+  h3 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .table-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.text-muted {
+  color: #8c8c8c;
+}
+
+// Form styling
+nz-form-item {
+  margin-bottom: 16px;
+}
+
+// Input styling for search form
+::ng-deep .search-section {
+  nz-form-item {
+    .ant-form-item-control {
+      width: 100%;
+    }
+    
+    nz-select {
+      width: 100%;
+      
+      .ant-select-selector {
+        width: 100%;
+        min-width: 200px;
+      }
+    }
+  }
+}
+
+// Table styling
 ::ng-deep .ant-table-wrapper {
   .ant-table {
     border-radius: 8px;
@@ -13,6 +130,7 @@
       padding: 16px;
       border-bottom: 2px solid #f0f0f0;
       transition: all 0.3s;
+
 
       &:hover {
         background: linear-gradient(135deg, #f0f0f0, #e6e6e6);
@@ -36,6 +154,7 @@
       padding: 16px;
       border-bottom: 1px solid #f0f0f0;
       transition: all 0.3s;
+
 
       // Sticky Action column styles
       &.sticky-action {
@@ -86,12 +205,168 @@
       .ant-table-thead > tr > th {
         background: #f0f0f0;
         font-weight: 500;
+        white-space: nowrap;
+        
+        &:nth-child(1) { // Serial No.
+          min-width: 100px;
+          width: 100px;
+        }
+        
+        &:nth-child(2) { // Course Code
+          min-width: 150px;
+          width: 150px;
+        }
+        
+        &:nth-child(3) { // Course Title
+          min-width: 250px;
+          width: 250px;
+        }
+        
+        &:nth-child(4) { // Credit Hours
+          min-width: 120px;
+          width: 120px;
+        }
+        
+        &:nth-child(5) { // TotalAmount
+          min-width: 120px;
+          width: 120px;
+        }
       }
     }
   }
 }
 
-/* Pagination styles */
+// Collapse styling
+::ng-deep .ant-collapse {
+  border: none;
+  background: transparent;
+
+  .ant-collapse-item {
+    border: none;
+    background: transparent;
+
+    .ant-collapse-header {
+      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+      border-radius: 12px 12px 0 0;
+      padding: 16px 20px;
+      font-weight: 600;
+      color: #1f2937;
+      border: 1px solid #e2e8f0;
+      border-bottom: none;
+
+      &:hover {
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+      }
+
+      .ant-collapse-arrow {
+        color: #6b7280;
+      }
+    }
+
+    .ant-collapse-content {
+      border: 1px solid #e2e8f0;
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      background: white;
+
+      .ant-collapse-content-box {
+        padding: 20px;
+      }
+    }
+  }
+}
+
+// Button styling
+::ng-deep .ant-btn {
+  border-radius: 8px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &.ant-btn-primary {
+    background: linear-gradient(135deg, #1890ff, #096dd9);
+    border: none;
+
+    &:hover {
+      background: linear-gradient(135deg, #40a9ff, #1890ff);
+    }
+  }
+}
+
+// No data styling
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: #8c8c8c;
+
+  .anticon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #d9d9d9;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+// No Results State Styling
+.no-results-container {
+  padding: 60px 20px;
+  text-align: center;
+  background: white;
+  border-radius: 8px;
+  margin: 20px;
+
+  .no-results-content {
+    max-width: 400px;
+    margin: 0 auto;
+
+    .no-results-icon {
+      margin-bottom: 24px;
+
+      .anticon {
+        font-size: 64px;
+        color: #d9d9d9;
+      }
+    }
+
+    .no-results-title {
+      margin: 0 0 16px 0;
+      color: #1f2937;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .no-results-description {
+      margin: 0 0 32px 0;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .no-results-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+
+      .ant-btn {
+        min-width: 120px;
+      }
+    }
+  }
+}
+
+// Pagination styles
 ::ng-deep .ant-pagination {
   margin-top: 16px;
   text-align: center;
@@ -124,51 +399,12 @@
   }
 }
 
-/* Loading state */
+// Loading state
 ::ng-deep .ant-spin-container {
   min-height: 200px;
 }
 
-/* Empty state */
-.no-data {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 0;
-  color: #8c8c8c;
-
-  .anticon {
-    font-size: 48px;
-    margin-bottom: 16px;
-    color: #d9d9d9;
-  }
-
-  p {
-    margin: 0;
-    font-size: 16px;
-    color: #8c8c8c;
-  }
-}
-
-/* Action buttons */
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-
-  button {
-    border-radius: 4px;
-    transition: all 0.3s;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
-  }
-}
-
-/* Table scroll indicator */
+// Table scroll indicator
 .table-scroll-indicator {
   position: relative;
   
@@ -185,8 +421,65 @@
   }
 }
 
-/* Responsive design */
+// Mobile responsive
 @media (max-width: 768px) {
+  .content-container {
+    padding: 16px;
+  }
+
+  .header-section {
+    padding: 16px;
+    margin-bottom: 16px;
+
+    .page-title {
+      h1 {
+        font-size: 20px;
+      }
+    }
+  }
+
+  .search-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .table-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+
+    .table-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+
+    .ant-btn {
+      width: 100%;
+    }
+  }
+
+  .no-results-container {
+    padding: 40px 16px;
+    margin: 16px;
+
+    .no-results-content {
+      .no-results-actions {
+        flex-direction: column;
+        align-items: stretch;
+
+        .ant-btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+
   ::ng-deep .ant-table-wrapper {
     .ant-table {
       font-size: 12px;
@@ -205,11 +498,6 @@
         min-width: 60px;
       }
     }
-  }
-
-  .action-buttons {
-    flex-direction: column;
-    gap: 4px;
   }
 
   // Mobile-specific table styles
@@ -250,3 +538,62 @@
   }
 }
 
+// Custom expand icon styling (matching term-course-offering)
+.expand-column {
+  width: 80px;
+  min-width: 80px;
+  text-align: center;
+  position: sticky;
+  left: 0;
+  background: white;
+  z-index: 10;
+}
+
+.custom-expand-icon {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  background: rgba(24, 144, 255, 0.05);
+  border: 1px solid rgba(24, 144, 255, 0.2);
+  
+  &:hover {
+    background: rgba(24, 144, 255, 0.15);
+    border-color: rgba(24, 144, 255, 0.4);
+    transform: scale(1.05);
+  }
+  
+  &.expanded {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+  
+  i[nz-icon] {
+    font-size: 18px;
+    font-weight: bold;
+  }
+}
+
+// Print styles
+@media print {
+  .content-container {
+    background: white;
+    padding: 0;
+  }
+
+  .header-section,
+  .search-section,
+  .table-header {
+    display: none;
+  }
+
+  .table-container {
+    box-shadow: none;
+    border: none;
+  }
+}

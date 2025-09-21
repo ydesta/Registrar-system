@@ -1,4 +1,5 @@
-// Content Container
+// Simplified, clean styling for performance and clarity
+
 .content-container {
   padding: 24px;
   background: #f5f7fa;
@@ -6,7 +7,6 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-// Header Section
 .header-section {
   background: white;
   border-radius: 16px;
@@ -16,25 +16,18 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   position: relative;
-
+  
   .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 16px;
-    position: relative; // For proper float handling
     
-    // Clearfix for floated elements
-    &::after {
-      content: '';
-      display: table;
-      clear: both;
-    }
-
     .page-title {
       flex: 1;
       min-width: 0;
+      
       .title-text {
         margin: 0 0 8px 0;
         font-size: 28px;
@@ -42,6 +35,7 @@
         color: #1f2937;
         line-height: 1.2;
       }
+      
       .subtitle-text {
         margin: 0;
         color: #6b7280;
@@ -49,142 +43,165 @@
         font-weight: 400;
       }
     }
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0; // Prevent shrinking
-      margin-left: auto; // Push to the right
-      float: right; // Float to the right corner
-      
-      .search-section {
-        max-width: 260px;
-        min-width: 200px;
-        flex-shrink: 0; // Prevent shrinking
-        nz-input-group {
-          border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-          transition: all 0.3s ease;
-          input {
-            border: none;
-            padding: 12px 16px;
-            font-size: 14px;
-            &:focus {
-              box-shadow: none;
-            }
-          }
-          .ant-input-suffix {
-            padding-right: 16px;
-            span[nz-icon] {
-              color: #9ca3af;
-              font-size: 16px;
-            }
-          }
-        }
-      }
-      .add-btn {
-        background: #1890ff;
-        color: white;
-        border-radius: 10px;
-        font-weight: 500;
-        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-        padding: 0 20px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        white-space: nowrap;
-        position: relative; // For proper positioning
-        &:hover {
-          background: #40a9ff;
-          color: white;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
-        }
-      }
-      .export-btn, .print-btn {
-        background: #f1f5f9;
-        color: #374151;
-        border-radius: 10px;
-        font-weight: 500;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        padding: 0 18px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        white-space: nowrap;
-        position: relative; // For proper positioning
-        &:hover {
-          background: #e0e7ef;
-          color: #1890ff;
-        }
-      }
-    }
   }
 }
 
-// Table Card
 .table-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 0 0 16px 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-top: none;
+  overflow: hidden;
   padding: 0 0 24px 0;
+}
+
+.table-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px 0 24px;
   
-  // Ensure table container has proper width
-  #print-section {
-    min-width: 100%;
-    overflow-x: auto;
+  .add-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    
+    i {
+      font-size: 16px;
+    }
+    
+    @media (max-width: 480px) {
+      padding: 6px 12px;
+      font-size: 13px;
+      
+      span {
+        display: none;
+      }
+    }
   }
 }
 
-// Table Styling
-.curricula-table {
-  background: transparent;
-  font-size: 15px;
-  min-width: 100%;
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 0 0 16px 16px;
   
-  ::ng-deep .ant-table {
-    background: transparent;
-    min-width: 100%;
-    
-    // Ensure table wrapper has proper overflow handling
-    .ant-table-container {
-      overflow-x: auto;
-    }
-    .ant-table-thead > tr > th {
-      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-      border-bottom: 2px solid #e2e8f0;
-      font-weight: 600;
-      color: #374151;
-      padding: 16px;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+  .responsive-table {
+    min-width: 1200px; // Ensure minimum width for horizontal scroll
+    width: 100%;
+  }
+}
 
-      // Sticky Action column styles
-      &.sticky-action {
-        position: sticky !important;
-        right: 0;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-        z-index: 10;
-        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+// Filter Section
+.filter-section {
+  background: white;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid #e5e7eb;
+  border-bottom: none;
+  padding: 12px 16px;
+  margin-bottom: 0;
+  
+  .search-input-group {
+    .batch-search-input {
+      border: none;
+      box-shadow: none;
+      font-size: 14px;
+      
+      &:focus {
+        box-shadow: none;
+        border-color: #1890ff;
       }
     }
-    .ant-table-tbody > tr > td {
-      border-bottom: 1px solid #f1f5f9;
-      padding: 16px;
-      transition: all 0.3s ease;
+    
+    .ant-input-group-addon {
+      background: transparent;
+      border: none;
+      
+      i {
+        color: #9ca3af;
+        font-size: 16px;
+      }
+    }
+  }
+}
 
-      // Sticky Action column styles
+::ng-deep .ant-table {
+  border-radius: 6px;
+  box-shadow: none;
+  width: 100%;
+  min-width: 1200px; // Ensure table has minimum width for horizontal scroll
+  table-layout: fixed;
+
+  .ant-table-thead > tr > th {
+    background: #f7f7f7;
+    color: #1890ff;
+    font-weight: 600;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 10px 8px;
+    text-align: left;
+    white-space: nowrap;
+    position: relative;
+    
+    &.expand-column,
+    &.action-column,
+    &.sticky-action {
+      position: sticky;
+      background: #f7f7f7;
+      z-index: 20;
+    }
+    
+    &.expand-column {
+      left: 0;
+    }
+    
+    &.action-column,
+    &.sticky-action {
+      right: 0;
+      box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .ant-table-tbody > tr {
+    transition: background 0.2s;
+    
+    &:hover {
+      background-color: #f5faff;
+      
+      .expand-column,
+      .action-column,
+      .sticky-action {
+        background: #f5faff;
+      }
+    }
+    
+    > td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: middle;
+      word-wrap: break-word;
+      max-width: 200px;
+      position: relative;
+      
+      &.expand-column,
+      &.action-column,
       &.sticky-action {
-        position: sticky !important;
+        position: sticky;
+        background: white;
+        z-index: 10;
+      }
+      
+      &.expand-column {
+        left: 0;
+      }
+      
+      &.action-column,
+      &.sticky-action {
         right: 0;
-        background: white !important;
-        z-index: 5;
         box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
       }
 
@@ -192,30 +209,39 @@
         background: #fafafa !important;
       }
     }
-    .ant-table-tbody > tr:hover > td {
-      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-      transform: scale(1.01);
 
-      &.sticky-action {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-      }
-    }
-    .ant-table-tbody > tr:nth-child(even) > td {
+    &:nth-child(even) > td {
       background: #fafafa;
 
       &.sticky-action {
         background: #fafafa !important;
       }
     }
-    .ant-table-tbody > tr:nth-child(even):hover > td {
+
+    &:nth-child(even):hover > td {
       background: #f0f0f0;
 
       &.sticky-action {
         background: #f0f0f0 !important;
       }
     }
-    .ant-table-pagination {
-      margin: 16px 0 0 0;
+  }
+
+  .ant-table-row-expand-icon {
+    background: #1890ff;
+    color: #fff;
+    border-radius: 4px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: #40a9ff;
+      transform: scale(1.1);
     }
   }
 }
@@ -330,95 +356,97 @@
   }
 }
 
-// Responsive Design
-@media (max-width: 1200px) {
-  .header-section {
-    .header-content {
-      .header-actions {
-        .search-section {
-          max-width: 200px; // Slightly smaller on medium screens
-        }
-      }
-    }
-  }
-}
-
-@media (max-width: 900px) {
-  .header-section {
-    padding: 16px;
-    .header-content {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
-      .header-actions {
-        width: 100%;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: flex-end; // Keep buttons on the right
-        float: right; // Maintain float on mobile
-        margin-left: auto; // Push to the right
-        .search-section {
-          width: 100%;
-          max-width: 100%;
-          order: 1; // Search first
-        }
-        .add-btn, .export-btn, .print-btn {
-          flex: 1;
-          min-width: 120px;
-          justify-content: center;
-          order: 2; // Buttons second
-        }
-      }
-    }
-  }
-  .table-card {
-    border-radius: 10px;
-    padding: 0 0 12px 0;
-    overflow-x: auto;
-  }
-  .curricula-table {
-    font-size: 13px;
-    min-width: 800px; // Ensure minimum width for all columns
-    
-    ::ng-deep .ant-table-thead > tr > th,
-    ::ng-deep .ant-table-tbody > tr > td {
-      padding: 10px;
-      white-space: nowrap; // Prevent text wrapping
-    }
-
-    // Ensure sticky action column is visible on mobile
-    ::ng-deep .ant-table-thead > tr > th.sticky-action,
-    ::ng-deep .ant-table-tbody > tr > td.sticky-action {
-      position: sticky !important;
-      right: 0;
-      z-index: 20;
-      min-width: 60px;
-    }
-  }
-}
-
 @media (max-width: 768px) {
-  .curricula-table {
-    font-size: 12px;
-    min-width: 700px; // Ensure minimum width for all columns
+  .content-container {
+    padding: 16px;
+  }
+  
+  .header-section {
+    padding: 20px 16px 20px 16px;
+  }
+  
+  .table-actions {
+    padding: 8px 12px 0 12px;
     
-    ::ng-deep .ant-table-thead > tr > th,
-    ::ng-deep .ant-table-tbody > tr > td {
-      padding: 8px;
-      white-space: nowrap; // Prevent text wrapping
+    .add-btn {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+  }
+  
+  .table-responsive {
+    .responsive-table {
+      min-width: 1000px; // Smaller minimum width on mobile
+    }
+  }
+  
+  ::ng-deep .ant-table {
+    min-width: 1000px; // Smaller minimum width on mobile
+    
+    .ant-table-thead > tr > th,
+    .ant-table-tbody > tr > td {
+      padding: 6px 4px;
+      font-size: 12px;
+    }
+  }
+  
+  .no-data {
+    padding: 24px 8px;
+    
+    span {
+      font-size: 28px;
+    }
+    
+    p {
+      font-size: 13px;
     }
   }
 }
 
 @media (max-width: 480px) {
-  .curricula-table {
-    font-size: 11px;
-    min-width: 600px; // Ensure minimum width for all columns
+  .content-container {
+    padding: 6px;
+  }
+  
+  .header-section {
+    padding: 10px;
+  }
+  
+  .header-content {
+    .page-title {
+      .title-text {
+        font-size: 16px;
+      }
+      
+      .subtitle-text {
+        font-size: 11px;
+      }
+    }
+  }
+  
+  .table-responsive {
+    .responsive-table {
+      min-width: 800px; // Minimum width for very small screens
+    }
+  }
+  
+  ::ng-deep .ant-table {
+    min-width: 800px; // Minimum width for very small screens
     
-    ::ng-deep .ant-table-thead > tr > th,
-    ::ng-deep .ant-table-tbody > tr > td {
-      padding: 6px 4px;
-      white-space: nowrap; // Prevent text wrapping
+    .ant-table-thead > tr > th,
+    .ant-table-tbody > tr > td {
+      padding: 4px 2px;
+      font-size: 11px;
     }
   }
 }
+
+@media print {
+  .paginate { display: none; }
+  .logo { display: block; }
+  .content-container { box-shadow: none; padding: 0; }
+  .header-section { border-bottom: 1px solid #000; }
+}
+
+.main-color { background-color: #1890ff; }
+.th-row { color: #1890ff; }

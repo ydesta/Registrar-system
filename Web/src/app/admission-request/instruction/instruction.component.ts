@@ -27,6 +27,11 @@ export class InstructionComponent {
       icon: 'info-circle',
       title: 'Acceptance Policy',
       description: 'Applying for admission doesn\'t guarantee acceptance. All applications are subject to review and approval.'
+    },
+    {
+      icon: 'graduation-cap',
+      title: 'Grade 12 Natural Science Requirement',
+      description: 'If you are a Grade 12 completed student, only Natural Science students are allowed to apply.'
     }
   ];
 }

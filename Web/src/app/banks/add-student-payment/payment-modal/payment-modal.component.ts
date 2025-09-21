@@ -66,7 +66,7 @@ export class PaymentModalComponent implements OnInit {
   paymentForm() {
     this.bankTransactionForm = this._fb.group({
       fromBank: [null, []],
-      toBank: [null, []],
+      toBank: [1, []], // Set Dashen Account (Id: 1) as default
       transactionDate: [new Date(), Validators.required],
       remark: ['', []],
       bankTransactionID: [null, Validators.required],

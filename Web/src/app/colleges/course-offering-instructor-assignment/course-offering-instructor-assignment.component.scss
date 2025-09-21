@@ -1,325 +1,639 @@
-// Professional styling for course offering instructor assignment component
-.course-offering-instructor-assignment {
-  padding: 24px;
+// Professional Instructor Assignment Modal Styling
+.instructor-assignment-modal {
   background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  margin: 32px auto;
-
-  .search-container {
-    margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  max-width: 800px;
+  min-width: 600px;
+  margin: 0 auto;
+  border: 1px solid #f0f0f0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
+  // Modal Header
+  .modal-header {
+    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+    padding: 24px;
+    color: #ffffff;
+    position: relative;
     
-    nz-input-group {
-      max-width: 400px;
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #52c41a 0%, #73d13d 50%, #52c41a 100%);
+    }
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
       
-      input {
-        border-radius: 6px;
-        border: 1px solid #d9d9d9;
-        transition: all 0.3s ease;
+      .header-icon {
+        span[nz-icon] {
+          font-size: 2rem;
+          color: rgba(255, 255, 255, 0.95);
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+      }
+      
+      .header-text {
+        flex: 1;
         
-        &:focus {
-          border-color: #1890ff;
-          box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        .modal-title {
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin: 0 0 6px 0;
+          color: #ffffff;
+          letter-spacing: -0.5px;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-subtitle {
+          font-size: 0.875rem;
+          margin: 0;
+          color: rgba(255, 255, 255, 0.9);
+          font-weight: 400;
+          line-height: 1.5;
         }
       }
     }
   }
-
-  // Table styling
-  nz-table {
-    border-radius: 8px;
-    //  overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    width: 100% !important;
-    min-width: 0;
-    display: block;
+  
+  // Modal Body
+  .modal-body {
+    padding: 24px;
     
-    // Width options
-    &.table-full-width {
-      width: 100%;
-    }
-    
-    &.table-fixed-width {
-      width: 800px;
-      margin: 0 auto;
-    }
-    
-    &.table-medium-width {
-      width: 70%;
-      margin: 0 auto;
-    }
-    
-    &.table-small-width {
-      width: 50%;
-      margin: 0 auto;
-    }
-    
-    // Custom width class
-    &.table-custom-width {
-      width: var(--table-width, 100%);
-    }
-    
-    ::ng-deep {
-      .ant-table-thead > tr > th {
-        background: #fafafa;
-        border-bottom: 2px solid #f0f0f0;
+    // Section Headers
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f5f5f5;
+      
+      span[nz-icon] {
+        color: #1890ff;
+        font-size: 1.25rem;
+        background: rgba(24, 144, 255, 0.1);
+        padding: 8px;
+        border-radius: 8px;
+      }
+      
+      .section-title {
+        font-size: 1.125rem;
         font-weight: 600;
         color: #262626;
-        padding: 16px 12px;
-        
-        &:first-child {
-          border-top-left-radius: 8px;
-        }
-        
-        &:last-child {
-          border-top-right-radius: 8px;
-        }
+        margin: 0;
+        flex: 1;
       }
       
-      .ant-table-tbody > tr > td {
-        padding: 16px 12px;
-        border-bottom: 1px solid #f0f0f0;
-        transition: background-color 0.3s ease;
-        
-        &:first-child {
-          width: 50px;
-          text-align: center;
-        }
+      .selection-info {
+        margin-left: auto;
       }
+    }
+    
+    // Search Section
+    .search-section {
+      margin-bottom: 24px;
       
-      .ant-table-tbody > tr:hover > td {
-        background-color: #f5f7fa;
-      }
-      
-      .ant-table-tbody > tr:last-child > td {
-        border-bottom: none;
-      }
-      
-      // Checkbox styling
-      .ant-checkbox-wrapper {
-        .ant-checkbox {
-          .ant-checkbox-inner {
-            border-radius: 4px;
-            border: 2px solid #d9d9d9;
+      .search-container {
+        nz-input-group {
+          max-width: 100%;
+          
+          .search-input {
+            border-radius: 8px;
+            border: 2px solid #e8e8e8;
+            transition: all 0.3s ease;
+            height: 44px;
+            padding: 8px 16px;
+            background: #fafafa;
+            font-size: 0.875rem;
             
             &:hover {
               border-color: #1890ff;
+              background: #ffffff;
             }
-          }
-          
-          &.ant-checkbox-checked .ant-checkbox-inner {
-            background-color: #1890ff;
-            border-color: #1890ff;
+            
+            &:focus {
+              border-color: #1890ff;
+              box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+              background: #ffffff;
+              outline: none;
+            }
+            
+            &::placeholder {
+              color: #bfbfbf;
+              font-style: italic;
+            }
           }
         }
       }
-      
-      // Pagination styling
-      .ant-pagination {
-        margin-top: 16px;
+    }
+    
+    // Table Section
+    .table-section {
+      .table-container {
+        border-radius: 8px;
+        overflow: visible;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #f0f0f0;
+        margin-bottom: 16px;
+        background: #ffffff;
         
-        .ant-pagination-item {
-          border-radius: 6px;
+        .instructors-table {
+          width: 100%;
           
-          &.ant-pagination-item-active {
-            background-color: #1890ff;
-            border-color: #1890ff;
+          ::ng-deep {
+            // Ensure table body doesn't overlap with pagination
+            .ant-table-container {
+              overflow: visible;
+            }
+            
+            .ant-table-body {
+              overflow: visible;
+            }
+            .ant-table-thead > tr > th {
+              background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+              border-bottom: 2px solid #e2e8f0;
+              font-weight: 600;
+              color: #374151;
+              padding: 16px;
+              font-size: 14px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              
+              &.checkbox-column {
+                width: 120px;
+                text-align: center;
+                
+                .select-all-text {
+                  font-size: 12px;
+                  font-weight: 500;
+                }
+              }
+              
+              &.code-column {
+                width: 150px;
+              }
+              
+              &.name-column {
+                flex: 1;
+                position: relative;
+                
+                .filter-trigger {
+                  position: absolute;
+                  right: 8px;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  color: #1890ff;
+                  cursor: pointer;
+                  transition: all 0.3s ease;
+                  
+                  &:hover {
+                    color: #40a9ff;
+                    transform: translateY(-50%) scale(1.1);
+                  }
+                }
+              }
+              
+              span[nz-icon] {
+                margin-right: 8px;
+                color: #1890ff;
+              }
+            }
+            
+            .ant-table-tbody > tr {
+              transition: all 0.3s ease;
+              
+              &.instructor-row {
+                &:hover {
+                  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                  transform: scale(1.01);
+                  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                }
+                
+                &:nth-child(even) {
+                  background: #fafafa;
+                  
+                  &:hover {
+                    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                  }
+                }
+              }
+              
+              > td {
+                padding: 16px;
+                border-bottom: 1px solid #f1f5f9;
+                transition: all 0.3s ease;
+                
+                &.checkbox-column {
+                  text-align: center;
+                  width: 120px;
+                  
+                  ::ng-deep .ant-checkbox-wrapper {
+                    .ant-checkbox {
+                      .ant-checkbox-inner {
+                        border-radius: 4px;
+                        border: 2px solid #d9d9d9;
+                        width: 18px;
+                        height: 18px;
+                        
+                        &:hover {
+                          border-color: #1890ff;
+                        }
+                      }
+                      
+                      &.ant-checkbox-checked .ant-checkbox-inner {
+                        background-color: #1890ff;
+                        border-color: #1890ff;
+                      }
+                    }
+                  }
+                }
+                
+                &.code-column {
+                  width: 150px;
+                  
+                  .code-tag {
+                    border-radius: 6px;
+                    font-weight: 500;
+                    font-size: 12px;
+                    padding: 4px 8px;
+                  }
+                }
+                
+                &.name-column {
+                  .instructor-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    
+                    .instructor-avatar {
+                      border: 2px solid #e5e7eb;
+                      transition: all 0.3s ease;
+                      
+                      &:hover {
+                        border-color: #1890ff;
+                        transform: scale(1.1);
+                      }
+                    }
+                    
+                    .instructor-name {
+                      font-weight: 500;
+                      color: #374151;
+                      font-size: 14px;
+                    }
+                  }
+                }
+              }
+            }
+            
+            // Pagination styling
+            .ant-pagination {
+              margin: 0;
+              padding: 16px;
+              background: #fafafa;
+              border-top: 1px solid #f0f0f0;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              position: relative;
+              z-index: 1;
+              
+              .ant-pagination-item {
+                border-radius: 6px;
+                margin: 0 4px;
+                
+                &.ant-pagination-item-active {
+                  background-color: #1890ff;
+                  border-color: #1890ff;
+                }
+              }
+              
+              .ant-pagination-prev,
+              .ant-pagination-next {
+                border-radius: 6px;
+                margin: 0 4px;
+              }
+              
+              .ant-pagination-options {
+                margin-left: 16px;
+              }
+            }
           }
         }
       }
     }
   }
-
-  // Filter dropdown styling
-  .ant-table-filter-dropdown {
+  
+  // Filter Dropdown
+  .filter-dropdown {
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border: 1px solid #f0f0f0;
+    background: #ffffff;
     
-    .search-box {
+    .filter-content {
       padding: 16px;
-      background: #ffffff;
       
-      input {
-        width: 100%;
+      .filter-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
         margin-bottom: 12px;
-        border-radius: 6px;
-        border: 1px solid #d9d9d9;
-        padding: 8px 12px;
-        transition: all 0.3s ease;
+        font-weight: 600;
+        color: #262626;
         
-        &:focus {
-          border-color: #1890ff;
-          box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        span[nz-icon] {
+          color: #1890ff;
         }
       }
       
-      button {
-        border-radius: 6px;
-        font-weight: 500;
-        transition: all 0.3s ease;
+      .filter-input {
+        margin-bottom: 12px;
         
-        &.ant-btn-primary {
-          background-color: #1890ff;
-          border-color: #1890ff;
+        .filter-search-input {
+          width: 100%;
+          border-radius: 6px;
+          border: 1px solid #d9d9d9;
+          padding: 8px 12px;
+          transition: all 0.3s ease;
           
-          &:hover {
-            background-color: #40a9ff;
-            border-color: #40a9ff;
-          }
-        }
-        
-        &:not(.ant-btn-primary) {
-          border-color: #d9d9d9;
-          color: #595959;
-          
-          &:hover {
+          &:focus {
             border-color: #1890ff;
-            color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+            outline: none;
           }
         }
       }
       
-      .search-button {
-        margin-right: 8px;
+      .filter-actions {
+        display: flex;
+        gap: 8px;
+        
+        button {
+          border-radius: 6px;
+          font-weight: 500;
+          transition: all 0.3s ease;
+          
+          &.filter-search-btn {
+            background-color: #1890ff;
+            border-color: #1890ff;
+            
+            &:hover {
+              background-color: #40a9ff;
+              border-color: #40a9ff;
+            }
+          }
+          
+          &.filter-reset-btn {
+            border-color: #d9d9d9;
+            color: #595959;
+            
+            &:hover {
+              border-color: #1890ff;
+              color: #1890ff;
+            }
+          }
+        }
       }
     }
   }
-
-  // Action buttons container
-  .button-container {
-    margin-top: 24px;
-    padding-top: 16px;
+  
+  // Modal Footer
+  .modal-footer {
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+    padding: 20px 24px;
     border-top: 1px solid #f0f0f0;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
     
-    button {
-      border-radius: 6px;
-      font-weight: 500;
-      padding: 8px 24px;
-      height: 40px;
-      transition: all 0.3s ease;
+    .footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
       
-      &.ant-btn-primary {
-        background-color: #1890ff;
-        border-color: #1890ff;
-        box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
+      .cancel-btn {
+        border: 2px solid #d9d9d9;
+        border-radius: 8px;
+        height: 44px;
+        padding: 0 20px;
+        font-weight: 600;
+        color: #595959;
+        background: #ffffff;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         
         &:hover {
-          background-color: #40a9ff;
-          border-color: #40a9ff;
-          box-shadow: 0 4px 8px rgba(24, 144, 255, 0.3);
+          border-color: #ff4d4f;
+          color: #ff4d4f;
+          background: #fff1f0;
           transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(255, 77, 79, 0.2);
         }
         
-        &:active {
-          transform: translateY(0);
+        span[nz-icon] {
+          font-size: 14px;
+        }
+      }
+      
+      .submit-btn {
+        background: #1890ff;
+        border: none;
+        border-radius: 8px;
+        height: 44px;
+        padding: 0 20px;
+        font-weight: 600;
+        color: #ffffff;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+        position: relative;
+        
+        &:hover:not(:disabled) {
+          background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(24, 144, 255, 0.4);
+        }
+        
+        &:disabled {
+          background: #f5f5f5;
+          color: #bfbfbf;
+          box-shadow: none;
+          transform: none;
+          cursor: not-allowed;
+        }
+        
+        .selection-count {
+          margin-left: 8px;
+          font-size: 11px;
+          padding: 2px 6px;
+          border-radius: 4px;
+        }
+        
+        span[nz-icon] {
+          font-size: 14px;
         }
       }
     }
   }
-
-  // Divider styling
-  nz-divider {
-    margin: 24px 0 16px 0;
-    border-color: #f0f0f0;
-  }
-
-  // Responsive design
-  @media (max-width: 768px) {
-    padding: 16px;
+  
+  // Loading State
+  .loading-state {
+    text-align: center;
+    padding: 48px 24px;
     
-    .search-container {
-      margin-bottom: 16px;
-      
-      nz-input-group {
-        max-width: 100%;
-      }
-    }
-    
-    // Reset table width on mobile
-    nz-table {
-      width: 100% !important;
-      
-      &.table-fixed-width,
-      &.table-medium-width,
-      &.table-small-width {
-        width: 100% !important;
-        margin: 0;
-      }
-    }
-    
-    .button-container {
+    .loading-content {
+      display: flex;
       flex-direction: column;
-      align-items: stretch;
+      align-items: center;
+      gap: 16px;
       
-      button {
-        width: 100%;
+      span[nz-icon] {
+        font-size: 2rem;
+        color: #1890ff;
       }
-    }
-    
-    nz-table ::ng-deep {
-      .ant-table-thead > tr > th,
-      .ant-table-tbody > tr > td {
-        padding: 12px 8px;
-      }
-    }
-  }
-
-  @media (max-width: 480px) {
-    padding: 12px;
-    
-    nz-table ::ng-deep {
-      .ant-table-thead > tr > th,
-      .ant-table-tbody > tr > td {
-        padding: 8px 6px;
-        font-size: 14px;
+      
+      p {
+        margin: 0;
+        color: #595959;
+        font-weight: 500;
       }
     }
   }
-}
-
-// Loading state styling
-.loading-overlay {
-  position: relative;
   
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-}
-
-// Empty state styling
-.empty-state {
-  text-align: center;
-  padding: 48px 24px;
-  color: #8c8c8c;
-  
-  nz-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-    color: #d9d9d9;
-  }
-  
-  h3 {
-    margin-bottom: 8px;
-    color: #595959;
-  }
-  
-  p {
+  // Empty State
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
     color: #8c8c8c;
-    margin: 0;
+    
+    span[nz-icon] {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      color: #d9d9d9;
+    }
+    
+    h3 {
+      margin-bottom: 8px;
+      color: #595959;
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+    
+    p {
+      color: #8c8c8c;
+      margin: 0;
+      font-size: 0.875rem;
+    }
   }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .instructor-assignment-modal {
+    margin: 16px;
+    border-radius: 8px;
+    min-width: auto;
+    max-width: 100%;
+    
+    .modal-header {
+      padding: 20px;
+      
+      .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+        
+        .header-icon span[nz-icon] {
+          font-size: 1.75rem;
+        }
+        
+        .header-text {
+          .modal-title {
+            font-size: 1.25rem;
+          }
+          
+          .modal-subtitle {
+            font-size: 0.75rem;
+          }
+        }
+      }
+    }
+    
+    .modal-body {
+      padding: 20px;
+      
+      .section-header {
+        .section-title {
+          font-size: 1rem;
+        }
+        
+        span[nz-icon] {
+          font-size: 1rem;
+          padding: 6px;
+        }
+      }
+    }
+    
+    .modal-footer {
+      padding: 16px 20px;
+      
+      .footer-actions {
+        flex-direction: column;
+        
+        .cancel-btn,
+        .submit-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .instructor-assignment-modal {
+    margin: 8px;
+    
+    .modal-body {
+      padding: 16px;
+      
+      .table-container {
+        .instructors-table {
+          ::ng-deep {
+            .ant-table-thead > tr > th,
+            .ant-table-tbody > tr > td {
+              padding: 12px 8px;
+              font-size: 13px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animation for modal appearance
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.instructor-assignment-modal {
+  animation: slideInUp 0.3s ease-out;
 }

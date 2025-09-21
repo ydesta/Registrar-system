@@ -31,6 +31,8 @@ export class StudentProfileSummaryComponent implements OnInit {
   public isUserAuthenticated: boolean = false;
   public isUserApprovedApplicant: boolean = false;
   public isUserAlreadyApplied: boolean = false;
+  public isUserAcademicDirector: boolean = false;
+  public isUserReception: boolean = false;
   public studentList: any;
   searchCollapse = true;
   initials: string = '';
@@ -42,7 +44,7 @@ export class StudentProfileSummaryComponent implements OnInit {
     public aciveRoute: ActivatedRoute,
   ) {
     this.userId = localStorage.getItem('userId');
-     this.progStatusId = this.aciveRoute.snapshot.paramMap.get('id');
+    this.progStatusId = this.aciveRoute.snapshot.paramMap.get('id');
     if (this.progStatusId != "null") {
       this.getListStudentProfileByStudentId(this.progStatusId);
     }
@@ -53,7 +55,7 @@ export class StudentProfileSummaryComponent implements OnInit {
 
   }
   ngOnInit(): void {
-    if ((this.isUserInstructor || this.isUserAdmin)) {
+    if ((this.isUserInstructor || this.isUserAdmin || this.isUserAcademicDirector)) {
       this.getStudentList();
     }
     this.getListOfYearNumberStatus();
@@ -62,11 +64,11 @@ export class StudentProfileSummaryComponent implements OnInit {
       this.getStudentProfileByStudentId();
     }
     this.StudentId.valueChanges.subscribe((res) => {
-      if (res && (this.isUserInstructor || this.isUserAdmin)) {
+      if (res && (this.isUserInstructor || this.isUserAdmin || this.isUserAcademicDirector)) {
         this.getListStudentProfileByStudentId(res);
       }
     });
-   
+
   }
 
   getStudentProfileByStudentId() {
@@ -122,6 +124,8 @@ export class StudentProfileSummaryComponent implements OnInit {
     this.isUserReviewer = role === 'Reviewer';
     this.isUserApplicant = role === 'Applicant';
     this.isUserApprovedApplicant = role === 'ApprovedApplicant';
+    this.isUserAcademicDirector = role === 'Academic Director';
+    this.isUserReception = role === 'Reception';
   }
 
   isValidProfilePicture(url: string | null): boolean {
@@ -178,22 +182,37 @@ export class StudentProfileSummaryComponent implements OnInit {
   getTotalPoints(courses: any[]): number {
     return courses.reduce((total, course) => total + course.points, 0);
   }
-  getGPA(courses: any[]): number {
-    if (courses.length === 0) {
-      return 0; // Handle division by zero
-    }
-
-    const totalPoints = courses.reduce(
-      (total, course) => total + course.points,
-      0
-    );
-    const totalCreditHours = courses.reduce(
-      (total, course) => total + course.creditHours,
-      0
-    );
-
-    return totalPoints / totalCreditHours;
+getGPA(courses: any[]): number {
+  if (!courses || courses.length === 0) {
+    return 0;
   }
+
+  const validCourses = courses.filter(
+    (course) =>
+      course.grade && // not null, undefined, or ""
+      course.grade !== '-' &&
+      course.grade !== 'RC' &&
+      course.grade !== 'RA' &&
+      course.creditHours > 0
+  );
+
+  if (validCourses.length === 0) {
+    return 0;
+  }
+
+  const totalPoints = validCourses.reduce(
+    (total, course) => total + course.points,
+    0
+  );
+
+  const totalCreditHours = validCourses.reduce(
+    (total, course) => total + course.creditHours,
+    0
+  );
+
+  return totalCreditHours === 0 ? 0 : totalPoints / totalCreditHours;
+}
+
 
   getCGPA(academicYears: any[]): number {
     let totalPoints = 0;

@@ -1,0 +1,190 @@
+<div class="registration-payment-container">
+  <div class="payment-header">
+    <h2>Course Registration Payment</h2>
+    <p>Complete your course registration by processing the payment</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading registration data...</p>
+  </div>
+
+  <!-- Payment Form -->
+  <div *ngIf="!isLoading" class="payment-content">
+    <!-- Registration Summary -->
+    <div class="registration-summary">
+      <h3>Registration Summary</h3>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span class="label">Registration ID:</span>
+          <span class="value">{{registrationId}}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Batch Code:</span>
+          <span class="value">{{batchCode}}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Academic Term:</span>
+          <span class="value">{{getAcademicTermDescription(paymentForm.get('academicTerm')?.value)}}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Academic Year:</span>
+          <span class="value">{{paymentForm.get('academicYear')?.value}}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Number of Courses:</span>
+          <span class="value">{{selectedCourses.length}}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selected Courses -->
+    <div class="courses-section" *ngIf="selectedCourses.length > 0">
+      <h3>Selected Courses</h3>
+      <div class="courses-list">
+        <div *ngFor="let course of selectedCourses" class="course-item">
+          <div class="course-info">
+            <span class="course-code">{{course.courseCode}}</span>
+            <span class="course-name">{{course.courseName}}</span>
+            <span class="course-credits">{{course.creditHours}} credits</span>
+          </div>
+          <div class="course-fee">
+            {{formatCurrency(course.totalFee || (course.creditHours * 500), currency)}}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Form -->
+    <form [formGroup]="paymentForm" (ngSubmit)="processPayment()" class="payment-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="totalAmount">Total Amount *</label>
+          <input
+            type="number"
+            id="totalAmount"
+            formControlName="totalAmount"
+            class="form-control"
+            readonly
+            [class.error]="paymentForm.get('totalAmount')?.invalid && paymentForm.get('totalAmount')?.touched"
+          />
+          <div *ngIf="paymentForm.get('totalAmount')?.invalid && paymentForm.get('totalAmount')?.touched" 
+               class="error-message">
+            Total amount is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="currency">Currency *</label>
+          <select id="currency" formControlName="currency" class="form-control">
+            <option value="ETB">ETB - Ethiopian Birr</option>
+            <option value="USD">USD - US Dollar</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          formControlName="description"
+          class="form-control"
+          rows="3"
+          readonly
+        ></textarea>
+      </div>
+
+      <!-- Payment Summary -->
+      <div class="payment-summary">
+        <div class="summary-total">
+          <span class="total-label">Total Payment:</span>
+          <span class="total-amount">{{formatCurrency(totalAmount, currency)}}</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="goBack()"
+          [disabled]="isPaymentProcessing"
+        >
+          Back to Registration
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-info"
+          (click)="checkPaymentStatus()"
+          [disabled]="isPaymentProcessing || isLoading"
+        >
+          Check Status
+        </button>
+
+        <button
+          *ngIf="!currentPaymentOrder"
+          type="submit"
+          class="btn btn-primary btn-lg"
+          [disabled]="!canProcessPayment"
+        >
+          <span *ngIf="isPaymentProcessing" class="spinner"></span>
+          {{isPaymentProcessing ? 'Processing...' : 'Proceed to Payment'}}
+        </button>
+
+        <button
+          *ngIf="currentPaymentOrder && canRetryPayment"
+          type="button"
+          class="btn btn-warning btn-lg"
+          (click)="retryPayment()"
+          [disabled]="isPaymentProcessing"
+        >
+          <span *ngIf="isPaymentProcessing" class="spinner"></span>
+          {{isPaymentProcessing ? 'Processing...' : 'Retry Payment'}}
+        </button>
+      </div>
+    </form>
+
+    <!-- Payment Status -->
+    <div *ngIf="currentPaymentOrder" class="payment-status">
+      <h3>Payment Status</h3>
+      <div class="status-details">
+        <div class="status-item">
+          <span class="label">Order Number:</span>
+          <span class="value">{{currentPaymentOrder.orderNumber}}</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Status:</span>
+          <span class="value" [class.paid]="currentPaymentOrder.isPaid" [class.pending]="!currentPaymentOrder.isPaid">
+            {{currentPaymentOrder.isPaid ? 'Paid' : 'Pending'}}
+          </span>
+        </div>
+        <div class="status-item" *ngIf="currentPaymentOrder.paidDate">
+          <span class="label">Paid Date:</span>
+          <span class="value">{{currentPaymentOrder.paidDate | date:'medium'}}</span>
+        </div>
+        <div class="status-item" *ngIf="currentPaymentOrder.transactionId">
+          <span class="label">Transaction ID:</span>
+          <span class="value">{{currentPaymentOrder.transactionId}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="messages">
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="icon-check"></i>
+      {{successMessage}}
+    </div>
+
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <i class="icon-error"></i>
+      {{errorMessage}}
+    </div>
+  </div>
+</div>
+
+
+

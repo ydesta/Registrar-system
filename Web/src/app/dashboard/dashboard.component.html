@@ -1,18 +1,22 @@
 <div class="main">
-  <div *ngIf="isUserApprovedApplicant ">
+  <div *ngIf="isUserApprovedApplicant">
     <app-student-dashboard></app-student-dashboard>
   </div>
-
+<!-- <app-student-profile-summary></app-student-profile-summary> -->
   <div *ngIf="isUserStudent && !isUserApprovedApplicant">
     <app-student-profile-summary></app-student-profile-summary>
   </div>
 
   <div *ngIf="isUserAdmin && !isUserInstructor">
-    <!-- <app-admin-dashboard></app-admin-dashboard> -->
     <app-student-profile-summary></app-student-profile-summary>
   </div>
 
-  <div *ngIf="!isUserAdmin && !isUserStudent && !isUserApprovedApplicant">
-    <app-admin-dashboard></app-admin-dashboard>
+  <div *ngIf="isUserAcademicDirector">
+     <app-student-profile-summary></app-student-profile-summary>
   </div>
+
+  <!-- <div *ngIf="!isUserAdmin && !isUserStudent && !isUserApprovedApplicant">
+     <app-student-profile-summary></app-student-profile-summary>
+  </div> -->
+
 </div>

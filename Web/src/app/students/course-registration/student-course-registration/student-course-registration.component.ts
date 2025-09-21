@@ -107,15 +107,15 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       this.filterAddCourses();
     });
   }
-  
+
   ngOnInit(): void {
     this.getListOfOfToBank();
     this.getListOfAcademicTermStatus();
     this.getListOfYearNumberStatus();
-    
+
     const next = sessionStorage.getItem('nextAcademicTerm');
     this.nextAcademicTerm = next ? JSON.parse(next) : null;
-    
+
     if (this.nextAcademicTerm) {
       this.initializeAcademicTerm();
     } else {
@@ -138,7 +138,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     this.academicTermId = this.nextAcademicTerm.termId;
     this.nextTermYear = this.nextAcademicTerm.year;
     const termDescription = this.getAcademicTermStatusDescription(this.nextAcademicTerm.termId);
-    
+
     this.nextTerm = `🎓 Registration : ${termDescription} ${this.nextAcademicTerm.year}`;
     this.courseSectionTitle = `📘 Courses Available – ${termDescription} ${this.nextAcademicTerm.year}`;
     this.courseAddTitle = `📘 Courses Add Request – ${termDescription} ${this.nextAcademicTerm.year}`;
@@ -201,7 +201,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
         this.handleCourseData(results);
       },
       error: (error) => {
-        this._customNotificationService.notification('error', 'Error', 
+        this._customNotificationService.notification('error', 'Error',
           'Failed to load course data. Please try again.');
         this.havePreparedCourseOffering = false;
         this.cdr.detectChanges();
@@ -376,13 +376,13 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     if (course && (this.totalSelectedCreditHours + course.creditHours) > this.getMaxAllowedCreditHours()) {
       const cgpa = this.studentTermCourseReg?.cgpa || 0;
       let message = '';
-      
+
       if (cgpa === 0) {
-        message = `Adding this course would exceed your maximum allowed credit hours of 19 for new students.`;
+        message = `Adding this course would exceed your maximum allowed credit hours of 22 for new students.`;
       } else {
         message = `Adding this course would exceed your maximum allowed credit hours of ${this.getMaxAllowedCreditHours()} based on your CGPA of ${this.studentTermCourseReg?.cgpa.toFixed(2)}.`;
       }
-      
+
       this._customNotificationService.notification('warning', 'Credit Hour Warning', message);
       return true;
     }
@@ -409,16 +409,21 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     if (course.isRegistered) {
       return false;
     }
-    if (course.currentGrade !== 'RA') {
+
+    // Lock if Current Grade is not empty and not 'RA'
+    if (course.currentGrade && course.currentGrade !== 'RA') {
       return true;
     }
+
+    // Lock if the course is not available in both addableCourse and regular courses
     const isInAddedCourses = this.listOfAddedCourses?.some(
-      addedCourse => addedCourse.courseId === course.courseId && addedCourse.currentGrade === 'RA'
+      addedCourse => addedCourse.courseId === course.courseId
     );
 
     const isInCourseOfferings = this.studentTermCourseReg?.courseTermOfferings?.some(
       offeringCourse => offeringCourse.courseId === course.courseId
     );
+
     return !(isInAddedCourses || isInCourseOfferings);
   }
 
@@ -612,39 +617,49 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   getMaxAllowedCreditHours(): number {
     // If ignoreGradeLevelValidation is true, return a very high number to effectively ignore the limit
     if (this.studentTermCourseReg?.ignoreGradeLevelValidation === true) {
-      return 999; // High number to effectively remove the credit hour limit
+      return 30; // High number to effectively remove the credit hour limit
     }
-    
+
     // Apply normal CGPA-based credit hour limits
     const cgpa = this.studentTermCourseReg?.cgpa || 0;
+    if (cgpa >= 2.0) {
+      return 22;
+    }
     if (cgpa >= 1.82) {
-      return 19;
-    } else if (cgpa >= 1.66) {
-      return 15;
+      return 20;
+    }
+    else if (cgpa >= 1.66) {
+      return 18;
     } else if (cgpa >= 1.5) {
-      return 10;
+      return 14;
     } else {
-      return 5;
+      return 9;
     }
   }
 
   onAllChecked(checked: boolean, type: 'regular' | 'add' | 'assessment'): void {
     if (type === 'regular') {
       if (checked) {
-        const totalCreditHours = this.studentTermCourseReg?.courseTermOfferings?.reduce((total, course) => total + course.creditHours, 0) || 0;
+        // Only calculate credit hours for non-disabled courses
+        const enabledCourses = this.studentTermCourseReg?.courseTermOfferings?.filter(course => !this.isRegularCourseDisabled(course)) || [];
+        const totalCreditHours = enabledCourses.reduce((total, course) => total + course.creditHours, 0);
         const maxAllowed = this.getMaxAllowedCreditHours();
 
         if (totalCreditHours > maxAllowed) {
           this._customNotificationService.notification('warning', 'Credit Hour Warning',
-            `Selecting all courses would exceed your maximum allowed credit hours of ${maxAllowed} based on your CGPA of ${this.studentTermCourseReg?.cgpa.toFixed(2)}.`);
+            `Selecting all available courses would exceed your maximum allowed credit hours of ${maxAllowed} based on your CGPA of ${this.studentTermCourseReg?.cgpa.toFixed(2)}.`);
           return;
         }
       }
 
+      // Only select/deselect courses that are not disabled
       this.studentTermCourseReg?.courseTermOfferings.forEach(course => {
         if (checked) {
-          this.setOfCheckedId.add(course.courseId);
-      } else {
+          // Only add if the course is not disabled
+          if (!this.isRegularCourseDisabled(course)) {
+            this.setOfCheckedId.add(course.courseId);
+          }
+        } else {
           this.setOfCheckedId.delete(course.courseId);
         }
       });
@@ -652,13 +667,15 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       this.indeterminateRegularCourses = false;
     } else if (type === 'add') {
       if (checked) {
-        const coursesToSelect = this.filteredAddCourses.slice(0, this.maxAddCoursesAllowed);
+        // Only select courses that are not disabled
+        const enabledCourses = this.filteredAddCourses.filter(course => !this.isRegularCourseDisabled(course));
+        const coursesToSelect = enabledCourses.slice(0, this.maxAddCoursesAllowed);
         coursesToSelect.forEach(course => {
           this.setOfCheckedAddCourses.add(course.courseId);
           this.coursePriorities.set(course.courseId, 0);
         });
-          this._customNotificationService.notification('warning', 'Warning',
-          `Only the first ${this.maxAddCoursesAllowed} courses were selected due to the maximum limit.`);
+        this._customNotificationService.notification('warning', 'Warning',
+          `Only the first ${this.maxAddCoursesAllowed} available courses were selected due to the maximum limit.`);
       } else {
         this.filteredAddCourses.forEach(course => {
           this.setOfCheckedAddCourses.delete(course.courseId);
@@ -669,20 +686,26 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       this.indeterminateAddCourses = false;
     } else if (type === 'assessment') {
       if (checked) {
-        const totalCreditHours = this.listOfCourseAssessment?.reduce((total, course) => total + course.creditHours, 0) || 0;
+        // Only calculate credit hours for non-disabled courses
+        const enabledCourses = this.listOfCourseAssessment?.filter(course => !this.isCourseDisabled(course)) || [];
+        const totalCreditHours = enabledCourses.reduce((total, course) => total + course.creditHours, 0);
         const maxAllowed = this.getMaxAllowedCreditHours();
 
         if (totalCreditHours > maxAllowed) {
           this._customNotificationService.notification('warning', 'Credit Hour Warning',
-            `Selecting all assessment courses would exceed your maximum allowed credit hours of ${maxAllowed} based on your CGPA of ${this.studentTermCourseReg?.cgpa.toFixed(2)}.`);
+            `Selecting all available assessment courses would exceed your maximum allowed credit hours of ${maxAllowed} based on your CGPA of ${this.studentTermCourseReg?.cgpa.toFixed(2)}.`);
           return;
         }
       }
 
+      // Only select/deselect courses that are not disabled
       this.listOfCourseAssessment.forEach(course => {
         if (checked) {
-          this.setOfCheckedAssessmentCourses.add(course.courseId);
-      } else {
+          // Only add if the course is not disabled
+          if (!this.isCourseDisabled(course)) {
+            this.setOfCheckedAssessmentCourses.add(course.courseId);
+          }
+        } else {
           this.setOfCheckedAssessmentCourses.delete(course.courseId);
         }
       });
@@ -698,7 +721,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     let currentTotal = this.totalSelectedCreditHours;
 
     if (currentTotal <= maxAllowed) {
-      return; 
+      return;
     }
 
     const regularCourses = Array.from(this.setOfCheckedId)
@@ -744,7 +767,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     );
 
     // Refresh all check states
-      this.refreshRegularCourseCheckedStatus();
+    this.refreshRegularCourseCheckedStatus();
     this.refreshAddCourseCheckedStatus();
     this.refreshAssessmentCheckedStatus();
 
@@ -908,6 +931,9 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
         return;
       }
 
+      // Check if there are courses that require payment (regular courses or assessment courses)
+      const hasPaymentRequiredCourses = regularCourses.length > 0 || assessmentCourses.length > 0;
+
       // Handle update or create with proper subscription management
       if (this.regId != null) {
         this._studentService.updateStudentCourseRegistration(this.regId, studentCourseOffering)
@@ -922,7 +948,13 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
               if (res && res.data) {
                 this.registrationId = res.data.id;
                 this.handleNotification('success', 'Success', res.studentId);
-                this._route.navigateByUrl(`banks/add-student-payment?registrationid=${this.regId}&code=${this.batchCode}&type=${semester}`);
+                this.isSubmitting = false;
+                if (hasPaymentRequiredCourses) {
+                  this._route.navigateByUrl(`banks/add-student-payment?registrationid=${this.regId}&code=${this.batchCode}&type=${semester}`);
+                  // this._route.navigateByUrl(`banks/registration/payment-options?registrationid=${this.regId}&code=${this.batchCode}&type=${semester}`);
+                } else {
+                  this._route.navigateByUrl('students/manage-student-course-registration');
+                }
               } else {
                 this._customNotificationService.notification('error', 'Error', 'Invalid response from server. Please try again.');
               }
@@ -945,7 +977,13 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
               if (res && res.data) {
                 this.registrationId = res.data.id;
                 this.handleNotification('success', 'Success', res.studentId);
-                this._route.navigateByUrl(`banks/add-student-payment?registrationid=${this.registrationId}&code=${this.batchCode}&type=${semester}`);
+                this.isSubmitting = false;
+                if (hasPaymentRequiredCourses) {
+                  this._route.navigateByUrl(`banks/registration/payment-options?registrationid=${this.registrationId}&code=${this.batchCode}&type=${semester}`);
+                  // this._route.navigateByUrl(`banks/registration/payment-options?registrationid=${this.regId}&code=${this.batchCode}&type=${semester}`);
+                } else {
+                  this._route.navigateByUrl('students/manage-student-course-registration');
+                }
               } else {
                 this._customNotificationService.notification('error', 'Error', 'Invalid response from server. Please try again.');
               }
@@ -967,7 +1005,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   }
   private handleNotification(type: string, message: string, studentId: string) {
     this._customNotificationService.notification(type, message, studentId);
-    this._route.navigateByUrl('students/manage-student-course-registration');
+    // Note: Redirect logic is now handled in the success handlers of sendRequest()
   }
 
   private clearSelectionAndRefresh() {
@@ -999,11 +1037,11 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     if (month >= 3 && month <= 5) {
       this.season = 2;
     } else if (month >= 6 && month <= 8) {
-      this.season = 3; 
+      this.season = 3;
     } else if (month >= 9 && month <= 11) {
-      this.season = 4; 
+      this.season = 4;
     } else {
-      this.season = 1; 
+      this.season = 1;
     }
   }
   generatePrintContent(): string {
@@ -1063,11 +1101,11 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
 
   get tableScrollHeight(): string {
     const width = window.innerWidth;
-    if (width < 768) {  
+    if (width < 768) {
       return '250px';
-    } else if (width < 992) {  
+    } else if (width < 992) {
       return '350px';
-    } else {  
+    } else {
       return 'calc(100vh - 250px)';
     }
   }
@@ -1079,32 +1117,32 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     }
 
     const passingGrades = ['A+', 'A', 'B', 'B+', 'C', 'D'];
-    
+
     switch (course.courseStatus) {
       case 'Not Taken':
         return false;
-      
+
       case 'Dropped':
-        return false; 
-      
+        return false;
+
       case 'Exempted':
-        return true; 
-      
+        return true;
+
       case 'Inactive':
         return true;
-      
+
       case 'Has Prerequisite':
         return true;
-      
+
       case 'Taken':
         if (passingGrades.includes(course.currentGrade) || course.currentGrade === '') {
           return true;
         } else if (course.currentGrade === 'F' || course.currentGrade === 'RC') {
-          return false; 
+          return false;
         } else {
-          return true; 
+          return true;
         }
-      
+
       default:
         return true;
     }
@@ -1113,8 +1151,8 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   getCourseLockTooltipMessage(course: any, context: 'regular' | 'add' = 'regular'): string {
     // Handle RA grade first
     if (course.currentGrade === 'RA') {
-      return context === 'add' 
-        ? 'Course is not available for add request' 
+      return context === 'add'
+        ? 'Course is not available for add request'
         : 'Course is not available for regular registration';
     }
 
@@ -1122,13 +1160,13 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     switch (course.courseStatus) {
       case 'Exempted':
         return 'Course is exempted - you have already fulfilled this requirement';
-      
+
       case 'Inactive':
         return 'Course is currently inactive and not available for registration';
-      
+
       case 'Has Prerequisite':
         return 'Course has prerequisite requirements that must be completed first';
-      
+
       case 'Taken':
         const passingGrades = ['A+', 'A', 'B', 'B+', 'C', 'D'];
         if (passingGrades.includes(course.currentGrade) || course.currentGrade === '') {
@@ -1138,16 +1176,38 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
         } else {
           return 'Course has already been taken';
         }
-      
+
       case 'Dropped':
         return 'Course was previously dropped and is now available for selection';
-      
+
       case 'Not Taken':
         return 'Course is available for selection';
-      
+
       default:
         return 'Course is not available for selection';
     }
+  }
+
+  getCourseAssessmentLockTooltipMessage(course: any): string {
+    // Lock if Current Grade is not empty and not 'RA'
+    if (course.currentGrade && course.currentGrade !== 'RA') {
+      return 'Course assessment is locked because the current grade has changed from RA';
+    }
+
+    // Lock if the course is not available in both addableCourse and regular courses
+    const isInAddedCourses = this.listOfAddedCourses?.some(
+      addedCourse => addedCourse.courseId === course.courseId
+    );
+
+    const isInCourseOfferings = this.studentTermCourseReg?.courseTermOfferings?.some(
+      offeringCourse => offeringCourse.courseId === course.courseId
+    );
+
+    if (!(isInAddedCourses || isInCourseOfferings)) {
+      return 'Course is not available in the regular course list or add request list';
+    }
+
+    return 'Course is available for assessment';
   }
 
   getTotalAssessmentCreditHours(): number {
@@ -1379,7 +1439,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
         nzOkDanger: true,
         nzCancelText: 'No, Cancel',
         nzOnOk: () => {
-          this._customNotificationService.notification('warning', 'Credit Hour Warning', 
+          this._customNotificationService.notification('warning', 'Credit Hour Warning',
             `You are proceeding with more than ${this.getMaxAllowedCreditHours()} credit hours. This may affect your academic performance.`);
           this.sendRequest();
         }
@@ -1424,7 +1484,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
 
   // Method to view registration history
   viewRegistrationHistory(): void {
-    this._customNotificationService.notification('info', 'Registration History', 
+    this._customNotificationService.notification('info', 'Registration History',
       'This feature will be available soon. You can check your registration history in the student portal.');
   }
 
@@ -1453,7 +1513,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
 
   // Method to complete profile
   completeProfile(): void {
-    this._customNotificationService.notification('info', 'Complete Profile', 
+    this._customNotificationService.notification('info', 'Complete Profile',
       'Redirecting to profile completion page. Please ensure all required information is filled out.');
     // You can add navigation to profile page here
     // this._route.navigate(['/student/profile']);

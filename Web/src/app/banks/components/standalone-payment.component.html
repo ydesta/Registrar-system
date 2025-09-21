@@ -1,0 +1,121 @@
+<div class="standalone-payment-container">
+  <div class="payment-header">
+    <h2>Standalone Payment Processing</h2>
+    <p>Complete your payment using the secure payment gateway</p>
+  </div>
+
+  <!-- Payment Form -->
+  <div class="payment-form" *ngIf="!currentPaymentOrder">
+    <div class="form-group">
+      <label for="studentCourseOfferingId">Course Offering ID:</label>
+      <input 
+        type="text" 
+        id="studentCourseOfferingId"
+        [(ngModel)]="paymentOrderRequest.studentCourseOfferingId"
+        class="form-control"
+        readonly>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="academicTerm">Academic Term:</label>
+        <select 
+          id="academicTerm"
+          [(ngModel)]="paymentOrderRequest.academicTerm"
+          class="form-control">
+          <option *ngFor="let term of academicTerms" [value]="term.Id">
+            {{term.Description}}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="academicYear">Academic Year:</label>
+        <input 
+          type="number" 
+          id="academicYear"
+          [(ngModel)]="paymentOrderRequest.academicYear"
+          class="form-control"
+          readonly>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="numberOfCourses">Number of Courses:</label>
+        <input 
+          type="number" 
+          id="numberOfCourses"
+          [(ngModel)]="paymentOrderRequest.numberOfCourses"
+          class="form-control"
+          readonly>
+      </div>
+
+      <div class="form-group">
+        <label for="totalAmount">Total Amount:</label>
+        <input 
+          type="number" 
+          id="totalAmount"
+          [(ngModel)]="paymentOrderRequest.totalAmount"
+          class="form-control"
+          readonly>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description:</label>
+      <textarea 
+        id="description"
+        [(ngModel)]="paymentOrderRequest.description"
+        class="form-control"
+        rows="3"
+        placeholder="Enter payment description (optional)">
+      </textarea>
+    </div>
+
+    <div class="form-actions">
+      <button 
+        type="button" 
+        class="btn btn-primary"
+        (click)="initiatePayment()"
+        [disabled]="isLoading || !paymentOrderRequest.studentCourseOfferingId">
+        <span *ngIf="isLoading" class="spinner"></span>
+        {{ isLoading ? 'Processing...' : 'Initiate Payment' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Payment Status -->
+  <div class="payment-status" *ngIf="currentPaymentOrder">
+    <div class="status-card">
+      <h3>Payment Order Created</h3>
+      <div class="status-info">
+        <p><strong>Order ID:</strong> {{ currentPaymentOrder.id }}</p>
+        <p><strong>Order Number:</strong> {{ currentPaymentOrder.orderNumber }}</p>
+        <p><strong>Status:</strong> {{ currentPaymentOrder.status }}</p>
+        <p><strong>Amount:</strong> {{ currentPaymentOrder.totalAmount }} {{ currentPaymentOrder.currency }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="messages" *ngIf="successMessage || errorMessage">
+    <div class="alert alert-success" *ngIf="successMessage">
+      {{ successMessage }}
+    </div>
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+  </div>
+
+  <!-- Payment Instructions -->
+  <div class="payment-instructions" *ngIf="currentPaymentOrder">
+    <h4>Payment Instructions</h4>
+    <ol>
+      <li>Click "Initiate Payment" to create a payment order</li>
+      <li>You will be redirected to the secure payment gateway</li>
+      <li>Complete your payment on the gateway</li>
+      <li>You will be redirected back to confirm payment status</li>
+    </ol>
+  </div>
+</div>

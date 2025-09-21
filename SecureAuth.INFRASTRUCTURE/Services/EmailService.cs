@@ -267,21 +267,44 @@ namespace SecureAuth.INFRASTRUCTURE.Services
             }
         }
 
-        public async Task SendUpdatedCredentialsAsync(string email, string username, string firstName, string lastName, string updateType)
+        public async Task SendUpdatedCredentialsAsync(string email, string username, string firstName, string lastName, string updateType, string newPassword = null)
         {
             try
             {
-                _logger.LogInformation("Sending updated credentials email to {Email} for user: {Username}, update type: {UpdateType}", 
-                    email, username, updateType);
+                _logger.LogInformation("Sending updated credentials email to {Email} for user: {Username}, update type: {UpdateType}, hasPassword: {HasPassword}", 
+                    email, username, updateType, !string.IsNullOrEmpty(newPassword));
+                
+                // Validate required parameters
+                if (string.IsNullOrEmpty(email))
+                {
+                    throw new ArgumentException("Email address cannot be null or empty", nameof(email));
+                }
+                if (string.IsNullOrEmpty(username))
+                {
+                    throw new ArgumentException("Username cannot be null or empty", nameof(username));
+                }
+                if (string.IsNullOrEmpty(firstName))
+                {
+                    throw new ArgumentException("First name cannot be null or empty", nameof(firstName));
+                }
+                if (string.IsNullOrEmpty(lastName))
+                {
+                    throw new ArgumentException("Last name cannot be null or empty", nameof(lastName));
+                }
+                if (string.IsNullOrEmpty(updateType))
+                {
+                    throw new ArgumentException("Update type cannot be null or empty", nameof(updateType));
+                }
                 
                 var loginUrl = $"{_frontendUrl}/login";
-                var subject = $"Your Account {updateType} Updated - SecureAuth";
+                var subject = $"Application Accepted - Your Login Credentials - SecureAuth";
+                var passwordSection = !string.IsNullOrEmpty(newPassword) ? $"\n                Password: {newPassword}" : "";
                 var content = $@"
                 Dear {firstName} {lastName},
 
-                Your account {updateType.ToLower()} has been updated by the system administrator. Here are your updated login credentials:
+                Congratulations! Your application has been accepted and your account credentials have been updated by the system administrator. Here are your login credentials:
 
-                Username: {username}
+                Username: {username}{passwordSection}
 
                 You can log in to your account using the following link:
                 {loginUrl}
@@ -296,7 +319,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                                 <html>
                                 <head>
                                     <meta charset='utf-8'>
-                                    <title>Application Approved</title>
+                                    <title>Application Accepted</title>
                                     <style>
                                         body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
                                         .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
@@ -310,24 +333,25 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                                 <body>
                                     <div class='container'>
                                         <div class='header'>
-                                            <h1>Application Approved</h1>
+                                            <h1>Application Accepted</h1>
                                         </div>
                                         <div class='content'>
                                             <p>Dear {firstName} {lastName},</p>
-                                            <p>Congratulations! 🎉 Your student application has been <strong>approved</strong>.</p>
+                                            <p>Congratulations! 🎉 Your application has been <strong>accepted</strong> and your account credentials have been updated by the system administrator.</p>
             
-                                            <p>Your account credentials have been updated. Please use the following username to log in:</p>
+                                            <p>Here are your login credentials:</p>
                                             <div class='credentials'>
                                                 <p><strong>Username:</strong> {username}</p>
+                                                {(!string.IsNullOrEmpty(newPassword) ? $"<p><strong>Password:</strong> {newPassword}</p>" : "")}
                                             </div>
 
                                             <div style='text-align: center;'>
                                                 <a href='{loginUrl}' class='button'>Login to Your Account</a>
                                             </div>
 
-                                            <p>If you have any questions, please contact the registrar’s office.</p>
+                                            <p>If you have any questions, please contact the system administrator.</p>
             
-                                            <p>Best regards,<br>The Admissions Team</p>
+                                            <p>Best regards,<br>The SecureAuth Team</p>
                                         </div>
                                         <div class='footer'>
                                             <p>This is an automated message, please do not reply to this email.</p>
@@ -337,6 +361,10 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                                 </html>";
 
                 var message = new Message(new[] { email }, subject, content, htmlContent);
+                
+                _logger.LogInformation("About to send email with subject: {Subject}, to: {Email}, content length: {ContentLength}", 
+                    subject, email, content.Length);
+                
                 await SendEmailAsync(message);
                 
                 _logger.LogInformation("Successfully sent updated credentials email to {Email} for user: {Username}, update type: {UpdateType}", 

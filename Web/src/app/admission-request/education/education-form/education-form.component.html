@@ -15,50 +15,16 @@
     <!-- School/University Name Field -->
     <nz-form-item>
       <nz-form-control [nzErrorTip]="schoolNameErrorTpl">
-        <input 
-          nz-input 
-          formControlName="schoollName" 
-          placeholder=" "
-          id="schoollName"
-          class="input-with-floating-label"
-          [class.error]="schoollName.invalid && (schoollName.dirty || schoollName.touched)" 
-        />
+        <input nz-input formControlName="schoollName" placeholder=" " id="schoollName" class="input-with-floating-label"
+          [class.error]="schoollName.invalid && (schoollName.dirty || schoollName.touched)" />
         <label for="schoollName" class="floating-label">
           <i nz-icon nzType="bank" nzTheme="outline"></i>
-          Institution Name(School Name) <span class="required">*</span>
+          College/University or School Name <span class="required">*</span>
         </label>
         <ng-template #schoolNameErrorTpl let-control>
           <div class="error-message" *ngIf="control.hasError('required')">
             <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
-            Institution name is required
-          </div>
-          <div class="error-message" *ngIf="control.hasError('alphabetsOnly')">
-            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
-            {{ control.getError('alphabetsOnly').message }}
-          </div>
-        </ng-template>
-      </nz-form-control>
-    </nz-form-item>
-
-    <!-- Major Area of Study Field -->
-    <nz-form-item>
-      <nz-form-control [nzErrorTip]="fieldOfStudyErrorTpl">
-        <input 
-          nz-input 
-          formControlName="fieldOfStudy" 
-          placeholder=" "
-          id="fieldOfStudy"
-          class="input-with-floating-label"
-          [class.error]="fieldOfStudy.invalid && (fieldOfStudy.dirty || fieldOfStudy.touched)" 
-        />
-        <label for="fieldOfStudy" class="floating-label">
-          <i nz-icon nzType="experiment" nzTheme="outline"></i>
-          Field of Study <span class="required">*</span>
-        </label>
-        <ng-template #fieldOfStudyErrorTpl let-control>
-          <div class="error-message" *ngIf="control.hasError('required')">
-            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
-            Field of study is required
+            College/University or School is required
           </div>
           <div class="error-message" *ngIf="control.hasError('alphabetsOnly')">
             <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
@@ -71,19 +37,11 @@
     <!-- Degree Obtained Field -->
     <nz-form-item>
       <nz-form-control [nzErrorTip]="programmeLevelErrorTpl">
-        <nz-select 
-          formControlName="programmeLevel" 
-          placeholder="Select Education Level"
-          id="programmeLevel"
+        <nz-select formControlName="programmeLevel" placeholder="Select Education Level" id="programmeLevel"
           class="select-with-floating-label"
-          [class.error]="programmeLevel.invalid && (programmeLevel.dirty || programmeLevel.touched)"
-          nzShowSearch
-          nzAllowClear
-        >
-          <nz-option 
-            *ngFor="let option of educationLevelOptions" 
-            [nzValue]="option.value" 
-            [nzLabel]="option.label">
+          [class.error]="programmeLevel.invalid && (programmeLevel.dirty || programmeLevel.touched)" nzShowSearch
+          nzAllowClear>
+          <nz-option *ngFor="let option of educationLevelOptions" [nzValue]="option.value" [nzLabel]="option.label">
           </nz-option>
         </nz-select>
         <label for="programmeLevel" class="floating-label">
@@ -99,24 +57,43 @@
       </nz-form-control>
     </nz-form-item>
 
+    <!-- Major Area of Study Field -->
+    <nz-form-item *ngIf="isFieldOfStudyVisible">
+      <nz-form-control [nzErrorTip]="fieldOfStudyErrorTpl">
+        <input nz-input formControlName="fieldOfStudy" placeholder=" " id="fieldOfStudy"
+          class="input-with-floating-label"
+          [class.error]="fieldOfStudy.invalid && (fieldOfStudy.dirty || fieldOfStudy.touched)" />
+        <label for="fieldOfStudy" class="floating-label">
+          <i nz-icon nzType="experiment" nzTheme="outline"></i>
+          Field of Study <span class="required" *ngIf="isFieldOfStudyRequired">*</span>
+        </label>
+        <ng-template #fieldOfStudyErrorTpl let-control>
+          <div class="error-message" *ngIf="control.hasError('required') && isFieldOfStudyRequired">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            Field of study is required for graduated students
+          </div>
+          <div class="error-message" *ngIf="control.hasError('alphabetsOnly')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            {{ control.getError('alphabetsOnly').message }}
+          </div>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
     <!-- Year Range Field -->
     <nz-form-item>
       <nz-form-control [nzErrorTip]="graduatedYearErrorTpl">
-        <nz-range-picker 
-          nzMode="year" 
-          formControlName="graduatedYear"
-          placeholder="['Start Year', 'End Year']"
+        <nz-range-picker nzMode="year" formControlName="graduatedYear" placeholder="['Start Year', 'End Year']"
           class="date-picker-with-floating-label"
-          [class.error]="graduatedYear.invalid && (graduatedYear.dirty || graduatedYear.touched)"
-        ></nz-range-picker>
+          [class.error]="graduatedYear.invalid && (graduatedYear.dirty || graduatedYear.touched)"></nz-range-picker>
         <label class="floating-label">
           <i nz-icon nzType="calendar" nzTheme="outline"></i>
-          Study Period <span class="required">*</span>
+          Duration From-To <span class="required">*</span>
         </label>
         <ng-template #graduatedYearErrorTpl let-control>
           <div class="error-message" *ngIf="control.hasError('required')">
             <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
-            Study period is required
+            Duration From-To is required
           </div>
         </ng-template>
       </nz-form-control>
@@ -125,13 +102,7 @@
     <!-- Remark Field -->
     <nz-form-item>
       <nz-form-control>
-        <input 
-          nz-input 
-          formControlName="remark" 
-          placeholder=" "
-          id="remark"
-          class="input-with-floating-label"
-        />
+        <input nz-input formControlName="remark" placeholder=" " id="remark" class="input-with-floating-label" />
         <label for="remark" class="floating-label">
           <i nz-icon nzType="file-text" nzTheme="outline"></i>
           Additional Notes
@@ -141,22 +112,16 @@
 
     <!-- File Upload Field -->
     <nz-form-item *ngIf="educationId==undefined">
-      <nz-form-control [nzErrorTip]="fileUploadErrorTpl" [nzValidateStatus]="actualFile.invalid && (actualFile.dirty || actualFile.touched) ? 'error' : ''">
+      <nz-form-control [nzErrorTip]="fileUploadErrorTpl"
+        [nzValidateStatus]="actualFile.invalid && (actualFile.dirty || actualFile.touched) ? 'error' : ''">
         <div class="file-upload-section" [class.error]="actualFile.invalid && (actualFile.dirty || actualFile.touched)">
           <label class="file-upload-label">
             <i nz-icon nzType="paper-clip" nzTheme="outline"></i>
-            <span class="upload-text">Click to attach documents</span>
+            <span class="upload-text">Click here to attach documents, If you have more than one doument please merge all the documents into one pdf file.</span>
             <span class="required">*</span>
-            <input 
-              nz-input 
-              type="file" 
-              style="visibility: hidden" 
-              #f_input
-              (change)="handleFileInputChange(f_input.files)" 
-              accept=".pdf, .jpg, .jpeg, .png, .gif"
-              multiple 
-              required
-            />
+            <input nz-input type="file" style="visibility: hidden" #f_input
+              (change)="handleFileInputChange(f_input.files)" accept=".pdf, .jpg, .jpeg, .png, .gif" multiple
+              required />
           </label>
           <!-- File List Display -->
           <div class="file-list" *ngIf="file_list.length > 0">
@@ -178,24 +143,15 @@
     <!-- Form Actions -->
     <div class="form-actions">
       <div class="action-buttons">
-        <button 
-          nz-button 
-          nzType="default" 
-          (click)="closeModal()"
-          class="cancel-btn"
-        >
+        <button nz-button nzType="default" (click)="closeModal()" class="cancel-btn">
           <i nz-icon nzType="close" nzTheme="outline"></i>
           Cancel
         </button>
-        <button 
-          nz-button 
-          nzType="primary" 
-          (click)="onSave()"
+        <button nz-button nzType="primary" (click)="onSave()"
           [disabled]="!applicantEducationBacgroundForm.valid || (educationId == undefined && (!file_store || file_store.length === 0))"
-          class="submit-btn"
-        >
+          class="submit-btn">
           <i nz-icon nzType="save" nzTheme="outline"></i>
-          {{ educationId ? 'Update' : 'Save' }} Education
+          {{ educationId ? 'Update' : 'Save' }}
         </button>
       </div>
     </div>

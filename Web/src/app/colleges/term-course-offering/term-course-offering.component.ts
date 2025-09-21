@@ -39,6 +39,11 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   listOfYearNumber: StaticData[] = [];
   expandSet = new Set<string>();
   tbLoading = true;
+  
+  // Batch filtering properties
+  searchBatch: string = "";
+  availableBatches: string[] = [];
+  filteredTermCourseOfferings: any[] = [];
 
   constructor(
     private _customNotificationService: CustomNotificationService,
@@ -125,6 +130,14 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
         });
         console.log('Mapped termCourseOfferings:', this.termCourseOfferings);
         console.log('termCourseOfferings length:', this.termCourseOfferings ? this.termCourseOfferings.length : 0);
+        
+        // Extract unique batch codes for filtering
+        this.availableBatches = [...new Set(this.termCourseOfferings.map(item => item.batchCode).filter(batch => batch))];
+        console.log('Available batches:', this.availableBatches);
+        
+        // Apply current filter
+        this.applyBatchFilter();
+        
         // Try different possible property names for total count
         this.totalRecord = res.totalRowCount || res.total || res.count || res.totalCount || (res.data ? res.data.length : 0);
         console.log('Setting totalRecord to:', this.totalRecord);
@@ -304,36 +317,6 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
     }
   }
 
-  exportTermCourseOffering() {
-    this._crudService
-      .getList("/TermCourseOfferings/excel")
-      .subscribe((res: any) => {
-        //acadamic-programme
-        if (res.data.toString() == "No data found") {
-          this._customNotificationService.notification(
-            "error",
-            "Error",
-            res.data
-          );
-        } else {
-          let fileLists = res.data.split("/");
-          this._crudService
-            .expoerExcel("/" + res.data)
-            .subscribe((data: any) => {
-              let downloadURL = window.URL.createObjectURL(data);
-              let link = document.createElement("a");
-              link.href = downloadURL;
-              link.download = fileLists[fileLists.length - 1];
-              link.click();
-              this._customNotificationService.notification(
-                "success",
-                "Success",
-                "Excel file is downloaded succesfully."
-              );
-            });
-        }
-      });
-  }
   getListOfAcademicTermStatus() {
     let division: StaticData = new StaticData();
     ACADEMIC_TERM_STATUS.forEach(pair => {
@@ -409,7 +392,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   }
   openModal(data: any): void {
     const modal: NzModalRef = this.modal.create({
-      nzTitle: "Assign Instructor",
+      nzTitle: null, // We'll use our custom header
       nzContent: CourseOfferingInstructorAssignmentComponent,
       nzComponentParams: {
         courseId: data.courseId,
@@ -417,7 +400,8 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
       },
       nzMaskClosable: false,
       nzFooter: null,
-      nzWidth: "36%"
+      nzWidth: "800px",
+      nzStyle: { 'padding-bottom': '0' }
     });
     modal.afterClose.subscribe(() => {
       this.fetchProgram();
@@ -429,5 +413,23 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   }
   trackByCourseId(index: number, item: any) {
     return item.courseId;
+  }
+
+  // Batch filtering methods
+  onBatchSearch(event: any): void {
+    this.searchBatch = event.target.value;
+    this.applyBatchFilter();
+  }
+
+  applyBatchFilter(): void {
+    if (!this.searchBatch || this.searchBatch.trim() === '') {
+      this.filteredTermCourseOfferings = [...this.termCourseOfferings];
+    } else {
+      const searchTerm = this.searchBatch.toLowerCase().trim();
+      this.filteredTermCourseOfferings = this.termCourseOfferings.filter(
+        item => item.batchCode && item.batchCode.toLowerCase().includes(searchTerm)
+      );
+    }
+    console.log('Filtered results:', this.filteredTermCourseOfferings.length);
   }
 }

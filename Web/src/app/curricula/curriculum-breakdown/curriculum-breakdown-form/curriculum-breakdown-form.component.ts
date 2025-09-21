@@ -28,6 +28,7 @@ export class CurriculumBreakdownFormComponent implements OnInit {
   courses: any[] = [];
   quadrants: any;
   submit = "Save";
+  isLoading = false;
   listOfTermNumber: StaticData[] = [];
   listOfYearNumber: StaticData[] = [];
   listOfSelectedValue = [];
@@ -83,11 +84,11 @@ export class CurriculumBreakdownFormComponent implements OnInit {
     });
     this.termNumber.valueChanges.subscribe(res => {
       this.term = res;
-      if (this.curId && this.term && this.year) {  
+      if (this.curId && this.term && this.year) {
         this.targetList = [];
         this.targetCourseIds$.next([]);
-        this.progId = 0;     
-        this.getCourseList();        
+        this.progId = 0;
+        this.getCourseList();
       }
     });
   }
@@ -117,11 +118,11 @@ export class CurriculumBreakdownFormComponent implements OnInit {
 
   getCourseList() {
     this._curriculumTermBreakdownService
-      .getListOfUnRegisteredCourseById(this.curId,this.term,this.year)
+      .getListOfUnRegisteredCourseById(this.curId, this.term, this.year)
       .subscribe((res: any) => {
 
         this.numberOfCourseList = res.length;
-        
+
         this.courses = res.map(course => ({
           key: course.id,
           title: `${course.courseCode} - ${course.courseTitle}`,
@@ -184,72 +185,104 @@ export class CurriculumBreakdownFormComponent implements OnInit {
   }
 
   submitForm() {
+    if (this.isLoading) return; // Prevent multiple submissions
+    
     const selectiveCourseId = [
       ...new Set(this.targetList.map(item => item["key"]))
     ];
     this.courseId.setValue(selectiveCourseId);
     this.CurriculumId.setValue(this.curId);
+    
     if (this.progId == 0) {
       if (this.curriculumBreakdownForm.valid) {
+        this.isLoading = true;
+        this.submit = "Saving...";
+        
         this._curriculumTermBreakdownService
           .create(this.curriculumBreakdownForm.value)
-          .subscribe((res: any) => {
-            this._customNotificationService.notification(
-              "success",
-              "Success",
-              "Curriculum Quadrant Breakdown saved successfully."
-            );
-            this.createBreakDown();
-            this.numberOfCourseList = 0;
-            // this._route.navigateByUrl(`curricula`);
-            // this._route.navigateByUrl(
-            //   `curricula/curriculum-break-down-form?id=${id}&&curriculum-id=${this.curId}&&curriculum-code=${this.curriculumCode}`
-            // );
-            this.CurriculumId.setValue(this.curriculumCode);
-            this.academicProgrammeID.setValue(this.programCode);
-            
-            this.yearNumber.reset();
-            this.termNumber.reset();
-            location.reload();
-          });
-      } else {
-        this._customNotificationService.notification(
-          "error",
-          "error",
-          "Enter valid data."
-        );
-      }
-    } else if (this.progId != 0) {
-      if (this.curriculumBreakdownForm.valid) {
-        this._curriculumTermBreakdownService
-          .update(this.progId, this.curriculumBreakdownForm.value)
-          .subscribe((res: any) => {
-            if (res) {
+          .subscribe({
+            next: (res: any) => {
               this._customNotificationService.notification(
                 "success",
                 "Success",
-                res.data
+                "Curriculum year term breakdown created successfully!"
               );
               this.createBreakDown();
               this.numberOfCourseList = 0;
               this.CurriculumId.setValue(this.curriculumCode);
-              this.academicProgrammeID.setValue(this.programCode);              
+              this.academicProgrammeID.setValue(this.programCode);
               this.yearNumber.reset();
               this.termNumber.reset();
+              this.isLoading = false;
+              this.submit = "Save";
               location.reload();
-            } else {
+            },
+            error: (error: any) => {
               this._customNotificationService.notification(
                 "error",
                 "Error",
-                res.data
+                "Failed to create curriculum breakdown. Please try again."
               );
+              this.isLoading = false;
+              this.submit = "Save";
             }
           });
       } else {
         this._customNotificationService.notification(
           "error",
+          "Validation Error",
+          "Please fill in all required fields correctly."
+        );
+      }
+    } else if (this.progId != 0) {
+      if (this.curriculumBreakdownForm.valid) {
+        this.isLoading = true;
+        this.submit = "Updating...";
+        
+        this._curriculumTermBreakdownService
+          .update(this.progId, this.curriculumBreakdownForm.value)
+          .subscribe({
+            next: (res: any) => {
+              if (res) {
+                this._customNotificationService.notification(
+                  "success",
+                  "Success",
+                  "Curriculum year term breakdown updated successfully!"
+                );
+                this.createBreakDown();
+                this.numberOfCourseList = 0;
+                this.CurriculumId.setValue(this.curriculumCode);
+                this.academicProgrammeID.setValue(this.programCode);
+                this.yearNumber.reset();
+                this.termNumber.reset();
+                this.isLoading = false;
+                this.submit = "Update";
+                location.reload();
+              } else {
+                this._customNotificationService.notification(
+                  "error",
+                  "Error",
+                  "Failed to update curriculum breakdown. Please try again."
+                );
+                this.isLoading = false;
+                this.submit = "Update";
+              }
+            },
+            error: (error: any) => {
+              this._customNotificationService.notification(
+                "error",
+                "Error",
+                "Failed to update curriculum breakdown. Please try again."
+              );
+              this.isLoading = false;
+              this.submit = "Update";
+            }
+          });
+      } else {
+        this._customNotificationService.notification(
           "error",
-          "Enter valid data."
+          "Validation Error",
+          "Please fill in all required fields correctly."
         );
       }
     }
@@ -265,7 +298,7 @@ export class CurriculumBreakdownFormComponent implements OnInit {
       lastModifiedBy: data.lastModifiedBy,
       remark: data.remark
     });
-   
+
   }
   getListOfAcademicTermStatus() {
     let division: StaticData = new StaticData();
@@ -319,7 +352,7 @@ export class CurriculumBreakdownFormComponent implements OnInit {
     const lowerCaseTitle = item.title.toLowerCase();
     return lowerCaseTitle.includes(inputValue);
   }
-  
+
   search(ret: {}): void {
   }
 

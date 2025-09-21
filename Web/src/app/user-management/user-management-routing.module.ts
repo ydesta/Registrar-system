@@ -6,6 +6,7 @@ import { RoleManagementComponent } from './components/role-management/role-manag
 import { PermissionManagementComponent } from './components/permission-management/permission-management.component';
 import { UserActivityComponent } from './components/user-activity/user-activity.component';
 import { UserDetailsComponent } from './components/user-details/user-details.component';
+import { UserCredentialsComponent } from './components/user-credentials/user-credentials.component';
 import { AuthGuardService } from '../services/guards/auth-guard.service';
 
 const routes: Routes = [
@@ -44,6 +45,12 @@ const routes: Routes = [
     component: UserDetailsComponent,
     canActivate: [AuthGuardService],
     data: { roles: ['Administrator', 'Admin', 'Super Admin'] }
+  },
+  { 
+    path: 'credentials', 
+    component: UserCredentialsComponent,
+    canActivate: [AuthGuardService],
+    data: { roles: ['Super Admin', 'Academic Director'] }
   }
 ];
 

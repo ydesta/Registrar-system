@@ -18,7 +18,9 @@ export class CourseOfferedPerAcademicTermComponent implements OnInit {
 
   data: CourseOfferedPerTerm[] = [];
   courses: CourseOffered[] = [];
-  isLoading = true;
+  isLoading = false;
+  isFormCollapsed = false;
+  hasSearched = false;
   formCourseOffered: FormGroup;
   headers = ['Batch Code', 'Course Code', 'Course Title', 'Credit Hours'];
   listOfTermNumber: StaticData[] = [];
@@ -46,6 +48,8 @@ export class CourseOfferedPerAcademicTermComponent implements OnInit {
 
   }
   getCourseOfferedPerAcademicTerm() {
+    this.isLoading = true;
+    this.hasSearched = true;
     const formModel = this.getStudentRegistered();
     this._reportService.getListOfCourseOfferedPerTerm(formModel)
       .subscribe(res => {
@@ -55,6 +59,15 @@ export class CourseOfferedPerAcademicTermComponent implements OnInit {
         this.updatePaginatedRegisteredStudent();
         this.isLoading = false;
       })
+  }
+
+  loadData() {
+    this.formCourseOffered.reset();
+    this.courses = [];
+    this.paginatedRegisteredStudent = [];
+    this.total = 0;
+    this.hasSearched = false;
+    this.isFormCollapsed = true;
   }
   private createCourseOffering() {
     this.formCourseOffered = this._fb.group({

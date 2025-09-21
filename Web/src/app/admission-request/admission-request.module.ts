@@ -40,6 +40,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { ApplicantIncompleteComponent } from './reviewer/applicant-incomplete/applicant-incomplete.component';
 
 @NgModule({
   declarations: [
@@ -63,7 +64,8 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
     AdmissionTabsComponent,
     ApplicantProfileComponent,
     AddressComponent,
-    ApplicationFeeComponent
+    ApplicationFeeComponent,
+    ApplicantIncompleteComponent
   ],
   imports: [
     CommonModule,

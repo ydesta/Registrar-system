@@ -77,11 +77,42 @@
 
 .table-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 0 0 16px 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #e5e7eb;
+  border-top: none;
   overflow: hidden;
   padding: 0 0 24px 0;
+}
+
+.table-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px 0 24px;
+  
+  .add-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    
+    i {
+      font-size: 16px;
+    }
+    
+    @media (max-width: 480px) {
+      padding: 6px 12px;
+      font-size: 13px;
+      
+      span {
+        display: none;
+      }
+    }
+  }
 }
 
 .table-responsive {
@@ -599,6 +630,10 @@
     padding: 20px;
   }
   
+  .filter-section {
+    padding: 10px 12px;
+  }
+  
   .header-content .page-title .title-text {
     font-size: 24px;
   }
@@ -612,6 +647,10 @@
   .header-section {
     padding: 16px;
     margin-bottom: 16px;
+  }
+  
+  .filter-section {
+    padding: 8px 12px;
   }
   
   .header-content {
@@ -687,6 +726,15 @@
     border-radius: 12px;
   }
   
+  .table-actions {
+    padding: 12px 16px 0 16px;
+    
+    .add-btn {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+  }
+  
   .table-responsive {
     .responsive-table {
       min-width: 100%;
@@ -748,6 +796,48 @@
   .table-responsive {
     .responsive-table {
       min-width: 100%;
+  }
+}
+
+// Filter Section
+.filter-section {
+  background: white;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid #e5e7eb;
+  border-bottom: none;
+  padding: 12px 16px;
+  margin-bottom: 0;
+  
+  .search-input-group {
+    .batch-search-input {
+      border: none;
+      box-shadow: none;
+      font-size: 14px;
+      
+      &:focus {
+        box-shadow: none;
+        border-color: #1890ff;
+      }
+    }
+    
+    .ant-input-group-addon {
+      background: transparent;
+      border: none;
+      
+      i {
+        color: #9ca3af;
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+.table-actions {
+    padding: 8px 12px 0 12px;
+    
+    .add-btn {
+      padding: 4px 8px;
+      font-size: 12px;
     }
   }
   

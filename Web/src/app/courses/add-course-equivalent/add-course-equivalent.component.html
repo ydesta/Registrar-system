@@ -1,119 +1,116 @@
 <div class="content-container">
   <!-- Header Section -->
   <div class="header-section">
+    <button nz-button nzType="default" class="back-btn" routerLink="/course/course-equivalent">
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Course Equivalents
+    </button>
     <div class="header-content">
       <div class="page-title">
-        <h3 class="title-text">{{ action }}</h3>
-        <p class="subtitle-text">Add or update course equivalent information</p>
-      </div>
-      <div class="header-actions">
-        <button 
-          routerLink="../course-equivalent" 
-          nz-button 
-          nzType="default" 
-          class="back-btn"
-        >
-          <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
-          <span>Back to Course Equivalents</span>
-        </button>
+        <h2 class="title-text">{{ action }}</h2>
+        <p class="subtitle-text">Create and manage course equivalent relationships</p>
+        <div class="equivalent-info" *ngIf="isEditMode">
+          <span nz-icon nzType="edit" nzTheme="outline"></span>
+          <span class="edit-mode">Editing existing equivalent</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Form Card -->
-  <div class="form-card">
-    <div class="form-header">
-      <div class="form-icon">
-        <i nz-icon nzType="swap" nzTheme="outline"></i>
+  <!-- Form Container -->
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="swap" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>Course Equivalent</h3>
+          <p>Configure the course equivalent relationship details</p>
+        </div>
       </div>
-      <div class="form-title">
-        <h4>Course Equivalent Information</h4>
-        <p>Please select the courses that are equivalent to each other</p>
-      </div>
+
+      <form nz-form [formGroup]="acadamicProgramForm" class="course-equivalent-form" (ngSubmit)="submitForm()">
+        <div class="form-sections">
+          <!-- Course Information Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="book" nzTheme="outline"></span>
+                Course Information
+              </h4>
+              <p class="section-description">Select the courses that are equivalent to each other</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Course</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select a course">
+                    <nz-select formControlName="courseId" nzPlaceHolder="Select course" nzShowSearch="true" nzAllowClear
+                      [nzLoading]="loading" class="professional-select">
+                      <nz-option *ngFor="let item of courses" [nzValue]="item.id"
+                        [nzLabel]="item.courseTitle"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Equivalent Course</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select an equivalent course">
+                    <nz-select formControlName="equivalentCourseId" nzPlaceHolder="Select equivalent course"
+                      nzShowSearch nzAllowClear [nzLoading]="loading" class="professional-select">
+                      <nz-option *ngFor="let item of courses" [nzValue]="item.id"
+                        [nzLabel]="item.courseTitle"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+
+          <!-- Additional Information Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+                Additional Information
+              </h4>
+              <p class="section-description">Provide additional details about the equivalent relationship</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col form-col-full">
+                <nz-form-item>
+                  <nz-form-label>Remark</nz-form-label>
+                  <nz-form-control>
+                    <nz-textarea-count [nzMaxCharacterCount]="500">
+                      <textarea rows="4" formControlName="remark" nz-input class="form-textarea"
+                        placeholder="Enter any additional remarks about this course equivalent relationship"></textarea>
+                    </nz-textarea-count>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
 
-    <form
-      nz-form
-      nzLayout="vertical"
-      [formGroup]="acadamicProgramForm"
-      (ngSubmit)="submitForm()"
-      class="course-form"
-    >
-      <div class="form-grid">
-        <!-- Row 1: Course & Equivalent Course -->
-        <div class="form-row">
-          <nz-form-item class="form-item">
-            <nz-form-label nzRequired>Course</nz-form-label>
-            <nz-form-control nzValidatingTip="Validating...">
-              <nz-select
-                formControlName="courseCode"
-                nzPlaceHolder="Select course"
-                nzShowSearch="true"
-              >
-                <nz-option
-                  *ngFor="let item of courses"
-                  [nzValue]="item.courseCode"
-                  [nzLabel]="item.courseTitle"
-                ></nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-
-          <nz-form-item class="form-item">
-            <nz-form-label nzRequired>Equivalent Course</nz-form-label>
-            <nz-form-control>
-              <nz-select
-                formControlName="equivalentCourseCode"
-                nzPlaceHolder="Select equivalent course"
-                nzShowSearch
-              >
-                <nz-option
-                  *ngFor="let item of courses"
-                  [nzValue]="item.courseCode"
-                  [nzLabel]="item.courseTitle"
-                ></nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-        </div>
-
-        <!-- Row 2: Remark -->
-        <div class="form-row">
-          <nz-form-item class="form-item">
-            <nz-form-label>Remark</nz-form-label>
-            <nz-form-control>
-              <textarea
-                nz-input
-                formControlName="remark"
-                placeholder="Enter remark"
-                rows="3"
-              ></textarea>
-            </nz-form-control>
-          </nz-form-item>
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button 
-          nz-button 
-          nzType="default" 
-          class="cancel-btn"
-          type="button"
-          routerLink="../course-equivalent"
-        >
-          <i nz-icon nzType="close" nzTheme="outline"></i>
-          <span>Cancel</span>
-        </button>
-        <button 
-          nz-button 
-          nzType="primary" 
-          class="submit-btn"
-          type="submit"
-        >
-          <i nz-icon nzType="save" nzTheme="outline"></i>
-          <span>{{ submit }}</span>
-        </button>
-      </div>
-    </form>
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button nz-button nzType="default" class="cancel-btn" routerLink="/course/course-equivalent"
+        [disabled]="submitting">
+        <span nz-icon nzType="close" nzTheme="outline"></span>
+        Cancel
+      </button>
+      <button nz-button nzType="primary" class="submit-btn" (click)="submitForm()" [nzLoading]="submitting"
+        [disabled]="acadamicProgramForm.invalid">
+        <span nz-icon nzType="save" nzTheme="outline"></span>
+        {{ submit }}
+      </button>
+    </div>
   </div>
 </div>

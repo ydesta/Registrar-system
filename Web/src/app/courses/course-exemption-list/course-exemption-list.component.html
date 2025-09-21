@@ -15,17 +15,17 @@
 
   <!-- Search Section -->
   <div class="search-section">
-    <div class="search-header">
+    <!-- <div class="search-header">
       <h3>Search</h3>
       <button nz-button nzType="default" nzSize="small" (click)="reset()" class="clear-search-btn" *ngIf="searchValue">
         <i nz-icon nzType="clear" nzTheme="outline"></i>
         Clear
       </button>
-    </div>
+    </div> -->
 
     <div class="search-controls">
       <div class="search-group">
-        <label>Search All Fields</label>
+        <!-- <label>Search All Fields</label> -->
         <nz-input-group [nzSuffix]="suffixIconSearch">
           <input type="text" nz-input placeholder="Search by student name, course, college, or grade..."
             [(ngModel)]="searchValue" (input)="search()" />

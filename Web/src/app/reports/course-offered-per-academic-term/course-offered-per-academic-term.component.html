@@ -1,89 +1,153 @@
-<h3 class="h-tag">Course Offered Per Academic  Term</h3>
-<nz-divider></nz-divider>
-<nz-card>
-    <form nz-form [formGroup]="formCourseOffered">
-        <div nz-row [nzGutter]="24">
-            <div nz-col nzSpan="11">
+<div class="content-container">
+  <!-- Page Header -->
+  <div class="header-section">
+    <div class="page-title">
+      <h1>Course Offered Per Academic Term</h1>
+      <p class="subtitle">View and manage courses offered per academic term</p>
+    </div>
+  </div>
 
-                <nz-form-item>
-                    <nz-form-label [nzSpan]="5" nzRequired>Term Year</nz-form-label>
-                    <nz-form-control nzValidatingTip="Validating...">
-                        <nz-select formControlName="termYear" nzPlaceHolder="Select Term Year" nzShowSearch>
-                            <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item"></nz-option>
-                        </nz-select>
-                    </nz-form-control>
-                </nz-form-item>
-                
-            </div>
-            <div nz-col nzSpan="11">
+  <!-- Collapsible Search Form -->
+  <div class="search-section">
+    <nz-collapse>
+      <nz-collapse-panel [nzHeader]="searchHeader" [nzActive]="!isFormCollapsed"
+        (nzActiveChange)="isFormCollapsed = !$event">
 
-                <nz-form-item>
-                    <nz-form-label nzRequired>Academic Term</nz-form-label>
-                    <nz-form-control>
-                        <nz-select formControlName="termId" nzPlaceHolder="Select Academic Term" nzShowSearch="true"
-                            nzAllowClear="true">
-                            <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
-                                [nzLabel]="item.Description"></nz-option>
-                        </nz-select>
-                    </nz-form-control>
-                </nz-form-item>
-              
-                <nz-form-item>
-                    <nz-form-control [nzOffset]="20" [nzSpan]="15">
-                        <button nz-button nzType="primary" class="submit" (click)="getCourseOfferedPerAcademicTerm()"
-                            [disabled]="!formCourseOffered.valid">Search</button>
-                    </nz-form-control>
-                </nz-form-item>
+        <ng-template #searchHeader>
+          <span>
+            <i nz-icon nzType="search" nzTheme="outline"></i>
+            Search Filters
+          </span>
+        </ng-template>
+
+        <form nz-form [formGroup]="formCourseOffered" (ngSubmit)="getCourseOfferedPerAcademicTerm()">
+          <div nz-row [nzGutter]="24">
+            <!-- Term Year -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6" nzRequired>Term Year</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                  <nz-select formControlName="termYear" nzPlaceHolder="Select Term Year" nzShowSearch nzAllowClear style="width: 100%;">
+                    <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
             </div>
+
+            <!-- Academic Term -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6" nzRequired>Academic Term</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                  <nz-select formControlName="termId" nzPlaceHolder="Select Academic Term" nzShowSearch nzAllowClear style="width: 100%;">
+                    <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id" [nzLabel]="item.Description"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div nz-row>
+            <div nz-col [nzSpan]="24" class="form-actions">
+              <button nz-button nzType="default" (click)="loadData()" class="mr-2">
+                <i nz-icon nzType="reload" nzTheme="outline"></i>
+                Reset
+              </button>
+              <button nz-button nzType="primary" (click)="getCourseOfferedPerAcademicTerm()" [disabled]="!formCourseOffered.valid" [nzLoading]="isLoading">
+                <i nz-icon nzType="search" nzTheme="outline"></i>
+                Search
+              </button>
+            </div>
+          </div>
+        </form>
+      </nz-collapse-panel>
+    </nz-collapse>
+  </div>
+  <!-- Data Table -->
+  <div class="table-container" *ngIf="hasSearched">
+    <!-- Table Header with Export Actions -->
+    <div class="table-header" *ngIf="total > 0">
+      <h3>Courses Offered Per Academic Term</h3>
+      <div class="table-actions">
+        <button nz-button nzType="primary" (click)="exportToExcel()" class="mr-2">
+          <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+          Export To Excel
+        </button>
+        <button nz-button nzType="primary" (click)="downloadPdf()">
+          <span nz-icon nzType="printer" nzTheme="outline"></span>
+          Export To PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Table -->
+    <div id="print-section" *ngIf="total > 0">
+      <nz-table #basicTable [nzData]="paginatedRegisteredStudent" nzBordered [nzPageSize]="pageSize"
+        [nzPageSizeOptions]="pageSizeOption" [nzShowSizeChanger]="true" [nzTotal]="total" [nzPageIndex]="pageIndex"
+        (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)"
+        [nzFrontPagination]="false" [nzShowTotal]="rangeTemplate" [nzLoading]="isLoading" [nzNoResult]="emptyTpl"
+        [nzShowQuickJumper]="true" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;" class="mobile-table-container">
+        
+        <ng-template #rangeTemplate let-range="range" let-total>
+          Showing {{ range[0] }}-{{ range[1] }} of {{ total }} items
+        </ng-template>
+        
+        <thead>
+          <tr>
+            <th style="min-width: 80px;">Serial No.</th>
+            <th style="min-width: 120px;">Batch Code</th>
+            <th style="min-width: 120px;">Course Code</th>
+            <th style="min-width: 200px;">Course Title</th>
+            <th style="min-width: 100px;">Credit Hours</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container tabindex="0" *ngFor="let reg of basicTable.data; let i = index">
+            <tr>
+              <td>
+                <span class="serial-number">
+                  {{ reg.serialNo }}
+                </span>
+              </td>
+              <td>{{ reg.batchCode }}</td>
+              <td>{{ reg.courseCode }}</td>
+              <td>{{ reg.courseTitle }}</td>
+              <td>{{ reg.creditHours }}</td>
+            </tr>
+          </ng-container>
+        </tbody>
+        
+        <ng-template #emptyTpl>
+          <div class="no-data">
+            <span nz-icon nzType="book" nzTheme="outline"></span>
+            <p>No courses found for this academic term</p>
+          </div>
+        </ng-template>
+      </nz-table>
+    </div>
+
+    <!-- No Results State -->
+    <div class="no-results-container" *ngIf="total === 0 && !isLoading">
+      <div class="no-results-content">
+        <div class="no-results-icon">
+          <span nz-icon nzType="search" nzTheme="outline"></span>
         </div>
-    </form>
-</nz-card>
-<nz-card style="margin-top: 50px;" *ngIf="total > 0">
-    <div class="header-section">
-        <h2>Registered Students per Course</h2>
-        <div class="action-buttons">
-          <button nz-button nzType="primary" (click)="exportToExcel()">
-            <span nz-icon nzType="file-excel" nzTheme="outline"></span>
-            Export To Excel
+        <h3 class="no-results-title">No Results Found</h3>
+        <p class="no-results-description">
+          No courses found for the selected criteria. Try adjusting your search filters.
+        </p>
+        <div class="no-results-actions">
+          <button nz-button nzType="default" (click)="loadData()" class="mr-2">
+            <i nz-icon nzType="reload" nzTheme="outline"></i>
+            Clear Filters
           </button>
-          <button nz-button nzType="primary" (click)="downloadPdf()" >
-            <span nz-icon nzType="printer" nzTheme="outline"></span>
-            Export To PDF 
+          <button nz-button nzType="primary" (click)="isFormCollapsed = false">
+            <i nz-icon nzType="search" nzTheme="outline"></i>
+            Modify Search
           </button>
         </div>
       </div>
-    <div id="print-section">
-        <nz-table #basicTable [nzData]="paginatedRegisteredStudent" nzBordered [nzPageSize]="pageSize"
-            [nzPageSizeOptions]="pageSizeOption" [nzShowSizeChanger]="true" [nzTotal]="total" [nzPageIndex]="pageIndex"
-            (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)"
-            [nzFrontPagination]="false" [nzShowTotal]="rangeTemplate" [nzLoading]="isLoading" [nzNoResult]="emptyTpl">
-            <ng-template #rangeTemplate let-range="range" let-total>
-                {{ range[0] }}-{{ range[1] }} of {{ total }} items
-            </ng-template>
-            <thead>
-                <tr>
-                    <th>Serial No.</th>
-                    <th>Batch Code</th>
-                    <th>Course Code</th>
-                    <th>Course Title</th>
-                    <th>Credit Hours</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let reg of paginatedRegisteredStudent">
-                    <td>{{ reg.serialNo }}</td>
-                    <td>{{ reg.batchCode }}</td>
-                    <td>{{ reg.courseCode }}</td>
-                    <td>{{ reg.courseTitle }}</td>
-                    <td>{{ reg.creditHours }}</td>
-                </tr>
-            </tbody>
-            <ng-template #emptyTpl>
-                <div class="no-data">
-                    <span nz-icon nzType="book" nzTheme="outline"></span>
-                    <p>No Academic term activity records available</p>
-                </div>
-            </ng-template>
-        </nz-table>
     </div>
-</nz-card>
+  </div>
+</div>

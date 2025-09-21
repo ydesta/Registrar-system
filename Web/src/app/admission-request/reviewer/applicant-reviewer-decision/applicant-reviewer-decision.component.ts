@@ -17,10 +17,11 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
   @Input() applicantId: string;
   @Input() academicProgramId: string;
   @Output() decisionSubmitted = new EventEmitter<AcademicProgramRequest>();
-  
+
   reviewerForm: FormGroup;
   id: number;
-  
+  isSubmitting = false;
+
   constructor(
     private fb: FormBuilder,
     private _generalInformationService: GeneralInformationService,
@@ -35,7 +36,7 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
       this.id = p["request-id"];
     });
   }
-  
+
   ngOnInit(): void {
     this.admissionDecision.valueChanges.subscribe(value => {
       if (value === "4" || value === "2") {
@@ -46,37 +47,35 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
       this.reviewerForm.get("remark").updateValueAndValidity();
     });
   }
-  
+
   createReviewerForm() {
     this.reviewerForm = this.fb.group({
       admissionDecision: ["", Validators.required],
       remark: [null, [Validators.maxLength(250)]]
     });
   }
-  
+
   get admissionDecision() {
     return this.reviewerForm.get("admissionDecision");
   }
-  
+
   private getApplicantReviewerDecision(): AcademicProgramRequest {
     const formModel = this.reviewerForm.getRawValue();
     const generalUserInfo = new AcademicProgramRequest();
-    
+
     // Use the academicProgramRequest ID if available, otherwise use the passed id
     generalUserInfo.id = this.academicProgramRequest?.id || this.id || 0;
     generalUserInfo.applicantId = this.applicantId || this.academicProgramRequest?.applicantId;
     generalUserInfo.acadamicProgrammeId = this.academicProgramId || this.academicProgramRequest?.acadamicProgrammeId;
     generalUserInfo.approvalStatus = formModel.admissionDecision;
     generalUserInfo.remark = formModel.remark;
-    
+
     return generalUserInfo;
   }
-  
+
   submitForm() {
     if (this.reviewerForm.valid) {
       const postData = this.getApplicantReviewerDecision();
-      
-      // Validate that we have the required IDs
       if (!postData.applicantId || !postData.acadamicProgrammeId) {
         this._customNotificationService.notification(
           "error",
@@ -85,17 +84,16 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
         );
         return;
       }
-      
+
+      this.isSubmitting = true;
       this._generalInformationService
         .applicantReviewerDecision(postData.id, postData)
         .subscribe(res => {
-          // Use helper method to extract data safely
-          const responseData = this.extractResponseData<any>(res);
-          
-          if (responseData && responseData.status === "success") {
-            const userId = responseData.data?.applicantUserId;
-            const email = responseData.data?.emailAddress;
-            
+          if (res && res.status == "success") {
+            const responseData = res.data;
+            const userId = responseData?.applicantUserId;
+            const email = responseData?.emailAddress || responseData?.['email'];
+
             if (postData.approvalStatus == 3) {
               if (userId) {
                 this.userManagementService.updateUserRole(String(userId), "ApprovedApplicant", email)
@@ -108,6 +106,7 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
                     this.decisionSubmitted.emit(postData);
                     this.modalRef.close(postData);
                     this.router.navigate(["/student-application/applicant-request-list"]);
+                    this.isSubmitting = false;
                   });
               } else {
                 this._customNotificationService.notification(
@@ -115,6 +114,7 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
                   "Error",
                   "Could not find userId to update role."
                 );
+                this.isSubmitting = false;
               }
             } else {
               this._customNotificationService.notification(
@@ -124,15 +124,23 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
               );
               this.decisionSubmitted.emit(postData);
               this.modalRef.close(postData);
+              this.isSubmitting = false;
             }
           } else {
-            // Handle case where status is not success
             this._customNotificationService.notification(
               "error",
               "Error",
               "Failed to save decision. Please try again."
             );
+            this.isSubmitting = false;
           }
+        }, error => {
+          this._customNotificationService.notification(
+            "error",
+            "Error",
+            "An error occurred while saving the decision. Please try again."
+          );
+          this.isSubmitting = false;
         });
     } else {
       this._customNotificationService.notification(
@@ -142,7 +150,7 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
       );
     }
   }
-  
+
   cancel() {
     this.modalRef.close();
   }

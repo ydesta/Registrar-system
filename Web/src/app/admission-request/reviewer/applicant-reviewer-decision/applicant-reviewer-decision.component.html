@@ -60,10 +60,10 @@
                 <span nz-icon nzType="close"></span>
                 Cancel
             </button>
-            <button [disabled]="!reviewerForm.valid" (click)="submitForm()" 
-                nz-button nzType="primary" class="submit-btn">
-                <span nz-icon nzType="check"></span>
-                Submit Decision
+            <button [disabled]="!reviewerForm.valid || isSubmitting" (click)="submitForm()" 
+                nz-button nzType="primary" class="submit-btn" [nzLoading]="isSubmitting">
+                <span nz-icon nzType="check" *ngIf="!isSubmitting"></span>
+                {{ isSubmitting ? 'Submitting...' : 'Submit Decision' }}
             </button>
         </div>
     </div>

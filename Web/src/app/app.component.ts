@@ -35,11 +35,15 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   public isUserApprovedApplicant: boolean = false;
   public isUserAlreadyApplied: boolean = false;
   public isUserFinance: boolean = false;
+  public isUserAcademicDirector: boolean = false;
+  public isUserReception: boolean = false;
   nextAcademicTerm: any;
   nextTerm = '';
   nextTermYear: number;
   academicTermId = 0;
   public currentUser: any = null;
+  private redirectInProgress = false;
+  private initialLoadComplete = false;
 
   private sessionSubscription: Subscription = new Subscription();
 
@@ -108,6 +112,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this._router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
+      // Mark initial load as complete after first route change
+      if (!this.initialLoadComplete) {
+        this.initialLoadComplete = true;
+      }
+      
       const shouldBeLoggedIn = localStorage.getItem('isLogin') === 'true';
       if (this.isLogin !== shouldBeLoggedIn) {
         this.isLogin = shouldBeLoggedIn;
@@ -232,7 +241,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
           this.redirectApplicantToAdmissionRequest();
         }
         if (this.isUserReviewer || userType === 'Reviewer' || role === 'Reviewer') {
-          this.redirectReviewerToApplicantRequestList();
+          // Add a small delay to ensure route is fully loaded
+          setTimeout(() => {
+            this.redirectReviewerToApplicantRequestList();
+          }, 100);
         }
         this.getUserDataFromApi();
       } else {
@@ -274,7 +286,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     
     
     if (this.isUserReviewer || this.userType === 'Reviewer' || role === 'Reviewer') {
-      this.redirectReviewerToApplicantRequestList();
+      // Add a small delay to ensure route is fully loaded
+      setTimeout(() => {
+        this.redirectReviewerToApplicantRequestList();
+      }, 100);
     }
 
     this.cdRef.detectChanges();
@@ -321,6 +336,14 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         break;
       case 'Finance':
         this.isUserFinance = true;
+        this.userType = cleanRole;
+        break;
+      case 'Reception':
+        this.isUserReception = true;
+        this.userType = cleanRole;
+        break;
+      case 'Academic Director':
+        this.isUserAcademicDirector = true;
         this.userType = cleanRole;
         break;
       default:
@@ -377,16 +400,35 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private redirectReviewerToApplicantRequestList() {
+    // Prevent multiple redirects
+    if (this.redirectInProgress) {
+      return;
+    }
+
+    // Don't redirect during initial page load
+    if (!this.initialLoadComplete) {
+      return;
+    }
+
     const currentUrl = this._router.url;
     
-    const shouldRedirect = !currentUrl.includes('/student-application/applicant-request-list') && 
-                          !currentUrl.includes('/student-application/applicant-request-detail') &&
-                          !currentUrl.includes('/accounts') &&
-                          !currentUrl.includes('/portal');
+    // Don't redirect if user is already on a reviewer page
+    const isOnReviewerPage = currentUrl.includes('/student-application/applicant-request-list') || 
+                            currentUrl.includes('/student-application/applicant-request-detail') ||
+                            currentUrl.includes('/student-application/applicant-incomplete');
+    
+    // Also check if we're on the root or any other non-reviewer page
+    const isOnRootOrOtherPage = currentUrl === '/' || 
+                               currentUrl === '/student-application' ||
+                               (!currentUrl.includes('/student-application/') && !currentUrl.includes('/accounts') && !currentUrl.includes('/portal'));
+    
+    const shouldRedirect = !isOnReviewerPage && isOnRootOrOtherPage;
     
     if (shouldRedirect) {
-      this._router.navigate(['/student-application/applicant-request-list']);
-    } else {
+      this.redirectInProgress = true;
+      this._router.navigate(['/student-application/applicant-request-list']).then(() => {
+        this.redirectInProgress = false;
+      });
     }
   }
 

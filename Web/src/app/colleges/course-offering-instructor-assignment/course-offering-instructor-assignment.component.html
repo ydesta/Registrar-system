@@ -1,98 +1,194 @@
-<div class="course-offering-instructor-assignment">
-  <!-- Search Section -->
-  <div class="search-container">
-    <nz-input-group nzSearch>
-      <input
-        nz-input
-        placeholder="Search instructors by code, first name, or last name..."
-        [(ngModel)]="searchText"
-        (ngModelChange)="onSearch()"
-        (keyup)="onSearch()"
-      />
-    </nz-input-group>
+<div class="instructor-assignment-modal">
+  <!-- Modal Header -->
+  <div class="modal-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <span nz-icon nzType="team" nzTheme="outline"></span>
+      </div>
+      <div class="header-text">
+        <h2 class="modal-title">Assign Instructors</h2>
+        <p class="modal-subtitle">Select instructors to assign to this course offering</p>
+      </div>
+    </div>
   </div>
 
-  <!-- Table Section -->
-  <nz-table
-    nzBordered
-    #basicTable
-    [nzData]="staffList"
-    [nzShowPagination]="true"
-    nzShowPagination
-    [nzPageSizeOptions]="[5, 10, 20, 50]"
-    [nzPageSize]="5"
-    nzShowSizeChanger
-    [nzTotal]="staffList?.length"
-    (nzCurrentPageDataChange)="onCurrentPageDataChange($event)"
-    [nzSize]="'middle'"
-    [nzLoading]="loading"
-    class="table-full-width"
-  >
-    <thead class="table-header-row">
-      <tr class="table-header-row">
-        <th
-          class="paginate"
-          [nzChecked]="checked"
-          [nzIndeterminate]="indeterminate"
-          (nzCheckedChange)="onAllChecked($event)"
-        ></th>
-        <th class="th-row">Instructor Code</th>
-        <th class="th-row">
-          Full Name
-          <nz-filter-trigger
-            [(nzVisible)]="visible"
-            [nzActive]="searchValue.length > 0"
-            [nzDropdownMenu]="menu"
-          >
-            <span nz-icon nzType="search"></span>
-          </nz-filter-trigger>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr tabindex="0" *ngFor="let data of basicTable.data; let i = index">
-        <td
-          class="paginate"
-          [nzChecked]="setOfCheckedId.has(data.id)"
-          (nzCheckedChange)="onItemChecked(data.id, $event)"
-        ></td>
-        <td>{{ data.staffCode }}</td>
-        <td>{{ data.firstName }} {{ data.lastName }}</td>
-      </tr>
-    </tbody>
-  </nz-table>
+  <!-- Modal Body -->
+  <div class="modal-body">
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="section-header">
+        <span nz-icon nzType="search" nzTheme="outline"></span>
+        <h3 class="section-title">Search Instructors</h3>
+      </div>
+      <div class="search-container">
+        <nz-input-group nzSearch [nzSuffix]="suffixIconSearch">
+          <input
+            nz-input
+            placeholder="Search by instructor code, first name, or last name..."
+            [(ngModel)]="searchText"
+            (ngModelChange)="onSearch()"
+            (keyup)="onSearch()"
+            class="search-input"
+          />
+        </nz-input-group>
+        <ng-template #suffixIconSearch>
+          <span nz-icon nzType="search" nzTheme="outline"></span>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Instructors Table Section -->
+    <div class="table-section">
+      <div class="section-header">
+        <span nz-icon nzType="user" nzTheme="outline"></span>
+        <h3 class="section-title">Available Instructors</h3>
+        <div class="selection-info" *ngIf="setOfCheckedId.size > 0">
+          <nz-tag nzColor="blue">{{ setOfCheckedId.size }} selected</nz-tag>
+        </div>
+      </div>
+      
+      <div class="table-container" *ngIf="!loading && staffList?.length > 0">
+        <nz-table
+          nzBordered
+          #basicTable
+          [nzData]="staffList"
+          [nzShowPagination]="true"
+          nzShowPagination
+          [nzPageSizeOptions]="[5, 10, 20, 50]"
+          [nzPageSize]="5"
+          nzShowSizeChanger
+          [nzTotal]="staffList?.length"
+          (nzCurrentPageDataChange)="onCurrentPageDataChange($event)"
+          [nzSize]="'middle'"
+          [nzLoading]="loading"
+          class="instructors-table"
+        >
+          <thead>
+            <tr>
+              <th
+                class="checkbox-column"
+                [nzChecked]="checked"
+                [nzIndeterminate]="indeterminate"
+                (nzCheckedChange)="onAllChecked($event)"
+              >
+                <!-- <span class="select-all-text">Select All</span> -->
+              </th>
+              <th class="code-column">
+                <span nz-icon nzType="idcard" nzTheme="outline"></span>
+                Instructor Code
+              </th>
+              <th class="name-column">
+                <span nz-icon nzType="user" nzTheme="outline"></span>
+                Full Name
+                <nz-filter-trigger
+                  [(nzVisible)]="visible"
+                  [nzActive]="searchValue.length > 0"
+                  [nzDropdownMenu]="menu"
+                  class="filter-trigger"
+                >
+                  <span nz-icon nzType="filter" nzTheme="outline"></span>
+                </nz-filter-trigger>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let data of basicTable.data; let i = index" class="instructor-row">
+              <td class="checkbox-column">
+                <label nz-checkbox
+                  [nzChecked]="setOfCheckedId.has(data.id)"
+                  (nzCheckedChange)="onItemChecked(data.id, $event)"
+                ></label>
+              </td>
+              <td class="code-column">
+                <nz-tag nzColor="blue" class="code-tag">{{ data.staffCode }}</nz-tag>
+              </td>
+              <td class="name-column">
+                <div class="instructor-info">
+                  <nz-avatar nzSize="small" nzIcon="user" class="instructor-avatar"></nz-avatar>
+                  <span class="instructor-name">{{ data.firstName }} {{ data.lastName }}</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="loading">
+        <nz-spin nzSize="large">
+          <div class="loading-content">
+            <span nz-icon nzType="loading" nzTheme="outline"></span>
+            <p>Loading instructors...</p>
+          </div>
+        </nz-spin>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!loading && (!staffList || staffList.length === 0)">
+        <span nz-icon nzType="user-delete" nzTheme="outline"></span>
+        <h3>No Instructors Found</h3>
+        <p>No instructors match your search criteria. Try adjusting your search terms.</p>
+      </div>
+    </div>
+  </div>
 
   <!-- Filter Dropdown Menu -->
   <nz-dropdown-menu #menu="nzDropdownMenu">
-    <div class="ant-table-filter-dropdown">
-      <div class="search-box">
-        <input
-          type="text"
-          nz-input
-          placeholder="Search First Name or Last Name"
-          [(ngModel)]="searchValue"
-        />
-        <button
-          nz-button
-          nzSize="small"
-          nzType="primary"
-          (click)="search()"
-          class="search-button"
-        >
-          Search
-        </button>
-        <button nz-button nzSize="small" (click)="reset()">Reset</button>
+    <div class="filter-dropdown">
+      <div class="filter-content">
+        <div class="filter-header">
+          <span nz-icon nzType="filter" nzTheme="outline"></span>
+          <span>Filter by Name</span>
+        </div>
+        <div class="filter-input">
+          <input
+            type="text"
+            nz-input
+            placeholder="Search first name or last name"
+            [(ngModel)]="searchValue"
+            class="filter-search-input"
+          />
+        </div>
+        <div class="filter-actions">
+          <button
+            nz-button
+            nzSize="small"
+            nzType="primary"
+            (click)="search()"
+            class="filter-search-btn"
+          >
+            <span nz-icon nzType="search"></span>
+            Search
+          </button>
+          <button nz-button nzSize="small" (click)="reset()" class="filter-reset-btn">
+            <span nz-icon nzType="reload"></span>
+            Reset
+          </button>
+        </div>
       </div>
     </div>
   </nz-dropdown-menu>
 
-  <!-- Action Buttons Section -->
-  <div class="button-container">
-    <button nz-button nzType="primary" (click)="onSubmit()">
-      <span nz-icon nzType="save"></span>
-      Save Assignment
-    </button>
+  <!-- Modal Footer -->
+  <div class="modal-footer">
+    <div class="footer-actions">
+      <button type="button" nz-button (click)="closeModal()" class="cancel-btn">
+        <span nz-icon nzType="close"></span>
+        Cancel
+      </button>
+      <button 
+        nz-button 
+        nzType="primary" 
+        (click)="onSubmit()"
+        [disabled]="setOfCheckedId.size === 0"
+        class="submit-btn"
+      >
+        <span nz-icon nzType="save"></span>
+        Save Assignment
+        <nz-tag nzColor="blue" *ngIf="setOfCheckedId.size > 0" class="selection-count">
+          {{ setOfCheckedId.size }}
+        </nz-tag>
+      </button>
+    </div>
   </div>
-  
-  <nz-divider></nz-divider>
 </div>

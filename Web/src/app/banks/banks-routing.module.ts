@@ -9,6 +9,12 @@ import { BanksComponent } from './banks.component';
 import { StudentPaymentComponent } from './student-payment/student-payment.component';
 import { TuitionFeeComponent } from './tuition-fee/tuition-fee.component';
 import { PendingPaymentListComponent } from './pending-payment-list/pending-payment-list.component';
+import { PaymentComponent } from './payment/payment.component';
+import { StandalonePaymentComponent } from './components/standalone-payment.component';
+import { PaymentCallbackComponent } from './payment/payment-callback/payment-callback.component';
+import { PaymentOptionsComponent } from './registration/payment-options/payment-options.component';
+import { RegistrationPaymentComponent } from './registration/registration-payment/registration-payment.component';
+import { RegistrationSuccessComponent } from './registration/registration-success/registration-success.component';
 
 const routes: Routes = [
   { path: '', component: BanksComponent },
@@ -19,7 +25,13 @@ const routes: Routes = [
   { path: 'add-bank-transacction/:id', component: AddBankTransactionComponent },
   { path: 'add-student-payment', component: AddStudentPaymentComponent },
   { path: 'add-tuition-fee/:id', component: AddTuitionFeeComponent },
-  { path: 'pending-payment', component: PendingPaymentListComponent }
+  { path: 'pending-payment', component: PendingPaymentListComponent },
+  { path: 'payment', component: PaymentComponent },
+  { path: 'payment/callback', component: PaymentCallbackComponent },
+  { path: 'payment/standalone', component: StandalonePaymentComponent },
+  { path: 'registration/payment', component: RegistrationPaymentComponent },
+  { path: 'registration/payment-options', component: PaymentOptionsComponent },
+  { path: 'registration/success', component: RegistrationSuccessComponent }
 ];
 
 @NgModule({

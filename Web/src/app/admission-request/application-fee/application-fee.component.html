@@ -26,7 +26,7 @@
             <button nz-button nzType="primary" nzSize="large" [disabled]="isPaymentButtonDisabled"
               (click)="openPaymentModal()" class="payment-button">
               <span nz-icon nzType="credit-card"></span>
-              {{ isPaymentButtonDisabled ? 'Payment Completed' : 'Make Payment' }}
+              {{ isPaymentButtonDisabled ? 'Payment Completed' : 'Attach your payment receipt' }}
             </button>
             <div class="button-spacer" *ngIf="isPaymentButtonDisabled"></div>
             <button *ngIf="shouldShowReceipt()" nz-button nzType="primary" nzSize="large"

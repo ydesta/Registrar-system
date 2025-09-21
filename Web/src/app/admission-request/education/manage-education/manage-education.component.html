@@ -1,7 +1,7 @@
 <div class="education-background-container">
     <div class="header-section">
         <h2 *ngIf="!isApplicantProfile">Education Background</h2>
-        <button (click)="openModal()" nz-button nzType="primary" [disabled]="isSubmittedApplicationForm>0" *ngIf="!isApplicantProfile">
+        <button (click)="openModal()" nz-button nzType="primary" *ngIf="!isApplicantProfile">
             <span nz-icon nzType="plus" nzTheme="outline"></span>
             Add Education
         </button>
@@ -10,9 +10,9 @@
     <nz-table #basicTable [nzData]="educationLists" nzBordered [nzPageSize]="5" [nzShowSizeChanger]="true"  [nzNoResult]="noDataTemplate">
         <thead>
             <tr>
-                <th>College/University</th>
+                <th>College/School Name</th>
                 <th>Major Area of Study</th>
-                <th>Degree Obtained</th>
+                <th>Education Level</th>
                 <th>Year(From - To)</th>
                 <th>Remark</th>
                 <th>Document</th>
@@ -37,7 +37,7 @@
                 </td>
                 <td *ngIf="!isApplicantProfile">
                     <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomRight"
-                        [disabled]="isSubmittedApplicationForm>0" nzTrigger="click" class="action-button">
+                        nzTrigger="click" class="action-button">
                         <span nz-icon nzType="more" nzTheme="outline"></span>
                     </button>
                     <nz-dropdown-menu #menu="nzDropdownMenu">

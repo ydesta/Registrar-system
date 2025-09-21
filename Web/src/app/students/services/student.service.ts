@@ -227,10 +227,21 @@ export class StudentService {
       .pipe(map((result) => result as StudentProfileViewModel));
   }
 
-  getListOfTermRegisteredCourseList(termId: string): Observable<StudentRegistrationSlipViewModel[]> {
-    const endpointUrl = `${this.getStudentUrl()}/student/${termId}/getListOfTermRegisteredCourseList`;
+  getListOfTermRegisteredCourseList(termId: string, startDate: string,
+    endDate: string,): Observable<StudentRegistrationSlipViewModel[]> {
+    const endpointUrl = `${this.getStudentUrl()}/student/getListOfTermRegisteredCourseList`;
+    let params = new HttpParams()
+    if (termId && termId.trim() !== '' && termId != null) {
+      params = params.append('termId', termId);
+    }
+    if (startDate && startDate.trim() !== '') {
+      params = params.append('startDate', startDate);
+    }
+    if (endDate && endDate.trim() !== '') {
+      params = params.append('endDate', endDate);
+    }
     return this.httpClient
-      .get(endpointUrl)
+      .get(endpointUrl, { params })
       .pipe(map((result) => result as StudentRegistrationSlipViewModel[]));
   }
   getRegisteredNewStudentList(academicProgrameCode: string, entryYear: number, startDate: string, endDate: string): Observable<RegisteredNewStudentViewModel[]> {

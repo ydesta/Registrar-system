@@ -9,6 +9,7 @@ namespace SecureAuth.APPLICATION.Interfaces
         IPasswordHistoryRepository PasswordHistory { get; }
         IPasswordResetTokenRepository PasswordResetTokens { get; }
         IRolePermissionRepository RolePermissions { get; }
+        IUserCredentialRepository UserCredentials { get; }
 
         // CQRS and security feature repositories/services
         IPasswordPolicyRepository PasswordPolicy { get; }

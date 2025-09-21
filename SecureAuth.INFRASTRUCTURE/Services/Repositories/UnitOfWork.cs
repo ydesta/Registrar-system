@@ -16,6 +16,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
         public IPasswordHistoryRepository PasswordHistory { get; }
         public IPasswordResetTokenRepository PasswordResetTokens { get; }
         public IRolePermissionRepository RolePermissions { get; }
+        public IUserCredentialRepository UserCredentials { get; }
         public IPasswordPolicyRepository PasswordPolicy { get; }
         public ISystemConfigurationRepository SystemConfiguration { get; }
         public ISystemBackupRepository SystemBackup { get; }
@@ -35,6 +36,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
             IPasswordHistoryRepository passwordHistoryRepository,
             IPasswordResetTokenRepository passwordResetTokenRepository,
             IRolePermissionRepository rolePermissionRepository,
+            IUserCredentialRepository userCredentialRepository,
             IPasswordPolicyRepository passwordPolicyRepository,
             ISystemConfigurationRepository systemConfigurationRepository,
             ISystemBackupRepository systemBackupRepository,
@@ -54,6 +56,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
             PasswordHistory = passwordHistoryRepository;
             PasswordResetTokens = passwordResetTokenRepository;
             RolePermissions = rolePermissionRepository;
+            UserCredentials = userCredentialRepository;
             PasswordPolicy = passwordPolicyRepository;
             SystemConfiguration = systemConfigurationRepository;
             SystemBackup = systemBackupRepository;

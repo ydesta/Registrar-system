@@ -282,12 +282,12 @@ export class ApplicationFeeComponent implements OnInit, OnDestroy {
       if (result) {
         this.loadApplicationFee();
         
-        this.modal.success({
-          nzTitle: 'Payment Successful!',
-          nzContent: 'Your application fee payment has been processed successfully.',
-          nzOkText: 'OK',
-          nzCentered: true
-        });
+        // this.modal.success({
+        //   nzTitle: 'Payment Successful!',
+        //   nzContent: 'Your application fee payment has been processed successfully.',
+        //   nzOkText: 'OK',
+        //   nzCentered: true
+        // });
       }
     });
   }

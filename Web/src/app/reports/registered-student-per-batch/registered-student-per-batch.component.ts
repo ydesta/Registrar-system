@@ -20,7 +20,9 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
   data: RegisteredStudentPerBatch;
   registeredStudentInformation: StudentInformation[] = [];
   paginatedRegisteredStudent: StudentInformation[] = [];
-  isLoading = true;
+  isLoading = false;
+  isFormCollapsed = false;
+  hasSearched = false;
   formRegisteredStudentPerBatch: FormGroup;
   listOfBatch: any[] = [];
   listOfTermNumber: StaticData[] = [];
@@ -85,6 +87,8 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
     })
   }
   getRegisteredStudentPerBatch() {
+    this.isLoading = true;
+    this.hasSearched = true;
     const formModel = this.getStudentRegistered();
     this._reportService.getListOfRegisteredStudentPerBatch(formModel)
       .subscribe((res: any) => {
@@ -94,6 +98,15 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
         this.updatePaginatedRegisteredStudent();
         this.isLoading = false;
       });
+  }
+
+  loadData() {
+    this.formRegisteredStudentPerBatch.reset();
+    this.registeredStudentInformation = [];
+    this.paginatedRegisteredStudent = [];
+    this.total = 0;
+    this.hasSearched = false;
+    this.isFormCollapsed = true;
   }
   getStudentRegistered(): SearchQueryParams {
     const formModel = this.formRegisteredStudentPerBatch.getRawValue();

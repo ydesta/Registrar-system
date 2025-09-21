@@ -16,7 +16,7 @@ namespace SecureAuth.APPLICATION.Interfaces
         Task SendEmailConfirmationAsync(string email, string token);
         Task SendEmailConfirmationWithUrlAsync(string email, string token, string baseUrl);
         Task SendUserCredentialsAsync(string email, string username, string password, string firstName, string lastName);
-        Task SendUpdatedCredentialsAsync(string email, string username, string firstName, string lastName, string updateType);
+        Task SendUpdatedCredentialsAsync(string email, string username, string firstName, string lastName, string updateType, string newPassword = null);
         Task SendOtpEmailAsync(string email, string otp, string purpose, DateTime expiresAt);
         Task SendActionEmailAsync(string email, string token, string actionType, string actionUrl, DateTime expiresAt, string customMessage = null);
     }

@@ -10,7 +10,7 @@ import { CustomNotificationService } from 'src/app/services/custom-notification.
   styleUrls: ['./add-academic-status.component.scss']
 })
 export class AddAcademicStatusComponent implements OnInit {
-  action = 'Add Academic Status';
+  action = 'Choose Academic Status';
   acadamicStatusForm:FormGroup;
   acadamicPrograms:any;
   progStatusId:any;

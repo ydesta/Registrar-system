@@ -120,6 +120,10 @@ export class AuthService {
 
   public getAccessToken = (): Promise<string> => {
     const token = this.tokenStorageService.getToken();
+    console.log('AuthService.getAccessToken() called');
+    console.log('Current user ID:', this.tokenStorageService.getCurrentUserId());
+    console.log('Token retrieved:', token ? 'Token exists' : 'No token found');
+    console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'null');
     return Promise.resolve(token || '');
   };
 

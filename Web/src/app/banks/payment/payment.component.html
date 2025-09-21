@@ -1,0 +1,238 @@
+<div class="payment-container">
+  <div class="payment-card">
+    <div class="payment-header">
+      <h2>Payment Processing</h2>
+      <p>Process your course registration payment through EthSwitch Gateway</p>
+    </div>
+
+    <form [formGroup]="paymentForm" (ngSubmit)="createPaymentOrder()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="studentCourseOfferingId">Student Course Offering ID *</label>
+          <input
+            type="text"
+            id="studentCourseOfferingId"
+            formControlName="studentCourseOfferingId"
+            class="form-control"
+            placeholder="Enter Student Course Offering ID"
+          />
+          <div *ngIf="paymentForm.get('studentCourseOfferingId')?.invalid && paymentForm.get('studentCourseOfferingId')?.touched" 
+               class="error-message">
+            Student Course Offering ID is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="academicTerm">Academic Term *</label>
+          <select id="academicTerm" formControlName="academicTerm" class="form-control">
+            <option value="1">Winter</option>
+            <option value="2">Spring</option>
+            <option value="3">Summer</option>
+            <option value="4">Autumn</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="academicYear">Academic Year *</label>
+          <input
+            type="number"
+            id="academicYear"
+            formControlName="academicYear"
+            class="form-control"
+            min="2020"
+            max="2030"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="numberOfCourses">Number of Courses *</label>
+          <input
+            type="number"
+            id="numberOfCourses"
+            formControlName="numberOfCourses"
+            class="form-control"
+            min="1"
+            max="10"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="totalAmount">Total Amount (ETB) *</label>
+          <input
+            type="number"
+            id="totalAmount"
+            formControlName="totalAmount"
+            class="form-control"
+            min="0.01"
+            step="0.01"
+            placeholder="0.00"
+          />
+          <div *ngIf="paymentForm.get('totalAmount')?.invalid && paymentForm.get('totalAmount')?.touched" 
+               class="error-message">
+            Please enter a valid amount
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="currency">Currency *</label>
+          <select id="currency" formControlName="currency" class="form-control">
+            <option value="ETB">Ethiopian Birr (ETB)</option>
+            <option value="USD">US Dollar (USD)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="processingOption">Payment Processing *</label>
+        <select 
+          id="processingOption" 
+          formControlName="processingOption" 
+          class="form-control"
+          (change)="onProcessingOptionChange()"
+        >
+          <option *ngFor="let option of processingOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+        <div class="help-text">
+          <strong>Pay Now:</strong> Process payment immediately<br>
+          <strong>Pay Later:</strong> Create order and pay within the specified timeframe
+        </div>
+      </div>
+
+      <div *ngIf="isPayLaterSelected" class="pay-later-options">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="paymentDueDate">Payment Due Date</label>
+            <input
+              type="date"
+              id="paymentDueDate"
+              formControlName="paymentDueDate"
+              class="form-control"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="paymentExpiryDate">Payment Expiry Date *</label>
+            <input
+              type="date"
+              id="paymentExpiryDate"
+              formControlName="paymentExpiryDate"
+              class="form-control"
+              [min]="today"
+            />
+            <div *ngIf="paymentForm.get('paymentExpiryDate')?.invalid && paymentForm.get('paymentExpiryDate')?.touched" 
+                 class="error-message">
+              Please select a valid expiry date
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="maxPaymentAttempts">Maximum Payment Attempts</label>
+          <input
+            type="number"
+            id="maxPaymentAttempts"
+            formControlName="maxPaymentAttempts"
+            class="form-control"
+            min="1"
+            max="10"
+          />
+          <div class="help-text">Number of times the student can attempt payment (1-10)</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          formControlName="description"
+          class="form-control"
+          rows="3"
+          placeholder="Enter payment description (optional)"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="orderNumber">Order Number</label>
+        <input
+          type="text"
+          id="orderNumber"
+          formControlName="orderNumber"
+          class="form-control"
+          placeholder="Will be generated by system"
+          readonly
+        />
+        <div class="help-text">Order number will be generated based on student information</div>
+      </div>
+
+      <div class="form-group">
+        <label for="transactionId">Transaction ID</label>
+        <input
+          type="text"
+          id="transactionId"
+          formControlName="transactionId"
+          class="form-control"
+          placeholder="Will be provided by payment gateway"
+          readonly
+        />
+        <div class="help-text">Transaction ID will be provided by the EthSwitch payment gateway</div>
+      </div>
+
+      <!-- Return URL removed - now uses configuration -->
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="resetForm()"
+          [disabled]="isProcessing"
+        >
+          Reset
+        </button>
+        
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isProcessing || paymentForm.invalid"
+        >
+          <span *ngIf="isProcessing" class="spinner"></span>
+          {{ isProcessing ? 'Creating...' : 'Create Payment Order' }}
+        </button>
+      </div>
+    </form>
+
+    <div *ngIf="paymentOrderId" class="payment-actions">
+      <div class="payment-order-info">
+        <h3>Payment Order Created</h3>
+        <p><strong>Order ID:</strong> {{ paymentOrderId }}</p>
+        <p><strong>Order Number:</strong> {{ paymentForm.get('orderNumber')?.value || 'Will be generated' }}</p>
+        <p><strong>Transaction ID:</strong> {{ paymentForm.get('transactionId')?.value || 'Will be provided by gateway' }}</p>
+        <p><strong>Status:</strong> Pending</p>
+      </div>
+
+      <div class="action-buttons">
+        <button
+          class="btn btn-success"
+          (click)="processPayment()"
+          [disabled]="isProcessing"
+        >
+          <span *ngIf="isProcessing" class="spinner"></span>
+          {{ isProcessing ? 'Processing...' : 'Process Payment' }}
+        </button>
+
+        <button
+          class="btn btn-info"
+          (click)="checkPaymentStatus()"
+          [disabled]="isProcessing"
+        >
+          Check Status
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

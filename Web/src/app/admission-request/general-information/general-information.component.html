@@ -608,11 +608,11 @@
                             <div class="form-field">
                                 <nz-form-item>
                                     <nz-form-control [nzValidateStatus]="''">
-                                        <input nz-input formControlName="city" placeholder=" " id="city" 
+                                        <input nz-input formControlName="city" placeholder="" id="city" 
                                             class="input-with-floating-label" />
                                         <label for="city" class="floating-label">
                                             <i nz-icon nzType="bank" nzTheme="outline"></i>
-                                            City
+                                            City/Zone
                                         </label>
                                     </nz-form-control>
                                 </nz-form-item>
@@ -651,16 +651,6 @@
                     </div>
                 </div>
 
-                <!-- Debug section -->
-                <!-- <div style="margin-top: 20px; padding: 16px; background: #f5f5f5; border-radius: 8px;">
-                    <h4>Debug Information</h4>
-                    <button nz-button nzType="primary" (click)="testValidation()">Test Validation</button>
-                    <div style="margin-top: 10px;">
-                        <strong>Form Valid:</strong> {{form?.valid}}<br>
-                        <strong>First Name Errors:</strong> {{firstName?.errors | json}}<br>
-                        <strong>First Name In Amh Errors:</strong> {{firstNameInAmh?.errors | json}}
-                    </div>
-                </div> -->
             </div>
         </form>
     </div>

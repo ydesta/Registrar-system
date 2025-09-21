@@ -184,6 +184,8 @@ export class ManageEducationComponent implements OnInit {
           this.getApplicantEducationByApplicantId(applicantId);
         } else if (!applicantId) {
           console.warn('No applicant found for user:', this.userId);
+          // Don't retry - this is a valid state where no applicant exists
+          return;
         }
       },
       error: (error) => {

@@ -434,7 +434,7 @@ nz-date-picker {
 
 /* Form Sections */
 .form-section {
-  padding: 32px 0;
+  padding: 10px 0;
   margin-bottom: 32px;
   
   &:first-child {
@@ -660,8 +660,8 @@ nz-date-picker {
 /* Main container */
 .form-container {
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
+  margin: -37px auto;
+  // padding: 24px;
 }
 
 /* Section Header Wrapper */
@@ -823,7 +823,7 @@ nz-date-picker {
 
 /* Form Sections */
 .form-section {
-  padding: 32px 0;
+  padding: 10px 0;
   margin-bottom: 32px;
   border-bottom: 1px solid #f0f0f0;
   

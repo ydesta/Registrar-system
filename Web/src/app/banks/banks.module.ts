@@ -14,6 +14,17 @@ import { PendingPaymentListComponent } from './pending-payment-list/pending-paym
 import { PaymentModalModule } from './add-student-payment/payment-modal/payment-modal.module';
 import { PaymentInstructionsComponent } from './pending-payment-list/payment-instructions/payment-instructions.component';
 
+// Payment Components
+import { PaymentComponent } from './payment/payment.component';
+import { PaymentCallbackComponent } from './payment/payment-callback/payment-callback.component';
+import { StandalonePaymentComponent } from './components/standalone-payment.component';
+import { RegistrationPaymentComponent } from './registration/registration-payment/registration-payment.component';
+import { PaymentOptionsComponent } from './registration/payment-options/payment-options.component';
+import { RegistrationSuccessComponent } from './registration/registration-success/registration-success.component';
+
+// Services
+import { PaymentService } from '../services/payment.service';
+import { CustomNotificationService } from '../services/custom-notification.service';
 
 @NgModule({
   declarations: [
@@ -26,7 +37,13 @@ import { PaymentInstructionsComponent } from './pending-payment-list/payment-ins
     AddBankTransactionComponent,
     AddBankComponent,
     PendingPaymentListComponent,
-    PaymentInstructionsComponent
+    PaymentInstructionsComponent,
+     PaymentComponent,
+    PaymentCallbackComponent,
+    StandalonePaymentComponent,
+    RegistrationPaymentComponent,
+    PaymentOptionsComponent,
+    RegistrationSuccessComponent
   ],
   imports: [
     CommonModule,

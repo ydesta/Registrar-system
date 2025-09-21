@@ -37,9 +37,9 @@ import { ApplicantReviewerDecisionComponent } from "../applicant-reviewer-decisi
 })
 export class ApplicantRequestDetailComponent implements OnInit {
 
-  selectedTabIndex = 1;
+  selectedTabIndex = 0;
   form: FormGroup;
-  activeTab = 1;
+  activeTab = 0;
   formData = new FormData();
   profilePicture = "";
   id: string;
@@ -53,6 +53,18 @@ export class ApplicantRequestDetailComponent implements OnInit {
   acadamicProgrammes: AcadamicProgramme[] = [];
   divisionStatusist: StaticData[] = [];
   isUserReviewer: boolean = false;
+  isUserAcademicDirector: boolean = false;
+  
+  // Loading states
+  isLoadingApplicant: boolean = false;
+  isLoadingContacts: boolean = false;
+  isLoadingEducation: boolean = false;
+  isLoadingWorkExperience: boolean = false;
+  isLoadingAcademicPrograms: boolean = false;
+  
+  // Error states
+  hasError: boolean = false;
+  errorMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -84,7 +96,10 @@ export class ApplicantRequestDetailComponent implements OnInit {
 
     this.createAcademicProgramRequest();
   }
-
+  ngOnInit(): void {
+    this.getAcademicProgramList();
+    this.getListOfDivisionStatus();
+  }
 
   private checkUserRole(): void {
     const role = localStorage.getItem('role');
@@ -94,19 +109,23 @@ export class ApplicantRequestDetailComponent implements OnInit {
         const roles = JSON.parse(role);
         if (Array.isArray(roles)) {
           this.isUserReviewer = roles.includes('Reviewer');
+          this.isUserAcademicDirector = roles.includes('Academic Director');
         } else {
           this.isUserReviewer = role === 'Reviewer';
+          this.isUserAcademicDirector = role === 'Academic Director';
         }
       } catch {
         this.isUserReviewer = role === 'Reviewer';
+        this.isUserAcademicDirector = role === 'Academic Director';
       }
     } else {
       // Check userType
       this.isUserReviewer = userType === 'Reviewer';
+      this.isUserAcademicDirector = userType === 'Academic Director';
     }
 
-    if (this.isUserReviewer) {
-      this.selectedTabIndex = 1;
+    if (this.isUserReviewer || this.isUserAcademicDirector) {
+      this.selectedTabIndex = 0;
       this.isTabDisabled = [true, false, false, false, false, false, false, true];
     } else {
       this.selectedTabIndex = 1;
@@ -114,10 +133,7 @@ export class ApplicantRequestDetailComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {
-    this.getAcademicProgramList();
-    this.getListOfDivisionStatus();
-  }
+
   //#region form Intialization
   cretaeGeneralInformationForm() {
     this.form = this.fb.group({
@@ -180,19 +196,33 @@ export class ApplicantRequestDetailComponent implements OnInit {
 
   //#region get data from the api
   getApplicantById(id: string) {
-    this.generalInformationService.getApplicantById(id).subscribe(res => {
-      // Use helper method to extract data
-      const applicantData = this.extractResponseData<any>(res);
-      
-      if (applicantData) {
-        this.form.patchValue(applicantData);
-        this.otherForm.patchValue(applicantData);
-        this.profilePicture =
-          environment.fileUrl +
-          "/Resources/profile/" +
-          applicantData.files[0]?.fileName;
-      } else {
-        console.error('Invalid response structure:', res);
+    this.isLoadingApplicant = true;
+    this.hasError = false;
+    
+    this.generalInformationService.getApplicantById(id).subscribe({
+      next: (res) => {
+        // Use helper method to extract data
+        const applicantData = this.extractResponseData<any>(res);
+        
+        if (applicantData) {
+          this.form.patchValue(applicantData);
+          this.otherForm.patchValue(applicantData);
+          this.profilePicture =
+            environment.fileUrl +
+            "/Resources/profile/" +
+            applicantData.files[0]?.fileName;
+        } else {
+          console.error('Invalid response structure:', res);
+          this.hasError = true;
+          this.errorMessage = 'Invalid response structure received from server';
+        }
+        this.isLoadingApplicant = false;
+      },
+      error: (error) => {
+        console.error('Error loading applicant data:', error);
+        this.hasError = true;
+        this.errorMessage = 'Failed to load applicant information. Please try again.';
+        this.isLoadingApplicant = false;
       }
     });
   }
@@ -369,5 +399,15 @@ export class ApplicantRequestDetailComponent implements OnInit {
 
   get isAcademicProgramValid(): boolean {
     return false;
+  }
+
+  /**
+   * Determines if a decision can be made based on the application status
+   * @param data The academic program request data
+   * @returns true if decision can be made, false otherwise
+   */
+  canMakeDecision(data: any): boolean {
+    // Check if approvalStatus is "Applied" (value 1) and studentStatus is "Submitted" (value 1)
+    return data.approvalStatus === 1 && data.studentStatus === 1;
   }
 }

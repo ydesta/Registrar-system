@@ -1,41 +1,103 @@
-<nz-card>
-    <div>
-        <h3 class="h-tag">
-            <button nz-button style="float: right;" nzType="primary" (click)="goToCurriculum()"> <span nz-icon
-                    nzType="left-circle" nzTheme="outline"></span>
-                Back</button>
-            <p>{{code}} - {{programme}}</p>
-        </h3>
+<div class="content-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <button nz-button nzType="default" class="back-btn" (click)="goToCurriculum()">
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Curricula
+    </button>
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">{{code}} - {{programme}}</h2>
+        <p class="subtitle-text">Manage quadrant breakdown and course distribution</p>
+        <div class="curriculum-info">
+          <span nz-icon nzType="appstore" nzTheme="outline"></span>
+          <span class="curriculum-description">View and manage academic quadrant breakdowns for curriculum courses</span>
+        </div>
+      </div>
     </div>
+  </div>
 
 
-    <nz-divider></nz-divider>
-    <div *ngIf="numberOfQuadrantBreakdown; else elseBlock">
-        <nz-row [nzGutter]="16">
-            <nz-col *ngFor="let quadrant of curriculumQuadrants; let first = first" [nzSpan]="12" class="panel-padding">
-                <nz-collapse [nzAccordion]="true">
+  <!-- Results Container -->
+  <div class="form-container" *ngIf="numberOfQuadrantBreakdown; else elseBlock">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="appstore" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>Quadrant Breakdown</h3>
+          <p>Academic quadrants and course distribution</p>
+        </div>
+      </div>
+
+      <div class="curriculum-form">
+        <div class="form-sections">
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="appstore" nzTheme="outline"></span>
+                Academic Quadrants
+              </h4>
+              <p class="section-description">Select a quadrant to view detailed course information</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col" *ngFor="let quadrant of curriculumQuadrants; let i = index">
+                <div class="term-card">
+                  <nz-collapse [nzAccordion]="true">
                     <nz-collapse-panel [nzHeader]="quadrant.quadrantCode">
-                        <app-course-details [courses]="quadrant.course"></app-course-details>
+                      <app-course-details [courses]="quadrant.course"></app-course-details>
                     </nz-collapse-panel>
-                </nz-collapse>
-            </nz-col>
-        </nz-row>
+                  </nz-collapse>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <ng-template #elseBlock>
-        <nz-alert nzShowIcon nzType="info" nzMessage="info" [nzDescription]="descriptionTemplate1"
-            [nzAction]="actionTemplate2"></nz-alert>
-        <ng-template #descriptionTemplate1>
-            <p>Please proceed with the task of recording the course breakdown for the curriculum quadrants.
-                Kindly begin by documenting the course breakdown for the curriculum quadrant, focusing on this
-                particular
-                curriculum.</p>
-        </ng-template>
-        <ng-template #actionTemplate2>
-            <button nz-button nzSize="small" nzType="primary" (click)="doAction()">Click here to record
-                course breakdown</button>
-        </ng-template>
-    </ng-template>
+  <ng-template #elseBlock>
+    <div class="form-container">
+      <div class="form-card">
+        <div class="form-header">
+          <div class="form-icon">
+            <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+          </div>
+          <div class="form-title">
+            <h3>No Quadrant Breakdown Available</h3>
+            <p>Create the initial course breakdown for this curriculum</p>
+          </div>
+        </div>
 
-
-</nz-card>
+        <div class="curriculum-form">
+          <div class="form-sections">
+            <div class="form-section">
+              <div class="empty-state-content">
+                <div class="empty-state-text">
+                  <p class="section-description">
+                    No quadrant breakdown has been recorded for the selected academic year. 
+                    Please create the initial course breakdown to begin managing this curriculum.
+                  </p>
+                </div>
+                <div class="empty-state-actions">
+                  <button 
+                    nz-button 
+                    nzType="primary" 
+                    nzSize="large" 
+                    (click)="doAction()" 
+                    class="create-breakdown-btn">
+                    <span nz-icon nzType="plus" nzTheme="outline"></span>
+                    Create Quadrant Breakdown
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</div>

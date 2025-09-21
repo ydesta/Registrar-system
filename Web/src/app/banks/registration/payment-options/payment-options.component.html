@@ -1,0 +1,169 @@
+<div class="payment-options-container">
+  <div class="payment-header">
+    <h2>Payment Options</h2>
+    <p>Choose your preferred payment method to complete your course registration</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading registration data...</p>
+  </div>
+
+  <!-- Payment Options Content -->
+  <div *ngIf="!isLoading" class="payment-content">
+    <!-- Registration Summary -->
+    <div class="registration-summary">
+      <h3>Registration Summary</h3>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span class="label">Order Number</span>
+          <span class="value">{{orderNumber || 'N/A'}}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Batch Code</span>
+          <span class="value">{{batchCode || 'N/A'}}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Academic Term</span>
+          <span class="value">{{getAcademicTermDescription(academicTerm) || 'N/A'}}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Academic Year</span>
+          <span class="value">{{academicYear || 'N/A'}}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Number of Courses</span>
+          <span class="value">{{numberOfCourses || 0}}</span>
+        </div>
+        <div class="summary-item total-amount">
+          <span class="label">Total Amount</span>
+          <span class="value">{{formatCurrency(totalAmount, currency)}}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Options Selection -->
+    <div class="payment-options-selection" *ngIf="!isProcessingGatewayPayment">
+      <h3>Choose Payment Method</h3>
+      
+      <div class="options-grid">
+        <!-- Receipt Upload Option -->
+        <div class="payment-option" 
+             [class.selected]="selectedPaymentOption === 'receipt'"
+             (click)="selectPaymentOption('receipt')">
+          <div class="option-icon">
+            <i nz-icon nzType="cloud-upload" nzTheme="outline"></i>
+          </div>
+          <div class="option-content">
+            <h4>Upload Receipt</h4>
+            <p>Upload a copy of your bank payment receipt for manual verification</p>
+            <ul class="option-features">
+              <li>Bank transfer receipt</li>
+              <li>Mobile banking screenshot</li>
+              <li>Manual verification</li>
+              <li>24-48 hour processing</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Gateway Payment Option -->
+        <!-- <div class="payment-option" 
+             [class.selected]="selectedPaymentOption === 'gateway'"
+             (click)="selectPaymentOption('gateway')">
+          <div class="option-icon">
+            <i nz-icon nzType="credit-card" nzTheme="outline"></i>
+          </div>
+          <div class="option-content">
+            <h4>Pay via EthSwitch</h4>
+            <p>Pay instantly using EthSwitch payment gateway</p>
+            <ul class="option-features">
+              <li>Instant payment</li>
+              <li>Secure gateway</li>
+              <li>Multiple payment methods</li>
+              <li>Immediate confirmation</li>
+            </ul>
+          </div>
+        </div> -->
+      </div>
+    </div>
+
+    <!-- EthSwitch Payment Processing Loading State -->
+    <div *ngIf="isProcessingGatewayPayment" class="ethswitch-loading-container">
+      <div class="loading-content">
+        <div class="spinner-large"></div>
+        <h3>Processing EthSwitch Payment</h3>
+        <p>Please wait while we initialize your payment...</p>
+        <div class="loading-steps">
+          <div class="step active">
+            <i nz-icon nzType="check-circle" nzTheme="outline"></i>
+            <span>Validating payment details</span>
+          </div>
+          <div class="step active">
+            <i nz-icon nzType="loading" nzTheme="outline"></i>
+            <span>Connecting to EthSwitch gateway</span>
+          </div>
+          <div class="step">
+            <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
+            <span>Redirecting to payment page</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Receipt Upload Redirect Message -->
+    <div *ngIf="selectedPaymentOption === 'receipt'" class="payment-form-container">
+      <div class="form-header">
+        <h3>Redirecting to Bank Payment</h3>
+        <p>You will be redirected to the bank payment page to upload your receipt</p>
+      </div>
+
+      <div class="redirect-info">
+        <div class="info-item">
+          <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+          <span>You will be taken to the bank payment form where you can upload your receipt</span>
+        </div>
+        <div class="info-item">
+          <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
+          <span>Please have your bank transaction details ready</span>
+        </div>
+        <div class="info-item">
+          <i nz-icon nzType="file-text" nzTheme="outline"></i>
+          <span>Supported file formats: JPEG, PNG, PDF (Max 5MB)</span>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="goBack()"
+        >
+          Back to Registration
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary btn-lg"
+          (click)="redirectToBankPayment()"
+        >
+          Continue to Bank Payment
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Messages -->
+  <div class="messages">
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i nz-icon nzType="check-circle" nzTheme="outline"></i>
+      {{successMessage}}
+    </div>
+
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <i nz-icon nzType="close-circle" nzTheme="outline"></i>
+      {{errorMessage}}
+    </div>
+  </div>
+</div>

@@ -268,56 +268,151 @@
         </li>
 
       </div>
+
+
+
+      <div *ngIf="isUserAcademicDirector">
+        <li nz-menu-item>
+          <i nz-icon nzType="dashboard"></i>
+          <span> <a routerLink="/dashboard">Dashboard</a></span>
+        </li>
+        <li nz-submenu nzTitle="Course Offering" nzIcon="folder-open">
+          <ul>
+
+            <li nz-menu-item>
+              <a routerLink="/colleges/term-course-offering">Course Offerings</a>
+            </li>
+          </ul>
+        </li>
+        <li nz-submenu nzTitle="Applicants" nzIcon="user">
+          <ul>
+
+            <li nz-menu-item>
+              <a routerLink="/student-application/applicant-request-list">Applicants Request</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/student-application/applicant-incomplete">Applicants Incomplete</a>
+            </li>
+          </ul>
+        </li>
+        <li nz-submenu nzTitle="Section Management" nzIcon="form">
+          <ul>
+            <li nz-menu-item>
+              <a routerLink="/student-section/student-section-assignments">Auto-Generate Class Sections</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/student-section/student-lab-section">Auto-Generate Lab Sections</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/student-section/reassigne-student-section">Reassign Student Sections</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/student-section/section-assigned-students">View Generated Sections</a>
+            </li>
+
+            <li nz-menu-item>
+              <a routerLink="/student-section/instructor-sections">Assign Instructors to Sections</a>
+            </li>
+          </ul>
+        </li>
+        <li nz-submenu nzTitle="User Management" nzIcon="team">
+          <ul>
+            <li nz-menu-item>
+              <a routerLink="/user-management/credentials">User Credentials</a>
+            </li>
+          </ul>
+        </li>
+        <li nz-submenu nzTitle="Reports" nzIcon="form">
+          <ul>
+
+            <li nz-menu-item>
+              <a routerLink="/reports/registered-student">Registered Students Per Course</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/reports/registered-student-per-batch">Registered Student Per Batch</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/reports/course-offered-per-term">Course Offered Per Term</a>
+            </li>
+
+            <li nz-menu-item>
+              <a routerLink="/reports/academic-term-registration-slip">Registration Slip Per Term</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/reports/transcript-search">Student Transcript</a>
+            </li>
+          </ul>
+        </li>
+
+
+      </div>
+
+
+
       <!-- userType == 'Student' -->
       <div *ngIf="isUserStudent || isUserApprovedApplicant">
         <li nz-menu-item>
           <i nz-icon nzType="dashboard"></i>
           <span> <a routerLink="/dashboard">Dashboard</a></span>
         </li>
-        <li nz-submenu nzTitle="Semester Registration" nzIcon="form">
-          <ul>
-            <li nz-menu-item>
-              <a routerLink="/students/manage-student-course-registration">Semester Course Registration</a>
-            </li>
-
-            <li nz-menu-item>
-              <a routerLink="/students/course-add-request">Course Add and Drop</a>
-            </li>
-            <li nz-menu-item>
-              <a routerLink="/reports/registration-slip">Course Registration Slip</a>
-            </li>
-          </ul>
-        </li>
         <li nz-submenu nzTitle="Profile Detail" nzIcon="user">
           <ul>
+
             <li nz-menu-item>
-              <a routerLink="/students/student-profile-summary">Grade Report</a>
-            </li>
-            <li nz-menu-item>
-              <a routerLink="/student-application/applicant-profile">Applicant Profile</a>
+              <a routerLink="/student-application/applicant-profile">My Profile</a>
             </li>
             <li nz-menu-item>
               <a routerLink="/students/register-semester-course">Enrollment Details</a>
             </li>
-
+            <!-- <li nz-menu-item>
+              <a routerLink="/students/student-profile-summary">Grade Report</a>
+            </li> -->
             <!-- <li nz-menu-item>
               <a routerLink="#">Academic History</a>
             </li> -->
 
           </ul>
         </li>
+        <li nz-submenu nzTitle="Course Registration" nzIcon="form">
+          <ul>
+            <li nz-menu-item>
+              <a routerLink="/students/manage-student-course-registration">Semester Registration</a>
+            </li>
+
+            <li nz-menu-item>
+              <a routerLink="/students/course-add-request">Course Add and Drop</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/reports/registration-slip">Payment Slip</a>
+            </li>
+          </ul>
+        </li>
+
         <li nz-menu-item>
           <i nz-icon nzType="usergroup-add" nzTheme="outline"></i>
           <span>
-            <a routerLink="/banks/pending-payment">Registration Payment </a>
+            <a routerLink="/banks/pending-payment">Settle Payment </a>
           </span>
         </li>
         <li nz-menu-item>
           <i nz-icon nzType="ordered-list" nzTheme="outline"></i>
           <span>
-            <a routerLink="/student-section/course-section-assignment">Course Section</a>
+            <a routerLink="/student-section/course-section-assignment">My Section</a>
           </span>
         </li>
+        <li nz-menu-item>
+          <i nz-icon nzType="usergroup-add" nzTheme="outline"></i>
+          <span>
+            <a routerLink="/students/student-profile-summary">Grade Report</a>
+          </span>
+        </li>
+        <li nz-menu-item>
+          <i nz-icon nzType="usergroup-add" nzTheme="outline"></i>
+          <span>
+            <a routerLink="/dashboard">My Schedule</a>
+          </span>
+        </li>
+
 
       </div>
 
@@ -328,6 +423,9 @@
             <li nz-menu-item>
               <a routerLink="/student-application/applicant-request-list">Applicants Request</a>
             </li>
+            <li nz-menu-item>
+              <a routerLink="/student-application/applicant-incomplete">Applicants Incomplete</a>
+            </li>
           </ul>
         </li>
       </div>
@@ -337,6 +435,16 @@
 
             <li nz-menu-item>
               <a routerLink="/reports/academic-term-registration-slip">Registration Slip Per Term</a>
+            </li>
+          </ul>
+        </li>
+      </div>
+      <div *ngIf="isUserReception">
+        <li nz-submenu nzTitle="Applicants" nzIcon="form">
+          <ul>
+
+            <li nz-menu-item>
+              <a routerLink="/student-application/applicant-incomplete">Applicants Incomplete</a>
             </li>
           </ul>
         </li>

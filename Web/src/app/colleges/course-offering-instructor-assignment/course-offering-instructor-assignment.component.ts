@@ -149,6 +149,14 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
   }
 
   onSubmit() {
+    if (this.setOfCheckedId.size === 0) {
+      this._customNotificationService.notification(
+        "warning",
+        "No Selection",
+        "Please select at least one instructor to assign."
+      );
+      return;
+    }
 
     const selectedStaffs = this.staffList
       .filter(data => this.setOfCheckedId.has(data.id))
@@ -158,20 +166,35 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
     assignment.courseId = this.courseId;
     assignment.courseOfferingId = this.courseOfferingId;
     assignment.staffId = selectedStaffs;
-    this.courseOfferingInstructorAssignmentService.create(assignment).subscribe(res => {
-      if (res) {
+    
+    this.loading = true;
+    this.courseOfferingInstructorAssignmentService.create(assignment).subscribe({
+      next: (res) => {
+        if (res) {
+          this._customNotificationService.notification(
+            "success",
+            "Success",
+            `Successfully assigned ${selectedStaffs.length} instructor(s) to the course offering.`
+          );
+          // Emit the event when data is successfully saved
+          this.dataUpdated.emit();
+          // Close the modal here if needed
+          this.modalRef.close();
+        }
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error assigning instructors:', error);
         this._customNotificationService.notification(
-          "success",
-          "Success",
-          res.data
+          "error",
+          "Error",
+          "Failed to assign instructors. Please try again."
         );
-        // Emit the event when data is successfully saved
-        this.dataUpdated.emit();
-        // Close the modal here if needed
-        this.modalRef.close();
+        this.loading = false;
+        this.cdr.detectChanges();
       }
-    })
-
+    });
   }
   reset(): void {
     this.clearSearch();
@@ -215,6 +238,10 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
       .subscribe(res => {
         this.existingStaffList = res;
       })
+  }
+
+  closeModal(): void {
+    this.modalRef.close();
   }
 
 }

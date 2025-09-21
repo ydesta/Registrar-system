@@ -97,7 +97,7 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
             this._customNotificationService.notification(
               "warning",
               "No Application Found",
-              "We couldn’t find any application data for you."
+              "We couldn't find any application data for you. Please create a new application."
             );
             return; // stop further execution
           }
@@ -117,11 +117,11 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
             errorMessage += 'Please refresh the page or try again later.';
           }
 
-          // this._customNotificationService.notification(
-          //   "error",
-          //   "Application Loading Error",
-          //   errorMessage
-          // );
+          this._customNotificationService.notification(
+            "error",
+            "Application Loading Error",
+            errorMessage
+          );
         }
       });
 
@@ -306,15 +306,53 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
       return true;
     }
 
-    return this.selectedTabIndex !== 7 || !this.agreementFormValid;
+    // Check if we're on the last tab (Agreement tab)
+    if (this.selectedTabIndex !== 7) {
+      return true;
+    }
+
+    // Check if agreement form is valid
+    if (!this.agreementFormValid) {
+      return true;
+    }
+
+    // Check if required counts are greater than zero
+    if (this.countNoOfContact <= 0) {
+      return true;
+    }
+
+    if (this.countNoOfEducation <= 0) {
+      return true;
+    }
+
+    if (this.countSubmitionCourse <= 0) {
+      return true;
+    }
+
+    return false;
   }
 
   get isAcademicProgramProcessed(): boolean {
     return this.isSubmittedApplicationForm === 1;
   }
 
+  // Debug method to check validation status
+  get submitButtonValidationStatus(): any {
+    return {
+      isApplicationSubmitted: this.isApplicationSubmitted,
+      isSubmittedApplicationForm: this.isSubmittedApplicationForm,
+      selectedTabIndex: this.selectedTabIndex,
+      agreementFormValid: this.agreementFormValid,
+      countNoOfContact: this.countNoOfContact,
+      countNoOfEducation: this.countNoOfEducation,
+      countSubmitionCourse: this.countSubmitionCourse,
+      isSubmitButtonDisabled: this.isSubmitButtonDisabled
+    };
+  }
+
   get isSaveButtonDisabled(): boolean {
-    return this.isAcademicProgramProcessed;
+    // Keep save button enabled after submission - only disable Review button
+    return false;
   }
 
   private collectReviewSummaryData(): ReviewSummaryData {
@@ -604,7 +642,7 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
         this.profilePicture =
           environment.fileUrl +
           "/Resources/profile/" +
-          applicantData.files[0]?.fileName;
+          (applicantData.files?.[0]?.fileName || '');
 
         if (applicantData.files && applicantData.files.length > 0 && applicantData.files[0]?.fileName) {
           this.form.patchValue({
@@ -752,7 +790,7 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
           next: (res) => {
             this.saveLoading = false;
             const responseData = this.extractResponseData<any>(res);
-            if (responseData != null) {
+            if (responseData != null && responseData.id) {
               this._customNotificationService.notification(
                 "success",
                 "Success",
@@ -1062,7 +1100,7 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
         this._customNotificationService.notification(
           "success",
           "Success",
-          "Application form submitted successfully!"
+          "Your application has been submitted successfully!"
         );
         this.router.navigateByUrl(
           `/student-application/admission-request?id=${this.id}`

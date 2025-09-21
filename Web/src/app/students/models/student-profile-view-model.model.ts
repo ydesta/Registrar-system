@@ -15,6 +15,7 @@ export class StudentProfileViewModel {
     public phoneNo: string;
     public status: string;
     public isDeleted: boolean;
+    public cgpa: number;
     public studentAcademicYears: StudentAcademicYears[];
     public studentCoursesTaken: StudentCoursesTaken[];
     public studentSectionYear: SectionYearResult[];

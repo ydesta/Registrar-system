@@ -68,8 +68,11 @@ export class QuadrantBreakdownFormComponent implements OnInit {
     this.CurriculumId.patchValue(this.curriculumCode);
     this.getQuadrantsList();
     this.quadrantsId.valueChanges.subscribe(res => {
+
+
       this.quadrantId = res;
       if (this.curriculumId != null && res != null) {
+        console.log(this.curriculumId);
         this.targetList = [];
         this.targetCourseIds$.next([]);
         this.id = 0
@@ -249,7 +252,7 @@ export class QuadrantBreakdownFormComponent implements OnInit {
     const lowerCaseTitle = item.title.toLowerCase();
     return lowerCaseTitle.includes(inputValue);
   }
-  
+
   search(ret: {}): void {
   }
 

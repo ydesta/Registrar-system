@@ -32,14 +32,9 @@ export class StudentProgramRequesterFormComponent implements OnInit {
     this.createAcademicProgramRequest();
   }
   ngOnInit(): void {
-    console.log("StudentProgramRequesterFormComponent - applicantId:", this.applicantId);
-    console.log("StudentProgramRequesterFormComponent - studentProgramRequester:", this.studentProgramRequester);
-    
     // Validate that we have an applicantId
     if (!this.applicantId) {
-      console.warn("Warning: applicantId is null or undefined in StudentProgramRequesterFormComponent");
       if (this.studentProgramRequester?.applicantId) {
-        console.log("Using applicantId from studentProgramRequester:", this.studentProgramRequester.applicantId);
         this.applicantId = this.studentProgramRequester.applicantId;
       }
     }
@@ -132,7 +127,7 @@ export class StudentProgramRequesterFormComponent implements OnInit {
               this._customNotificationService.notification(
                 "warn",
                 "Warning",
-                "Academic Program Request already exists."
+                "Academic Program Request already exists or save failed."
               );
             }
           },
@@ -152,7 +147,11 @@ export class StudentProgramRequesterFormComponent implements OnInit {
           .update(this.id, postData)
           .subscribe({
             next: (res) => {
-              if (res != null) {
+              console.log("##      ", res);
+              // Check if response indicates success
+              const isSuccess = res === "success";
+              
+              if (isSuccess) {
                 this._customNotificationService.notification(
                   "success",
                   "Success",
@@ -164,11 +163,12 @@ export class StudentProgramRequesterFormComponent implements OnInit {
                 this._customNotificationService.notification(
                   "warn",
                   "Warning",
-                  "Academic Program Request already exists."
+                  "Academic Program Request already exists or update failed."
                 );
               }
             },
             error: (error) => {
+              console.error('Error updating academic program request:', error);
               this._customNotificationService.notification(
                 "error",
                 "Error",

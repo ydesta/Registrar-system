@@ -1,0 +1,46 @@
+<div class="registration-success-container">
+  <div class="success-content">
+    <div class="success-icon">
+      <i class="icon-check-circle"></i>
+    </div>
+    
+    <h1>Registration Successful!</h1>
+    <p class="success-message">
+      Your course registration has been completed successfully.
+    </p>
+    
+    <div class="registration-details">
+      <div class="detail-item">
+        <span class="label">Registration ID:</span>
+        <span class="value">{{registrationId}}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Payment Method:</span>
+        <span class="value">{{getPaymentMethodText()}}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Status:</span>
+        <span class="value status-approved">Approved</span>
+      </div>
+    </div>
+    
+    <div class="next-steps">
+      <h3>What's Next?</h3>
+      <ul>
+        <li>✓ Your registration is now active</li>
+        <li>✓ You can view your registered courses in the dashboard</li>
+        <li>✓ Course materials will be available soon</li>
+        <li>✓ Check your email for confirmation details</li>
+      </ul>
+    </div>
+    
+    <div class="action-buttons">
+      <button class="btn btn-primary" (click)="goToDashboard()">
+        Go to Dashboard
+      </button>
+      <button class="btn btn-secondary" (click)="goToRegistration()">
+        Register More Courses
+      </button>
+    </div>
+  </div>
+</div>

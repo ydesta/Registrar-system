@@ -40,7 +40,27 @@ export class EducationFormComponent implements OnInit {
   ngOnInit(): void {
     if (this.educationBackground != undefined) {
       this.educationId = this.educationBackground.id;
-      this.applicantEducationBacgroundForm.patchValue(this.educationBackground);
+      
+      // Convert graduatedYear string to array format for range picker
+      const educationData: any = { ...this.educationBackground };
+      if (educationData.graduatedYear && typeof educationData.graduatedYear === 'string') {
+        const yearParts = educationData.graduatedYear.split(',');
+        if (yearParts.length === 2) {
+          // Convert to Date objects for the range picker
+          educationData.graduatedYear = [
+            new Date(parseInt(yearParts[0].trim()), 0, 1), // Start year
+            new Date(parseInt(yearParts[1].trim()), 11, 31) // End year
+          ];
+        }
+      }
+      
+      this.applicantEducationBacgroundForm.patchValue(educationData);
+      
+      // Set initial validation based on existing programme level
+      const programmeLevel = this.educationBackground.programmeLevel;
+      if (programmeLevel) {
+        this.updateFieldOfStudyValidation(programmeLevel);
+      }
     } else {
       // Clear file-related data for new records
       this.file_store = undefined;
@@ -63,7 +83,7 @@ export class EducationFormComponent implements OnInit {
       ],
       fieldOfStudy: [
         "",
-        [Validators.required, alphabetsWithSpecialCharsValidator()]
+        [alphabetsWithSpecialCharsValidator()]
       ],
       programmeLevel: [
         "",
@@ -73,6 +93,11 @@ export class EducationFormComponent implements OnInit {
       remark: [""],
       ActualFile: ["",Validators.required]
     });
+
+    // Subscribe to programmeLevel changes to update fieldOfStudy validation
+    this.applicantEducationBacgroundForm.get('programmeLevel')?.valueChanges.subscribe(level => {
+      this.updateFieldOfStudyValidation(level);
+    });
   }
   private getApplicantEducationBackground(): ApplicantEducationBackgroundRequest {
     const formModel = this.applicantEducationBacgroundForm.getRawValue();
@@ -80,7 +105,16 @@ export class EducationFormComponent implements OnInit {
     education.applicantID = this.applicationId;
     education.createdBy = "";
     education.fieldOfStudy = formModel.fieldOfStudy;
-    education.graduatedYear = formModel.graduatedYear.toString();
+    
+    // Convert graduatedYear array back to string format
+    if (Array.isArray(formModel.graduatedYear) && formModel.graduatedYear.length === 2) {
+      const startYear = formModel.graduatedYear[0].getFullYear();
+      const endYear = formModel.graduatedYear[1].getFullYear();
+      education.graduatedYear = `${startYear},${endYear}`;
+    } else {
+      education.graduatedYear = formModel.graduatedYear ? formModel.graduatedYear.toString() : "";
+    }
+    
     education.programmeLevel = formModel.programmeLevel;
     education.remark = formModel.remark;
     education.schoollName = formModel.schoollName;
@@ -91,6 +125,11 @@ export class EducationFormComponent implements OnInit {
   }
   get fieldOfStudy() {
     return this.applicantEducationBacgroundForm.get("fieldOfStudy");
+  }
+
+  get isFieldOfStudyRequired() {
+    const programmeLevel = this.applicantEducationBacgroundForm.get("programmeLevel")?.value;
+    return this.isGraduatedStudent(programmeLevel);
   }
   get programmeLevel() {
     return this.applicantEducationBacgroundForm.get("programmeLevel");
@@ -105,6 +144,42 @@ export class EducationFormComponent implements OnInit {
   
   remark() {
     return this.applicantEducationBacgroundForm.get("remark");
+  }
+
+  private isGraduatedStudent(programmeLevel: string): boolean {
+    const graduatedLevels = [
+      "Bachelor's Degree",
+      "Master's Degree", 
+      "Doctorate (Ph.D.)",
+      "Associate's Degree",
+      "Certificate/Diploma"
+    ];
+    return graduatedLevels.includes(programmeLevel);
+  }
+
+  get isFieldOfStudyVisible(): boolean {
+    const programmeLevel = this.applicantEducationBacgroundForm.get("programmeLevel")?.value;
+    // Hide field of study for High School Complete, show for all others
+    return programmeLevel !== "High School Complete";
+  }
+
+  private updateFieldOfStudyValidation(programmeLevel: string): void {
+    const fieldOfStudyControl = this.applicantEducationBacgroundForm.get("fieldOfStudy");
+    
+    if (programmeLevel === "High School Complete") {
+      // Clear field of study value and remove validators for High School Complete
+      fieldOfStudyControl?.setValue("");
+      fieldOfStudyControl?.setValidators([alphabetsWithSpecialCharsValidator()]);
+    } else if (this.isGraduatedStudent(programmeLevel)) {
+      // Add required validator for graduated students
+      fieldOfStudyControl?.setValidators([Validators.required, alphabetsWithSpecialCharsValidator()]);
+    } else {
+      // Remove required validator for other non-graduated students
+      fieldOfStudyControl?.setValidators([alphabetsWithSpecialCharsValidator()]);
+    }
+    
+    // Update validation status
+    fieldOfStudyControl?.updateValueAndValidity();
   }
 
   getFileUploadStatus() {

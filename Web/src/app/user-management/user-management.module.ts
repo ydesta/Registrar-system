@@ -17,6 +17,7 @@ import { UserDetailsComponent } from './components/user-details/user-details.com
 import { UserStatusComponent } from './components/user-status/user-status.component';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { CreateUserComponent } from './components/create-user/create-user.component';
+import { UserCredentialsComponent } from './components/user-credentials/user-credentials.component';
 
 // Ng-Zorro Modules
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -63,7 +64,8 @@ import { NzModalRef } from 'ng-zorro-antd/modal';
     UserDetailsComponent,
     UserStatusComponent,
     ResetPasswordComponent,
-    CreateUserComponent
+    CreateUserComponent,
+    UserCredentialsComponent
   ],
   imports: [
     CommonModule,

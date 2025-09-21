@@ -8,29 +8,74 @@
     (previousTabClicked)="previousTab()">
 
     <div tabContent="generalInfo">
-        <div class="professional-header">
-            <h1 class="page-title">Applicant Information Review</h1>
-            <p class="page-subtitle">Review applicant's personal and contact information</p>
+        <div class="professional-header" role="banner" aria-label="Applicant Information Review Header">
+            <div class="header-content">
+                <div class="header-icon" aria-hidden="true">
+                    <span nz-icon nzType="user" nzTheme="outline"></span>
+                </div>
+                <div class="header-text">
+                    <h1 class="page-title" id="page-title">Applicant Information Review</h1>
+                    <p class="page-subtitle" id="page-subtitle">Comprehensive review of applicant's personal and contact information</p>
+                </div>
+                <div class="header-status">
+                    <nz-tag nzColor="processing" class="status-tag" aria-label="Application status: Under Review">
+                        <span nz-icon nzType="clock-circle" nzTheme="outline" aria-hidden="true"></span>
+                        Under Review
+                    </nz-tag>
+                </div>
+            </div>
         </div>
 
-        <nz-form [formGroup]="form" class="professional-form">
+        <!-- Loading State -->
+        <div *ngIf="isLoadingApplicant" class="loading-container" role="status" aria-label="Loading applicant information">
+            <nz-spin nzSize="large">
+                <div class="loading-content">
+                    <span nz-icon nzType="loading" nzTheme="outline" style="font-size: 24px;"></span>
+                    <p>Loading applicant information...</p>
+                </div>
+            </nz-spin>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="hasError && !isLoadingApplicant" class="error-container" role="alert">
+            <nz-alert
+                nzType="error"
+                [nzMessage]="'Error Loading Data'"
+                [nzDescription]="errorMessage"
+                nzShowIcon
+                nzCloseable
+                (nzOnClose)="hasError = false">
+            </nz-alert>
+        </div>
+
+        <nz-form [formGroup]="form" class="professional-form" *ngIf="!isLoadingApplicant && !hasError">
             <nz-row [nzGutter]="24" class="profile-container">
                 <nz-col nzSpan="6">
                     <div class="profile-section">
-                        <h2 class="section-title">
-                            <span nz-icon nzType="user" nzTheme="outline"></span>
-                            Profile Photo
-                        </h2>
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <span nz-icon nzType="user" nzTheme="outline"></span>
+                                Profile Photo
+                            </h2>                          
+                        </div>
                         <nz-divider></nz-divider>
                         <div class="profile-photo-container">
                             <div class="photo-wrapper">
-                                <img *ngIf="profilePicture == ''" 
-                                     class="profile-image" 
-                                     src="./../../../assets/images/profile.png" 
-                                     alt="Default Profile" />
-                                <img [src]="profilePicture" 
-                                     class="profile-image" 
-                                     alt="Applicant Photo" />
+                                <div class="photo-frame" role="img" aria-label="Applicant profile photograph">
+                                    <img *ngIf="profilePicture == ''" 
+                                         class="profile-image" 
+                                         src="./../../../assets/images/profile.png" 
+                                         alt="Default profile picture placeholder" 
+                                         role="presentation" />
+                                    <img [src]="profilePicture" 
+                                         class="profile-image" 
+                                         alt="Applicant profile photograph" 
+                                         role="presentation" />
+                                    <div class="photo-overlay" aria-hidden="true">
+                                        <span nz-icon nzType="eye" nzTheme="outline"></span>
+                                    </div>
+                                </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -38,297 +83,411 @@
 
                 <nz-col nzSpan="18">
                     <div class="information-section">
-                        <h2 class="section-title">
-                            <span nz-icon nzType="idcard" nzTheme="outline"></span>
-                            Personal Information
-                        </h2>
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <span nz-icon nzType="idcard" nzTheme="outline"></span>
+                                Personal Information
+                            </h2>
+                           
+                        </div>
                         <nz-divider></nz-divider>
                         
-                        <div nz-row [nzGutter]="16">
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label nzRequired class="form-label">First Name</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="firstName"
-                                            placeholder="First name"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
+                        <!-- Basic Information Group -->
+                        <div class="info-group">
+                            <h3 class="group-title">
+                                <span nz-icon nzType="user" nzTheme="outline"></span>
+                                Basic Information
+                            </h3>
+                            <div nz-row [nzGutter]="16">
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label nzRequired class="form-label" for="firstName">
+                                            <span nz-icon nzType="user" nzTheme="outline" aria-hidden="true"></span>
+                                            First Name
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="firstName"
+                                                id="firstName"
+                                                placeholder="First name"
+                                                class="readonly-input"
+                                                aria-label="Applicant's first name"
+                                                aria-describedby="firstName-help" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
+
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label nzRequired class="form-label">
+                                            <span nz-icon nzType="user" nzTheme="outline"></span>
+                                            Father's Name
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="fatherName"
+                                                placeholder="Father's name"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
+                            </div>
+                            <div nz-row [nzGutter]="16">
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label nzRequired class="form-label">
+                                            <span nz-icon nzType="user" nzTheme="outline"></span>
+                                            Grandfather's Name
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="grandFatherName"
+                                                placeholder="Grandfather's name"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label class="form-label">
+                                            <span nz-icon nzType="user" nzTheme="outline"></span>
+                                            Sir Name
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="sirName" 
+                                                placeholder="Sir name"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
                             </div>
 
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label nzRequired class="form-label">Father's Name</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="fatherName"
-                                            placeholder="Father's name"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
+                            <div nz-row [nzGutter]="16">
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label nzRequired class="form-label">
+                                            <span nz-icon nzType="user" nzTheme="outline"></span>
+                                            Mother's Name
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="motherName"
+                                                placeholder="Mother's name"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label nzRequired class="form-label">
+                                            <span nz-icon nzType="team" nzTheme="outline"></span>
+                                            Gender
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <nz-select [nzDisabled]="true" formControlName="gender"
+                                                nzPlaceHolder="Select gender" class="readonly-select">
+                                                <nz-option nzValue="Male" nzLabel="Male"></nz-option>
+                                                <nz-option nzValue="Female" nzLabel="Female"></nz-option>
+                                            </nz-select>
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
                             </div>
                         </div>
 
-                        <div nz-row [nzGutter]="16">
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label nzRequired class="form-label">Grandfather's Name</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="grandFatherName"
-                                            placeholder="Grandfather's name"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
+                        <!-- Identity Information Group -->
+                        <div class="info-group">
+                            <h3 class="group-title">
+                                <span nz-icon nzType="idcard" nzTheme="outline"></span>
+                                Identity Information
+                            </h3>
+
+                            <div nz-row [nzGutter]="16">
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label nzRequired class="form-label">
+                                            <span nz-icon nzType="flag" nzTheme="outline"></span>
+                                            Nationality
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="nationality"
+                                                placeholder="Nationality"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label nzRequired class="form-label">
+                                            <span nz-icon nzType="environment" nzTheme="outline"></span>
+                                            Birth Place
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="birthPlace"
+                                                placeholder="Birth place"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
                             </div>
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label class="form-label">Sir Name</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="sirName" 
-                                            placeholder="Sir name"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
+
+                            <div nz-row [nzGutter]="16">
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label nzRequired class="form-label">
+                                            <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                                            Birth Date
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="birthDate" 
+                                                placeholder="Birth date"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label class="form-label">
+                                            <span nz-icon nzType="file-text" nzTheme="outline"></span>
+                                            TIN
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="tin"
+                                                placeholder="TIN"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
                             </div>
                         </div>
 
-                        <div nz-row [nzGutter]="16">
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label nzRequired class="form-label">Mother's Name</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="motherName"
-                                            placeholder="Mother's name"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
+                        <!-- Amharic Names Group -->
+                        <div class="info-group">
+                            <h3 class="group-title">
+                                <span nz-icon nzType="global" nzTheme="outline"></span>
+                                Amharic Names
+                            </h3>
+                            <div nz-row [nzGutter]="16">
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label nzRequired class="form-label">
+                                            <span nz-icon nzType="user" nzTheme="outline"></span>
+                                            First Name (Amharic)
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="firstNameInAmh"
+                                                placeholder="First name in Amharic"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label nzRequired class="form-label">
+                                            <span nz-icon nzType="user" nzTheme="outline"></span>
+                                            Father's Name (Amharic)
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="fatherNameInAmh"
+                                                placeholder="Father's name in Amharic"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
                             </div>
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label nzRequired class="form-label">Gender</nz-form-label>
-                                    <nz-form-control>
-                                        <nz-select [nzDisabled]="true" formControlName="gender"
-                                            nzPlaceHolder="Select gender" class="readonly-select">
-                                            <nz-option nzValue="Male" nzLabel="Male"></nz-option>
-                                            <nz-option nzValue="Female" nzLabel="Female"></nz-option>
-                                        </nz-select>
-                                    </nz-form-control>
-                                </nz-form-item>
+                            <div nz-row [nzGutter]="16">
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label nzRequired class="form-label">
+                                            <span nz-icon nzType="user" nzTheme="outline"></span>
+                                            Grandfather's Name (Amharic)
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="grandFatherNameInAmh"
+                                                placeholder="Grandfather's name in Amharic"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label class="form-label">
+                                            <span nz-icon nzType="file-text" nzTheme="outline"></span>
+                                            National Examination ID
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="nationalExaminationId"
+                                                placeholder="National Examination ID"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
                             </div>
-                        </div>
-
-                        <div nz-row [nzGutter]="16">
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label nzRequired class="form-label">Nationality</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="nationality"
-                                            placeholder="Nationality"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
-                            </div>
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label nzRequired class="form-label">Birth Place</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="birthPlace"
-                                            placeholder="Birth place"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
-                            </div>
-                        </div>
-
-                        <div nz-row [nzGutter]="16">
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label nzRequired class="form-label">Birth Date</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="birthDate" 
-                                            placeholder="Birth date"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
-                            </div>
-                             <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label class="form-label">TIN</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="tin"
-                                            placeholder="TIN"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
-                            </div>
-                        </div>
-                        <div nz-row [nzGutter]="16">
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label nzRequired class="form-label">First Name (Amharic)</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="firstNameInAmh"
-                                            placeholder="First name in Amharic"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
-                            </div>
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label nzRequired class="form-label">Father's Name (Amharic)</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="fatherNameInAmh"
-                                            placeholder="Father's name in Amharic"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
-                            </div>
-                        </div>
-                        <div nz-row [nzGutter]="16">
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label nzRequired class="form-label">Grandfather's Name (Amharic)</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="grandFatherNameInAmh"
-                                            placeholder="Grandfather's name in Amharic"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
-                            </div>
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label class="form-label">National Examination ID</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="nationalExaminationId"
-                                            placeholder="National Examination ID"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
+                            <div nz-row [nzGutter]="16">
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label class="form-label">
+                                            <span nz-icon nzType="idcard" nzTheme="outline"></span>
+                                            National ID
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="nationalId"
+                                                placeholder="National ID"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
+                                <div nz-col nzSpan="12">
+                                    <nz-form-item class="enhanced-form-item">
+                                        <nz-form-label class="form-label">
+                                            <span nz-icon nzType="environment" nzTheme="outline"></span>
+                                            Area Type
+                                        </nz-form-label>
+                                        <nz-form-control>
+                                            <input readonly nz-input formControlName="areaType"
+                                                placeholder="Area Type"
+                                                class="readonly-input" />
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </div>
                             </div>
                         </div>
-                        <div nz-row [nzGutter]="16">
-                             <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label class="form-label">National ID</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="nationalId"
-                                            placeholder="National ID"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
-                            </div>
-                            <div nz-col nzSpan="12">
-                                <nz-form-item>
-                                    <nz-form-label class="form-label">Area Type</nz-form-label>
-                                    <nz-form-control>
-                                        <input readonly nz-input formControlName="areaType"
-                                            placeholder="Area Type"
-                                            class="readonly-input" />
-                                    </nz-form-control>
-                                </nz-form-item>
-                            </div>
-                            
-                        </div>
-                       
                     </div>
                 </nz-col>
             </nz-row>
 
             <div class="contact-section">
-                <h2 class="section-title">
-                    <span nz-icon nzType="environment" nzTheme="outline"></span>
-                    Contact Information
-                </h2>
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span nz-icon nzType="environment" nzTheme="outline"></span>
+                        Contact Information
+                    </h2>
+                   
+                </div>
                 <nz-divider></nz-divider>
 
-                <div nz-row [nzGutter]="16">
-                    <div nz-col nzSpan="12">
-                        <nz-form-item>
-                            <nz-form-label class="form-label">Office Phone</nz-form-label>
-                            <nz-form-control>
-                                <input readonly nz-input formControlName="telephonOffice"
-                                    placeholder="Office phone number"
-                                    class="readonly-input" />
-                            </nz-form-control>
-                        </nz-form-item>
+                <!-- Phone Numbers Group -->
+                <div class="info-group">
+                    <h3 class="group-title">
+                        <span nz-icon nzType="phone" nzTheme="outline"></span>
+                        Phone Numbers
+                    </h3>
+                    <div nz-row [nzGutter]="16">
+                        <div nz-col nzSpan="12">
+                            <nz-form-item class="enhanced-form-item">
+                                <nz-form-label class="form-label">
+                                    <span nz-icon nzType="phone" nzTheme="outline"></span>
+                                    Office Phone
+                                </nz-form-label>
+                                <nz-form-control>
+                                    <input readonly nz-input formControlName="telephonOffice"
+                                        placeholder="Office phone number"
+                                        class="readonly-input" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                        <div nz-col nzSpan="12">
+                            <nz-form-item class="enhanced-form-item">
+                                <nz-form-label class="form-label">
+                                    <span nz-icon nzType="home" nzTheme="outline"></span>
+                                    Home Phone
+                                </nz-form-label>
+                                <nz-form-control>
+                                    <input readonly nz-input formControlName="telephonHome"
+                                        placeholder="Home phone number"
+                                        class="readonly-input" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
                     </div>
-                    <div nz-col nzSpan="12">
-                        <nz-form-item>
-                            <nz-form-label class="form-label">Home Phone</nz-form-label>
-                            <nz-form-control>
-                                <input readonly nz-input formControlName="telephonHome"
-                                    placeholder="Home phone number"
-                                    class="readonly-input" />
-                            </nz-form-control>
-                        </nz-form-item>
-                    </div>
-                </div>
-
-                <div nz-row [nzGutter]="16">
-                    <div nz-col nzSpan="12">
-                        <nz-form-item>
-                            <nz-form-label nzRequired class="form-label">Mobile Number</nz-form-label>
-                            <nz-form-control>
-                                <input readonly nz-input formControlName="mobile" 
-                                    placeholder="Mobile number"
-                                    class="readonly-input" />
-                            </nz-form-control>
-                        </nz-form-item>
-                    </div>
-                    <div nz-col nzSpan="12">
-                        <nz-form-item>
-                            <nz-form-label class="form-label">Postal Address</nz-form-label>
-                            <nz-form-control>
-                                <input readonly nz-input formControlName="postalAddress"
-                                    placeholder="Postal address"
-                                    class="readonly-input" />
-                            </nz-form-control>
-                        </nz-form-item>
-                    </div>
-                </div>
-
-                <div nz-row [nzGutter]="16">
-                    <div nz-col nzSpan="12">
-                        <nz-form-item>
-                            <nz-form-label nzRequired class="form-label">Email Address</nz-form-label>
-                            <nz-form-control>
-                                <input readonly nz-input formControlName="emailAddress"
-                                    placeholder="Email address"
-                                    class="readonly-input" />
-                            </nz-form-control>
-                        </nz-form-item>
-                    </div>
-                    <div nz-col nzSpan="12">
-                        <nz-form-item>
-                            <nz-form-label nzRequired class="form-label">Region</nz-form-label>
-                            <nz-form-control>
-                                <input readonly nz-input formControlName="region" 
-                                    placeholder="Region"
-                                    class="readonly-input" />
-                            </nz-form-control>
-                        </nz-form-item>
+                    <div nz-row [nzGutter]="16">
+                        <div nz-col nzSpan="12">
+                            <nz-form-item class="enhanced-form-item">
+                                <nz-form-label nzRequired class="form-label">
+                                    <span nz-icon nzType="mobile" nzTheme="outline"></span>
+                                    Mobile Number
+                                </nz-form-label>
+                                <nz-form-control>
+                                    <input readonly nz-input formControlName="mobile" 
+                                        placeholder="Mobile number"
+                                        class="readonly-input" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                        <div nz-col nzSpan="12">
+                            <nz-form-item class="enhanced-form-item">
+                                <nz-form-label class="form-label">
+                                    <span nz-icon nzType="mail" nzTheme="outline"></span>
+                                    Email Address
+                                </nz-form-label>
+                                <nz-form-control>
+                                    <input readonly nz-input formControlName="emailAddress"
+                                        placeholder="Email address"
+                                        class="readonly-input" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
                     </div>
                 </div>
 
-                <div nz-row [nzGutter]="16">
-                    <div nz-col nzSpan="12">
-                        <nz-form-item>
-                            <nz-form-label class="form-label">Woreda</nz-form-label>
-                            <nz-form-control>
-                                <input readonly nz-input formControlName="woreda" 
-                                    placeholder="Woreda"
-                                    class="readonly-input" />
-                            </nz-form-control>
-                        </nz-form-item>
+                <!-- Address Information Group -->
+                <div class="info-group">
+                    <h3 class="group-title">
+                        <span nz-icon nzType="environment" nzTheme="outline"></span>
+                        Address Information
+                    </h3>
+                    <div nz-row [nzGutter]="16">
+                        <div nz-col nzSpan="12">
+                            <nz-form-item class="enhanced-form-item">
+                                <nz-form-label class="form-label">
+                                    <span nz-icon nzType="home" nzTheme="outline"></span>
+                                    Postal Address
+                                </nz-form-label>
+                                <nz-form-control>
+                                    <input readonly nz-input formControlName="postalAddress"
+                                        placeholder="Postal address"
+                                        class="readonly-input" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                            <div nz-col nzSpan="12">
+                            <nz-form-item class="enhanced-form-item">
+                                <nz-form-label nzRequired class="form-label">
+                                    <span nz-icon nzType="global" nzTheme="outline"></span>
+                                    Region
+                                </nz-form-label>
+                                <nz-form-control>
+                                    <input readonly nz-input formControlName="region" 
+                                        placeholder="Region"
+                                        class="readonly-input" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
                     </div>
-                    <div nz-col nzSpan="12">
-                        <nz-form-item>
-                            <nz-form-label class="form-label">Kebele</nz-form-label>
-                            <nz-form-control>
-                                <input readonly nz-input formControlName="kebele" 
-                                    placeholder="Kebele"
-                                    class="readonly-input" />
-                            </nz-form-control>
-                        </nz-form-item>
+                    <div nz-row [nzGutter]="16">
+                    
+                        <div nz-col nzSpan="12">
+                            <nz-form-item class="enhanced-form-item">
+                                <nz-form-label class="form-label">
+                                    <span nz-icon nzType="environment" nzTheme="outline"></span>
+                                    Woreda
+                                </nz-form-label>
+                                <nz-form-control>
+                                    <input readonly nz-input formControlName="woreda" 
+                                        placeholder="Woreda"
+                                        class="readonly-input" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                        <div nz-col nzSpan="12">
+                            <nz-form-item class="enhanced-form-item">
+                                <nz-form-label class="form-label">
+                                    <span nz-icon nzType="environment" nzTheme="outline"></span>
+                                    Kebele
+                                </nz-form-label>
+                                <nz-form-control>
+                                    <input readonly nz-input formControlName="kebele" 
+                                        placeholder="Kebele"
+                                        class="readonly-input" />
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -337,107 +496,330 @@
 
     <div tabContent="contactPerson">
         <div class="professional-header">
-            <h1 class="page-title">Emergency Contacts</h1>
-            <p class="page-subtitle">Review applicant's emergency contact information</p>
+            <div class="header-content">
+                <div class="header-icon">
+                    <span nz-icon nzType="team" nzTheme="outline"></span>
+                </div>
+                <div class="header-text">
+                    <h1 class="page-title">Emergency Contacts</h1>
+                    <p class="page-subtitle">Review applicant's emergency contact information and relationships</p>
+                </div>
+                <div class="header-status">
+                    <nz-tag nzColor="blue" class="status-tag">
+                        <span nz-icon nzType="contacts" nzTheme="outline"></span>
+                        {{ contactPersonLists.length }} Contact(s)
+                    </nz-tag>
+                </div>
+            </div>
         </div>
 
-        <nz-table #basicTable [nzData]="contactPersonLists" 
-                  nzBordered 
-                  class="professional-table">
-            <thead>
-                <tr>
-                    <th class="table-header">Full Name</th>
-                    <th class="table-header">Office Phone</th>
-                    <th class="table-header">Home Phone</th>
-                    <th class="table-header">Relationship</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let data of basicTable.data; let i = index" class="table-row">
-                    <td class="table-cell">{{ data.fullName }}</td>
-                    <td class="table-cell">{{ data.telephoneOffice }}</td>
-                    <td class="table-cell">{{ data.telephoneHome }}</td>
-                    <td class="table-cell">{{ data.relation }}</td>
-                </tr>
-            </tbody>
-        </nz-table>
+        <div class="table-container">
+            <div class="table-header-section">
+                <div class="table-title">
+                    Emergency Contact Information
+                </div>
+                <div class="table-subtitle">
+                    {{ contactPersonLists.length }} Contact(s) Available
+                </div>
+            </div>
+            
+            <nz-table #basicTable [nzData]="contactPersonLists" 
+                      nzBordered 
+                      nzSize="middle"
+                      nzNoResult=""
+                      class="enhanced-table contact-table">
+                <thead>
+                    <tr>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Full Name</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Office Phone</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Home Phone</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Relationship</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let data of basicTable.data; let i = index" class="enhanced-row">
+                        <td class="enhanced-cell">
+                            <div class="contact-info">
+                                <div class="contact-details">
+                                    <div class="contact-name">{{ data.fullName }}</div>
+                                    <div class="contact-type">Emergency Contact</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="phone-info">
+                                <span class="phone-number">{{ data.telephoneOffice || 'Not Provided' }}</span>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="phone-info">
+                                <span class="phone-number">{{ data.telephoneHome || 'Not Provided' }}</span>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="relationship-info">
+                                <nz-tag nzColor="blue" class="relationship-badge">
+                                    {{ data.relation }}
+                                </nz-tag>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </nz-table>
+            
+            <div *ngIf="contactPersonLists.length === 0" class="empty-state">
+                <div class="empty-icon">
+                    <div class="empty-icon-placeholder">👥</div>
+                </div>
+                <h3>No Emergency Contacts</h3>
+                <p>No emergency contact information has been provided by the applicant.</p>
+            </div>
+        </div>
     </div>
 
     <div tabContent="education">
         <div class="professional-header">
-            <h1 class="page-title">Educational Background</h1>
-            <p class="page-subtitle">Review applicant's educational qualifications and history</p>
+            <div class="header-content">
+                <div class="header-icon">
+                    <span nz-icon nzType="book" nzTheme="outline"></span>
+                </div>
+                <div class="header-text">
+                    <h1 class="page-title">Educational Background</h1>
+                    <p class="page-subtitle">Review applicant's educational qualifications and academic history</p>
+                </div>
+                <div class="header-status">
+                    <nz-tag nzColor="green" class="status-tag">
+                        <span nz-icon nzType="graduation-cap" nzTheme="outline"></span>
+                        {{ educationLists.length }} Qualification(s)
+                    </nz-tag>
+                </div>
+            </div>
         </div>
 
-        <nz-table #educationTable [nzData]="educationLists" 
-                  nzBordered 
-                  class="professional-table">
-            <thead>
-                <tr>
-                    <th class="table-header">Institution</th>
-                    <th class="table-header">Field of Study</th>
-                    <th class="table-header">Degree Level</th>
-                    <th class="table-header">Duration</th>
-                    <th class="table-header">Remarks</th>
-                    <th class="table-header">Documents</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let data of educationTable.data; let i = index" class="table-row">
-                    <td class="table-cell">{{ data.schoollName }}</td>
-                    <td class="table-cell">{{ data.fieldOfStudy }}</td>
-                    <td class="table-cell">{{ data.programmeLevel }}</td>
-                    <td class="table-cell">
-                        {{ data.graduatedYear.split(',')[0] | date : "yyyy"}} -
-                        {{ data.graduatedYear.split(',')[1] | date : "yyyy" }}
-                    </td>
-                    <td class="table-cell">{{ data.remark }}</td>
-                    <td class="table-cell">
-                        <button nz-button nzType="link" (click)="viewFile(data)" 
-                                class="document-button">
-                            <span nz-icon nzType="file-text"></span>
-                            View Documents
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-        </nz-table>
+        <div class="table-container">
+            <div class="table-header-section">
+                <div class="table-title">
+                    Educational Qualifications
+                </div>
+                <div class="table-subtitle">
+                    {{ educationLists.length }} Qualification(s) Listed
+                </div>
+            </div>
+            
+            <nz-table #educationTable [nzData]="educationLists" 
+                      nzBordered 
+                      nzSize="middle"
+                      nzNoResult=""
+                      class="enhanced-table education-table">
+                <thead>
+                    <tr>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Institution</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Field of Study</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Degree Level</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Duration</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Remarks</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Documents</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let data of educationTable.data; let i = index" class="enhanced-row">
+                        <td class="enhanced-cell">
+                            <div class="institution-card">
+                                <div class="institution-details">
+                                    <div class="institution-name">{{ data.schoollName }}</div>
+                                    <div class="institution-type">Educational Institution</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="field-card">
+                                <span class="field-name">{{ data.fieldOfStudy }}</span>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="degree-info">
+                                <nz-tag nzColor="blue" class="degree-badge">
+                                    {{ data.programmeLevel }}
+                                </nz-tag>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="duration-card">
+                                <div class="duration-details">
+                                    <div class="duration-period">
+                                        {{ data.graduatedYear.split(',')[0] | date : "yyyy"}} - 
+                                        {{ data.graduatedYear.split(',')[1] | date : "yyyy" }}
+                                    </div>
+                                    <div class="duration-label">Study Period</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="remarks-card">
+                                <div class="remarks-text">{{ data.remark || 'No remarks provided' }}</div>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="document-actions">
+                                <button nz-button nzType="link" (click)="viewFile(data)" 
+                                        class="enhanced-document-button">
+                                    View Documents
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </nz-table>
+            
+            <div *ngIf="educationLists.length === 0" class="empty-state">
+                <div class="empty-icon">
+                    <div class="empty-icon-placeholder">🎓</div>
+                </div>
+                <h3>No Educational Background</h3>
+                <p>No educational qualifications have been provided by the applicant.</p>
+            </div>
+        </div>
     </div>
 
     <div tabContent="workExperience">
-        <div class="professional-header">
-            <h1 class="page-title">Work Experience</h1>
-            <p class="page-subtitle">Review applicant's professional work history</p>
+        <div class="table-container">
+            <div class="table-header-section">
+                <div class="table-title">
+                    Professional Work Experience
+                </div>
+                <div class="table-subtitle">
+                    {{ workExperienceLists.length }} Experience(s) Recorded
+                </div>
+            </div>
+            
+            <nz-table #experinceTable [nzData]="workExperienceLists" 
+                      nzBordered 
+                      nzSize="middle"
+                      nzNoResult=""
+                      class="enhanced-table experience-table">
+                <thead>
+                    <tr>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Company</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Duration</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Position</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Start Date</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Documents</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let data of experinceTable.data; let i = index" class="enhanced-row">
+                        <td class="enhanced-cell">
+                            <div class="company-card">
+                                <div class="company-details">
+                                    <div class="company-name">{{ data.companyName }}</div>
+                                    <div class="company-type">Workplace</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="duration-card">
+                                <div class="duration-details">
+                                    <div class="duration-value">{{ data.totalWorkYear }} years</div>
+                                    <div class="duration-label">Total Experience</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="position-card">
+                                <div class="position-details">
+                                    <div class="position-title">{{ data.post }}</div>
+                                    <div class="position-level">Professional Role</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="date-card">
+                                <div class="date-details">
+                                    <div class="date-value">{{ data.createdDate | date:'dd-MM-yyyy' }}</div>
+                                    <div class="date-label">Start Date</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="document-actions">
+                                <button nz-button nzType="link" (click)="viewFile(data)" 
+                                        class="enhanced-document-button">
+                                    View Documents
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </nz-table>
+            
+            <div *ngIf="workExperienceLists.length === 0" class="empty-state">
+                <div class="empty-icon">
+                    <div class="empty-icon-placeholder">📋</div>
+                </div>
+                <h3>No Work Experience</h3>
+                <p>No work experience information has been provided by the applicant.</p>
+            </div>
         </div>
-
-        <nz-table #experinceTable [nzData]="workExperienceLists" 
-                  nzBordered 
-                  class="professional-table">
-            <thead>
-                <tr>
-                    <th class="table-header">Company</th>
-                    <th class="table-header">Duration</th>
-                    <th class="table-header">Position</th>
-                    <th class="table-header">Start Date</th>
-                    <th class="table-header">Documents</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let data of experinceTable.data; let i = index" class="table-row">
-                    <td class="table-cell">{{ data.companyName }}</td>
-                    <td class="table-cell">{{ data.totalWorkYear }} years</td>
-                    <td class="table-cell">{{ data.post }}</td>
-                    <td class="table-cell">{{ data.createdDate | date:'dd-MM-yyyy' }}</td>
-                    <td class="table-cell">
-                        <button nz-button nzType="link" (click)="viewFile(data)" 
-                                class="document-button">
-                            <span nz-icon nzType="file-text"></span>
-                            View Documents
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-        </nz-table>
     </div>
 
     <div tabContent="applicationFeeReviewer">
@@ -449,51 +831,143 @@
 
     <div tabContent="academicProgramReviewer">
         <div class="professional-header">
-            <h1 class="page-title">Academic Program Applications</h1>
-            <p class="page-subtitle">Review applicant's academic program requests and status</p>
+            <div class="header-content">
+                <div class="header-icon">
+                    <span nz-icon nzType="book" nzTheme="outline"></span>
+                </div>
+                <div class="header-text">
+                    <h1 class="page-title">Academic Program Applications</h1>
+                    <p class="page-subtitle">Review and make decisions on applicant's academic program requests</p>
+                </div>
+                <div class="header-status">
+                    <nz-tag nzColor="purple" class="status-tag">
+                        <span nz-icon nzType="file-text" nzTheme="outline"></span>
+                        {{ applicationProgramRequestList.length }} Application(s)
+                    </nz-tag>
+                </div>
+            </div>
         </div>
 
-        <nz-table #basicsTable [nzData]="applicationProgramRequestList" 
-                  nzBordered 
-                  class="professional-table">
-            <thead>
-                <tr>
-                    <th class="table-header">Program</th>
-                    <th class="table-header">Division</th>
-                    <th class="table-header">Request Status</th>
-                    <th class="table-header">Applicant Status</th>
-                    <th class="table-header">Application Date</th>
-                    <th class="table-header">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let data of basicsTable.data; let i = index" class="table-row">
-                    <td class="table-cell">{{ getAcademicProgramDescription(data.acadamicProgrammeId) }}</td>
-                    <td class="table-cell">{{ getDivisionStatusDescription(data.division) }}</td>
-                    <td class="table-cell">
-                        <nz-tag [nzColor]="getStatusColor(data.approvalStatus)">
-                            {{ getReguestStatus(data.approvalStatus) }}
-                        </nz-tag>
-                    </td>
-                    <td class="table-cell">
-                        <nz-tag [nzColor]="getStatusColor(data.studentStatus)">
-                            {{ getStudentStatus(data.studentStatus) }}
-                        </nz-tag>
-                    </td>
-                    <td class="table-cell">{{ data.createdDate | date:'dd-MM-yyyy'}}</td>
-                    <td class="table-cell">
-                        <button nz-button 
-                                nzType="link"
-                                (click)="openDecisionModal(data)"
-                                class="document-button"
-                                [disabled]="!(data.studentStatus === 1 && data.approvalStatus === 1)">
-                            <span nz-icon nzType="audit" nzTheme="outline"></span>
-                            Make Decision
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-        </nz-table>
+        <div class="table-container">
+            <div class="table-header-section">
+                <div class="table-title">
+                    Academic Program Applications
+                </div>
+                <div class="table-subtitle">
+                    {{ applicationProgramRequestList.length }} Application(s) Submitted
+                </div>
+            </div>
+            
+            <nz-table #basicsTable [nzData]="applicationProgramRequestList" 
+                      nzBordered 
+                      nzSize="middle"
+                      nzNoResult=""
+                      class="enhanced-table academic-table">
+                <thead>
+                    <tr>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Program</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Division</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Request Status</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Applicant Status</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Application Date</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
+                                <span class="header-text">Actions</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let data of basicsTable.data; let i = index" class="enhanced-row">
+                        <td class="enhanced-cell">
+                            <div class="program-card">
+                                <div class="program-details">
+                                    <div class="program-name">{{ getAcademicProgramDescription(data.acadamicProgrammeId) }}</div>
+                                    <div class="program-type">Academic Program</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="division-card">
+                                <div class="division-details">
+                                    <div class="division-name">{{ getDivisionStatusDescription(data.division) }}</div>
+                                    <div class="division-type">Department</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="status-info">
+                                <nz-tag [nzColor]="getStatusColor(data.approvalStatus)" class="enhanced-status-tag">
+                                    {{ getReguestStatus(data.approvalStatus) }}
+                                </nz-tag>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="status-info">
+                                <nz-tag [nzColor]="getStatusColor(data.studentStatus)" class="enhanced-status-tag">
+                                    {{ getStudentStatus(data.studentStatus) }}
+                                </nz-tag>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="date-card">
+                                <div class="date-details">
+                                    <div class="date-value">{{ data.createdDate | date:'dd-MM-yyyy'}}</div>
+                                    <div class="date-label">Applied On</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="action-buttons">
+                                <button *ngIf="isUserReviewer && canMakeDecision(data)" 
+                                        nz-button 
+                                        nzType="link"
+                                        (click)="openDecisionModal(data)"
+                                        class="enhanced-action-button">
+                                    Make Decision
+                                </button>
+                                <span *ngIf="!isUserReviewer" class="no-action-text">
+                                    <span nz-icon nzType="lock" nzTheme="outline"></span>
+                                    Review Only
+                                </span>
+                                <span *ngIf="isUserReviewer && !canMakeDecision(data)" class="no-action-text decision-not-available">
+                                    <span nz-icon nzType="clock-circle" nzTheme="outline"></span>
+                                    Decision Not Available
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </nz-table>
+            
+            <div *ngIf="applicationProgramRequestList.length === 0" class="empty-state">
+                <div class="empty-icon">
+                    <div class="empty-icon-placeholder">📚</div>
+                </div>
+                <h3>No Academic Program Applications</h3>
+                <p>No academic program applications have been submitted by the applicant.</p>
+            </div>
+        </div>
     </div>
 
     <!-- Also include the default tab content selectors for compatibility -->
@@ -539,14 +1013,24 @@
                     </td>
                     <td class="table-cell">{{ data.createdDate | date:'dd-MM-yyyy'}}</td>
                     <td class="table-cell">
-                        <button nz-button 
+                        <button *ngIf="isUserReviewer && canMakeDecision(data)" 
+                                nz-button 
                                 nzType="link"
                                 (click)="openDecisionModal(data)"
-                                class="document-button"
-                                [disabled]="!(data.studentStatus === 1 && data.approvalStatus === 1)">
-                            <span nz-icon nzType="audit" nzTheme="outline"></span>
+                                class="action-button"
+                                [attr.aria-label]="'Make decision for ' + getAcademicProgramDescription(data.acadamicProgrammeId)"
+                                [attr.aria-describedby]="'decision-help-' + i">
+                            <span nz-icon nzType="audit" nzTheme="outline" aria-hidden="true"></span>
                             Make Decision
                         </button>
+                        <span *ngIf="!isUserReviewer" class="no-action-text" role="status" aria-label="Review only mode - no actions available">
+                            <span nz-icon nzType="lock" nzTheme="outline" aria-hidden="true"></span>
+                            Review Only
+                        </span>
+                        <span *ngIf="isUserReviewer && !canMakeDecision(data)" class="no-action-text decision-not-available" role="status" aria-label="Decision not available for current status">
+                            <span nz-icon nzType="clock-circle" nzTheme="outline" aria-hidden="true"></span>
+                            Decision Not Available
+                        </span>
                     </td>
                 </tr>
             </tbody>

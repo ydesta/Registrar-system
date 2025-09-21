@@ -20,27 +20,35 @@
         <h2 class="title-text">Course Offerings</h2>
         <p class="subtitle-text">View, search, and manage all term course offerings</p>
       </div>
-      <div class="action-buttons">
-        <button nz-button nzType="primary" routerLink="../add-term-course-offering/null" class="action-btn">
-          <span nz-icon nzType="plus" nzTheme="outline"></span>
-          <span class="btn-text">Add Term Course Offering</span>
-        </button>
-        <button nz-button nzType="primary" (click)="exportTermCourseOffering()" class="action-btn">
-          <span nz-icon nzType="file-excel" nzTheme="outline"></span>
-          <span class="btn-text">Export</span>
-        </button>
-        <button nz-button nzType="primary" printTitle="." [useExistingCss]="true" printSectionId="print-section" ngxPrint class="action-btn">
-          <span nz-icon nzType="printer" nzTheme="outline"></span>
-          <span class="btn-text">Print</span>
-        </button>
-      </div>
     </div>
   </div>
   
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <nz-input-group [nzSuffix]="suffixIconSearch" class="search-input-group">
+      <input 
+        type="text" 
+        nz-input 
+        [(ngModel)]="searchBatch"
+        (input)="onBatchSearch($event)"
+        placeholder="Search by batch code..." 
+        class="batch-search-input" />
+      <ng-template #suffixIconSearch>
+        <i nz-icon nzType="search" nzTheme="outline"></i>
+      </ng-template>
+    </nz-input-group>
+  </div>
+  
   <div class="table-card">
+    <div class="table-actions">
+      <button nz-button nzType="primary" routerLink="../add-term-course-offering/null" class="add-btn">
+        <i nz-icon nzType="plus" nzTheme="outline"></i>
+        Add Term Course Offering
+      </button>
+    </div>
     <div class="table-responsive">
       <nz-table #basicTable 
-                [nzData]="termCourseOfferings" 
+                [nzData]="filteredTermCourseOfferings" 
                 nzBordered
                 [nzPageSize]="pageSize"
                 [nzShowSizeChanger]="true"

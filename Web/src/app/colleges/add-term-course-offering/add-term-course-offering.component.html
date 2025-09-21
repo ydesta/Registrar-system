@@ -198,36 +198,56 @@
 
             <div class="search-container">
               <nz-input-group nzSearch class="search-input">
-                <input nz-input placeholder="Search courses..." [(ngModel)]="searchTextB"
-                  (ngModelChange)="onSearchBreak()" class="search-field">
+                <input nz-input 
+                       placeholder="Search courses..." 
+                       [(ngModel)]="searchTextB"
+                       (ngModelChange)="onSearchBreak()" 
+                       (input)="onSearchBreak()"
+                       (keyup)="onSearchBreak()"
+                       class="search-field">
                 <!-- <span nz-icon nzType="search" nzTheme="outline"></span> -->
               </nz-input-group>
             </div>
 
             <div class="table-container">
-              <nz-table nzBordered #basicTable [nzData]="listOfCourseBreakDown || []" [nzShowPagination]="true"
-                nzShowPagination nzShowSizeChanger (nzCurrentPageDataChange)="onCurrentPageDataChange($event)"
-                class="course-table">
+              <nz-table 
+                nzBordered 
+                #basicTable 
+                [nzData]="listOfCourseBreakDown || []" 
+                [nzShowPagination]="true"
+                nzShowSizeChanger 
+                [nzPageSize]="10"
+                [nzPageSizeOptions]="[5, 10, 20, 50]"
+                (nzCurrentPageDataChange)="onCurrentPageDataChange($event)"
+                class="course-table"
+                [nzScroll]="{ x: '100%' }">
                 <thead>
                   <tr>
-                    <th class="checkbox-column" [nzChecked]="checked" [nzIndeterminate]="indeterminate"
-                      (nzCheckedChange)="onAllChecked($event)">
+                    <th nzWidth="60px" nzAlign="center" class="checkbox-column">
+                      <label nz-checkbox 
+                        [nzChecked]="checked" 
+                        [nzIndeterminate]="indeterminate"
+                        (nzCheckedChange)="onAllChecked($event)"
+                        class="header-checkbox">
+                      </label>
                     </th>
-                    <th class="course-code-column">Course Code</th>
-                    <th class="course-title-column">Course Title</th>
-                    <th class="credit-hours-column">Credit Hours</th>
+                    <th nzWidth="120px" nzAlign="left" class="course-code-column">Course Code</th>
+                    <th nzAlign="left" class="course-title-column">Course Title</th>
+                    <th nzWidth="100px" nzAlign="center" class="credit-hours-column">Credit Hours</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let data of basicTable.data; let i = index" class="course-row">
-                    <td class="checkbox-cell">
-                      <label nz-checkbox [nzChecked]="setOfCheckedId.has(data.courseId)"
-                        (nzCheckedChange)="onItemChecked(data.courseId, $event)" class="course-checkbox">
+                    <td nzAlign="center" class="checkbox-cell">
+                      <label nz-checkbox 
+                        [nzChecked]="setOfCheckedId.has(data.courseId)"
+                        (nzCheckedChange)="onItemChecked(data.courseId, $event)" 
+                        class="course-checkbox">
                       </label>
                     </td>
-                    <td class="course-code">{{ data.courseCode }}</td>
-                    <td class="course-title">{{ data.courseTitle }}</td>
-                    <td class="credit-hours">{{ data.creditHours }}</td>
+                    <td nzAlign="left" class="course-code">{{ data.courseCode }}</td>
+                    <td nzAlign="left" class="course-title">{{ data.courseTitle }}</td>
+                    <td nzAlign="center" class="credit-hours">{{ data.creditHours }}</td>
                   </tr>
                 </tbody>
               </nz-table>
@@ -242,9 +262,9 @@
               <div class="header-content">
                 <h4 class="card-title">
                   <span nz-icon nzType="plus-circle" nzTheme="outline"></span>
-                  Additional Courses (Not in Curriculum)
+                  List of Courses
                 </h4>
-                <p class="card-description">Select additional courses not part of the curriculum (optional)</p>
+                <p class="card-description">Select additional list of courses </p>
               </div>
               <div class="header-stats">
                 <div class="stat-item">
@@ -262,8 +282,13 @@
 
             <div class="search-container">
               <nz-input-group nzSearch class="search-input">
-                <input nz-input placeholder="Search courses..." [(ngModel)]="searchText" (ngModelChange)="onSearch()"
-                  class="search-field">
+                <input nz-input 
+                       placeholder="Search courses..." 
+                       [(ngModel)]="searchText" 
+                       (ngModelChange)="onSearch()"
+                       (input)="onSearch()"
+                       (keyup)="onSearch()"
+                       class="search-field">
                 <!-- <span nz-icon nzType="search" nzTheme="outline"></span> -->
               </nz-input-group>
             </div>
@@ -277,29 +302,44 @@
               </div>
               
               <!-- Show table when courses are available -->
-              <nz-table *ngIf="courses && courses.length > 0" nzBordered #basicTableA [nzData]="courses" 
-                        [nzShowPagination]="true" nzShowPagination nzShowSizeChanger 
-                        (nzCurrentPageDataChange)="onCurrentPageDataChangeA($event)" class="course-table">
+              <nz-table *ngIf="courses && courses.length > 0" 
+                        nzBordered 
+                        #basicTableA 
+                        [nzData]="courses" 
+                        [nzShowPagination]="true" 
+                        nzShowSizeChanger 
+                        [nzPageSize]="10"
+                        [nzPageSizeOptions]="[5, 10, 20, 50]"
+                        (nzCurrentPageDataChange)="onCurrentPageDataChangeA($event)" 
+                        class="course-table"
+                        [nzScroll]="{ x: '100%' }">
                 <thead>
                   <tr>
-                    <th class="checkbox-column" [nzChecked]="checkedA" [nzIndeterminate]="indeterminateA"
-                      (nzCheckedChange)="onAllCheckedA($event)">
+                    <th nzWidth="60px" nzAlign="center" class="checkbox-column">
+                      <label nz-checkbox 
+                        [nzChecked]="checkedA" 
+                        [nzIndeterminate]="indeterminateA"
+                        (nzCheckedChange)="onAllCheckedA($event)"
+                        class="header-checkbox">
+                      </label>
                     </th>
-                    <th class="course-code-column">Course Code</th>
-                    <th class="course-title-column">Course Title</th>
-                    <th class="credit-hours-column">Credit Hours</th>
+                    <th nzWidth="120px" nzAlign="left" class="course-code-column">Course Code</th>
+                    <th nzAlign="left" class="course-title-column">Course Title</th>
+                    <th nzWidth="100px" nzAlign="center" class="credit-hours-column">Credit Hours</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let data of basicTableA.data; let i = index" class="course-row">
-                    <td class="checkbox-cell">
-                      <label nz-checkbox [nzChecked]="setOfCheckedIdA.has(data.courseId)"
-                        (nzCheckedChange)="onItemCheckedA(data.courseId, $event)" class="course-checkbox">
+                    <td nzAlign="center" class="checkbox-cell">
+                      <label nz-checkbox 
+                        [nzChecked]="setOfCheckedIdA.has(data.courseId)"
+                        (nzCheckedChange)="onItemCheckedA(data.courseId, $event)" 
+                        class="course-checkbox">
                       </label>
                     </td>
-                    <td class="course-code">{{ data.courseCode }}</td>
-                    <td class="course-title">{{ data.courseTitle }}</td>
-                    <td class="credit-hours">{{ data.creditHours }}</td>
+                    <td nzAlign="left" class="course-code">{{ data.courseCode }}</td>
+                    <td nzAlign="left" class="course-title">{{ data.courseTitle }}</td>
+                    <td nzAlign="center" class="credit-hours">{{ data.creditHours }}</td>
                   </tr>
                 </tbody>
               </nz-table>

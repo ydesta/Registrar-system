@@ -43,7 +43,10 @@ export class AuthGuardService {
       role === 'Administrator' || 
       role === 'Admin' || 
       role === 'Super Admin' ||
-      role === 'Reviewer'
+      role === 'Reviewer' ||
+      role === 'Academic Director' ||
+      role === 'Reception' ||
+      role === 'Instructor' 
     );
 
     return hasRequiredRole ? true : this.redirectToUnauthorized();

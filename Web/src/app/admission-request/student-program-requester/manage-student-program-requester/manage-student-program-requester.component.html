@@ -3,7 +3,7 @@
         <h2 *ngIf="!isApplicantProfile">Academic Program Information</h2>
         <button (click)="openModal()" nz-button nzType="primary" [disabled]="noOfApplicantProgramRequest>0" *ngIf="!isApplicantProfile">
             <span nz-icon nzType="plus" nzTheme="outline"></span>
-            Add Academic Program
+            Choose Academic Program
         </button>
     </div>
 
@@ -63,7 +63,6 @@
                                 nz-dropdown 
                                 [nzDropdownMenu]="menu" 
                                 nzPlacement="bottomRight"
-                                [disabled]="isSubmittedApplicationForm>0"
                                 nzTrigger="click"
                                 class="action-button">
                             <span nz-icon nzType="more" nzTheme="outline"></span>

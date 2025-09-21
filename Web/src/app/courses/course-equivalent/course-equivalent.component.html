@@ -1,49 +1,45 @@
 <div class="content-container">
-  <!-- Header Section -->
+  <!-- Page Header -->
   <div class="header-section">
-    <div class="header-content">
-      <div class="page-title">
-        <h3 class="title-text">Course Equivalents</h3>
-        <p class="subtitle-text">Manage and view all course equivalent relationships</p>
-      </div>
-      <div class="header-actions">
-        <div class="search-section">
-          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input type="text" nz-input placeholder="Search equivalents..." />
-          </nz-input-group>
-          <ng-template #suffixIconButton>
-            <button nz-button nzType="primary" class="search-btn" nzSearch>
-              <i nz-icon nzType="search"></i>
-            </button>
+    <div class="page-title">
+      <h1>Course Equivalents</h1>
+      <p class="subtitle">Manage and view all course equivalent relationships</p>
+    </div>
+    <div class="header-actions">
+      <button nz-button nzType="primary" class="add-btn" [routerLink]="['/course/add-course-equivalent', 'null']">
+        <i nz-icon nzType="plus" nzTheme="outline"></i>
+        Add Course Equivalent
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="search-section">
+    <div class="search-controls">
+      <div class="search-group">
+        <nz-input-group [nzSuffix]="suffixIconSearch">
+          <input type="text" nz-input placeholder="Search by course code, title, equivalent course code/title, or remark..."
+            [(ngModel)]="searchValue" (input)="search()" />
+          <ng-template #suffixIconSearch>
+            <i nz-icon nzType="search" nzTheme="outline"></i>
           </ng-template>
-        </div>
-        <button
-          [routerLink]="['/course/add-course-equivalent', 'null']"
-          class="add-btn"
-          nz-button
-          nzType="primary"
-        >
-          <i nz-icon nzType="plus" nzTheme="outline"></i>
-          <span>Add Equivalent</span>
-        </button>
+        </nz-input-group>
       </div>
     </div>
   </div>
 
   <!-- Table Card -->
   <div class="table-card">
-    <div id="print-section">
-      <nz-table 
-        #basicTable 
-        [nzData]="courseEquivalents!" 
-        nzBordered
-        class="equivalents-table"
-      >
+    <nz-table #basicTable [nzData]="listOfDisplayData" nzBordered [nzPageSize]="10" [nzShowPagination]="true"
+      [nzShowSizeChanger]="true" [nzShowQuickJumper]="true" [nzLoading]="loading" [nzNoResult]="emptyTpl"
+      class="equivalents-table">
         <thead>
           <tr>
             <th class="sn-column">S/N</th>
-            <th>Equivalent Course Code</th>
+            <th>Course Code</th>
             <th>Course Title</th>
+            <th>Equivalent Course Code</th>
+            <th>Equivalent Course Title</th>
             <th>Remark</th>
             <th class="action-column">Actions</th>
           </tr>
@@ -53,40 +49,46 @@
             <td class="sn-column">
               <span class="sn-badge">{{ i + 1 }}</span>
             </td>
-            <td>{{ data.equivalentCourseCode }}</td>
-            <td>{{ data.course.courseTitle }}</td>
-            <td>{{ data.remark }}</td>
+            <td>
+              <div class="course-info">
+                <strong>{{ data.courseCode || 'N/A' }}</strong>
+              </div>
+            </td>
+            <td>
+              <div class="course-info">
+                <strong>{{ data.courseTitle || 'N/A' }}</strong>
+              </div>
+            </td>
+            <td>
+              <div class="course-info">
+                <strong>{{ data.equivalentCourseCode || 'N/A' }}</strong>
+              </div>
+            </td>
+            <td>
+              <div class="course-info">
+                <strong>{{ data.equivalentCourseTitle || 'N/A' }}</strong>
+              </div>
+            </td>
+            <td>
+              <span class="college-name">{{ data.remark || 'N/A' }}</span>
+            </td>
             <td class="action-column">
-              <button 
-                nz-button 
-                nz-dropdown 
-                [nzDropdownMenu]="menu" 
-                nzPlacement="bottomLeft"
-                class="action-button"
-              >
+              <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomLeft"
+                class="action-button">
                 <i nz-icon nzType="more" nzTheme="outline"></i>
               </button>
               <nz-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
                   <li>
-                    <a
-                      [routerLink]="['/course/add-course-equivalent', data.id]"
-                      nz-button
-                      nzType="default"
-                      class="action-item edit"
-                    >
+                    <a [routerLink]="['/course/add-course-equivalent', data.id]" nz-button nzType="default"
+                      class="action-item edit">
                       <i nz-icon nzType="edit" nzTheme="fill"></i>
                       <span>Edit</span>
                     </a>
                   </li>
                   <li>
-                    <button
-                      nz-button
-                      nzDanger
-                      nzType="default"
-                      class="action-item delete"
-                      (click)="showDeleteConfirm(data.id)"
-                    >
+                    <button nz-button nzDanger nzType="default" class="action-item delete"
+                      (click)="showDeleteConfirm(data.id!)">
                       <i nz-icon nzType="delete" nzTheme="fill"></i>
                       <span>Delete</span>
                     </button>
@@ -98,11 +100,10 @@
         </tbody>
         <ng-template #emptyTpl>
           <div class="no-data">
-            <i nz-icon nzType="book" nzTheme="outline"></i>
+            <i nz-icon nzType="file-text" nzTheme="outline"></i>
             <p>No course equivalent records available</p>
           </div>
         </ng-template>
       </nz-table>
-    </div>
   </div>
 </div>
