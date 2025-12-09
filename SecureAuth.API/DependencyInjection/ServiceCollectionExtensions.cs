@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using SecureAuth.API.Configuration;
 
 namespace SecureAuth.API.DependencyInjection
 {
@@ -13,8 +14,8 @@ namespace SecureAuth.API.DependencyInjection
             // Add API Explorer
             services.AddEndpointsApiExplorer();
 
-            // Add Antiforgery services
-            services.AddAntiforgery();
+            // Add Antiforgery services with secure configuration
+            services.ConfigureAntiforgery();
 
             // Add HttpContextAccessor for accessing current user context
             services.AddHttpContextAccessor();

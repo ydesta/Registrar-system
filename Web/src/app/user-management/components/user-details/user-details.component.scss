@@ -156,6 +156,17 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+
+  // Ensure card headers maintain styling in editing mode
+  &.editing-mode {
+    .info-card {
+      ::ng-deep .ant-card {
+        .ant-card-head {
+          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+        }
+      }
+    }
+  }
 }
 
 // Info Cards
@@ -179,7 +190,7 @@
     box-shadow: none;
 
     .ant-card-head {
-      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
       border-bottom: 1px solid #e2e8f0;
       padding: 20px 24px;
 
@@ -192,6 +203,15 @@
 
     .ant-card-body {
       padding: 24px;
+    }
+  }
+
+  // Ensure card headers maintain styling when forms are present
+  &.info-card {
+    ::ng-deep .ant-card {
+      .ant-card-head {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+      }
     }
   }
 }
@@ -220,6 +240,13 @@
       min-height: 36px;
       line-height: 20px;
     }
+  }
+}
+
+// Prevent form styling from affecting card headers
+::ng-deep form {
+  .ant-card-head {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
   }
 }
 

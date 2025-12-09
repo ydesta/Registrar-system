@@ -202,10 +202,19 @@ export class StudentService {
       .get(endpointUrl)
       .pipe(map((result) => result as CourseViewModel[]));
   }
-  getListOfStudentCourseAdded(courseId): Observable<StudentAddedViewModel[]> {
+  getListOfStudentCourseAdded(
+    courseId: string,
+    approvalStatus?: number | string | null
+  ): Observable<StudentAddedViewModel[]> {
     const endpointUrl = `${this.getStudentUrl()}/course/student/getListOfStudentCourseAdded/${courseId}`;
+    let params = new HttpParams();
+    
+    if (approvalStatus !== null && approvalStatus !== undefined) {
+      params = params.append('approvalStatus', approvalStatus.toString());
+    }
+    
     return this.httpClient
-      .get(endpointUrl)
+      .get<StudentAddedViewModel[]>(endpointUrl, { params })
       .pipe(map((result) => result as StudentAddedViewModel[]));
   }
   submitCourseTakenApproval(courseTakens: CourseTaken[]): Observable<any> {
@@ -228,9 +237,12 @@ export class StudentService {
   }
 
   getListOfTermRegisteredCourseList(termId: string, startDate: string,
-    endDate: string,): Observable<StudentRegistrationSlipViewModel[]> {
+    endDate: string, studentId): Observable<StudentRegistrationSlipViewModel[]> {
     const endpointUrl = `${this.getStudentUrl()}/student/getListOfTermRegisteredCourseList`;
     let params = new HttpParams()
+    if (studentId && studentId.trim() !== '' && studentId != null) {
+      params = params.append('studentId', studentId);
+    }
     if (termId && termId.trim() !== '' && termId != null) {
       params = params.append('termId', termId);
     }
@@ -373,6 +385,22 @@ export class StudentService {
     return this.httpClient
       .get(endpointUrl)
       .pipe(map((result) => result as StudentRegistrationSlipViewModel[]));
+  }
+
+  getAddableCoursesWithEquivalentsAsync(
+    applicantUserId: string,
+    term: number,
+    id: number
+  ): Observable<CourseBreakDownOffering[]> {
+    const endpointUrl = `${this.getStudentUrl()}/addable-with-equivalents/${applicantUserId}/${term}/${id}`;
+    return this.httpClient
+      .get(endpointUrl)
+      .pipe(map((result) => result as CourseBreakDownOffering[]));
+  }
+
+  getManualTermCourseOfferingProgramBased(studentCode: string, seasonTerm: number, academicYear: number): Observable<CourseBreakDownOffering[]> {
+    const endpointUrl = `${this.getStudentUrl()}/manual-program-based/${studentCode}/${seasonTerm}/${academicYear}`;
+    return this.httpClient.get<CourseBreakDownOffering[]>(endpointUrl);
   }
 }
 

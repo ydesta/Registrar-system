@@ -3,4 +3,6 @@ export class StudentInformation {
     studentCode: string;
     fullName: string;
     batchCode: string;
+    courseCode: string;
+    courseTitle: string;
 }

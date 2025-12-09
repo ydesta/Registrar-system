@@ -24,7 +24,7 @@ export class CourseOfferingInstructorAssignmentService {
   }
   getCourseOfferingInstructorAssigned(
     courseId: string,
-    offeringId: string
+    offeringId: number
   ): Observable<any> {
     const endPointUrl = `${this.getCourseOfferingInstructorAssignmentUrl()}/${courseId}/${offeringId}`;
     return this.httpClient.get<any>(endPointUrl).pipe(

@@ -8,6 +8,7 @@ import { CustomNotificationService } from 'src/app/services/custom-notification.
 import { SharedDataService } from 'src/app/services/shared-data.service';
 import { TokenStorageService } from 'src/app/services/token-storage.service';
 import { environment } from 'src/environments/environment';
+import { RouteRefreshService } from '../services/route-refresh.service';
 
 @Component({
   selector: 'app-login',
@@ -25,6 +26,9 @@ export class LoginComponent implements OnInit, OnDestroy {
   otpResendCountdown = 0;
   canResendOtp = true;
   private isProcessingLogin = false;
+  isAccountLocked = false;
+  lockoutEndTime: Date | null = null;
+  remainingAttempts = -1;
 
   constructor(
     private _notificationService: CustomNotificationService,
@@ -32,7 +36,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private _fb: FormBuilder,
     private _authService: AuthService,
     private _sharedDataService: SharedDataService,
-    private _tokenStorageService: TokenStorageService
+    private _tokenStorageService: TokenStorageService,
+    private _routeRefreshService: RouteRefreshService
   ) {
     this.loginForm = _fb.group({
       email: [null, [Validators.required, Validators.email]],
@@ -42,10 +47,22 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Check for session expiration reason
+    const reason = this._router.url.split('reason=')[1];
+    if (reason && reason.includes('session_expired')) {
+      this._notificationService.notification(
+        'info',
+        'Session Expired',
+        'Your session has expired. Please log in again to continue.'
+      );
+    }
+
     // Check if already authenticated and redirect if necessary
     this._authService.isAuthenticated().then(isAuth => {
       if (isAuth) {
-        this._router.navigate(['/dashboard']);
+        const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+        const destination = returnUrl || '/dashboard';
+        this._router.navigate([destination]);
       }
     });
 
@@ -97,8 +114,21 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.isProcessingLogin = false;
           
+          // Handle lockout status
+          if (response.isLocked) {
+            this.isAccountLocked = true;
+            this.lockoutEndTime = response.lockoutEnd ? new Date(response.lockoutEnd) : null;
+            this.remainingAttempts = 0;
+          } else {
+            this.isAccountLocked = false;
+            this.lockoutEndTime = null;
+            this.remainingAttempts = response.remainingAttempts ?? -1;
+          }
+          
           if (response.success) {
-            if (response.requiresTwoFactor) {
+            // ✅ FIX: Check RequiresTwoFactor FIRST before handling success
+            if (response.requiresTwoFactor && !response.token) {
+              console.log('2FA required, showing OTP form');
               this.requiresTwoFactor = true;
               this.emailForOtp = loginRequest.email;
               this.startOtpResendCountdown();
@@ -107,37 +137,79 @@ export class LoginComponent implements OnInit, OnDestroy {
                 'Two-Factor Authentication',
                 'Please check your email for the verification code.'
               );
-            } else {
+              return; // Don't proceed with login handling
+            }
+            
+            // Only handle successful login if tokens are provided
+            if (response.token) {
               this.handleSuccessfulLogin(response, loginRequest.email);
+            } else {
+              console.error('Login response missing token:', response);
+              this.incorrectLoginAttempt = 'Login failed. Please try again.';
             }
           } else {
             console.error('Login failed:', response.message);
             this.incorrectLoginAttempt = response.message;
-            this._notificationService.notification('error', 'Error', response.message);
+            
+            // Show appropriate notification based on lockout status
+            if (response.isLocked) {
+              this._notificationService.notification('warning', 'Account Locked', response.message);
+            } else {
+              this._notificationService.notification('error', 'Login Failed', response.message);
+            }
           }
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Login error:', error);
           this.isLoading = false;
           this.isProcessingLogin = false;
           
-          // Production-specific error handling
-          let errorMessage = 'An error occurred during login. Please try again.';
+          // Handle error response that might contain our custom error information
+          let errorMessage = 'Invalid email or password. Please check your credentials and try again.';
           
-          if (error.message) {
+          // Get the original error or error from the custom error wrapper
+          const originalError = error.originalError || error;
+          const errorData = error.error || originalError.error || error;
+          
+          // Check if this is a 401 error with LoginResponse details
+          if ((error.status === 401 || originalError.status === 401) && errorData) {
+            console.log('401 error with data:', errorData);
+            
+            // The backend returns LoginResponse even for failed logins
+            const loginResponse = errorData;
+            
+            if (loginResponse.message) {
+              errorMessage = loginResponse.message;
+              console.log('Error message from backend:', errorMessage);
+            }
+            
+            // Extract remaining attempts and lockout info if available
+            if (loginResponse.remainingAttempts !== undefined) {
+              this.remainingAttempts = loginResponse.remainingAttempts;
+              console.log('Remaining attempts:', this.remainingAttempts);
+            }
+            
+            if (loginResponse.isLocked) {
+              this.isAccountLocked = true;
+              if (loginResponse.lockoutEnd) {
+                this.lockoutEndTime = new Date(loginResponse.lockoutEnd);
+              }
+              this._notificationService.notification('warning', 'Account Locked', errorMessage);
+            } else {
+              this._notificationService.notification('error', 'Login Failed', errorMessage);
+            }
+          } else if (error.message) {
             if (error.message.includes('Network error')) {
               errorMessage = 'Network error: Unable to connect to the server. Please check your internet connection and try again.';
             } else if (error.message.includes('timeout')) {
               errorMessage = 'Request timeout: The server is taking too long to respond. Please try again.';
             } else if (error.message.includes('Authentication failed')) {
               errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-            } else {
-              errorMessage = error.message;
             }
+            this._notificationService.notification('error', 'Error', errorMessage);
           }
           
           this.incorrectLoginAttempt = errorMessage;
-          this._notificationService.notification('error', 'Error', errorMessage);
         }
       });
     } else if (this.isProcessingLogin) {
@@ -202,6 +274,12 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   private saveUserData(response: any, email: string): void {
+    // ✅ FIX: Don't save user data if 2FA is pending (no tokens yet)
+    if (response.requiresTwoFactor && !response.token) {
+      console.log('2FA pending - skipping user data save');
+      return;
+    }
+    
     if (response.user && response.user.id) {
       // Save user data using token storage service
       this._tokenStorageService.saveUser(response.user);
@@ -341,10 +419,14 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   goToRegister(): void {
-    this._router.navigate(['/accounts/register']);
+    this._routeRefreshService.navigateWithRefresh(['/accounts/register']);
+  }
+
+  goToForgotPassword(): void {
+    this._routeRefreshService.navigateWithRefresh(['/accounts/forgot-password']);
   }
 
   goToHome(): void {
-    this._router.navigate(['/']);
+    this._routeRefreshService.navigateWithRefresh(['/']);
   }
 }

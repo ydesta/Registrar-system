@@ -1,0 +1,51 @@
+# Security fix: Enable automated dependency vulnerability scanning
+version: 2
+updates:
+  # Enable Dependabot for NPM packages in Web directory
+  - package-ecosystem: "npm"
+    directory: "/Web"
+    schedule:
+      interval: "daily"
+      time: "04:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+    commit-message:
+      prefix: "[Security]"
+      prefix-development: "[Security]"
+      include: "scope"
+    reviewers:
+      - "your-team"
+    groups:
+      npm-dependencies:
+        patterns:
+          - "@angular/*"
+          - "rxjs"
+          - "zone.js"
+          - "tslib"
+        update-types:
+          - "minor"
+          - "patch"
+      npm-security:
+        patterns:
+          - "*"  # All packages for security updates
+        update-types:
+          - "security"
+        
+  # Enable Dependabot for .NET NuGet packages
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "dotnet"
+    commit-message:
+      prefix: "[NuGet]"
+      include: "scope"
+
+

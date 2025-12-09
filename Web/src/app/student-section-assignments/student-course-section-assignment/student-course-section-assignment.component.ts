@@ -21,19 +21,27 @@ export class StudentCourseSectionAssignmentComponent implements OnInit {
   initials: string = '';
   isLoading: boolean = false;
   progStatusId: any;
+  academicTerm: number;
+  yearNumber: number;
+  nextAcademicTerm: any;
   constructor(private studentSectionAssignmentService: StudentSectionAssignmentService) {
+    const next = sessionStorage.getItem('nextAcademicTerm');
+    this.nextAcademicTerm = next ? JSON.parse(next) : null;
+    
+    this.academicTerm = this.nextAcademicTerm.termId;
+    this.yearNumber = this.nextAcademicTerm.year;
     this.userId = localStorage.getItem('userId');
   }
 
   ngOnInit(): void {
     this.getListOfYearNumberStatus();
     this.getListOfAcademicTermStatus();
-    this.getStudentSectioningByStudentId(this.userId);
+    this.getStudentSectioningByStudentId(this.userId, this.academicTerm, this.yearNumber);
   }
 
-  getStudentSectioningByStudentId(userId: string) {
+  getStudentSectioningByStudentId(userId: string, academicTerm?: number, year?: number) {
     this.isLoading = true;
-    this.studentSectionAssignmentService.getStudentSectioningByStudentId(userId).subscribe({
+    this.studentSectionAssignmentService.getStudentSectioningByStudentId(userId, academicTerm, year).subscribe({
       next: (res) => {
         if (res) {
           this.studentProfile = res;
@@ -92,7 +100,7 @@ export class StudentCourseSectionAssignmentComponent implements OnInit {
     const fatherName = nameParts[1] || '';
     return firstName.charAt(0).toUpperCase() + fatherName.charAt(0).toUpperCase(); // D + B
   }
-   isValidProfilePicture(url: string | null): boolean {
+  isValidProfilePicture(url: string | null): boolean {
     return url !== null && !url.includes('/null');
   }
 }

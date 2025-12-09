@@ -10,13 +10,42 @@ import { ChangePasswordComponent } from './change-password/change-password.compo
 import { AuthGuard } from '../guards/auth.guard';
 
 const routes: Routes = [
-  { path: '', component: AccountsComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: UserRegisterComponent },
-  { path: 'forgot-password', component: ForgotPasswordComponent },
-  { path: 'reset-password', component: ResetPasswordComponent },
-  { path: 'verify-email', component: VerifyEmailComponent },
-  { path: 'change-password', component: ChangePasswordComponent, canActivate: [AuthGuard] }
+  { 
+    path: '', 
+    component: AccountsComponent,
+    runGuardsAndResolvers: 'always'
+  },
+  { 
+    path: 'login', 
+    component: LoginComponent,
+    runGuardsAndResolvers: 'always'
+  },
+  { 
+    path: 'register', 
+    component: UserRegisterComponent,
+    runGuardsAndResolvers: 'always'
+  },
+  { 
+    path: 'forgot-password', 
+    component: ForgotPasswordComponent,
+    runGuardsAndResolvers: 'always'
+  },
+  { 
+    path: 'reset-password', 
+    component: ResetPasswordComponent,
+    runGuardsAndResolvers: 'always'
+  },
+  { 
+    path: 'verify-email', 
+    component: VerifyEmailComponent,
+    runGuardsAndResolvers: 'always'
+  },
+  { 
+    path: 'change-password', 
+    component: ChangePasswordComponent, 
+    canActivate: [AuthGuard],
+    runGuardsAndResolvers: 'always'
+  }
 ];
 
 @NgModule({

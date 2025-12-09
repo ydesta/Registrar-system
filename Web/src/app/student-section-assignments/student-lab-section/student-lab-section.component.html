@@ -63,6 +63,19 @@
                 </nz-form-control>
               </nz-form-item>
             </div>
+              <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Section</nz-form-label>
+                <nz-form-control nzErrorTip="Section is required">
+                  <nz-select formControlName="sectionId" nzPlaceHolder="Select section" nzShowSearch nzAllowClear
+                    [nzLoading]="loadingSections" [nzDisabled]="listOfSections.length === 0" style="width: 100%;">
+                    <nz-option *ngFor="let section of listOfSections" [nzValue]="section.id"
+                      [nzLabel]="section.sectionName">
+                    </nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
           </div>
 
           <!-- Action Buttons -->

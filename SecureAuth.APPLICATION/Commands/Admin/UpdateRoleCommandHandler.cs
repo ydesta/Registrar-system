@@ -55,6 +55,7 @@ namespace SecureAuth.APPLICATION.Commands.Admin
             role.NormalizedName = command.Name.ToUpper();
             role.Description = command.Description;
             role.IsActive = command.IsActive;
+            role.RequiresTwoFactor = command.RequiresTwoFactor;  // ✅ NEW: Update 2FA requirement
 
             var result = await _roleManager.UpdateAsync(role);
             if (!result.Succeeded)

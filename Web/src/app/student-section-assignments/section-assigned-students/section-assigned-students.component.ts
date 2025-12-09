@@ -8,6 +8,8 @@ import { TermCourseOfferingService } from '../../colleges/services/term-course-o
 import { StaticData } from '../../admission-request/model/StaticData';
 import { StudentSectionAssignmentService } from 'src/app/services/student-section-assignment.service';
 import { StudentRegisteredCoursesModel, StudentRegisteredCoursesResult } from 'src/app/Models/StudentRegisteredCoursesModel';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-section-assigned-students',
@@ -75,11 +77,18 @@ export class SectionAssignedStudentsComponent implements OnInit {
     this.sectionType.valueChanges.subscribe(sectionType => {
 
       if (this.academicTerm.value && this.year.value && this.batchCode.value) {
-        this.loadAvailableSections();
         this.getListOfCourse();
       }
 
     });
+     this.courseId.valueChanges.subscribe(course => {
+
+      if (course && this.academicTerm.value && this.year.value && this.batchCode.value) {
+        this.loadAvailableSections();
+      }
+
+    });
+    
   }
 
   private createSearchForm() {
@@ -106,6 +115,9 @@ export class SectionAssignedStudentsComponent implements OnInit {
 
   get batchCode() {
     return this.searchForm.get("batchCode");
+  }
+  get courseId() {
+    return this.searchForm.get("courseId");
   }
 
   /**
@@ -203,7 +215,7 @@ export class SectionAssignedStudentsComponent implements OnInit {
     this.listOfSections = [];
 
     this.studentSectionAssignmentService
-      .getListOfSectionBasedOnBatch(this.batchCode.value, this.academicTerm.value, this.year.value, this.sectionType.value)
+      .getListOfSectionBasedOnBatch(this.batchCode.value, this.academicTerm.value, this.year.value, this.sectionType.value,this.courseId.value)
       .subscribe({
         next: (sections: any) => {
           this.loadingSections = false;
@@ -213,7 +225,6 @@ export class SectionAssignedStudentsComponent implements OnInit {
         error: (error) => {
           this.loadingSections = false;
           this.notificationService.notification('error', 'Error', 'Failed to load available sections');
-          console.error('Error loading sections:', error);
         }
       });
   }
@@ -236,8 +247,6 @@ export class SectionAssignedStudentsComponent implements OnInit {
               this.sectionAssignedStudents = response.data;
               this.listOfData = [...this.sectionAssignedStudents];
               this.listOfDisplayData = [...this.sectionAssignedStudents];
-              console.log('Total students:', this.sectionAssignedStudents.length);
-              console.log('Display data length:', this.listOfDisplayData.length);
               this.successMessage = `Found ${this.sectionAssignedStudents.length} section assigned students`;
               this.notificationService.notification('success', 'Success', this.successMessage);
             } else {
@@ -249,7 +258,6 @@ export class SectionAssignedStudentsComponent implements OnInit {
             this.loading = false;
             this.errorMessage = 'Error retrieving section assigned students. Please try again.';
             this.notificationService.notification('error', 'Error', this.errorMessage);
-            console.error('Error:', error);
           }
         });
     } else {
@@ -608,5 +616,342 @@ export class SectionAssignedStudentsComponent implements OnInit {
    */
   filterSectionOption = (input: string, option: any): boolean => {
     return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+  };
+
+  /**
+   * Exports the attendance sheet as a PDF document optimized for printing
+   * Opens the browser's print dialog for immediate printing
+   * @returns void
+   */
+  public exportAttendanceSheetPDF(): void {
+    try {
+      if (this.sectionAssignedStudents.length === 0) {
+        this.notificationService.notification('warning', 'Warning', 'No data to export');
+        return;
+      }
+
+      // Get form values for header information
+      const academicTerm = this.academicTerm.value;
+      const year = this.year.value;
+      const courseId = this.searchForm.get('courseId')?.value;
+      const sectionId = this.searchForm.get('sectionId')?.value;
+
+      // Get course and section information
+      const selectedCourse = this.registeredCourses.find(c => c.courseId === courseId);
+      const selectedSection = this.listOfSections.find(s => s.id === sectionId);
+
+      // Create PDF in landscape mode
+      const doc = new jsPDF('landscape', 'mm', 'a4');
+    
+    // Add professional header
+    doc.setFontSize(17);
+    doc.setFont('helvetica', 'bold');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const textWidth = doc.getTextWidth('HILCoE SCHOOL OF COMPUTER SCIENCE & TECHNOLOGY');
+    const centerX = (pageWidth - textWidth) / 2;
+    doc.text('HILCoE SCHOOL OF COMPUTER SCIENCE & TECHNOLOGY', centerX, 12);
+    
+    // Add decorative line
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    const lineLength = 150; // Length of the decorative line
+    const lineStartX = (pageWidth - lineLength) / 2;
+    doc.line(lineStartX, 14, lineStartX + lineLength, 14);
+    
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CLASS ATTENDANCE SHEET', 20, 20);
+    
+    // Add course information in a better distributed layout
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    
+    // Left column - Course details
+    doc.text(`Class: ${this.batchCode.value || 'N/A'}`, 20, 26);
+    doc.text(`Term: ${this.getAcademicTermName(academicTerm)} ${year}`, 20, 30);
+    doc.text(`Section: ${selectedSection?.sectionName || 'N/A'}`, 20, 34);
+    
+    // Middle column - Course code and instructor
+    doc.text(`Course Code: ${selectedCourse?.courseCode || 'N/A'}`, 100, 26);
+    doc.text(`Instructor: _________________`, 100, 31);
+    
+    // Right column - Date and signature
+    doc.text(`Date: ${new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}`, 180, 26);
+    doc.text(`Signature: _________________`, 180, 31);
+
+    // Prepare table data
+    const tableData = this.sectionAssignedStudents.map((student, index) => [
+      index + 1,
+      student.fullName,
+      student.batchCode,
+      ...Array(24).fill('') // Empty cells for attendance marks
+    ]);
+
+    // Define table columns
+    const columns = [
+      { title: 'No.', dataKey: 'no', width: 16 },
+      { title: 'Full Name', dataKey: 'name', width: 80 },
+      { title: 'Batch', dataKey: 'batch', width: 30 },
+      ...Array.from({ length: 24 }, (_, i) => ({ 
+        title: `${i + 1}`, 
+        dataKey: `day${i + 1}`, 
+        width: 8 
+      }))
+    ];
+
+    // Add table
+    autoTable(doc, {
+      head: [columns.map(col => col.title)],
+      body: tableData,
+      startY: 44,
+      margin: { left: 2, right: 15, top: 20, bottom: 20 },
+      pageBreak: 'auto',
+      rowPageBreak: 'avoid',
+      showHead: 'everyPage',
+      styles: {
+        fontSize: 10,
+        cellPadding: 2,
+        overflow: 'linebreak',
+        halign: 'center',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2,
+        minCellHeight: 6,
+        font: 'helvetica'
+      },
+      headStyles: {
+        fillColor: [240, 240, 240],
+        textColor: [0, 0, 0],
+        fontStyle: 'bold',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2,
+        fontSize: 10,
+        cellPadding: 2,
+        font: 'helvetica'
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 12 }, // No. (minimized slightly)
+        1: { halign: 'left', cellWidth: 65, fontStyle: 'bold' },   // Name - Bold (added more width to prevent wrapping)
+        2: { halign: 'center', cellWidth: 25, fontStyle: 'bold' }, // Batch - Bold
+        // Attendance columns - increased width to prevent wrapping
+        ...Object.fromEntries(
+          Array.from({ length: 24 }, (_, i) => [i + 3, { halign: 'center', cellWidth: 8 }])
+        )
+      },
+      bodyStyles: {
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2,
+        fontSize: 10,
+        cellPadding: 2,
+        font: 'helvetica'
+      },
+      didDrawPage: (data: any) => {
+        // Add page number
+        const pageCount = doc.getNumberOfPages();
+        doc.setFontSize(8);
+        doc.text(`Page ${data.pageNumber} of ${pageCount}`, 20, doc.internal.pageSize.height - 10);
+      }
+    });
+
+    // Save the PDF and open print dialog
+    const fileName = `attendance-sheet-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.pdf`;
+    
+    // Generate PDF blob
+    const pdfBlob = doc.output('blob');
+    
+    // Create object URL and open in new window for printing
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    const printWindow = window.open(pdfUrl, '_blank');
+    
+    if (printWindow) {
+      printWindow.onload = () => {
+        printWindow.print();
+        // Clean up the URL after printing
+        setTimeout(() => {
+          URL.revokeObjectURL(pdfUrl);
+        }, 1000);
+      };
+    } else {
+      // Fallback: download the PDF if popup is blocked
+      doc.save(fileName);
+    }
+
+    this.notificationService.notification('success', 'Success', 'Attendance sheet ready for printing');
+    } catch (error) {
+      this.notificationService.notification('error', 'Export Error', 'Failed to generate attendance sheet. Please try again.');
+    }
   }
-} 
+
+  /**
+   * Exports the mark list as a PDF document optimized for printing
+   * Opens the browser's print dialog for immediate printing
+   * @returns void
+   */
+  public exportMarkListPDF(): void {
+    try {
+      if (this.sectionAssignedStudents.length === 0) {
+        this.notificationService.notification('warning', 'Warning', 'No data to export');
+        return;
+      }
+
+    // Get form values for header information
+    const academicTerm = this.academicTerm.value;
+    const year = this.year.value;
+    const courseId = this.searchForm.get('courseId')?.value;
+    const sectionId = this.searchForm.get('sectionId')?.value;
+
+    // Get course and section information
+    const selectedCourse = this.registeredCourses.find(c => c.courseId === courseId);
+    const selectedSection = this.listOfSections.find(s => s.id === sectionId);
+
+    // Create PDF in portrait mode
+    const doc = new jsPDF('portrait', 'mm', 'a4');
+    
+    // Add professional header
+    doc.setFontSize(17);
+    doc.setFont('helvetica', 'bold');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const textWidth = doc.getTextWidth('HILCoE SCHOOL OF COMPUTER SCIENCE & TECHNOLOGY');
+    const centerX = (pageWidth - textWidth) / 2;
+    doc.text('HILCoE SCHOOL OF COMPUTER SCIENCE & TECHNOLOGY', centerX, 12);
+    
+    // Add decorative line
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    const lineLength = 150; // Length of the decorative line
+    const lineStartX = (pageWidth - lineLength) / 2;
+    doc.line(lineStartX, 14, lineStartX + lineLength, 14);
+    
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RESULT SUBMISSION SHEET', 20, 20);
+    
+    // Add course information in a better distributed layout
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    
+    // Left column - Course details
+    doc.text(`Class: ${this.batchCode.value || 'N/A'}`, 5, 26);
+    doc.text(`Term: ${this.getAcademicTermName(academicTerm)} ${year}`, 5, 30);
+    doc.text(`Course Code: ${selectedCourse?.courseCode || 'N/A'}`, 5, 34);
+    
+    // Middle column - Section and instructor
+    doc.text(`Section: ${selectedSection?.sectionName || 'N/A'}`, 70, 26);
+    doc.text(`Instructor: _________________`, 70, 31);
+    
+    // Right column - Date and signature
+    doc.text(`Date of Submission: ${new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}`, 140, 26);
+    doc.text(`Signature: _________________`, 140, 31);
+
+    // Prepare table data
+    const tableData = this.sectionAssignedStudents.map((student) => [
+      student.studentCode,
+      student.fullName,
+      student.batchCode,
+      '', // 30%
+      '', // 60%
+      '', // 55%
+      '', // 15%
+      '', // Total
+      '', // Grade
+      ''  // Remark
+    ]);
+
+    // Define table columns
+    const columns = [
+      { title: 'Student Code', dataKey: 'studentCode', width: 35 },
+      { title: 'Full Name', dataKey: 'fullName', width: 60 },
+      { title: 'Batch', dataKey: 'batch', width: 25 },
+      { title: '30%', dataKey: 'score1', width: 20 },
+      { title: '60%', dataKey: 'score2', width: 20 },
+      { title: '55%', dataKey: 'score3', width: 20 },
+      { title: '15%', dataKey: 'score4', width: 20 },
+      { title: 'Total(100%)', dataKey: 'total', width: 25 },
+      { title: 'Grade', dataKey: 'grade', width: 20 },
+      { title: 'Remark', dataKey: 'remark', width: 25 }
+    ];
+
+    // Add table
+    autoTable(doc, {
+      head: [columns.map(col => col.title)],
+      body: tableData,
+      startY: 44,
+      margin: { left: -2, right: 15, top: 20, bottom: 20 },
+      pageBreak: 'auto',
+      rowPageBreak: 'avoid',
+      showHead: 'everyPage',
+      styles: {
+        fontSize: 10,
+        cellPadding: 2,
+        overflow: 'linebreak',
+        halign: 'center',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2,
+        minCellHeight: 6,
+        font: 'helvetica'
+      },
+      headStyles: {
+        fillColor: [240, 240, 240],
+        textColor: [0, 0, 0],
+        fontStyle: 'bold',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2,
+        fontSize: 10,
+        cellPadding: 2,
+        font: 'helvetica'
+      },
+      bodyStyles: {
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2,
+        fontSize: 10,
+        cellPadding: 2,
+        font: 'helvetica'
+      },
+      columnStyles: {
+        0: { halign: 'left', cellWidth: 25 },  // Student Code (reduced)
+        1: { halign: 'left', cellWidth: 50, fontStyle: 'bold' },  // Full Name - Bold (further reduced)
+        2: { halign: 'center', cellWidth: 25, fontStyle: 'bold' }, // Batch - Bold (reduced)
+        3: { halign: 'center', cellWidth: 15 }, // 30% (reduced)
+        4: { halign: 'center', cellWidth: 15 }, // 60% (reduced)
+        5: { halign: 'center', cellWidth: 15 }, // 55% (reduced)
+        6: { halign: 'center', cellWidth: 15 }, // 15% (reduced)
+        7: { halign: 'center', cellWidth: 22 }, // Total (increased width to prevent wrapping)
+        8: { halign: 'center', cellWidth: 15 }, // Grade (reduced)
+        9: { halign: 'center', cellWidth: 18 }  // Remark (reduced)
+      },
+      didDrawPage: (data: any) => {
+        // Add page number
+        const pageCount = doc.getNumberOfPages();
+        doc.setFontSize(8);
+        doc.text(`Page ${data.pageNumber} of ${pageCount}`, 20, doc.internal.pageSize.height - 10);
+      }
+    });
+
+    // Save the PDF and open print dialog
+    const fileName = `mark-list-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.pdf`;
+    
+    // Generate PDF blob
+    const pdfBlob = doc.output('blob');
+    
+    // Create object URL and open in new window for printing
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    const printWindow = window.open(pdfUrl, '_blank');
+    
+    if (printWindow) {
+      printWindow.onload = () => {
+        printWindow.print();
+        // Clean up the URL after printing
+        setTimeout(() => {
+          URL.revokeObjectURL(pdfUrl);
+        }, 1000);
+      };
+    } else {
+      // Fallback: download the PDF if popup is blocked
+      doc.save(fileName);
+    }
+
+    this.notificationService.notification('success', 'Success', 'Mark list ready for printing');
+    } catch (error) {
+      this.notificationService.notification('error', 'Export Error', 'Failed to generate mark list. Please try again.');
+    }
+  }
+}

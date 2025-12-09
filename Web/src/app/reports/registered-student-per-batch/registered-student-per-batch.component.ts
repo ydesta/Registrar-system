@@ -11,6 +11,7 @@ import { ACADEMIC_TERM_STATUS } from 'src/app/common/constant';
 import { CrudService } from 'src/app/services/crud.service';
 import * as XLSX from 'xlsx';
 import { StudentInformation } from '../model/student-information.model';
+import { TermCourseOfferingService } from 'src/app/colleges/services/term-course-offering.service';
 @Component({
   selector: 'app-registered-student-per-batch',
   templateUrl: './registered-student-per-batch.component.html',
@@ -41,7 +42,8 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
     private _pdfExportService: PdfExportService,
     private _batchService: BatchService,
     private _fb: FormBuilder,
-    private _crudService: CrudService
+    private _crudService: CrudService,
+    private courseTermOfferingService: TermCourseOfferingService,
   ) {
     const currentYear = new Date();
     this.yearList = this.getYearRange(currentYear.getFullYear());
@@ -49,17 +51,37 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.getListOfBatch();
-    this.getListOfAcademicTermStatus();
-    this._crudService.getList("/courses").subscribe((res: any) => {
-      this.courses = res.data;
+    this.termId.valueChanges.subscribe(res => {
+      if (res && this.termYear.value) {
+        this.getListOfCourseOffering(res, this.termYear.value);
+        this.getListOfBatch(res, this.termYear.value);
+      }
     });
+    // Subscribe to year changes
+    this.termYear.valueChanges.subscribe(year => {
+      if (year && this.termId.value) {
+        this.getListOfCourseOffering(this.termId.value, year);
+        this.getListOfBatch(this.termId.value, year);
+      }
+    });
+    this.batchCode.valueChanges.subscribe(res => {
+      console.log("$$       ",res);
+      if (this.termYear.value && this.termId.value && res) {
+        this.getListOfCourseOffering(this.termId.value, this.termYear.value, res);
+      }
+    });
+    // this.
+    // ();
+    this.getListOfAcademicTermStatus();
+    // this._crudService.getList("/courses").subscribe((res: any) => {
+    //   this.courses = res.data;
+    // });
   }
   private createRegisteredStudentPerBatch() {
     this.formRegisteredStudentPerBatch = this._fb.group({
       termId: [null, [Validators.required]],
       termYear: [null, [Validators.required]],
-      courseId: [null, [Validators.required]],
+      courseId: [null, []],
       batchCode: [null, [Validators.required]],
     });
   }
@@ -81,10 +103,15 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
     }
     return yearList.reverse();
   }
-  getListOfBatch() {
-    this._batchService.getBatchList().subscribe(res => {
-      this.listOfBatch = res.data;
-    })
+  // getListOfBatch() {
+  //   this._batchService.getBatchList().subscribe(res => {
+  //     this.listOfBatch = res.data;
+  //   })
+  // }
+  getListOfBatch(termId: number = 0, termYear: number = 0) {
+    this.courseTermOfferingService.getListOfBatchCodeByAcademicTerm(termId, termYear).subscribe(res => {
+      this.listOfBatch = res;
+    });
   }
   getRegisteredStudentPerBatch() {
     this.isLoading = true;
@@ -117,26 +144,73 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
     params.batchCode = formModel.batchCode;
     return params;
   }
-
+  get termId() {
+    return this.formRegisteredStudentPerBatch.get("termId");
+  }
+  get termYear() {
+    return this.formRegisteredStudentPerBatch.get("termYear");
+  }
+  get batchCode() {
+    return this.formRegisteredStudentPerBatch.get("batchCode");
+  }
   exportToExcel(): void {
-    // Get course data from the main object (not array)
-    const term = this.data[0].academicTerm;
-    const course = `${this.data[0].courseCode} - ${this.data[0].courseTitle}`;
-    const batch = this.data[0].batchCode;
+    // Check if data exists and has the required structure
+    if (!this.data || !Array.isArray(this.data) || this.data.length === 0) {
+      console.error('No data available for export');
+      return;
+    }
+
+    const firstDataItem = this.data[0];
+    if (!firstDataItem) {
+      console.error('Invalid data structure for export');
+      return;
+    }
+
+    // Get form values to determine course information
+    const formValues = this.formRegisteredStudentPerBatch.getRawValue();
+    const selectedCourseId = formValues.courseId;
+
+    // Safely extract data with fallbacks
+    const term = firstDataItem.academicTerm || 'N/A';
+    const batch = firstDataItem.batchCode || 'N/A';
+
+    // Determine course information
+    let courseInfo = 'All Courses';
+    if (selectedCourseId && this.courses) {
+      // Find the selected course from the dropdown
+      const selectedCourse = this.courses.find(course => course.courseId === selectedCourseId);
+      if (selectedCourse) {
+        courseInfo = `${selectedCourse.courseCode} - ${selectedCourse.courseTitle}`;
+      }
+    } else if (firstDataItem.courseCode && firstDataItem.courseTitle) {
+      // Use course info from API response if available
+      courseInfo = `${firstDataItem.courseCode} - ${firstDataItem.courseTitle}`;
+    }
+
+    // Check if student information exists
+    const studentInfo = firstDataItem.studentInformation || [];
+    if (!Array.isArray(studentInfo) || studentInfo.length === 0) {
+      console.warn('No student information available for export');
+    }
+
     const excelData = [
       [`Academic Term: ${term}`],
-      [`Course: ${course}`],
+      [`Course: ${courseInfo}`],
       [`Batch Code: ${batch}`],
-      ["Serial No", "Student Code", "Full Name"],
-      ...this.data[0].studentInformation.map(student => [
-        student.serialNo,
-        student.studentCode,
-        student.fullName
+      ["Serial No", "Course Code", "Course Title", "Student Code", "Full Name"],
+      ...studentInfo.map(student => [
+        student.serialNo || 'N/A',
+        student.courseCode || 'N/A',
+        student.courseTitle || 'N/A',
+        student.studentCode || 'N/A',
+        student.fullName || 'N/A'
       ])
     ];
+
     const merges: XLSX.Range[] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } }
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } }
     ];
 
     this._excelExportService.exportWithCustomLayout(
@@ -147,18 +221,55 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
     );
   }
   exportToPdf(): void {
+    // Check if data exists and has the required structure
+    if (!this.data || !Array.isArray(this.data) || this.data.length === 0) {
+      console.error('No data available for PDF export');
+      return;
+    }
+
+    const firstDataItem = this.data[0];
+    if (!firstDataItem) {
+      console.error('Invalid data structure for PDF export');
+      return;
+    }
+
+    // Get form values to determine course information
+    const formValues = this.formRegisteredStudentPerBatch.getRawValue();
+    const selectedCourseId = formValues.courseId;
+
+    // Safely extract data with fallbacks
+    const term = firstDataItem.academicTerm || 'N/A';
+    const batch = firstDataItem.batchCode || 'N/A';
+
+    // Determine course information
+    let courseInfo = 'All Courses';
+    if (selectedCourseId && this.courses) {
+      // Find the selected course from the dropdown
+      const selectedCourse = this.courses.find(course => course.courseId === selectedCourseId);
+      if (selectedCourse) {
+        courseInfo = `${selectedCourse.courseCode} - ${selectedCourse.courseTitle}`;
+      }
+    } else if (firstDataItem.courseCode && firstDataItem.courseTitle) {
+      // Use course info from API response if available
+      courseInfo = `${firstDataItem.courseCode} - ${firstDataItem.courseTitle}`;
+    }
+
     const headerLines = [
-      `Academic Term: ${this.data[0].academicTerm}`,
-      `Course: ${this.data[0].courseCode} - ${this.data[0].courseTitle}`,
-      `Batch Code: ${this.data[0].batchCode}`
+      `Academic Term: ${term}`,
+      `Course: ${courseInfo}`,
+      `Batch Code: ${batch}`
     ];
 
-    const tableHeaders = ['Serial No', 'Student Code', 'Full Name'];
+    const tableHeaders = ['Serial No', 'Course Code', 'Course Title', 'Student Code', 'Full Name'];
 
-    const tableData = this.data[0].studentInformation.map(student => [
-      student.serialNo,
-      student.studentCode,
-      student.fullName,
+    // Check if student information exists
+    const studentInfo = firstDataItem.studentInformation || [];
+    const tableData = studentInfo.map(student => [
+      student.serialNo || 'N/A',
+      student.courseCode || 'N/A',
+      student.courseTitle || 'N/A',
+      student.studentCode || 'N/A',
+      student.fullName || 'N/A',
     ]);
 
     this._pdfExportService.exportToPdf(
@@ -191,6 +302,22 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
     this.sortOrder = sort.value;
     this.updatePaginatedRegisteredStudent();
   }
-
+  getListOfCourseOffering(termId: number, termYear: number, batchCode?: string) {
+    this.courses = null;
+    if (termId && termYear) {
+      this.courseTermOfferingService.getListOfCourseByAcademicTermAndBatch(termId, termYear, batchCode)
+        .subscribe({
+          next: (res: any) => {
+            this.courses = res;
+            this.isLoading = false;
+          },
+          error: (err) => {
+            console.error('Error fetching course offerings:', err);
+            this.courses = [];
+            this.isLoading = false;
+          }
+        });
+    }
+  }
 }
 

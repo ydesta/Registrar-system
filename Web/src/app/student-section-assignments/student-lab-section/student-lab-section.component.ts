@@ -8,6 +8,7 @@ import { StaticData } from '../../admission-request/model/StaticData';
 import { StudentSectionAssignmentService } from '../../services/student-section-assignment.service';
 import { LabSectionAssignmentRequest } from '../../Models/BulkSectionAssignmentRequest';
 import { NzModalService } from 'ng-zorro-antd/modal';
+import { SectionViewModel } from 'src/app/Models/SectionViewModel';
 
 @Component({
   selector: 'app-student-lab-section',
@@ -17,7 +18,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 export class StudentLabSectionComponent implements OnInit {
   // Make Math available in template
   Math = Math;
-  
+
   // Form data
   searchForm: FormGroup;
   listOfTermNumber: StaticData[] = [];
@@ -32,7 +33,7 @@ export class StudentLabSectionComponent implements OnInit {
   studentsPerSection = 45; // Calculated value
   errorMessage = '';
   successMessage = '';
-  
+
   // Section generation status
   numberOfGeneratedSections: number = 0;
   isSectionGenerated: boolean = false;
@@ -44,7 +45,9 @@ export class StudentLabSectionComponent implements OnInit {
 
   // Collapse state
   isSearchCollapsed = false;
-
+  listOfSections: SectionViewModel[] = [];
+  availableSections: SectionViewModel[] = [];
+  loadingSections = false;
   constructor(
     private fb: FormBuilder,
     private studentSectionAssignmentService: StudentSectionAssignmentService,
@@ -84,7 +87,13 @@ export class StudentLabSectionComponent implements OnInit {
     // Subscribe to batchCode changes to automatically search
     this.batchCode.valueChanges.subscribe(batchCode => {
       if (batchCode) {
-        this.onSearch(batchCode);
+        //  this.onSearch(batchCode);
+        this.loadAvailableSections();
+      }
+    });
+    this.sectionId.valueChanges.subscribe(section => {
+      if (section && this.batchCode.value) {
+        this.onSearch(this.batchCode.value, section);
       }
     });
   }
@@ -93,15 +102,39 @@ export class StudentLabSectionComponent implements OnInit {
   get academicTerm() { return this.searchForm.get('academicTerm'); }
   get year() { return this.searchForm.get('year'); }
   get batchCode() { return this.searchForm.get('batchCode'); }
+  get sectionId() { return this.searchForm.get('sectionId'); }
 
   createSearchForm(): void {
     this.searchForm = this.fb.group({
       academicTerm: [null, Validators.required],
       year: [null, Validators.required],
-      batchCode: [null, Validators.required]
+      batchCode: [null, Validators.required],
+      sectionId: [null, Validators.required]
     });
   }
-
+  loadAvailableSections(): void {
+    if (!this.batchCode.value || !this.academicTerm.value || !this.year.value) {
+      return;
+    }
+    this.loadingSections = true;
+    this.availableSections = [];
+    this.listOfSections = [];
+    const courseId = '00000000-0000-0000-0000-000000000000';
+    const sectionType: number = 0; // Lab sections
+    this.studentSectionAssignmentService
+      .getListOfSectionBasedOnBatch(this.batchCode.value, this.academicTerm.value, this.year.value, sectionType, courseId)
+      .subscribe({
+        next: (sections: any) => {
+          this.loadingSections = false;
+          this.availableSections = sections.data || [];
+          this.listOfSections = sections.data;
+        },
+        error: (error) => {
+          this.loadingSections = false;
+          this.notificationService.notification('error', 'Error', 'Failed to load available sections');
+        }
+      });
+  }
   getListOfAcademicTermStatus(): void {
     let division: StaticData = new StaticData();
     ACADEMIC_TERM_STATUS.forEach(pair => {
@@ -139,19 +172,21 @@ export class StudentLabSectionComponent implements OnInit {
   /**
    * Search for lab section assigned students based on form parameters
    */
-  onSearch(batchCode: string): void {
+  onSearch(batchCode: string, sectionId?: any): void {
     if (batchCode) {
       this.loading = true;
       this.errorMessage = '';
       this.successMessage = '';
 
       const { academicTerm, year } = this.searchForm.value;
-      
+      // Use the passed sectionId if provided, otherwise read from form
+      const actualSectionId = sectionId !== undefined ? sectionId : this.searchForm.value.sectionId;
+      console.log("%%     ", actualSectionId);
       // First, check if lab sections have already been generated for this batch
-      this.checkLabSectionGenerationStatus(batchCode, academicTerm, year);
-      
+      this.checkLabSectionGenerationStatus(batchCode, academicTerm, year, actualSectionId);
+
       this.studentSectionAssignmentService
-        .getListOfSectionAssignedStudentsForLab(batchCode, academicTerm, year)
+        .getListOfSectionAssignedStudentsForLab(batchCode, academicTerm, year, actualSectionId)
         .subscribe({
           next: (response) => {
             this.loading = false;
@@ -159,16 +194,16 @@ export class StudentLabSectionComponent implements OnInit {
               this.labSectionAssignedStudents = response.data;
               this.listOfData = [...this.labSectionAssignedStudents];
               this.listOfDisplayData = [...this.labSectionAssignedStudents];
-              
 
-              
+
+
               // Check if lab sections are already generated by examining the student data
               this.checkLabSectionStatusFromData();
-              
+
               this.successMessage = `Found ${this.labSectionAssignedStudents.length} students in lab sections`;
               // Collapse the search section when data is returned
               this.isSearchCollapsed = true;
-              
+
               // Auto-suggest optimal sections when data is loaded
               if (this.labSectionAssignedStudents.length > 0) {
                 this.suggestOptimalSections();
@@ -203,12 +238,12 @@ export class StudentLabSectionComponent implements OnInit {
     this.searchValue = '';
     this.listOfBatch = [];
     this.searchForm.reset();
-    
+
     // Reset section-related values
     this.numberOfSections = 1;
     this.studentsPerSection = 45;
     this.generatingAssignments = false;
-    
+
     // Reset section generation status
     this.numberOfGeneratedSections = 0;
     this.isSectionGenerated = false;
@@ -231,7 +266,7 @@ export class StudentLabSectionComponent implements OnInit {
   /**
    * Check if lab sections have already been generated for the current batch
    */
-  private checkLabSectionGenerationStatus(batchCode: string, academicTerm: number, year: number): void {
+  private checkLabSectionGenerationStatus(batchCode: string, academicTerm: number, year: number, sectionId: number): void {
     // Since we don't have a separate API to check status, we'll check it from the student data response
     // This method will be called before the main search to prepare the status
     // The actual status will be determined from the response data
@@ -246,33 +281,33 @@ export class StudentLabSectionComponent implements OnInit {
       // Use the numberOfGeneratedSections value from the API response
       // This is the correct value from the backend
       const firstStudent = this.labSectionAssignedStudents[0];
-      
+
       if (firstStudent && firstStudent.numberOfGeneratedSections !== undefined) {
         this.numberOfGeneratedSections = firstStudent.numberOfGeneratedSections;
         this.isSectionGenerated = firstStudent.numberOfGeneratedSections > 0;
-        
+
         console.log(`✅ Lab sections status from API: ${this.numberOfGeneratedSections} sections generated, isGenerated: ${this.isSectionGenerated}`);
-        
+
         // Additional validation: also check if students have section assignments
-        const studentsWithSections = this.labSectionAssignedStudents.filter(student => 
+        const studentsWithSections = this.labSectionAssignedStudents.filter(student =>
           student.sectionId && student.sectionId > 0
         );
-        
+
         if (studentsWithSections.length > 0) {
           console.log(`Students assigned to ${studentsWithSections.length} sections`);
         }
       } else {
         // Fallback: check if students have section assignments by looking at their sectionId
-        const studentsWithSections = this.labSectionAssignedStudents.filter(student => 
+        const studentsWithSections = this.labSectionAssignedStudents.filter(student =>
           student.sectionId && student.sectionId > 0
         );
-        
+
         if (studentsWithSections.length > 0) {
           // Count unique sections as fallback
           const uniqueSections = new Set(studentsWithSections.map(student => student.sectionId));
           this.numberOfGeneratedSections = uniqueSections.size;
           this.isSectionGenerated = true;
-          
+
           console.log(`⚠️ Lab sections calculated from student data: ${this.numberOfGeneratedSections} sections for ${studentsWithSections.length} students`);
         } else {
           // No sections generated
@@ -381,10 +416,10 @@ export class StudentLabSectionComponent implements OnInit {
     if (this.numberOfSections > 0 && totalStudents > 0) {
       // Calculate new students per section based on user input
       this.studentsPerSection = Math.ceil(totalStudents / this.numberOfSections);
-      
+
       // Clear previous error messages
       this.errorMessage = '';
-      
+
       // Provide feedback on the distribution
       if (this.studentsPerSection > 50) {
         this.errorMessage = `Warning: ${this.studentsPerSection} students per section may be too many for effective lab management.`;
@@ -403,13 +438,13 @@ export class StudentLabSectionComponent implements OnInit {
       // Suggest sections based on ideal students per section (25-35 students per section)
       const idealStudentsPerSection = 30;
       const suggestedSections = Math.ceil(totalStudents / idealStudentsPerSection);
-      
+
       // Ensure suggested sections are within reasonable bounds
       const finalSuggestion = Math.max(1, Math.min(suggestedSections, Math.min(20, totalStudents)));
-      
+
       this.numberOfSections = finalSuggestion;
       this.onNumberOfSectionsChange();
-      
+
       this.successMessage = `Suggested ${finalSuggestion} sections for optimal lab management (${Math.ceil(totalStudents / finalSuggestion)} students per section)`;
     }
   }
@@ -454,6 +489,7 @@ export class StudentLabSectionComponent implements OnInit {
       academicTerm: academicTerm,
       year: year,
       numberOfSections: this.numberOfSections,
+      sectionId: this.sectionId.value,
       students: this.labSectionAssignedStudents.map(student => ({
         sectionId: student.sectionId, // Will be assigned by the backend
         studentId: student.id
@@ -478,11 +514,11 @@ export class StudentLabSectionComponent implements OnInit {
     this.studentSectionAssignmentService.assignStudentLabSections(request).subscribe({
       next: (response) => {
         this.generatingAssignments = false;
-        
+
         // Handle different response structures
         let isSuccess = false;
         let message = '';
-        
+
         if (response.success !== undefined) {
           isSuccess = response.success;
           message = response.message || response.error || '';
@@ -497,20 +533,20 @@ export class StudentLabSectionComponent implements OnInit {
           isSuccess = !response.error;
           message = response.message || response.error || 'Lab section assignments processed';
         }
-        
+
         if (isSuccess) {
           this.successMessage = `Successfully generated ${this.numberOfSections} lab sections for ${totalStudents} students`;
-          
+
           // Update the section generation status
           this.isSectionGenerated = true;
           this.numberOfGeneratedSections = this.numberOfSections;
-          
+
           // Refresh the data to show updated assignments
           this.onSearch(batchCode);
         } else {
           this.errorMessage = message || 'Failed to generate lab section assignments';
         }
-        
+
         console.log('Lab section assignments response:', response);
       },
       error: (error) => {

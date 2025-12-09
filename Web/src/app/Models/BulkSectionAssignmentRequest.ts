@@ -14,6 +14,7 @@ export interface LabSectionAssignmentRequest {
   academicTerm: number;
   year: number;
   numberOfSections?: number;
+  sectionId?: number;
   students: StudentLab[];
 }
 

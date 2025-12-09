@@ -31,69 +31,64 @@ namespace SecureAuth.API.Middleware
             
             try
             {
-                // Skip rate limiting for certain paths
+                // Skip rate limiting for certain paths (health checks, swagger, etc.)
                 if (ShouldSkipRateLimiting(context.Request.Path))
                 {
                     await _next(context);
                     return;
                 }
 
-                // Skip rate limiting for authenticated users on most endpoints
-                if (context.User?.Identity?.IsAuthenticated == true && !IsAuthenticationEndpoint(context.Request.Path))
+                // Only rate limit authentication/security-sensitive endpoints
+                if (ShouldRateLimitEndpoint(context.Request.Path))
                 {
-                    await _next(context);
-                    return;
-                }
+                    var key = GetRateLimitKey(context);
+                    if (string.IsNullOrEmpty(key))
+                    {
+                        await _next(context);
+                        return;
+                    }
 
-                var key = GetRateLimitKey(context);
-                if (string.IsNullOrEmpty(key))
-                {
-                    await _next(context);
-                    return;
-                }
+                    // Use different limits based on endpoint type
+                    int maxAttempts = GetRateLimitForEndpoint(context.Request.Path);
+                    int timeWindowMinutes = _rateLimitingPolicy.TimeWindowMinutes;
 
-                // Check for specific rate limit attributes on the endpoint
-                var endpoint = context.GetEndpoint();
-                var rateLimitAttribute = endpoint?.Metadata?.GetMetadata<RateLimitAttribute>();
-                
-                int maxAttempts = _rateLimitingPolicy.MaxAttempts;
-                int timeWindowMinutes = _rateLimitingPolicy.TimeWindowMinutes;
-                
-                if (rateLimitAttribute != null)
-                {
-                    maxAttempts = rateLimitAttribute.MaxAttempts;
-                    timeWindowMinutes = rateLimitAttribute.TimeWindowMinutes;
-                    key = $"{key}:{context.Request.Path}"; // Add path to key for endpoint-specific rate limiting
-                }
+                    // Check for specific rate limit attributes on the endpoint
+                    var endpoint = context.GetEndpoint();
+                    var rateLimitAttribute = endpoint?.Metadata?.GetMetadata<RateLimitAttribute>();
+                    
+                    if (rateLimitAttribute != null)
+                    {
+                        maxAttempts = rateLimitAttribute.MaxAttempts;
+                        timeWindowMinutes = rateLimitAttribute.TimeWindowMinutes;
+                        key = $"{key}:{context.Request.Path}"; // Add path to key for endpoint-specific rate limiting
+                    }
 
-                // Check if rate limit is exceeded first (more efficient)
-                var isRateLimited = await _rateLimiter.IsRateLimitExceededAsync(
-                    key,
-                    maxAttempts,
-                    timeWindowMinutes);
+                    // Check if rate limit will be exceeded BEFORE incrementing
+                    var isRateLimited = await _rateLimiter.IsRateLimitExceededAsync(
+                        key,
+                        maxAttempts,
+                        timeWindowMinutes);
 
-                if (!isRateLimited)
-                {
+                    if (isRateLimited)
+                    {
+                        _logger.LogWarning("Rate limit exceeded for {Key}", key);
+                        context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+
+                        // Add retry headers
+                        context.Response.Headers.Add("Retry-After", (timeWindowMinutes * 60).ToString());
+                        context.Response.Headers.Add("X-Retry-After", "1"); // For exponential backoff
+
+                        await context.Response.WriteAsJsonAsync(new
+                        {
+                            error = "Too many requests. Please try again later.",
+                            retryAfter = timeWindowMinutes * 60, // Convert to seconds
+                            message = "Rate limit exceeded. Please wait before making more requests."
+                        });
+                        return;
+                    }
+
                     // Only increment if not rate limited
                     await _rateLimiter.IncrementRequestCountAsync(key);
-                }
-
-                if (isRateLimited)
-                {
-                    _logger.LogWarning("Rate limit exceeded for {Key}", key);
-                    context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-
-                    // Add retry headers
-                    context.Response.Headers.Add("Retry-After", (timeWindowMinutes * 60).ToString());
-                    context.Response.Headers.Add("X-Retry-After", "1"); // For exponential backoff
-
-                    await context.Response.WriteAsJsonAsync(new
-                    {
-                        error = "Too many requests. Please try again later.",
-                        retryAfter = timeWindowMinutes * 60, // Convert to seconds
-                        message = "Rate limit exceeded. Please wait before making more requests."
-                    });
-                    return;
                 }
 
                 await _next(context);
@@ -165,6 +160,48 @@ namespace SecureAuth.API.Middleware
             }
 
             return null;
+        }
+
+        private bool ShouldRateLimitEndpoint(PathString path)
+        {
+            // Rate limit security-sensitive endpoints to prevent abuse
+            var rateLimitedPaths = new[]
+            {
+                "/api/authentication/login",
+                "/api/authentication/forgot-password",
+                "/api/authentication/reset-password",
+                "/api/authentication/verify-email",
+                "/api/authentication/change-password"
+            };
+
+            return rateLimitedPaths.Any(p => path.StartsWithSegments(p));
+        }
+
+        private int GetRateLimitForEndpoint(PathString path)
+        {
+            // Different limits for different endpoint types
+            if (path.StartsWithSegments("/api/authentication/login"))
+            {
+                return 10; // Strict limit for login (brute force prevention)
+            }
+            else if (path.StartsWithSegments("/api/authentication/forgot-password"))
+            {
+                return 20; // Password reset (20 per 15 min is reasonable)
+            }
+            else if (path.StartsWithSegments("/api/authentication/reset-password"))
+            {
+                return 20; // Password reset completion
+            }
+            else if (path.StartsWithSegments("/api/authentication/verify-email"))
+            {
+                return 20; // Email verification
+            }
+            else if (path.StartsWithSegments("/api/authentication/change-password"))
+            {
+                return 10; // Change password (strict for security)
+            }
+
+            return _rateLimitingPolicy.MaxAttempts; // Default fallback
         }
 
         private bool IsAuthenticationEndpoint(PathString path)

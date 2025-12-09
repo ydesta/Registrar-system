@@ -9,9 +9,12 @@
   </div>
 
     <!-- Error Message -->
-    <div *ngIf="incorrectLoginAttempt" class="error-message">
+    <div *ngIf="incorrectLoginAttempt" class="error-message" [class.lockout-message]="isAccountLocked">
       <span>{{ incorrectLoginAttempt }}</span>
-  </div>
+      <div *ngIf="lockoutEndTime" class="lockout-countdown">
+        Lockout expires: {{ lockoutEndTime | date:'short' }}
+      </div>
+    </div>
 
     <!-- Verification Actions -->
     <div *ngIf="incorrectLoginAttempt && incorrectLoginAttempt.includes('verify your email')" class="verification-actions">
@@ -49,7 +52,7 @@
             <label nz-checkbox formControlName="rememberMe">
         <span>Remember me</span>
       </label>
-            <a class="forgot-password" routerLink="/accounts/forgot-password">Forgot password?</a>
+            <a class="forgot-password" (click)="goToForgotPassword()">Forgot password?</a>
           </div>
         </nz-form-control>
       </nz-form-item>
@@ -60,9 +63,13 @@
           class="login-button" 
           [nzType]="'primary'" 
           [nzLoading]="isLoading"
-          [disabled]="!loginForm.valid || isLoading">
-          {{ isLoading ? 'Signing in...' : 'Sign In' }}
+          [disabled]="!loginForm.valid || isLoading || isAccountLocked">
+          {{ isLoading ? 'Signing in...' : (isAccountLocked ? 'Account Locked' : 'Sign In') }}
         </button>
+    </div>
+    <!-- Remaining Attempts Warning -->
+    <div *ngIf="remainingAttempts > 0 && remainingAttempts < 5 && !isAccountLocked" class="attempts-warning">
+      <span>⚠️ {{ remainingAttempts }} attempt(s) remaining before account is locked</span>
     </div>
     </form>
 

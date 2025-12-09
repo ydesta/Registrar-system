@@ -1,5 +1,5 @@
 export class CourseOfferingInstructorAssignment {
-  courseOfferingId: string;
+  courseOfferingId: number;
   courseId: string;
   staffId: string[];
 }

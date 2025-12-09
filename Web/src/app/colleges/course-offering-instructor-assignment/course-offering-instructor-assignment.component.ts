@@ -20,7 +20,7 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
   indeterminate = false;
   loading = false;
   @Input() courseId: string;
-  @Input() courseOfferingId: string;
+  @Input() courseOfferingId: number;
   searchText = '';
   @ViewChild('basicTable', { static: false }) basicTable!: NzTableComponent<any>;
   searchValue = '';
@@ -55,8 +55,6 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
           this.staffList = res.data;
           this.originalStaffList = [...this.staffList];
           this.listOfCurrentPageData = [...this.staffList];
-          console.log('Staff list loaded:', this.staffList);
-          console.log('Original staff list initialized:', this.originalStaffList.length);
         } else {
           console.error('No data received from staff service');
           this.staffList = [];
@@ -78,7 +76,7 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
   onCurrentPageDataChange(listOfCurrentPageData: readonly any[]): void {
     this.listOfCurrentPageData = listOfCurrentPageData;
     this.setOfCheckedId.clear();
-   // Check items based on courseId array
+    // Check items based on courseId array
     this.existingStaffList.forEach(staff => {
       const matchingItem = listOfCurrentPageData.find(item => item.id == staff.instructorId);
       if (matchingItem) {
@@ -115,13 +113,13 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
   onSearch(): void {
     console.log('Search text:', this.searchText);
     console.log('Original staff list length:', this.originalStaffList?.length);
-    
+
     // Check if originalStaffList exists
     if (!this.originalStaffList || this.originalStaffList.length === 0) {
       console.log('No original staff list available');
       return;
     }
-    
+
     // Check if there's any search text
     if (this.searchText.trim() === '') {
       // If the search text is empty, reset the staffList to its original state
@@ -131,15 +129,15 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
       // Filter the original list based on search criteria
       this.staffList = this.originalStaffList.filter(item => {
         if (!item) return false;
-        
+
         const staffCode = item.staffCode ? item.staffCode.toLowerCase() : '';
         const firstName = item.firstName ? item.firstName.toLowerCase() : '';
         const lastName = item.lastName ? item.lastName.toLowerCase() : '';
         const searchTerm = this.searchText.toLowerCase();
-        
-        return staffCode.includes(searchTerm) || 
-               firstName.includes(searchTerm) || 
-               lastName.includes(searchTerm);
+
+        return staffCode.includes(searchTerm) ||
+          firstName.includes(searchTerm) ||
+          lastName.includes(searchTerm);
       });
       console.log('Filtered list length:', this.staffList.length);
     }
@@ -166,8 +164,9 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
     assignment.courseId = this.courseId;
     assignment.courseOfferingId = this.courseOfferingId;
     assignment.staffId = selectedStaffs;
-    
+
     this.loading = true;
+    console.log("%%%         ", assignment);
     this.courseOfferingInstructorAssignmentService.create(assignment).subscribe({
       next: (res) => {
         if (res) {
@@ -203,13 +202,13 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
 
   search(): void {
     this.visible = false;
-    
+
     // Check if originalStaffList exists
     if (!this.originalStaffList || this.originalStaffList.length === 0) {
       console.log('No original staff list available for dropdown search');
       return;
     }
-    
+
     // Check if there's any search value
     if (this.searchValue.trim() === '') {
       // If the search value is empty, reset the staffList to its original state
@@ -219,16 +218,16 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
       // Filter the original list based on search criteria
       this.staffList = this.originalStaffList.filter((item: any) => {
         if (!item) return false;
-        
+
         const firstName = item.firstName ? item.firstName.toLowerCase() : '';
         const lastName = item.lastName ? item.lastName.toLowerCase() : '';
         const searchTerm = this.searchValue.toLowerCase();
-        
+
         return firstName.includes(searchTerm) || lastName.includes(searchTerm);
       });
       console.log('Dropdown search filtered list length:', this.staffList.length);
     }
-    
+
     // Refresh the checked status after filtering
     this.refreshCheckedStatus();
   }

@@ -4,6 +4,7 @@ using SecureAuth.APPLICATION.DTOs.Authentication;
 using SecureAuth.APPLICATION.Interfaces;
 using SecureAuth.DOMAIN.Models;
 using SecureAuth.DOMAIN.Models.Security;
+using Microsoft.AspNetCore.Http;
 
 namespace SecureAuth.APPLICATION.Commands.Auth
 {
@@ -15,6 +16,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
         private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly IActivityLogService _activityLogService;
         private readonly ISecurityEventService _securityEventService;
+        private readonly IUnitOfWork _unitOfWork;
 
         public VerifyOtpCommandHandler(
             IOtpService otpService,
@@ -22,7 +24,8 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             ISecureTokenService tokenService,
             IRolePermissionRepository rolePermissionRepository,
             IActivityLogService activityLogService,
-            ISecurityEventService securityEventService)
+            ISecurityEventService securityEventService,
+            IUnitOfWork unitOfWork)
         {
             _otpService = otpService;
             _userManager = userManager;
@@ -30,6 +33,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             _rolePermissionRepository = rolePermissionRepository;
             _activityLogService = activityLogService;
             _securityEventService = securityEventService;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<OtpVerifyResponse> HandleAsync(VerifyOtpCommand command)
@@ -60,12 +64,19 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 };
             }
 
+            // ✅ FIX: Reset failed login attempts after successful OTP verification
+            await _unitOfWork.Users.ResetFailedLoginAttemptsAsync(user.Id);
+            await _unitOfWork.Users.UpdateLastLoginAsync(user.Id, DateTime.UtcNow);
+
             // Generate tokens for successful verification
             var token = await _tokenService.GenerateAccessTokenAsync(user);
             var refreshToken = await _tokenService.GenerateRefreshTokenAsync();
 
             // Get user roles and permissions in a single optimized call
             var userLoginData = await _rolePermissionRepository.GetUserLoginDataAsync(user.Id);
+            
+            // ✅ FIX: Save changes to database
+            await _unitOfWork.SaveChangesAsync();
 
             // Log successful OTP verification
             await _activityLogService.LogUserActionAsync(
@@ -77,6 +88,9 @@ namespace SecureAuth.APPLICATION.Commands.Auth
 
             // Record successful login in security events
             await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, true, "127.0.0.1", "Unknown");
+            
+            // Save any remaining changes (for activity logs and security events)
+            await _unitOfWork.SaveChangesAsync();
 
             return new OtpVerifyResponse
             {

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { BaseModel } from 'src/app/Models/BaseMode';
 import { StaffModel } from 'src/app/Models/StaffModel';
@@ -19,11 +20,26 @@ export class StaffsComponent implements OnInit {
   constructor(
     private _customNotificationService: CustomNotificationService,
     private _staffService: StaffService,
-    private modal: NzModalService
+    private modal: NzModalService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
+    // Check if user is an instructor and redirect to profile
+    this.checkUserRoleAndRedirect();
     this.fetchStaffs();
+  }
+
+  checkUserRoleAndRedirect(): void {
+    const role = (localStorage.getItem('role') || '').replace(/"/g, '');
+    const userType = (localStorage.getItem('userType') || '').replace(/"/g, '');
+    const effectiveRole = userType || role;
+    
+    // If user is an instructor, redirect to their profile
+    if (effectiveRole === 'Instructor') {
+      this.router.navigate(['/staffs/staff-profile']);
+      return;
+    }
   }
 
   fetchStaffs() {

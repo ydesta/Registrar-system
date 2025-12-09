@@ -2,6 +2,7 @@ import { CourseRegistrationApprovalComponent } from "./course-registration-appro
 import { StudentCourseRegistrationComponent } from "./course-registration/student-course-registration/student-course-registration.component";
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
+import { AuthGuard } from '../guards/auth.guard';
 import { AddCourseAttendanceComponent } from "./add-course-attendance/add-course-attendance.component";
 import { AddGradingSystemComponent } from "./add-grading-system/add-grading-system.component";
 import { AddStudentAcademicStatusHistoryComponent } from "./add-student-academic-status-history/add-student-academic-status-history.component";
@@ -37,104 +38,125 @@ import { GradeChangeRequestFormComponent } from "./grade-change-request/grade-ch
 import { SpecialCaseManualRegistrationComponent } from "./special-case-manual-registration/special-case-manual-registration.component";
 
 const routes: Routes = [
-  { path: "", component: StudentsComponent },
-  { path: "assign-batch", component: AssignBatchComponent },
-  { path: "student-registration", component: StudentRegistrationComponent },
-  { path: "entry-trucking", component: StudentEntryTruckingComponent },
+  { path: "", component: StudentsComponent, canActivate: [AuthGuard] },
+  { path: "assign-batch", component: AssignBatchComponent, canActivate: [AuthGuard] },
+  { path: "student-registration", component: StudentRegistrationComponent, canActivate: [AuthGuard] },
+  { path: "entry-trucking", component: StudentEntryTruckingComponent, canActivate: [AuthGuard] },
   {
     path: "student-status-history",
-    component: StudentAcademicStatusHistoryComponent
+    component: StudentAcademicStatusHistoryComponent,
+    canActivate: [AuthGuard]
   },
-  { path: "StudentGrades", component: StudentGradeComponent },
-  { path: "grading-system", component: GradingSystemComponent },
-  { path: "student-attendance", component: CourseAttendanceComponent },
-  { path: "student-clearance", component: StudentClearanceComponent },
-  { path: "student-feedback", component: StudentFeedbackComponent },
-  { path: "add-student/:id", component: AddStudentComponent },
+  { path: "StudentGrades", component: StudentGradeComponent, canActivate: [AuthGuard] },
+  { path: "grading-system", component: GradingSystemComponent, canActivate: [AuthGuard] },
+  { path: "student-attendance", component: CourseAttendanceComponent, canActivate: [AuthGuard] },
+  { path: "student-clearance", component: StudentClearanceComponent, canActivate: [AuthGuard] },
+  { path: "student-feedback", component: StudentFeedbackComponent, canActivate: [AuthGuard] },
+  { path: "add-student/:id", component: AddStudentComponent, canActivate: [AuthGuard] },
   {
     path: "add-student-registration/:id",
-    component: AddStudentRegistrationComponent
+    component: AddStudentRegistrationComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "add-entry-trucking/:id",
-    component: AddStudentEntryTruckingComponent
+    component: AddStudentEntryTruckingComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "add-student-status-history/:id",
-    component: AddStudentAcademicStatusHistoryComponent
+    component: AddStudentAcademicStatusHistoryComponent,
+    canActivate: [AuthGuard]
   },
-  { path: "add-student-grade/:id", component: AddStudentGradeComponent },
-  { path: "add-grading-system/:id", component: AddGradingSystemComponent },
+  { path: "add-student-grade/:id", component: AddStudentGradeComponent, canActivate: [AuthGuard] },
+  { path: "add-grading-system/:id", component: AddGradingSystemComponent, canActivate: [AuthGuard] },
   {
     path: "add-student-attendance/:id",
-    component: AddCourseAttendanceComponent
+    component: AddCourseAttendanceComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "add-student-clearance/:id",
-    component: AddStudentClearanceComponent
+    component: AddStudentClearanceComponent,
+    canActivate: [AuthGuard]
   },
-  { path: "student-course", component: CourseOfferingComponent },
-  { path: "add-student-feedback/:id", component: AddStudentFeedbackComponent },
-  { path: "student-grade-report", component: StudentGradeReportComponent },
+  { path: "student-course", component: CourseOfferingComponent, canActivate: [AuthGuard] },
+  { path: "add-student-feedback/:id", component: AddStudentFeedbackComponent, canActivate: [AuthGuard] },
+  { path: "student-grade-report", component: StudentGradeReportComponent, canActivate: [AuthGuard] },
   {
     path: "student-course-registration",
-    component: StudentCourseRegistrationComponent
+    component: StudentCourseRegistrationComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "course-registration-approval",
-    component: CourseRegistrationApprovalComponent
+    component: CourseRegistrationApprovalComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "manage-student-course-registration",
-    component: ManageStudentCourseRegistrationComponent
+    component: ManageStudentCourseRegistrationComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "register-semester-course",
-    component: CourseEnrollmentDetailsComponent
+    component: CourseEnrollmentDetailsComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "import-student-grade",
-    component: ImportStudentGradeComponent
+    component: ImportStudentGradeComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "student-profile-summary",
-    component: StudentProfileSummaryComponent
+    component: StudentProfileSummaryComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "course-add-approval",
-    component: AddCourseApprovalComponent
+    component: AddCourseApprovalComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "course-add-request",
-    component: AddCourseRequestComponent
+    component: AddCourseRequestComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "new-registered-list",
-    component: RegisteredNewStudentListComponent
+    component: RegisteredNewStudentListComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "grade-change-request",
-    component: ManageGradeChangeRequestComponent
+    component: ManageGradeChangeRequestComponent,
+    canActivate: [AuthGuard]
   },
    {
     path: "grade-change-request-form",
-    component: GradeChangeRequestFormComponent
+    component: GradeChangeRequestFormComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "grade-change-request-for-approval",
-    component: GradeChangeRequestListForApprovalComponent
+    component: GradeChangeRequestListForApprovalComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "profile/:id",
-    component: StudentProfileSummaryComponent
+    component: StudentProfileSummaryComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "edit/:id",
-    component: AddStudentComponent
+    component: AddStudentComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "special-case-manual-registration",
-    component: SpecialCaseManualRegistrationComponent
+    component: SpecialCaseManualRegistrationComponent,
+    canActivate: [AuthGuard]
   },
 ];
 

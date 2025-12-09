@@ -20,6 +20,10 @@ namespace SecureAuth.APPLICATION.DependencyInjection
             services.AddScoped<IValidator<AdminCreateUserRequest>, AdminCreateUserRequestValidator>();
             services.AddScoped<IValidator<ChangePasswordCommand>, ChangePasswordCommandValidator>();
             services.AddScoped<IPasswordGeneratorService, PasswordGeneratorService>();
+            
+            // Register input sanitization service
+            services.AddScoped<IInputSanitizationService, InputSanitizationService>();
+            
             return services;
         }
     }

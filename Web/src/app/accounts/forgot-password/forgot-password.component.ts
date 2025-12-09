@@ -1,25 +1,29 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
+import { RouteRefreshService } from '../services/route-refresh.service';
 
 @Component({
   selector: 'app-forgot-password',
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.scss']
 })
-export class ForgotPasswordComponent implements OnInit {
+export class ForgotPasswordComponent implements OnInit, OnDestroy {
   forgotPasswordForm: FormGroup;
   isLoading = false;
   emailSent = false;
   emailAddress = '';
+  private redirectTimer: any;
+  redirectCountdown = 0;
 
   constructor(
     private _notificationService: CustomNotificationService,
     private _router: Router,
     private _fb: FormBuilder,
-    private _authService: AuthService
+    private _authService: AuthService,
+    private _routeRefreshService: RouteRefreshService
   ) {
     this.forgotPasswordForm = _fb.group({
       email: [null, [Validators.required, Validators.email]]
@@ -35,6 +39,13 @@ export class ForgotPasswordComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    // Clear the redirect timer/interval if component is destroyed
+    if (this.redirectTimer) {
+      clearInterval(this.redirectTimer);
+    }
+  }
+
   submitForm(): void {
     if (this.forgotPasswordForm.valid) {
       this.isLoading = true;
@@ -44,12 +55,29 @@ export class ForgotPasswordComponent implements OnInit {
       this._authService.forgotPassword(email).subscribe({
         next: (response) => {
           this.isLoading = false;
-          this.emailSent = true;
-          this._notificationService.notification(
-            'success',
-            'Email Sent',
-            'If an account with this email exists, you will receive password reset instructions.'
-          );
+          
+          // Check if the request was successful and email was sent
+          if (response.success === true && response.emailSent === true) {
+            this.emailSent = true;
+            this._notificationService.notification(
+              'success',
+              'Email Sent',
+              'Password reset instructions have been sent to your email address. Please check your inbox and spam folder.'
+            );
+            
+            // Auto-redirect to login page after 2 seconds with countdown
+            this.startRedirectCountdown();
+          } else {
+            // Request processed but no email sent (unregistered email)
+            this._notificationService.notification(
+              'info',
+              'Request Processed',
+              'If an account with this email address exists, you will receive password reset instructions. Please check your email inbox and spam folder.'
+            );
+            
+            // Auto-redirect to login page after 2 seconds for unregistered emails too
+            this.startRedirectCountdown();
+          }
         },
         error: (error) => {
           this.isLoading = false;
@@ -74,15 +102,31 @@ export class ForgotPasswordComponent implements OnInit {
   }
 
   goToLogin(): void {
-    this._router.navigate(['/accounts/login']);
+    console.log('Navigating to login page...');
+    // Clear any existing countdown timer
+    if (this.redirectTimer) {
+      clearInterval(this.redirectTimer);
+      this.redirectTimer = null;
+    }
+    this.redirectCountdown = 0;
+    
+    // Navigate with refresh
+    this._routeRefreshService.navigateWithRefresh(['/accounts/login']);
   }
 
   goToRegister(): void {
-    this._router.navigate(['/accounts/register']);
+    console.log('Navigating to register page...');
+    this._routeRefreshService.navigateWithRefresh(['/accounts/register']);
   }
 
   goToHome(): void {
-    this._router.navigate(['/']);
+    console.log('Navigating to home page...');
+    this._routeRefreshService.navigateWithRefresh(['/']);
+  }
+
+  refreshForgotPassword(): void {
+    // Refresh the current forgot password page
+    this._routeRefreshService.navigateWithRefresh(['/accounts/forgot-password']);
   }
 
   resendEmail(): void {
@@ -92,4 +136,20 @@ export class ForgotPasswordComponent implements OnInit {
 
   // Getter methods for form validation
   get email() { return this.forgotPasswordForm.get('email'); }
+
+  private startRedirectCountdown(): void {
+    this.redirectCountdown = 5;
+    
+    const countdownInterval = setInterval(() => {
+      this.redirectCountdown--;
+      
+      if (this.redirectCountdown <= 0) {
+        clearInterval(countdownInterval);
+        this._routeRefreshService.navigateWithRefresh(['/accounts/login']);
+      }
+    }, 1000);
+    
+    // Store interval reference for cleanup
+    this.redirectTimer = countdownInterval;
+  }
 } 

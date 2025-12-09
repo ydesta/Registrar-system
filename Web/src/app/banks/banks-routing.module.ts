@@ -15,23 +15,24 @@ import { PaymentCallbackComponent } from './payment/payment-callback/payment-cal
 import { PaymentOptionsComponent } from './registration/payment-options/payment-options.component';
 import { RegistrationPaymentComponent } from './registration/registration-payment/registration-payment.component';
 import { RegistrationSuccessComponent } from './registration/registration-success/registration-success.component';
+import { AuthGuard } from '../guards/auth.guard';
 
 const routes: Routes = [
-  { path: '', component: BanksComponent },
-  { path: 'bank-transacction', component: BankTransactionComponent },
-  { path: 'student-payment', component: StudentPaymentComponent },
-  { path: 'tuition-fee', component: TuitionFeeComponent },
-  { path: 'add-bank/:id', component: AddBankComponent },
-  { path: 'add-bank-transacction/:id', component: AddBankTransactionComponent },
-  { path: 'add-student-payment', component: AddStudentPaymentComponent },
-  { path: 'add-tuition-fee/:id', component: AddTuitionFeeComponent },
-  { path: 'pending-payment', component: PendingPaymentListComponent },
-  { path: 'payment', component: PaymentComponent },
-  { path: 'payment/callback', component: PaymentCallbackComponent },
-  { path: 'payment/standalone', component: StandalonePaymentComponent },
-  { path: 'registration/payment', component: RegistrationPaymentComponent },
-  { path: 'registration/payment-options', component: PaymentOptionsComponent },
-  { path: 'registration/success', component: RegistrationSuccessComponent }
+  { path: '', component: BanksComponent, canActivate: [AuthGuard] },
+  { path: 'bank-transacction', component: BankTransactionComponent, canActivate: [AuthGuard] },
+  { path: 'student-payment', component: StudentPaymentComponent, canActivate: [AuthGuard] },
+  { path: 'tuition-fee', component: TuitionFeeComponent, canActivate: [AuthGuard] },
+  { path: 'add-bank/:id', component: AddBankComponent, canActivate: [AuthGuard] },
+  { path: 'add-bank-transacction/:id', component: AddBankTransactionComponent, canActivate: [AuthGuard] },
+  { path: 'add-student-payment', component: AddStudentPaymentComponent, canActivate: [AuthGuard] },
+  { path: 'add-tuition-fee/:id', component: AddTuitionFeeComponent, canActivate: [AuthGuard] },
+  { path: 'pending-payment', component: PendingPaymentListComponent, canActivate: [AuthGuard] },
+  { path: 'payment', component: PaymentComponent, canActivate: [AuthGuard] },
+  { path: 'payment/callback', component: PaymentCallbackComponent, canActivate: [AuthGuard] },
+  { path: 'payment/standalone', component: StandalonePaymentComponent, canActivate: [AuthGuard] },
+  { path: 'registration/payment', component: RegistrationPaymentComponent, canActivate: [AuthGuard] },
+  { path: 'registration/payment-options', component: PaymentOptionsComponent, canActivate: [AuthGuard] },
+  { path: 'registration/success', component: RegistrationSuccessComponent, canActivate: [AuthGuard] }
 ];
 
 @NgModule({

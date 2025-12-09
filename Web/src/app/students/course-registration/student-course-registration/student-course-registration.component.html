@@ -44,7 +44,7 @@
               <span class="card-title">Max Allowed</span>
             </div>
             <div class="card-value max-value">{{ getMaxAllowedCreditHours() }}</div>
-            <div class="card-subtitle">Based on CGPA</div>
+            <div class="card-subtitle">{{ studentTermCourseReg?.ignoreGradeLevelValidation ? 'All Available Courses' : (studentTermCourseReg?.cgpa === 0 ? 'All Available Courses' : 'Based on CGPA') }}</div>
           </div>
 
           <div class="summary-card selected-credits">
@@ -86,14 +86,14 @@
           [nzDescription]="'Select the courses you want to register for the current term. These are your primary course selections.'"
           class="mb-16"></nz-alert>
         <div id="print-section" class="print-section">
-          <button class="print-button" (click)="printSlip()">
+          <!-- <button class="print-button" (click)="printSlip()">
             <span nz-icon nzType="printer" nzTheme="outline"></span>
             Show Slip
-          </button>
-          <button class="print-button" (click)="downloadPDF()">
+          </button> -->
+          <!-- <button class="print-button" (click)="downloadPDF()">
             <span nz-icon nzType="download" nzTheme="outline"></span>
             Download PDF
-          </button>
+          </button> -->
         </div>
 
         <nz-spin [nzSpinning]="isLoadingRegularCourses" [nzTip]="'Loading courses...'">
@@ -109,8 +109,11 @@
                   <th class="th-row">
                     Course Code
                   </th>
-                  <th class="th-row">
-                    Course Title
+                  <th class="th-row" style="cursor: pointer;" (click)="sortByCourseTitle('regular')">
+                    <div class="d-flex align-items-center">
+                      <span>Course Title</span>
+                      <i nz-icon [nzType]="getSortIcon('regular')" class="ml-2" [style.color]="regularCoursesSortOrder ? '#1890ff' : '#bfbfbf'"></i>
+                    </div>
                   </th>
                   <th class="th-row">
                     Status
@@ -146,12 +149,12 @@
                         </label>
                       </ng-template>
                     </td>
-                    <td>{{data.courseCode}}</td>
-                    <td>{{ data.courseTitle }} </td>
-                    <td>{{ data.courseStatus }}</td>
-                    <td>{{ data.currentGrade }}</td>
-                    <td class="text-center">{{ data.creditHours }}</td>
-                    <td class="text-center">{{ data.totalAmount }}</td>
+                    <td class="table-data-font">{{data.courseCode}}</td>
+                    <td class="table-data-font">{{ data.courseTitle }} </td>
+                    <td class="table-data-font">{{ data.courseStatus }}</td>
+                    <td class="table-data-font">{{ data.currentGrade }}</td>
+                    <td class="text-center table-data-font">{{ data.creditHours }}</td>
+                    <td class="text-center table-data-font">{{ data.totalAmount }}</td>
                   </tr>
                 </ng-container>
               </tbody>
@@ -166,7 +169,7 @@
           </div>
         </nz-spin>
       </nz-card>
-      <nz-card nzType="inner" [nzTitle]="courseAddTitle" class="card-section">
+      <nz-card nzType="inner" [nzTitle]="courseAddTitle" class="card-section" *ngIf="listOfAddedCourses && listOfAddedCourses.length > 0">
         <nz-alert nzType="info" nzShowIcon [nzMessage]="'Add Course Request'"
           [nzDescription]="'You can select up to 3 additional courses. Each course must be assigned a priority (1-3) before selecting another course. Priority 1 is the highest priority.'"
           class="mb-16"></nz-alert>
@@ -194,7 +197,12 @@
                   <th class="th-row">Priority</th>
                   <th class="th-row">Batch Code</th>
                   <th class="th-row">Course Code</th>
-                  <th class="th-row">Course Title</th>
+                  <th class="th-row" style="cursor: pointer;" (click)="sortByCourseTitle('add')">
+                    <div class="d-flex align-items-center">
+                      <span>Course Title</span>
+                      <i nz-icon [nzType]="getSortIcon('add')" class="ml-2" [style.color]="addCoursesSortOrder ? '#1890ff' : '#bfbfbf'"></i>
+                    </div>
+                  </th>
                   <th class="th-row">Status</th>
                   <th class="th-row">Grade</th>
                   <th class="th-row">Credit Hour</th>
@@ -227,13 +235,13 @@
                         [nzDisabled]="!setOfCheckedAddCourses.has(data.courseId)" class="priority-input">
                       </nz-input-number>
                     </td>
-                     <td class="batch-code-cell" title="{{data.batchCode}}">{{data.batchCode}}</td>
-                     <td>{{data.courseCode}}</td>
-                     <td class="course-title-cell" title="{{ data.courseTitle }}">{{ data.courseTitle }}</td>
-                     <td>{{ data.courseStatus }}</td>
-                    <td>{{ data.currentGrade }}</td>
-                    <td class="text-center">{{ data.creditHours }}</td>
-                    <td class="text-center">{{ data.totalAmount }}</td>
+                     <td class="batch-code-cell table-data-font" title="{{data.batchCode}}">{{data.batchCode}}</td>
+                     <td class="table-data-font">{{data.courseCode}}</td>
+                     <td class="course-title-cell table-data-font" title="{{ data.courseTitle }}">{{ data.courseTitle }}</td>
+                     <td class="table-data-font">{{ data.courseStatus }}</td>
+                    <td class="table-data-font">{{ data.currentGrade }}</td>
+                    <td class="text-center table-data-font">{{ data.creditHours }}</td>
+                    <td class="text-center table-data-font">{{ data.totalAmount }}</td>
                   </tr>
                 </ng-container>
               </tbody>
@@ -248,7 +256,7 @@
           </div>
         </nz-spin>
       </nz-card>
-      <nz-card nzType="inner" [nzTitle]="courseAssessmentTitle" class="card-section">
+      <nz-card nzType="inner" [nzTitle]="courseAssessmentTitle" class="card-section" *ngIf="listOfCourseAssessment && listOfCourseAssessment.length > 0">
         <nz-alert nzType="info" nzShowIcon [nzMessage]="'Course Assessment'"
           [nzDescription]="'Select courses that you need to retake or reassess. These courses will be marked for assessment purposes.'"
           class="mb-16"></nz-alert>
@@ -262,8 +270,14 @@
                     [nzIndeterminate]="indeterminateAssessmentCourses"
                     (nzCheckedChange)="onAllChecked($event, 'assessment')" [nzDisabled]="isAllCoursesDisabled()">
                   </th>
+                  <th class="th-row">Batch Code</th>
                   <th class="th-row">Course Code</th>
-                  <th class="th-row">Course Title</th>
+                  <th class="th-row" style="cursor: pointer;" (click)="sortByCourseTitle('assessment')">
+                    <div class="d-flex align-items-center">
+                      <span>Course Title</span>
+                      <i nz-icon [nzType]="getSortIcon('assessment')" class="ml-2" [style.color]="assessmentCoursesSortOrder ? '#1890ff' : '#bfbfbf'"></i>
+                    </div>
+                  </th>
                   <th class="th-row">Previous Grade</th>
                   <th class="th-row">Current Grade</th>
                   <th class="th-row">Credit Hour</th>
@@ -285,13 +299,101 @@
                       </ng-container>
                       <ng-template #checkbox>
                         <label nz-checkbox [nzChecked]="setOfCheckedAssessmentCourses.has(data.courseId)"
+                          [nzDisabled]="isAssessmentCourseCheckboxDisabled(data)"
                           (nzCheckedChange)="onItemChecked(data.courseId, $event, false, true)">
                         </label>
                       </ng-template>
                     </td>
+                    <td class="table-data-font">{{data.batchCode}}</td>
+                    <td class="table-data-font">{{data.courseCode}}</td>
+                    <td class="table-data-font">{{ data.courseTitle }}</td>
+                    <td class="table-data-font">{{ data.previousRAGrade }}</td>
+                    <td class="table-data-font">{{ data.currentGrade }}</td>
+                    <td class="text-center table-data-font">{{ data.creditHours }}</td>
+                    <td class="text-center table-data-font">{{ data.totalAmount }}</td>
+                  </tr>
+                </ng-container>
+              </tbody>
+              <tfoot class="footer-row">
+                <tr>
+                  <td colspan="6" class="text-bold">Total</td>
+                  <td class="footer-total-center">{{ getTotalAssessmentCreditHours() }}</td>
+                  <td class="footer-total-center">{{ getTotalAssessmentAmount() | number:'1.2-2' }}
+                  </td>
+                </tr>
+              </tfoot>
+            </nz-table>
+          </div>
+        </nz-spin>
+      </nz-card>
+
+      <nz-card nzType="inner" [nzTitle]="courseEquivalentTitle" class="card-section" *ngIf="listOfEquivalentCourses && listOfEquivalentCourses.length > 0">
+        <nz-alert nzType="info" nzShowIcon [nzMessage]="'Equivalent Courses'"
+          [nzDescription]="'Select equivalent courses that can substitute for required courses. These courses provide alternative options for meeting academic requirements.'"
+          class="mb-16"></nz-alert>
+        <div class="mb-16">
+          <nz-input-group nzSearch [nzAddOnAfter]="equivalentSearchButton">
+            <input type="text" nz-input placeholder="Search by course code or title" [(ngModel)]="searchEquivalentCourseText"
+              (ngModelChange)="onSearchEquivalentTextChange($event)" />
+          </nz-input-group>
+          <ng-template #equivalentSearchButton>
+            <button nz-button nzType="primary" nzSearch (click)="filterEquivalentCourses()">
+              <span nz-icon nzType="search"></span>
+            </button>
+          </ng-template>
+        </div>
+        <nz-spin [nzSpinning]="isLoadingEquivalentCourses">
+          <div class="responsive-table-wrapper">
+            <nz-table #equivalentTable [nzData]="filteredEquivalentCourses" nzShowSizeChanger
+              (nzCurrentPageDataChange)="onCurrentPageDataChange($event)" nzBordered [nzShowPagination]="false"
+              [nzScroll]="{ y: tableScrollHeight }" [nzPageSize]="filteredEquivalentCourses.length">
+              <thead class="table-header-row">
+                <tr class="table-header-row">
+                  <th class="paginate" [nzChecked]="checkedEquivalentCourses"
+                    [nzIndeterminate]="indeterminateEquivalentCourses"
+                    (nzCheckedChange)="onAllChecked($event, 'equivalent')">
+                  </th>
+                  <th class="th-row">Batch Code</th>
+                  <th class="th-row">Course Code</th>
+                  <th class="th-row" style="cursor: pointer;" (click)="sortByCourseTitle('equivalent')">
+                    <div class="d-flex align-items-center">
+                      <span>Course Title</span>
+                      <i nz-icon [nzType]="getSortIcon('equivalent')" class="ml-2" [style.color]="equivalentCoursesSortOrder ? '#1890ff' : '#bfbfbf'"></i>
+                    </div>
+                  </th>
+                  <th class="th-row">Equivalent Course Code</th>
+                  <th class="th-row">Equivalent Course Title</th>
+                  <th class="th-row">Status</th>
+                  <th class="th-row">Grade</th>
+                  <th class="th-row">Credit Hour</th>
+                  <th class="th-row">Total Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container tabindex="0" *ngFor="let data of equivalentTable.data; let i = index">
+                  <tr [class.disabled-row]="!setOfCheckedEquivalentCourses.has(data.courseId)"
+                    [style.background-color]="isEquivalentCourseDisabled(data) ? '#fff1f0' : '#ffffff'"
+                    [style.color]="isEquivalentCourseDisabled(data) ? '#595959' : ''">
+                    <td class="paginate">
+                      <ng-container *ngIf="isEquivalentCourseDisabled(data); else equivalentCheckbox">
+                        <span nz-icon nzType="lock" nzTheme="outline" class="lock-icon"
+                          nz-tooltip [nzTooltipTitle]="getCourseLockTooltipMessage(data, 'equivalent')" nzTooltipPlacement="right"
+                          [nzTooltipColor]="'#1890ff'">
+                        </span>
+                      </ng-container>
+                      <ng-template #equivalentCheckbox>
+                        <label nz-checkbox [nzChecked]="setOfCheckedEquivalentCourses.has(data.courseId)"
+                          (nzCheckedChange)="onItemChecked(data.courseId, $event, false, false, true)"
+                          [nzDisabled]="isEquivalentCourseDisabled(data)">
+                        </label>
+                      </ng-template>
+                    </td>
+                    <td>{{data.batchCode}}</td>
                     <td>{{data.courseCode}}</td>
                     <td>{{ data.courseTitle }}</td>
-                    <td>{{ data.previousRAGrade }}</td>
+                    <td>{{ data.equivalentCourseCode }}</td>
+                    <td>{{ data.equivalentCourseTitle }}</td>
+                    <td>{{ data.courseStatus }}</td>
                     <td>{{ data.currentGrade }}</td>
                     <td class="text-center">{{ data.creditHours }}</td>
                     <td class="text-center">{{ data.totalAmount }}</td>
@@ -300,10 +402,9 @@
               </tbody>
               <tfoot class="footer-row">
                 <tr>
-                  <td colspan="5" class="text-bold">Total</td>
-                  <td class="footer-total-center">{{ getTotalAssessmentCreditHours() }}</td>
-                  <td class="footer-total-center">{{ getTotalAssessmentAmount() | number:'1.2-2' }}
-                  </td>
+                  <td colspan="7" class="text-bold">Total</td>
+                  <td class="footer-total-center">{{ getTotalEquivalentCreditHours() }}</td>
+                  <td class="footer-total-center">{{ getTotalEquivalentAmount() | number:'1.2-2' }}</td>
                 </tr>
               </tfoot>
             </nz-table>
@@ -317,8 +418,9 @@
           <span>Selected Courses</span>
           <ul>
             <li><span>Semester</span><strong>{{ setOfCheckedId.size }}</strong></li>
-            <li><span>Add Request</span><strong>{{ setOfCheckedAddCourses.size }}</strong></li>
-            <li><span>Assessment</span><strong>{{ setOfCheckedAssessmentCourses.size }}</strong></li>
+            <li *ngIf="listOfAddedCourses && listOfAddedCourses.length > 0"><span>Add Request</span><strong>{{ setOfCheckedAddCourses.size }}</strong></li>
+            <li *ngIf="listOfCourseAssessment && listOfCourseAssessment.length > 0"><span>Assessment</span><strong>{{ setOfCheckedAssessmentCourses.size }}</strong></li>
+            <li *ngIf="listOfEquivalentCourses && listOfEquivalentCourses.length > 0"><span>Equivalent</span><strong>{{ setOfCheckedEquivalentCourses.size }}</strong></li>
             <li><span>Total Credit Hours</span><strong>{{ totalSelectedCreditHours }}</strong></li>
           </ul>
         </div>
@@ -326,14 +428,14 @@
 
       <nz-form-item>
         <nz-form-control [nzOffset]="12" [nzSpan]="12" class="send-request">
-          <div *ngIf="totalSelectedCreditHours > getMaxAllowedCreditHours()" class="mb-16">
+          <div *ngIf="totalSelectedCreditHours > getMaxAllowedCreditHours() && !studentTermCourseReg?.ignoreGradeLevelValidation" class="mb-16">
             <nz-alert nzType="warning" nzShowIcon [nzMessage]="'Credit Hour Warning'"
-              [nzDescription]="'You have selected ' + totalSelectedCreditHours + ' credit hours, which exceeds the recommended limit of ' + getMaxAllowedCreditHours() + ' credit hours. This may affect your academic performance.'">
+              [nzDescription]="(studentTermCourseReg?.cgpa === 0 ? 'You have selected ' + totalSelectedCreditHours + ' credit hours, which exceeds the recommended limit of ' + getMaxAllowedCreditHours() + ' credit hours for new students. This may affect your academic performance.' : 'You have selected ' + totalSelectedCreditHours + ' credit hours, which exceeds the recommended limit of ' + getMaxAllowedCreditHours() + ' credit hours. This may affect your academic performance.')">
             </nz-alert>
           </div>
           
           <button nz-button nzType="primary"
-            [disabled]="(setOfCheckedId.size === 0 && setOfCheckedAddCourses.size === 0 && setOfCheckedAssessmentCourses.size === 0) || totalSelectedCreditHours > getMaxAllowedCreditHours()"
+            [disabled]="(setOfCheckedId.size === 0 && setOfCheckedAddCourses.size === 0 && setOfCheckedAssessmentCourses.size === 0 && setOfCheckedEquivalentCourses.size === 0) || (totalSelectedCreditHours > getMaxAllowedCreditHours() && !studentTermCourseReg?.ignoreGradeLevelValidation)"
              (click)="onSubmitClicked()">
             Submit
           </button>
@@ -556,14 +658,14 @@
       {{ seasonTitles }}
     </ng-template>
     <div class="print-section">
-      <button class="print-button" (click)="printSlip()">
+      <!-- <button class="print-button" (click)="printSlip()">
         <span nz-icon nzType="printer" nzTheme="outline"></span>
         Show Slip
-      </button>
-      <button class="print-button" (click)="downloadPDF()">
+      </button> -->
+      <!-- <button class="print-button" (click)="downloadPDF()">
         <span nz-icon nzType="download" nzTheme="outline"></span>
         Download PDF
-      </button>
+      </button> -->
     </div>
     <div class="responsive-table-wrapper">
       <nz-table #basicTable [nzData]="studentTermCourseReg?.courseTermOfferings" nzShowSizeChanger
@@ -571,7 +673,12 @@
         <thead class="table-header-row">
           <tr class="table-header-row">
             <th class="th-row">Course Code</th>
-            <th class="th-row">Course Title</th>
+            <th class="th-row" style="cursor: pointer;" (click)="sortByCourseTitle('regular')">
+              <div class="d-flex align-items-center">
+                <span>Course Title</span>
+                <i nz-icon [nzType]="getSortIcon('regular')" class="ml-2" [style.color]="regularCoursesSortOrder ? '#1890ff' : '#bfbfbf'"></i>
+              </div>
+            </th>
             <th class="th-row">Credit Hour</th>
             <th class="th-row">Total Amount</th>
           </tr>

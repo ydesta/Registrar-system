@@ -17,7 +17,7 @@ export class AuthGuardService {
     if (!roles) {
       return this.checkIsUserAuthenticated();
     } else {
-      return this.checkForAdministrator();
+      return this.checkForRequiredRoles(roles);
     }
   }
 
@@ -33,20 +33,14 @@ export class AuthGuardService {
     }
   }
 
-  private checkForAdministrator() {
-    const userRole = localStorage.getItem('role');
-    const userType = localStorage.getItem('userType');
-    const roles = this.getUserRoles();
+  private checkForRequiredRoles(requiredRoles: string[]) {
+    const userRoles = this.getUserRoles();
 
     // Check if user has any of the required roles
-    const hasRequiredRole = roles.some(role => 
-      role === 'Administrator' || 
-      role === 'Admin' || 
-      role === 'Super Admin' ||
-      role === 'Reviewer' ||
-      role === 'Academic Director' ||
-      role === 'Reception' ||
-      role === 'Instructor' 
+    // Super Admin has access to everything
+    const hasRequiredRole = userRoles.some(role => 
+      requiredRoles.includes(role) ||
+      role === 'Super Admin'
     );
 
     return hasRequiredRole ? true : this.redirectToUnauthorized();

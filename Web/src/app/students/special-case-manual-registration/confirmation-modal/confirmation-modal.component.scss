@@ -1,25 +1,39 @@
+// Modern color palette (matching main component)
+$primary-color: #1890ff;
+$success-color: #52c41a;
+$warning-color: #faad14;
+$error-color: #ff4d4f;
+$text-color: #262626;
+$text-secondary: #8c8c8c;
+$border-color: #f0f0f0;
+$background-light: #fafafa;
+$background-white: #ffffff;
+$shadow-light: 0 2px 8px rgba(0, 0, 0, 0.06);
+$shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.1);
+
 // Modal Override Styling to align with project design
 ::ng-deep .ant-modal {
   .ant-modal-content {
     border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     overflow: hidden;
-    background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+    background: #f5f7fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
   .ant-modal-header {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    border-bottom: 1px solid #e8e8e8;
+    border-bottom: 2px solid $border-color;
     padding: 24px 32px;
     position: relative;
     overflow: hidden;
 
     .ant-modal-title {
       font-size: 20px;
-      font-weight: 700;
-      color: #262626;
+      font-weight: 600;
+      color: $text-color;
       position: relative;
       z-index: 1;
     }
@@ -29,7 +43,7 @@
     padding: 32px;
     max-height: 70vh;
     overflow-y: auto;
-    background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+    background: #f5f7fa;
     
     &::-webkit-scrollbar {
       width: 8px;
@@ -41,25 +55,25 @@
     }
     
     &::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, #1890ff 0%, #40a9ff 100%);
+      background: linear-gradient(180deg, $primary-color 0%, #40a9ff 100%);
       border-radius: 4px;
     }
     
     &::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(180deg, #096dd9 0%, #1890ff 100%);
+      background: linear-gradient(180deg, #096dd9 0%, $primary-color 100%);
     }
   }
 
   .ant-modal-close {
-    top: 32px;
-    right: 32px;
+    top: 24px;
+    right: 24px;
     
     .ant-modal-close-x {
-      width: 36px;
-      height: 36px;
-      line-height: 36px;
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
       border-radius: 50%;
-      background: #ff4d4f;
+      background: $error-color;
       color: white;
       transition: all 0.3s ease;
       backdrop-filter: blur(10px);
@@ -67,6 +81,7 @@
       &:hover {
         background: #ff7875;
         transform: scale(1.1);
+        box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
       }
     }
   }
@@ -74,17 +89,17 @@
 
 .confirmation-modal {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #262626;
+  color: $text-color;
   max-width: 800px;
   margin: 0 auto;
 
   .modal-header {
-    color: #262626;
-    padding: 40px;
-    border-radius: 12px 12px 0 0;
+    color: $text-color;
+    padding: 32px;
+    border-radius: 16px 16px 0 0;
     margin: -32px -32px 24px -32px;
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    border-bottom: 1px solid #e8e8e8;
+    border-bottom: 2px solid $border-color;
 
     .header-content {
       display: flex;
@@ -98,12 +113,13 @@
         .header-icon {
           width: 48px;
           height: 48px;
-          background: #1890ff;
+          background: linear-gradient(135deg, $primary-color, #40a9ff);
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           margin-right: 16px;
+          box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
 
           span {
             color: white;
@@ -117,30 +133,35 @@
             margin: 0;
             font-size: 24px;
             font-weight: 600;
-            color: #262626;
+            color: $text-color;
+            background: linear-gradient(135deg, $primary-color, #40a9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
           }
 
           p {
             margin: 8px 0 0 0;
-            color: #8c8c8c;
+            color: $text-secondary;
             font-size: 14px;
           }
         }
       }
 
-             .header-badge {
-         background: #1890ff;
-         color: white;
-         padding: 8px 16px;
-         border-radius: 20px;
-         border: 1px solid #1890ff;
-         margin-right: 60px; // Add margin to prevent overlap with close button
+      .header-badge {
+        background: linear-gradient(135deg, $primary-color, #40a9ff);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: 1px solid $primary-color;
+        margin-right: 60px;
+        box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
 
-         span {
-           font-size: 12px;
-           font-weight: 500;
-         }
-       }
+        span {
+          font-size: 12px;
+          font-weight: 600;
+        }
+      }
     }
   }
 
@@ -148,55 +169,61 @@
     padding: 0 24px;
 
     .info-card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px #1890ff;
-      border: 1px solid #e8e8e8;
+      background: $background-white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: $shadow-light;
+      border: 1px solid $border-color;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: $shadow-medium;
+      }
 
       &.student-card {
         background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
         border: 1px solid #91d5ff;
-        box-shadow: 0 4px 12px #1890ff;
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
       }
 
       &.academic-card {
         background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
         border: 1px solid #91d5ff;
-        box-shadow: 0 4px 12px #1890ff;
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
       }
 
       &.courses-card {
         &.deletion-courses {
           background: linear-gradient(135deg, #fff2f0 0%, #fff5f5 100%);
           border: 1px solid #ffccc7;
-          box-shadow: 0 4px 12px #1890ff;
+          box-shadow: 0 4px 12px rgba(255, 77, 79, 0.15);
         }
 
         &.registration-courses {
           background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
           border: 1px solid #91d5ff;
-          box-shadow: 0 4px 12px #1890ff;
+          box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
         }
       }
 
       &.summary-card {
         background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%);
         border: 1px solid #ffd591;
-        box-shadow: 0 4px 12px #1890ff;
+        box-shadow: 0 4px 12px rgba(250, 173, 20, 0.15);
       }
 
       &.warning-card {
         background: linear-gradient(135deg, #fff2f0 0%, #fff5f5 100%);
         border: 2px solid #ffccc7;
-        box-shadow: 0 4px 12px #1890ff;
+        box-shadow: 0 4px 12px rgba(255, 77, 79, 0.15);
       }
 
       .card-header {
         display: flex;
         align-items: center;
-        margin-bottom: 16px;
+        margin-bottom: 20px;
 
         .card-icon {
           width: 40px;
@@ -205,7 +232,8 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-right: 12px;
+          margin-right: 16px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
           span {
             color: white;
@@ -214,27 +242,27 @@
           }
 
           &.student-icon {
-            background: #1890ff;
+            background: linear-gradient(135deg, $primary-color, #40a9ff);
           }
 
           &.academic-icon {
-            background: #1890ff;
+            background: linear-gradient(135deg, $primary-color, #40a9ff);
           }
 
           &.deletion-icon {
-            background: #ff4d4f;
+            background: linear-gradient(135deg, $error-color, #ff7875);
           }
 
           &.registration-icon {
-            background: #1890ff;
+            background: linear-gradient(135deg, $primary-color, #40a9ff);
           }
 
           &.summary-icon {
-            background: #faad14;
+            background: linear-gradient(135deg, $warning-color, #ffc53d);
           }
 
           &.warning-icon {
-            background: #ff4d4f;
+            background: linear-gradient(135deg, $error-color, #ff7875);
           }
         }
 
@@ -243,16 +271,20 @@
           font-size: 18px;
           font-weight: 600;
           flex: 1;
-          color: #262626;
+          color: $text-color;
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
 
         .course-count {
-          background: #1890ff;
+          background: linear-gradient(135deg, $primary-color, #40a9ff);
           color: white;
           padding: 6px 12px;
           border-radius: 16px;
           font-size: 12px;
           font-weight: 600;
+          box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
         }
       }
 
@@ -324,9 +356,10 @@
 
           .course-title {
             font-size: 14px;
-            color: #262626;
+            color: $primary-color;
             line-height: 1.4;
             margin-bottom: 8px;
+            font-weight: 600;
           }
 
           .course-footer {
@@ -405,65 +438,110 @@
   }
 
   .modal-footer {
-    padding: 20px 24px;
-    background: #fafafa;
-    border-top: 1px solid #f0f0f0;
+    padding: 24px 32px;
+    background: $background-light;
+    border-top: 2px solid $border-color;
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
+    gap: 16px;
     margin: 24px -32px -32px -32px;
     border-radius: 0 0 16px 16px;
 
     button {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      padding: 8px 16px;
+      padding: 12px 24px;
       border-radius: 8px;
-      font-weight: 500;
-      height: 36px;
+      font-weight: 600;
+      font-size: 15px;
+      height: 48px;
+      min-width: 140px;
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
 
-      &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
 
       &.ant-btn-primary {
-        background: linear-gradient(135deg, #1890ff, #40a9ff);
+        background: linear-gradient(135deg, $primary-color, #40a9ff);
         border: none;
+        color: white;
         box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
 
-        &:hover {
-          background: linear-gradient(135deg, #40a9ff, #69c0ff);
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(24, 144, 255, 0.4);
+        &:hover:not(:disabled) {
+          background: linear-gradient(135deg, #40a9ff, $primary-color);
+          box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+        }
+
+        &:active:not(:disabled) {
+          background: linear-gradient(135deg, $primary-color, #1890ff);
+          box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
         }
       }
 
       &.ant-btn-default {
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        border: 1px solid #d9d9d9;
-        color: #595959;
+        background: $background-white;
+        border: 1px solid $border-color;
+        color: $text-color;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-        &:hover {
-          background: linear-gradient(135deg, #e9ecef, #dee2e6);
-          border-color: #1890ff;
-          color: #1890ff;
-          transform: translateY(-1px);
+        &:hover:not(:disabled) {
+          background: $background-white;
+          border-color: $primary-color;
+          color: $primary-color;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
         }
       }
 
-      &.ant-btn-dangerous {
-        background: linear-gradient(135deg, #ff4d4f, #ff7875);
-        border: none;
-        box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3);
-
+      &:disabled {
+        background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+        border-color: #d9d9d9;
+        color: #8c8c8c;
+        box-shadow: none;
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: none;
+        
         &:hover {
-          background: linear-gradient(135deg, #ff7875, #ff9c9c);
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(255, 77, 79, 0.4);
+          background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+          border-color: #d9d9d9;
+          color: #8c8c8c;
+          box-shadow: none;
+          transform: none;
         }
+      }
+
+      // Add subtle shine effect
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+      }
+      
+      &:hover:not(:disabled)::before {
+        left: 100%;
+      }
+
+      i {
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
   }

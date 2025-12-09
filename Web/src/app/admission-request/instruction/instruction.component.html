@@ -33,5 +33,15 @@
         </div>
       </div>
     </div>
+
+    <div class="payment-policy-section">
+      <div class="payment-policy-card">
+        <label nz-checkbox [(ngModel)]="paymentPolicyChecked" (ngModelChange)="onPaymentPolicyChange($event)" class="payment-policy-checkbox">
+          <span class="payment-policy-text">
+            Accept - Notice: Please note that all payments made are non-refundable.
+          </span>
+        </label>
+      </div>
+    </div>
   </div>
 </div>

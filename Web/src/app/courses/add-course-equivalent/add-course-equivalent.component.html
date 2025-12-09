@@ -50,7 +50,7 @@
                     <nz-select formControlName="courseId" nzPlaceHolder="Select course" nzShowSearch="true" nzAllowClear
                       [nzLoading]="loading" class="professional-select">
                       <nz-option *ngFor="let item of courses" [nzValue]="item.id"
-                        [nzLabel]="item.courseTitle"></nz-option>
+                        [nzLabel]="item.courseCode + ' - ' + item.courseTitle"></nz-option>
                     </nz-select>
                   </nz-form-control>
                 </nz-form-item>
@@ -63,7 +63,7 @@
                     <nz-select formControlName="equivalentCourseId" nzPlaceHolder="Select equivalent course"
                       nzShowSearch nzAllowClear [nzLoading]="loading" class="professional-select">
                       <nz-option *ngFor="let item of courses" [nzValue]="item.id"
-                        [nzLabel]="item.courseTitle"></nz-option>
+                        [nzLabel]="item.courseCode + ' - ' + item.courseTitle"></nz-option>
                     </nz-select>
                   </nz-form-control>
                 </nz-form-item>

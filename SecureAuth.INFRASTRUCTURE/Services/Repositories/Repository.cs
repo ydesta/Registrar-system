@@ -61,5 +61,10 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
             
             return await _dbSet.CountAsync(predicate);
         }
+
+        public virtual IQueryable<T> Query()
+        {
+            return _dbSet;
+        }
     }
 } 

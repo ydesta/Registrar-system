@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { StudentService } from '../../services/student.service';
 import { StudentViewModel } from '../../models/student-view-model.model';
 import { StaticData } from 'src/app/admission-request/model/StaticData';
-import { ACADEMIC_TERM_STATUS, ACADEMIC_YEAR_NUMBER_STATUS, APPROVAL_STATUS } from 'src/app/common/constant';
+import { ACADEMIC_TERM_STATUS, ACADEMIC_YEAR_NUMBER_STATUS, APPROVAL_STATUS, COURSE_REGISTRATION_STATUS } from 'src/app/common/constant';
 import { StudentCourseRegistrationView } from '../../models/student-course-registration-view.model';
 
 @Component({
@@ -37,6 +37,7 @@ export class RegisteredSemesterCoursesComponent implements OnInit {
       .getStudentCourseTakenList(applicantUserId)
       .subscribe((res) => {
         this.studentTermCourseReg = res;
+        console.log("list  ",this.studentTermCourseReg);
       });
 
   }
@@ -59,7 +60,7 @@ export class RegisteredSemesterCoursesComponent implements OnInit {
           title: c.courseTitle,
           code: c.courseCode,
           creditHours: c.creditHours,
-          grade: c.gradeLetter,
+          grade: c.grade,
           point: c.point,
           status: c.status,
         };
@@ -122,7 +123,7 @@ export class RegisteredSemesterCoursesComponent implements OnInit {
   }
   getListOfRegisterApprovalStatus() {
     let division: StaticData = new StaticData();
-    APPROVAL_STATUS.forEach((pair) => {
+    COURSE_REGISTRATION_STATUS.forEach((pair) => {
       division = {
         Id: pair.Id.toString(),
         Description: pair.Description,

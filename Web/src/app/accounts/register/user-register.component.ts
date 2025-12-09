@@ -7,6 +7,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { phoneValidator, phoneValidator9To14 } from 'src/app/common/constant';
 import { RegistrationSuccessDialogComponent } from './registration-success-dialog/registration-success-dialog.component';
+import { RouteRefreshService } from '../services/route-refresh.service';
 
 @Component({
   selector: 'app-user-register',
@@ -18,13 +19,16 @@ export class UserRegisterComponent implements OnInit {
   isLoading = false;
   passwordVisible = false;
   confirmPasswordVisible = false;
+  isRegistrationLocked = false; 
+  lockMessage = 'Application is currently closed. It can be reopened anytime. For inquiries or assistance, please contact us:\n📍 Arat Kilo HiLCoE Admission office\n📧 Email: info@hilcoe.edu.et\n📞 Phone: +251 111 564 888';
 
   constructor(
     private _notificationService: CustomNotificationService,
     private _router: Router,
     private _fb: FormBuilder,
     private _authService: AuthService,
-    private _modal: NzModalService
+    private _modal: NzModalService,
+    private _routeRefreshService: RouteRefreshService
   ) {
     this.registerForm = _fb.group({
       firstName: [null, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
@@ -66,6 +70,11 @@ export class UserRegisterComponent implements OnInit {
   }
 
   submitForm(): void {
+    if (this.isRegistrationLocked) {
+      this._notificationService.notification('warning', 'Registration Closed', this.lockMessage);
+      return;
+    }
+
     if (this.registerForm.valid) {
       this.isLoading = true;
 
@@ -150,11 +159,16 @@ export class UserRegisterComponent implements OnInit {
   }
 
   goToLogin(): void {
-    this._router.navigate(['/accounts/login']);
+    this._routeRefreshService.navigateWithRefresh(['/accounts/login']);
   }
 
   goToHome(): void {
     this._router.navigate(['/']);
+  }
+
+  // Method to toggle registration lock (for admin use)
+  toggleRegistrationLock(): void {
+    this.isRegistrationLocked = !this.isRegistrationLocked;
   }
 
   // Getter methods for form validation

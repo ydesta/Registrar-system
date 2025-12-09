@@ -23,10 +23,15 @@ export class ReportService {
     searchParms: SearchQueryParams
   ): Observable<RegisteredStudentPerCourse> {
     const endpointUrl = `${this.getReportsUrl()}/getListOfRegisteredStudentPerCourse`;
-    const saParams = new HttpParams()
+    let saParams = new HttpParams()
       .append('termId', searchParms.termId.toString())
-      .append('termYear', searchParms.termYear.toString())
-      .append('courseId', searchParms.courseId.toString());
+      .append('termYear', searchParms.termYear.toString());
+    
+    // Only add courseId if it's not null or undefined
+    if (searchParms.courseId != null) {
+      saParams = saParams.append('courseId', searchParms.courseId.toString());
+    }
+    
     return this.httpClient.get<RegisteredStudentPerCourse>(endpointUrl, { params: saParams });
   }
 
@@ -34,11 +39,16 @@ export class ReportService {
     searchParms: SearchQueryParams
   ): Observable<RegisteredStudentPerBatch[]> {
     const endpointUrl = `${this.getReportsUrl()}/getListOfRegisteredStudent/PerBatch`;
-    const saParams = new HttpParams()
+    let saParams = new HttpParams()
       .append('termId', searchParms.termId.toString())
       .append('termYear', searchParms.termYear.toString())
-      .append('courseId', searchParms.courseId.toString())
-      .append('batchCode', searchParms.batchCode.toString())
+      .append('batchCode', searchParms.batchCode.toString());
+    
+    // Only add courseId if it's not null or undefined
+    if (searchParms.courseId != null) {
+      saParams = saParams.append('courseId', searchParms.courseId.toString());
+    }
+    
     return this.httpClient.get<RegisteredStudentPerBatch[]>(endpointUrl, { params: saParams });
   }
 

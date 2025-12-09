@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Instruction } from '../model/instruction.interface';
 
 @Component({
@@ -6,7 +6,12 @@ import { Instruction } from '../model/instruction.interface';
   templateUrl: './instruction.component.html',
   styleUrls: ['./instruction.component.scss']
 })
-export class InstructionComponent {
+export class InstructionComponent implements OnChanges {
+  @Input() hasExistingData: boolean = false;
+  @Output() paymentPolicyAccepted = new EventEmitter<boolean>();
+  
+  paymentPolicyChecked: boolean = false;
+
   instructions: Instruction[] = [
     {
       icon: 'file-text',
@@ -34,4 +39,16 @@ export class InstructionComponent {
       description: 'If you are a Grade 12 completed student, only Natural Science students are allowed to apply.'
     }
   ];
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['hasExistingData'] && changes['hasExistingData'].currentValue === true) {
+      this.paymentPolicyChecked = true;
+      this.paymentPolicyAccepted.emit(true);
+    }
+  }
+
+  onPaymentPolicyChange(checked: boolean): void {
+    this.paymentPolicyChecked = checked;
+    this.paymentPolicyAccepted.emit(checked);
+  }
 }

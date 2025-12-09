@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SecureAuth.APPLICATION.Commands.Auth;
 using SecureAuth.APPLICATION.Commands.User;
 using SecureAuth.APPLICATION.DTOs;
 using SecureAuth.APPLICATION.DTOs.Authentication;
@@ -13,7 +14,7 @@ namespace SecureAuth.API.Controllers.User
 {
     [ApiController]
     [Route("api/[controller]")]
-   // [Authorize]
+    [Authorize] // Security fix: Require authentication by default
     public class UserManagementController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -49,6 +50,16 @@ namespace SecureAuth.API.Controllers.User
         {
             try
             {
+                // Security fix: Check if user is Super Admin or accessing their own profile
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var isSuperAdmin = User.IsInRole("Super Admin");
+                
+                // Only allow access if user is Super Admin or accessing their own profile
+                if (!isSuperAdmin && currentUserId != id)
+                {
+                    return Forbid("You can only access your own profile. Only Super Admins can access other users' profiles.");
+                }
+
                 var query = new GetUserByIdQuery
                 {
                     UserId = id,
@@ -107,7 +118,7 @@ namespace SecureAuth.API.Controllers.User
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Super Admin")]
+        [Authorize(Roles = "Super Admin")] // Security fix: Re-enabled authorization
         public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserCommand command)
         {
             try
@@ -421,18 +432,23 @@ namespace SecureAuth.API.Controllers.User
         }
 
         [HttpPost("enable-2fa")]
-        public async Task<ActionResult<TwoFactorSetupModel>> EnableTwoFactor()
+        public async Task<ActionResult<EnableTwoFactorResponse>> EnableTwoFactor()
         {
             try
             {
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userId))
                 {
-                    return Unauthorized(new TwoFactorSetupModel());
+                    return Unauthorized(new EnableTwoFactorResponse 
+                    { 
+                        Success = false, 
+                        Message = "User not authenticated",
+                        TwoFactorEnabled = false
+                    });
                 }
 
-                var query = new GetTwoFactorSetupQuery { UserId = userId };
-                var result = await _mediator.QueryAsync<GetTwoFactorSetupQuery, TwoFactorSetupModel>(query);
+                var command = new EnableTwoFactorCommand { UserId = userId };
+                var result = await _mediator.SendAsync<EnableTwoFactorCommand, EnableTwoFactorResponse>(command);
                 
                 if (result.Success)
                 {
@@ -443,40 +459,58 @@ namespace SecureAuth.API.Controllers.User
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new TwoFactorSetupModel());
+                return StatusCode(500, new EnableTwoFactorResponse 
+                { 
+                    Success = false, 
+                    Message = ex.Message,
+                    TwoFactorEnabled = false
+                });
             }
         }
 
         [HttpPost("disable-2fa")]
-        public async Task<ActionResult<UserProfileResponseModel>> DisableTwoFactor([FromBody] VerifyTwoFactorModel model)
+        public async Task<ActionResult<DisableTwoFactorResponse>> DisableTwoFactor([FromBody] VerifyTwoFactorModel? model)
         {
             try
             {
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userId))
                 {
-                    return Unauthorized(new UserProfileResponseModel());
+                    return Unauthorized(new DisableTwoFactorResponse 
+                    { 
+                        Success = false, 
+                        Message = "User not authenticated",
+                        TwoFactorEnabled = true
+                    });
                 }
 
-                // TODO: Create DisableTwoFactorCommand if not exists
-                // var command = new DisableTwoFactorCommand
-                // {
-                //     UserId = userId,
-                //     Code = model.Code
-                // };
-                // var result = await _mediator.SendAsync<DisableTwoFactorCommand, bool>(command);
+                var command = new DisableTwoFactorCommand 
+                { 
+                    UserId = userId,
+                    Code = model?.Code
+                };
+                var result = await _mediator.SendAsync<DisableTwoFactorCommand, DisableTwoFactorResponse>(command);
                 
-                // For now, return not implemented
-                return StatusCode(501, new UserProfileResponseModel());
+                if (result.Success)
+                {
+                    return Ok(result);
+                }
+                
+                return BadRequest(result);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new UserProfileResponseModel());
+                return StatusCode(500, new DisableTwoFactorResponse 
+                { 
+                    Success = false, 
+                    Message = ex.Message,
+                    TwoFactorEnabled = true
+                });
             }
         }
 
         [HttpPost("UpdateRole/user-role")]
-      //  [Authorize(Roles = "Super Admin")]
+        [Authorize(Roles = "Super Admin")] // Security fix: Re-enabled authorization
         public async Task<IActionResult> UpdateRole([FromBody] UpdateUserRoleCommand command)
         {
             try
@@ -505,7 +539,7 @@ namespace SecureAuth.API.Controllers.User
         }
 
         [HttpPut("admin/{id}/username")]
-        [Authorize(Roles = "Super Admin")]
+        [Authorize(Roles = "Super Admin")] // Security fix: Re-enabled authorization
         public async Task<IActionResult> AdminUpdateUsername(string id, [FromBody] UpdateUsernameModel model)
         {
             try
@@ -532,7 +566,7 @@ namespace SecureAuth.API.Controllers.User
         }
 
         [HttpPut("admin/{id}/email")]
-        //[Authorize(Roles = "Super Admin")]
+        [Authorize(Roles = "Super Admin")] // Security fix: Re-enabled authorization
         public async Task<IActionResult> AdminUpdateEmail(string id, [FromBody] AdminUpdateEmailModel model)
         {
             try
@@ -569,7 +603,7 @@ namespace SecureAuth.API.Controllers.User
         }
 
         [HttpGet("credentials")]
-        // [Authorize(Roles = "Super Admin, Academic Director")] // Temporarily disabled for testing
+        [Authorize(Roles = "Super Admin, Academic Director")] // Security fix: Re-enabled authorization
         public async Task<IActionResult> GetUserCredentials(
             [FromQuery] DateTime? fromDate = null,
             [FromQuery] DateTime? toDate = null,

@@ -264,7 +264,6 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   }
 
   showDeactivateCourseOffering(id: number): void {
-    console.log("%%$$      id", id);
     this.modal.confirm({
       nzTitle: "Are you sure deactivate this Course Offering?",
       nzOkText: "Yes",
@@ -391,6 +390,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
     return 0;
   }
   openModal(data: any): void {
+    console.log("Test Co assign  ",data);
     const modal: NzModalRef = this.modal.create({
       nzTitle: null, // We'll use our custom header
       nzContent: CourseOfferingInstructorAssignmentComponent,

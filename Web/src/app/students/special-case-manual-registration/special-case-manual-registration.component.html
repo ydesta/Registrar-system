@@ -114,15 +114,21 @@
                         <thead>
                             <tr>
                                 <th nzWidth="60px">
-                                    <input type="checkbox"
-                                        [checked]="selectedUnregisteredCourses.length === filteredUnregisteredCourses.length"
-                                        [indeterminate]="selectedUnregisteredCourses.length > 0 && selectedUnregisteredCourses.length < filteredUnregisteredCourses.length"
-                                        (change)="onSelectAllUnregisteredCoursesEvent($event)">
+                                    <label nz-checkbox 
+                                        [nzChecked]="areAllSelectableUnregisteredCoursesSelected()"
+                                        [nzIndeterminate]="selectedUnregisteredCourses.length > 0 && !areAllSelectableUnregisteredCoursesSelected()"
+                                        (nzCheckedChange)="onSelectAllUnregisteredCourses($event)">
+                                    </label>
                                 </th>
+                                <th nzSortOrder="sortColumn === 'batchCode' ? sortOrder : null" 
+                                    (nzSortOrderChange)="sortUnregisteredCourses('batchCode', $event)">Batch Code</th>
                                 <th>Course Code</th>
-                                <th>Course Title</th>
+                                <th nzSortOrder="sortColumn === 'courseTitle' ? sortOrder : null" 
+                                    (nzSortOrderChange)="sortUnregisteredCourses('courseTitle', $event)">Course Title</th>
                                 <th>Credit Hours</th>
                                 <th>Total Amount</th>
+                                <th nzSortOrder="sortColumn === 'currentGrade' ? sortOrder : null" 
+                                    (nzSortOrderChange)="sortUnregisteredCourses('currentGrade', $event)">Grade</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -130,9 +136,13 @@
                         <tbody>
                             <tr *ngFor="let course of unregisteredTable.data">
                                 <td>
-                                    <input type="checkbox" [checked]="isUnregisteredCourseSelected(course.courseId)"
-                                        (change)="onUnregisteredCourseSelectionChangeEvent(course.courseId, $event)">
+                                    <label nz-checkbox 
+                                        [nzChecked]="isUnregisteredCourseSelected(course)"
+                                        [nzDisabled]="isUnregisteredCourseDisabled(course)"
+                                        (nzCheckedChange)="onUnregisteredCourseSelectionChange(course, $event)">
+                                    </label>
                                 </td>
+                                <td>{{course.batchCode || '-'}}</td>
                                 <td>
                                     <span class="course-code">{{course.courseCode}}</span>
                                 </td>
@@ -141,11 +151,11 @@
                                 </td>
                                 <td>{{course.creditHours}}</td>
                                 <td>{{course.totalAmount}}</td>
+                                <td>{{course.currentGrade || '-'}}</td>
                                 <td>
                                     <nz-tag
-                                        [nzColor]="isUnregisteredCourseSelected(course.courseId) ? 'green' : 'blue'">
-                                        {{isUnregisteredCourseSelected(course.courseId) ? 'Selected for Registration' :
-                                        'Available'}}
+                                        [nzColor]="getCourseStatusColor(course.courseStatus)">
+                                        {{course.courseStatus || 'Available'}}
                                     </nz-tag>
                                 </td>
                             </tr>
@@ -190,10 +200,11 @@
                     <thead>
                         <tr>
                             <th nzWidth="60px">
-                                <input type="checkbox"
-                                    [checked]="selectedRegisteredCourses.length === filteredRegisteredCourses.length"
-                                    [indeterminate]="selectedRegisteredCourses.length > 0 && selectedRegisteredCourses.length < filteredRegisteredCourses.length"
-                                    (change)="onSelectAllRegisteredCoursesEvent($event)">
+                                <label nz-checkbox 
+                                    [nzChecked]="selectedRegisteredCourses.length === filteredRegisteredCourses.length"
+                                    [nzIndeterminate]="selectedRegisteredCourses.length > 0 && selectedRegisteredCourses.length < filteredRegisteredCourses.length"
+                                    (nzCheckedChange)="onSelectAllRegisteredCourses($event)">
+                                </label>
                             </th>
                             <th>Course Code</th>
                             <th>Course Title</th>
@@ -206,8 +217,10 @@
                     <tbody>
                         <tr *ngFor="let course of registeredTable.data">
                             <td>
-                                <input type="checkbox" [checked]="isRegisteredCourseSelected(course.id)"
-                                    (change)="onRegisteredCourseSelectionChangeEvent(course.id, $event)">
+                                <label nz-checkbox 
+                                    [nzChecked]="isRegisteredCourseSelected(course.id)"
+                                    (nzCheckedChange)="onRegisteredCourseSelectionChange(course.id, $event)">
+                                </label>
                             </td>
                             <td>
                                 <span class="course-code">{{course.courseCode}}</span>
@@ -218,7 +231,7 @@
                             <td>{{course.creditHours}}</td>
                             <td>{{course.totalAmount}}</td>
                             <td>
-                                <nz-tag [nzColor]="isRegisteredCourseSelected(course.id) ? 'red' : 'green'">
+                                <nz-tag [nzColor]="isRegisteredCourseSelected(course.id) ? 'volcano' : 'red'">
                                     {{isRegisteredCourseSelected(course.id) ? 'Selected for Delete' : 'Registered'}}
                                 </nz-tag>
                             </td>
@@ -241,25 +254,16 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button nz-button nzType="default" (click)="showSearch()">
+                    <button nz-button nzType="default" nzSize="large" (click)="showSearch()">
                         <i nz-icon nzType="file-add"></i>
-                        New
+                        New Registration
                     </button>
-                    <button nz-button nzType="primary" [disabled]="!canSubmit" (click)="onSubmit()"
+                    <button nz-button nzType="primary" nzSize="large" [disabled]="!canSubmit" (click)="onSubmit()"
                         [nz-tooltip]="!canSubmit ? 'Please select Academic Term, Academic Year, and at least one course to enable submission' : ''">
                         <i nz-icon nzType="check"></i>
-                        Submit
+                        Submit Registration
                     </button>
-
-
                 </div>
-
-                <!-- Validation message -->
-                <!-- <div *ngIf="!canSubmit" class="validation-message">
-                    <i nz-icon nzType="info-circle"></i>
-                    <span>Please select Academic Term, Academic Year, and at least one course from the available courses
-                        to enable submission.</span>
-                </div> -->
             </div>
         </div>
     </div>

@@ -12,6 +12,7 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
@@ -35,6 +36,8 @@ import { ManageInstructorTableComponent } from './instructor-sections/instructor
 import { ViewAssignedInstructorSectionsComponent } from './instructor-sections/view-assigned-instructor-sections/view-assigned-instructor-sections.component';
 import { StudentCourseSectionAssignmentComponent } from './student-course-section-assignment/student-course-section-assignment.component';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { UnassignedStudentsComponent } from './unassigned-students/unassigned-students.component';
+import { AssignStudentToSectionComponent } from './assign-student-to-section/assign-student-to-section.component';
 
 @NgModule({
   declarations: [
@@ -46,7 +49,9 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
     InstructorSectionFormComponent,
     ManageInstructorTableComponent,
     ViewAssignedInstructorSectionsComponent,
-    StudentCourseSectionAssignmentComponent
+    StudentCourseSectionAssignmentComponent,
+    UnassignedStudentsComponent,
+    AssignStudentToSectionComponent
   ],
   imports: [
     CommonModule,
@@ -59,6 +64,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
     NzSelectModule,
     NzButtonModule,
     NzIconModule,
+    NzToolTipModule,
     NzTableModule,
     NzTagModule,
     NzSpaceModule,

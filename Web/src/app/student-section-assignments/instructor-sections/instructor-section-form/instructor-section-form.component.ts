@@ -61,7 +61,7 @@ export class InstructorSectionFormComponent implements OnInit {
     this.checkEditMode();
     this.getListOfAcademicTermStatus();
     this.getListOfSectionType();
-    
+
     // Load batch list when both academic term and year are selected
     this.academicTerm.valueChanges.subscribe(res => {
       if (res && this.year.value) {
@@ -85,14 +85,15 @@ export class InstructorSectionFormComponent implements OnInit {
 
     // Load courses and sections when section type changes (if all required fields are selected)
     this.sectionType.valueChanges.subscribe(sectionType => {
-      const batch = this.listOfBatch.find(b => b.Id === this.batchId.value) ||
-        this.listOfBatch.find(b => b.id === this.batchId.value) ||
-        this.listOfBatch.find(b => b.batchId === this.batchId.value);
-
-      const batchCode = batch?.batchCode || batch?.batchCode || batch?.code || '';
-
       if (this.academicTerm.value && this.year.value && this.batchId.value) {
-        this.loadAvailableSections(batchCode);
+        // Find batch and get batchCode when all required fields are available
+        const batch = this.listOfBatch.find(b => b.Id === this.batchId.value) ||
+          this.listOfBatch.find(b => b.id === this.batchId.value) ||
+          this.listOfBatch.find(b => b.batchId === this.batchId.value);
+        console.log("%%    batch    ", batch);
+        const batchCode = batch?.batchCode || batch?.code || '';
+        
+        console.log("%%%  Mukera     ", this.academicTerm.value, this.year.value, this.batchId.value, sectionType);
         this.getListOfCourse(batchCode);
       } else {
         // Clear courses and sections if section type is not selected
@@ -104,7 +105,14 @@ export class InstructorSectionFormComponent implements OnInit {
 
     this.courseId.valueChanges.subscribe(course => {
       if (course && this.academicTerm.value && this.year.value && this.batchId.value) {
+        // Find batch and get batchCode when all required fields are available
+        const batch = this.listOfBatch.find(b => b.Id === this.batchId.value) ||
+          this.listOfBatch.find(b => b.id === this.batchId.value) ||
+          this.listOfBatch.find(b => b.batchId === this.batchId.value);
+        const batchCode = batch?.batchCode || batch?.code || '';
+        
         this.loadAvailableStaff();
+        this.loadAvailableSections(batchCode);
       }
     });
   }
@@ -147,7 +155,7 @@ export class InstructorSectionFormComponent implements OnInit {
     if (!this.batchId.value || !this.academicTerm.value || !this.year.value || !this.courseId.value) {
       return;
     }
-    
+
     this.courseOfferingInstructorAssignmentService.getAssignedInstructors(this.academicTerm.value, this.year.value, this.batchId.value, this.courseId.value).subscribe({
       next: (res: any) => {
         this.staffList = res || [];
@@ -166,24 +174,24 @@ export class InstructorSectionFormComponent implements OnInit {
 
     // Load batch list first
     this.getListOfBatch(data.academicTerm, data.year);
-    
+
     // Load sections and courses after batch is loaded
     setTimeout(() => {
       if (this.listOfBatch.length > 0) {
         const batch = this.listOfBatch.find(b => b.batchId === data.batchId) ||
-                     this.listOfBatch.find(b => b.Id === data.batchId) ||
-                     this.listOfBatch.find(b => b.id === data.batchId);
-        
+          this.listOfBatch.find(b => b.Id === data.batchId) ||
+          this.listOfBatch.find(b => b.id === data.batchId);
+
         if (batch) {
           const batchCode = batch.batchCode || batch.code || '';
-          
+
           // Only make API calls if we have valid batchCode and form is populated
           if (batchCode && batchCode.trim() !== '' && this.form.value.batchId) {
             // Double-check that form values are properly set
             if (this.form.value.academicTerm && this.form.value.year && this.form.value.batchId) {
               this.loadAvailableSections(batchCode);
               this.getListOfCourse(batchCode);
-              
+
               // Load staff list after courses are loaded
               setTimeout(() => {
                 if (data.courseId && this.form.value.courseId) {
@@ -201,13 +209,13 @@ export class InstructorSectionFormComponent implements OnInit {
     if (!this.batchId.value || !this.academicTerm.value || !this.year.value || !batchCode || batchCode.trim() === '') {
       return;
     }
-    
+
     this.loadingSections = true;
     this.availableSections = [];
     this.listOfSections = [];
 
     this.studentSectionAssignmentService
-      .getListOfSectionBasedOnBatch(batchCode, this.academicTerm.value, this.year.value, this.sectionType.value)
+      .getListOfSectionBasedOnBatch(batchCode, this.academicTerm.value, this.year.value, this.sectionType.value, this.courseId.value)
       .subscribe({
         next: (sections: any) => {
           this.loadingSections = false;
@@ -221,11 +229,12 @@ export class InstructorSectionFormComponent implements OnInit {
       });
   }
   getListOfCourse(batchCode: string) {
+    console.log("&&&   ff      ", batchCode);
     // Validate all required parameters before making API call
     if (!this.batchId.value || !this.academicTerm.value || !this.year.value || !batchCode || batchCode.trim() === '') {
       return;
     }
-    
+    console.log("$$   333   ", batchCode, this.academicTerm.value, this.year.value, this.sectionType.value);
     this.loadingCourses = true;
     this.registeredCourses = [];
 
@@ -233,7 +242,7 @@ export class InstructorSectionFormComponent implements OnInit {
     const year = this.year.value;
     const sectionType = this.sectionType.value;
     this.studentSectionAssignmentService
-      .getStudentRegisteredCourses(batchCode, academicTerm, year,sectionType)
+      .getStudentRegisteredCourses(batchCode, academicTerm, year, sectionType)
       .subscribe({
         next: (res: StudentRegisteredCoursesResult) => {
           this.loadingCourses = false;
@@ -250,7 +259,7 @@ export class InstructorSectionFormComponent implements OnInit {
     if (!termId || !termYear) {
       return;
     }
-    
+
     this.courseTermOfferingService.getListOfBatchCodeByAcademicTerm(termId, termYear).subscribe({
       next: (res) => {
         this.listOfBatch = res;
@@ -362,14 +371,14 @@ export class InstructorSectionFormComponent implements OnInit {
   handleSubmit(): void {
     if (this.form.valid) {
       const formData = this.form.value;
-      
+
       const currentUser = this.authService.getCurrentUser();
       const request: InstructorSectionRequest = {
         ...formData,
         createdBy: currentUser?.id || 'unknown-user',
         lastModifiedBy: currentUser?.id || 'unknown-user'
       };
-      
+
       if (this.isEditMode && this.editingId) {
         this.updateInstructorSection(this.editingId, request);
       } else {
@@ -405,7 +414,7 @@ export class InstructorSectionFormComponent implements OnInit {
 
   updateInstructorSection(id: number, request: InstructorSectionRequest): void {
     this.loading = true;
-    
+
     this.instructorSectionService.updateInstructorSection(id, request).subscribe({
       next: (response) => {
         if (response.status === 'success') {
@@ -442,14 +451,14 @@ export class InstructorSectionFormComponent implements OnInit {
     const courseIdValid = this.courseId.value !== null && this.courseId.value !== undefined;
     const staffIdValid = this.staffId.value !== null && this.staffId.value !== undefined;
 
-    return formValid && 
-           academicTermValid && 
-           yearValid && 
-           batchIdValid && 
-           sectionTypeValid && 
-           sectionIdValid && 
-           courseIdValid && 
-           staffIdValid;
+    return formValid &&
+      academicTermValid &&
+      yearValid &&
+      batchIdValid &&
+      sectionTypeValid &&
+      sectionIdValid &&
+      courseIdValid &&
+      staffIdValid;
   }
 
   // Get submit button text

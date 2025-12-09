@@ -72,13 +72,13 @@ export class PaymentModalComponent implements OnInit {
       bankTransactionID: [null, Validators.required],
       amount: [{ value: this.totalAmount, disabled: true }, Validators.required],
       attachment: [null, Validators.required],
-      type: [this.type]
+      type: [this.type],
+      acceptPolicy: [false, Validators.requiredTrue]
     });
   }
 
   private getStudentPayment(): StudentPaymentRequest {
     const formModel = this.bankTransactionForm.getRawValue();
-    console.log("$$$    ", formModel);
     const payment = new StudentPaymentRequest();
     payment.parentId = this.studentCourseRegistrationID;
     payment.fromBank = formModel.fromBank !== null && formModel.fromBank !== undefined && formModel.fromBank !== '' ? formModel.fromBank : null;

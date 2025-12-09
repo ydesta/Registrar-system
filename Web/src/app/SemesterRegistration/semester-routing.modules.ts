@@ -1,10 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SemesterRegistrationListComponent } from './semester-registration-list.component';
+import { AuthGuard } from '../guards/auth.guard';
 
 
 const routes: Routes = [
-  { path: '', component: SemesterRegistrationListComponent },
+  { path: '', component: SemesterRegistrationListComponent, canActivate: [AuthGuard] },
  ];
 
 @NgModule({

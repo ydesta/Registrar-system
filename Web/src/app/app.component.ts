@@ -37,6 +37,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   public isUserFinance: boolean = false;
   public isUserAcademicDirector: boolean = false;
   public isUserReception: boolean = false;
+  public isUserSectionReportViewer: boolean = false;
   nextAcademicTerm: any;
   nextTerm = '';
   nextTermYear: number;
@@ -126,6 +127,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cdRef.detectChanges();
       }
       this.checkIfAuthRoute();
+      this.cdRef.detectChanges(); // Trigger change detection after route check
       if (this.isUserApplicant || this.userType === 'Applicant') {
         this.redirectApplicantToAdmissionRequest();
       }
@@ -187,6 +189,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       currentUrl.includes('/reset-password');
     this.isPortalRoute = currentUrl.includes('/portal');
     
+    // Trigger change detection to ensure UI updates immediately
+    this.cdRef.detectChanges();
   }
 
   ngAfterViewInit(): void {
@@ -303,6 +307,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isUserReviewer = false;
     this.isUserApplicant = false;
     this.isUserApprovedApplicant = false;
+    this.isUserSectionReportViewer = false;
     
     switch (cleanRole) {
       case 'Super Admin':
@@ -346,6 +351,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isUserAcademicDirector = true;
         this.userType = cleanRole;
         break;
+      case 'Section Report Viewer':
+        this.isUserSectionReportViewer = true;
+        this.userType = cleanRole;
+        break;
       default:
         console.log('Unknown role:', cleanRole);
         break;
@@ -364,6 +373,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isUserApprovedApplicant = false;
     this.isUserAlreadyApplied = false;
     this.isUserFinance = false;
+    this.isUserSectionReportViewer = false;
   }
 
   private checkApplicantStatus() {

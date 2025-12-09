@@ -46,12 +46,11 @@
     <!-- Payment Options Selection -->
     <div class="payment-options-selection" *ngIf="!isProcessingGatewayPayment">
       <h3>Choose Payment Method</h3>
-      
+
       <div class="options-grid">
         <!-- Receipt Upload Option -->
-        <div class="payment-option" 
-             [class.selected]="selectedPaymentOption === 'receipt'"
-             (click)="selectPaymentOption('receipt')">
+        <div class="payment-option" [class.selected]="selectedPaymentOption === 'receipt'"
+          (click)="selectPaymentOption('receipt')">
           <div class="option-icon">
             <i nz-icon nzType="cloud-upload" nzTheme="outline"></i>
           </div>
@@ -68,9 +67,8 @@
         </div>
 
         <!-- Gateway Payment Option -->
-        <!-- <div class="payment-option" 
-             [class.selected]="selectedPaymentOption === 'gateway'"
-             (click)="selectPaymentOption('gateway')">
+        <!-- <div class="payment-option" [class.selected]="selectedPaymentOption === 'gateway'"
+          (click)="selectPaymentOption('gateway')">
           <div class="option-icon">
             <i nz-icon nzType="credit-card" nzTheme="outline"></i>
           </div>
@@ -134,19 +132,11 @@
       </div>
 
       <div class="form-actions">
-        <button
-          type="button"
-          class="btn btn-secondary"
-          (click)="goBack()"
-        >
+        <button type="button" class="btn btn-secondary" (click)="goBack()">
           Back to Registration
         </button>
 
-        <button
-          type="button"
-          class="btn btn-primary btn-lg"
-          (click)="redirectToBankPayment()"
-        >
+        <button type="button" class="btn btn-primary btn-lg" (click)="redirectToBankPayment()">
           Continue to Bank Payment
         </button>
       </div>

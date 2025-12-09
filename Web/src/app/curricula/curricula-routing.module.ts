@@ -12,34 +12,40 @@ import { ManageCurriculumBreakdownComponent } from "./curriculum-breakdown/manag
 import { CurriculumBreakdownFormComponent } from "./curriculum-breakdown/curriculum-breakdown-form/curriculum-breakdown-form.component";
 import { CurriculumCourseBreakdownListComponent } from "./curriculum-breakdown/curriculm-course-breakdown-list/curriculm-course-breakdown-list.component";
 import { DataMigrationComponent } from "./data-migration/data-migration.component";
+import { AuthGuard } from '../guards/auth.guard';
 
 const routes: Routes = [
-  { path: "", component: CurriculaComponent },
-  { path: "add-curriculum/:id", component: AddCurriculumComponent },
-  { path: "status-tracking", component: StatusTrackingComponent },
-  { path: "add-status-tracking/:id", component: AddStatusTrackingComponent },
-  { path: "accrediation", component: AccrediationComponent },
-  { path: "quadrant-break-down", component: ManageQuadrantBreakdownComponent },
+  { path: "", component: CurriculaComponent, canActivate: [AuthGuard] },
+  { path: "add-curriculum/:id", component: AddCurriculumComponent, canActivate: [AuthGuard] },
+  { path: "status-tracking", component: StatusTrackingComponent, canActivate: [AuthGuard] },
+  { path: "add-status-tracking/:id", component: AddStatusTrackingComponent, canActivate: [AuthGuard] },
+  { path: "accrediation", component: AccrediationComponent, canActivate: [AuthGuard] },
+  { path: "quadrant-break-down", component: ManageQuadrantBreakdownComponent, canActivate: [AuthGuard] },
   {
     path: "quadrant-break-down-form",
-    component: QuadrantBreakdownFormComponent
+    component: QuadrantBreakdownFormComponent,
+    canActivate: [AuthGuard]
   },
-  { path: "add-accrediation/:id", component: AddAccrediationComponent },
+  { path: "add-accrediation/:id", component: AddAccrediationComponent, canActivate: [AuthGuard] },
   {
     path: "curriculum-break-down",
-    component: ManageCurriculumBreakdownComponent
+    component: ManageCurriculumBreakdownComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "curriculum-break-down-form",
-    component: CurriculumBreakdownFormComponent
+    component: CurriculumBreakdownFormComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "curriculum-break-down-list",
-    component: CurriculumCourseBreakdownListComponent
+    component: CurriculumCourseBreakdownListComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: "data-migration",
-    component: DataMigrationComponent
+    component: DataMigrationComponent,
+    canActivate: [AuthGuard]
   },
 ];
 

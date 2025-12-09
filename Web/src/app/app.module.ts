@@ -20,6 +20,7 @@ import { HeaderComponent } from './header/header.component';
 import { SignoutRedirectCallbackComponent } from './signout-redirect-callback/signout-redirect-callback.component';
 import { SigninRedirectCallbackComponent } from './signin-redirect-callback/signin-redirect-callback.component';
 import { AuthInterceptorService } from './services/auth-interceptor.service';
+import { CsrfInterceptor } from './interceptors/csrf.interceptor';
 import { RouterModule } from '@angular/router';
 import { PortalModule } from './portal/portal.module';
 import { environment } from '../environments/environment';
@@ -55,6 +56,11 @@ registerLocaleData(en);
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptorService,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: CsrfInterceptor,
       multi: true,
     },
   ],

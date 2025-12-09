@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SecureAuth.DOMAIN.Models;
@@ -14,15 +15,18 @@ namespace SecureAuth.INFRASTRUCTURE.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<DatabaseSeedService> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
         public DatabaseSeedService(
             IServiceProvider serviceProvider,
             ILogger<DatabaseSeedService> logger,
-            ApplicationDbContext context)
+            ApplicationDbContext context,
+            IConfiguration configuration)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
             _context = context;
+            _configuration = configuration;
         }
 
         public async Task SeedDatabaseAsync()
@@ -207,8 +211,15 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                 var userManager = _serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
                 var roleManager = _serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
-                string superAdminEmail = "hilcoeadmin@gmail.com";
-                string superAdminPassword = "P@ssw0rd$123";
+                // Security fix: Read credentials from configuration instead of hardcoded values
+                string superAdminEmail = _configuration["SeedData:SuperAdminEmail"] 
+                    ?? throw new InvalidOperationException("SuperAdminEmail not configured in SeedData section");
+                
+                string superAdminPassword = _configuration["SeedData:SuperAdminPassword"] 
+                    ?? throw new InvalidOperationException("SuperAdminPassword not configured in SeedData section");
+
+                // Log that seeding is happening (without logging the password)
+                _logger.LogInformation("Seeding Super Admin user: {Email}", superAdminEmail);
 
                 // Ensure Super Admin role exists
                 var superAdminRole = await roleManager.FindByNameAsync("Super Admin");

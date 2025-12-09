@@ -10,17 +10,18 @@ import { CourseOfferedPerAcademicTermComponent } from './course-offered-per-acad
 import { AcademicTermRegistrationSlipComponent } from './academic-term-registration-slip/academic-term-registration-slip.component';
 import { TranscriptSearchComponent } from './transcript-search/transcript-search.component';
 import { StudentSemsterCourseRegistrationSlipComponent } from './student-semster-course-registration-slip/student-semster-course-registration-slip.component';
+import { AuthGuard } from '../guards/auth.guard';
 
 const routes: Routes = [
-  { path: '', component: ReportsComponent },
+  { path: '', component: ReportsComponent, canActivate: [AuthGuard] },
 
-  { path: 'course-report', component: CourseReportComponent },
-  { path: 'registered-student', component: RegisteredStudentPerCourseComponent },
-  { path: 'registered-student-per-batch', component: RegisteredStudentPerBatchComponent },
-  { path: 'course-offered-per-term', component: CourseOfferedPerAcademicTermComponent },
-  { path: 'academic-term-registration-slip', component: AcademicTermRegistrationSlipComponent },
-  { path: 'transcript-search', component: TranscriptSearchComponent },
-  { path: 'registration-slip', component: StudentSemsterCourseRegistrationSlipComponent },
+  { path: 'course-report', component: CourseReportComponent, canActivate: [AuthGuard] },
+  { path: 'registered-student', component: RegisteredStudentPerCourseComponent, canActivate: [AuthGuard] },
+  { path: 'registered-student-per-batch', component: RegisteredStudentPerBatchComponent, canActivate: [AuthGuard] },
+  { path: 'course-offered-per-term', component: CourseOfferedPerAcademicTermComponent, canActivate: [AuthGuard] },
+  { path: 'academic-term-registration-slip', component: AcademicTermRegistrationSlipComponent, canActivate: [AuthGuard] },
+  { path: 'transcript-search', component: TranscriptSearchComponent, canActivate: [AuthGuard] },
+  { path: 'registration-slip', component: StudentSemsterCourseRegistrationSlipComponent, canActivate: [AuthGuard] },
 ];
 
 @NgModule({

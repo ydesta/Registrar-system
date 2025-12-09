@@ -1,3 +1,5 @@
+using SecureAuth.APPLICATION.Commands;
+
 namespace SecureAuth.APPLICATION.Commands.Admin
 {
     public class UpdateRoleCommand : ICommand<bool>
@@ -6,6 +8,7 @@ namespace SecureAuth.APPLICATION.Commands.Admin
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public bool IsActive { get; set; } = true;
+        public bool RequiresTwoFactor { get; set; } = false;  // ✅ NEW: Role-based 2FA requirement
         public string? CurrentUserId { get; set; }
     }
 } 

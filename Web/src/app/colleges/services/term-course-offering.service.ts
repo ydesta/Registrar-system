@@ -61,7 +61,7 @@ export class TermCourseOfferingService {
     return this.httpClient.put<any>(url, {}).pipe(map(response => response));
   }
   deactivateCourseOfering(id: number): Observable<any> {
-    const url = `${this.getTermCourseOfferingsUrl()}/deactivate/${id}`;
+    const url = `${this.getTermCourseOfferingsUrl()}/activate/${id}`;
     return this.httpClient.put<any>(url, {}).pipe(map(response => response));
   }
 
@@ -136,5 +136,29 @@ export class TermCourseOfferingService {
   getTermCourseOfferingList(): Observable<any> {
     const endpointUrl = `${this.getTermCourseOfferingsUrl()}paginated?searchKey=${this.searchKey}&pageindex=${this.pageindex - 1}&pageSize=${this.pageSize}&sortColumn=${this.sortColumn}&sortOrder=${this.sortOrder}`;
     return this.httpClient.get(endpointUrl).pipe(map(result => result as any));
+  }
+  getListOfCourseByAcademicTerm(
+    termId: number,
+    termYear: number
+  ): Observable<any> {
+    const endPointUrl = `${this.getTermCourseOfferingsUrl()}/${termId}/${termYear}`;
+    return this.httpClient.get<any>(endPointUrl).pipe(
+      map(data => {
+        return data;
+      })
+    );
+  }
+
+    getListOfCourseByAcademicTermAndBatch(
+    termId: number,
+    termYear: number,
+    batchCode: string
+  ): Observable<any> {
+    const endPointUrl = `${this.getTermCourseOfferingsUrl()}/getListOfCourseByAcademicTermAndBatch/${termId}/${termYear}/${batchCode}`;
+    return this.httpClient.get<any>(endPointUrl).pipe(
+      map(data => {
+        return data;
+      })
+    );
   }
 }

@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CourseViewModel } from 'src/app/students/models/course-break-down-offering.model';
 import { StudentService } from 'src/app/students/services/student.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { StaticData } from 'src/app/admission-request/model/StaticData';
+import { REGISTARAR_APPROVAL_STATUS } from 'src/app/common/constant';
 
 export class StudentAddedViewModel {
   public studentId: string;
@@ -33,6 +35,7 @@ export class AddCourseApprovalComponent implements OnInit {
   checked = false;
   indeterminate = false;
   listOfCurrentPageData: readonly any[] = [];
+  approvalStatusList: StaticData[] = [];
 
   get approvedCount(): number {
     return this.setOfCheckedId.size;
@@ -52,16 +55,13 @@ export class AddCourseApprovalComponent implements OnInit {
 
   ngOnInit(): void {
     this.getListOfAddedCourses();
-    this.courseId.valueChanges.subscribe((value) => {
-      if (value) {
-        this.getListOfStudentCourseAdded(value);
-      }
-    });
+    this.getListOfApprovalStatus();
   }
 
   createForms() {
     this.formAddedCourses = this._fb.group({
       courseId: ['', Validators.required],
+      approvalStatus: [null]
     });
 
     this.approvalForm = this._fb.group({
@@ -73,9 +73,38 @@ export class AddCourseApprovalComponent implements OnInit {
     return this.formAddedCourses.get('courseId');
   }
 
-  getListOfStudentCourseAdded(courseId?: string) {
+  get approvalStatus() {
+    return this.formAddedCourses.get('approvalStatus');
+  }
+
+  getListOfApprovalStatus() {
+    let division: StaticData = new StaticData();
+    REGISTARAR_APPROVAL_STATUS.forEach(pair => {
+      division = {
+        Id: pair.Id.toString(),
+        Description: pair.Description
+      };
+      this.approvalStatusList.push(division);
+    });
+    // Add "All" option at the beginning
+    this.approvalStatusList.unshift({ Id: null, Description: 'All' });
+  }
+
+  onSearch() {
+    if (!this.courseId.value) {
+      this.message.warning('Please select a course');
+      return;
+    }
+    const approvalStatus = this.approvalStatus.value;
+    this.getListOfStudentCourseAdded(this.courseId.value, approvalStatus);
+  }
+
+  getListOfStudentCourseAdded(courseId?: string, approvalStatus?: number | string | null) {
+    if (!courseId) {
+      return;
+    }
     this.loading = true;
-    this.courseApprovalService.getListOfStudentCourseAdded(courseId)
+    this.courseApprovalService.getListOfStudentCourseAdded(courseId, approvalStatus)
       .subscribe({
         next: (data: any[]) => {
           this.listOfStudents = data.map(item => ({
@@ -86,6 +115,20 @@ export class AddCourseApprovalComponent implements OnInit {
             fullName: item.fullName,
             batchCode: item.batchCode
           }));
+          
+          // Clear previous selections
+          this.setOfCheckedId.clear();
+          
+          // If filtering by "Approved" (status 3), auto-check all returned students
+          if (approvalStatus === 3 || approvalStatus === '3') {
+            this.listOfStudents.forEach(student => {
+              if (student.courseTakenId) {
+                this.setOfCheckedId.add(student.courseTakenId);
+              }
+            });
+          }
+          
+          this.refreshCheckedStatus();
           this.loading = false;
         },
         error: (error) => {
@@ -158,15 +201,16 @@ export class AddCourseApprovalComponent implements OnInit {
           next: (response) => {
             this.loading = false;
             this.message.success('Course approval submitted successfully');
-            this.formAddedCourses.reset();
-            this.listOfStudents = [];
+            const currentCourseId = this.courseId.value;
+            const currentApprovalStatus = this.approvalStatus.value;
             this.setOfCheckedId.clear();
             this.checked = false;
             this.indeterminate = false;
-            // Reload both course and student lists
-            this.getListOfAddedCourses();
-            if (this.courseId.value) {
-              this.getListOfStudentCourseAdded(this.courseId.value);
+            // Reload student list with current filters
+            if (currentCourseId) {
+              this.getListOfStudentCourseAdded(currentCourseId, currentApprovalStatus);
+            } else {
+              this.listOfStudents = [];
             }
           },
           error: (error) => {

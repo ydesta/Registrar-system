@@ -103,19 +103,12 @@ namespace SecureAuth.APPLICATION.Commands.User
                         CreatedAt = DateTime.Now,
                         Email = command.NewEmail,
                         Password = newPassword,
-                        FirstName = existingUser.FirstName,
-                        FatherName = existingUser.LastName,
+                        FirstName = user.FirstName,
+                        FatherName = user.LastName,
                     };
 
                     await _unitOfWork.UserCredentials.AddAsync(userCred);
-                    Console.WriteLine($"Stored UserCredential for email: {command.NewEmail}");
-                    
-                    // Log before sending email
-                    Console.WriteLine($"About to send email to: {command.NewEmail}");
-                    Console.WriteLine($"Username: {user.UserName}");
-                    Console.WriteLine($"FirstName: {user.FirstName}");
-                    Console.WriteLine($"LastName: {user.LastName}");
-                    Console.WriteLine($"NewPassword: {newPassword}");
+                   
                     
                     await _emailService.SendUpdatedCredentialsAsync(
                         oldEmail,
@@ -125,14 +118,11 @@ namespace SecureAuth.APPLICATION.Commands.User
                         "Email and Password",
                         newPassword);
                         
-                    Console.WriteLine("Email sent successfully!");
                 }
                 catch (Exception ex)
                 {
-                    // Log the error but don't fail the update
                     Console.WriteLine($"Email sending failed: {ex.Message}");
                     Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                    // The admin can manually send notification later
                 }
                 await _activityLogService.LogUserActionAsync(
                     user.Id,

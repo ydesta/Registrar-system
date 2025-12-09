@@ -72,36 +72,186 @@ namespace SecureAuth.API.Controllers
             }
         }
 
+        [HttpGet("database-check")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DatabaseCheck()
+        {
+            try
+            {
+                var userManager = HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
+                var roleManager = HttpContext.RequestServices.GetRequiredService<RoleManager<ApplicationRole>>();
+                var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+                
+                // Check database connection
+                var canConnect = await dbContext.Database.CanConnectAsync();
+                
+                // Check if tables exist
+                var usersCount = await dbContext.Users.CountAsync();
+                var rolesCount = await dbContext.Roles.CountAsync();
+                
+                // Check for admin user
+                var adminUser = await userManager.FindByEmailAsync("hilcoeadmin@gmail.com");
+                
+                // Check for Super Admin role
+                var superAdminRole = await roleManager.FindByNameAsync("Super Admin");
+                
+                return Ok(new
+                {
+                    databaseConnected = canConnect,
+                    usersCount = usersCount,
+                    rolesCount = rolesCount,
+                    adminUserExists = adminUser != null,
+                    adminUserActive = adminUser?.IsActive ?? false,
+                    adminUserEmailConfirmed = adminUser?.EmailConfirmed ?? false,
+                    superAdminRoleExists = superAdminRole != null,
+                    adminUserDetails = adminUser != null ? new
+                    {
+                        id = adminUser.Id,
+                        email = adminUser.Email,
+                        firstName = adminUser.FirstName,
+                        lastName = adminUser.LastName,
+                        isActive = adminUser.IsActive,
+                        emailConfirmed = adminUser.EmailConfirmed,
+                        createdAt = adminUser.CreatedAt
+                    } : null,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    error = ex.Message,
+                    stackTrace = ex.StackTrace,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [HttpPost("test-login")]
+        [AllowAnonymous]
+        public async Task<ActionResult<LoginResponse>> TestLogin(LoginRequest request)
+        {
+            try
+            {
+                // Validate request
+                if (request == null)
+                {
+                    return BadRequest(new LoginResponse { Success = false, Message = "Request cannot be null" });
+                }
+
+                if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+                {
+                    return BadRequest(new LoginResponse { Success = false, Message = "Email and password are required" });
+                }
+
+                // Check if user exists
+                var userManager = HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
+                var user = await userManager.FindByEmailAsync(request.Email.Trim().ToLowerInvariant());
+                
+                if (user == null)
+                {
+                    return NotFound(new LoginResponse { Success = false, Message = "User not found" });
+                }
+
+                // Check password
+                var passwordValid = await userManager.CheckPasswordAsync(user, request.Password);
+                if (!passwordValid)
+                {
+                    return Unauthorized(new LoginResponse { Success = false, Message = "Invalid password" });
+                }
+
+                // Check if user is active
+                if (!user.IsActive)
+                {
+                    return Unauthorized(new LoginResponse { Success = false, Message = "User account is deactivated" });
+                }
+
+                // Check email confirmation
+                if (!user.EmailConfirmed)
+                {
+                    return Unauthorized(new LoginResponse { Success = false, Message = "Email not confirmed" });
+                }
+
+                return Ok(new LoginResponse 
+                { 
+                    Success = true, 
+                    Message = "Test login successful",
+                    User = new UserInfo
+                    {
+                        Id = user.Id,
+                        Email = user.Email ?? string.Empty,
+                        FirstName = user.FirstName ?? string.Empty,
+                        LastName = user.LastName ?? string.Empty,
+                        EmailConfirmed = user.EmailConfirmed,
+                        IsActive = user.IsActive
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                var logger = HttpContext.RequestServices.GetRequiredService<ILogger<AuthenticationController>>();
+                logger.LogError(ex, "Test login error for email: {Email}", request?.Email);
+                
+                return StatusCode(500, new LoginResponse { 
+                    Success = false, 
+                    Message = $"Test login error: {ex.Message}" 
+                });
+            }
+        }
+
         [HttpPost("login")]
         // [RateLimit(5, 15)] // Temporarily disabled due to 429 errors in production
         public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
         {
             try
             {
+                // Validate request
+                if (request == null)
+                {
+                    return BadRequest(new LoginResponse { Success = false, Message = "Request cannot be null" });
+                }
+
+                if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+                {
+                    return BadRequest(new LoginResponse { Success = false, Message = "Email and password are required" });
+                }
+
                 var validationResult = await _loginValidator.ValidateAsync(request);
                 if (!validationResult.IsValid)
                 {
-                    return BadRequest(new LoginResponse { Success = false, Message = "Invalid login request" });
+                    var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
+                    return BadRequest(new LoginResponse { Success = false, Message = $"Invalid login request: {errors}" });
                 }
 
                 var command = new LoginCommand
                 {
-                    Email = request.Email,
+                    Email = request.Email.Trim().ToLowerInvariant(),
                     Password = request.Password
                 };
 
                 var result = await _mediator.SendAsync<LoginCommand, LoginResponse>(command);
                 
-                if (result.Success)
+                // ✅ FIX: Return 200 OK for RequiresTwoFactor to trigger OTP form
+                if (result.Success || result.RequiresTwoFactor)
                 {
                     return Ok(result);
                 }
                 
-                return Unauthorized(result);
+                // Return 401 only for actual login failures (not 2FA)
+                Response.StatusCode = 401;
+                return new ObjectResult(result) { StatusCode = 401 };
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new LoginResponse { Success = false, Message = "An error occurred during login" });
+                // Log the exception for debugging
+                var logger = HttpContext.RequestServices.GetRequiredService<ILogger<AuthenticationController>>();
+                logger.LogError(ex, "Login error for email: {Email}", request?.Email);
+                
+                return StatusCode(500, new LoginResponse { 
+                    Success = false, 
+                    Message = "Server error. Please try again later or contact support." 
+                });
             }
         }
 
@@ -215,12 +365,13 @@ namespace SecureAuth.API.Controllers
 
                 var result = await _mediator.SendAsync<ForgotPasswordCommand, ForgotPasswordResponse>(command);
                 
-                if (result.Success)
-                {
-                    return Ok(new { message = result.Message });
-                }
-                
-                return BadRequest(new { message = result.Message });
+                // Always return Ok to maintain security (don't reveal email existence)
+                // Frontend will handle the response based on success and emailSent properties
+                return Ok(new { 
+                    success = result.Success, 
+                    message = result.Message,
+                    emailSent = result.EmailSent
+                });
             }
             catch (Exception ex)
             {

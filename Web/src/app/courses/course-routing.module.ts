@@ -8,17 +8,18 @@ import { CoursePrerequisiteComponent } from './course-prerequisite/course-prereq
 import { CourseComponent } from './course.component';
 import { CourseExemptionListComponent } from './course-exemption-list/course-exemption-list.component';
 import { CourseExemptionFormComponent } from './course-exemption-form/course-exemption-form.component';
+import { AuthGuard } from '../guards/auth.guard';
 
 const routes: Routes = [
-  { path: '', component: CourseComponent },
-{ path: 'add-course/:id', component: AddCourseComponent },
-{ path: 'course-equivalent', component: CourseEquivalentComponent },
-{ path: 'add-course-equivalent/:id', component: AddCourseEquivalentComponent },
-{ path: 'course-prerequisite', component: CoursePrerequisiteComponent },
-{ path: 'add-course-prerequisite/:id', component: AddCoursePrerequisiteComponent },
-{ path: 'course-exemption-list', component: CourseExemptionListComponent },
-{ path: 'course-exemption-form', component: CourseExemptionFormComponent },
-{ path: 'course-exemption-form/:id', component: CourseExemptionFormComponent }
+  { path: '', component: CourseComponent, canActivate: [AuthGuard] },
+{ path: 'add-course/:id', component: AddCourseComponent, canActivate: [AuthGuard] },
+{ path: 'course-equivalent', component: CourseEquivalentComponent, canActivate: [AuthGuard] },
+{ path: 'add-course-equivalent/:id', component: AddCourseEquivalentComponent, canActivate: [AuthGuard] },
+{ path: 'course-prerequisite', component: CoursePrerequisiteComponent, canActivate: [AuthGuard] },
+{ path: 'add-course-prerequisite/:id', component: AddCoursePrerequisiteComponent, canActivate: [AuthGuard] },
+{ path: 'course-exemption-list', component: CourseExemptionListComponent, canActivate: [AuthGuard] },
+{ path: 'course-exemption-form', component: CourseExemptionFormComponent, canActivate: [AuthGuard] },
+{ path: 'course-exemption-form/:id', component: CourseExemptionFormComponent, canActivate: [AuthGuard] }
 ];
 
 @NgModule({

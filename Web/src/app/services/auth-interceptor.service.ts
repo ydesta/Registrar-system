@@ -9,7 +9,7 @@ import {
   HttpHeaders,
   HttpErrorResponse,
 } from '@angular/common/http';
-import { Observable, catchError, from, throwError } from 'rxjs';
+import { Observable, catchError, from, throwError, switchMap } from 'rxjs';
 import { Constants } from '../constants';
 
 @Injectable({
@@ -25,9 +25,29 @@ export class AuthInterceptorService implements HttpInterceptor {
     // Only intercept API requests
     if (req.url.startsWith(Constants.apiRoot)) {
       console.log('AuthInterceptorService: Intercepting API request to:', req.url);
-      return from(
-        this._authService.getAccessToken().then((token) => {
+      
+      // Skip adding token for authentication endpoints (login, register, etc.)
+      const isAuthEndpoint = req.url.includes('/authentication/login') || 
+                             req.url.includes('/authentication/register') ||
+                             req.url.includes('/authentication/test-login') ||
+                             req.url.includes('/authentication/database-check');
+      
+      if (isAuthEndpoint) {
+        console.log('AuthInterceptorService: Skipping token for auth endpoint:', req.url);
+        return next.handle(req);
+      }
+      
+      // Use switchMap to properly handle the async token retrieval
+      return from(this._authService.getAccessToken()).pipe(
+        switchMap((token: string) => {
           console.log('AuthInterceptorService: Token received:', token ? 'Token exists' : 'No token');
+          
+          // If no token, proceed with original request
+          if (!token) {
+            return next.handle(req);
+          }
+          
+          // Clone the request with the token
           const headers = new HttpHeaders().set(
             'Authorization',
             `Bearer ${token}`
@@ -78,7 +98,7 @@ export class AuthInterceptorService implements HttpInterceptor {
               
               return throwError(() => err);
             })
-          ).toPromise();
+          );
         })
       );
     } else {

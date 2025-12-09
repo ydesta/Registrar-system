@@ -358,7 +358,12 @@ export class AuthService {
       } else if (error.status === 400) {
         errorMessage = error.error?.message || 'Bad request. Please check your verification link and try again.';
       } else if (error.status === 401) {
-        errorMessage = 'Authentication failed. Please check your credentials or verification link.';
+        // Extract the actual error message from the backend response
+        errorMessage = error.error?.message || 'Authentication failed. Please check your credentials.';
+        // Log the full error for debugging
+        if (error.error) {
+          console.error('401 Unauthorized - Backend error details:', error.error);
+        }
       } else if (error.status === 403) {
         errorMessage = 'Access denied. You do not have permission to access this resource.';
       } else if (error.status === 404) {
@@ -375,6 +380,10 @@ export class AuthService {
       console.error('Server-side error:', errorMessage);
     }
     
-    return throwError(() => new Error(errorMessage));
+    // Return the original error with the proper message so the component can access error.error
+    const customError = new Error(errorMessage);
+    (customError as any).originalError = error;
+    (customError as any).error = error.error;
+    return throwError(() => customError);
   }
 }

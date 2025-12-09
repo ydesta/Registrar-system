@@ -10,6 +10,7 @@ import { CrudService } from 'src/app/services/crud.service';
 import { SearchQueryParams } from '../SearchParam/search-query-params';
 import { StudentInformation } from '../model/student-information.model';
 import * as XLSX from 'xlsx';
+import { TermCourseOfferingService } from 'src/app/colleges/services/term-course-offering.service';
 @Component({
   selector: 'app-registered-student-per-course',
   templateUrl: './registered-student-per-course.component.html',
@@ -38,7 +39,8 @@ export class RegisteredStudentPerCourseComponent implements OnInit {
     private _excelExportService: ExcelExportService,
     private _pdfExportService: PdfExportService,
     private _fb: FormBuilder,
-    private _crudService: CrudService
+    private _crudService: CrudService,
+    private _termCourseOfferingService: TermCourseOfferingService
   ) {
     const currentYear = new Date();
     this.yearList = this.getYearRange(currentYear.getFullYear());
@@ -47,10 +49,19 @@ export class RegisteredStudentPerCourseComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this._crudService.getList("/courses").subscribe((res: any) => {
-      this.courses = res.data;
-    });
     this.getListOfAcademicTermStatus();
+    this.termId.valueChanges.subscribe(res => {
+      if (res && this.termYear.value) {
+        this.getListOfCourseOffering(res, this.termYear.value);
+      }
+    });
+
+    // Subscribe to year changes
+    this.termYear.valueChanges.subscribe(year => {
+      if (year && this.termId.value) {
+        this.getListOfCourseOffering(this.termId.value, year);
+      }
+    });
   }
 
   private createCourseOffering() {
@@ -68,6 +79,23 @@ export class RegisteredStudentPerCourseComponent implements OnInit {
   }
   get courseId() {
     return this.formRegisteredStudentPerCourse.get('courseId');
+  }
+  getListOfCourseOffering(termId: number, termYear: number) {
+    this.courses = null;
+    if (termId && termYear) {
+      this._termCourseOfferingService.getListOfCourseByAcademicTerm(termId, termYear)
+        .subscribe({
+          next: (res: any) => {
+            this.courses = res;
+            this.isLoading = false;
+          },
+          error: (err) => {
+            console.error('Error fetching course offerings:', err);
+            this.courses = [];
+            this.isLoading = false;
+          }
+        });
+    }
   }
   getListOfAcademicTermStatus() {
     let division: StaticData = new StaticData();
@@ -96,7 +124,7 @@ export class RegisteredStudentPerCourseComponent implements OnInit {
       .subscribe({
         next: (res: any) => {
           this.data = res;
-          
+
           // Check if response exists and has data
           if (res && Array.isArray(res) && res.length > 0 && res[0] && res[0].studentInformation) {
             this.registeredStudentInformation = res[0].studentInformation;
@@ -107,10 +135,10 @@ export class RegisteredStudentPerCourseComponent implements OnInit {
             this.total = 0;
             this.data = null;
           }
-          
+
           this.updatePaginatedRegisteredStudent();
           this.isLoading = false;
-          
+
           // Collapse the search form when results are returned
           this.isFormCollapsed = true;
         },
@@ -121,7 +149,7 @@ export class RegisteredStudentPerCourseComponent implements OnInit {
           this.data = null;
           this.updatePaginatedRegisteredStudent();
           this.isLoading = false;
-          
+
           // Collapse the search form even on error
           this.isFormCollapsed = true;
         }
@@ -137,10 +165,10 @@ export class RegisteredStudentPerCourseComponent implements OnInit {
     const term = this.data[0].academicTerm || 'N/A';
     const course = `${this.data[0].courseCode || 'N/A'} - ${this.data[0].courseTitle || 'N/A'}`;
     const studentData = this.data[0].studentInformation || [];
-    
+
     const excelData = [
-      [`Academic Term: ${term}`], 
-      [`Course: ${course}`],   
+      [`Academic Term: ${term}`],
+      [`Course: ${course}`],
       ["SerialNo", "StudentCode", "FullName", "BatchCode"],
       ...studentData.map(student => [
         student.serialNo || '',
@@ -150,10 +178,10 @@ export class RegisteredStudentPerCourseComponent implements OnInit {
       ])
     ];
     const merges: XLSX.Range[] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }, 
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } }  
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } }
     ];
-  
+
     this._excelExportService.exportWithCustomLayout(
       excelData,
       'Registered_Students',
@@ -161,35 +189,35 @@ export class RegisteredStudentPerCourseComponent implements OnInit {
       merges
     );
   }
-exportToPdf(): void {
-  // Check if data exists and has the required structure
-  if (!this.data || !Array.isArray(this.data) || this.data.length === 0 || !this.data[0]) {
-    console.error('No data available for export');
-    return;
+  exportToPdf(): void {
+    // Check if data exists and has the required structure
+    if (!this.data || !Array.isArray(this.data) || this.data.length === 0 || !this.data[0]) {
+      console.error('No data available for export');
+      return;
+    }
+
+    const headerLines = [
+      `Academic Term: ${this.data[0].academicTerm || 'N/A'}`,
+      `Course: ${this.data[0].courseCode || 'N/A'} - ${this.data[0].courseTitle || 'N/A'}`
+    ];
+
+    const tableHeaders = ['Serial No', 'Student Code', 'Full Name', 'Batch Code'];
+    const studentData = this.data[0].studentInformation || [];
+
+    const tableData = studentData.map(student => [
+      student.serialNo || '',
+      student.studentCode || '',
+      student.fullName || '',
+      student.batchCode || ''
+    ]);
+
+    this._pdfExportService.exportToPdf(
+      headerLines,
+      tableHeaders,
+      tableData,
+      'Registered_Students_Report'
+    );
   }
-
-  const headerLines = [
-    `Academic Term: ${this.data[0].academicTerm || 'N/A'}`,
-    `Course: ${this.data[0].courseCode || 'N/A'} - ${this.data[0].courseTitle || 'N/A'}`
-  ];
-
-  const tableHeaders = ['Serial No', 'Student Code', 'Full Name', 'Batch Code'];
-  const studentData = this.data[0].studentInformation || [];
-  
-  const tableData = studentData.map(student => [
-    student.serialNo || '',
-    student.studentCode || '',
-    student.fullName || '',
-    student.batchCode || ''
-  ]);
-
-  this._pdfExportService.exportToPdf(
-    headerLines,
-    tableHeaders,
-    tableData,
-    'Registered_Students_Report'
-  );
-}
   getStudentRegistered(): SearchQueryParams {
     const formModel = this.formRegisteredStudentPerCourse.getRawValue();
     const params = new SearchQueryParams();

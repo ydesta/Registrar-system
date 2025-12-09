@@ -16,6 +16,9 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(60);
     options.Limits.MaxRequestBufferSize = 1024 * 1024; // 1MB
     options.Limits.MaxResponseBufferSize = 1024 * 1024; // 1MB
+    
+    // Security: Remove server header to prevent information disclosure
+    options.AddServerHeader = false;
 });
 
 // Add services using extension methods
@@ -24,6 +27,21 @@ builder.Services.AddApplicationServices();
 builder.Services.AddApplicationValidators();
 builder.Services.AddConfigurationServices(builder.Configuration);
 builder.Services.AddApiServices();
+
+// Configure HSTS with proper settings
+builder.Services.AddHsts(x =>
+{
+    x.Preload = true;
+    x.IncludeSubDomains = true;
+    x.MaxAge = TimeSpan.FromDays(365); // 1 year (31536000 seconds)
+    
+    // Exclude localhost and HTTP endpoints during development
+    if (builder.Environment.IsDevelopment())
+    {
+        x.ExcludedHosts.Add("localhost");
+        x.ExcludedHosts.Add("127.0.0.1");
+    }
+});
 
 // Configure HTTP client with extended timeout and SSL bypass
 builder.Services.AddHttpClient("default", client =>
@@ -54,7 +72,10 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+var swaggerEnabled = app.Configuration.GetValue<bool>("SwaggerSettings:Enabled", false);
+var shouldEnableSwagger = app.Environment.IsDevelopment() && swaggerEnabled;
+
+if (shouldEnableSwagger)
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
@@ -71,60 +92,27 @@ if (app.Environment.IsDevelopment())
 // Add CORS middleware before other middleware
 app.UseCors("AllowAngularApp");
 
+// Security fix: Use secure error handling middleware instead of inline handler
+app.UseMiddleware<SecureErrorHandlingMiddleware>();
+
 // Add custom middleware
 app.UseMiddleware<CorsDebugMiddleware>();
 app.UseMiddleware<SecurityHeadersMiddleware>();
-// app.UseMiddleware<RateLimitingMiddleware>(); // Temporarily disabled due to 429 errors in production
+app.UseMiddleware<RateLimitingMiddleware>();
 
-// Add HTTPS redirection for production
-if (!app.Environment.IsDevelopment())
+// Add HTTPS redirection - required for HSTS
+if (app.Environment.IsProduction())
 {
     app.UseHttpsRedirection();
 }
 
+// Enable HSTS middleware in all environments
+app.UseHsts();
+
 app.UseAuthentication();
+app.UseAntiforgery();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// Add global exception handler with extended timeout handling
-app.Use(async (context, next) =>
-{
-    var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60)); // 60 second timeout
-    
-    try
-    {
-        context.RequestAborted = CancellationTokenSource.CreateLinkedTokenSource(
-            context.RequestAborted, cts.Token).Token;
-        
-        await next();
-    }
-    catch (OperationCanceledException)
-    {
-        context.Response.StatusCode = 504;
-        await context.Response.WriteAsJsonAsync(new { 
-            error = "Request timeout", 
-            message = "The request took too long to process. Please try again.",
-            timestamp = DateTime.UtcNow
-        });
-    }
-    catch (Exception ex)
-    {
-        // Log the exception
-        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An unhandled exception occurred");
-        
-        context.Response.StatusCode = 500;
-        await context.Response.WriteAsJsonAsync(new { 
-            error = "An internal server error occurred",
-            message = "Please try again later or contact support if the problem persists.",
-            timestamp = DateTime.UtcNow
-        });
-    }
-    finally
-    {
-        cts.Dispose();
-    }
-});
 
 app.Run();

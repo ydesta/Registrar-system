@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
+import { RouteRefreshService } from '../services/route-refresh.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -23,7 +24,8 @@ export class ResetPasswordComponent implements OnInit {
     private _router: Router,
     private _route: ActivatedRoute,
     private _fb: FormBuilder,
-    private _authService: AuthService
+    private _authService: AuthService,
+    private _routeRefreshService: RouteRefreshService
   ) {
     this.resetPasswordForm = _fb.group({
       newPassword: [null, [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)]],
@@ -38,14 +40,14 @@ export class ResetPasswordComponent implements OnInit {
       this.email = params['email'];
       if (!this.token || !this.email) {
         this._notificationService.notification('error', 'Invalid Reset Link', 'The password reset link is invalid or has expired.');
-        this._router.navigate(['/accounts/forgot-password']);
+        this._routeRefreshService.navigateWithRefresh(['/accounts/forgot-password']);
       }
     });
 
     // Check if user is already authenticated
     this._authService.isAuthenticated().then(isAuth => {
       if (isAuth) {
-        this._router.navigate(['/dashboard']);
+        this._routeRefreshService.navigateWithRefresh(['/dashboard']);
       }
     });
   }
@@ -112,15 +114,18 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   goToLogin(): void {
-    this._router.navigate(['/accounts/login']);
+    console.log('Navigating to login page...');
+    this._routeRefreshService.navigateWithRefresh(['/accounts/login']);
   }
 
   goToForgotPassword(): void {
-    this._router.navigate(['/accounts/forgot-password']);
+    console.log('Navigating to forgot password page...');
+    this._routeRefreshService.navigateWithRefresh(['/accounts/forgot-password']);
   }
 
   goToHome(): void {
-    this._router.navigate(['/']);
+    console.log('Navigating to home page...');
+    this._routeRefreshService.navigateWithRefresh(['/']);
   }
 
   togglePasswordVisibility(): void {

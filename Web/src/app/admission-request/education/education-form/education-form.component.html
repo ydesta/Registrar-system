@@ -117,7 +117,7 @@
         <div class="file-upload-section" [class.error]="actualFile.invalid && (actualFile.dirty || actualFile.touched)">
           <label class="file-upload-label">
             <i nz-icon nzType="paper-clip" nzTheme="outline"></i>
-            <span class="upload-text">Click here to attach documents, If you have more than one doument please merge all the documents into one pdf file.</span>
+            <span class="upload-text">Click here to attach documents. If you have more than one document, please merge all the documents into one PDF file. Make sure to include your Grade 12 ESLSE document.</span>
             <span class="required">*</span>
             <input nz-input type="file" style="visibility: hidden" #f_input
               (change)="handleFileInputChange(f_input.files)" accept=".pdf, .jpg, .jpeg, .png, .gif" multiple

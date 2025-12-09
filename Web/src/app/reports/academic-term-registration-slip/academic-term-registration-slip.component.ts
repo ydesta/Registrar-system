@@ -30,7 +30,8 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
   isFormCollapsed = false;
   hasSearched = false;
 
-  constructor(private courseTermOfferingService: TermCourseOfferingService,
+  constructor(
+    private courseTermOfferingService: TermCourseOfferingService,
     private _pdfExportService: PdfExportService,
     private _fb: FormBuilder,
     private _studentService: StudentService
@@ -60,6 +61,7 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
       batchCode: [null, [Validators.required]],
       startDate: [null],
       endDate: [null],
+      studentId: [null, []],
     });
   }
   get termId() {
@@ -76,6 +78,9 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
   }
   get endDate() {
     return this.formCourseOffered.get("endDate");
+  }
+  get studentId() {
+    return this.formCourseOffered.get("studentId");
   }
 
   getListOfBatch(termId: number = 0, termYear: number = 0) {
@@ -118,7 +123,8 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
       this.hasSearched = true;
       const startDate = formModel.startDate ? this.formatDate(formModel.startDate) : '';
       const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
-      this._studentService.getListOfTermRegisteredCourseList(formModel.batchCode, startDate, endDate)
+      const studentId = formModel.studentId ? formModel.studentId : null;
+      this._studentService.getListOfTermRegisteredCourseList(formModel.batchCode, startDate, endDate, studentId)
         .subscribe({
           next: (res) => {
             this.listOdRegisteredStudent = res;
@@ -169,26 +175,27 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
   generatePdf(): void {
     const formModel = this.formCourseOffered.getRawValue();
     //if (formModel.termId && formModel.termYear && formModel.batchCode) {
-      this.tbLoading = true;
-      this.hasSearched = true;
-      const startDate = formModel.startDate ? this.formatDate(formModel.startDate) : '';
-      const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
-      console.log("%%%%           ", formModel.batchCode);
-      this._studentService.getListOfTermRegisteredCourseList(formModel.batchCode, startDate, endDate)
-        .subscribe({
-          next: (res) => {
-            this.listOdRegisteredStudent = res;
+    this.tbLoading = true;
+    this.hasSearched = true;
+    const startDate = formModel.startDate ? this.formatDate(formModel.startDate) : '';
+    const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
+    const studentId = formModel.studentId ? formModel.studentId : null;
+    console.log("%%%%           ", formModel.batchCode);
+    this._studentService.getListOfTermRegisteredCourseList(formModel.batchCode, startDate, endDate, studentId)
+      .subscribe({
+        next: (res) => {
+          this.listOdRegisteredStudent = res;
 
-            this.totalRecord = res.length;
-            this.tbLoading = false;
-            this.isFormCollapsed = true;
-            this._pdfExportService.generateRegistrationSlipsPdf(res);
-          },
-          error: (error) => {
-            console.error('Error generating PDF:', error);
-            this.tbLoading = false;
-          }
-        });
+          this.totalRecord = res.length;
+          this.tbLoading = false;
+          this.isFormCollapsed = true;
+          this._pdfExportService.generateRegistrationSlipsPdf(res);
+        },
+        error: (error) => {
+          console.error('Error generating PDF:', error);
+          this.tbLoading = false;
+        }
+      });
     // } else {
     //   console.error('Please select all required fields before generating PDF.');
     // }

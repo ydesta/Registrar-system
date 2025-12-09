@@ -54,6 +54,7 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
   reviewSummaryData: any = {};
   isApplicationSubmitted: boolean = false;
   reviewSubmissionLoading: boolean = false;
+  paymentPolicyAccepted: boolean = false;
   @ViewChild(SchoolWithStudentAgreementComponent)
   schoolAgreementComp: SchoolWithStudentAgreementComponent;
   currentModalRef: any;
@@ -277,7 +278,7 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
   public isNextButtonDisabled(): boolean {
     switch (this.selectedTabIndex) {
       case 0:
-        return false;
+        return !this.paymentPolicyAccepted;
       case 1:
         return !this.id || !this.form?.valid;
       case 2:
@@ -649,6 +650,9 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
             profilePicture: applicantData.files[0].fileName
           });
         }
+
+        // If existing data is loaded, payment policy is considered accepted
+        this.paymentPolicyAccepted = true;
 
         this.updateTabDisabledStateOptimized();
 
@@ -1138,6 +1142,10 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
   onPaymentStatusChange(status: string) {
     this.paymentStatus = status;
     this.updateTabDisabledStateOptimized();
+  }
+
+  onPaymentPolicyAccepted(accepted: boolean) {
+    this.paymentPolicyAccepted = accepted;
   }
 
   onPaymentSuccessful() {

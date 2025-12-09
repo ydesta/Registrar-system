@@ -16,24 +16,25 @@ import { BatchComponent } from './batch/batch.component';
 import { CollegesComponent } from './colleges.component';
 import { EntryComponent } from './entry/entry.component';
 import { TermCourseOfferingComponent } from './term-course-offering/term-course-offering.component';
+import { AuthGuard } from '../guards/auth.guard';
 
 const routes: Routes = [
-  { path: '', component: CollegesComponent },
-  { path: 'add-college/:id', component: AddCollegeComponent },
-  { path: 'batch', component: BatchComponent },
-  { path: 'add-batch/:id', component: AddBatchComponent },
-  { path: 'activity', component: ActivityComponent },
-  { path: 'entry', component: EntryComponent },
-  { path: 'add-entry/:id', component: AddEntryComponent },
-  { path: 'add-activity/:id', component: AddActivityComponent },
-  { path: 'academic-status', component: AcademicStatusComponent },
-  { path: 'add-academic-status/:id', component: AddAcademicStatusComponent },
-  { path: 'term-course-offering', component: TermCourseOfferingComponent },
-  { path: 'add-term-course-offering/:id', component: AddTermCourseOfferingComponent },
-  { path: 'academic-term-activity', component: AcademicTermActivityComponent },
-  { path: 'add-academic-term-activity/:id', component: AddAcademicTermActivityComponent },
-  { path: 'academic-term', component: AcademicTermComponent },
-  { path: 'add-academic-term/:id', component: AddAcademicTermComponent },
+  { path: '', component: CollegesComponent, canActivate: [AuthGuard] },
+  { path: 'add-college/:id', component: AddCollegeComponent, canActivate: [AuthGuard] },
+  { path: 'batch', component: BatchComponent, canActivate: [AuthGuard] },
+  { path: 'add-batch/:id', component: AddBatchComponent, canActivate: [AuthGuard] },
+  { path: 'activity', component: ActivityComponent, canActivate: [AuthGuard] },
+  { path: 'entry', component: EntryComponent, canActivate: [AuthGuard] },
+  { path: 'add-entry/:id', component: AddEntryComponent, canActivate: [AuthGuard] },
+  { path: 'add-activity/:id', component: AddActivityComponent, canActivate: [AuthGuard] },
+  { path: 'academic-status', component: AcademicStatusComponent, canActivate: [AuthGuard] },
+  { path: 'add-academic-status/:id', component: AddAcademicStatusComponent, canActivate: [AuthGuard] },
+  { path: 'term-course-offering', component: TermCourseOfferingComponent, canActivate: [AuthGuard] },
+  { path: 'add-term-course-offering/:id', component: AddTermCourseOfferingComponent, canActivate: [AuthGuard] },
+  { path: 'academic-term-activity', component: AcademicTermActivityComponent, canActivate: [AuthGuard] },
+  { path: 'add-academic-term-activity/:id', component: AddAcademicTermActivityComponent, canActivate: [AuthGuard] },
+  { path: 'academic-term', component: AcademicTermComponent, canActivate: [AuthGuard] },
+  { path: 'add-academic-term/:id', component: AddAcademicTermComponent, canActivate: [AuthGuard] },
 ];
 
 @NgModule({

@@ -35,7 +35,7 @@ export class PaymentCallbackComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.processCallback();
+    this.checkOrderStatusAndHandleCallback();
   }
 
   private async processCallback(): Promise<void> {
@@ -112,7 +112,7 @@ export class PaymentCallbackComponent implements OnInit {
   async checkOrderStatusAndHandleCallback(): Promise<void> {
     try {
       this.route.queryParams.subscribe(async params => {
-        const orderId = params['orderNumber'] || params['orderNumber'];
+        const orderId = 'a9bf4b34-fabc-4a5b-8008-4923f85c6026'; //params['orderNumber'] || params['orderNumber'];
         if (!orderId) {
           this.paymentStatus = 'error';
           this.message = 'No order ID provided in callback';
@@ -132,7 +132,7 @@ export class PaymentCallbackComponent implements OnInit {
 
             if (response.data.registration?.id) {
               setTimeout(() => {
-                this.router.navigate(['/registration/success'], {
+                this.router.navigate(['/students/manage-student-course-registration'], {
                   queryParams: { registrationId: response.data.registration.id }
                 });
               }, 2000);

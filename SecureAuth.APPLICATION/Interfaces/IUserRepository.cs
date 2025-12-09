@@ -19,7 +19,7 @@ namespace SecureAuth.APPLICATION.Interfaces
         Task UpdateLastLoginAsync(string userId, DateTime loginTime);
         Task IncrementFailedLoginAttemptsAsync(string userId);
         Task ResetFailedLoginAttemptsAsync(string userId);
-        Task LockUserAsync(string userId, DateTime lockoutEnd);
+        Task LockUserAsync(string userId, DateTimeOffset lockoutEnd);
         Task UnlockUserAsync(string userId);
         // CQRS addition
         Task<List<ApplicationUser>> GetUsersInRoleAsync(string roleName);

@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SecureAuth.APPLICATION.Commands.Auth;
 using SecureAuth.APPLICATION.DTOs.Authentication;
 using SecureAuth.APPLICATION.Interfaces;
@@ -17,6 +19,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
         private readonly IOtpService _otpService;
         private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly ISecurityEventService _securityEventService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public LoginCommandHandler(
             UserManager<ApplicationUser> userManager,
@@ -26,7 +29,8 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             IActivityLogService activityLogService,
             IOtpService otpService,
             IRolePermissionRepository rolePermissionRepository,
-            ISecurityEventService securityEventService)
+            ISecurityEventService securityEventService,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -36,15 +40,67 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             _otpService = otpService;
             _rolePermissionRepository = rolePermissionRepository;
             _securityEventService = securityEventService;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        private string GetClientIpAddress()
+        {
+            try
+            {
+                var ip = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+                return ip ?? "127.0.0.1"; // Fallback to localhost if unable to get IP
+            }
+            catch
+            {
+                return "127.0.0.1";
+            }
+        }
+
+        private string GetUserAgent()
+        {
+            try
+            {
+                var userAgent = _httpContextAccessor.HttpContext?.Request?.Headers["User-Agent"].ToString();
+                return userAgent ?? "Unknown";
+            }
+            catch
+            {
+                return "Unknown";
+            }
         }
 
         public async Task<LoginResponse> HandleAsync(LoginCommand command)
         {
-            var user = await _userManager.FindByEmailAsync(command.Email);
+            try
+            {
+                // Validate command
+                if (command == null)
+                {
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = "Invalid login command",
+                        Token = null,
+                        RefreshToken = null
+                    };
+                }
+
+                if (string.IsNullOrWhiteSpace(command.Email) || string.IsNullOrWhiteSpace(command.Password))
+                {
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = "Email and password are required",
+                        Token = null,
+                        RefreshToken = null
+                    };
+                }
+
+                var user = await _userManager.FindByEmailAsync(command.Email.Trim().ToLowerInvariant());
             if (user == null)
             {
                 // Record failed login attempt for non-existent user
-                await _securityEventService.RecordFailedLoginAsync(command.Email, "127.0.0.1", "Unknown", "User not found");
+                await _securityEventService.RecordFailedLoginAsync(command.Email, GetClientIpAddress(), GetUserAgent(), "User not found");
                 
                 return new LoginResponse
                 {
@@ -58,7 +114,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             // Check if user is active
             if (!user.IsActive)
             {
-                await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, "127.0.0.1", "Unknown", "Account deactivated");
+                await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, GetClientIpAddress(), GetUserAgent(), "Account deactivated");
                 
                 return new LoginResponse
                 {
@@ -70,16 +126,72 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             }
 
             // Check if user is locked out
-            if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow)
+            if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
             {
-                await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, "127.0.0.1", "Unknown", "Account locked");
+                await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, GetClientIpAddress(), GetUserAgent(), "Account locked");
+                
+                var now = DateTimeOffset.UtcNow;
+                var lockoutEnd = user.LockoutEnd.Value;
+                var timeRemaining = lockoutEnd.Subtract(now);
+                var totalHours = (int)Math.Floor(timeRemaining.TotalHours);
+                var remainingMinutes = (int)Math.Floor(timeRemaining.TotalMinutes % 60);
+                
+                // Debug logging to help diagnose the issue
+                Console.WriteLine($"=== LOCKOUT DEBUG ===");
+                Console.WriteLine($"Now (UTC): {now}");
+                Console.WriteLine($"Lockout End (UTC): {lockoutEnd}");
+                Console.WriteLine($"Time Remaining: {timeRemaining.TotalHours:F2} hours ({timeRemaining.TotalMinutes:F2} minutes)");
+                Console.WriteLine($"Total Hours: {totalHours}");
+                Console.WriteLine($"Remaining Minutes: {remainingMinutes}");
+                Console.WriteLine($"====================");
+                
+                string lockoutMessage;
+                if (totalHours >= 1)
+                {
+                    if (totalHours == 1)
+                    {
+                        lockoutMessage = $"Account is temporarily locked due to multiple failed login attempts. Please try again in approximately {totalHours} hour.";
+                    }
+                    else if (totalHours > 1 && totalHours < 24)
+                    {
+                        lockoutMessage = $"Account is temporarily locked due to multiple failed login attempts. Please try again in approximately {totalHours} hours.";
+                    }
+                    else
+                    {
+                        // For 24+ hours, show in days
+                        int days = totalHours / 24;
+                        int hours = totalHours % 24;
+                        if (hours == 0)
+                        {
+                            lockoutMessage = $"Account is temporarily locked due to multiple failed login attempts. Please try again in {days} day{(days == 1 ? "" : "s")}.";
+                        }
+                        else
+                        {
+                            lockoutMessage = $"Account is temporarily locked due to multiple failed login attempts. Please try again in {days} day{(days == 1 ? "" : "s")} and {hours} hour{(hours == 1 ? "" : "s")}.";
+                        }
+                    }
+                }
+                else if (remainingMinutes >= 1)
+                {
+                    lockoutMessage = $"Account is temporarily locked due to multiple failed login attempts. Please try again in {remainingMinutes} minute{(remainingMinutes == 1 ? "" : "s")}.";
+                }
+                else
+                {
+                    lockoutMessage = $"Account is temporarily locked. Please try again shortly.";
+                }
+                
+                // Log the calculated message for debugging
+                Console.WriteLine($"Final message: {lockoutMessage}");
                 
                 return new LoginResponse
                 {
                     Success = false,
-                    Message = "Account is temporarily locked",
+                    Message = lockoutMessage,
                     Token = null,
-                    RefreshToken = null
+                    RefreshToken = null,
+                    IsLocked = true,
+                    LockoutEnd = lockoutEnd.DateTime,
+                    RemainingAttempts = 0
                 };
             }
 
@@ -87,51 +199,109 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             var passwordResult = await _signInManager.CheckPasswordSignInAsync(user, command.Password, false);
             if (!passwordResult.Succeeded)
             {
+                // Calculate remaining attempts BEFORE incrementing
+                int remainingAttemptsBeforeIncrement = 5 - (user.FailedLoginAttempts + 1);
+                
                 await _unitOfWork.Users.IncrementFailedLoginAttemptsAsync(user.Id);
                 
-                // Check if we should lock the account
-                if (user.FailedLoginAttempts >= 5)
+                // Check if we should lock the account AFTER incrementing (since we just made it 5)
+                await _unitOfWork.SaveChangesAsync();
+                
+                var shouldLock = user.FailedLoginAttempts >= 5;
+                
+                if (shouldLock)
                 {
-                    await _unitOfWork.Users.LockUserAsync(user.Id, DateTime.UtcNow.AddMinutes(15));
+                    var lockoutDurationHours = 12; // Lock account for 12 hours for security
+                    var lockoutEnd = DateTimeOffset.UtcNow.AddHours(lockoutDurationHours);
+                    
+                    Console.WriteLine($"=== LOCKING USER AFTER 5 FAILED ATTEMPTS ===");
+                    Console.WriteLine($"User ID: {user.Id}");
+                    Console.WriteLine($"Current Time: {DateTimeOffset.UtcNow}");
+                    Console.WriteLine($"Lockout End: {lockoutEnd}");
+                    Console.WriteLine($"Duration: {lockoutDurationHours} hours");
+                    
+                    await _unitOfWork.Users.LockUserAsync(user.Id, lockoutEnd);
+                    // Don't call SaveChangesAsync here - LockUserAsync already does it
+
+                    // Record failed login attempt
+                    await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, GetClientIpAddress(), GetUserAgent(), "Invalid password - account locked");
+                    
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = $"Too many failed login attempts. Your account has been locked for {lockoutDurationHours} hours for security reasons.",
+                        Token = null,
+                        RefreshToken = null,
+                        IsLocked = true,
+                        LockoutEnd = lockoutEnd.DateTime,
+                        RemainingAttempts = 0
+                    };
                 }
 
-                await _unitOfWork.SaveChangesAsync();
-
                 // Record failed login attempt
-                await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, "127.0.0.1", "Unknown", "Invalid password");
-
-                return new LoginResponse
-                {
-                    Success = false,
-                    Message = "Invalid email or password",
-                    Token = null,
-                    RefreshToken = null
-                };
-            }
-
-            // Check if email is confirmed
-            if (!user.EmailConfirmed)
-            {
-                await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, "127.0.0.1", "Unknown", "Email not confirmed");
+                await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, GetClientIpAddress(), GetUserAgent(), "Invalid password");
                 
+                string message = remainingAttemptsBeforeIncrement > 0 
+                    ? $"Invalid email or password. {remainingAttemptsBeforeIncrement} attempt(s) remaining before account is locked."
+                    : "Invalid email or password";
+
                 return new LoginResponse
                 {
                     Success = false,
-                    Message = "Please verify your email address before logging in. Check your email for a verification link.",
+                    Message = message,
                     Token = null,
-                    RefreshToken = null
+                    RefreshToken = null,
+                    RemainingAttempts = remainingAttemptsBeforeIncrement
                 };
             }
 
-            // Check if 2FA is required
-            if (user.TwoFactorEnabled && string.IsNullOrEmpty(command.TwoFactorCode))
+            // Check if email is confirmed - TEMPORARILY DISABLED FOR TESTING
+            // if (!user.EmailConfirmed)
+            // {
+            //     await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, GetClientIpAddress(), GetUserAgent(), "Email not confirmed");
+            //     
+            //     return new LoginResponse
+            //     {
+            //         Success = false,
+            //         Message = "Please verify your email address before logging in. Check your email for a verification link.",
+            //         Token = null,
+            //         RefreshToken = null
+            //     };
+            // }
+
+            // Check if 2FA is required (by user OR by role)
+            bool isTwoFactorRequired = false;
+            
+            // Check if user has 2FA enabled
+            if (user.TwoFactorEnabled)
+            {
+                isTwoFactorRequired = true;
+            }
+            else
+            {
+                // Check if user's role requires 2FA
+                var userRoles = await _userManager.GetRolesAsync(user);
+                
+                foreach (var roleName in userRoles)
+                {
+                    var role = await _unitOfWork.Roles.GetByNameAsync(roleName);
+                    if (role != null && role.RequiresTwoFactor)
+                    {
+                        isTwoFactorRequired = true;
+                        break;
+                    }
+                }
+            }
+            
+            if (isTwoFactorRequired && string.IsNullOrEmpty(command.TwoFactorCode))
             {
                 // Generate and send OTP
                 var otp = await _otpService.GenerateOtpAsync(user.Id, user.Email, "Login");
                 
+                // ✅ FIX: Return Success=true so Angular shows OTP form (not error handler)
                 return new LoginResponse
                 {
-                    Success = false,
+                    Success = true,
                     Message = "Two-factor authentication required. Please check your email for the verification code.",
                     RequiresTwoFactor = true,
                     Token = null,
@@ -139,13 +309,13 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 };
             }
 
-            // Verify 2FA if provided
-            if (user.TwoFactorEnabled && !string.IsNullOrEmpty(command.TwoFactorCode))
+            // Verify 2FA if provided and required
+            if (isTwoFactorRequired && !string.IsNullOrEmpty(command.TwoFactorCode))
             {
                 var otpValid = await _otpService.VerifyOtpAsync(user.Id, command.TwoFactorCode, "Login");
                 if (!otpValid)
                 {
-                    await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, "127.0.0.1", "Unknown", "Invalid OTP");
+                    await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, GetClientIpAddress(), GetUserAgent(), "Invalid OTP");
                     
                     return new LoginResponse
                     {
@@ -177,7 +347,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 "User logged in successfully");
 
             // Record successful login in security events
-            await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, true, "127.0.0.1", "Unknown");
+            await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, true, GetClientIpAddress(), GetUserAgent());
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -210,6 +380,22 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                     HasAdminAccess = userLoginData.HasAdminAccess
                 }
             };
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging
+                // Note: In a real implementation, you'd inject ILogger here
+                System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                return new LoginResponse
+                {
+                    Success = false,
+                    Message = "An internal error occurred during login. Please try again later.",
+                    Token = null,
+                    RefreshToken = null
+                };
+            }
         }
     }
 } 

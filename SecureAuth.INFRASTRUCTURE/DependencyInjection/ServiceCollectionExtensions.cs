@@ -41,33 +41,33 @@ namespace SecureAuth.INFRASTRUCTURE.DependencyInjection
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            // Add CORS Policy
+            // Add CORS Policy - More restrictive configuration
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAngularApp", policy =>
                 {
                     policy
                         .WithOrigins(
-                            "http://localhost:4200",     // Angular dev server
-                            "https://localhost:4200",    // Angular dev server HTTPS
-                            "http://localhost:4201",     // Alternative Angular port
-                            "https://localhost:4201",    // Alternative Angular port HTTPS
-                            "https://hilcoe.edu.et",     // Production domain
-                            "https://hilcoe.edu.et:4200", // Production domain with port
-                            "https://staging.hilcoe.edu.et", // Staging subdomain (frontend)
-                            "https://staging.hilcoe.edu.et:4200", // Staging subdomain with port
-                            "https://hsis.hilcoe.edu.et",  // Production domain
-                            "https://www.hilcoe.edu.et",   // Production domain with www
-                            "https://hilcoe.edu.et:80",    // HTTP port
-                            "https://hilcoe.edu.et:443",   // HTTPS port
-                            "https://hilcoe.edu.et:5001",  // API port (main domain)
-                            "https://hilcoe.edu.et:7123",  // API port (main domain)
-                            "https://staging.hilcoe.edu.et:7123"   // Staging API port (if needed)
+                            "https://hilcoe.edu.et",           // Production domain
+                            "https://staging.hilcoe.edu.et",    // Staging subdomain
+                            "https://hsis.hilcoe.edu.et"        // Production domain
                         )
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
+                        .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .WithHeaders("Content-Type", "Authorization", "X-Requested-With", "X-CSRF-TOKEN")
                         .AllowCredentials()
-                        .WithExposedHeaders("X-Pagination", "X-Total-Count", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection", "Referrer-Policy", "Content-Security-Policy", "Permissions-Policy", "Strict-Transport-Security");
+                        .WithExposedHeaders("X-Pagination", "X-Total-Count");
+                        
+                    // Development environment - more permissive
+                    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                    {
+                        policy
+                            .WithOrigins(
+                                "http://localhost:4200",     // Angular dev server
+                                "https://localhost:4200",    // Angular dev server HTTPS
+                                "http://localhost:4201",     // Alternative Angular port
+                                "https://localhost:4201"     // Alternative Angular port HTTPS
+                            );
+                    }
                 });
             });
 
@@ -207,6 +207,8 @@ namespace SecureAuth.INFRASTRUCTURE.DependencyInjection
             services.AddScoped<ICommandHandler<ResendOtpCommand, ResendOtpResponse>, ResendOtpCommandHandler>();
             services.AddScoped<ICommandHandler<ChangePasswordCommand, ChangePasswordResponse>, ChangePasswordCommandHandler>();
             services.AddScoped<ICommandHandler<RegeneratePasswordCommand, RegeneratePasswordResult>, RegeneratePasswordCommandHandler>();
+            services.AddScoped<ICommandHandler<EnableTwoFactorCommand, EnableTwoFactorResponse>, EnableTwoFactorCommandHandler>();
+            services.AddScoped<ICommandHandler<DisableTwoFactorCommand, DisableTwoFactorResponse>, DisableTwoFactorCommandHandler>();
 
             // Register Command Handlers (Admin)
             services.AddScoped<ICommandHandler<CreateRoleCommand, string>, CreateRoleCommandHandler>();

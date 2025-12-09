@@ -5,10 +5,11 @@ import { environment } from '../../environments/environment';
 import { BulkSectionAssignmentRequest, SectionTransferRequestWrapper, StudentSectionTransferRequest, CourseSectionAssignmentRequest, LabSectionAssignmentRequest } from '../Models/BulkSectionAssignmentRequest';
 import { SectionAssignedStudentInfo, SectionAssignedStudentsResponse } from '../Models/SectionAssignedStudentModel';
 import { SectionViewModel } from '../Models/SectionViewModel';
-import { StudentRegisteredCoursesResult } from '../Models/StudentRegisteredCoursesModel';
+import { CourseInfo, StudentRegisteredCoursesResult } from '../Models/StudentRegisteredCoursesModel';
 import { ResponseDtos } from '../admission-request/model/response-dtos.model';
 import { LabSectionAssignedStudentsResponse } from '../Models/LabSectionAssignedStudentModel';
 import { StudentProfileViewModel } from '../students/models/student-profile-view-model.model';
+import { UnassignedStudentsResponse } from '../Models/StudentInfo';
 
 @Injectable({
   providedIn: 'root'
@@ -102,22 +103,32 @@ export class StudentSectionAssignmentService {
   }
 
 
-  getListOfSectionBasedOnBatch(batchCode: string, academicTerm: number, year: number, sectionType: number): Observable<SectionViewModel[]> {
-    return this.http.get<SectionViewModel[]>(`${this.apiUrl}/sections-by-batch/${batchCode}/${academicTerm}/${year}/${sectionType}`);
+  getListOfSectionBasedOnBatch(batchCode: string, academicTerm: number, year: number, sectionType: number, courseId: string): Observable<SectionViewModel[]> {
+    return this.http.get<SectionViewModel[]>(`${this.apiUrl}/sections-by-batch/${batchCode}/${academicTerm}/${year}/${sectionType}/${courseId}`);
   }
   getListOfSectionAssignedStudentsBySectionId(batchCode: string, academicTerm: number, year: number, sectionId: number, sectionType: number): Observable<ResponseDtos> {
     return this.http.get<ResponseDtos>(`${this.apiUrl}/${batchCode}/${academicTerm}/${year}/${sectionId}/${sectionType}`);
   }
-  getListOfSectionAssignedStudentsForLab(batchCode: string, academicTerm: number, year: number): Observable<LabSectionAssignedStudentsResponse> {
-    return this.http.get<LabSectionAssignedStudentsResponse>(`${this.apiUrl}/getListOfSectionAssigned/lab/${batchCode}/${academicTerm}/${year}`);
+  getListOfSectionAssignedStudentsForLab(batchCode: string, academicTerm: number, year: number, sectionId: number): Observable<LabSectionAssignedStudentsResponse> {
+    return this.http.get<LabSectionAssignedStudentsResponse>(`${this.apiUrl}/getListOfSectionAssigned/lab/${batchCode}/${academicTerm}/${year}/${sectionId}`);
   }
 
   assignStudentLabSections(request: LabSectionAssignmentRequest): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/student/lab/section`, request);
   }
 
-  getStudentSectioningByStudentId(userId: string): Observable<StudentProfileViewModel> {
-    return this.http.get<any>(`${this.apiUrl}/getStudentSectioningByStudentId/${userId}`);
+  getStudentSectioningByStudentId(userId: string, academicTerm: number, year: number): Observable<StudentProfileViewModel> {
+    return this.http.get<any>(`${this.apiUrl}/getStudentSectioningByStudentId/${userId}/${academicTerm}/${year}`);
+  }
+
+  getUnassignedStudents(batchCode: string, academicTerm: number, year: number, sectionType: number): Observable<UnassignedStudentsResponse> {
+    return this.http.get<UnassignedStudentsResponse>(`${this.apiUrl}/unassigned-students/${batchCode}/${academicTerm}/${year}?sectionType=${sectionType}`);
+  }
+  getUnassignedCoursesForStudent(studentId: string, academicTerm: number, year: number, batchCode: string, sectionType: number): Observable<CourseInfo[]> {
+    return this.http.get<CourseInfo[]>(`${this.apiUrl}/unassigned-course-for-students/${studentId}/${academicTerm}/${year}/${batchCode}/${sectionType}`);
+  }
+  getListOfSectionAssignedBatch(batchCode: string, academicTerm: number, year: number, sectionType: number): Observable<SectionViewModel> {
+    return this.http.get<SectionViewModel>(`${this.apiUrl}/assigned-batch-section/${batchCode}/${academicTerm}/${year}/${sectionType}`);
   }
 
 } 

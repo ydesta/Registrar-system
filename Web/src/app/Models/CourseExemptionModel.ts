@@ -31,3 +31,4 @@ export interface CourseExemptionRequest {
   createdBy?: string;
   lastModifiedBy?: string;
 }
+

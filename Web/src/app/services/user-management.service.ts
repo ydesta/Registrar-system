@@ -167,8 +167,18 @@ export class UserManagementService implements IUserManagementService {
       );
   }
 
-  updateUser(userId: string, userData: Partial<User>): Observable<any> {
-    return this.http.put(`${this.baseUrl}/UserManagement/users/${userId}`, userData)
+  updateUser(userId: string, userData: Partial<User>, skipUsernameUpdate: boolean = false): Observable<any> {
+    // Transform User object to UpdateUserCommand structure
+    const updateCommand = {
+      userId: userId,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      phoneNumber: userData.phoneNumber,
+      userName: userData.email, // Always pass email as userName
+      isActive: userData.isActive
+    };
+    
+    return this.http.put(`${this.baseUrl}/UserManagement/${userId}`, updateCommand)
       .pipe(
         catchError(this.handleError)
       );
@@ -390,6 +400,26 @@ export class UserManagementService implements IUserManagementService {
   updateAdminEmail(id: string, model: any): Observable<any> {
     const url = `${this.baseUrl}/UserManagement/admin/${id}/email`;
     return this.http.put<any>(url, model);
+  }
+
+  updateUserEmail(userId: string, newEmail: string): Observable<any> {
+    const updateEmailModel = {
+      newEmail: newEmail
+    };
+    return this.http.put(`${this.baseUrl}/UserManagement/admin/${userId}/email`, updateEmailModel)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  updateUserUsername(userId: string, newUsername: string): Observable<any> {
+    const updateUsernameModel = {
+      newUsername: newUsername
+    };
+    return this.http.put(`${this.baseUrl}/UserManagement/admin/${userId}/username`, updateUsernameModel)
+      .pipe(
+        catchError(this.handleError)
+      );
   }
   getUserStatistics(): Observable<{ totalUsers: number, activeUsers: number, inactiveUsers: number }> {
     // Check cache first

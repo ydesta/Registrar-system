@@ -25,9 +25,24 @@
             <!-- Term Year -->
             <div nz-col [nzSpan]="12">
               <nz-form-item>
+                <nz-form-label [nzSpan]="6" nzRequired>Academic Term</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                  <nz-select formControlName="termId" nzPlaceHolder="Select Academic Term" nzShowSearch nzAllowClear
+                    style="width: 100%;">
+                    <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
+                      [nzLabel]="item.Description"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
                 <nz-form-label [nzSpan]="6" nzRequired>Term Year</nz-form-label>
                 <nz-form-control [nzSpan]="18">
-                  <nz-select formControlName="termYear" nzPlaceHolder="Select Term Year" nzShowSearch nzAllowClear style="width: 100%;">
+                  <nz-select formControlName="termYear" nzPlaceHolder="Select Term Year" nzShowSearch nzAllowClear
+                    style="width: 100%;">
                     <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item"></nz-option>
                   </nz-select>
                 </nz-form-control>
@@ -39,24 +54,17 @@
               <nz-form-item>
                 <nz-form-label [nzSpan]="6" nzRequired>Course</nz-form-label>
                 <nz-form-control [nzSpan]="18">
-                  <nz-select formControlName="courseId" nzPlaceHolder="Select Course" nzShowSearch nzAllowClear style="width: 100%;">
-                    <nz-option *ngFor="let item of courses" [nzValue]="item.id" [nzLabel]="item.courseTitle"></nz-option>
+                  <nz-select formControlName="courseId" nzPlaceHolder="Select Course" nzShowSearch nzAllowClear
+                    style="width: 100%;">
+                    <nz-option *ngFor="let item of courses" [nzValue]="item.id"
+                      [nzLabel]="item.courseTitle"></nz-option>
                   </nz-select>
                 </nz-form-control>
               </nz-form-item>
             </div>
 
             <!-- Academic Term -->
-            <div nz-col [nzSpan]="12">
-              <nz-form-item>
-                <nz-form-label [nzSpan]="6" nzRequired>Academic Term</nz-form-label>
-                <nz-form-control [nzSpan]="18">
-                  <nz-select formControlName="termId" nzPlaceHolder="Select Academic Term" nzShowSearch nzAllowClear style="width: 100%;">
-                    <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id" [nzLabel]="item.Description"></nz-option>
-                  </nz-select>
-                </nz-form-control>
-              </nz-form-item>
-            </div>
+
           </div>
 
           <!-- Action Buttons -->
@@ -66,7 +74,8 @@
                 <i nz-icon nzType="reload" nzTheme="outline"></i>
                 Reset
               </button>
-              <button nz-button nzType="primary" (click)="getRegisteredStudentPerCourse()" [disabled]="!formRegisteredStudentPerCourse.valid" [nzLoading]="isLoading">
+              <button nz-button nzType="primary" (click)="getRegisteredStudentPerCourse()"
+                [disabled]="!formRegisteredStudentPerCourse.valid" [nzLoading]="isLoading">
                 <i nz-icon nzType="search" nzTheme="outline"></i>
                 Search
               </button>
@@ -101,11 +110,11 @@
         (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)"
         [nzFrontPagination]="false" [nzShowTotal]="rangeTemplate" [nzLoading]="isLoading" [nzNoResult]="emptyTpl"
         [nzShowQuickJumper]="true" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;" class="mobile-table-container">
-        
+
         <ng-template #rangeTemplate let-range="range" let-total>
           Showing {{ range[0] }}-{{ range[1] }} of {{ total }} items
         </ng-template>
-        
+
         <thead>
           <tr>
             <th style="min-width: 80px;">Serial No.</th>
@@ -128,7 +137,7 @@
             </tr>
           </ng-container>
         </tbody>
-        
+
         <ng-template #emptyTpl>
           <div class="no-data">
             <span nz-icon nzType="book" nzTheme="outline"></span>

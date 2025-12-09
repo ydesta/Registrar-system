@@ -13,5 +13,8 @@ namespace SecureAuth.APPLICATION.Interfaces
         Task DeleteAsync(T entity);
         Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
         Task<int> CountAsync(Expression<Func<T, bool>> predicate = null);
+        
+        // Query support for advanced filtering
+        IQueryable<T> Query();
     }
 } 

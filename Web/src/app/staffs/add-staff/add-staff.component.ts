@@ -55,6 +55,21 @@ ngOnInit(): void {
   }
 }
 
+  // Helper method to determine where to navigate after save
+  private getNavigationPath(): string {
+    const role = (localStorage.getItem('role') || '').replace(/"/g, '');
+    const userType = (localStorage.getItem('userType') || '').replace(/"/g, '');
+    const effectiveRole = userType || role;
+    
+    // If user is an instructor, redirect to their profile
+    if (effectiveRole === 'Instructor') {
+      return '/staffs/staff-profile';
+    }
+    
+    // Otherwise, redirect to staff list (for admins)
+    return '/staffs';
+  }
+
   submitForm() {
     if (this.staffForm.valid) {
       // Get the current logged-in user ID from localStorage
@@ -67,24 +82,24 @@ ngOnInit(): void {
       if (this.progStatusId == "null") {
         this._staffService.createStaff(formData as StaffModel).subscribe((res: any) => {
           this._customNotificationService.notification('success', 'Success', res.data);
-    this._route.navigateByUrl('staffs');
+          this._route.navigateByUrl(this.getNavigationPath());
         });
       } else if (this.progStatusId != "null") {
         if (this.staffForm.valid) {
           this._staffService.updateStaff(this.progStatusId, formData as StaffModel).subscribe((res: any) => {
             if (res.status == 'success') {
               this._customNotificationService.notification('success', 'Success', res.data);
-        this._route.navigateByUrl('staffs');
+              this._route.navigateByUrl(this.getNavigationPath());
             } else {
               this._customNotificationService.notification('error', 'Error', res.data);
-       }
-      })
-     }
-   }
+            }
+          })
+        }
+      }
     } else {
       this._customNotificationService.notification('error', 'error', 'Enter valid data.');
- }
-}
+    }
+  }
 
 patchValues(data: any) {
   this.staffForm.patchValue({

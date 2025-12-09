@@ -27,9 +27,9 @@ export class AddStudentComponent implements OnInit {
 
   constructor(
     public aciveRoute: ActivatedRoute,
-    private _route: Router, 
+    private _route: Router,
     private _fb: FormBuilder,
-    private _studentService: StudentService, 
+    private _studentService: StudentService,
     private _crudService: CrudService,
     private _termCourseOfferingService: TermCourseOfferingService,
     private _customNotificationService: CustomNotificationService
@@ -102,6 +102,7 @@ export class AddStudentComponent implements OnInit {
       batchCode: ['', Validators.required],
       entryYear: ['', Validators.required],
       studentId: ['', Validators.required],
+      tuitionPerCredit: [0, Validators.required],
       // Registration fields
       isAllowedToRegister: [0, Validators.required],
       offerBatchCode: [''],
@@ -123,32 +124,33 @@ export class AddStudentComponent implements OnInit {
   }
 
   submitForm() {
-    if (this.form.valid) {
-      this.loading = true;
-      if (this.progStatusId == "null") {
-        this._studentService.addStudent(this.form.value).subscribe((res: any) => {
+    // if (this.form.valid) {
+    this.loading = true;
+    if (this.progStatusId == "null") {
+      this._studentService.addStudent(this.form.value).subscribe((res: any) => {
+        this._customNotificationService.notification('success', 'Success', res.data);
+        this._route.navigateByUrl('students');
+        this.loading = false;
+      }, error => {
+        this.loading = false;
+      });
+    } else if (this.progStatusId != "null") {
+      console.log("$$$          ", this.form.value);
+      this._studentService.updateStudent(this.progStatusId, this.form.value).subscribe((res: any) => {
+        if (res.status == 'success') {
           this._customNotificationService.notification('success', 'Success', res.data);
           this._route.navigateByUrl('students');
-          this.loading = false;
-        }, error => {
-          this.loading = false;
-        });
-      } else if (this.progStatusId != "null") {
-        this._studentService.updateStudent(this.progStatusId, this.form.value).subscribe((res: any) => {
-          if (res.status == 'success') {
-            this._customNotificationService.notification('success', 'Success', res.data);
-            this._route.navigateByUrl('students');
-          } else {
-            this._customNotificationService.notification('error', 'Error', res.data);
-          }
-          this.loading = false;
-        }, error => {
-          this.loading = false;
-        });
-      }
-    } else {
-      this._customNotificationService.notification('error', 'error', 'Enter valid data.');
+        } else {
+          this._customNotificationService.notification('error', 'Error', res.data);
+        }
+        this.loading = false;
+      }, error => {
+        this.loading = false;
+      });
     }
+    // } else {
+    //   this._customNotificationService.notification('error', 'error', 'Enter valid data.');
+    // }
   }
 
   patchValues(data: any) {
@@ -183,11 +185,13 @@ export class AddStudentComponent implements OnInit {
       batchCode: data.batchCode,
       entryYear: data.entryYear,
       studentId: data.studentId,
+      sourceOfFinance: data.sourceOfFinance,
+      tuitionPerCredit: data.tuitionPerCredit,
       isAllowedToRegister: data.isAllowedToRegister !== undefined ? data.isAllowedToRegister : 0,
       offerBatchCode: data.offerBatchCode || data.batchCode || '',
       studentStatus: (data.studentStatus !== undefined && data.studentStatus !== null && data.studentStatus > 0) ? data.studentStatus : 1
     });
-    
+
     // Debug: Check if the value was set correctly
     setTimeout(() => {
     }, 100);
@@ -201,11 +205,11 @@ export class AddStudentComponent implements OnInit {
     const firstName = this.form.get('firstName')?.value || '';
     const fatherName = this.form.get('fatherName')?.value || '';
     const grandFatherName = this.form.get('grandFatherName')?.value || '';
-    
+
     const firstInitial = firstName.charAt(0).toUpperCase();
     const fatherInitial = fatherName.charAt(0).toUpperCase();
     const grandFatherInitial = grandFatherName.charAt(0).toUpperCase();
-    
+
     return firstInitial + fatherInitial + grandFatherInitial;
   }
 
@@ -213,5 +217,5 @@ export class AddStudentComponent implements OnInit {
     this.initials = this.getInitials();
   }
 
- 
+
 }

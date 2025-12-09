@@ -91,6 +91,10 @@
             </li>
 
             <li nz-menu-item>
+              <a routerLink="/student-section/unassigned-students">Unassigned Students</a>
+            </li>
+
+            <li nz-menu-item>
               <a routerLink="/student-section/instructor-sections">Assign Instructors to Sections</a>
             </li>
           </ul>
@@ -361,9 +365,9 @@
             <li nz-menu-item>
               <a routerLink="/student-application/applicant-profile">My Profile</a>
             </li>
-            <li nz-menu-item>
+            <!-- <li nz-menu-item>
               <a routerLink="/students/register-semester-course">Enrollment Details</a>
-            </li>
+            </li> -->
             <!-- <li nz-menu-item>
               <a routerLink="/students/student-profile-summary">Grade Report</a>
             </li> -->
@@ -449,6 +453,15 @@
           </ul>
         </li>
       </div>
+      <div *ngIf="isUserSectionReportViewer">
+        <li nz-submenu nzTitle="Section Management" nzIcon="form">
+          <ul>
+            <li nz-menu-item>
+              <a routerLink="/student-section/section-assigned-students">View Generated Sections</a>
+            </li>
+          </ul>
+        </li>
+      </div>
       <div *ngIf="isUserApplicant">
         <ul>
 
@@ -490,12 +503,12 @@
                 </button>
                 <nz-dropdown-menu #menu="nzDropdownMenu">
                   <ul nz-menu class="profile-dropdown">
-                    <li nz-menu-item>
+                    <!-- <li nz-menu-item>
                       <button nz-button nzType="default" class="profile-button" (click)="goToProfile()">
                         <i nz-icon nzType="user" nzTheme="outline"></i>
                         <span>Profile</span>
                       </button>
-                    </li>
+                    </li> -->
                     <li nz-menu-item>
                       <button nz-button nzType="default" class="change-password-button" (click)="changePassword()">
                         <i nz-icon nzType="lock" nzTheme="outline"></i>

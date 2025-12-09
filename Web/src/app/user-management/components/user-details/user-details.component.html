@@ -36,7 +36,7 @@
   </div>
 
   <!-- User Details Content -->
-  <div *ngIf="!loading && user" class="user-details-content">
+  <div *ngIf="!loading && user" class="user-details-content" [class.editing-mode]="isEditing">
     <!-- Basic Information -->
     <div class="info-card">
       <nz-card nzTitle="Basic Information" [nzExtra]="basicInfoExtra">
@@ -162,7 +162,7 @@
         </div>
 
         <!-- Role Selection in Edit Mode -->
-        <div *ngIf="isEditing">
+        <form *ngIf="isEditing" nz-form [formGroup]="form" nzLayout="vertical">
           <nz-form-item label="User Roles">
             <nz-form-control>
               <nz-select 
@@ -199,7 +199,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </form>
       </nz-card>
     </div>
 

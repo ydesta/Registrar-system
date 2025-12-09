@@ -14,7 +14,7 @@
     (submitClicked)="onApplicanFormSubmit()">
 
     <div tabContent="instruction">
-        <app-instruction></app-instruction>
+        <app-instruction [hasExistingData]="!!id" (paymentPolicyAccepted)="onPaymentPolicyAccepted($event)"></app-instruction>
     </div>
 
     <div tabContent="generalInfo">

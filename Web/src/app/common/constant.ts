@@ -225,13 +225,21 @@ export const APPROVAL_STATUS: any[] = [
   { Id: 2, Description: "Approved" },
   { Id: 3, Description: "Rejected" }
 ];
+export const COURSE_REGISTRATION_STATUS: any[] = [
+  { Id: 0, Description: "Registered" },
+  { Id: 1, Description: "Dropped" },
+  { Id: 2, Description: "Added" },
+  { Id: 3, Description: "Assessment" },
+  { Id: 4, Description: "Registrar Override" },
+  { Id: 5, Description: "Deleted" },
+];
 export const SECTION_TYPE: any[] = [
   { Id: 0, Description: "Class" },
   { Id: 1, Description: "Lab" },
   { Id: 2, Description: "Manual" }
 ];
 export const REGISTARAR_APPROVAL_STATUS: any[] = [
-  { Id: 0, Description: "Draft" },
+  { Id: 0, Description: "Pending" },
   { Id: 2, Description: "Rejected" },
   { Id: 3, Description: "Accepted" }
 ];
@@ -293,11 +301,13 @@ export const INSTRUCTOR_TITLES: any[] = [
 ];
 
 export enum RegistrationStatus {
-  Regular = 0,
-  Drop = 1,
-  Withdraw = 4,
-  Add = 2,
-  Assessment = 3
+  Regular ,
+  Drop ,  
+  Add,
+  Assessment,
+  RegistrarOverride,
+  Deleted,
+  Equivalent  
 }
 export function etEnAlphabetValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {

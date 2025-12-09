@@ -56,7 +56,8 @@ export class StudentRegistrationSlipViewModel {
     public fullName: string;
     public studentCode: string;
     public academicTerm: string;
-    public batchCode: string;
+    public offeredBatchCode: string;
+    public owenBatchCode: string;
     public fromBank: string;
     public toBank: string;
     public registrationDate: string;
@@ -86,7 +87,9 @@ export class RegisteredNewStudentViewModel {
 export interface CourseSectionAssignmentViewModel {
     courseCode: string;
     courseTitle: string;
+    batchCode: string;
     sectionName: string;
+    sectionType: string;
     instructor: string;
 }
 

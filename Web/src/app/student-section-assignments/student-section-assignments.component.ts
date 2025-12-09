@@ -9,6 +9,10 @@ import { TermCourseOfferingService } from '../colleges/services/term-course-offe
 import { StaticData } from '../admission-request/model/StaticData';
 import { CourseSectionAssignment } from '../Models/CourseSectionAssignment';
 import { NzModalService } from 'ng-zorro-antd/modal';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { saveAs } from 'file-saver';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-student-section-assignments',
@@ -438,5 +442,255 @@ export class StudentSectionAssignmentsComponent implements OnInit {
         }, 10000);
       }
     });
+  }
+
+  /**
+   * Download the current section assignment data as PDF in landscape orientation
+   */
+  downloadAsPDF(): void {
+    if (this.registeredCourses.courses.length === 0) {
+      this.errorMessage = 'No data available to generate PDF report.';
+      return;
+    }
+
+    try {
+      // Create new PDF document in landscape orientation
+      const doc = new jsPDF('landscape', 'mm', 'a4');
+      
+      // Set up fonts and colors
+      doc.setFont('helvetica');
+      
+      // Add header
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      
+      // Header background
+      doc.setFillColor(41, 128, 185); // Blue background
+      doc.rect(0, 0, pageWidth, 25, 'F');
+      
+      // Header text
+      doc.setTextColor(255, 255, 255); // White text
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Course Section Assignment Report', pageWidth / 2, 12, { align: 'center' });
+      
+      // Subtitle
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Student Registration Summary', pageWidth / 2, 18, { align: 'center' });
+      
+      // Reset text color
+      doc.setTextColor(0, 0, 0);
+      
+      // Add report details
+      let yPosition = 35;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      
+      // Report metadata
+      const { academicTerm, year, batchCode } = this.searchForm.value;
+      const termName = this.getAcademicTermName(academicTerm);
+      const currentDate = new Date().toLocaleDateString();
+      
+      doc.text(`Academic Term: ${termName} ${year}`, 20, yPosition);
+      doc.text(`Batch Code: ${batchCode}`, pageWidth - 20, yPosition, { align: 'right' });
+      
+      yPosition += 8;
+      doc.text(`Generated On: ${currentDate}`, 20, yPosition);
+      doc.text(`Total Students: ${this.getTotalStudents()}`, pageWidth - 20, yPosition, { align: 'right' });
+      
+      yPosition += 8;
+      doc.text(`Total Courses: ${this.getTotalCourses()}`, 20, yPosition);
+      doc.text(`Number of Sections: ${this.numberOfSections}`, pageWidth - 20, yPosition, { align: 'right' });
+      
+      yPosition += 15;
+      
+      // Prepare table data
+      const tableData = this.registeredCourses.courses.map((course, index) => [
+        index + 1,
+        course.courseCode,
+        course.courseTitle,
+        course.numberOfStudents.toString(),
+        course.isDefaultSection ? 'Yes' : 'No',
+        course.numberOfSections.toString()
+      ]);
+      
+      // Create table
+      (doc as any).autoTable({
+        head: [['#', 'Course Code', 'Course Title', 'Students', 'Default Section', 'Sections']],
+        body: tableData,
+        startY: yPosition,
+        styles: {
+          fontSize: 9,
+          cellPadding: 3,
+          overflow: 'linebreak',
+          halign: 'left'
+        },
+        headStyles: {
+          fillColor: [52, 73, 94], // Dark blue-gray
+          textColor: 255,
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245] // Light gray
+        },
+        columnStyles: {
+          0: { halign: 'center', cellWidth: 15 }, // #
+          1: { halign: 'center', cellWidth: 30 }, // Course Code
+          2: { cellWidth: 80 }, // Course Title
+          3: { halign: 'center', cellWidth: 25 }, // Students
+          4: { halign: 'center', cellWidth: 30 }, // Default Section
+          5: { halign: 'center', cellWidth: 25 }  // Sections
+        },
+        margin: { left: 20, right: 20 },
+        tableWidth: 'auto'
+      });
+      
+      // Add footer
+      const finalY = (doc as any).lastAutoTable.finalY || yPosition + 50;
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text('This report was generated automatically by the Student Section Assignment System.', 
+               20, finalY + 15);
+      doc.text(`Page 1 of 1`, pageWidth - 20, finalY + 15, { align: 'right' });
+      
+      // Generate filename
+      const filename = `Section_Assignment_Report_${batchCode}_${termName}_${year}_${currentDate.replace(/\//g, '-')}.pdf`;
+      
+      // Save the PDF
+      doc.save(filename);
+      
+      // Show success message
+      this.successMessage = 'PDF report downloaded successfully!';
+      
+      // Auto-hide success message
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      this.errorMessage = 'Error generating PDF report. Please try again.';
+    }
+  }
+
+  /**
+   * Export the current section assignment data to Excel
+   */
+  exportToExcel(): void {
+    if (this.registeredCourses.courses.length === 0) {
+      this.errorMessage = 'No data available to export to Excel.';
+      return;
+    }
+
+    try {
+      // Prepare data for Excel export
+      const exportData = this.registeredCourses.courses.map((course, index) => ({
+        '#': index + 1,
+        'Course Code': course.courseCode,
+        'Course Title': course.courseTitle,
+        'Number of Students': course.numberOfStudents,
+        'Default Section': course.isDefaultSection ? 'Yes' : 'No',
+        'Number of Sections': course.numberOfSections,
+        'Max Students Per Section': course.maxStudentsPerSection
+      }));
+
+      // Create workbook and worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(exportData);
+
+      // Set column widths
+      const colWidths = [
+        { wch: 5 },   // #
+        { wch: 15 },  // Course Code
+        { wch: 40 },  // Course Title
+        { wch: 18 },  // Number of Students
+        { wch: 18 },  // Default Section
+        { wch: 20 },  // Number of Sections
+        { wch: 25 }   // Max Students Per Section
+      ];
+      ws['!cols'] = colWidths;
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, 'Section Assignments');
+
+      // Generate filename
+      const { academicTerm, year, batchCode } = this.searchForm.value;
+      const termName = this.getAcademicTermName(academicTerm);
+      const currentDate = new Date().toLocaleDateString();
+      const filename = `Section_Assignment_Report_${batchCode}_${termName}_${year}_${currentDate.replace(/\//g, '-')}.xlsx`;
+
+      // Save the file
+      XLSX.writeFile(wb, filename);
+
+      // Show success message
+      this.successMessage = 'Excel file exported successfully!';
+      
+      // Auto-hide success message
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      this.errorMessage = 'Error exporting to Excel. Please try again.';
+    }
+  }
+
+  /**
+   * Export the current section assignment data to CSV
+   */
+  exportToCSV(): void {
+    if (this.registeredCourses.courses.length === 0) {
+      this.errorMessage = 'No data available to export to CSV.';
+      return;
+    }
+
+    try {
+      // Prepare CSV headers
+      const headers = ['#', 'Course Code', 'Course Title', 'Number of Students', 'Default Section', 'Number of Sections', 'Max Students Per Section'];
+      
+      // Prepare CSV data
+      const csvData = this.registeredCourses.courses.map((course, index) => [
+        index + 1,
+        course.courseCode,
+        course.courseTitle,
+        course.numberOfStudents,
+        course.isDefaultSection ? 'Yes' : 'No',
+        course.numberOfSections,
+        course.maxStudentsPerSection
+      ]);
+
+      // Convert to CSV format
+      const csvContent = [
+        headers.join(','),
+        ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n');
+
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      
+      // Generate filename
+      const { academicTerm, year, batchCode } = this.searchForm.value;
+      const termName = this.getAcademicTermName(academicTerm);
+      const currentDate = new Date().toLocaleDateString();
+      const filename = `Section_Assignment_Report_${batchCode}_${termName}_${year}_${currentDate.replace(/\//g, '-')}.csv`;
+
+      // Save the file
+      saveAs(blob, filename);
+
+      // Show success message
+      this.successMessage = 'CSV file exported successfully!';
+      
+      // Auto-hide success message
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error exporting to CSV:', error);
+      this.errorMessage = 'Error exporting to CSV. Please try again.';
+    }
   }
 } 

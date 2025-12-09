@@ -157,4 +157,142 @@
   margin-bottom: 16px;
   padding-bottom: 8px;
   border-bottom: 1px solid #f0f0f0;
+}
+
+// Payment Policy Section
+.payment-policy-section {
+  margin-top: 24px;
+  margin-bottom: 20px;
+  
+  .payment-policy-card {
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-left: 4px solid #1890ff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-left-color: #40a9ff;
+    }
+    
+    .payment-policy-checkbox {
+      display: flex;
+      align-items: flex-start;
+      cursor: pointer;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      
+      &:hover {
+        .ant-checkbox-inner {
+          border-color: #40a9ff;
+        }
+      }
+    }
+  }
+}
+
+// Professional checkbox styling
+::ng-deep {
+  .payment-policy-card {
+    .payment-policy-checkbox {
+      &.ant-checkbox-wrapper {
+        display: flex !important;
+        align-items: flex-start !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1.6 !important;
+        
+        .ant-checkbox {
+          flex-shrink: 0 !important;
+          margin-top: 3px !important;
+          margin-right: 12px !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          
+          .ant-checkbox-inner {
+            width: 18px !important;
+            height: 18px !important;
+            border: 2px solid #d9d9d9 !important;
+            border-radius: 4px !important;
+            background-color: #ffffff !important;
+            transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
+            
+            &::after {
+              position: absolute !important;
+              display: table !important;
+              border: 2px solid #fff !important;
+              border-top: 0 !important;
+              border-left: 0 !important;
+              transform: rotate(45deg) scale(0) translate(-50%, -50%) !important;
+              opacity: 0 !important;
+              transition: all 0.1s cubic-bezier(0.71, -0.46, 0.88, 0.6), opacity 0.1s !important;
+              content: ' ' !important;
+              top: 50% !important;
+              left: 22% !important;
+              width: 5.71428571px !important;
+              height: 9.14285714px !important;
+            }
+          }
+          
+          &:hover .ant-checkbox-inner {
+            border-color: #40a9ff !important;
+          }
+          
+          &.ant-checkbox-checked {
+            .ant-checkbox-inner {
+              background-color: #1890ff !important;
+              border-color: #1890ff !important;
+              
+              &::after {
+                transform: rotate(45deg) scale(1) translate(-50%, -50%) !important;
+                opacity: 1 !important;
+                transition: all 0.2s cubic-bezier(0.12, 0.4, 0.29, 1.46) 0.1s !important;
+              }
+            }
+            
+            &:hover .ant-checkbox-inner {
+              background-color: #40a9ff !important;
+              border-color: #40a9ff !important;
+            }
+          }
+          
+          &.ant-checkbox-focused .ant-checkbox-inner {
+            border-color: #40a9ff !important;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1) !important;
+          }
+        }
+        
+        > span:not(.ant-checkbox) {
+          flex: 1;
+          display: inline-block;
+          font-size: 14px;
+          font-weight: 400;
+          color: #262626;
+          line-height: 1.6;
+          letter-spacing: 0.01em;
+          user-select: none;
+          padding-top: 2px;
+        }
+      }
+    }
+    
+    // Form control styling for checkbox
+    .ant-form-item {
+      margin-bottom: 0;
+      
+      .ant-form-item-control {
+        .ant-form-item-explain-error {
+          margin-top: 8px;
+          font-size: 12px;
+          color: #ff4d4f;
+        }
+      }
+    }
+  }
 } 

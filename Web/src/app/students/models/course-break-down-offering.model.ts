@@ -13,6 +13,12 @@ export class CourseBreakDownOffering {
   public previousRAGrade: string;
   public currentGrade: string;
   public courseStatus: string;
+
+   // Equivalent course properties
+  public equivalentCourseId: string;
+  public equivalentCourseCode: string;
+  public equivalentCourseTitle: string;
+  public equivalentCreditHours: number;
 }
  export class CourseViewModel
  {

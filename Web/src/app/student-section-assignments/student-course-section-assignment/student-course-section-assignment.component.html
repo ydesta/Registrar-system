@@ -132,7 +132,7 @@
         </div>
       </nz-tab>
     </nz-tabset> -->
-        <nz-collapse class="custom-collapse" nzAccordion>
+        <!-- <nz-collapse class="custom-collapse" nzAccordion>
             <nz-collapse-panel *ngFor="let academicYear of studentProfile?.studentSectionYear"
                 [nzHeader]="academicYear.year.toString()" [nzActive]="false">
                 <div class="academic-year-container">
@@ -166,7 +166,54 @@
                     </div>
                 </div>
             </nz-collapse-panel>
-        </nz-collapse>
+        </nz-collapse> -->
+        <div *ngFor="let academicYear of studentProfile?.studentSectionYear">
 
+
+            <!-- <div class="academic-year-container"> -->
+            <div *ngFor="let academicTerm of academicYear?.studentSection" class="academic-term">
+                <nz-card nzType="inner" [nzTitle]="
+                'Semester: ' + academicTerm.academicTerm + ' - ' + academicYear.year.toString()
+                 " class="student-card">
+
+
+                    <!-- <div style="float: left">
+                        <h2> Semester:
+                            {{ academicTerm.academicTerm }} - {{
+                            academicYear.year.toString() }}
+                        </h2>
+                    </div> -->
+                    <nz-table [nzData]="academicTerm.courseSections" [nzSize]="'middle'" [nzShowPagination]="false"
+                        class="table-container">
+                        <thead>
+                            <tr>
+                                <th>Course Code</th>
+                                <th>Course Title</th>
+                                <th>Batch Code</th>
+                                <th>Section Type</th>
+                                <th>Section</th>
+                                <th>Instructor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let course of academicTerm.courseSections">
+                                <td>{{ course.courseCode }}</td>
+                                <td>{{ course.courseTitle }}</td>
+                                <td>{{ course.batchCode }}</td>
+                                <td>{{ course.sectionType }}</td>
+                                <td>{{ course.sectionName }}</td>
+                                <td>{{course.instructor}}</td>
+                            </tr>
+                        </tbody>
+
+                    </nz-table>
+                </nz-card>
+
+            </div>
+            <!-- </div> -->
+
+
+
+        </div>
     </ng-container>
 </div>

@@ -9,24 +9,56 @@
       <div class="header-actions">
         <div class="course-selection">
           <form [formGroup]="formAddedCourses" class="course-form">
-            <nz-form-item>
-              <nz-form-label [nzSpan]="24" nzRequired>Select Course</nz-form-label>
-              <nz-form-control [nzSpan]="24">
-                <nz-select 
-                  formControlName="courseId" 
-                  nzPlaceHolder="Choose a course to review registrations" 
-                  class="course-select" 
-                  nzShowSearch
-                  [nzDropdownMatchSelectWidth]="true" 
-                  [nzDropdownStyle]="{ minWidth: '350px' }">
-                  <nz-option 
-                    *ngFor="let course of listOfAddedCourses" 
-                    [nzValue]="course.id" 
-                    [nzLabel]="course.courseTitle">
-                  </nz-option>
-                </nz-select>
-              </nz-form-control>
-            </nz-form-item>
+            <div class="search-form-row">
+              <nz-form-item class="form-item-course">
+                <nz-form-label [nzSpan]="24" nzRequired>Select Course</nz-form-label>
+                <nz-form-control [nzSpan]="24">
+                  <nz-select 
+                    formControlName="courseId" 
+                    nzPlaceHolder="Choose a course to review registrations" 
+                    class="course-select" 
+                    nzShowSearch
+                    [nzDropdownMatchSelectWidth]="true" 
+                    [nzDropdownStyle]="{ minWidth: '350px' }">
+                    <nz-option 
+                      *ngFor="let course of listOfAddedCourses" 
+                      [nzValue]="course.id" 
+                      [nzLabel]="course.courseTitle">
+                    </nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item class="form-item-status">
+                <nz-form-label [nzSpan]="24">Approval Status</nz-form-label>
+                <nz-form-control [nzSpan]="24">
+                  <nz-select 
+                    formControlName="approvalStatus" 
+                    nzPlaceHolder="Select approval status" 
+                    class="status-select"
+                    [nzAllowClear]="true">
+                    <nz-option 
+                      *ngFor="let status of approvalStatusList" 
+                      [nzValue]="status.Id === null ? null : +status.Id" 
+                      [nzLabel]="status.Description">
+                    </nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item class="form-item-button">
+                <nz-form-control [nzSpan]="24">
+                  <button 
+                    nz-button 
+                    nzType="primary" 
+                    (click)="onSearch()"
+                    [nzLoading]="loading"
+                    [disabled]="!courseId.value"
+                    class="search-btn">
+                    <span nz-icon nzType="search" nzTheme="outline"></span>
+                    Search
+                  </button>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
           </form>
         </div>
         <div class="student-count" *ngIf="listOfStudents.length > 0">

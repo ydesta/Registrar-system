@@ -34,7 +34,7 @@ export class PaymentOptionsComponent implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
   successMessage = '';
-
+  semester: string;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -47,8 +47,10 @@ export class PaymentOptionsComponent implements OnInit, OnDestroy {
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
+        console.log("%%%     ", params);
         this.registrationId = params['registrationid'];
         this.batchCode = params['code'];
+        this.semester = params['type'];
         this.requestType = this.getRequestType(params['type']);
         if (this.registrationId) {
           this.loadRegistrationData();
@@ -232,7 +234,7 @@ export class PaymentOptionsComponent implements OnInit, OnDestroy {
     this.router.navigate(['/students/course-registration']);
   }
   redirectToBankPayment(): void {
-    const semester = this.getSemesterType();
+    const semester = this.semester;
     this.router.navigate(['/banks/add-student-payment'], {
       queryParams: {
         registrationid: this.registrationId,

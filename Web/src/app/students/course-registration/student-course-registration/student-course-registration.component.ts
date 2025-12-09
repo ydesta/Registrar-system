@@ -31,6 +31,7 @@ import { PrintContentService } from 'src/app/services/print-content.service';
 export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
+  private searchEquivalentSubject = new Subject<string>();
 
   gradeQueryForm: FormGroup;
   registrationForm: FormGroup;
@@ -69,6 +70,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   courseSectionTitle = '';
   courseAddTitle = '';
   courseAssessmentTitle = '';
+  courseEquivalentTitle = '';
   regId: string = null;
   listOfAddedCourses: CourseBreakDownOffering[] = [];
   checkedRegularCourses = false;
@@ -90,6 +92,20 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   private retryCount = 0;
   private readonly MAX_RETRIES = 3;
 
+  // Equivalent courses properties
+  listOfEquivalentCourses: CourseBreakDownOffering[] = [];
+  filteredEquivalentCourses: CourseBreakDownOffering[] = [];
+  searchEquivalentCourseText: string = '';
+  checkedEquivalentCourses = false;
+  indeterminateEquivalentCourses = false;
+  setOfCheckedEquivalentCourses = new Set<string>();
+  isLoadingEquivalentCourses = false;
+
+  // Sorting properties
+  regularCoursesSortOrder: 'asc' | 'desc' | null = null;
+  addCoursesSortOrder: 'asc' | 'desc' | null = null;
+  assessmentCoursesSortOrder: 'asc' | 'desc' | null = null;
+  equivalentCoursesSortOrder: 'asc' | 'desc' | null = null;
   constructor(
     private _customNotificationService: CustomNotificationService,
     private _studentService: StudentService,
@@ -105,6 +121,14 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       distinctUntilChanged()
     ).subscribe(searchText => {
       this.filterAddCourses();
+    });
+
+    this.searchEquivalentSubject.pipe(
+      takeUntil(this.destroy$),
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(searchText => {
+      this.filterEquivalentCourses();
     });
   }
 
@@ -143,6 +167,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     this.courseSectionTitle = `📘 Courses Available – ${termDescription} ${this.nextAcademicTerm.year}`;
     this.courseAddTitle = `📘 Courses Add Request – ${termDescription} ${this.nextAcademicTerm.year}`;
     this.courseAssessmentTitle = `📘 Courses Assessment – ${termDescription} ${this.nextAcademicTerm.year}`;
+    this.courseEquivalentTitle = `📘 Equivalent Courses – ${termDescription} ${this.nextAcademicTerm.year}`;
     this.seasonTitles = this.nextTerm;
   }
 
@@ -154,6 +179,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     this.isLoadingRegularCourses = true;
     this.isLoadingAddCourses = true;
     this.isLoadingAssessmentCourses = true;
+    this.isLoadingEquivalentCourses = true;
 
     const regularCourses$ = this._studentService.getStudentCourseOfferingId(
       this.applicantUserId,
@@ -185,10 +211,21 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       })
     );
 
+    // const equivalentCourses$ = this._studentService.getAddableCoursesWithEquivalentsAsync(
+    //   this.applicantUserId,
+    //   this.academicTermId,
+    //   this.nextAcademicTerm.id
+    // ).pipe(
+    //   catchError(error => {
+    //     return of([]);
+    //   })
+    // );
+
     forkJoin({
       regularCourses: regularCourses$,
       addableCourses: addableCourses$,
-      assessmentCourses: assessmentCourses$
+      assessmentCourses: assessmentCourses$,
+    //  equivalentCourses: equivalentCourses$
     }).pipe(
       takeUntil(this.destroy$),
       finalize(() => {
@@ -211,6 +248,12 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
 
   private handleCourseData(results: any): void {
     try {
+      // Reset sort orders when new data is loaded
+      this.regularCoursesSortOrder = null;
+      this.addCoursesSortOrder = null;
+      this.assessmentCoursesSortOrder = null;
+      this.equivalentCoursesSortOrder = null;
+
       if (results.regularCourses) {
         this.resultStatus = results.regularCourses.status;
         if (!results.regularCourses.courseTermOfferings?.length) {
@@ -236,11 +279,24 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
         this.listOfCourseAssessment = results.assessmentCourses;
         this.setOfCheckedAssessmentCourses = new Set<string>();
         this.listOfCourseAssessment.forEach(course => {
-          if (course.isRegistered) {
+          // Only select if registered AND not locked (disabled)
+          if (course.isRegistered && !this.isCourseDisabled(course)) {
             this.setOfCheckedAssessmentCourses.add(course.courseId);
           }
         });
         this.refreshAssessmentCheckedStatus();
+      }
+
+      if (results.equivalentCourses) {
+        this.listOfEquivalentCourses = results.equivalentCourses;
+        this.setOfCheckedEquivalentCourses = new Set<string>();
+        this.listOfEquivalentCourses.forEach(course => {
+          if (course.isRegistered) {
+            this.setOfCheckedEquivalentCourses.add(course.courseId);
+          }
+        });
+        this.filterEquivalentCourses(); // This will apply sorting
+        this.refreshEquivalentCourseCheckedStatus();
       }
 
       this.cdr.detectChanges();
@@ -253,11 +309,10 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
 
   private processAddableCourses(courses: any[]): void {
     this.listOfAddedCourses = courses;
-    this.filteredAddCourses = [...courses];
     this.setOfCheckedAddCourses = new Set<string>();
     this.coursePriorities.clear();
 
-    this.filteredAddCourses.forEach(course => {
+    courses.forEach(course => {
       if (course.isRegistered) {
         this.setOfCheckedAddCourses.add(course.courseId);
         if (typeof course.priority === 'number' && course.priority > 0) {
@@ -265,6 +320,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
         }
       }
     });
+    this.filterAddCourses(); // This will apply sorting
     this.refreshAddCourseCheckedStatus();
   }
 
@@ -279,11 +335,16 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     this.isLoadingRegularCourses = false;
     this.isLoadingAddCourses = false;
     this.isLoadingAssessmentCourses = false;
+    this.isLoadingEquivalentCourses = false;
     this.cdr.detectChanges();
   }
 
   onSearchTextChange(text: string): void {
     this.searchSubject.next(text);
+  }
+
+  onSearchEquivalentTextChange(text: string): void {
+    this.searchEquivalentSubject.next(text);
   }
 
   private initializeCheckedCourses(): void {
@@ -296,12 +357,17 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     this.refreshRegularCourseCheckedStatus();
   }
 
-  onItemChecked(id: string, checked: boolean, isAddCourse: boolean = false, isAssessment: boolean = false): void {
+  onItemChecked(id: string, checked: boolean, isAddCourse: boolean = false, isAssessment: boolean = false, isEquivalent: boolean = false): void {
+    console.log("onItemChecked called:", { id, checked, isAddCourse, isAssessment, isEquivalent });
     if (isAssessment) {
+      console.log("Calling handleAssessmentCourseSelection");
       this.handleAssessmentCourseSelection(id, checked);
     } else if (isAddCourse) {
       this.handleAddCourseSelection(id, checked);
-    } else {
+    } else if (isEquivalent) {
+      this.handleEquivalentCourseSelection(id, checked);
+    }
+    else {
       this.handleRegularCourseSelection(id, checked);
     }
     this.adjustSelectionsToStayWithinLimit();
@@ -309,31 +375,76 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
 
   private handleAssessmentCourseSelection(id: string, checked: boolean): void {
     const course = this.listOfCourseAssessment.find(c => c.courseId === id);
+    console.log("%%           ", course);
     if (!course) return;
 
-    if (course.isRegistered && !checked) {
-      this._customNotificationService.notification('warning', 'Warning', 'This course is already registered and cannot be unchecked.');
+    // Handle unchecking (trying to deselect)
+    if (!checked) {
+      console.log("Attempting to uncheck course:", {
+        courseId: course.courseId,
+        isRegistered: course.isRegistered,
+        isPaid: course.isPaid,
+        courseStatus: course.courseStatus
+      });
+
+      // Lock if ALL conditions are true: isRegistered=true, isPaid=true, status="Registered"
+      if (course.isRegistered === true && course.isPaid === true && course.courseStatus === 'Registered') {
+        this._customNotificationService.notification('warning', 'Warning', 'This course is already registered, paid, and confirmed. Cannot be unselected.');
+        return;
+      }
+
+      // Lock if course status is "Registered"
+      if (course.courseStatus === 'Registered') {
+        this._customNotificationService.notification('warning', 'Warning', 'This course status is "Registered" and cannot be unselected.');
+        return;
+      }
+
+      // Lock if course is paid
+      if (course.isPaid === true) {
+        this._customNotificationService.notification('warning', 'Warning', 'This course is already paid and cannot be unselected.');
+        return;
+      }
+
+      // If course is registered by student but not paid and status is not "Registered"
+      if (course.isRegistered === true && course.isPaid === false && course.courseStatus !== 'Registered') {
+        console.log("Allowing unselection - isRegistered=true, isPaid=false, status!='Registered'");
+        // Allow unselection
+        this.setOfCheckedAssessmentCourses.delete(id);
+        this.refreshAssessmentCheckedStatus();
+        return;
+      }
+
+      // If course is registered by student but not meeting unselection criteria
+      if (course.isRegistered === true) {
+        this._customNotificationService.notification('warning', 'Warning', 'This course is already registered and cannot be unselected.');
+        return;
+      }
+
+      // If course is not registered (just a normal uncheck)
+      this.setOfCheckedAssessmentCourses.delete(id);
+      this.refreshAssessmentCheckedStatus();
       return;
     }
 
-    if (course && this.isCourseDisabled(course)) {
-      this._customNotificationService.notification('warning', 'Warning',
-        course.currentGrade !== 'RA'
-          ? 'Only courses with RA grade can be selected for assessment'
-          : 'This course is not available in the add courses list');
-      return;
-    }
-
+    // Handle checking (trying to select)
     if (checked) {
+      // Check if course is disabled
+      if (this.isCourseDisabled(course)) {
+        this._customNotificationService.notification('warning', 'Warning',
+          course.currentGrade !== 'RA'
+            ? 'Only courses with RA grade can be selected for assessment'
+            : 'This course is not available in the add courses list');
+        return;
+      }
+
       const courseToAdd = this.listOfCourseAssessment.find(c => c.courseId === id);
       if (this.wouldExceedCreditLimit(courseToAdd)) {
         return;
       }
       this.setOfCheckedAssessmentCourses.add(id);
-    } else {
-      this.setOfCheckedAssessmentCourses.delete(id);
+      this.refreshAssessmentCheckedStatus();
+      return;
     }
-    this.refreshAssessmentCheckedStatus();
   }
 
   private handleAddCourseSelection(id: string, checked: boolean): void {
@@ -373,12 +484,23 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   }
 
   private wouldExceedCreditLimit(course: any): boolean {
+    // Skip credit hour validation if ignoreGradeLevelValidation is true
+    if (this.studentTermCourseReg?.ignoreGradeLevelValidation === true) {
+      return false;
+    }
+
+    // Skip validation if the course is already paid/registered
+    if (course && course.isPaid === true) {
+      return false;
+    }
+
+    // Check against total selected credit hours (both registered and new selected courses)
     if (course && (this.totalSelectedCreditHours + course.creditHours) > this.getMaxAllowedCreditHours()) {
       const cgpa = this.studentTermCourseReg?.cgpa || 0;
       let message = '';
 
       if (cgpa === 0) {
-        message = `Adding this course would exceed your maximum allowed credit hours of 22 for new students.`;
+        message = `Adding this course would exceed your maximum allowed credit hours of ${this.getMaxAllowedCreditHours()} for new students.`;
       } else {
         message = `Adding this course would exceed your maximum allowed credit hours of ${this.getMaxAllowedCreditHours()} based on your CGPA of ${this.studentTermCourseReg?.cgpa.toFixed(2)}.`;
       }
@@ -402,29 +524,81 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       ?.filter(course => this.setOfCheckedAddCourses.has(course.courseId))
       ?.reduce((total, course) => total + course.creditHours, 0) || 0;
 
-    return regular + assessment + add;
+    const equivalent = this.listOfEquivalentCourses
+      ?.filter(course => this.setOfCheckedEquivalentCourses.has(course.courseId))
+      ?.reduce((total, course) => total + course.creditHours, 0) || 0;
+
+    return regular + assessment + add + equivalent;
+  }
+
+  // Calculate only unpaid courses for payment purposes
+  get totalNewSelectedCreditHours(): number {
+    const regular = this.studentTermCourseReg?.courseTermOfferings
+      ?.filter(course => this.setOfCheckedId.has(course.courseId) && course.isPaid === false)
+      ?.reduce((total, course) => total + course.creditHours, 0) || 0;
+
+    const assessment = this.listOfCourseAssessment
+      ?.filter(course => this.setOfCheckedAssessmentCourses.has(course.courseId) && course.isPaid === false)
+      ?.reduce((total, course) => total + course.creditHours, 0) || 0;
+
+    const add = this.filteredAddCourses
+      ?.filter(course => this.setOfCheckedAddCourses.has(course.courseId) && course.isPaid === false)
+      ?.reduce((total, course) => total + course.creditHours, 0) || 0;
+
+    const equivalent = this.listOfEquivalentCourses
+      ?.filter(course => this.setOfCheckedEquivalentCourses.has(course.courseId) && course.isPaid === false)
+      ?.reduce((total, course) => total + course.creditHours, 0) || 0;
+
+    return regular + assessment + add + equivalent;
   }
 
   isCourseDisabled(course: any): boolean {
-    if (course.isRegistered) {
+    // Check if the course exists in listOfAddedCourses or studentTermCourseReg?.courseTermOfferings
+    const isInAddedCourses = this.listOfAddedCourses?.some(
+      addedCourse => addedCourse.courseId === course.courseId
+    );
+    console.log("34567      ", course);
+    const isInCourseOfferings = this.studentTermCourseReg?.courseTermOfferings?.some(
+      offeringCourse => offeringCourse.courseId === course.courseId
+    );
+    console.log("&&   ##      ", isInCourseOfferings, isInAddedCourses);
+    // If course exists in either list, it should be unlock (not disabled)
+    const existsInLists = isInAddedCourses || isInCourseOfferings;
+
+    // Always lock if course is paid (regardless of whether it exists in lists)
+    if (course.isPaid === true) {
+      return true;
+    }
+
+    // Always lock if course is registered AND paid (regardless of whether it exists in lists)
+    if (course.isRegistered === true && course.isPaid === true) {
+      return true;
+    }
+
+    // If course exists in either list, unlock it (even if courseStatus is 'Registered' or currentGrade is not 'RA')
+    // This allows courses from studentTermCourseReg?.courseTermOfferings to be selectable in assessment list
+    if (existsInLists) {
       return false;
     }
 
-    // Lock if Current Grade is not empty and not 'RA'
+    // If course does NOT exist in the lists, apply normal lock conditions
+    // Lock if course status is 'Registered' - this means it's already been registered in the system
+    if (course.courseStatus === 'Registered') {
+      return true;
+    }
+
+    // Lock if Current Grade is not empty and not 'RA' (only if course is not in the lists)
     if (course.currentGrade && course.currentGrade !== 'RA') {
       return true;
     }
 
     // Lock if the course is not available in both addableCourse and regular courses
-    const isInAddedCourses = this.listOfAddedCourses?.some(
-      addedCourse => addedCourse.courseId === course.courseId
-    );
+    return true;
+  }
 
-    const isInCourseOfferings = this.studentTermCourseReg?.courseTermOfferings?.some(
-      offeringCourse => offeringCourse.courseId === course.courseId
-    );
-
-    return !(isInAddedCourses || isInCourseOfferings);
+  isAssessmentCourseCheckboxDisabled(course: any): boolean {
+    // Use the same logic as isCourseDisabled for assessment courses
+    return this.isCourseDisabled(course);
   }
 
   refreshAssessmentCheckedStatus(): void {
@@ -454,11 +628,13 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
 
   getListOfCourseAssessment(applicantUserId: string, term: number, id: number): void {
     this.isLoadingAssessmentCourses = true;
+    this.assessmentCoursesSortOrder = null; // Reset sort order when new data is loaded
     this._studentService
       .getListOfRetakeTermCourseOffering(applicantUserId, term, id)
       .subscribe({
         next: (res) => {
           this.listOfCourseAssessment = res;
+          this.cdr.detectChanges();
         },
         error: (error) => {
           this._customNotificationService.notification('error', 'Error', 'Failed to load assessment courses');
@@ -484,10 +660,9 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
         next: (res) => {
           if (res && Array.isArray(res)) {
             this.listOfAddedCourses = res;
-            this.filteredAddCourses = [...res];
             this.setOfCheckedAddCourses = new Set<string>();
             this.coursePriorities.clear();
-            this.filteredAddCourses.forEach(course => {
+            res.forEach(course => {
               if (course.isRegistered) {
                 this.setOfCheckedAddCourses.add(course.courseId);
                 if (typeof course.priority === 'number' && course.priority > 0) {
@@ -495,6 +670,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
                 }
               }
             });
+            this.filterAddCourses(); // This will apply sorting
             this.refreshAddCourseCheckedStatus();
           } else {
             this.listOfAddedCourses = [];
@@ -572,7 +748,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       return 0;
     }
     return this.studentTermCourseReg.courseTermOfferings
-      .filter(course => this.setOfCheckedId.has(course.courseId))
+      .filter(course => this.setOfCheckedId.has(course.courseId) && course.isPaid === false)
       .reduce((total, data) => total + data.creditHours, 0);
   }
 
@@ -581,7 +757,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       return 0;
     }
     return this.studentTermCourseReg.courseTermOfferings
-      .filter(course => this.setOfCheckedId.has(course.courseId))
+      .filter(course => this.setOfCheckedId.has(course.courseId) && course.isPaid === false)
       .reduce((total, data) => total + data.totalAmount, 0);
   }
 
@@ -614,14 +790,92 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     this.indeterminateRegularCourses = checkedCount > 0 && checkedCount < totalCourses;
   }
 
+  getTotalAvailableRegularCourseCreditHours(): number {
+    if (!this.studentTermCourseReg?.courseTermOfferings) {
+      return 0;
+    }
+
+    // Calculate total credit hours including registered courses
+    // This includes: Not Taken, Dropped, Registered, and Failed courses (F, RC)
+    const coursesToInclude = this.studentTermCourseReg.courseTermOfferings
+      .filter(course => this.shouldIncludeCourseInCreditCalculation(course));
+
+    const totalCreditHours = coursesToInclude.reduce((total, course) => total + course.creditHours, 0);
+
+    // Debug logging to help understand the calculation
+    console.log('Available courses for credit calculation:', {
+      totalCourses: this.studentTermCourseReg.courseTermOfferings.length,
+      includedCourses: coursesToInclude.length,
+      totalCreditHours: totalCreditHours,
+      courseDetails: coursesToInclude.map(c => ({
+        courseCode: c.courseCode,
+        creditHours: c.creditHours,
+        status: c.courseStatus,
+        grade: c.currentGrade,
+        isRegistered: c.isRegistered
+      }))
+    });
+
+    return totalCreditHours;
+  }
+
+  private shouldIncludeCourseInCreditCalculation(course: any): boolean {
+    // Include courses that should count toward the total credit hours
+    // This is different from isRegularCourseDisabled which determines if course is selectable
+
+    if (course.currentGrade === 'RA') {
+      return false; // RA courses don't count toward credit hours
+    }
+
+    const passingGrades = ['A+', 'A', 'B', 'B+', 'C', 'D'];
+
+    switch (course.courseStatus) {
+      case 'Not Taken':
+        return true;
+
+      case 'Dropped':
+        return true;
+
+      case 'Registered':
+        return true; // Registered courses count toward total credit hours
+
+      case 'Exempted':
+        return false; // Exempted courses don't count
+
+      case 'Inactive':
+        return false; // Inactive courses don't count
+
+      case 'Has Prerequisite':
+        return false; // Prerequisite courses don't count
+
+      case 'Taken':
+        if (passingGrades.includes(course.currentGrade) || course.currentGrade === '') {
+          return false; // Already passed courses don't count
+        } else if (course.currentGrade === 'F' || course.currentGrade === 'RC') {
+          return true; // Failed courses can be retaken
+        } else {
+          return false;
+        }
+
+      default:
+        return false;
+    }
+  }
+
   getMaxAllowedCreditHours(): number {
-    // If ignoreGradeLevelValidation is true, return a very high number to effectively ignore the limit
+    // If ignoreGradeLevelValidation is true, return total credit hours of all available regular courses
     if (this.studentTermCourseReg?.ignoreGradeLevelValidation === true) {
-      return 30; // High number to effectively remove the credit hour limit
+      return this.getTotalAvailableRegularCourseCreditHours();
     }
 
     // Apply normal CGPA-based credit hour limits
     const cgpa = this.studentTermCourseReg?.cgpa || 0;
+
+    // Handle new students with CGPA of 0.00 (no courses taken yet)
+    if (cgpa === 0) {
+      return this.getTotalAvailableRegularCourseCreditHours();
+    }
+
     if (cgpa >= 2.0) {
       return 22;
     }
@@ -637,18 +891,29 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     }
   }
 
-  onAllChecked(checked: boolean, type: 'regular' | 'add' | 'assessment'): void {
+  onAllChecked(checked: boolean, type: 'regular' | 'add' | 'assessment' | 'equivalent'): void {
     if (type === 'regular') {
       if (checked) {
-        // Only calculate credit hours for non-disabled courses
-        const enabledCourses = this.studentTermCourseReg?.courseTermOfferings?.filter(course => !this.isRegularCourseDisabled(course)) || [];
-        const totalCreditHours = enabledCourses.reduce((total, course) => total + course.creditHours, 0);
-        const maxAllowed = this.getMaxAllowedCreditHours();
+        // Skip credit hour validation if ignoreGradeLevelValidation is true
+        if (this.studentTermCourseReg?.ignoreGradeLevelValidation !== true) {
+          // Calculate credit hours for all courses (both registered and new selected)
+          const enabledCourses = this.studentTermCourseReg?.courseTermOfferings?.filter(course => !this.isRegularCourseDisabled(course)) || [];
+          const totalCreditHours = enabledCourses.reduce((total, course) => total + course.creditHours, 0);
+          const maxAllowed = this.getMaxAllowedCreditHours();
 
-        if (totalCreditHours > maxAllowed) {
-          this._customNotificationService.notification('warning', 'Credit Hour Warning',
-            `Selecting all available courses would exceed your maximum allowed credit hours of ${maxAllowed} based on your CGPA of ${this.studentTermCourseReg?.cgpa.toFixed(2)}.`);
-          return;
+          if (totalCreditHours > maxAllowed) {
+            const cgpa = this.studentTermCourseReg?.cgpa || 0;
+            let message = '';
+
+            if (cgpa === 0) {
+              message = `Selecting all available courses would exceed your maximum allowed credit hours of ${maxAllowed} for new students.`;
+            } else {
+              message = `Selecting all available courses would exceed your maximum allowed credit hours of ${maxAllowed} based on your CGPA of ${this.studentTermCourseReg?.cgpa.toFixed(2)}.`;
+            }
+
+            this._customNotificationService.notification('warning', 'Credit Hour Warning', message);
+            return;
+          }
         }
       }
 
@@ -686,15 +951,26 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       this.indeterminateAddCourses = false;
     } else if (type === 'assessment') {
       if (checked) {
-        // Only calculate credit hours for non-disabled courses
-        const enabledCourses = this.listOfCourseAssessment?.filter(course => !this.isCourseDisabled(course)) || [];
-        const totalCreditHours = enabledCourses.reduce((total, course) => total + course.creditHours, 0);
-        const maxAllowed = this.getMaxAllowedCreditHours();
+        // Skip credit hour validation if ignoreGradeLevelValidation is true
+        if (this.studentTermCourseReg?.ignoreGradeLevelValidation !== true) {
+          // Calculate credit hours for all courses (both registered and new selected)
+          const enabledCourses = this.listOfCourseAssessment?.filter(course => !this.isCourseDisabled(course)) || [];
+          const totalCreditHours = enabledCourses.reduce((total, course) => total + course.creditHours, 0);
+          const maxAllowed = this.getMaxAllowedCreditHours();
 
-        if (totalCreditHours > maxAllowed) {
-          this._customNotificationService.notification('warning', 'Credit Hour Warning',
-            `Selecting all available assessment courses would exceed your maximum allowed credit hours of ${maxAllowed} based on your CGPA of ${this.studentTermCourseReg?.cgpa.toFixed(2)}.`);
-          return;
+          if (totalCreditHours > maxAllowed) {
+            const cgpa = this.studentTermCourseReg?.cgpa || 0;
+            let message = '';
+
+            if (cgpa === 0) {
+              message = `Selecting all available assessment courses would exceed your maximum allowed credit hours of ${maxAllowed} for new students.`;
+            } else {
+              message = `Selecting all available assessment courses would exceed your maximum allowed credit hours of ${maxAllowed} based on your CGPA of ${this.studentTermCourseReg?.cgpa.toFixed(2)}.`;
+            }
+
+            this._customNotificationService.notification('warning', 'Credit Hour Warning', message);
+            return;
+          }
         }
       }
 
@@ -711,12 +987,55 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       });
       this.checkedAssessmentCourses = checked;
       this.indeterminateAssessmentCourses = false;
+    } else if (type === 'equivalent') {
+      if (checked) {
+        // Skip credit hour validation if ignoreGradeLevelValidation is true
+        if (this.studentTermCourseReg?.ignoreGradeLevelValidation !== true) {
+          // Calculate credit hours for all courses (both registered and new selected)
+          const enabledCourses = this.listOfEquivalentCourses?.filter(course => !this.isEquivalentCourseDisabled(course)) || [];
+          const totalCreditHours = enabledCourses.reduce((total, course) => total + course.creditHours, 0);
+          const maxAllowed = this.getMaxAllowedCreditHours();
+
+          if (totalCreditHours > maxAllowed) {
+            const cgpa = this.studentTermCourseReg?.cgpa || 0;
+            let message = '';
+
+            if (cgpa === 0) {
+              message = `Selecting all available equivalent courses would exceed your maximum allowed credit hours of ${maxAllowed} for new students.`;
+            } else {
+              message = `Selecting all available equivalent courses would exceed your maximum allowed credit hours of ${maxAllowed} based on your CGPA of ${this.studentTermCourseReg?.cgpa.toFixed(2)}.`;
+            }
+
+            this._customNotificationService.notification('warning', 'Credit Hour Warning', message);
+            return;
+          }
+        }
+      }
+
+      // Only select/deselect courses that are not disabled
+      this.listOfEquivalentCourses.forEach(course => {
+        if (checked) {
+          // Only add if the course is not disabled
+          if (!this.isEquivalentCourseDisabled(course)) {
+            this.setOfCheckedEquivalentCourses.add(course.courseId);
+          }
+        } else {
+          this.setOfCheckedEquivalentCourses.delete(course.courseId);
+        }
+      });
+      this.checkedEquivalentCourses = checked;
+      this.indeterminateEquivalentCourses = false;
     }
 
     this.adjustSelectionsToStayWithinLimit();
   }
 
   private adjustSelectionsToStayWithinLimit(): void {
+    // Skip adjustment if ignoreGradeLevelValidation is true
+    if (this.studentTermCourseReg?.ignoreGradeLevelValidation === true) {
+      return;
+    }
+
     const maxAllowed = this.getMaxAllowedCreditHours();
     let currentTotal = this.totalSelectedCreditHours;
 
@@ -739,16 +1058,30 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       .filter(course => course !== undefined)
       .sort((a, b) => b.creditHours - a.creditHours);
 
+    const equivalentCourses = Array.from(this.setOfCheckedEquivalentCourses)
+      .map(id => this.listOfEquivalentCourses.find(c => c.courseId === id))
+      .filter(course => course !== undefined)
+      .sort((a, b) => b.creditHours - a.creditHours);
+
     // Combine all courses and sort by credit hours
-    const allCourses = [...regularCourses, ...addCourses, ...assessmentCourses]
+    const allCourses = [...regularCourses, ...addCourses, ...assessmentCourses, ...equivalentCourses]
       .sort((a, b) => b.creditHours - a.creditHours);
 
     // Keep track of which courses to keep
     const coursesToKeep = new Set<string>();
     let runningTotal = 0;
 
-    // Try to keep courses with higher credit hours first
-    for (const course of allCourses) {
+    // First, keep all paid courses (they should not be adjusted)
+    allCourses.forEach(course => {
+      if (course.isPaid === true) {
+        coursesToKeep.add(course.courseId);
+        runningTotal += course.creditHours;
+      }
+    });
+
+    // Then, try to keep unpaid courses with higher credit hours first
+    const unpaidCourses = allCourses.filter(course => course.isPaid === false);
+    for (const course of unpaidCourses) {
       if (runningTotal + course.creditHours <= maxAllowed) {
         coursesToKeep.add(course.courseId);
         runningTotal += course.creditHours;
@@ -765,23 +1098,43 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     this.setOfCheckedAssessmentCourses = new Set(
       Array.from(this.setOfCheckedAssessmentCourses).filter(id => coursesToKeep.has(id))
     );
+    this.setOfCheckedEquivalentCourses = new Set(
+      Array.from(this.setOfCheckedEquivalentCourses).filter(id => coursesToKeep.has(id))
+    );
 
     // Refresh all check states
     this.refreshRegularCourseCheckedStatus();
     this.refreshAddCourseCheckedStatus();
     this.refreshAssessmentCheckedStatus();
+    this.refreshEquivalentCourseCheckedStatus();
 
     if (currentTotal > maxAllowed) {
-      this._customNotificationService.notification('warning', 'Credit Hour Warning',
-        `Some courses were automatically unselected to stay within your maximum allowed credit hours of ${maxAllowed} based on your CGPA of ${this.studentTermCourseReg?.cgpa.toFixed(2)}.`);
+      const cgpa = this.studentTermCourseReg?.cgpa || 0;
+      let message = '';
+
+      if (cgpa === 0) {
+        message = `Some courses were automatically unselected to stay within your maximum allowed credit hours of ${maxAllowed} for new students. This includes both registered and newly selected courses.`;
+      } else {
+        message = `Some courses were automatically unselected to stay within your maximum allowed credit hours of ${maxAllowed} based on your CGPA of ${this.studentTermCourseReg?.cgpa.toFixed(2)}. This includes both registered and newly selected courses.`;
+      }
+
+      this._customNotificationService.notification('warning', 'Credit Hour Warning', message);
     }
   }
 
   private checkCreditHours(): void {
     // Only check credit hour limit if ignoreGradeLevelValidation is false
     if (!this.studentTermCourseReg?.ignoreGradeLevelValidation && this.totalSelectedCreditHours > this.getMaxAllowedCreditHours()) {
-      this._customNotificationService.notification('warning', 'Credit Hour Warning',
-        `You have selected ${this.totalSelectedCreditHours} credit hours, which exceeds the recommended limit of ${this.getMaxAllowedCreditHours()} credit hours.`);
+      const cgpa = this.studentTermCourseReg?.cgpa || 0;
+      let message = '';
+
+      if (cgpa === 0) {
+        message = `You have selected ${this.totalSelectedCreditHours} credit hours, which exceeds the recommended limit of ${this.getMaxAllowedCreditHours()} credit hours for new students. This includes both registered and newly selected courses.`;
+      } else {
+        message = `You have selected ${this.totalSelectedCreditHours} credit hours, which exceeds the recommended limit of ${this.getMaxAllowedCreditHours()} credit hours. This includes both registered and newly selected courses.`;
+      }
+
+      this._customNotificationService.notification('warning', 'Credit Hour Warning', message);
     }
   }
 
@@ -812,7 +1165,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       return 0;
     }
     return this.filteredAddCourses
-      .filter(course => this.setOfCheckedAddCourses.has(course.courseId))
+      .filter(course => this.setOfCheckedAddCourses.has(course.courseId) && course.isPaid === false)
       .reduce((total, course) => total + course.creditHours, 0);
   }
   getTotalAddedAmount(): number {
@@ -820,7 +1173,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       return 0;
     }
     return this.filteredAddCourses
-      .filter(course => this.setOfCheckedAddCourses.has(course.courseId))
+      .filter(course => this.setOfCheckedAddCourses.has(course.courseId) && course.isPaid === false)
       .reduce((total, course) => total + course.totalAmount, 0);
   }
   onCurrentPageDataChange(listOfCurrentPageData: readonly any[]): void {
@@ -843,8 +1196,9 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     const hasRegularCourses = this.setOfCheckedId.size > 0;
     const hasAddCourses = this.setOfCheckedAddCourses.size > 0;
     const hasAssessmentCourses = this.setOfCheckedAssessmentCourses.size > 0;
+    const hasEquivalentCourses = this.setOfCheckedEquivalentCourses.size > 0;
 
-    if (!hasRegularCourses && !hasAddCourses && !hasAssessmentCourses) {
+    if (!hasRegularCourses && !hasAddCourses && !hasAssessmentCourses && !hasEquivalentCourses) {
       this._customNotificationService.notification('warning', 'Warning', 'Please select at least one course for registration.');
       return;
     }
@@ -878,7 +1232,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
           }
           return course;
         })
-        .filter(course => course && course.isPaid === false)
+        .filter(course => course &&  course.courseStatus != 'Registered')
         .map(course => ({
           courseId: course.courseId,
           registrationStatus: RegistrationStatus.Regular,
@@ -903,6 +1257,23 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
           };
         });
 
+
+      const equivalentCourses: SelectedCourses[] = Array.from(this.setOfCheckedEquivalentCourses)
+        .filter(courseId => {
+          const course = this.listOfEquivalentCourses.find(c => c.courseId === courseId);
+          return course && course.courseStatus !== 'Registered';
+        })
+        .map(courseId => {
+          const course = this.listOfEquivalentCourses.find(c => c.courseId === courseId);
+          return {
+            courseId: course?.equivalentCourseId || courseId, // Use EquivalentCourseId instead of original CourseId
+            registrationStatus: RegistrationStatus.Equivalent, // Use Equivalent status
+            priority: 0,
+            totalAmount: course ? course.totalAmount : 0,
+            batchCode: course.batchCode || null
+          }
+        });
+
       // Validate add course priorities
       if (addCourses.length > 0) {
         const hasUnassignedPriority = addCourses.some(course => course.priority === 0);
@@ -921,7 +1292,8 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       studentCourseOffering.selectedCourses = [
         ...regularCourses,
         ...addCourses,
-        ...assessmentCourses
+        ...assessmentCourses,
+        ...equivalentCourses
       ];
 
       // Validate the offering object
@@ -931,8 +1303,8 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Check if there are courses that require payment (regular courses or assessment courses)
-      const hasPaymentRequiredCourses = regularCourses.length > 0 || assessmentCourses.length > 0;
+      // Check if there are courses that require payment (regular courses, assessment courses, or equivalent courses)
+      const hasPaymentRequiredCourses = regularCourses.length > 0 || assessmentCourses.length > 0 || equivalentCourses.length > 0;
 
       // Handle update or create with proper subscription management
       if (this.regId != null) {
@@ -950,7 +1322,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
                 this.handleNotification('success', 'Success', res.studentId);
                 this.isSubmitting = false;
                 if (hasPaymentRequiredCourses) {
-                  this._route.navigateByUrl(`banks/add-student-payment?registrationid=${this.regId}&code=${this.batchCode}&type=${semester}`);
+                  this._route.navigateByUrl(`banks/registration/payment-options?registrationid=${this.regId}&code=${this.batchCode}&type=${semester}`);
                   // this._route.navigateByUrl(`banks/registration/payment-options?registrationid=${this.regId}&code=${this.batchCode}&type=${semester}`);
                 } else {
                   this._route.navigateByUrl('students/manage-student-course-registration');
@@ -1087,16 +1459,132 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   }
 
   filterAddCourses(): void {
+    let filtered: CourseBreakDownOffering[];
     if (!this.searchAddCourseText) {
-      this.filteredAddCourses = [...this.listOfAddedCourses];
-      return;
+      filtered = [...this.listOfAddedCourses];
+    } else {
+      const searchText = this.searchAddCourseText.toLowerCase();
+      filtered = this.listOfAddedCourses.filter(course =>
+        course.courseCode.toLowerCase().includes(searchText) ||
+        course.courseTitle.toLowerCase().includes(searchText)
+      );
+    }
+    this.filteredAddCourses = this.applySorting(filtered, 'add');
+  }
+
+  filterEquivalentCourses(): void {
+    let filtered: CourseBreakDownOffering[];
+    if (!this.searchEquivalentCourseText) {
+      filtered = [...this.listOfEquivalentCourses];
+    } else {
+      const searchText = this.searchEquivalentCourseText.toLowerCase();
+      filtered = this.listOfEquivalentCourses.filter(course =>
+        course.courseCode.toLowerCase().includes(searchText) ||
+        course.courseTitle.toLowerCase().includes(searchText) ||
+        course.equivalentCourseCode.toLowerCase().includes(searchText) ||
+        course.equivalentCourseTitle.toLowerCase().includes(searchText)
+      );
+    }
+    this.filteredEquivalentCourses = this.applySorting(filtered, 'equivalent');
+  }
+
+  // Sorting methods
+  sortByCourseTitle(tableType: 'regular' | 'add' | 'assessment' | 'equivalent'): void {
+    switch (tableType) {
+      case 'regular':
+        if (this.regularCoursesSortOrder === null || this.regularCoursesSortOrder === 'desc') {
+          this.regularCoursesSortOrder = 'asc';
+        } else {
+          this.regularCoursesSortOrder = 'desc';
+        }
+        if (this.studentTermCourseReg?.courseTermOfferings) {
+          this.studentTermCourseReg.courseTermOfferings = this.applySorting(
+            [...this.studentTermCourseReg.courseTermOfferings],
+            'regular'
+          );
+        }
+        break;
+      case 'add':
+        if (this.addCoursesSortOrder === null || this.addCoursesSortOrder === 'desc') {
+          this.addCoursesSortOrder = 'asc';
+        } else {
+          this.addCoursesSortOrder = 'desc';
+        }
+        this.filteredAddCourses = this.applySorting([...this.filteredAddCourses], 'add');
+        break;
+      case 'assessment':
+        if (this.assessmentCoursesSortOrder === null || this.assessmentCoursesSortOrder === 'desc') {
+          this.assessmentCoursesSortOrder = 'asc';
+        } else {
+          this.assessmentCoursesSortOrder = 'desc';
+        }
+        this.listOfCourseAssessment = this.applySorting([...this.listOfCourseAssessment], 'assessment');
+        break;
+      case 'equivalent':
+        if (this.equivalentCoursesSortOrder === null || this.equivalentCoursesSortOrder === 'desc') {
+          this.equivalentCoursesSortOrder = 'asc';
+        } else {
+          this.equivalentCoursesSortOrder = 'desc';
+        }
+        this.filteredEquivalentCourses = this.applySorting([...this.filteredEquivalentCourses], 'equivalent');
+        break;
+    }
+    this.cdr.detectChanges();
+  }
+
+  getSortIcon(tableType: 'regular' | 'add' | 'assessment' | 'equivalent'): string {
+    let sortOrder: 'asc' | 'desc' | null;
+    switch (tableType) {
+      case 'regular':
+        sortOrder = this.regularCoursesSortOrder;
+        break;
+      case 'add':
+        sortOrder = this.addCoursesSortOrder;
+        break;
+      case 'assessment':
+        sortOrder = this.assessmentCoursesSortOrder;
+        break;
+      case 'equivalent':
+        sortOrder = this.equivalentCoursesSortOrder;
+        break;
+    }
+    if (sortOrder === null) return 'sort';
+    return sortOrder === 'asc' ? 'sort-ascending' : 'sort-descending';
+  }
+
+  private applySorting(data: any[], tableType: 'regular' | 'add' | 'assessment' | 'equivalent'): any[] {
+    let sortOrder: 'asc' | 'desc' | null;
+    switch (tableType) {
+      case 'regular':
+        sortOrder = this.regularCoursesSortOrder;
+        break;
+      case 'add':
+        sortOrder = this.addCoursesSortOrder;
+        break;
+      case 'assessment':
+        sortOrder = this.assessmentCoursesSortOrder;
+        break;
+      case 'equivalent':
+        sortOrder = this.equivalentCoursesSortOrder;
+        break;
     }
 
-    const searchText = this.searchAddCourseText.toLowerCase();
-    this.filteredAddCourses = this.listOfAddedCourses.filter(course =>
-      course.courseCode.toLowerCase().includes(searchText) ||
-      course.courseTitle.toLowerCase().includes(searchText)
-    );
+    if (sortOrder === null) {
+      return data;
+    }
+
+    const sorted = [...data].sort((a, b) => {
+      const titleA = (a.courseTitle || '').toLowerCase();
+      const titleB = (b.courseTitle || '').toLowerCase();
+      
+      if (sortOrder === 'asc') {
+        return titleA.localeCompare(titleB);
+      } else {
+        return titleB.localeCompare(titleA);
+      }
+    });
+
+    return sorted;
   }
 
   get tableScrollHeight(): string {
@@ -1111,6 +1599,10 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   }
 
   isRegularCourseDisabled(course: any): boolean {
+    // Lock if course is already registered or paid
+    if (course.courseStatus === 'Registered' || course.isPaid === true) {
+      return true;
+    }
 
     if (course.currentGrade === 'RA') {
       return true;
@@ -1124,6 +1616,9 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
 
       case 'Dropped':
         return false;
+
+      case 'Registered':
+        return true; // Registered courses are locked (already registered)
 
       case 'Exempted':
         return true;
@@ -1148,9 +1643,67 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     }
   }
 
-  getCourseLockTooltipMessage(course: any, context: 'regular' | 'add' = 'regular'): string {
-    // Handle RA grade first
-    if (course.currentGrade === 'RA') {
+  isEquivalentCourseDisabled(course: any): boolean {
+    // Lock if course is already registered or paid
+    if (course.courseStatus === 'Registered' || course.isPaid === true) {
+      return true;
+    }
+
+    // For equivalent courses, RA and RC grades should be unlocked (selectable)
+    // This is different from regular courses where RA grades are locked
+
+    // First check: RA and RC grades should always be unlocked for equivalent courses
+    if (course.currentGrade === 'RA' || course.currentGrade === 'RC') {
+      return false; // Unlocked
+    }
+
+    const passingGrades = ['A+', 'A', 'B', 'B+', 'C', 'D'];
+
+    switch (course.courseStatus) {
+      case 'Not Taken':
+        return false;
+
+      case 'Dropped':
+        return false;
+
+      case 'Registered':
+        return true; // Registered courses are locked (already registered)
+
+      case 'Exempted':
+        return true;
+
+      case 'Inactive':
+        return true;
+
+      case 'Has Prerequisite':
+        return true;
+
+      case 'Taken':
+      case 'Taken (Equivalent)':
+        if (passingGrades.includes(course.currentGrade) || course.currentGrade === '') {
+          return true;
+        } else if (course.currentGrade === 'F') {
+          return false;
+        } else {
+          return true;
+        }
+
+      default:
+        return true;
+    }
+  }
+
+  getCourseLockTooltipMessage(course: any, context: 'regular' | 'add' | 'equivalent' = 'regular'): string {
+    // Handle registered courses first
+    if (course.courseStatus === 'Registered') {
+      return 'Course is already registered and cannot be modified';
+    }
+
+    // Handle RA and RC grades
+    if (course.currentGrade === 'RA' || course.currentGrade === 'RC') {
+      if (context === 'equivalent') {
+        return 'Course is available for equivalent selection';
+      }
       return context === 'add'
         ? 'Course is not available for add request'
         : 'Course is not available for regular registration';
@@ -1179,6 +1732,9 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
 
       case 'Dropped':
         return 'Course was previously dropped and is now available for selection';
+
+      case 'Registered':
+        return 'Course is already registered and cannot be modified';
 
       case 'Not Taken':
         return 'Course is available for selection';
@@ -1215,7 +1771,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       return 0;
     }
     return this.listOfCourseAssessment
-      .filter(course => this.setOfCheckedAssessmentCourses.has(course.courseId))
+      .filter(course => this.setOfCheckedAssessmentCourses.has(course.courseId) && course.isPaid === false)
       .reduce((total, course) => total + course.creditHours, 0);
   }
   getTotalAssessmentAmount(): number {
@@ -1223,10 +1779,76 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       return 0;
     }
     return this.listOfCourseAssessment
-      .filter(course => this.setOfCheckedAssessmentCourses.has(course.courseId))
+      .filter(course => this.setOfCheckedAssessmentCourses.has(course.courseId) && course.isPaid === false)
       .reduce((total, course) => total + course.totalAmount, 0);
   }
 
+  getTotalEquivalentCreditHours(): number {
+    if (!this.filteredEquivalentCourses) {
+      return 0;
+    }
+    return this.filteredEquivalentCourses
+      .filter(course => this.setOfCheckedEquivalentCourses.has(course.courseId) && course.isPaid === false)
+      .reduce((total, course) => total + course.creditHours, 0);
+  }
+
+  getTotalEquivalentAmount(): number {
+    if (!this.filteredEquivalentCourses) {
+      return 0;
+    }
+    return this.filteredEquivalentCourses
+      .filter(course => this.setOfCheckedEquivalentCourses.has(course.courseId) && course.isPaid === false)
+      .reduce((total, course) => total + course.totalAmount, 0);
+  }
+  private handleEquivalentCourseSelection(id: string, checked: boolean): void {
+    if (checked) {
+      const courseToAdd = this.listOfEquivalentCourses.find(c => c.courseId === id);
+      if (this.wouldExceedCreditLimit(courseToAdd)) {
+        return;
+      }
+      this.setOfCheckedEquivalentCourses.add(id);
+    } else {
+      this.setOfCheckedEquivalentCourses.delete(id);
+    }
+    this.refreshEquivalentCourseCheckedStatus();
+  }
+  refreshEquivalentCourseCheckedStatus(): void {
+    if (!this.filteredEquivalentCourses) {
+      this.checkedEquivalentCourses = false;
+      this.indeterminateEquivalentCourses = false;
+      return;
+    }
+    const listOfEnabledData = this.filteredEquivalentCourses;
+    this.checkedEquivalentCourses = listOfEnabledData.every(course => this.setOfCheckedEquivalentCourses.has(course.courseId));
+    this.indeterminateEquivalentCourses = listOfEnabledData.some(course => this.setOfCheckedEquivalentCourses.has(course.courseId)) && !this.checkedEquivalentCourses;
+  }
+  getListOfEquivalentCourses(applicantUserId: string, term: number, id: number): void {
+    this.isLoadingEquivalentCourses = true;
+    this.equivalentCoursesSortOrder = null; // Reset sort order when new data is loaded
+    this._studentService
+      .getAddableCoursesWithEquivalentsAsync(applicantUserId, term, id)
+      .subscribe({
+        next: (res) => {
+          console.log("Equivalent Course      ", res);
+          this.listOfEquivalentCourses = res;
+          // Initialize checked state for equivalent courses
+          this.setOfCheckedEquivalentCourses = new Set<string>();
+          this.listOfEquivalentCourses.forEach(course => {
+            if (course.isRegistered) {
+              this.setOfCheckedEquivalentCourses.add(course.courseId);
+            }
+          });
+          this.filterEquivalentCourses(); // This will apply sorting
+          this.refreshEquivalentCourseCheckedStatus();
+        },
+        error: (error) => {
+          this._customNotificationService.notification('error', 'Error', 'Failed to load equivalent courses');
+        },
+        complete: () => {
+          this.isLoadingEquivalentCourses = false;
+        }
+      });
+  }
   downloadPDF(): void {
     if (this.isGeneratingPDF) {
       return;
@@ -1431,16 +2053,27 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   onSubmitClicked(): void {
     // Only check credit hour limit if ignoreGradeLevelValidation is false
     if (!this.studentTermCourseReg?.ignoreGradeLevelValidation && this.totalSelectedCreditHours > this.getMaxAllowedCreditHours()) {
+      const cgpa = this.studentTermCourseReg?.cgpa || 0;
+      let contentMessage = '';
+      let warningMessage = '';
+
+      if (cgpa === 0) {
+        contentMessage = `You have selected ${this.totalSelectedCreditHours} credit hours, which exceeds the recommended limit of ${this.getMaxAllowedCreditHours()} credit hours for new students. This includes both registered and newly selected courses. Would you like to proceed with the registration?`;
+        warningMessage = `You are proceeding with more than ${this.getMaxAllowedCreditHours()} credit hours. This may affect your academic performance.`;
+      } else {
+        contentMessage = `You have selected ${this.totalSelectedCreditHours} credit hours, which exceeds the recommended limit of ${this.getMaxAllowedCreditHours()} credit hours. This includes both registered and newly selected courses. Would you like to proceed with the registration?`;
+        warningMessage = `You are proceeding with more than ${this.getMaxAllowedCreditHours()} credit hours. This may affect your academic performance.`;
+      }
+
       this.modal.confirm({
         nzTitle: 'Credit Hour Limit Exceeded',
-        nzContent: `You have selected ${this.totalSelectedCreditHours} credit hours, which exceeds the recommended limit of ${this.getMaxAllowedCreditHours()} credit hours. Would you like to proceed with the registration?`,
+        nzContent: contentMessage,
         nzOkText: 'Yes, Proceed',
         nzOkType: 'primary',
         nzOkDanger: true,
         nzCancelText: 'No, Cancel',
         nzOnOk: () => {
-          this._customNotificationService.notification('warning', 'Credit Hour Warning',
-            `You are proceeding with more than ${this.getMaxAllowedCreditHours()} credit hours. This may affect your academic performance.`);
+          this._customNotificationService.notification('warning', 'Credit Hour Warning', warningMessage);
           this.sendRequest();
         }
       });
@@ -1547,9 +2180,14 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     this.listOfAddedCourses = [];
     this.filteredAddCourses = [];
     this.listOfCourseAssessment = [];
+    this.listOfEquivalentCourses = [];
+    this.filteredEquivalentCourses = [];
+    this.searchAddCourseText = '';
+    this.searchEquivalentCourseText = '';
     this.setOfCheckedId = new Set<string>();
     this.setOfCheckedAddCourses = new Set<string>();
     this.setOfCheckedAssessmentCourses = new Set<string>();
+    this.setOfCheckedEquivalentCourses = new Set<string>();
     this.coursePriorities.clear();
     this.selectedBatchCode = null;
     this.regId = null;
@@ -1557,6 +2195,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     this.isLoadingRegularCourses = false;
     this.isLoadingAddCourses = false;
     this.isLoadingAssessmentCourses = false;
+    this.isLoadingEquivalentCourses = false;
     this.cdr.detectChanges();
   }
 

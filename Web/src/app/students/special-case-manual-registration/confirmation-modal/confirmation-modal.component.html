@@ -4,7 +4,8 @@
   [nzFooter]="null"
   [nzWidth]="900"
   [nzBodyStyle]="{ padding: '0' }"
-  (nzOnCancel)="onCancel()">
+  (nzOnCancel)="onCancel()"
+  >
   
   <div *nzModalContent>
     <div class="confirmation-modal">
@@ -142,7 +143,7 @@
               <div class="summary-label">Total Amount</div>
             </div>
             <div class="summary-item">
-              <div class="summary-value">{{ isDeletion ? 'Course Deletion' : 'Special Case Manual' }}</div>
+              <div class="summary-value">{{ isDeletion ? 'Course Deletion' : 'Manual' }}</div>
               <div class="summary-label">{{ isDeletion ? 'Action Type' : 'Registration Type' }}</div>
             </div>
           </div>

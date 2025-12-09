@@ -71,7 +71,7 @@ export class ReassignStudentSectionComponent implements OnInit {
       }
     });
 
-   
+
     this.sectionType.valueChanges.subscribe(batchCode => {
       if (this.batchCode.value && this.academicTerm.value && this.year.value) {
         this.loadAvailableSections();
@@ -172,9 +172,9 @@ export class ReassignStudentSectionComponent implements OnInit {
     this.loadingSections = true;
     this.availableSections = [];
     this.listOfSections = [];
-
+    const safeCourseId = '00000000-0000-0000-0000-000000000000';
     this.studentSectionAssignmentService
-      .getListOfSectionBasedOnBatch(this.batchCode.value, this.academicTerm.value, this.year.value, this.sectionType.value)
+      .getListOfSectionBasedOnBatch(this.batchCode.value, this.academicTerm.value, this.year.value, this.sectionType.value, safeCourseId)
       .subscribe({
         next: (sections: any) => {
           this.loadingSections = false;
@@ -414,7 +414,7 @@ export class ReassignStudentSectionComponent implements OnInit {
       return;
     }
 
-    const { academicTerm, year, batchCode,sectionType, sectionIdL, sectionIdR } = this.searchForm.value;
+    const { academicTerm, year, batchCode, sectionType, sectionIdL, sectionIdR } = this.searchForm.value;
 
 
     const sourceStudents = this.leftList
@@ -449,7 +449,7 @@ export class ReassignStudentSectionComponent implements OnInit {
         academicTerm: academicTerm,
         year: year,
         batchCode: batchCode,
-         sectionType: sectionType,
+        sectionType: sectionType,
         sectionId: sectionIdR,
         studentIds: targetStudents
       }

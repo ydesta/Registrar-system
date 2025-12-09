@@ -8,7 +8,18 @@
       <p>Join HiLCoE School of Computer Science & Technology</p>
     </div>
 
-    <form nz-form [formGroup]="registerForm" class="register-form" (ngSubmit)="submitForm()">
+    <!-- Registration Lock Message -->
+    <div class="registration-lock-message" *ngIf="isRegistrationLocked">
+      <div class="lock-icon">
+        <i nz-icon nzType="lock" nzTheme="outline"></i>
+      </div>
+      <div class="lock-content">
+        <h3>Application Temporarily Closed</h3>
+        <div class="lock-message-text">{{ lockMessage }}</div>
+      </div>
+    </div>
+
+    <form nz-form [formGroup]="registerForm" class="register-form" *ngIf="!isRegistrationLocked" (ngSubmit)="submitForm()">
       <!-- First Name and Last Name Row -->
       <div class="form-row">
         <nz-form-item>
@@ -176,9 +187,9 @@
           class="register-button" 
           [nzType]="'primary'" 
           [nzLoading]="isLoading"
-          [disabled]="!registerForm.valid || isLoading"
+          [disabled]="!registerForm.valid || isLoading || isRegistrationLocked"
           type="submit">
-          {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+          {{ isLoading ? 'Creating Account...' : (isRegistrationLocked ? 'Registration Closed' : 'Create Account') }}
         </button>
       </div>
     </form>

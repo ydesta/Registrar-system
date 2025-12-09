@@ -103,6 +103,41 @@
   }
 }
 
+/* Payment Policy Section */
+.payment-policy-section {
+  margin-top: 32px;
+  
+  .payment-policy-card {
+    @extend .content-card;
+    padding: 24px;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+    border: 2px solid rgba(255, 77, 79, 0.2);
+    border-radius: 12px;
+    
+    .payment-policy-checkbox {
+      display: flex;
+      align-items: flex-start;
+      cursor: pointer;
+      width: 100%;
+      
+      &:hover {
+        opacity: 0.9;
+      }
+      
+      .payment-policy-text {
+        margin-left: 12px;
+        font-size: $font-size-base;
+        font-weight: $font-weight-medium;
+        color: $text-primary;
+        line-height: $line-height-normal;
+        user-select: none;
+      }
+    }
+  }
+  
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .instruction-container {
@@ -153,6 +188,20 @@
     flex-direction: column;
         text-align: center;
         gap: 8px;
+      }
+    }
+  }
+
+  .payment-policy-section {
+    margin-top: 24px;
+    
+    .payment-policy-card {
+      padding: 20px;
+      
+      .payment-policy-checkbox {
+        .payment-policy-text {
+          font-size: $font-size-sm;
+        }
       }
     }
   }

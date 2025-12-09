@@ -39,8 +39,8 @@
             <!-- Academic Term -->
             <div nz-col [nzSpan]="12">
               <nz-form-item>
-                <nz-form-label [nzSpan]="8">Academic Term</nz-form-label>
-                <nz-form-control [nzSpan]="16">
+                <nz-form-label [nzSpan]="8">Academic Term <span class="required">*</span></nz-form-label>
+                <nz-form-control [nzSpan]="16" [nzValidateStatus]="termId.invalid && termId.touched ? 'error' : ''" [nzErrorTip]="termId.invalid && termId.touched ? 'Academic Term is required' : ''">
                   <nz-select formControlName="termId" nzPlaceHolder="Select Academic Term" nzShowSearch nzAllowClear style="width: 100%;">
                     <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id" [nzLabel]="item.Description"></nz-option>
                   </nz-select>
@@ -51,8 +51,8 @@
             <!-- Term Year -->
             <div nz-col [nzSpan]="12">
               <nz-form-item>
-                <nz-form-label [nzSpan]="8">Term Year</nz-form-label>
-                <nz-form-control [nzSpan]="16">
+                <nz-form-label [nzSpan]="8">Term Year <span class="required">*</span></nz-form-label>
+                <nz-form-control [nzSpan]="16" [nzValidateStatus]="termYear.invalid && termYear.touched ? 'error' : ''" [nzErrorTip]="termYear.invalid && termYear.touched ? 'Term Year is required' : ''">
                   <nz-select formControlName="termYear" nzPlaceHolder="Select Term Year" nzShowSearch nzAllowClear style="width: 100%;">
                     <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item"></nz-option>
                   </nz-select>
@@ -63,8 +63,8 @@
             <!-- Batch Code -->
             <div nz-col [nzSpan]="12">
               <nz-form-item>
-                <nz-form-label [nzSpan]="8">Batch Code</nz-form-label>
-                <nz-form-control [nzSpan]="16">
+                <nz-form-label [nzSpan]="8">Batch Code <span class="required">*</span></nz-form-label>
+                <nz-form-control [nzSpan]="16" [nzValidateStatus]="batchCode.invalid && batchCode.touched ? 'error' : ''" [nzErrorTip]="batchCode.invalid && batchCode.touched ? 'Batch Code is required' : ''">
                   <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch Code" nzShowSearch nzAllowClear style="width: 100%;">
                     <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.id" [nzLabel]="item.batchCode"></nz-option>
                   </nz-select>
@@ -91,6 +91,15 @@
                 </nz-form-control>
               </nz-form-item>
             </div>
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="8">Student Id</nz-form-label>
+                <nz-form-control [nzSpan]="16">
+                    <input nz-input formControlName="studentId"  class="form-input"
+                      placeholder="Auto-populated" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
           </div>
 
           <!-- Action Buttons -->
@@ -100,7 +109,7 @@
                 <i nz-icon nzType="reload" nzTheme="outline"></i>
                 Reset
               </button>
-              <button nz-button nzType="primary" (click)="generatePdf()" [nzLoading]="tbLoading">
+              <button nz-button nzType="primary" (click)="generatePdf()" [nzLoading]="tbLoading" [disabled]="!formCourseOffered.valid || !termId.value || !termYear.value || !batchCode.value">
                 <i nz-icon nzType="file-pdf" nzTheme="outline"></i>
                 Generate Slip
               </button>
@@ -194,14 +203,15 @@
 
         <tr [nzExpand]="expandSet.has(data.studentCode)">
           <td colspan="8">
-            <nz-table [nzData]="getCourseDetails(data)" nzBordered [nzScroll]="{ x: '600px' }" [nzShowPagination]="false">
+            <nz-table [nzData]="getCourseDetails(data)" nzBordered [nzShowPagination]="false" 
+              style="table-layout: fixed; width: 100%;">
               <thead>
                 <tr>
-                  <th style="min-width: 80px;">Serial No.</th>
-                  <th style="min-width: 120px;">Course Code</th>
-                  <th style="min-width: 200px;">Course Title</th>
-                  <th style="min-width: 100px;">Credit Hours</th>
-                  <th style="min-width: 100px;">TotalAmount</th>
+                  <th style="width: 80px;">Serial No.</th>
+                  <th style="width: 100px;">Course Code</th>
+                  <th style="width: 280px;">Course Title</th>
+                  <th style="width: 80px;">Credit H.</th>
+                  <th style="width: 100px;">Total Amount</th>
                 </tr>
               </thead>
     <tbody>

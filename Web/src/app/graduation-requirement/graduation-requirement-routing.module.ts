@@ -8,15 +8,16 @@ import { CurriculumQuadrantBreakdownComponent } from './curriculum-quadrant-brea
 import { GraduationRequirementComponent } from './graduation-requirement.component';
 import { QuadrantComponent } from './quadrant/quadrant.component';
 import { RequirementQuandrantComponent } from './requirement-quandrant/requirement-quandrant.component';
+import { AuthGuard } from '../guards/auth.guard';
 
-const routes: Routes = [{ path: '', component: GraduationRequirementComponent },
-{path:'quandrant-requirement',component:RequirementQuandrantComponent},
-{path:'add-requirement/:id',component:AddRequirementComponent},
-{path:'add-requirement-quadrant/:id',component:AddRequirementQuadrantComponent},
-{path:'quadrant',component:QuadrantComponent},
-{path:'cuadrant-breakdown',component:CurriculumQuadrantBreakdownComponent},
-{path:'add-quadrant/:id',component:AddQuadrantComponent},
-{path:'add-cuadrant-breakdown/:id',component:AddCurriculumQuadrantBreakdownComponent}
+const routes: Routes = [{ path: '', component: GraduationRequirementComponent, canActivate: [AuthGuard] },
+{path:'quandrant-requirement',component:RequirementQuandrantComponent, canActivate: [AuthGuard]},
+{path:'add-requirement/:id',component:AddRequirementComponent, canActivate: [AuthGuard]},
+{path:'add-requirement-quadrant/:id',component:AddRequirementQuadrantComponent, canActivate: [AuthGuard]},
+{path:'quadrant',component:QuadrantComponent, canActivate: [AuthGuard]},
+{path:'cuadrant-breakdown',component:CurriculumQuadrantBreakdownComponent, canActivate: [AuthGuard]},
+{path:'add-quadrant/:id',component:AddQuadrantComponent, canActivate: [AuthGuard]},
+{path:'add-cuadrant-breakdown/:id',component:AddCurriculumQuadrantBreakdownComponent, canActivate: [AuthGuard]}
 
 
 

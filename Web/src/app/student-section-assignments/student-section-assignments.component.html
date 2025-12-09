@@ -100,6 +100,24 @@
       </ng-template>
     </nz-alert>
 
+    <!-- Export Actions -->
+    <div class="export-section">
+      <div class="export-buttons">
+        <button nz-button nzType="default" (click)="exportToExcel()" class="export-btn" [disabled]="registeredCourses.courses.length === 0">
+          <i nz-icon nzType="file-excel" nzTheme="outline"></i>
+          Export to Excel 4567
+        </button>
+        <button nz-button nzType="default" (click)="exportToCSV()" class="export-btn" [disabled]="registeredCourses.courses.length === 0">
+          <i nz-icon nzType="download" nzTheme="outline"></i>
+          Export to CSV
+        </button>
+        <button nz-button nzType="default" (click)="downloadAsPDF()" class="export-btn" [disabled]="registeredCourses.courses.length === 0">
+          <i nz-icon nzType="file-text" nzTheme="outline"></i>
+          Export to PDF
+        </button>
+      </div>
+    </div>
+
     <!-- Results Summary -->
     <!-- <div class="table-header" *ngIf="registeredCourses.courses.length > 0">
       <div class="page-info">

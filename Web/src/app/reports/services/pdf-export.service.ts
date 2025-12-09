@@ -53,59 +53,59 @@ export class PdfExportService {
 
   generateRegistrationSlipsPdf(slips: StudentRegistrationSlipViewModel[]): void {
     const doc = new jsPDF();
-    const slipHeight = 95; 
+    const slipHeight = 85; // Reduced from 95 to 85
 
     slips.forEach((slip, studentIndex) => {
       for (let copy = 0; copy < 3; copy++) {
-        const yOffset = 10 + copy * slipHeight;
-        doc.setFontSize(12);
+        const yOffset = 8 + copy * slipHeight; // Reduced from 10 to 8
+        doc.setFontSize(10); // Reduced from 12 to 10
         doc.setTextColor(9, 62, 150);
-        doc.text(`HiLCoE Registration ${slip.academicTerm}`, 105, yOffset + 4, { align: 'center' });
+        doc.text(`HiLCoE Registration ${slip.academicTerm}/Offer Batch ${slip.offeredBatchCode}`, 105, yOffset + 3, { align: 'center' }); // Reduced from 4 to 3
         doc.setDrawColor(9, 62, 150);
-        doc.setLineWidth(0.7);
-        doc.line(20, yOffset + 7, 190, yOffset + 7);
+        doc.setLineWidth(0.5); // Reduced from 0.7 to 0.5
+        doc.line(20, yOffset + 6, 190, yOffset + 6); // Reduced from 7 to 6
 
         doc.setDrawColor(41, 128, 185);
         doc.setFillColor(240, 248, 255);
-        doc.roundedRect(25, yOffset + 10, 160, 28, 2, 2, 'FD');
-        doc.setFontSize(8);
+        doc.roundedRect(25, yOffset + 8, 160, 24, 2, 2, 'FD'); // Reduced height from 28 to 24
+        doc.setFontSize(7); // Reduced from 8 to 7
         doc.setFont('helvetica', 'bold');
-        doc.text('Student Name:', 30, yOffset + 16);
-        doc.text('Student ID:', 30, yOffset + 21);
-        doc.text('Academic Term:', 110, yOffset + 16);
-        doc.text('Batch Code:', 110, yOffset + 21);
+        doc.text('Student Name:', 30, yOffset + 13); // Reduced from 16 to 13
+        doc.text('Student ID:', 30, yOffset + 17); // Reduced from 21 to 17
+        doc.text('Academic Term:', 110, yOffset + 13); // Reduced from 16 to 13
+        doc.text('Own Batch:', 110, yOffset + 17); // Reduced from 21 to 17
         doc.setFont('helvetica', 'normal');
-        doc.text(slip.fullName, 60, yOffset + 16);
-        doc.text(slip.studentCode, 60, yOffset + 21);
-        doc.text(slip.academicTerm, 145, yOffset + 16);
-        doc.text(slip.batchCode, 145, yOffset + 21);
+        doc.text(slip.fullName, 60, yOffset + 13); // Reduced from 16 to 13
+        doc.text(slip.studentCode, 60, yOffset + 17); // Reduced from 21 to 17
+        doc.text(slip.academicTerm, 145, yOffset + 13); // Reduced from 16 to 13
+        doc.text(slip.owenBatchCode, 145, yOffset + 17); // Reduced from 21 to 17
 
         // Info box two-column layout for extra fields
         // First row (left)
         doc.setFont('helvetica', 'bold');
-        doc.text('Bank:', 30, yOffset + 26);
+        doc.text('Bank:', 30, yOffset + 21); // Reduced from 26 to 21
         doc.setFont('helvetica', 'normal');
-        doc.text(`From: ${slip.fromBank} To: ${slip.toBank}`, 60, yOffset + 26);
+        doc.text(`From: ${slip.fromBank} To: ${slip.toBank}`, 60, yOffset + 21); // Reduced from 26 to 21
 
         doc.setFont('helvetica', 'bold');
-        doc.text('FS NO.:', 30, yOffset + 31);
+        doc.text('FS NO.:', 30, yOffset + 25); // Reduced from 31 to 25
         doc.setFont('helvetica', 'normal');
-        doc.text('____________________', 60, yOffset + 31);
+        doc.text('____________________', 60, yOffset + 25); // Reduced from 31 to 25
 
         // First row (right)
         doc.setFont('helvetica', 'bold');
-        doc.text('Bank Transaction Id .:', 110, yOffset + 26);
+        doc.text('Bank Transaction Id .:', 110, yOffset + 21); // Reduced from 26 to 21
         doc.setFont('helvetica', 'normal');
-        doc.text(slip.bankTransactionId, 145, yOffset + 26);
+        doc.text(slip.bankTransactionId, 145, yOffset + 21); // Reduced from 26 to 21
 
         doc.setFont('helvetica', 'bold');
-        doc.text('Registration Date:', 110, yOffset + 31);
+        doc.text('Registration Date:', 110, yOffset + 25); // Reduced from 31 to 25
         doc.setFont('helvetica', 'normal');
-        doc.text(slip.registrationDate, 145, yOffset + 31);
+        doc.text(slip.registrationDate, 145, yOffset + 25); // Reduced from 31 to 25
 
         // Table (move up to follow the info box, now below the larger card)
         autoTable(doc, {
-          startY: yOffset + 40,
+          startY: yOffset + 32, // Reduced from 40 to 32
           margin: { left: 25, right: 25 },
           head: [['Course Code', 'Course Title', 'Credit Hours', 'Total Amount']],
           body: slip.courses.map(c => [
@@ -117,9 +117,9 @@ export class PdfExportService {
             slip.courses.reduce((sum, c) => sum + c.totalAmount, 0)
           ]],
           theme: 'grid',
-          headStyles: { fillColor: [9, 62, 150], textColor: 255, fontSize: 8 },
-          footStyles: { fillColor: [245, 245, 245], textColor: 0, fontStyle: 'bold', fontSize: 8 },
-          styles: { fontSize: 8, cellPadding: 1.5 },
+          headStyles: { fillColor: [9, 62, 150], textColor: 255, fontSize: 6 }, // Reduced from 8 to 6
+          footStyles: { fillColor: [245, 245, 245], textColor: 0, fontStyle: 'bold', fontSize: 6 }, // Reduced from 8 to 6
+          styles: { fontSize: 6, cellPadding: 1 }, // Reduced from 8 to 6, and padding from 1.5 to 1
           alternateRowStyles: { fillColor: [245, 250, 255] },
           columnStyles: {
             2: { halign: 'center' },
@@ -133,16 +133,16 @@ export class PdfExportService {
         });
 
         // Signature lines and labels on the same row, with top padding
-        const sigY = yOffset + slipHeight - 10; // More top padding
+        const sigY = yOffset + slipHeight - 8; // Reduced from 10 to 8
         doc.setDrawColor(9, 62, 150);
         doc.setLineDashPattern([2, 2], 0);
         doc.line(25, sigY, 90, sigY);   // Student Signature line
         doc.line(120, sigY, 185, sigY); // Authorized By line
         doc.setLineDashPattern([], 0);
-        doc.setFontSize(8);
+        doc.setFontSize(6); // Reduced from 8 to 6
         doc.setTextColor(44, 62, 80);
         // Place the labels BELOW the lines
-        const labelBelowOffset = 4;
+        const labelBelowOffset = 3; // Reduced from 4 to 3
         doc.text('Student Signature', 57.5, sigY + labelBelowOffset, { align: 'center' });
         doc.text('Authorized By', 152.5, sigY + labelBelowOffset, { align: 'center' });
       }

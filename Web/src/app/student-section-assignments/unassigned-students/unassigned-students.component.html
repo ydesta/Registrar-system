@@ -1,0 +1,260 @@
+<div class="content-container">
+  <!-- Page Header -->
+  <div class="header-section">
+    <div class="page-title">
+      <h1>Unassigned Students</h1>
+      <p class="subtitle">View students who haven't been assigned to sections yet</p>
+    </div>
+    <div class="header-actions">
+      <button nz-button nzType="default" routerLink="../student-section-assignments" class="back-btn">
+        <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
+        Back to Section Assignments
+      </button>
+    </div>
+  </div>
+
+  <!-- Collapsible Search Form -->
+  <div class="search-section">
+    <nz-collapse>
+      <nz-collapse-panel [nzHeader]="searchHeader" [nzActive]="!isSearchCollapsed">
+
+        <ng-template #searchHeader>
+          <span>
+            <i nz-icon nzType="filter" nzTheme="outline"></i>
+            Search Criteria
+          </span>
+        </ng-template>
+
+        <form nz-form [formGroup]="searchForm">
+          <div nz-row [nzGutter]="24">
+            <!-- Academic Term -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Academic Term</nz-form-label>
+                <nz-form-control nzErrorTip="Academic term is required">
+                  <nz-select formControlName="academicTerm" nzPlaceHolder="Select Academic Term" nzShowSearch
+                    nzAllowClear style="width: 100%;">
+                    <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
+                      [nzLabel]="item.Description"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Term Year -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Term Year</nz-form-label>
+                <nz-form-control nzErrorTip="Term year is required">
+                  <nz-select formControlName="year" nzPlaceHolder="Select Term Year" nzShowSearch style="width: 100%;">
+                    <nz-option *ngFor="let item of listOfYears" [nzValue]="item"
+                      [nzLabel]="item.toString()"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <div nz-row [nzGutter]="24">
+            <!-- Batch Code -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Batch Code</nz-form-label>
+                <nz-form-control nzErrorTip="Batch code is required">
+                  <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch Code" nzShowSearch nzAllowClear
+                    style="width: 100%;">
+                    <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.batchCode"
+                      [nzLabel]="item.batchCode"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Section Type -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>Section Type</nz-form-label>
+                <nz-form-control nzErrorTip="Section Type is required">
+                  <nz-select formControlName="sectionType" nzPlaceHolder="Select Section Type" nzShowSearch nzAllowClear
+                    style="width: 100%;">
+                    <nz-option *ngFor="let item of listOfSectionType" [nzValue]="item.Id"
+                      [nzLabel]="item.Description"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div nz-row>
+            <div nz-col [nzSpan]="24" style="display: flex; justify-content: flex-end; gap: 12px;">
+              <button nz-button nzType="default" (click)="resetSearch()">
+                <i nz-icon nzType="reload" nzTheme="outline"></i>
+                Reset
+              </button>
+              <button nz-button nzType="primary" [nzLoading]="loading" (click)="loadUnassignedStudents()"
+                [disabled]="!searchForm.valid">
+                <i nz-icon nzType="search" nzTheme="outline"></i>
+                Search
+              </button>
+            </div>
+          </div>
+        </form>
+      </nz-collapse-panel>
+    </nz-collapse>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-section" *ngIf="data">
+    <nz-row [nzGutter]="16">
+      <nz-col [nzSpan]="getSummaryCardSpan()" *ngFor="let summary of summaryData">
+        <nz-card class="summary-card" [nzLoading]="false">
+          <div class="summary-content">
+            <div class="summary-icon">
+              <i nz-icon [nzType]="summary.iconType"></i>
+            </div>
+            <div class="summary-info">
+              <h3>{{ summary.value }}</h3>
+              <p>{{ summary.label }}</p>
+            </div>
+          </div>
+        </nz-card>
+      </nz-col>
+    </nz-row>
+  </div>
+
+  <!-- Export Actions -->
+  <div class="export-section" *ngIf="students.length > 0">
+    <div class="export-buttons">
+      <button nz-button nzType="default" (click)="exportToCSV()" class="export-btn">
+        <i nz-icon nzType="file-excel" nzTheme="outline"></i>
+        Export to CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Results Table -->
+  <div class="table-container" *ngIf="students.length > 0">
+    <div class="table-header">
+      <div class="page-info">
+        <span class="text-muted">
+          Found {{ students.length }} unassigned students
+        </span>
+      </div>
+      <div class="search-box">
+        <input nz-input placeholder="Search by name..." [(ngModel)]="searchValue" (ngModelChange)="search()" />
+        <i nz-icon nzType="search"></i>
+      </div>
+    </div>
+
+    <nz-table #basicTable [nzData]="listOfDisplayData" [nzLoading]="loading" [nzShowPagination]="false"
+      [nzPageSize]="9999" [nzNoResult]="emptyTpl" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;"
+      class="mobile-table-container">
+
+      <thead>
+        <tr>
+          <th style="min-width: 50px; width: 60px;">#</th>
+          <th style="min-width: 120px;">Student Code</th>
+          <th style="min-width: 100px;">Batch Code</th>
+          <th style="min-width: 200px; cursor: pointer;" (click)="sortByFullName()">
+            <div class="d-flex align-items-center">
+              <span>Full Name</span>
+              <i nz-icon [nzType]="getSortIcon()" class="ml-2" [style.color]="sortOrder ? '#1890ff' : '#bfbfbf'"></i>
+            </div>
+          </th>
+          <th style="min-width: 150px;">Unassigned Courses</th>
+          <th style="min-width: 100px;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let student of basicTable.data; let i = index">
+          <td>
+            <span class="serial-number">
+              {{ i + 1 }}
+            </span>
+          </td>
+          <td>
+            <strong>{{ student.studentCode }}</strong>
+          </td>
+          <td>
+            <nz-tag nzColor="blue">{{ student.batchCode }}</nz-tag>
+          </td>
+          <td>{{ student.fullName }}</td>
+          <td>
+            <nz-tag nzColor="orange">{{ student.unassignedCourseCount }}</nz-tag>
+          </td>
+          <td>
+            <button 
+              nz-button 
+              nzType="primary" 
+              nzSize="small" 
+              nzTooltipTitle="Click to assign this student to a section"
+              nzTooltipPlacement="top"
+              (click)="navigateToNewComponent(student)"
+              style="margin-right: 8px;">
+              <i nz-icon nzType="usergroup-add" nzTheme="outline"></i>
+              Assign to Section
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+
+    <!-- Empty State Template -->
+    <ng-template #emptyTpl>
+      <div class="no-data">
+        <span nz-icon nzType="user-delete" nzTheme="outline"></span>
+        <p>No students found matching your search</p>
+        <p class="text-muted">Try adjusting your search criteria.</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && students.length === 0 && searchForm.get('batchCode')?.value">
+    <nz-card class="empty-card">
+      <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="notFoundContent">
+        <ng-template #notFoundContent>
+          <span>No unassigned students found for the specified criteria.</span>
+        </ng-template>
+      </nz-empty>
+    </nz-card>
+  </div>
+
+  <!-- Initial Empty State -->
+  <div class="empty-state" *ngIf="!loading && students.length === 0 && !searchForm.get('batchCode')?.value">
+    <nz-card class="empty-card">
+      <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="notFoundContentInitial">
+        <ng-template #notFoundContentInitial>
+          <span>Fill in the search criteria and click Search to find unassigned students.</span>
+        </ng-template>
+      </nz-empty>
+    </nz-card>
+  </div>
+</div>
+
+<!-- Assign Student to Section Modal -->
+<nz-modal 
+  [(nzVisible)]="isModalVisible" 
+  nzTitle="Assign Student to Section" 
+  [nzWidth]="'75%'"
+  [nzMaskClosable]="false"
+  [nzClosable]="true"
+  [nzCentered]="true"
+  [nzZIndex]="1000"
+  [nzFooter]="null"
+  [nzBodyStyle]="{ 'padding': '0', 'max-height': '60vh' }"
+  nzClassName="assign-student-modal"
+  (nzOnCancel)="onModalClose()">
+  <div *nzModalContent>
+    <app-assign-student-to-section
+      *ngIf="selectedStudent"
+      [student]="selectedStudent"
+      [academicTerm]="academicTerm.value"
+      [year]="year.value"
+      [sectionType]="sectionType.value"
+      (assignmentComplete)="onModalSuccess()"
+      (assignmentCancelled)="onModalClose()">
+    </app-assign-student-to-section>
+  </div>
+</nz-modal>

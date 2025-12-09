@@ -47,10 +47,57 @@
       gap: 12px;
       
       .course-selection {
-        max-width: 300px;
         flex: 1;
+        min-width: 0;
         
         .course-form {
+          .search-form-row {
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            
+            .form-item-course {
+              flex: 1;
+              min-width: 250px;
+            }
+            
+            .form-item-status {
+              flex: 0 0 200px;
+              min-width: 180px;
+            }
+            
+            .form-item-button {
+              flex: 0 0 auto;
+              
+              .search-btn {
+                height: 40px;
+                border-radius: 12px;
+                font-weight: 500;
+                padding: 0 24px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+                transition: all 0.3s ease;
+                
+                &:hover:not(:disabled) {
+                  transform: translateY(-2px);
+                  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+                }
+                
+                &:disabled {
+                  opacity: 0.6;
+                  cursor: not-allowed;
+                }
+                
+                span[nz-icon] {
+                  font-size: 16px;
+                }
+              }
+            }
+          }
+          
           ::ng-deep .ant-form-item-label > label {
             color: #374151;
             font-weight: 600;
@@ -373,6 +420,24 @@
         .course-selection {
           width: 100%;
           max-width: 100%;
+          
+          .course-form {
+            .search-form-row {
+              .form-item-course,
+              .form-item-status {
+                flex: 1;
+                min-width: 200px;
+              }
+              
+              .form-item-button {
+                width: 100%;
+                
+                .search-btn {
+                  width: 100%;
+                }
+              }
+            }
+          }
         }
       }
     }

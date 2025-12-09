@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, forkJoin, of, Observable } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { UserManagementService } from '../../../services/user-management.service';
@@ -14,7 +15,7 @@ import { User, Role } from '../../../types/user-management.types';
 })
 export class UserDetailsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
+
   user: User | null = null;
   loading = false;
   userId: string = '';
@@ -36,7 +37,7 @@ export class UserDetailsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.userId = this.route.snapshot.paramMap.get('id') || '';
-    
+
     if (this.userId) {
       this.loadUser();
       this.loadRoles();
@@ -66,13 +67,13 @@ export class UserDetailsComponent implements OnInit, OnDestroy {
         next: (user) => {
           this.user = user;
           this.populateForm();
-          
+
           // Check if edit mode is requested via query parameter
           const editMode = this.route.snapshot.queryParamMap.get('edit');
           if (editMode === 'true') {
             this.isEditing = true; // Start in edit mode
           }
-          
+
           this.loading = false;
         },
         error: (error) => {
@@ -126,23 +127,46 @@ export class UserDetailsComponent implements OnInit, OnDestroy {
 
   saveChanges(): void {
     if (!this.user || !this.form.valid) return;
-    
+
     const formValue = this.form.value;
+    const emailChanged = this.user.email !== formValue.email;
+    this.loading = true;
+
+    // Always use the basic update endpoint first
     const updatedUser: User = {
       ...this.user,
       firstName: formValue.firstName,
       lastName: formValue.lastName,
-      email: formValue.email,
+      email: formValue.email, // Don't update email in basic update if it changed
       phoneNumber: formValue.phoneNumber
     };
-    
-    this.loading = true;
-    this.userManagementService.updateUser(this.userId, updatedUser)
-      .pipe(takeUntil(this.destroy$))
+    // Skip username update in basic update if email changed (email update will handle username)
+    let updateObservable = this.userManagementService.updateUser(this.userId, updatedUser, emailChanged);
+
+    // If email changed, chain the email update after the basic update
+    if (emailChanged) {
+      updateObservable = updateObservable.pipe(
+        switchMap(() => this.userManagementService.updateUserEmail(this.userId, formValue.email))
+      );
+    }
+
+    // Chain role updates
+    updateObservable = updateObservable.pipe(
+      switchMap(() => this.updateUserRoles(formValue.selectedRoles))
+    );
+
+    updateObservable.pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
+        next: () => {
           this.message.success('User updated successfully');
-          this.user = updatedUser;
+          // Update the user object with all changes
+          this.user = {
+            ...this.user!,
+            firstName: formValue.firstName,
+            lastName: formValue.lastName,
+            email: formValue.email,
+            phoneNumber: formValue.phoneNumber
+          };
           this.isEditing = false;
           this.loading = false;
         },
@@ -153,9 +177,75 @@ export class UserDetailsComponent implements OnInit, OnDestroy {
       });
   }
 
+  private updateUserRoles(selectedRoleIds: string[]) {
+    if (!this.user) return of(null);
+
+    const currentRoleIds = this.user.roles.map(role => role.id);
+
+    // Find roles to add
+    const rolesToAdd = selectedRoleIds.filter(roleId => !currentRoleIds.includes(roleId));
+
+    // Find roles to remove
+    const rolesToRemove = currentRoleIds.filter(roleId => !selectedRoleIds.includes(roleId));
+
+    // Create observables for role operations
+    const removeRoleObservables = rolesToRemove.map(roleId =>
+      this.userManagementService.removeRoleFromUser(this.userId, roleId)
+        .pipe(catchError(error => {
+          console.error(`Failed to remove role ${roleId}:`, error);
+          return of(null); // Continue with other operations
+        }))
+    );
+
+    const addRoleObservables = rolesToAdd.map(roleId =>
+      this.userManagementService.assignRoleToUser(this.userId, roleId)
+        .pipe(catchError(error => {
+          console.error(`Failed to add role ${roleId}:`, error);
+          return of(null); // Continue with other operations
+        }))
+    );
+
+    // Execute all role operations in parallel
+    const allRoleOperations = [...removeRoleObservables, ...addRoleObservables];
+
+    if (allRoleOperations.length === 0) {
+      return of(null); // No role changes needed
+    }
+
+    return forkJoin(allRoleOperations).pipe(
+      switchMap(() => {
+        // Reload user data to get updated roles
+        return this.userManagementService.getUserById(this.userId);
+      }),
+      catchError(error => {
+        console.error('Error updating user roles:', error);
+        throw error;
+      })
+    );
+  }
+
   getRoleNameById(roleId: string): string {
     const role = this.availableRoles.find(r => r.id === roleId);
     return role ? role.name : 'Unknown Role';
+  }
+
+  updateUserUsername(newUsername: string): void {
+    if (!this.user) return;
+
+    this.loading = true;
+    this.userManagementService.updateUserUsername(this.userId, newUsername)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.message.success('Username updated successfully');
+          this.user!.email = newUsername; // Update the user object
+          this.loading = false;
+        },
+        error: (error) => {
+          this.message.error('Failed to update username: ' + error.message);
+          this.loading = false;
+        }
+      });
   }
 
   // Legacy methods for backward compatibility

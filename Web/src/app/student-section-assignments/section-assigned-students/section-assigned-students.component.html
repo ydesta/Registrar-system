@@ -141,12 +141,20 @@
   <div class="export-section" *ngIf="sectionAssignedStudents.length > 0">
     <div class="export-buttons">
       <button nz-button nzType="default" (click)="exportAttendanceSheet()" class="export-btn">
-        <i nz-icon nzType="download" nzTheme="outline"></i>
-        Export Attendance List
+        <i nz-icon nzType="file-excel" nzTheme="outline"></i>
+        Export Attendance (Excel)
+      </button>
+      <button nz-button nzType="default" (click)="exportAttendanceSheetPDF()" class="export-btn">
+        <i nz-icon nzType="file-pdf" nzTheme="outline"></i>
+        Export Attendance (PDF)
       </button>
       <button nz-button nzType="default" (click)="exportMarkList()" class="export-btn">
-        <i nz-icon nzType="download" nzTheme="outline"></i>
-        Export Mark List
+        <i nz-icon nzType="file-excel" nzTheme="outline"></i>
+        Export Mark List (Excel)
+      </button>
+      <button nz-button nzType="default" (click)="exportMarkListPDF()" class="export-btn">
+        <i nz-icon nzType="file-pdf" nzTheme="outline"></i>
+        Export Mark List (PDF)
       </button>
     </div>
   </div>

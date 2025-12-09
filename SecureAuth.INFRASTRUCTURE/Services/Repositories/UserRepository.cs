@@ -93,13 +93,22 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
             }
         }
 
-        public async Task LockUserAsync(string userId, DateTime lockoutEnd)
+        public async Task LockUserAsync(string userId, DateTimeOffset lockoutEnd)
         {
             var user = await GetByIdAsync(userId);
             if (user != null)
             {
+                Console.WriteLine($"=== LOCKING USER ===");
+                Console.WriteLine($"User: {user.Email}");
+                Console.WriteLine($"Setting LockoutEnd to: {lockoutEnd} (UTC)");
+                Console.WriteLine($"LockoutEnd is: {lockoutEnd.DateTime} (local)");
+                
                 user.LockoutEnd = lockoutEnd;
-                await UpdateAsync(user);
+                _dbSet.Update(user);
+                await _context.SaveChangesAsync();
+                
+                Console.WriteLine($"User locked successfully. LockoutEnd saved as: {user.LockoutEnd}");
+                Console.WriteLine($"====================");
             }
         }
 

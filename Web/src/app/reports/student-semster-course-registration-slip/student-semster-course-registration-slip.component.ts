@@ -195,7 +195,7 @@ export class StudentSemsterCourseRegistrationSlipComponent implements OnInit {
       const yOffset = 10 + copy * slipHeight;
       doc.setFontSize(12);
       doc.setTextColor(9, 62, 150);
-      doc.text(`HiLCoE Registration ${slip.academicTerm}`, 105, yOffset + 4, { align: 'center' });
+      doc.text(`HiLCoE Registration ${slip.academicTerm}/Offer Batch ${slip.offeredBatchCode}`, 105, yOffset + 4, { align: 'center' });
       doc.setDrawColor(9, 62, 150);
       doc.setLineWidth(0.7);
       doc.line(20, yOffset + 7, 190, yOffset + 7);
@@ -208,12 +208,12 @@ export class StudentSemsterCourseRegistrationSlipComponent implements OnInit {
       doc.text('Student Name:', 30, yOffset + 16);
       doc.text('Student ID:', 30, yOffset + 21);
       doc.text('Academic Term:', 110, yOffset + 16);
-      doc.text('Batch Code:', 110, yOffset + 21);
+      doc.text('Own Batch:', 110, yOffset + 21);
       doc.setFont('helvetica', 'normal');
       doc.text(slip.fullName, 60, yOffset + 16);
       doc.text(slip.studentCode, 60, yOffset + 21);
       doc.text(slip.academicTerm, 145, yOffset + 16);
-      doc.text(slip.batchCode, 145, yOffset + 21);
+      doc.text(slip.owenBatchCode, 145, yOffset + 21);
 
       // Info box two-column layout for extra fields
       // First row (left)
