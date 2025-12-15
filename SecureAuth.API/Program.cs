@@ -3,6 +3,7 @@ using SecureAuth.APPLICATION.DependencyInjection;
 using SecureAuth.INFRASTRUCTURE.DependencyInjection;
 using SecureAuth.INFRASTRUCTURE.Services;
 using SecureAuth.API.Middleware;
+using SecureAuth.API.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,60 @@ builder.WebHost.ConfigureKestrel(options =>
     // Security: Remove server header to prevent information disclosure
     options.AddServerHeader = false;
 });
+
+// Override configuration values from constants (auto-selects dev or prod)
+builder.Configuration["ConnectionStrings:DefaultConnection"] = AppConstants.Database.ConnectionString;
+builder.Configuration["JWT:ValidAudience"] = AppConstants.Jwt.ValidAudience;
+builder.Configuration["JWT:ValidIssuer"] = AppConstants.Jwt.ValidIssuer;
+builder.Configuration["JWT:Secret"] = AppConstants.Jwt.Secret;
+builder.Configuration["AppSettings:FrontendUrl"] = AppConstants.AppSettings.FrontendUrl;
+builder.Configuration["EmailConfiguration:From"] = AppConstants.Email.From;
+builder.Configuration["EmailConfiguration:SmtpServer"] = AppConstants.Email.SmtpServer;
+builder.Configuration["EmailConfiguration:Port"] = AppConstants.Email.Port.ToString();
+builder.Configuration["EmailConfiguration:Username"] = AppConstants.Email.Username;
+builder.Configuration["EmailConfiguration:Password"] = AppConstants.Email.Password;
+builder.Configuration["EmailConfiguration:BaseUrl"] = AppConstants.Email.BaseUrl;
+builder.Configuration["RateLimiting:MaxAttempts"] = AppConstants.RateLimiting.MaxAttempts.ToString();
+builder.Configuration["RateLimiting:TimeWindowMinutes"] = AppConstants.RateLimiting.TimeWindowMinutes.ToString();
+builder.Configuration["TokenPolicy:AccessTokenValidity"] = AppConstants.TokenPolicy.AccessTokenValidity.ToString();
+builder.Configuration["TokenPolicy:RefreshTokenValidity"] = AppConstants.TokenPolicy.RefreshTokenValidity.ToString();
+builder.Configuration["TokenPolicy:RequireRefreshTokenRotation"] = AppConstants.TokenPolicy.RequireRefreshTokenRotation.ToString();
+builder.Configuration["PasswordPolicy:MinLength"] = AppConstants.PasswordPolicy.MinLength.ToString();
+builder.Configuration["PasswordPolicy:RequireUppercase"] = AppConstants.PasswordPolicy.RequireUppercase.ToString();
+builder.Configuration["PasswordPolicy:RequireLowercase"] = AppConstants.PasswordPolicy.RequireLowercase.ToString();
+builder.Configuration["PasswordPolicy:RequireDigit"] = AppConstants.PasswordPolicy.RequireDigit.ToString();
+builder.Configuration["PasswordPolicy:RequireSpecialCharacter"] = AppConstants.PasswordPolicy.RequireSpecialCharacter.ToString();
+builder.Configuration["PasswordPolicy:PasswordHistorySize"] = AppConstants.PasswordPolicy.PasswordHistorySize.ToString();
+builder.Configuration["PasswordPolicy:MaxAgeDays"] = AppConstants.PasswordPolicy.MaxAgeDays.ToString();
+builder.Configuration["Security:FrontendClientKey"] = AppConstants.Security.FrontendClientKey;
+
+// Set CORS configuration from AppConstants
+var corsOrigins = AppConstants.Cors.AllowedOrigins;
+var corsMethods = AppConstants.Cors.AllowedMethods;
+var corsHeaders = AppConstants.Cors.AllowedHeaders;
+
+// Set CORS configuration in IConfiguration for ServiceCollectionExtensions to read
+// Use indexed format for array binding
+for (int i = 0; i < corsOrigins.Length; i++)
+{
+    builder.Configuration[$"Cors:AllowedOrigins:{i}"] = corsOrigins[i];
+}
+for (int i = 0; i < corsMethods.Length; i++)
+{
+    builder.Configuration[$"Cors:AllowedMethods:{i}"] = corsMethods[i];
+}
+for (int i = 0; i < corsHeaders.Length; i++)
+{
+    builder.Configuration[$"Cors:AllowedHeaders:{i}"] = corsHeaders[i];
+}
+
+// Log which environment is being used
+var loggerFactory = LoggerFactory.Create(config => config.AddConsole());
+var logger = loggerFactory.CreateLogger<Program>();
+logger.LogInformation("Starting application in {Environment} mode", AppConstants.Environment.CurrentEnvironment);
+logger.LogInformation("CORS Origins configured: {Origins}", string.Join(", ", AppConstants.Cors.AllowedOrigins));
+logger.LogInformation("CORS Methods configured: {Methods}", string.Join(", ", AppConstants.Cors.AllowedMethods));
+logger.LogInformation("CORS Headers configured: {Headers}", string.Join(", ", AppConstants.Cors.AllowedHeaders));
 
 // Add services using extension methods
 builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -43,16 +98,13 @@ builder.Services.AddHsts(x =>
     }
 });
 
-// Configure HTTP client with extended timeout and SSL bypass
+// Configure HTTP client with extended timeout - REMOVED SSL BYPASS
 builder.Services.AddHttpClient("default", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(60);
     client.DefaultRequestHeaders.Add("User-Agent", "SecureAuth-API/1.0");
-}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-{
-    ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true,
-    CheckCertificateRevocationList = false
 });
+// REMOVED: SSL certificate validation bypass - use valid certificates instead
 
 var app = builder.Build();
 
@@ -66,14 +118,13 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        var logger = app.Services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Database seeding failed");
+        var seedLogger = app.Services.GetRequiredService<ILogger<Program>>();
+        seedLogger.LogError(ex, "Database seeding failed");
     }
 }
 
 // Configure the HTTP request pipeline.
-var swaggerEnabled = app.Configuration.GetValue<bool>("SwaggerSettings:Enabled", false);
-var shouldEnableSwagger = app.Environment.IsDevelopment() && swaggerEnabled;
+var shouldEnableSwagger = app.Environment.IsDevelopment() && AppConstants.Swagger.Enabled;
 
 if (shouldEnableSwagger)
 {
@@ -91,6 +142,9 @@ if (shouldEnableSwagger)
 
 // Add CORS middleware before other middleware
 app.UseCors("AllowAngularApp");
+
+// IMPORTANT: FrontendRequestValidation must come after CORS to allow preflight requests
+app.UseMiddleware<FrontendRequestValidationMiddleware>();
 
 // Security fix: Use secure error handling middleware instead of inline handler
 app.UseMiddleware<SecureErrorHandlingMiddleware>();

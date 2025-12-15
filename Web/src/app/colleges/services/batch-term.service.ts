@@ -9,7 +9,7 @@ import { TermViewModel } from '../model/term-view-model';
 })
 export class BatchTermService {
   baseUrl = environment.baseUrl;
-  private readonly _batchTerms: string = "/BatchTerms";
+  private readonly _batchTerms: string = `/${environment.apiVersion}/batchterms`;
   getBatchTermsUrl() {
     return this.baseUrl + this._batchTerms;
   }

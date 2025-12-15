@@ -9,7 +9,7 @@ import { ChangeRequestViewModel, GradeChangeRequestViewModel } from '../Models/G
   providedIn: 'root'
 })
 export class GradeChangeRequestService {
-  private apiUrl = `${environment.baseUrl}/GradeChangeRequests`;
+  private apiUrl = `${environment.baseUrl}/${environment.apiVersion}/gradechangerequests`;
 
   constructor(private http: HttpClient) { }
 

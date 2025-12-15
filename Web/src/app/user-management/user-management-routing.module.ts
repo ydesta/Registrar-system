@@ -5,6 +5,7 @@ import { UserListComponent } from './components/user-list/user-list.component';
 import { RoleManagementComponent } from './components/role-management/role-management.component';
 import { PermissionManagementComponent } from './components/permission-management/permission-management.component';
 import { UserActivityComponent } from './components/user-activity/user-activity.component';
+import { SuspiciousActivityComponent } from './components/suspicious-activity/suspicious-activity.component';
 import { UserDetailsComponent } from './components/user-details/user-details.component';
 import { UserCredentialsComponent } from './components/user-credentials/user-credentials.component';
 import { AuthGuardService } from '../services/guards/auth-guard.service';
@@ -37,6 +38,12 @@ const routes: Routes = [
   { 
     path: 'activity', 
     component: UserActivityComponent,
+    canActivate: [AuthGuardService],
+    data: { roles: ['Administrator', 'Admin', 'Super Admin'] }
+  },
+  { 
+    path: 'suspicious-activity', 
+    component: SuspiciousActivityComponent,
     canActivate: [AuthGuardService],
     data: { roles: ['Administrator', 'Admin', 'Super Admin'] }
   },

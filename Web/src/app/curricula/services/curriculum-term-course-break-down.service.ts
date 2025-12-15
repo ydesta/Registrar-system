@@ -8,7 +8,7 @@ import { environment } from "src/environments/environment";
 })
 export class CurriculumTermCourseBreakDownService {
   baseUrl = environment.baseUrl;
-  private readonly curriculumTernCourseBreakdowns: string = "/CurriculumTermCourseBreakdown";
+  private readonly curriculumTernCourseBreakdowns: string = `/${environment.apiVersion}/curriculumtermcoursebreakdown`;
   getCurriculumTermCourseBreakdownsUrl() {
     return this.baseUrl + this.curriculumTernCourseBreakdowns;
   }

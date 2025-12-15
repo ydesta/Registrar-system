@@ -72,7 +72,6 @@ export class QuadrantBreakdownFormComponent implements OnInit {
 
       this.quadrantId = res;
       if (this.curriculumId != null && res != null) {
-        console.log(this.curriculumId);
         this.targetList = [];
         this.targetCourseIds$.next([]);
         this.id = 0

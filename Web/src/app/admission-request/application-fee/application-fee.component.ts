@@ -231,7 +231,6 @@ export class ApplicationFeeComponent implements OnInit, OnDestroy {
         localStorage.setItem('applicationFeeLastRefresh', new Date().toISOString());
       },
       error: (error) => {
-        console.error('Error loading application fee:', error);
         this.loading = false;
         this.applicationFee = {
           paymentType: 'Application Fee',

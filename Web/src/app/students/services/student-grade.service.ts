@@ -17,7 +17,7 @@ export class StudentGradeService {
 
  
   getStudentGrades(userId: string): Observable<StudentGradeViewModel[]> {
-    return this.http.get<BaseModel<StudentGradeViewModel[]>>(`${this.apiUrl}/StudentGrades/getStudentGrades/${userId}`)
+    return this.http.get<BaseModel<StudentGradeViewModel[]>>(`${this.apiUrl}/${environment.apiVersion}/grade/getStudentGrades/${userId}`)
       .pipe(
         map(response => response.data || [])
       );
@@ -25,7 +25,7 @@ export class StudentGradeService {
 
  
   getStudentGradesByQuery(queryParams: any): Observable<StudentGradeViewModel[]> {
-    return this.http.post<BaseModel<StudentGradeViewModel[]>>(`${this.apiUrl}/StudentGrades/report`, queryParams)
+    return this.http.post<BaseModel<StudentGradeViewModel[]>>(`${this.apiUrl}/${environment.apiVersion}/grade/report`, queryParams)
       .pipe(
         map(response => response.data || [])
       );
@@ -33,10 +33,10 @@ export class StudentGradeService {
 
   
   uploadGrades(formData: FormData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/StudentGrades/uploadGrade`, formData);
+    return this.http.post(`${this.apiUrl}/${environment.apiVersion}/grade/uploadGrade`, formData);
   }
   getStudentInformationWithInstructor(userId: string,studentId:string): Observable<StudentInformationView> {
-    const endpointUrl = `${this.apiUrl}/getStudentInformationWithInstructor/${userId}/${studentId}`;
+    const endpointUrl = `${this.apiUrl}/${environment.apiVersion}/grade/getStudentInformationWithInstructor/${userId}/${studentId}`;
     return this.http.get<StudentInformationView>(endpointUrl).pipe(
       catchError((error) => {
         console.error('Error occurred while fetching student information with instructor:', error);

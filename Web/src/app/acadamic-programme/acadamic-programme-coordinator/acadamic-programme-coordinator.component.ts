@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-acadamic-program-coordinator',
@@ -18,8 +19,10 @@ export class AcadamicProgrammeCoordinatorComponent implements OnInit {
     this.fetchProgramCoordinator();
      }
      fetchProgramCoordinator(){
-      this._crudService.getList('/AcadamicProgrammeCoordinators').subscribe((res:any)=>{
-        this.programCoordinator =res.data
+      this._crudService.getList(`/${environment.apiVersion}/acadamicprogrammecoordinators`).subscribe((res:any)=>{
+        // API returns ResponseDtos, which is wrapped in BaseModel by getList()
+        // ResponseDtos has Data property, so we need res.data.Data or res.data.data
+        this.programCoordinator = res.data?.Data || res.data?.data || res.data
         })
      }
      showDeleteConfirm(id:any): void {
@@ -31,14 +34,14 @@ export class AcadamicProgrammeCoordinatorComponent implements OnInit {
         nzOkType: 'primary',
         nzOkDanger: true,
         nzOnOk: () => {
-             this._crudService.delete('/AcadamicProgrammeCoordinators', this.progCoordinorId).subscribe((res:any)=>{
-             // 
+             this._crudService.delete(`/${environment.apiVersion}/acadamicprogrammecoordinators`, this.progCoordinorId).subscribe((res:any)=>{
+             // API now returns ResponseDtos
               this.fetchProgramCoordinator();
-              if(res.status ==  "success" ){
-          this._customNotificationService.notification('success','Success',res.data)
+              if(res.status ==  "success" || res.Status == "success"){
+          this._customNotificationService.notification('success','Success',res.data || res.Data)
               }
-              if(res.status ==  "error" ){
-                this._customNotificationService.notification('error','Error',res.data)
+              if(res.status ==  "error" || res.Status == "error"){
+                this._customNotificationService.notification('error','Error',res.data || res.Data || res.error || res.Error)
                     }
              })
         },

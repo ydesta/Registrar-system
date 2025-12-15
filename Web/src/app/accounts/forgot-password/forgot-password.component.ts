@@ -102,8 +102,6 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
   }
 
   goToLogin(): void {
-    console.log('Navigating to login page...');
-    // Clear any existing countdown timer
     if (this.redirectTimer) {
       clearInterval(this.redirectTimer);
       this.redirectTimer = null;

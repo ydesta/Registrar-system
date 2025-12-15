@@ -12,10 +12,10 @@ import { environment } from "src/environments/environment";
 })
 export class CurriculumQuadrantBreakdownService {
   baseUrl = environment.baseUrl;
-  private readonly curriculumQuadrantBreakdowns: string = "/CurriculumQuadrantBreakdowns";
-  private readonly Quadrants: string = "/Quadrants";
-  private readonly Courses: string = "/Courses";
-  private readonly curriculum: string = "/Curriculums";
+  private readonly curriculumQuadrantBreakdowns: string = `/${environment.apiVersion}/curriculumquadrantbreakdowns`;
+  private readonly Quadrants: string = `/${environment.apiVersion}/quadrants`;
+  private readonly Courses: string = `/${environment.apiVersion}/courses`;
+  private readonly curriculum: string = `/${environment.apiVersion}/curriculum`;
   getcurriculumQuadrantBreakdownsUrl() {
     return this.baseUrl + this.curriculumQuadrantBreakdowns;
   }

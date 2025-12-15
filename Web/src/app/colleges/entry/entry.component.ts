@@ -46,7 +46,7 @@ export class EntryComponent implements OnInit {
              })
         },
         nzCancelText: 'No',
-        nzOnCancel: () => console.log('Cancel')
+        nzOnCancel: () => {}
       });
     }
   }

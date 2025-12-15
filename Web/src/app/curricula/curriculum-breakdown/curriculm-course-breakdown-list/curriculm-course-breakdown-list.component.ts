@@ -132,7 +132,7 @@ export class CurriculumCourseBreakdownListComponent implements OnInit {
         //   });
       },
       nzCancelText: "No",
-      nzOnCancel: () => console.log("Cancel")
+      nzOnCancel: () => {}
     });
   }
   gotoCurriculumBreakdown(id: number) {

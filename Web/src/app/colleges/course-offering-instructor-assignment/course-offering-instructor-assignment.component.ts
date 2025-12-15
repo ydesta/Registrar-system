@@ -56,7 +56,6 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
           this.originalStaffList = [...this.staffList];
           this.listOfCurrentPageData = [...this.staffList];
         } else {
-          console.error('No data received from staff service');
           this.staffList = [];
           this.originalStaffList = [];
         }
@@ -65,7 +64,6 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Error loading staff list:', error);
         this.staffList = [];
         this.originalStaffList = [];
         this.loading = false;
@@ -111,12 +109,8 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
     }
   }
   onSearch(): void {
-    console.log('Search text:', this.searchText);
-    console.log('Original staff list length:', this.originalStaffList?.length);
-
     // Check if originalStaffList exists
     if (!this.originalStaffList || this.originalStaffList.length === 0) {
-      console.log('No original staff list available');
       return;
     }
 
@@ -124,7 +118,6 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
     if (this.searchText.trim() === '') {
       // If the search text is empty, reset the staffList to its original state
       this.staffList = [...this.originalStaffList];
-      console.log('Reset to original list, length:', this.staffList.length);
     } else {
       // Filter the original list based on search criteria
       this.staffList = this.originalStaffList.filter(item => {
@@ -139,7 +132,6 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
           firstName.includes(searchTerm) ||
           lastName.includes(searchTerm);
       });
-      console.log('Filtered list length:', this.staffList.length);
     }
 
     // Refresh the checked status after filtering
@@ -166,7 +158,6 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
     assignment.staffId = selectedStaffs;
 
     this.loading = true;
-    console.log("%%%         ", assignment);
     this.courseOfferingInstructorAssignmentService.create(assignment).subscribe({
       next: (res) => {
         if (res) {
@@ -184,7 +175,6 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Error assigning instructors:', error);
         this._customNotificationService.notification(
           "error",
           "Error",
@@ -205,7 +195,6 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
 
     // Check if originalStaffList exists
     if (!this.originalStaffList || this.originalStaffList.length === 0) {
-      console.log('No original staff list available for dropdown search');
       return;
     }
 
@@ -213,7 +202,6 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
     if (this.searchValue.trim() === '') {
       // If the search value is empty, reset the staffList to its original state
       this.staffList = [...this.originalStaffList];
-      console.log('Dropdown search reset to original list, length:', this.staffList.length);
     } else {
       // Filter the original list based on search criteria
       this.staffList = this.originalStaffList.filter((item: any) => {
@@ -225,7 +213,6 @@ export class CourseOfferingInstructorAssignmentComponent implements OnInit {
 
         return firstName.includes(searchTerm) || lastName.includes(searchTerm);
       });
-      console.log('Dropdown search filtered list length:', this.staffList.length);
     }
 
     // Refresh the checked status after filtering

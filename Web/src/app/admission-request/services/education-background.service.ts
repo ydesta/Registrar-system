@@ -8,7 +8,7 @@ import { environment } from "src/environments/environment";
 })
 export class EducationBackgroundService {
   baseUrl = environment.baseUrl;
-  private readonly _educationBackgroundUrl: string = "/ApplicantEducationBackgrounds";
+  private readonly _educationBackgroundUrl: string = `/${environment.apiVersion}/applicanteducationbackgrounds`;
   getEducationBackgroundUrl() {
     return this.baseUrl + this._educationBackgroundUrl;
   }

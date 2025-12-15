@@ -8,7 +8,7 @@ import { environment } from "src/environments/environment";
 })
 export class FileService {
   baseUrl = environment.baseUrl;
-  private readonly _fileUrl: string = "/Files";
+  private readonly _fileUrl: string = `/${environment.apiVersion}/file`;
   getFileUrl() {
     return this.baseUrl + this._fileUrl;
   }

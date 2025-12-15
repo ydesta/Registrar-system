@@ -10,8 +10,8 @@ import { ApplicantFeeViewModel } from "../model/applicant-fee-view-model.model";
 })
 export class AcademicProgramRequestService {
   baseUrl = environment.baseUrl;
-  private readonly acadamicPrgram: string = "/AcademicProgramRequest";
-  private readonly acadamicPrgramList: string = "/AcadamicProgramme";
+  private readonly acadamicPrgram: string = `/${environment.apiVersion}/academicprogramrequest`;
+  private readonly acadamicPrgramList: string = `/${environment.apiVersion}/program`;
   getacadamicPrgramUrl() {
     return this.baseUrl + this.acadamicPrgram;
   }
@@ -29,7 +29,6 @@ export class AcademicProgramRequestService {
       observe: 'response'
     }).pipe(
       map(response => {
-        console.log('Create response:', response);
         // Handle different response structures
         if (response.body) {
           return response.body;
@@ -39,7 +38,6 @@ export class AcademicProgramRequestService {
         return response;
       }),
       catchError(error => {
-        console.error('Create error:', error);
         // If it's a 200 status but treated as error, treat it as success
         if (error.status === 200) {
           return of("success");
@@ -60,7 +58,6 @@ export class AcademicProgramRequestService {
       observe: 'response'
     }).pipe(
       map(response => {
-        console.log('Update response:', response);
         // Handle different response structures
         if (response.body) {
           return response.body;
@@ -70,7 +67,6 @@ export class AcademicProgramRequestService {
         return response;
       }),
       catchError(error => {
-        console.error('Update error:', error);
         // If it's a 200 status but treated as error, treat it as success
         if (error.status === 200) {
           return of("success");
@@ -85,7 +81,6 @@ export class AcademicProgramRequestService {
       observe: 'response'
     }).pipe(
       map(response => {
-        console.log('Delete response:', response);
         // Handle different response structures
         if (response.body) {
           return response.body;
@@ -95,7 +90,6 @@ export class AcademicProgramRequestService {
         return response;
       }),
       catchError(error => {
-        console.error('Delete error:', error);
         // If it's a 200 status but treated as error, treat it as success
         if (error.status === 200) {
           return of("success");

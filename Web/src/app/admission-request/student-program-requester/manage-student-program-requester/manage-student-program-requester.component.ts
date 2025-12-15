@@ -67,8 +67,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
         this.getAcademicProgramList();
         this.getListOfDivisionStatus();
         this.isInitialized = true;
-      } else {
-        console.log('User not authenticated, waiting for login...');
       }
     });
 
@@ -80,7 +78,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
     // Monitor authentication state changes
     this.authSubscription = this.authService.isAuthenticated$.subscribe(isAuth => {
       if (isAuth && !this.isInitialized) {
-        console.log('User authenticated, initializing student program requester component...');
         this.userId = localStorage.getItem('userId');
         this.clearCachedData();
         this.initializeData();
@@ -89,7 +86,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
         this.getListOfDivisionStatus();
         this.isInitialized = true;
       } else if (!isAuth && this.isInitialized) {
-        console.log('User logged out, clearing student program requester component state...');
         this.clearComponentState();
         this.isInitialized = false;
       }
@@ -99,7 +95,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
     this.authSubscription.add(
       this.authService.loginChanged.subscribe(isLoggedIn => {
         if (isLoggedIn && !this.isInitialized) {
-          console.log('Login detected, initializing student program requester component...');
           this.userId = localStorage.getItem('userId');
           this.clearCachedData();
           this.initializeData();
@@ -108,7 +103,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
           this.getListOfDivisionStatus();
           this.isInitialized = true;
         } else if (!isLoggedIn) {
-          console.log('Logout detected, clearing student program requester component state...');
           this.clearComponentState();
           this.isInitialized = false;
         }
@@ -119,7 +113,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
     this.authSubscription.add(
       this.authService.currentUser$.subscribe(user => {
         if (user && user.id !== this.userId) {
-          console.log('User changed, updating student program requester component...');
           this.userId = user.id;
           this.clearCachedData();
           if (this.isInitialized) {
@@ -201,7 +194,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
 
  private loadApplicantIdFromService(): void {
   if (!this.userId) {
-    console.warn('No userId available, cannot load applicant ID');
     return;
   }
 
@@ -209,20 +201,15 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
     next: (applicantId) => {
       if (applicantId && applicantId !== this.applicantId) {
         this.applicantId = applicantId;
-        console.log("Applicant ID loaded successfully:", this.applicantId);
         this.getApplicantacadamicPrgramtId(applicantId);
       } else if (!applicantId) {
-        console.warn('No applicant found for user:', this.userId);
         // Don't retry - this is a valid state where no applicant exists
         return;
       }
     },
     error: (error) => {
-      console.error('Error loading applicant ID:', error);
-      
       // Handle cooldown error specifically
       if (error.message && error.message.includes('Fetch cooldown active')) {
-        console.log('Fetch cooldown active, waiting for cached value...');
         // Wait a bit longer and try again, or check if there's a cached value
         setTimeout(() => this.loadApplicantIdFromService(), 1000);
         return;
@@ -232,7 +219,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
       
       // Don't retry automatically on authentication errors
       if (error.status === 401 || error.status === 403) {
-        console.log('Authentication error, user may need to login again');
         return;
       }
       // Retry for other errors after a delay
@@ -243,8 +229,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
 
   // Add method to handle authentication errors gracefully
   private handleAuthError(error: any): void {
-    console.error('Authentication error in student program requester component:', error);
-    
     if (error.status === 401 || error.status === 403) {
       // User is not authenticated, clear state and wait for login
       this.clearComponentState();
@@ -313,7 +297,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
           }
         },
         error: (error) => {
-          console.error('Error loading academic program requests:', error);
           this.handleAuthError(error);
           this.applicationProgramRequestList = [];
           this.countSubmitionCourse = 0;
@@ -404,7 +387,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
   openModal(): void {
     // Validate that we have an applicantId before opening the modal
     if (!this.applicantId) {
-      console.error("Cannot open modal: applicantId is not available");
       this._customNotificationService.notification(
         "error",
         "Error",
@@ -412,8 +394,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
       );
       return;
     }
-
-    console.log("Opening modal with applicantId:", this.applicantId);
     
     const modal: NzModalRef = this._modal.create({
       nzTitle: "Student Program Request",
@@ -441,13 +421,11 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
   editModal(request: AcademicProgramRequest): void {
     // Validate that we have the required data before opening the modal
     if (!request) {
-      console.error("Cannot edit: request object is null or undefined");
       return;
     }
 
     const applicantId = request.applicantId || this.applicantId;
     if (!applicantId) {
-      console.error("Cannot edit: applicantId is not available");
       this._customNotificationService.notification(
         "error",
         "Error",
@@ -455,8 +433,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
       );
       return;
     }
-
-    console.log("Opening edit modal with applicantId:", applicantId);
     
     const modal: NzModalRef = this._modal.create({
       nzTitle: "Edit Academic Program Request",
@@ -547,7 +523,6 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
           }
         },
         error: (error) => {
-          console.error('Error loading academic programs:', error);
           this.acadamicProgrammes = [];
         }
       });

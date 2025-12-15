@@ -61,16 +61,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Log environment configuration for debugging
-    if (environment.production) {
-      console.log('Production Environment Configuration:', {
-        secureUrl: environment.secureUrl,
-        baseUrl: environment.baseUrl,
-        fileUrl: environment.fileUrl
-      });
-    }
-    
-    this.getNextAcademicTerm();
     this.initializeUserData();
     
     // Subscribe to authentication state changes
@@ -79,9 +69,14 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       this.currentUser = this._authService.getCurrentUser();
       this.isUserAdmin = this._authService.hasRole('Administrator') || this._authService.hasRole('Admin');
       this.initializeUserData();
+      
+      // Only make API calls if user is authenticated
+      if (isAuth) {
+        this.getNextAcademicTerm();
+      }
+      
       this.cdRef.detectChanges();
-    }).catch(error => {
-      console.error('Authentication check failed:', error);
+    }).catch(() => {
       // If authentication check fails, clear cache and retry
       this.handleAuthFailure();
     });
@@ -93,8 +88,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isUserAdmin = this._authService.hasRole('Administrator') || this._authService.hasRole('Admin');
       this.initializeUserData();
       this.cdRef.detectChanges();
-    }, error => {
-      console.error('User subscription error:', error);
+    }, () => {
       this.handleAuthFailure();
     });
 
@@ -203,8 +197,19 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getNextAcademicTerm() {
-    this.batchTermService.getNextAcademicTerm().subscribe((res: any) => {
-      sessionStorage.setItem('nextAcademicTerm', JSON.stringify(res));
+    // Only make API call if user is authenticated
+    const isAuth = localStorage.getItem('isLogin') === 'true' && this._authService.getToken();
+    if (!isAuth) {
+      return;
+    }
+    
+    this.batchTermService.getNextAcademicTerm().subscribe({
+      next: (res: any) => {
+        sessionStorage.setItem('nextAcademicTerm', JSON.stringify(res));
+      },
+      error: (error) => {
+        // Silently handle errors - don't show notifications for unauthenticated requests
+      }
     });
   }
 
@@ -356,7 +361,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         this.userType = cleanRole;
         break;
       default:
-        console.log('Unknown role:', cleanRole);
         break;
     }
   }
@@ -483,7 +487,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   private handleAuthFailure(): void {
-    console.warn('Authentication check failed. Retrying.');
     this.initializeUserData(); // Re-initialize user data to force a fresh login attempt
     this.cdRef.detectChanges();
   }

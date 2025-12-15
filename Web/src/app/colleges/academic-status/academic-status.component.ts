@@ -47,7 +47,7 @@ export class AcademicStatusComponent implements OnInit {
              })
         },
         nzCancelText: 'No',
-        nzOnCancel: () => console.log('Cancel')
+        nzOnCancel: () => {}
       });
     }
   }

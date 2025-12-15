@@ -10,12 +10,12 @@ export class DataMigrationService {
  //  idp = "https://localhost:5001/api/StudentDataMigrations"
  // idp = "https://hilcoe.edu.et:5001/api/StudentDataMigrations"
   baseUrl = environment.baseUrl;
-  idp = `${environment.baseUrl}/StudentDataMigrations`;
-  private readonly _settingDataLoads: string = "/SettingDataLoads";
-  private readonly _batchCodeDataMigrations: string = "/BatchCodeDataMigrations";
-  private readonly _termCourseOfferingDataMigrations: string = "/TermCourseOfferingDataMigrations";
-  private readonly _studentCourseRegistrationDatas: string = "/StudentCourseRegistrationDatas";
-  private readonly _studentDataMigrations: string = "/StudentDataMigrations";
+  idp = `${environment.baseUrl}/${environment.apiVersion}/migrate/student`;
+  private readonly _settingDataLoads: string = `/${environment.apiVersion}/migrate/setting`;
+  private readonly _batchCodeDataMigrations: string = `/${environment.apiVersion}/migrate/batch`;
+  private readonly _termCourseOfferingDataMigrations: string = `/${environment.apiVersion}/migrate/offering`;
+  private readonly _studentCourseRegistrationDatas: string = `/${environment.apiVersion}/migrate/registration`;
+  private readonly _studentDataMigrations: string = `/${environment.apiVersion}/migrate/student`;
   getSettingDataLoadsUrl() {
     return this.baseUrl + this._settingDataLoads;
   }

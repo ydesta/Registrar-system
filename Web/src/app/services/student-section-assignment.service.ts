@@ -15,7 +15,7 @@ import { UnassignedStudentsResponse } from '../Models/StudentInfo';
   providedIn: 'root'
 })
 export class StudentSectionAssignmentService {
-  private apiUrl = `${environment.baseUrl}/StudentSectionAssignments`;
+  private apiUrl = `${environment.baseUrl}/${environment.apiVersion}/studentsectionassignments`;
 
   constructor(private http: HttpClient) { }
 

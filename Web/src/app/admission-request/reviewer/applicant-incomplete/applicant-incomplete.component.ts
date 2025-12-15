@@ -36,14 +36,12 @@ export class ApplicantIncompleteComponent implements OnInit {
     this.generalInformationService.getIncompleteApplicants()
       .subscribe({
         next: (response) => {
-          console.log('Incomplete Applicants:', response);
           this.incompleteApplicants = response;
           this.total = response.length;
           this.updatePaginatedData();
           this.tableLoading = false;
         },
         error: (error) => {
-          console.error('Error loading incomplete applicants:', error);
           this._customNotificationService.notification(
             "error",
             "Error",

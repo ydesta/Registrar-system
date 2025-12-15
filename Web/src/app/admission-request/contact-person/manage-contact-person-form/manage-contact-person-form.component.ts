@@ -49,8 +49,6 @@ export class ManageContactPersonFormComponent {
       if (isAuth) {
         this.initializeData();
         this.isInitialized = true;
-      } else {
-        console.log('User not authenticated, waiting for login...');
       }
     });
 
@@ -62,13 +60,11 @@ export class ManageContactPersonFormComponent {
     // Monitor authentication state changes
     this.authSubscription = this.authService.isAuthenticated$.subscribe(isAuth => {
       if (isAuth && !this.isInitialized) {
-        console.log('User authenticated, initializing component...');
         this.userId = localStorage.getItem('userId');
         this.clearCachedData();
         this.initializeData();
         this.isInitialized = true;
       } else if (!isAuth && this.isInitialized) {
-        console.log('User logged out, clearing component state...');
         this.clearComponentState();
         this.isInitialized = false;
       }
@@ -78,13 +74,11 @@ export class ManageContactPersonFormComponent {
     this.authSubscription.add(
       this.authService.loginChanged.subscribe(isLoggedIn => {
         if (isLoggedIn && !this.isInitialized) {
-          console.log('Login detected, initializing component...');
           this.userId = localStorage.getItem('userId');
           this.clearCachedData();
           this.initializeData();
           this.isInitialized = true;
         } else if (!isLoggedIn) {
-          console.log('Logout detected, clearing component state...');
           this.clearComponentState();
           this.isInitialized = false;
         }
@@ -95,7 +89,6 @@ export class ManageContactPersonFormComponent {
     this.authSubscription.add(
       this.authService.currentUser$.subscribe(user => {
         if (user && user.id !== this.userId) {
-          console.log('User changed, updating component...');
           this.userId = user.id;
           this.clearCachedData();
           if (this.isInitialized) {
@@ -168,28 +161,22 @@ export class ManageContactPersonFormComponent {
 
   private loadApplicantIdFromService(): void {
     if (!this.userId) {
-      console.warn('No userId available, cannot load applicant ID');
       return;
     }
 
     this.generalInformationService.getOrStoreParentApplicantId(this.userId).subscribe({
       next: (applicantId) => {
-        console.log("contact person applicantId    ", applicantId);
         if (applicantId && applicantId !== this.applicantId) {
           this.applicantId = applicantId;
           this.getApplicantContactPersonByApplicantId(applicantId);
         } else if (!applicantId) {
-          console.warn('No applicant found for user:', this.userId);
           // Don't retry - this is a valid state where no applicant exists
           return;
         }
       },
       error: (error) => {
-        console.error('Error loading applicant ID:', error);
-        
         // Handle cooldown error specifically
         if (error.message && error.message.includes('Fetch cooldown active')) {
-          console.log('Fetch cooldown active, waiting for cached value...');
           // Wait a bit longer and try again, or check if there's a cached value
           setTimeout(() => this.loadApplicantIdFromService(), 1000);
           return;
@@ -199,7 +186,6 @@ export class ManageContactPersonFormComponent {
         
         // Don't retry automatically on authentication errors
         if (error.status === 401 || error.status === 403) {
-          console.log('Authentication error, user may need to login again');
           return;
         }
         // Retry for other errors after a delay
@@ -229,7 +215,6 @@ export class ManageContactPersonFormComponent {
               }
             },
             error: (error) => {
-              console.error('Error deleting contact:', error);
               this._customNotificationService.notification(
                 "error",
                 "Error",
@@ -238,7 +223,6 @@ export class ManageContactPersonFormComponent {
             }
           });
         } catch (error) {
-          console.error('Error in delete operation:', error);
           this._customNotificationService.notification(
             "error",
             "Error",
@@ -253,7 +237,6 @@ export class ManageContactPersonFormComponent {
 
   getApplicantContactPersonByApplicantId(id: string) {
     if (!id) {
-      console.warn('No applicant ID provided for contact person lookup');
       return;
     }
     
@@ -272,7 +255,6 @@ export class ManageContactPersonFormComponent {
           }
         },
         error: (error) => {
-          console.error('Error loading contact persons:', error);
           this.handleAuthError(error);
           this.contactPersonLists = [];
           this.noumberOfContact = 0;
@@ -305,8 +287,6 @@ export class ManageContactPersonFormComponent {
 
   // Add method to handle authentication errors gracefully
   private handleAuthError(error: any): void {
-    console.error('Authentication error in component:', error);
-    
     if (error.status === 401 || error.status === 403) {
       // User is not authenticated, clear state and wait for login
       this.clearComponentState();

@@ -62,7 +62,6 @@ export class StudentProgramRequesterFormComponent implements OnInit {
     
     // Ensure we have a valid applicantId
     if (!this.applicantId) {
-      console.error("Error: applicantId is required but not available");
       throw new Error("Applicant ID is required but not available");
     }
     
@@ -93,7 +92,6 @@ export class StudentProgramRequesterFormComponent implements OnInit {
           }
         },
         error: (error) => {
-          console.error('Error loading academic programs:', error);
           this._customNotificationService.notification(
             "error",
             "Error",
@@ -111,7 +109,6 @@ export class StudentProgramRequesterFormComponent implements OnInit {
   onSubmit() {
     if (this.academicProgramRequestForm.valid) {
       const postData = this.getAcademicProgramRequest();
-      console.log("object         ", postData);
       if (this.id == undefined) {
         this._academicProgramRequestService.create(postData).subscribe({
           next: (res) => {
@@ -132,7 +129,6 @@ export class StudentProgramRequesterFormComponent implements OnInit {
             }
           },
           error: (error) => {
-            console.error('Error creating academic program request:', error);
             this._customNotificationService.notification(
               "error",
               "Error",
@@ -147,7 +143,6 @@ export class StudentProgramRequesterFormComponent implements OnInit {
           .update(this.id, postData)
           .subscribe({
             next: (res) => {
-              console.log("##      ", res);
               // Check if response indicates success
               const isSuccess = res === "success";
               
@@ -168,7 +163,6 @@ export class StudentProgramRequesterFormComponent implements OnInit {
               }
             },
             error: (error) => {
-              console.error('Error updating academic program request:', error);
               this._customNotificationService.notification(
                 "error",
                 "Error",

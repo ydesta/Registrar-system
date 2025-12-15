@@ -6,12 +6,12 @@ using SecureAuth.APPLICATION.Queries.Admin;
 using SecureAuth.APPLICATION.DTOs.Admin;
 using SecureAuth.DOMAIN.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using SecureAuth.INFRASTRUCTURE.Data;
 using SecureAuth.INFRASTRUCTURE.SeedData;
 using SecureAuth.DOMAIN.Models.Security;
 using SecureAuth.INFRASTRUCTURE.Services;
-using Microsoft.Extensions.Configuration;
+using SecureAuth.API.Configuration;
+using Microsoft.EntityFrameworkCore;
 
 namespace SecureAuth.API.Controllers
 {
@@ -501,19 +501,23 @@ namespace SecureAuth.API.Controllers
         {
             try
             {
-                var configuration = HttpContext.RequestServices.GetRequiredService<IConfiguration>();
-                
                 var result = new
                 {
-                    Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
-                    ConnectionString = configuration.GetConnectionString("DefaultConnection"),
-                    JwtIssuer = configuration["JWT:ValidIssuer"],
-                    JwtAudience = configuration["JWT:ValidAudience"],
-                    EmailFrom = configuration["EmailConfiguration:From"],
-                    EmailServer = configuration["EmailConfiguration:SmtpServer"],
-                    RateLimitingMaxAttempts = configuration["RateLimiting:MaxAttempts"],
-                    TokenPolicyAccessTokenValidity = configuration["TokenPolicy:AccessTokenValidity"],
-                    PasswordPolicyMinLength = configuration["PasswordPolicy:MinLength"]
+                    Environment = AppConstants.Environment.CurrentEnvironment,
+                    IsDevelopment = AppConstants.Environment.IsDevelopmentEnvironment,
+                    IsProduction = AppConstants.Environment.IsProductionEnvironment,
+                    ConnectionString = AppConstants.Database.ConnectionString,
+                    DatabaseServer = AppConstants.Database.Server,
+                    DatabaseName = AppConstants.Database.DatabaseName,
+                    JwtIssuer = AppConstants.Jwt.ValidIssuer,
+                    JwtAudience = AppConstants.Jwt.ValidAudience,
+                    EmailFrom = AppConstants.Email.From,
+                    EmailServer = AppConstants.Email.SmtpServer,
+                    FrontendUrl = AppConstants.AppSettings.FrontendUrl,
+                    RateLimitingMaxAttempts = AppConstants.RateLimiting.MaxAttempts,
+                    TokenPolicyAccessTokenValidity = AppConstants.TokenPolicy.AccessTokenValidity,
+                    PasswordPolicyMinLength = AppConstants.PasswordPolicy.MinLength,
+                    SwaggerEnabled = AppConstants.Swagger.Enabled
                 };
 
                 return Ok(result);

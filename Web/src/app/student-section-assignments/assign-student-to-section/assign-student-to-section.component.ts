@@ -62,7 +62,6 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
     if (this.student && this.academicTerm && this.year) {
       this.studentId = this.student.id;
       this.batchCode = this.student.batchCode;
-      console.log("%%%      ",this.batchCode);
       this.loadStudentInfo();
       this.loadStudentCourses();
       this.loadSectionsForBatch();
@@ -104,18 +103,15 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
             this.studentInfo = response;
           }
         },
-        error: (error) => {
+        error: () => {
           this.loadingStudent = false;
-          console.error('Error loading student info:', error);
           this.notificationService.notification('error', 'Error', 'Failed to load student information');
         }
       });
   }
 
   private loadStudentCourses(): void {
-    console.log("%% this.studentId    ", this.studentId, this.academicTerm, this.year, this.batchCode);
     if (!this.batchCode || !this.academicTerm || !this.year || !this.studentId) return;
-    console.log("%% this.studentId    ", this.studentId, this.academicTerm, this.year, this.batchCode);
     this.loadingCourses = true;
     this.courses = [];
 
@@ -128,16 +124,12 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
           const courses: CourseInfo[] = Array.isArray(response) ? response : (response?.data || response?.courses || []);
 
           if (courses && courses.length > 0) {
-            console.log('Loaded courses:', courses);
             this.courses = courses;
             this.buildFormArray();
-          } else {
-            console.error('No courses loaded or courses array is empty');
           }
         },
-        error: (error) => {
+        error: () => {
           this.loadingCourses = false;
-          console.error('Error loading courses:', error);
           this.notificationService.notification('error', 'Error', 'Failed to load courses');
         }
       });
@@ -148,7 +140,6 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
     formArray.clear();
 
     this.courses.forEach(course => {
-      console.log('Processing course:', course);
       const courseGroup = this.fb.group({
         courseId: [course.courseId, Validators.required],
         courseCode: [course.courseCode],
@@ -160,7 +151,6 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
       formArray.push(courseGroup);
     });
 
-    console.log('Form array created with', formArray.length, 'courses');
   }
 
   private loadSectionsForBatch(): void {
@@ -173,7 +163,6 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
         next: (response: any) => {
           this.loadingSections = false;
           if (response) {
-            console.log("Sections response:", response);
 
             // Handle different response formats
             let sectionsData: any[] = [];
@@ -188,7 +177,6 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
               sectionsData = response;
             }
 
-            console.log("Processed sections data:", sectionsData);
 
             // Map to SectionViewModel format
             this.allSections = sectionsData.map((item: any) => ({
@@ -196,14 +184,12 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
               sectionName: item.sectionName || item.name || item.SectionName || item.title || 'Section'
             }));
 
-            console.log("Mapped sections:", this.allSections);
           } else {
             this.allSections = [];
           }
         },
         error: (error) => {
           this.loadingSections = false;
-          console.error('Error loading sections for batch:', error);
           this.allSections = [];
           this.notificationService.notification('error', 'Error', 'Failed to load sections');
         }
@@ -229,7 +215,6 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
     );
     
     if (hasEmptyBatchCode) {
-      console.error('batchCode is missing for one or more courses');
       return false;
     }
     
@@ -266,7 +251,6 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
 
     this.loading = true;
     const assignments = this.prepareStudentSectionAssignments();
-    console.log("Form data ", assignments);
     
     // Send the array of assignments in a single request
     this.sectionService.addStudentSectionAssignment(assignments)
@@ -274,7 +258,6 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.loading = false;
-          console.log('Assignment response:', response);
           
           this.showSummary = true;
           this.notificationService.notification('success', 'Success', 'Student assigned to sections successfully');
@@ -284,7 +267,6 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.loading = false;
-          console.error('Error assigning student to sections:', error);
           this.notificationService.notification('error', 'Error', 'Failed to assign student to sections. Please try again.');
         }
       });
@@ -296,25 +278,18 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
 
       // Validate all mandatory fields
       if (!this.studentId) {
-        console.error('studentId is missing');
       }
       if (!formValue.sectionId) {
-        console.error('sectionId is missing');
       }
       if (!formValue.courseId) {
-        console.error('courseId is missing');
       }
       if (!formValue.batchCode) {
-        console.error('batchCode is missing');
       }
       if (!this.sectionType) {
-        console.error('sectionType is missing');
       }
       if (!this.academicTerm) {
-        console.error('academicTerm is missing');
       }
       if (!this.year) {
-        console.error('year is missing');
       }
 
       return {

@@ -19,7 +19,7 @@ import { SharedModule } from './shared-module/shared/shared.module';
 import { HeaderComponent } from './header/header.component';
 import { SignoutRedirectCallbackComponent } from './signout-redirect-callback/signout-redirect-callback.component';
 import { SigninRedirectCallbackComponent } from './signin-redirect-callback/signin-redirect-callback.component';
-import { AuthInterceptorService } from './services/auth-interceptor.service';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { CsrfInterceptor } from './interceptors/csrf.interceptor';
 import { RouterModule } from '@angular/router';
 import { PortalModule } from './portal/portal.module';
@@ -51,11 +51,10 @@ registerLocaleData(en);
 
   ],
   providers: [
-    AuthInterceptorService,
     { provide: NZ_I18N, useValue: en_US },
     {
       provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptorService,
+      useClass: AuthInterceptor,
       multi: true,
     },
     {

@@ -79,7 +79,6 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
 
   fetchProgram() {
     this.tbLoading = true;
-    console.log('Fetching with pageindex:', this.pageindex, 'pageSize:', this.pageSize);
     this._crudService
       .getList(
         `/TermCourseOfferings/paginated?searchKey=${this.searchKey}&pageindex=${this.pageindex - 1  // Convert 1-based UI index to 0-based API index
@@ -87,9 +86,6 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
         }`
       )
       .subscribe((res: any) => {
-        console.log('API Response:', res);
-        console.log('Total records from API:', res.totalRowCount);
-        console.log('Data length:', res.data ? res.data.length : 0);
         this.termCourseOfferings = res.data.map((item: any) => {
           const term = this.listOfTermNumber.find(t => t.Id === item.academicTermSeason);
           let courseDetails: any[] = [];
@@ -99,12 +95,6 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
             courseDetails = item.couse.map((c: any, index: number) => {
               totalCreditHours += c.creditHours || 0;
               totalAssignedInstructors += c.noOfAssignedInstructor || 0;
-              
-              // Debug: Log the original course object to see available properties
-              console.log('Original course object:', c);
-              console.log('Available properties in course:', Object.keys(c));
-              console.log('Course ID type:', typeof c.id, 'Value:', c.id);
-              console.log('Course offering ID type:', typeof c.courseOfferingId, 'Value:', c.courseOfferingId);
               
               const courseDetail = {
                 number: index + 1,
@@ -116,7 +106,6 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
                 courseOfferingId: c.courseOfferingId || c.id, // Try to use courseOfferingId if available, fallback to course ID
                 isActive: c.isActive !== undefined ? c.isActive : true // Default to true if not provided
               };
-              console.log('Course detail mapped:', courseDetail);
               return courseDetail;
             });
           }
@@ -128,20 +117,15 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
             totalAssignedInstructors
           };
         });
-        console.log('Mapped termCourseOfferings:', this.termCourseOfferings);
-        console.log('termCourseOfferings length:', this.termCourseOfferings ? this.termCourseOfferings.length : 0);
         
         // Extract unique batch codes for filtering
         this.availableBatches = [...new Set(this.termCourseOfferings.map(item => item.batchCode).filter(batch => batch))];
-        console.log('Available batches:', this.availableBatches);
         
         // Apply current filter
         this.applyBatchFilter();
         
         // Try different possible property names for total count
         this.totalRecord = res.totalRowCount || res.total || res.count || res.totalCount || (res.data ? res.data.length : 0);
-        console.log('Setting totalRecord to:', this.totalRecord);
-        console.log('Available properties in response:', Object.keys(res));
         this.tbLoading = false;
         // Don't override pageSize and pageindex from server response
         // as it can interfere with pagination state
@@ -151,13 +135,11 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   }
 
   onPageIndexChange(page: number): void {
-    console.log('Page index changed to:', page);
     this.pageindex = page;
     this.fetchProgram();
   }
 
   onPageSizeChange(size: number): void {
-    console.log('Page size changed to:', size);
     this.pageSize = size;
     this.pageindex = 1;
     this.fetchProgram();
@@ -193,7 +175,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
           });
       },
       nzCancelText: "No",
-      nzOnCancel: () => console.log("Cancel")
+      nzOnCancel: () => {}
     });
   }
   showDeactivateConfirm(id: any): void {
@@ -226,7 +208,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
           });
       },
       nzCancelText: "No",
-      nzOnCancel: () => console.log("Cancel")
+      nzOnCancel: () => {}
     });
   }
 
@@ -259,7 +241,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
           });
       },
       nzCancelText: "No",
-      nzOnCancel: () => console.log("Cancel")
+      nzOnCancel: () => {}
     });
   }
 
@@ -291,7 +273,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
               });
       },
       nzCancelText: "No",
-      nzOnCancel: () => console.log("Cancel")
+      nzOnCancel: () => {}
     });
   }
 
@@ -390,7 +372,6 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
     return 0;
   }
   openModal(data: any): void {
-    console.log("Test Co assign  ",data);
     const modal: NzModalRef = this.modal.create({
       nzTitle: null, // We'll use our custom header
       nzContent: CourseOfferingInstructorAssignmentComponent,
@@ -430,6 +411,5 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
         item => item.batchCode && item.batchCode.toLowerCase().includes(searchTerm)
       );
     }
-    console.log('Filtered results:', this.filteredTermCourseOfferings.length);
   }
 }

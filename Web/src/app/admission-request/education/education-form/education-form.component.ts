@@ -278,7 +278,6 @@ export class EducationFormComponent implements OnInit {
               }
             },
             error: (error) => {
-              console.error('Error creating education:', error);
               this._customNotificationService.notification(
                 "error",
                 "Error",
@@ -306,7 +305,6 @@ export class EducationFormComponent implements OnInit {
               }
             },
             error: (error) => {
-              console.error('Error updating education:', error);
               this._customNotificationService.notification(
                 "error",
                 "Error",

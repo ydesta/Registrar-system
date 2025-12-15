@@ -15,7 +15,7 @@ export interface StaffResponse {
 })
 export class StaffService {
   private baseUrl = environment.baseUrl;
-  private staffEndpoint = '/staffs';
+  private staffEndpoint = `/${environment.apiVersion}/staff`;
 
   constructor(private http: HttpClient) { }
 

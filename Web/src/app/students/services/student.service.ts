@@ -18,10 +18,10 @@ import { StudentInformationView } from '../models/student-information-view .mode
 export class StudentService {
   private apiUrl = 'assets/student-profile-mock.json';
   baseUrl = environment.baseUrl;
-  private readonly studentUrlList: string = '/Students';
-  private readonly studentUrl: string = '/StudentCourseOfferings';
-  private readonly studentSemesterUrl: string = '/RegistrarWorkFlows';
-  private readonly studentGradesUrl: string = '/StudentGrades';
+  private readonly studentUrlList: string = `/${environment.apiVersion}/std`;
+  private readonly studentUrl: string = `/${environment.apiVersion}/studentcourseofferings`;
+  private readonly studentSemesterUrl: string = `/${environment.apiVersion}/registrarworkflows`;
+  private readonly studentGradesUrl: string = `/${environment.apiVersion}/grade`;
   getStudentUrlList() {
     return this.baseUrl + this.studentUrlList;
   }

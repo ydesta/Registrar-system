@@ -50,8 +50,6 @@ export class AddressComponent {
           environment.fileUrl +
           "/Resources/profile/" +
           applicantData.files[0]?.fileName;
-      } else {
-        console.error('Invalid response structure:', res);
       }
     });
   }

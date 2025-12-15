@@ -116,8 +116,7 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
         // Load unregistered courses after student data is loaded (if termId and termYear are already selected)
         this.loadUnregisteredCourses();
       },
-      error: (error) => {
-        console.error('Error fetching registered courses:', error);
+      error: () => {
         this.showSearchForm = false;
       }
     });
@@ -142,8 +141,7 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
           this.updateAllCourses();
           this.updateSubmitButtonState();
         },
-        error: (error) => {
-          console.error('Error fetching unregistered courses:', error);
+        error: () => {
           this.unregisteredCourses = [];
           this.filteredUnregisteredCourses = [];
           this.sortColumn = '';
@@ -387,8 +385,7 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
         this.canDelete = false;
         this.message.success(`${courseIds.length} course(s) have been deleted successfully.`);
       },
-      error: (error) => {
-        console.error('Error deleting courses:', error);
+      error: () => {
         this.message.error('Failed to delete selected courses. Please try again.');
       }
     });
@@ -465,7 +462,6 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
       }
       
       if (!course) {
-        console.error(`Course not found for courseId: ${courseId}, batchCode: ${batchCode}`);
         this.message.error(`Course not found: ${courseId}. Please refresh and try again.`);
         return;
       }
@@ -502,24 +498,11 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
       selectedCourses: selectedCourses
     };
 
-    console.log('Submitting registration request:', request);
-    console.log('Selected courses count:', selectedCourses.length);
-    console.log('Request payload:', JSON.stringify(request, null, 2));
-    console.log('Student ID:', this.studentList.id);
-    console.log('Term ID:', termId);
-    console.log('Year:', termYear);
-
     // Call the service method
     this.studentServices.addStudentManualCourseOfferingAsync(request).subscribe({
       next: (response) => {
-        console.log('Registration submitted successfully:', response);
-        console.log('Response type:', typeof response);
-        console.log('Response is null:', response === null);
-        console.log('Response is undefined:', response === undefined);
-        
         // Check if response is null or empty
         if (response === null || response === undefined) {
-          console.warn('Backend returned null/undefined response. This might indicate an issue.');
           // Still show success but log a warning
           this.message.warning('Registration request sent, but received empty response. Please verify the registration was successful.');
         } else {
@@ -536,11 +519,6 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
         }, 1500);
       },
       error: (error) => {
-        console.error('Error submitting registration:', error);
-        console.error('Error status:', error?.status);
-        console.error('Error statusText:', error?.statusText);
-        console.error('Error details:', JSON.stringify(error, null, 2));
-        
         // Provide more detailed error message
         let errorMessage = 'Failed to submit registration.';
         if (error?.error?.message) {
@@ -552,9 +530,6 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
         }
         
         this.message.error(errorMessage);
-      },
-      complete: () => {
-        console.log('Observable completed');
       }
     });
   }

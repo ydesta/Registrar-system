@@ -59,7 +59,7 @@ export class StatusTrackingComponent implements OnInit {
           });
       },
       nzCancelText: 'No',
-      nzOnCancel: () => console.log('Cancel'),
+      nzOnCancel: () => {},
     });
   }
 

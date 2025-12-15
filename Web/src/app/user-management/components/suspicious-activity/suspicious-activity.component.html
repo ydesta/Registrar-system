@@ -1,0 +1,295 @@
+<div class="suspicious-activity-container">
+  <nz-page-header>
+    <nz-breadcrumb nz-page-header-breadcrumb>
+      <nz-breadcrumb-item>Dashboard</nz-breadcrumb-item>
+      <nz-breadcrumb-item>User Management</nz-breadcrumb-item>
+      <nz-breadcrumb-item>Suspicious Activity</nz-breadcrumb-item>
+    </nz-breadcrumb>
+    <nz-page-header-title>Suspicious Activity Monitoring</nz-page-header-title>
+    <nz-page-header-subtitle>Monitor and analyze suspicious user and IP activities</nz-page-header-subtitle>
+  </nz-page-header>
+
+  <!-- Statistics Cards -->
+  <div class="stats-cards" *ngIf="statistics">
+    <div class="stat-card">
+      <div class="stat-title">Total Suspicious Activities</div>
+      <div class="stat-value">{{ statistics.totalSuspiciousActivities | number }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Suspicious IPs</div>
+      <div class="stat-value">{{ statistics.totalSuspiciousIPs | number }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Suspicious Users</div>
+      <div class="stat-value">{{ statistics.totalSuspiciousUsers | number }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Last 24 Hours</div>
+      <div class="stat-value">{{ statistics.suspiciousActivitiesLast24Hours | number }}</div>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <form [formGroup]="filterForm">
+      <div class="filter-row">
+        <div class="filter-item">
+          <label>IP Address</label>
+          <input 
+            nz-input 
+            formControlName="ipAddress"
+            placeholder="Filter by IP address..." 
+            (blur)="onFilterChange()"
+            (keyup.enter)="onFilterChange()"
+            class="filter-input" />
+        </div>
+        
+        <div class="filter-item">
+          <label>User ID</label>
+          <input 
+            nz-input 
+            formControlName="userId"
+            placeholder="Filter by User ID..." 
+            (blur)="onFilterChange()"
+            (keyup.enter)="onFilterChange()"
+            class="filter-input" />
+        </div>
+        
+        <div class="filter-item">
+          <label>Date Range</label>
+          <nz-range-picker 
+            [(ngModel)]="dateRange" 
+            [ngModelOptions]="{standalone: true}"
+            (ngModelChange)="onDateRangeChange()"
+            [nzShowTime]="false"
+            nzFormat="yyyy-MM-dd"
+            class="filter-date-picker">
+          </nz-range-picker>
+        </div>
+        
+        <div class="filter-item filter-actions">
+          <button 
+            nz-button 
+            nzType="default"
+            (click)="resetFilters()">
+            <span nz-icon nzType="reload"></span>
+            Reset
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tabs -->
+  <nz-tabset [(nzSelectedIndex)]="selectedTabIndex" nzType="card">
+    <!-- Top Risky IPs Tab -->
+    <nz-tab nzTitle="Top Risky IPs">
+      <nz-card [nzLoading]="riskyIPsLoading">
+        <nz-table 
+          #riskyIPsTable
+          [nzData]="topRiskyIPs" 
+          nzBordered
+          [nzPageSize]="10"
+          [nzFrontPagination]="true">
+          <thead>
+            <tr>
+              <th>IP Address</th>
+              <th>Risk Level</th>
+              <th>Risk Score</th>
+              <th>Suspicious Attempts</th>
+              <th>Failed Auth</th>
+              <th>Total Requests</th>
+              <th>Suspicious %</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ip of riskyIPsTable.data">
+              <td><strong>{{ ip.ipAddress }}</strong></td>
+              <td>
+                <nz-badge 
+                  [nzStatus]="getRiskLevelBadge(ip.riskLevel)" 
+                  [nzText]="ip.riskLevel">
+                </nz-badge>
+              </td>
+              <td>{{ ip.riskScore }}</td>
+              <td>{{ ip.totalSuspiciousAttempts }}</td>
+              <td>{{ ip.totalFailedAuthAttempts }}</td>
+              <td>{{ ip.totalRequests }}</td>
+              <td>{{ ip.suspiciousPercentage | number:'1.2-2' }}%</td>
+              <td>
+                <button 
+                  nz-button 
+                  nzType="link" 
+                  nzSize="small"
+                  (click)="viewIpDetails(ip.ipAddress)">
+                  View Details
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </nz-card>
+    </nz-tab>
+
+    <!-- Top Risky Users Tab -->
+    <nz-tab nzTitle="Top Risky Users">
+      <nz-card [nzLoading]="riskyUsersLoading">
+        <nz-table 
+          #riskyUsersTable
+          [nzData]="topRiskyUsers" 
+          nzBordered
+          [nzPageSize]="10"
+          [nzFrontPagination]="true">
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>Username</th>
+              <th>Risk Level</th>
+              <th>Risk Score</th>
+              <th>Suspicious Attempts</th>
+              <th>Failed Auth</th>
+              <th>Total Requests</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of riskyUsersTable.data">
+              <td><strong>{{ user.userId }}</strong></td>
+              <td>{{ user.username || 'N/A' }}</td>
+              <td>
+                <nz-badge 
+                  [nzStatus]="getRiskLevelBadge(user.riskLevel)" 
+                  [nzText]="user.riskLevel">
+                </nz-badge>
+              </td>
+              <td>{{ user.riskScore }}</td>
+              <td>{{ user.totalSuspiciousAttempts }}</td>
+              <td>{{ user.totalFailedAuthAttempts }}</td>
+              <td>{{ user.totalRequests }}</td>
+              <td>
+                <button 
+                  nz-button 
+                  nzType="link" 
+                  nzSize="small"
+                  (click)="viewUserDetails(user.userId)">
+                  View Details
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </nz-card>
+    </nz-tab>
+
+    <!-- Statistics Tab -->
+    <nz-tab nzTitle="Statistics">
+      <nz-card [nzLoading]="statisticsLoading">
+        <div *ngIf="statistics">
+          <nz-descriptions nzBordered [nzColumn]="2">
+            <nz-descriptions-item nzTitle="Total Suspicious Activities">
+              {{ statistics.totalSuspiciousActivities | number }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Suspicious IPs">
+              {{ statistics.totalSuspiciousIPs | number }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Suspicious Users">
+              {{ statistics.totalSuspiciousUsers | number }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Last 24 Hours">
+              {{ statistics.suspiciousActivitiesLast24Hours | number }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Last 7 Days">
+              {{ statistics.suspiciousActivitiesLast7Days | number }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Last 30 Days">
+              {{ statistics.suspiciousActivitiesLast30Days | number }}
+            </nz-descriptions-item>
+          </nz-descriptions>
+
+          <nz-divider></nz-divider>
+
+          <h3>Top Suspicious Tools</h3>
+          <nz-list [nzDataSource]="getTopToolsList()" nzBordered>
+            <nz-list-item *ngFor="let tool of getTopToolsList()">
+              <nz-list-item-meta>
+                <nz-list-item-meta-title>{{ tool.name }}</nz-list-item-meta-title>
+                <nz-list-item-meta-description>{{ tool.count }} occurrences</nz-list-item-meta-description>
+              </nz-list-item-meta>
+            </nz-list-item>
+          </nz-list>
+        </div>
+      </nz-card>
+    </nz-tab>
+
+    <!-- Activity Details Tab -->
+    <nz-tab nzTitle="Activity Details">
+      <div class="table-container">
+        <nz-card [nzLoading]="loading">
+          <nz-table 
+            #activityTable
+            [nzData]="suspiciousActivities" 
+            nzBordered
+            [nzPageSize]="pageSize"
+            [nzPageSizeOptions]="pageSizeOptions"
+            [nzShowSizeChanger]="true"
+            [nzTotal]="total"
+            [nzPageIndex]="pageIndex"
+            (nzPageIndexChange)="onPageIndexChange($event)"
+            (nzPageSizeChange)="onPageSizeChange($event)"
+            [nzFrontPagination]="false"
+            [nzLoading]="loading"
+            [nzScroll]="{ x: '1400px' }">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Method</th>
+                <th>Path</th>
+                <th>IP Address</th>
+                <th>User</th>
+                <th>Tool</th>
+                <th>Status</th>
+                <th>Score</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let activity of activityTable.data">
+                <td>{{ activity.timestamp | date:'short' }}</td>
+                <td><nz-tag [nzColor]="getMethodColor(activity.method)">{{ activity.method }}</nz-tag></td>
+                <td class="path-cell">{{ activity.path }}</td>
+                <td>
+                  <a (click)="viewIpDetails(activity.ipAddress || '')" style="cursor: pointer; color: #1890ff;">
+                    {{ activity.ipAddress }}
+                  </a>
+                </td>
+                <td>
+                  <span *ngIf="activity.userId">
+                    <a (click)="viewUserDetails(activity.userId || '')" style="cursor: pointer; color: #1890ff;">
+                      {{ activity.username || activity.userId }}
+                    </a>
+                  </span>
+                  <span *ngIf="!activity.userId" style="color: #999;">Anonymous</span>
+                </td>
+                <td>{{ activity.userAgentTool || 'Unknown' }}</td>
+                <td>
+                  <nz-tag [nzColor]="getStatusCodeColor(activity.statusCode)">
+                    {{ activity.statusCode }}
+                  </nz-tag>
+                </td>
+                <td>
+                  <nz-badge 
+                    [nzCount]="activity.suspiciousScore" 
+                    [nzShowZero]="true"
+                    [nzOverflowCount]="999">
+                  </nz-badge>
+                </td>
+                <td class="reason-cell" [nz-tooltip]="activity.suspiciousReason">{{ activity.suspiciousReason }}</td>
+              </tr>
+            </tbody>
+          </nz-table>
+        </nz-card>
+      </div>
+    </nz-tab>
+  </nz-tabset>
+</div>

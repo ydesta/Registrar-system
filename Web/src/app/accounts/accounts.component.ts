@@ -19,8 +19,6 @@ export class AccountsComponent implements OnInit {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      console.log('AccountsComponent: Route changed to:', event.url);
-      
       // Force change detection and refresh
       setTimeout(() => {
         this.cdr.detectChanges();

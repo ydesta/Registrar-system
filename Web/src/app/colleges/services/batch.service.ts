@@ -9,7 +9,7 @@ import { environment } from "src/environments/environment";
 })
 export class BatchService {
   baseUrl = environment.baseUrl;
-  private readonly _batchs: string = "/batchs";
+  private readonly _batchs: string = `/${environment.apiVersion}/batch`;
   getBatchsUrl() {
     return this.baseUrl + this._batchs;
   }

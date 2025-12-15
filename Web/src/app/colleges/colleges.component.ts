@@ -46,7 +46,7 @@ export class CollegesComponent implements OnInit {
              })
         },
         nzCancelText: 'No',
-        nzOnCancel: () => console.log('Cancel')
+        nzOnCancel: () => {}
       });
     }
   }

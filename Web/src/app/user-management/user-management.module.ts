@@ -12,6 +12,7 @@ import { RoleCreateComponent } from './components/role-create/role-create.compon
 import { RoleEditComponent } from './components/role-edit/role-edit.component';
 import { PermissionManagementComponent } from './components/permission-management/permission-management.component';
 import { UserActivityComponent } from './components/user-activity/user-activity.component';
+import { SuspiciousActivityComponent } from './components/suspicious-activity/suspicious-activity.component';
 import { UserCreateComponent } from './components/user-create/user-create.component';
 import { UserDetailsComponent } from './components/user-details/user-details.component';
 import { UserStatusComponent } from './components/user-status/user-status.component';
@@ -49,6 +50,10 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzCollapseModule } from 'ng-zorro-antd/collapse';
+import { NzBadgeModule } from 'ng-zorro-antd/badge';
+import { NzListModule } from 'ng-zorro-antd/list';
+import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
+import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzModalRef } from 'ng-zorro-antd/modal';
 
 @NgModule({
@@ -60,6 +65,7 @@ import { NzModalRef } from 'ng-zorro-antd/modal';
     RoleEditComponent,
     PermissionManagementComponent,
     UserActivityComponent,
+    SuspiciousActivityComponent,
     UserCreateComponent,
     UserDetailsComponent,
     UserStatusComponent,
@@ -101,7 +107,11 @@ import { NzModalRef } from 'ng-zorro-antd/modal';
     NzMenuModule,
     NzProgressModule,
     NzSpaceModule,
-    NzCollapseModule
+    NzCollapseModule,
+    NzBadgeModule,
+    NzListModule,
+    NzPageHeaderModule,
+    NzBreadCrumbModule
   ],
   providers: [
     {

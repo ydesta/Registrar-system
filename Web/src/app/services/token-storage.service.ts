@@ -52,18 +52,13 @@ export class TokenStorageService {
 
   public getToken(): string | null {
     const userId = this.getCurrentUserId();
-    console.log('TokenStorageService.getToken() called');
-    console.log('Current user ID:', userId);
     
     if (!userId) {
-      console.log('No user ID found, returning null');
       return null;
     }
     
     const key = this.getUserKey(userId, 'token');
-    console.log('Token key:', key);
     const token = localStorage.getItem(key);
-    console.log('Token from localStorage:', token ? 'Token exists' : 'No token found');
     return token;
   }
 

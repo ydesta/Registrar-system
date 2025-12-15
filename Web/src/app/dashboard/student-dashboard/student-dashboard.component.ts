@@ -243,7 +243,6 @@ export class StudentDashboardComponent implements OnInit {
           this.kpis = data;
         },
         error: (error) => {
-          console.error('Error loading KPI cards:', error);
           // You could show a user-friendly error message here
         }
       });
@@ -262,7 +261,6 @@ export class StudentDashboardComponent implements OnInit {
           ];
         },
         error: (error) => {
-          console.error('Error loading GPA trend:', error);
           // You could show a user-friendly error message here
         }
       });

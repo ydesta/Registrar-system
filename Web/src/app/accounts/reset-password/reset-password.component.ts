@@ -93,7 +93,6 @@ export class ResetPasswordComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
-          console.error('Reset password error:', error);
           
           let errorMessage = 'An error occurred while resetting your password. Please try again.';
           if (error.error && error.error.message) {
@@ -114,17 +113,14 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   goToLogin(): void {
-    console.log('Navigating to login page...');
     this._routeRefreshService.navigateWithRefresh(['/accounts/login']);
   }
 
   goToForgotPassword(): void {
-    console.log('Navigating to forgot password page...');
     this._routeRefreshService.navigateWithRefresh(['/accounts/forgot-password']);
   }
 
   goToHome(): void {
-    console.log('Navigating to home page...');
     this._routeRefreshService.navigateWithRefresh(['/']);
   }
 

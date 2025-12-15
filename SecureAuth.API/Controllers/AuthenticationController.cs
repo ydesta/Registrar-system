@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
@@ -201,6 +201,7 @@ namespace SecureAuth.API.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         // [RateLimit(5, 15)] // Temporarily disabled due to 429 errors in production
         public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
         {

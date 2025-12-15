@@ -8,7 +8,7 @@ import { environment } from "src/environments/environment";
 })
 export class CurriculumService {
   baseUrl = environment.baseUrl;
-  private readonly _curriculums: string = "/Curriculums";
+  private readonly _curriculums: string = `/${environment.apiVersion}/curriculum`;
   getCurriculumsUrl() {
     return this.baseUrl + this._curriculums;
   }

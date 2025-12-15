@@ -239,17 +239,9 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       .getCourseBreakDownList(curriculumCode, termId, batchId, isUpdate)
       .subscribe({
         next: (res: any) => {
-          console.log('Received course breakdown:', res);
           this.listOfCourseBreakDown = res.courseBreakDownOffering;
           this.originalBCourses = [...this.listOfCourseBreakDown];
           this.numberOfCourseBreakDown = this.listOfCourseBreakDown.length;
-          
-          // Debug: Log sample breakdown course data structure
-          if (this.listOfCourseBreakDown && this.listOfCourseBreakDown.length > 0) {
-            console.log('Sample breakdown course data:', this.listOfCourseBreakDown[0]);
-            console.log('Breakdown course code type:', typeof this.listOfCourseBreakDown[0].courseCode);
-            console.log('Breakdown course title type:', typeof this.listOfCourseBreakDown[0].courseTitle);
-          }
           
           // Handle course selection for update mode
           if (isUpdate && this.coursesId && this.coursesId.length > 0) {
@@ -282,7 +274,6 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
           this.refreshCheckedStatus();
         },
         error: (error) => {
-          console.error('Error fetching course breakdown:', error);
           this._customNotificationService.notification(
             "error",
             "Error",
@@ -317,7 +308,6 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
           });
         },
         error: (error) => {
-          console.error('Error fetching course offering:', error);
           this._customNotificationService.notification(
             "error",
             "Error",
@@ -328,20 +318,10 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
   }
 
   private loadCourseData() {
-    console.log('loadCourseData called with:', {
-      curriculumCodes: this.curriculumCodes,
-      batchId: this.batchId,
-      academicTermId: this.academicTermId,
-      isUpdate: this.isUpdate
-    });
-    
     if (this.curriculumCodes && this.batchId && this.academicTermId !== undefined) {
-      console.log('Loading course data...');
       this.getCourseBreakDownListByBatch(this.curriculumCodes, this.academicTermId, this.batchId, this.isUpdate);
       // For additional courses, always pass isUpdate as true to get all available courses
       this.getAllCourseByBatchId(this.curriculumCodes, this.batchId, true, this.academicTermId);
-    } else {
-      console.log('Missing required data for loading course data');
     }
   }
 
@@ -439,7 +419,6 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       // Note: Course selection is optional - users can submit without selecting courses
       return !isFormValid || !hasRequiredFields;
     } catch (error) {
-      console.warn('Error in isSubmitDisabled getter:', error);
       return true; // Default to disabled if there's an error
     }
   }
@@ -507,7 +486,6 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
         },
         error: (error) => {
           this.loading = false;
-          console.error('Error creating course offering:', error);
           this._customNotificationService.notification(
             "error",
             "Error",
@@ -538,7 +516,6 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
           },
           error: (error) => {
             this.loading = false;
-            console.error('Error updating course offering:', error);
             this._customNotificationService.notification(
               "error",
               "Error",
@@ -707,7 +684,6 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       this._cachedCreditHoursTimestamp = this._lastChangeDetectionTimestamp;
       return result;
     } catch (error) {
-      console.warn('Error in selectedCreditHours getter:', error);
       return 0;
     }
   }
@@ -735,7 +711,6 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       this._cachedAdditionalCreditHoursTimestamp = this._lastChangeDetectionTimestamp;
       return result;
     } catch (error) {
-      console.warn('Error in selectedAdditionalCreditHours getter:', error);
       return 0;
     }
   }
@@ -875,24 +850,18 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
   }
 
   performSearch(): void {
-    console.log('Search triggered with text:', this.searchText);
-    console.log('Original courses:', this.originalCourses);
-    
     if (!this.courses) {
       this.courses = [];
     }
     
     if (!this.originalCourses || this.originalCourses.length === 0) {
-      console.log('No original courses available');
       return;
     }
     
     if (this.searchText.trim() === '') {
       this.courses = [...this.originalCourses];
-      console.log('Empty search - showing all courses:', this.courses.length);
     } else {
       const searchTerm = this.searchText.toLowerCase().trim();
-      console.log('Searching for:', searchTerm);
       
       this.courses = this.originalCourses.filter(item => {
         if (!item) return false;
@@ -903,13 +872,8 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
         const codeMatch = courseCode.includes(searchTerm);
         const titleMatch = courseTitle.includes(searchTerm);
         
-        console.log(`Course: ${item.courseCode} - Code: "${courseCode}", Title: "${courseTitle}"`);
-        console.log(`Code match: ${codeMatch}, Title match: ${titleMatch}`);
-        
         return codeMatch || titleMatch;
       });
-      
-      console.log('Filtered courses:', this.courses.length);
     }
     
     // Don't clear checked states during search - they should persist
@@ -924,20 +888,14 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
   }
 
   performSearchBreak(): void {
-    console.log('Breakdown search triggered with text:', this.searchTextB);
-    console.log('Original breakdown courses:', this.originalBCourses);
-    
     if (!this.originalBCourses || this.originalBCourses.length === 0) {
-      console.log('No original breakdown courses available');
       return;
     }
     
     if (this.searchTextB.trim() === '') {
       this.listOfCourseBreakDown = [...this.originalBCourses];
-      console.log('Empty breakdown search - showing all courses:', this.listOfCourseBreakDown.length);
     } else {
       const searchTerm = this.searchTextB.toLowerCase().trim();
-      console.log('Searching breakdown for:', searchTerm);
       
       this.listOfCourseBreakDown = this.originalBCourses.filter(item => {
         if (!item) return false;
@@ -948,13 +906,8 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
         const codeMatch = courseCode.includes(searchTerm);
         const titleMatch = courseTitle.includes(searchTerm);
         
-        console.log(`Breakdown Course: ${item.courseCode} - Code: "${courseCode}", Title: "${courseTitle}"`);
-        console.log(`Code match: ${codeMatch}, Title match: ${titleMatch}`);
-        
         return codeMatch || titleMatch;
       });
-      
-      console.log('Filtered breakdown courses:', this.listOfCourseBreakDown.length);
     }
     
     // If in update mode, ensure saved courses remain checked after search
@@ -977,16 +930,8 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       .getAllCourseByBatchId(curriculumId, batchId, isUpdate, seasonTerm)
       .subscribe({
         next: (res: any) => {
-          console.log('Received additional courses:', res);
           this.courses = res;
           this.originalCourses = [...this.courses];
-          
-          // Debug: Log sample course data structure
-          if (this.courses && this.courses.length > 0) {
-            console.log('Sample course data:', this.courses[0]);
-            console.log('Course code type:', typeof this.courses[0].courseCode);
-            console.log('Course title type:', typeof this.courses[0].courseTitle);
-          }
           
           // If in update mode and we have saved additional course IDs, restore them
           if (isUpdate && this.savedAdditionalCourseIds && this.savedAdditionalCourseIds.length > 0) {
@@ -1011,7 +956,6 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
           this.refreshCheckedStatusA();
         },
         error: (error) => {
-          console.error('Error fetching additional courses:', error);
           this._customNotificationService.notification(
             "error",
             "Error",

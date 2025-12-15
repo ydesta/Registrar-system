@@ -13,7 +13,6 @@ export class RouteRefreshService {
    */
   refreshCurrentRoute(): void {
     const currentUrl = this.router.url;
-    console.log('RouteRefreshService: Refreshing route:', currentUrl);
     
     // Navigate to the same route to force refresh
     this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
@@ -25,8 +24,6 @@ export class RouteRefreshService {
    * Navigate to a route with forced refresh
    */
   navigateWithRefresh(route: string[]): void {
-    console.log('RouteRefreshService: Navigating with refresh to:', route);
-    
     // First navigate to root, then to target route
     this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
       this.router.navigate(route);

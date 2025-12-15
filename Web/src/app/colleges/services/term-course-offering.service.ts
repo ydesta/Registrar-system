@@ -9,11 +9,11 @@ import { TermCourseOfferingRequest } from "../model/term-course-offering-request
 })
 export class TermCourseOfferingService {
   baseUrl = environment.baseUrl;
-  private readonly _entrys: string = "/entrys";
-  private readonly _academicTerms: string = "/academicTerms";
-  private readonly _staffs: string = "/staffs";
-  private readonly _termCourseOfferings: string = "/TermCourseOfferings";
-  private readonly _batchs: string = "/batchs";
+  private readonly _entrys: string = `/${environment.apiVersion}/entrys`;
+  private readonly _academicTerms: string = `/${environment.apiVersion}/term`;
+  private readonly _staffs: string = `/${environment.apiVersion}/staff`;
+  private readonly _termCourseOfferings: string = `/${environment.apiVersion}/offering`;
+  private readonly _batchs: string = `/${environment.apiVersion}/batch`;
   pageindex = 1;
   totalRecord = 0;
   pageSize = 10;

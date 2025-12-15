@@ -212,14 +212,12 @@ export class ApplicantRequestDetailComponent implements OnInit {
             "/Resources/profile/" +
             applicantData.files[0]?.fileName;
         } else {
-          console.error('Invalid response structure:', res);
           this.hasError = true;
           this.errorMessage = 'Invalid response structure received from server';
         }
         this.isLoadingApplicant = false;
       },
       error: (error) => {
-        console.error('Error loading applicant data:', error);
         this.hasError = true;
         this.errorMessage = 'Failed to load applicant information. Please try again.';
         this.isLoadingApplicant = false;

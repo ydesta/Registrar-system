@@ -665,15 +665,10 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
             });
           }
         });
-
-        console.log('Applicant data successfully loaded and form updated');
       },
       error: (error) => {
-        console.error('Error fetching applicant data:', error);
-
         // Prevent recursive calls
         if (this.isHandlingApplicantError) {
-          console.log('Already handling applicant error, skipping recursive call');
           return;
         }
 
@@ -699,7 +694,6 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
 
         // Redirect to login if we can't load the application
         setTimeout(() => {
-          console.log('Redirecting to login due to applicant data fetch failure');
           this.router.navigate(['/accounts/login']);
         }, 3000);
       }
@@ -1089,7 +1083,6 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
         nzCancelDisabled: true
       });
     }
-    console.log("$$      ", postData);
     this.reviewSubmissionLoading = true;
 
     this.generalInformationService.finalSubmit(this.id, postData).subscribe({
@@ -1152,7 +1145,6 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
     // This method is no longer used since we removed the paymentSuccessful event
     // The application-fee component now handles successful payments internally
     // without navigating to the next tab, following the ManageEducationComponent pattern
-    console.log('Payment successful - staying on current tab');
   }
 
   checkPaymentStatusAndUpdateTabs(): void {
@@ -1172,13 +1164,11 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
 
   // Add retry method for manual retry
   retryApplicantFetch() {
-    console.log('Manual retry requested for applicant fetch');
     this.resetErrorFlags();
 
     if (this.userId) {
       this.ngOnInit();
     } else {
-      console.log('No userId available for retry');
       this.router.navigate(['/accounts/login']);
     }
   }

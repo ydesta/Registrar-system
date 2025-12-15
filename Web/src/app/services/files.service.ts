@@ -18,9 +18,9 @@ export class FilesService {
     // let headers = new HttpHeaders()
     //   .set('Content-Type', 'multipart/form-data;boundary=xxBOUNDARYxx;')
     //   .set('encType' , "multipart/form-data");
-    return this._http.post(this.baseUrl + "/Files", formData);
+    return this._http.post(this.baseUrl + `/${environment.apiVersion}/file`, formData);
   };
   public getOneFile(id: any) {
-    return this._http.get("/Files/" + id);
+    return this._http.get(this.baseUrl + `/${environment.apiVersion}/file/${id}`);
   }
 }

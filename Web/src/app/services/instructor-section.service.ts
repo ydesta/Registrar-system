@@ -10,7 +10,7 @@ import { StaffTeachingDataViewModel } from '../Models/StaffTeachingDataViewModel
   providedIn: 'root'
 })
 export class InstructorSectionService {
-  private apiUrl = `${environment.baseUrl}/InstructorSections`;
+  private apiUrl = `${environment.baseUrl}/${environment.apiVersion}/instructorsections`;
 
   constructor(private http: HttpClient) {}
 

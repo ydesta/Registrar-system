@@ -9,8 +9,8 @@ import { PendingStudentPaymentModel } from '../models/pending-sudent-payment.mod
 })
 export class BankService {
   baseUrl = environment.baseUrl;
-  private readonly _studentPayment: string = "/StudentPayments";
-  private readonly _banks: string = "/Banks";
+  private readonly _studentPayment: string = `/${environment.apiVersion}/pay`;
+  private readonly _banks: string = `/${environment.apiVersion}/banks`;
   getStudentPaymentUrl() {
     return this.baseUrl + this._studentPayment;
   }

@@ -60,9 +60,6 @@ export class ApplicantRequestListComponent implements OnInit {
     const academicProgrammeId = this.academicProgramRequestForm.get('acadamicProgrammeId')?.value;
     const status = this.academicProgramRequestForm.get('approvalStatus')?.value;
 
-    console.log('Search parameters:', { academicProgrammeId, status });
-    console.log('REQUEST_STATUS.Submitted value:', REQUEST_STATUS.Submitted);
-
     this.generalInformationService.getApplicantRequestList(academicProgrammeId, status).subscribe(res => {
       this.originalApplicants = res;
       this.applyFiltersAndPagination();
@@ -122,7 +119,6 @@ export class ApplicantRequestListComponent implements OnInit {
           }
         },
         error: (error) => {
-          console.error('Error loading academic programs:', error);
           this._customNotificationService.notification(
             "error",
             "Error",

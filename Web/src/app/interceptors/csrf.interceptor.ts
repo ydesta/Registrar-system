@@ -17,13 +17,24 @@ export class CsrfInterceptor implements HttpInterceptor {
   constructor(private http: HttpClient) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    // Only add CSRF token for state-changing requests to our API
+    // Check if request is to our API (both secureUrl and baseUrl)
+    const isSecureApiRequest = request.url.startsWith(environment.secureUrl);
+    const isBaseApiRequest = request.url.startsWith(environment.baseUrl);
+    const isApiRequest = isSecureApiRequest || isBaseApiRequest;
+    
+    if (!isApiRequest) {
+      return next.handle(request);
+    }
+
+    // Always add X-Client-App header for all API requests
+    // Only add CSRF token for state-changing requests
     if (this.shouldAddCsrfToken(request)) {
       return this.getCsrfToken().pipe(
         switchMap(token => {
           const csrfRequest = request.clone({
             setHeaders: {
-              'X-CSRF-TOKEN': token
+              'X-CSRF-TOKEN': token,
+              'X-Client-App': environment.frontendClientKey // Required header to identify frontend requests
             }
           });
           return next.handle(csrfRequest);
@@ -31,17 +42,43 @@ export class CsrfInterceptor implements HttpInterceptor {
       );
     }
 
-    return next.handle(request);
+    // For non-state-changing requests, still add the client header
+    const clientHeaderRequest = request.clone({
+      setHeaders: {
+        'X-Client-App': environment.frontendClientKey // Required header to identify frontend requests
+      }
+    });
+    return next.handle(clientHeaderRequest);
   }
 
   private shouldAddCsrfToken(request: HttpRequest<unknown>): boolean {
+    // Exclude authentication endpoints from CSRF token requirement
+    // These endpoints are public and don't require CSRF protection
+    const isAuthEndpoint = request.url.includes('/authentication/login') || 
+                           request.url.includes('/usr/login') ||
+                           request.url.includes('/authentication/register') ||
+                           request.url.includes('/authentication/test-login') ||
+                           request.url.includes('/authentication/database-check') ||
+                           request.url.includes('/authentication/verify-otp') ||
+                           request.url.includes('/authentication/forgot-password') ||
+                           request.url.includes('/authentication/reset-password') ||
+                           request.url.includes('/authentication/verify-email') ||
+                           request.url.includes('/authentication/resend-verification-email') ||
+                           request.url.includes('/authentication/resend-otp') ||
+                           request.url.includes('/authentication/csrf-token');
+    
+    if (isAuthEndpoint) {
+      return false;
+    }
+    
     // Add CSRF token for POST, PUT, DELETE, PATCH requests to our API
     const method = request.method.toUpperCase();
     const isStateChanging = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method);
     
-    // Check if request is to our API
-    const apiUrl = environment.production ? 'https://hilcoe.edu.et:5001/api' : 'https://localhost:7123/api';
-    const isApiRequest = request.url.startsWith(apiUrl);
+    // Check if request is to our API (both secureUrl and baseUrl)
+    const isSecureApiRequest = request.url.startsWith(environment.secureUrl);
+    const isBaseApiRequest = request.url.startsWith(environment.baseUrl);
+    const isApiRequest = isSecureApiRequest || isBaseApiRequest;
     
     return isStateChanging && isApiRequest;
   }
@@ -67,7 +104,7 @@ export class CsrfInterceptor implements HttpInterceptor {
 
   private async fetchCsrfToken(): Promise<string> {
     try {
-      const apiUrl = environment.production ? 'https://hilcoe.edu.et:5001/api' : 'https://localhost:7123/api';
+      const apiUrl = environment.secureUrl;
       const response = await this.http.get<{token: string}>(`${apiUrl}/authentication/csrf-token`).toPromise();
       
       if (response?.token) {
@@ -77,7 +114,6 @@ export class CsrfInterceptor implements HttpInterceptor {
       
       throw new Error('No CSRF token received');
     } catch (error) {
-      console.error('Failed to fetch CSRF token:', error);
       // Return empty token as fallback - the server will handle validation
       return '';
     }

@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { Subject, takeUntil } from 'rxjs';
 import { LoginRequest } from 'src/app/services/auth.interface';
 import { AuthService } from 'src/app/services/auth.service';
@@ -37,7 +38,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private _authService: AuthService,
     private _sharedDataService: SharedDataService,
     private _tokenStorageService: TokenStorageService,
-    private _routeRefreshService: RouteRefreshService
+    private _routeRefreshService: RouteRefreshService,
+    private _http: HttpClient
   ) {
     this.loginForm = _fb.group({
       email: [null, [Validators.required, Validators.email]],
@@ -68,8 +70,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     // Production-specific debugging
     if (environment.production) {
-      console.log('Production Environment Detected');
-      console.log('API Base URL:', environment.secureUrl);
       
       // Test network connectivity
       this.testNetworkConnectivity();
@@ -82,10 +82,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       method: 'GET',
       mode: 'cors'
     }).then(response => {
-      console.log('Network connectivity test successful:', response.status);
     }).catch(error => {
-      console.error('Network connectivity test failed:', error);
-      console.error('This might indicate a CORS, SSL, or network issue in production');
     });
   }
 
@@ -106,11 +103,9 @@ export class LoginComponent implements OnInit, OnDestroy {
         rememberMe: this.loginForm.value.rememberMe
       };
 
-      console.log('Attempting login with:', { email: loginRequest.email, rememberMe: loginRequest.rememberMe });
 
       this._authService.loginWithCredentials(loginRequest).subscribe({
         next: (response) => {
-          console.log('Login response received:', response);
           this.isLoading = false;
           this.isProcessingLogin = false;
           
@@ -126,9 +121,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           }
           
           if (response.success) {
-            // ✅ FIX: Check RequiresTwoFactor FIRST before handling success
             if (response.requiresTwoFactor && !response.token) {
-              console.log('2FA required, showing OTP form');
               this.requiresTwoFactor = true;
               this.emailForOtp = loginRequest.email;
               this.startOtpResendCountdown();
@@ -173,14 +166,11 @@ export class LoginComponent implements OnInit, OnDestroy {
           
           // Check if this is a 401 error with LoginResponse details
           if ((error.status === 401 || originalError.status === 401) && errorData) {
-            console.log('401 error with data:', errorData);
-            
             // The backend returns LoginResponse even for failed logins
             const loginResponse = errorData;
             
             if (loginResponse.message) {
               errorMessage = loginResponse.message;
-              console.log('Error message from backend:', errorMessage);
             }
             
             // Extract remaining attempts and lockout info if available

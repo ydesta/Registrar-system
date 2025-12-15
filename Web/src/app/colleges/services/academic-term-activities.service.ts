@@ -9,8 +9,8 @@ import { environment } from 'src/environments/environment';
 })
 export class AcademicTermActivitiesService {
   baseUrl = environment.baseUrl;
-  private readonly _academicTermActivities: string = "/AcademicTermActivitys";
-  private readonly _activities: string = "/Activities";
+  private readonly _academicTermActivities: string = `/${environment.apiVersion}/academictermactivitys`;
+  private readonly _activities: string = `/${environment.apiVersion}/activities`;
   getAcademicTermActivityUrl() {
     return this.baseUrl + this._academicTermActivities;
   }

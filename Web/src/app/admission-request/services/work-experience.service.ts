@@ -8,7 +8,7 @@ import { environment } from "src/environments/environment";
 })
 export class WorkExperienceService {
   baseUrl = environment.baseUrl;
-  private readonly _workExperience: string = "/ApplicantWorkExperiences";
+  private readonly _workExperience: string = `/${environment.apiVersion}/applicantworkexperiences`;
   getWorkExperienceUrl() {
     return this.baseUrl + this._workExperience;
   }

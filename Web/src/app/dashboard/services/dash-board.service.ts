@@ -11,7 +11,7 @@ import { GPATrend } from '../models/GPATrend';
 })
 export class DashBoardService {
   baseUrl = environment.baseUrl;
-  private readonly _dashboardUrl: string = "/DashBorad";
+  private readonly _dashboardUrl: string = `/${environment.apiVersion}/dash`;
   getDashBoardUrl() {
     return this.baseUrl + this._dashboardUrl;
   }
@@ -55,7 +55,6 @@ export class DashBoardService {
       //   )
       // ),
       catchError((err: HttpErrorResponse) => {
-        console.error('Dashboard API error:', err);
         return throwError(() => err);
       })
     );

@@ -17,7 +17,7 @@ import {
 })
 export class PaymentService {
   private baseUrl = environment.baseUrl;
-  private readonly _payment: string = "/Payment";
+  private readonly _payment: string = `/${environment.apiVersion}/payment`;
   constructor(private httpClient: HttpClient) { }
   createPaymentOrder(request: PaymentOrderRequest): Observable<ResponseDtos> {
     const endPointUrl = `${this.baseUrl}${this._payment}/create-payment-order`;

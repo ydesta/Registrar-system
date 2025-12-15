@@ -56,9 +56,6 @@ export class AuthService {
     const timeoutValue = this.mobileDetectionService.isMobileDevice() ? 60000 : 45000; // Increased timeout for production
     const retryCount = this.mobileDetectionService.isSlowConnection() ? 3 : 2;
     
-    console.log('Making login request to:', `${this.baseUrl}/authentication/login`);
-    console.log('Environment:', environment.production ? 'Production' : 'Development');
-    
     return this.http.post(`${this.baseUrl}/authentication/login`, loginRequest)
       .pipe(
         timeout(timeoutValue), // Longer timeout for production
@@ -120,15 +117,23 @@ export class AuthService {
 
   public getAccessToken = (): Promise<string> => {
     const token = this.tokenStorageService.getToken();
-    console.log('AuthService.getAccessToken() called');
-    console.log('Current user ID:', this.tokenStorageService.getCurrentUserId());
-    console.log('Token retrieved:', token ? 'Token exists' : 'No token found');
-    console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'null');
     return Promise.resolve(token || '');
   };
 
   public getToken(): string | null {
-    return this.tokenStorageService.getToken() || localStorage.getItem('access_token');
+    // Try tokenStorageService first (user-specific token)
+    const tokenStorageToken = this.tokenStorageService.getToken();
+    if (tokenStorageToken) {
+      return tokenStorageToken;
+    }
+    
+    // Fallback to localStorage (backward compatibility)
+    const localStorageToken = localStorage.getItem('access_token');
+    if (localStorageToken) {
+      return localStorageToken;
+    }
+    
+    return null;
   }
 
   public checkIfUserIsAdmin = (): Promise<boolean> => {
@@ -221,7 +226,6 @@ export class AuthService {
     return this.http.get(`${this.baseUrl}/authentication/verify-email?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`)
       .pipe(
         catchError((error) => {
-          console.error('GET verification failed, trying POST method', error);
           // Fallback to POST method if GET fails
           return this.verifyEmail(email, token);
         })
@@ -339,18 +343,10 @@ export class AuthService {
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An error occurred';
     
-    console.error('HTTP Error Details:', {
-      status: error.status,
-      statusText: error.statusText,
-      url: error.url,
-      error: error.error,
-      message: error.message
-    });
     
     if (error.error instanceof ErrorEvent) {
       // Client-side error
       errorMessage = error.error.message;
-      console.error('Client-side error:', errorMessage);
     } else {
       // Server-side error
       if (error.status === 0) {
@@ -360,10 +356,6 @@ export class AuthService {
       } else if (error.status === 401) {
         // Extract the actual error message from the backend response
         errorMessage = error.error?.message || 'Authentication failed. Please check your credentials.';
-        // Log the full error for debugging
-        if (error.error) {
-          console.error('401 Unauthorized - Backend error details:', error.error);
-        }
       } else if (error.status === 403) {
         errorMessage = 'Access denied. You do not have permission to access this resource.';
       } else if (error.status === 404) {
@@ -377,7 +369,6 @@ export class AuthService {
       } else {
         errorMessage = error.error?.message || error.message || 'Server error';
       }
-      console.error('Server-side error:', errorMessage);
     }
     
     // Return the original error with the proper message so the component can access error.error

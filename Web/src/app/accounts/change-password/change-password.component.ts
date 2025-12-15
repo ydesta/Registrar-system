@@ -78,7 +78,6 @@ export class ChangePasswordComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
-          console.error('Change password error:', error);
           
           let errorMessage = 'An error occurred while changing your password. Please try again.';
           if (error.error && error.error.message) {

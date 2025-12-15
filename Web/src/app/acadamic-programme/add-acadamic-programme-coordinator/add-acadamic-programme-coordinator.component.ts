@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-add-acadamic-programme-coordinator',
@@ -35,8 +36,10 @@ ngOnInit(): void {
   if(this.progCoordinatorId!="null"){
     this.action="Edit Programme Coordinator"
     this.submit ='Update';
-    this._crudService.getList('/AcadamicProgrammeCoordinators' + '/' + this.progCoordinatorId).subscribe((data:any)=>{
-      this.patchValues(data);
+    // GET by ID returns AcadamicProgrammeCoordinator directly, wrapped in BaseModel by getList()
+    this._crudService.getList(`/${environment.apiVersion}/acadamicprogrammecoordinators/${this.progCoordinatorId}`).subscribe((res:any)=>{
+      // The object is in res.data since getList() wraps it in BaseModel
+      this.patchValues(res.data);
     });
   }
   this._crudService.getList( '/AcadamicProgramme').subscribe((res:any)=>{
@@ -45,19 +48,21 @@ ngOnInit(): void {
 submitForm(){
  if(this.acadamicProgramCoordinatorForm.valid){
   if(this.progCoordinatorId =="null") {
-  this._crudService.add('/AcadamicProgrammeCoordinators',this.acadamicProgramCoordinatorForm.value).subscribe((res:any)=>{
+  // POST returns AcadamicProgrammeCoordinator directly (not wrapped in ResponseDtos)
+  this._crudService.add(`/${environment.apiVersion}/acadamicprogrammecoordinators`,this.acadamicProgramCoordinatorForm.value).subscribe((res:any)=>{
     this._customNotificationService.notification('success','Success','Acadamic Programme Coordinator registered successfully.');
     this._route.navigateByUrl('acadamic-program/program-coordinator');
   })}
   else if(this.progCoordinatorId!="null") {
     if(this.acadamicProgramCoordinatorForm.valid){
-      this._crudService.update('/AcadamicProgrammeCoordinators' ,this.progCoordinatorId,this.acadamicProgramCoordinatorForm.value).subscribe((res:any)=>{
-       if(res.status == 'success'){
-        this._customNotificationService.notification('success','Success',res.data);
+      // PATCH returns ResponseDtos
+      this._crudService.update(`/${environment.apiVersion}/acadamicprogrammecoordinators` ,this.progCoordinatorId,this.acadamicProgramCoordinatorForm.value).subscribe((res:any)=>{
+       if(res.status == 'success' || res.Status == 'success'){
+        this._customNotificationService.notification('success','Success',res.data || res.Data);
         this._route.navigateByUrl('acadamic-program/program-coordinator');
        }
        else{
-          this._customNotificationService.notification('error','Error',res.data);
+          this._customNotificationService.notification('error','Error',res.data || res.Data || res.error || res.Error);
          
        }
       })

@@ -49,7 +49,6 @@ export class ActivityComponent implements OnInit {
   // Search functionality
   clickSearchKey(): void {
     // Implement search logic here
-    console.log('Searching for:', this.searchKey);
     // You can filter the activities based on searchKey
     // For now, just refetch all data
     this.fetchProgram();
@@ -58,7 +57,6 @@ export class ActivityComponent implements OnInit {
   // Export functionality
   exportActivities(): void {
     // Implement export logic here
-    console.log('Exporting activities...');
     // You can implement CSV/Excel export functionality
   }
 
@@ -94,7 +92,7 @@ export class ActivityComponent implements OnInit {
         })
       },
       nzCancelText: 'No',
-      nzOnCancel: () => console.log('Cancel')
+      nzOnCancel: () => {}
     });
   }
   openModal(): void {

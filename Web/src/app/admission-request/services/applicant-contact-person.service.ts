@@ -8,7 +8,7 @@ import { environment } from "src/environments/environment";
 })
 export class ApplicantContactPersonService {
   baseUrl = environment.baseUrl;
-  private readonly _applicantContactPersonUrl: string = "/ApplicantContactPersons";
+  private readonly _applicantContactPersonUrl: string = `/${environment.apiVersion}/applicantcontactpersons`;
   getApplicantContactPersonUrl() {
     return this.baseUrl + this._applicantContactPersonUrl;
   }

@@ -41,7 +41,7 @@ interface ReviewerDecisionResponse extends CreateUpdateResponse {
 })
 export class GeneralInformationService {
   baseUrl = environment.baseUrl;
-  private readonly _generalUserInformation: string = "/Applicants";
+  private readonly _generalUserInformation: string = `/${environment.apiVersion}/applicant`;
   private parentApplicantIdSubject = new BehaviorSubject<string | null>(null);
   private isFetching = false;
   private lastFetchTime = 0;
@@ -140,7 +140,6 @@ export class GeneralInformationService {
         map(res => {
           const applicantData = this.extractResponseData<ApplicantResponse>(res);
           if (!applicantData?.id) {
-            console.warn('No applicant data found for user:', userId);
             // Don't throw an error for "no data found" - this is a valid state
             // Instead, return a special value that components can handle
             this.parentApplicantIdSubject.next(null);
@@ -153,7 +152,6 @@ export class GeneralInformationService {
         }),
         catchError(error => {
           this.clearParentApplicantIdCache();
-          console.error('Error fetching applicant data:', error);
           
           let errorMessage = 'Unable to load applicant data. ';
           if (error.status === 404) {

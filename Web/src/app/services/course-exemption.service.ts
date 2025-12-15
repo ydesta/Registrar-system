@@ -16,31 +16,31 @@ export class CourseExemptionService {
 
   // Get all course exemptions
   getCourseExemptions(): Observable<BaseModel<CourseExemptionModel[]>> {
-    return this.http.get<BaseModel<CourseExemptionModel[]>>(`${this.baseUrl}/CourseExemptions`);
+    return this.http.get<BaseModel<CourseExemptionModel[]>>(`${this.baseUrl}/${environment.apiVersion}/courseexemptions`);
   }
 
   // Get course exemption by ID
   getCourseExemptionById(id: number): Observable<BaseModel<CourseExemptionModel>> {
-    return this.http.get<BaseModel<CourseExemptionModel>>(`${this.baseUrl}/CourseExemptions/${id}`);
+    return this.http.get<BaseModel<CourseExemptionModel>>(`${this.baseUrl}/${environment.apiVersion}/courseexemptions/${id}`);
   }
 
   // Get course exemptions by student ID
   getCourseExemptionsByStudentId(studentId: string): Observable<BaseModel<CourseExemptionModel[]>> {
-    return this.http.get<BaseModel<CourseExemptionModel[]>>(`${this.baseUrl}/CourseExemptions/student/${studentId}`);
+    return this.http.get<BaseModel<CourseExemptionModel[]>>(`${this.baseUrl}/${environment.apiVersion}/courseexemptions/student/${studentId}`);
   }
 
   // Add new course exemption
   addCourseExemption(courseExemption: CourseExemptionModel): Observable<BaseModel<any>> {
-    return this.http.post<BaseModel<any>>(`${this.baseUrl}/CourseExemptions`, courseExemption);
+    return this.http.post<BaseModel<any>>(`${this.baseUrl}/${environment.apiVersion}/courseexemptions`, courseExemption);
   }
 
   // Update course exemption
   updateCourseExemption(id: number, courseExemption: CourseExemptionModel): Observable<BaseModel<any>> {
-    return this.http.patch<BaseModel<any>>(`${this.baseUrl}/CourseExemptions/${id}`, courseExemption);
+    return this.http.patch<BaseModel<any>>(`${this.baseUrl}/${environment.apiVersion}/courseexemptions/${id}`, courseExemption);
   }
 
   // Delete course exemption
   deleteCourseExemption(id: number): Observable<BaseModel<any>> {
-    return this.http.delete<BaseModel<any>>(`${this.baseUrl}/CourseExemptions/${id}`);
+    return this.http.delete<BaseModel<any>>(`${this.baseUrl}/${environment.apiVersion}/courseexemptions/${id}`);
   }
 }

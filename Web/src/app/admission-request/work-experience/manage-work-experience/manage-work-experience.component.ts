@@ -51,8 +51,6 @@ export class ManageWorkExperienceComponent implements OnInit {
       if (isAuth) {
         this.initializeData();
         this.isInitialized = true;
-      } else {
-        console.log('User not authenticated, waiting for login...');
       }
     });
 
@@ -64,13 +62,11 @@ export class ManageWorkExperienceComponent implements OnInit {
     // Monitor authentication state changes
     this.authSubscription = this.authService.isAuthenticated$.subscribe(isAuth => {
       if (isAuth && !this.isInitialized) {
-        console.log('User authenticated, initializing work experience component...');
         this.userId = localStorage.getItem('userId');
         this.clearCachedData();
         this.initializeData();
         this.isInitialized = true;
       } else if (!isAuth && this.isInitialized) {
-        console.log('User logged out, clearing work experience component state...');
         this.clearComponentState();
         this.isInitialized = false;
       }
@@ -80,13 +76,11 @@ export class ManageWorkExperienceComponent implements OnInit {
     this.authSubscription.add(
       this.authService.loginChanged.subscribe(isLoggedIn => {
         if (isLoggedIn && !this.isInitialized) {
-          console.log('Login detected, initializing work experience component...');
           this.userId = localStorage.getItem('userId');
           this.clearCachedData();
           this.initializeData();
           this.isInitialized = true;
         } else if (!isLoggedIn) {
-          console.log('Logout detected, clearing work experience component state...');
           this.clearComponentState();
           this.isInitialized = false;
         }
@@ -97,7 +91,6 @@ export class ManageWorkExperienceComponent implements OnInit {
     this.authSubscription.add(
       this.authService.currentUser$.subscribe(user => {
         if (user && user.id !== this.userId) {
-          console.log('User changed, updating work experience component...');
           this.userId = user.id;
           this.clearCachedData();
           if (this.isInitialized) {
@@ -158,7 +151,6 @@ export class ManageWorkExperienceComponent implements OnInit {
 
   private loadApplicantIdFromService(): void {
     if (!this.userId) {
-      console.warn('No userId available, cannot load applicant ID');
       return;
     }
 
@@ -168,17 +160,13 @@ export class ManageWorkExperienceComponent implements OnInit {
           this.applicantId = applicantId;
           this.getApplicantExperienceByApplicantId(applicantId);
         } else if (!applicantId) {
-          console.warn('No applicant found for user:', this.userId);
           // Don't retry - this is a valid state where no applicant exists
           return;
         }
       },
       error: (error) => {
-        console.error('Error loading applicant ID:', error);
-        
         // Handle cooldown error specifically
         if (error.message && error.message.includes('Fetch cooldown active')) {
-          console.log('Fetch cooldown active, waiting for cached value...');
           // Wait a bit longer and try again, or check if there's a cached value
           setTimeout(() => this.loadApplicantIdFromService(), 1000);
           return;
@@ -188,7 +176,6 @@ export class ManageWorkExperienceComponent implements OnInit {
         
         // Don't retry automatically on authentication errors
         if (error.status === 401 || error.status === 403) {
-          console.log('Authentication error, user may need to login again');
           return;
         }
         // Retry for other errors after a delay
@@ -199,8 +186,6 @@ export class ManageWorkExperienceComponent implements OnInit {
 
   // Add method to handle authentication errors gracefully
   private handleAuthError(error: any): void {
-    console.error('Authentication error in work experience component:', error);
-    
     if (error.status === 401 || error.status === 403) {
       // User is not authenticated, clear state and wait for login
       this.clearComponentState();
@@ -266,7 +251,6 @@ export class ManageWorkExperienceComponent implements OnInit {
           }
         },
         error: (error) => {
-          console.error('Error loading work experience records:', error);
           this.handleAuthError(error);
           this.workExperienceLists = [];
         }
@@ -315,7 +299,6 @@ export class ManageWorkExperienceComponent implements OnInit {
               }
             },
             error: (error) => {
-              console.error('Error deleting work experience:', error);
               this._customNotificationService.notification(
                 "error",
                 "Error",

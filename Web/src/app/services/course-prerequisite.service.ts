@@ -7,7 +7,7 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class CoursePrerequisiteService {
-  private apiUrl = `${environment.baseUrl}/CoursePrerequisites`;
+  private apiUrl = `${environment.baseUrl}/${environment.apiVersion}/courseprerequisites`;
 
   constructor(private http: HttpClient) {}
 

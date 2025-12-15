@@ -12,7 +12,7 @@ import { SearchQueryParams } from '../SearchParam/search-query-params';
 })
 export class ReportService {
   baseUrl = environment.baseUrl;
-  private readonly _reports: string = "/reports";
+  private readonly _reports: string = `/${environment.apiVersion}/rpt`;
   getReportsUrl() {
     return this.baseUrl + this._reports;
   }

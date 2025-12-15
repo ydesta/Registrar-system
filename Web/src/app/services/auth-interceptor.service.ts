@@ -11,6 +11,7 @@ import {
 } from '@angular/common/http';
 import { Observable, catchError, from, throwError, switchMap } from 'rxjs';
 import { Constants } from '../constants';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -47,11 +48,10 @@ export class AuthInterceptorService implements HttpInterceptor {
             return next.handle(req);
           }
           
-          // Clone the request with the token
-          const headers = new HttpHeaders().set(
-            'Authorization',
-            `Bearer ${token}`
-          );
+          // Clone the request with the token and custom client header
+          const headers = new HttpHeaders()
+            .set('Authorization', `Bearer ${token}`)
+            .set('X-Client-App', environment.frontendClientKey); // Required header to identify frontend requests
           const authRequest = req.clone({ headers });
           console.log('AuthInterceptorService: Making authenticated request to:', authRequest.url);
           

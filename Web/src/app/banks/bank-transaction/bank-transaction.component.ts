@@ -4,6 +4,7 @@ import { BaseModel } from 'src/app/Models/BaseMode';
 import { BankTransactionModel } from 'src/app/Models/BankTransactionModel';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-bank-transaction',
@@ -37,7 +38,7 @@ export class BankTransactionComponent implements OnInit {
 
   fetchProgram() {
     this.tbLoading = true;
-    this._crudService.getList('/bankTransactions').subscribe((res: BaseModel<BankTransactionModel[]>) => {
+    this._crudService.getList(`/${environment.apiVersion}/bank`).subscribe((res: BaseModel<BankTransactionModel[]>) => {
       this.bankTransactions = res.data;
       this.totalRecord = res.data?.length || 0;
       this.tbLoading = false;
@@ -86,7 +87,7 @@ export class BankTransactionComponent implements OnInit {
       nzOkType: 'primary',
       nzOkDanger: true,
       nzOnOk: () => {
-        this._crudService.delete('/bankTransactions', this.reqId).subscribe((res: any) => {
+        this._crudService.delete(`/${environment.apiVersion}/bank`, this.reqId).subscribe((res: any) => {
           this.fetchProgram();
           if (res.status == "success") {
             this._customNotificationService.notification('success', 'Success', res.data)

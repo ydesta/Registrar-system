@@ -4,6 +4,7 @@ import { BaseModel } from 'src/app/Models/BaseMode';
 import { StudentPaymentModel } from 'src/app/Models/StudentPaymentModel';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-student-payment',
@@ -36,7 +37,7 @@ export class StudentPaymentComponent implements OnInit {
 
   fetchProgram() {
     this.tbLoading = true;
-    this._crudService.getList('/StudentPayments').subscribe((res: BaseModel<StudentPaymentModel[]>) => {
+    this._crudService.getList(`/${environment.apiVersion}/pay`).subscribe((res: BaseModel<StudentPaymentModel[]>) => {
       this.studentPayments = res.data;
       this.totalRecord = res.data?.length || 0;
       this.tbLoading = false;
@@ -85,7 +86,7 @@ export class StudentPaymentComponent implements OnInit {
       nzOkType: 'primary',
       nzOkDanger: true,
       nzOnOk: () => {
-        this._crudService.delete('/StudentPayments', this.reqId).subscribe((res: any) => {
+        this._crudService.delete(`/${environment.apiVersion}/pay`, this.reqId).subscribe((res: any) => {
           this.fetchProgram();
           if (res.status == "success") {
             this._customNotificationService.notification('success', 'Success', res.data)

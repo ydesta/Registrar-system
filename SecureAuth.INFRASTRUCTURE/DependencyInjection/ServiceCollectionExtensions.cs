@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +35,7 @@ using SecureAuth.INFRASTRUCTURE.Services.Repositories;
 using SecureAuth.INFRASTRUCTURE.Services.Security;
 using System.Text;
 using System.Security.Claims;
+using System.Linq;
 using SecureAuth.APPLICATION.DTOs;
 
 namespace SecureAuth.INFRASTRUCTURE.DependencyInjection
@@ -41,39 +46,130 @@ namespace SecureAuth.INFRASTRUCTURE.DependencyInjection
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            // Add CORS Policy - More restrictive configuration
+            // Add CORS Policy - Values come from configuration (set from AppConstants in Program.cs)
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAngularApp", policy =>
                 {
+                    // Get CORS origins from configuration (set from AppConstants in Program.cs)
+                    // Configuration is set as indexed keys (Cors:AllowedOrigins:0, Cors:AllowedOrigins:1, etc.)
+                    var corsSection = configuration.GetSection("Cors:AllowedOrigins");
+                    var allowedOrigins = new List<string>();
+                    
+                    // Read indexed configuration values
+                    int index = 0;
+                    while (true)
+                    {
+                        var origin = configuration[$"Cors:AllowedOrigins:{index}"];
+                        if (string.IsNullOrEmpty(origin))
+                            break;
+                        allowedOrigins.Add(origin);
+                        index++;
+                    }
+                    
+                    // Fallback to production origins if not configured
+                    if (allowedOrigins.Count == 0)
+                    {
+                        allowedOrigins = new List<string> 
+                        { 
+                            "https://hilcoe.edu.et", 
+                            "https://staging.hilcoe.edu.et", 
+                            "https://hsis.hilcoe.edu.et",
+                            // Always include localhost for development
+                            "http://localhost:4200",
+                            "https://localhost:4200",
+                            "http://localhost:4201",
+                            "https://localhost:4201"
+                        };
+                    }
+                    
+                    var allOrigins = allowedOrigins.Distinct().ToList();
+                    
+                    // ALWAYS add localhost origins for development (even if API is in production mode)
+                    // This allows local frontend to access production/staging API
+                    var localhostOrigins = new[] 
+                    { 
+                        "http://localhost:4200",
+                        "https://localhost:4200",
+                        "http://localhost:4201",
+                        "https://localhost:4201"
+                    };
+                    foreach (var localhostOrigin in localhostOrigins)
+                    {
+                        if (!allOrigins.Contains(localhostOrigin, StringComparer.OrdinalIgnoreCase))
+                        {
+                            allOrigins.Add(localhostOrigin);
+                        }
+                    }
+                    
+                    // Get allowed methods from configuration (indexed format)
+                    var allowedMethods = new List<string>();
+                    int methodIndex = 0;
+                    while (true)
+                    {
+                        var method = configuration[$"Cors:AllowedMethods:{methodIndex}"];
+                        if (string.IsNullOrEmpty(method))
+                            break;
+                        allowedMethods.Add(method);
+                        methodIndex++;
+                    }
+                    if (allowedMethods.Count == 0)
+                    {
+                        allowedMethods = new List<string> { "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH" };
+                    }
+                    
+                    // Get allowed headers from configuration (indexed format)
+                    var allowedHeaders = new List<string>();
+                    int headerIndex = 0;
+                    while (true)
+                    {
+                        var header = configuration[$"Cors:AllowedHeaders:{headerIndex}"];
+                        if (string.IsNullOrEmpty(header))
+                            break;
+                        allowedHeaders.Add(header);
+                        headerIndex++;
+                    }
+                    if (allowedHeaders.Count == 0)
+                    {
+                        allowedHeaders = new List<string> 
+                        { 
+                            "Content-Type", 
+                            "Authorization", 
+                            "X-Requested-With", 
+                            "Accept", 
+                            "Origin", 
+                            "X-CSRF-TOKEN", 
+                            "X-Client-App" 
+                        };
+                    }
+                    
+                    // Note: CORS origins configured - logging will be done in Program.cs during startup
                     policy
-                        .WithOrigins(
-                            "https://hilcoe.edu.et",           // Production domain
-                            "https://staging.hilcoe.edu.et",    // Staging subdomain
-                            "https://hsis.hilcoe.edu.et"        // Production domain
-                        )
-                        .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .WithHeaders("Content-Type", "Authorization", "X-Requested-With", "X-CSRF-TOKEN")
+                        .WithOrigins(allOrigins.ToArray())
+                        .WithMethods(allowedMethods.ToArray())
+                        .WithHeaders(allowedHeaders.ToArray())
                         .AllowCredentials()
                         .WithExposedHeaders("X-Pagination", "X-Total-Count");
-                        
-                    // Development environment - more permissive
-                    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
-                    {
-                        policy
-                            .WithOrigins(
-                                "http://localhost:4200",     // Angular dev server
-                                "https://localhost:4200",    // Angular dev server HTTPS
-                                "http://localhost:4201",     // Alternative Angular port
-                                "https://localhost:4201"     // Alternative Angular port HTTPS
-                            );
-                    }
                 });
             });
 
             // Add DbContext
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            // Add TrustServerCertificate=True to handle SSL certificate trust issues in production
+            if (!string.IsNullOrEmpty(connectionString) && !connectionString.Contains("TrustServerCertificate", StringComparison.OrdinalIgnoreCase))
+            {
+                connectionString += ";TrustServerCertificate=True";
+            }
+            
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(connectionString, sqlOptions =>
+                {
+                    // Enable retry on failure for transient database errors
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null);
+                }));
 
             // Add Identity
             services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -117,17 +213,35 @@ namespace SecureAuth.INFRASTRUCTURE.DependencyInjection
                     ValidateIssuerSigningKey = true,
                     ClockSkew = TimeSpan.Zero,
 
-                    ValidAudience = configuration["JWT:ValidAudience"],
-                    ValidIssuer = configuration["JWT:ValidIssuer"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"])),
+                    // Values come from configuration (set from AppConstants in Program.cs)
+                    ValidAudience = configuration["JWT:ValidAudience"] ?? string.Empty,
+                    ValidIssuer = configuration["JWT:ValidIssuer"] ?? string.Empty,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"] ?? string.Empty)),
                     
                     // Configure claim types for proper role mapping
                     NameClaimType = ClaimTypes.Name,
                     RoleClaimType = ClaimTypes.Role
                 };
+                
+                // Configure events to allow anonymous endpoints (like login)
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = context =>
+                    {
+                        // Don't challenge if endpoint allows anonymous access
+                        var endpoint = context.HttpContext.GetEndpoint();
+                        if (endpoint?.Metadata.GetMetadata<IAllowAnonymous>() != null)
+                        {
+                            // Skip the challenge for anonymous endpoints
+                            context.HandleResponse();
+                            return Task.CompletedTask;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
-            // Configure security policies
+            // Configure security policies - Values come from configuration (set from AppConstants in Program.cs)
             services.Configure<RateLimitingPolicy>(configuration.GetSection("RateLimiting"));
             services.Configure<TokenPolicy>(configuration.GetSection("TokenPolicy"));
             services.Configure<PasswordPolicy>(configuration.GetSection("PasswordPolicy"));

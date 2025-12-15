@@ -9,7 +9,7 @@ import { CourseOfferingInstructorAssignment } from "../model/course-offering-ins
 })
 export class CourseOfferingInstructorAssignmentService {
   baseUrl = environment.baseUrl;
-  private readonly _courseOfferingInstructorAssignment: string = "/CourseOfferingInstructorAssignment";
+  private readonly _courseOfferingInstructorAssignment: string = `/${environment.apiVersion}/courseofferinginstructorassignment`;
   getCourseOfferingInstructorAssignmentUrl() {
     return this.baseUrl + this._courseOfferingInstructorAssignment;
   }

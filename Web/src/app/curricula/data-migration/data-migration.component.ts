@@ -88,8 +88,6 @@ export class DataMigrationComponent implements OnInit {
         res => this.handleSuccessResponse(),
         error => this.handleErrorResponse(error)
       );
-    } else {
-      console.error('No matching case found for uploadType:', uploadType);
     }
   }
   private handleSuccessResponse() {

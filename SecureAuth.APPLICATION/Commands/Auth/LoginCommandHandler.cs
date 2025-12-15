@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SecureAuth.APPLICATION.Commands.Auth;
 using SecureAuth.APPLICATION.DTOs.Authentication;
 using SecureAuth.APPLICATION.Interfaces;
@@ -20,6 +21,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
         private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly ISecurityEventService _securityEventService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<LoginCommandHandler> _logger;
 
         public LoginCommandHandler(
             UserManager<ApplicationUser> userManager,
@@ -30,7 +32,8 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             IOtpService otpService,
             IRolePermissionRepository rolePermissionRepository,
             ISecurityEventService securityEventService,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            ILogger<LoginCommandHandler> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -41,6 +44,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             _rolePermissionRepository = rolePermissionRepository;
             _securityEventService = securityEventService;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
         private string GetClientIpAddress()
@@ -383,11 +387,20 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             }
             catch (Exception ex)
             {
-                // Log the exception for debugging
-                // Note: In a real implementation, you'd inject ILogger here
-                System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                // Log the exception with full details for debugging
+                _logger.LogError(ex, "Login error for email: {Email}, IP: {IpAddress}, UserAgent: {UserAgent}", 
+                    command?.Email ?? "unknown", 
+                    GetClientIpAddress(), 
+                    GetUserAgent());
                 
+                // Log inner exception if present
+                if (ex.InnerException != null)
+                {
+                    _logger.LogError(ex.InnerException, "Inner exception during login for email: {Email}", 
+                        command?.Email ?? "unknown");
+                }
+                
+                // Return a user-friendly error message while logging the actual error
                 return new LoginResponse
                 {
                     Success = false,

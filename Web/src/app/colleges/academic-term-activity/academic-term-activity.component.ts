@@ -72,7 +72,7 @@ export class AcademicTermActivityComponent implements OnInit {
         })
       },
       nzCancelText: 'No',
-      nzOnCancel: () => console.log('Cancel')
+      nzOnCancel: () => {}
     });
   }
   exportTermActivity() {

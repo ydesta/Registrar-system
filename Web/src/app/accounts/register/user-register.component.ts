@@ -103,7 +103,6 @@ export class UserRegisterComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
-          console.error('Registration error:', error);
           
           let errorMessage = 'An error occurred during registration. Please try again.';
           if (error.message) {

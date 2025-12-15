@@ -8,7 +8,8 @@ import { environment } from "src/environments/environment";
 })
 export class AcademicProgrammeService {
   baseUrl = environment.baseUrl;
-  private readonly _academicProgramm: string = "/AcadamicProgramme";
+  apiVersion = environment.apiVersion;
+  private readonly _academicProgramm: string = `/${environment.apiVersion}/program`;
   getAcademicProgrammeUrl() {
     return this.baseUrl + this._academicProgramm;
   }

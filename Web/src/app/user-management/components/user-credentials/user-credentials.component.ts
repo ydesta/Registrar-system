@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { UserManagementService } from '../../../services/user-management.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { environment } from '../../../../environments/environment';
 import * as XLSX from 'xlsx';
 
 export interface UserCredential {
@@ -74,9 +75,9 @@ export class UserCredentialsComponent implements OnInit {
         console.error('API connection test failed:', error);
         
         if (error.status === 404) {
-          this.message.error('API server not found. Please ensure the SecureAuth API is running on https://localhost:7123');
+          this.message.error(`API server not found. Please ensure the SecureAuth API is running on ${environment.secureUrl}`);
         } else if (error.status === 0) {
-          this.message.error('Cannot connect to API server. Please check if the server is running on https://localhost:7123');
+          this.message.error(`Cannot connect to API server. Please check if the server is running on ${environment.secureUrl}`);
         } else {
           this.message.error(`API connection failed: ${error.message || 'Unknown error'}`);
         }
@@ -126,7 +127,7 @@ export class UserCredentialsComponent implements OnInit {
         } else if (error.status === 404) {
           this.message.error('API endpoint not found. Please ensure the SecureAuth API is running.');
         } else if (error.status === 0) {
-          this.message.error('Cannot connect to API server. Please check if the server is running on https://localhost:7123');
+          this.message.error(`Cannot connect to API server. Please check if the server is running on ${environment.secureUrl}`);
         } else {
           this.message.error(`Failed to load user credentials: ${error.message || 'Unknown error'}`);
         }
@@ -202,7 +203,7 @@ export class UserCredentialsComponent implements OnInit {
         } else if (error.status === 404) {
           this.message.error('API endpoint not found. Please ensure the SecureAuth API is running.');
         } else if (error.status === 0) {
-          this.message.error('Cannot connect to API server. Please check if the server is running on https://localhost:7123');
+          this.message.error(`Cannot connect to API server. Please check if the server is running on ${environment.secureUrl}`);
         } else {
           this.message.error(`Failed to export to Excel: ${error.message || 'Unknown error'}`);
         }

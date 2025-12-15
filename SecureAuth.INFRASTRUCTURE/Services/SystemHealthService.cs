@@ -80,10 +80,25 @@ namespace SecureAuth.INFRASTRUCTURE.Services
         {
             try
             {
+                // Round value appropriately to avoid SQL Server float precision issues
+                // For counts (threads, etc.), round to integer; for percentages and measurements, round to 2 decimal places
+                float roundedValue;
+                if (metricType.Contains("Threads", StringComparison.OrdinalIgnoreCase) || 
+                    metricType.Contains("Count", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Round to integer for count-based metrics
+                    roundedValue = (float)Math.Round(value, 0);
+                }
+                else
+                {
+                    // Round to 2 decimal places for other metrics (CPU, Memory, Uptime, etc.)
+                    roundedValue = (float)Math.Round(value, 2);
+                }
+
                 var systemMetric = new SystemMetrics
                 {
                     MetricType = metricType,
-                    Value = (float)value, // Convert double to float for database compatibility
+                    Value = roundedValue,
                     Unit = unit,
                     Timestamp = DateTime.UtcNow,
                     Description = description ?? $"System metric: {metricType}"
@@ -93,7 +108,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("System metric recorded: {MetricType} = {Value} {Unit}", 
-                    metricType, value, unit ?? "");
+                    metricType, roundedValue, unit ?? "");
             }
             catch (Exception ex)
             {

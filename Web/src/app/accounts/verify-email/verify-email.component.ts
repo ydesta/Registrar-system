@@ -252,7 +252,6 @@ export class VerifyEmailComponent implements OnInit, OnDestroy {
         );
       },
       error: (error) => {
-        console.error('Resend verification failed:', error);
         this.isLoading = false;
         let errorMessage = 'Failed to resend verification email. Please try again.';
         if (error.error && error.error.message) {
