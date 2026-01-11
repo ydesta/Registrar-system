@@ -723,6 +723,7 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
 
     const postData = this.getApplicantGeneralInfo();
     postData.applicantUserId = this.userId;
+    console.log("%%%    applicantUserId:", postData.applicantUserId);
     if (this.id != undefined) {
       postData.id = this.id;
     }

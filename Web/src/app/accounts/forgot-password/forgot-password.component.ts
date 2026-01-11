@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { RouteRefreshService } from '../services/route-refresh.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-forgot-password',
@@ -81,7 +82,10 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.isLoading = false;
+          // Use secure logger - error details are sanitized
+          if (!environment.production) {
           console.error('Forgot password error:', error);
+          }
           
           let errorMessage = 'An error occurred while processing your request. Please try again.';
           if (error.error && error.error.message) {
@@ -113,12 +117,16 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
   }
 
   goToRegister(): void {
+    if (!environment.production) {
     console.log('Navigating to register page...');
+    }
     this._routeRefreshService.navigateWithRefresh(['/accounts/register']);
   }
 
   goToHome(): void {
+    if (!environment.production) {
     console.log('Navigating to home page...');
+    }
     this._routeRefreshService.navigateWithRefresh(['/']);
   }
 

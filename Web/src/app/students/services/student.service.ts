@@ -137,6 +137,10 @@ export class StudentService {
   getListStudentProfileByStudentId(
     studentId: string
   ): Observable<StudentProfileViewModel> {
+    // Validate studentId to prevent null/undefined values in URL
+    if (!studentId || studentId === "null" || studentId.trim() === "") {
+      throw new Error('StudentService: Invalid studentId provided. studentId cannot be null, undefined, or empty.');
+    }
     const endpointUrl = `${this.getStudentUrlList()}/getListStudentProfile/student/profile/${studentId}`;
     return this.httpClient.get<StudentProfileViewModel>(endpointUrl);
   }

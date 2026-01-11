@@ -119,17 +119,36 @@ namespace SecureAuth.API.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // 🔍 DEBUG BREAKPOINT: Set breakpoint on next line to verify middleware is being called
-            // This line will ALWAYS execute if middleware is registered and request reaches it
-            System.Diagnostics.Debugger.Break(); // Force breakpoint - will stop here if middleware executes
-            
             var path = context.Request.Path.Value ?? "";
             var pathLower = path.ToLower();
             var logger = context.RequestServices.GetService<Microsoft.Extensions.Logging.ILogger<FrontendRequestValidationMiddleware>>();
             
             // Log all requests to help diagnose why middleware isn't being hit
-            logger?.LogInformation("SecureAuthAPI FrontendRequestValidationMiddleware - Method: {Method}, Path: {Path}", 
-                context.Request.Method, path);
+            logger?.LogInformation("SecureAuthAPI FrontendRequestValidationMiddleware - Method: {Method}, Path: {Path}, PathLower: {PathLower}", 
+                context.Request.Method, path, pathLower);
+            
+            // Special handling for verify-email endpoint - MUST be checked FIRST before ANY other checks
+            // Email verification links are legitimate direct browser navigations and should be allowed
+            // Only match the exact verify-email endpoint path to avoid affecting other endpoints like register
+            var isVerifyEmail = pathLower.StartsWith("/api/authentication/verify-email");
+            
+            if (isVerifyEmail)
+            {
+                var clientHeader = GetClientHeaderValue(context);
+                var hasValidHeader = !string.IsNullOrEmpty(clientHeader) && 
+                                   clientHeader.Equals(_requiredClientValue, StringComparison.OrdinalIgnoreCase);
+                var method = context.Request.Method;
+                var remoteIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                
+                // Log all headers for debugging
+                var allHeaders = string.Join(", ", context.Request.Headers.Keys);
+                logger?.LogWarning(
+                    "✅✅✅ ALLOWING {Method} request to verify-email endpoint. Path: {Path}, IP: {IP}, HasValidHeader: {HasValidHeader}, AllHeaders: {AllHeaders}, ClientHeader: {ClientHeader}", 
+                    method, path, remoteIp, hasValidHeader, allHeaders, clientHeader ?? "(null)");
+                
+                await _next(context);
+                return;
+            }
             
             // Allow CORS preflight requests
             if (context.Request.Method == "OPTIONS")
@@ -176,7 +195,6 @@ namespace SecureAuth.API.Middleware
                                  pathLower.Contains("/api/authentication/verify-otp") ||
                                  pathLower.Contains("/api/authentication/forgot-password") ||
                                  pathLower.Contains("/api/authentication/reset-password") ||
-                                 pathLower.Contains("/api/authentication/verify-email") ||
                                  pathLower.Contains("/api/authentication/resend-verification") ||
                                  pathLower.Contains("/api/authentication/resend-otp") ||
                                  pathLower.Contains("/api/authentication/csrf-token") ||
@@ -272,31 +290,34 @@ namespace SecureAuth.API.Middleware
                 }
                 
                 // SECURITY CHECK 2: Block requests with no Origin/Referer (typical of testing tools)
-                // In DEVELOPMENT: Allow if they have valid X-Client-App header (testing tools don't send Origin/Referer)
-                // In PRODUCTION: Still require Origin/Referer even with valid header (browser requests should have them)
+                // If X-Client-App header is valid, be more lenient (legitimate frontend requests)
+                // In DEVELOPMENT: Allow if they have valid X-Client-App header
+                // In PRODUCTION: Allow if they have valid X-Client-App header (frontend sends it)
                 if (string.IsNullOrEmpty(origin) && string.IsNullOrEmpty(referer))
                 {
                     var hasValidHeader = !string.IsNullOrEmpty(clientHeader) && 
                                        clientHeader.Equals(_requiredClientValue, StringComparison.OrdinalIgnoreCase);
                     
-                    if (_isDevelopment && hasValidHeader)
+                    if (hasValidHeader)
                     {
-                        // DEVELOPMENT MODE: Allow requests without Origin/Referer if they have valid header
-                logger?.LogInformation(
-                            "ℹ️ DEVELOPMENT MODE: Allowing request without Origin/Referer (testing tool) with valid X-Client-App header. IP: {IP}, Path: {Path}, UserAgent: {UserAgent}",
+                        // Allow requests without Origin/Referer if they have valid X-Client-App header
+                        // This handles legitimate frontend requests that may not always send Origin/Referer
+                        logger?.LogInformation(
+                            "ℹ️ Allowing request without Origin/Referer with valid X-Client-App header. IP: {IP}, Path: {Path}, UserAgent: {UserAgent}, Environment: {Environment}",
                             remoteIp,
                             context.Request.Path,
-                            userAgent
+                            userAgent,
+                            _isDevelopment ? "Development" : "Production"
                         );
-                        // Continue to header validation check
+                        // Continue to header validation check (which will pass since header is valid)
                     }
                     else
                     {
-                        // PRODUCTION MODE or missing/invalid header: Block requests without Origin/Referer
+                        // Missing/invalid header: Block requests without Origin/Referer
                         logger?.LogWarning(
                             "⚠️ SECURITY WARNING: Authentication request with no Origin/Referer headers. IP: {IP}, Path: {Path}, UserAgent: {UserAgent}, X-Client-App: {ClientApp}, HasValidHeader: {HasValidHeader}, Environment: {Environment}",
                             remoteIp,
-                    context.Request.Path,
+                            context.Request.Path,
                             userAgent,
                             string.IsNullOrEmpty(clientHeader) ? "(not provided)" : (clientHeader.Length > 20 ? clientHeader.Substring(0, 20) + "..." : clientHeader),
                             hasValidHeader,
@@ -304,29 +325,26 @@ namespace SecureAuth.API.Middleware
                         );
                         
                         // Block if header is also missing/invalid
-                if (string.IsNullOrEmpty(clientHeader) || !clientHeader.Equals(_requiredClientValue, StringComparison.OrdinalIgnoreCase))
-                {
-                            logger?.LogError(
-                                "🚨 SECURITY ALERT: Blocked authentication request - Missing/invalid X-Client-App AND no Origin/Referer. IP: {IP}, Path: {Path}, UserAgent: {UserAgent}",
-                                remoteIp,
+                        logger?.LogError(
+                            "🚨 SECURITY ALERT: Blocked authentication request - Missing/invalid X-Client-App AND no Origin/Referer. IP: {IP}, Path: {Path}, UserAgent: {UserAgent}",
+                            remoteIp,
                             context.Request.Path,
-                                userAgent
-                            );
+                            userAgent
+                        );
 
-                            context.Response.StatusCode = 403;
-                            context.Response.ContentType = "application/json";
-                            context.Response.Headers.Append("X-Middleware-Validation", "BLOCKED-MissingHeaderAndOrigin");
-                            
-                            var errorResponse = new
-                            {
-                                error = "Unauthorized Access Detected",
-                                message = "Unauthorized access attempt has been logged. If you require legitimate access to this system, please contact the system administrator immediately.",
-                                reason = "Suspicious activity detected. All access attempts are monitored and logged for security purposes."
-                            };
+                        context.Response.StatusCode = 403;
+                        context.Response.ContentType = "application/json";
+                        context.Response.Headers.Append("X-Middleware-Validation", "BLOCKED-MissingHeaderAndOrigin");
+                        
+                        var errorResponse = new
+                        {
+                            error = "Unauthorized Access Detected",
+                            message = "Unauthorized access attempt has been logged. If you require legitimate access to this system, please contact the system administrator immediately.",
+                            reason = "Suspicious activity detected. All access attempts are monitored and logged for security purposes."
+                        };
 
-                            await context.Response.WriteAsJsonAsync(errorResponse);
+                        await context.Response.WriteAsJsonAsync(errorResponse);
                         return;
-                    }
                     }
                 }
                 

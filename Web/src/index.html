@@ -8,8 +8,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   
-  <!-- SSL Certificate Validation Bypass Script -->
-  <script src="assets/ssl-bypass.js"></script>
+  <!-- Development SSL Helper - ONLY loads in development (localhost) -->
+  <!-- This helps with self-signed certificates during development -->
+  <!-- Automatically disabled in production - never affects production security -->
+  <script>
+    (function() {
+      'use strict';
+      // Only load SSL helper in development (localhost)
+      const isDevelopment = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' ||
+                           window.location.hostname.startsWith('192.168.') ||
+                           window.location.hostname.startsWith('10.') ||
+                           window.location.hostname.startsWith('172.');
+      
+      if (isDevelopment) {
+        const script = document.createElement('script');
+        script.src = 'assets/dev-ssl-helper.js';
+        script.async = true;
+        document.head.appendChild(script);
+      }
+    })();
+  </script>
   
   <meta name="description" content="HiLCoE College Registration System - Manage academic programs, student registrations, and administrative tasks">
   
@@ -29,11 +48,165 @@
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css?family=Noto Sans Ethiopic:300,400,500" rel="stylesheet">
   
-  <!-- Content Security Policy - Note: unsafe-inline is required for Angular's dynamic content -->
-  <!-- This is a security trade-off necessary for Angular SPAs -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: blob: https://hilcoe.edu.et:7123 https://hilcoe.edu.et:5000 https://hilcoe.edu.et:36201 https://staging.hilcoe.edu.et:7123 https://staging.hilcoe.edu.et:5000 https://staging.hilcoe.edu.et:36201 https://maps.googleapis.com http://localhost:5000 https://hilcoe.edu.et https://staging.hilcoe.edu.et https://hsis.hilcoe.edu.et https:; font-src 'self' data: https:; connect-src 'self' http://localhost:56204 https://localhost:5001 http://localhost:5000 https://localhost:7123 http://localhost:4200 https://localhost:4200 https://localhost:36201 https://hilcoe.edu.et https://hilcoe.edu.et:7123 https://hilcoe.edu.et:5000 https://hilcoe.edu.et:36201 https://hilcoe.edu.et:5001 https://hilcoe.edu.et:5002 https://staging.hilcoe.edu.et https://staging.hilcoe.edu.et:7123 https://staging.hilcoe.edu.et:5000 https://staging.hilcoe.edu.et:36201 https://staging.hilcoe.edu.et:5001 https://staging.hilcoe.edu.et:5002 https://staging.hilcoe.edu.et:4200 https://hilcoe.edu.et:4200 https://hsis.hilcoe.edu.et https://maps.googleapis.com ws: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests; worker-src 'self'; manifest-src 'self';">
+  <!-- Content Security Policy - Dynamically set based on environment -->
+  <!-- Uses unsafe-inline (Angular requirement), removes unsafe-eval for security -->
+  <!-- Note: unsafe-inline for styles is required for Angular component styles -->
+  <!-- Note: frame-ancestors must be set via HTTP header, not meta tag -->
+  <script>
+    (function() {
+      'use strict';
+      
+      // Generate nonce for this page load
+      function generateNonce() {
+        const array = new Uint8Array(16);
+        crypto.getRandomValues(array);
+        return btoa(String.fromCharCode.apply(null, Array.from(array)))
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=/g, '');
+      }
+      
+      // Nonce generation kept for potential future use, but not used in script-src
+      // (using unsafe-inline instead for Angular compatibility)
+      const nonce = generateNonce();
+      window.__CSP_NONCE__ = nonce; // Make nonce available to Angular if needed
+      
+      // Determine if we're in development (localhost) or production
+      const isDevelopment = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' ||
+                           window.location.hostname.startsWith('192.168.') ||
+                           window.location.hostname.startsWith('10.') ||
+                           window.location.hostname.startsWith('172.');
+      
+      // Base CSP directives (common for both environments)
+      // For Angular: Balance security with functionality
+      // - Use 'unsafe-inline' for Angular's inline scripts (Angular requirement)
+      // - Remove 'unsafe-eval' (major security risk, Angular doesn't need it)
+      // - Note: When nonce is present, 'unsafe-inline' is ignored, so we don't use nonce in script-src
+      // - 'strict-dynamic' disables host allowlisting, so we use it carefully
+      
+      // Approach: Use 'unsafe-inline' for Angular compatibility
+      // Remove 'unsafe-eval' (major security improvement)
+      // Remove 'strict-dynamic' (it disables host allowlisting which we need)
+      // Keep host allowlisting ('self', https://maps.googleapis.com)
+      const scriptSrc = isDevelopment
+        ? "'self' 'unsafe-inline' https://maps.googleapis.com"
+        : "'self' 'unsafe-inline' https://maps.googleapis.com";
+      
+      const baseDirectives = [
+        "default-src 'self'",
+        // Script sources: 
+        // - 'unsafe-inline' needed for Angular's inline scripts
+        // - 'unsafe-eval' REMOVED (major security improvement - this was the real risk)
+        // - Host allowlisting ('self', https://maps.googleapis.com) enabled
+        // - Note: Removed 'strict-dynamic' as it disables host allowlisting
+        "script-src " + scriptSrc,
+        // Styles: unsafe-inline required for Angular component styles (unavoidable)
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com",
+        "font-src 'self' data: https:",
+        // frame-ancestors must be set via HTTP header only (not in meta tag)
+        "base-uri 'self'",
+        "form-action 'self'",
+        "object-src 'none'",
+        "worker-src 'self'",
+        "manifest-src 'self'"
+      ];
+      
+      // Image sources
+      const imgSources = [
+        "'self'",
+        "data:",
+        "blob:",
+        "https://hilcoe.edu.et:7123",
+        "https://hilcoe.edu.et:5000",
+        "https://hilcoe.edu.et:36201",
+        "https://staging.hilcoe.edu.et:7123",
+        "https://staging.hilcoe.edu.et:5000",
+        "https://staging.hilcoe.edu.et:36201",
+        "https://maps.googleapis.com",
+        "https://hilcoe.edu.et",
+        "https://staging.hilcoe.edu.et",
+        "https://hsis.hilcoe.edu.et",
+        "https:"
+      ];
+      
+      // Connect sources for production (HTTPS only, no localhost)
+      const connectSourcesProd = [
+        "'self'",
+        "https://hilcoe.edu.et",
+        "https://hilcoe.edu.et:7123",
+        "https://hilcoe.edu.et:5000",
+        "https://hilcoe.edu.et:36201",
+        "https://hilcoe.edu.et:5001",
+        "https://hilcoe.edu.et:5002",
+        "https://staging.hilcoe.edu.et",
+        "https://staging.hilcoe.edu.et:7123",
+        "https://staging.hilcoe.edu.et:5000",
+        "https://staging.hilcoe.edu.et:36201",
+        "https://staging.hilcoe.edu.et:5001",
+        "https://staging.hilcoe.edu.et:5002",
+        "https://staging.hilcoe.edu.et:4200",
+        "https://hilcoe.edu.et:4200",
+        "https://hsis.hilcoe.edu.et",
+        "https://maps.googleapis.com",
+        "wss:"
+      ];
+      
+      // Connect sources for development (allows HTTP)
+      const connectSourcesDev = [
+        "'self'",
+        "http://localhost:56204",
+        "https://localhost:5001",
+        "http://localhost:5000",
+        "https://localhost:7123",
+        "http://localhost:4200",
+        "https://localhost:4200",
+        "https://localhost:36201",
+        "https://hilcoe.edu.et",
+        "https://hilcoe.edu.et:7123",
+        "https://hilcoe.edu.et:5000",
+        "https://hilcoe.edu.et:36201",
+        "https://hilcoe.edu.et:5001",
+        "https://hilcoe.edu.et:5002",
+        "https://staging.hilcoe.edu.et",
+        "https://staging.hilcoe.edu.et:7123",
+        "https://staging.hilcoe.edu.et:5000",
+        "https://staging.hilcoe.edu.et:36201",
+        "https://staging.hilcoe.edu.et:5001",
+        "https://staging.hilcoe.edu.et:5002",
+        "https://staging.hilcoe.edu.et:4200",
+        "https://hilcoe.edu.et:4200",
+        "https://hsis.hilcoe.edu.et",
+        "https://maps.googleapis.com",
+        "ws:",
+        "wss:"
+      ];
+      
+      // Add image sources for development (allows HTTP localhost)
+      if (isDevelopment) {
+        imgSources.push("http://localhost:5000");
+      }
+      
+      // Build CSP policy
+      const cspDirectives = baseDirectives.concat([
+        "img-src " + imgSources.join(" "),
+        "connect-src " + (isDevelopment ? connectSourcesDev : connectSourcesProd).join(" ")
+      ]);
+      
+      // Add upgrade-insecure-requests only in production
+      if (!isDevelopment) {
+        cspDirectives.push("upgrade-insecure-requests");
+      }
+      
+      // Set CSP meta tag
+      const cspMeta = document.createElement('meta');
+      cspMeta.httpEquiv = 'Content-Security-Policy';
+      cspMeta.content = cspDirectives.join('; ');
+      document.head.appendChild(cspMeta);
+    })();
+  </script>
   <!-- Cache-busting meta tag to force CSP update -->
-  <meta name="csp-version" content="2024-01-27-v15-hsis-domain-added">
+  <meta name="csp-version" content="2024-01-27-v16-https-enforcement">
 </head>
 
 <body>
@@ -41,6 +214,7 @@
   <noscript>Please enable JavaScript to continue using this application.</noscript>
   
   <!-- Cache Busting Script -->
+  <!-- Note: This inline script works with 'unsafe-inline' in CSP (no nonce needed) -->
   <script>
     // Force cache refresh on version change
     const currentVersion = '2024-01-27-v8';

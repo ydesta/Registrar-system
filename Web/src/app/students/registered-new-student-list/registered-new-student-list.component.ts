@@ -5,6 +5,8 @@ import { StudentService } from '../services/student.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AcademicProgramRequestService } from 'src/app/admission-request/services/academic-program-request.service';
 import { UserManagementService } from 'src/app/services/user-management.service';
+import { SecureLoggerService } from 'src/app/services/secure-logger.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-registered-new-student-list',
@@ -36,10 +38,12 @@ export class RegisteredNewStudentListComponent implements OnInit {
   phoneFilter = '';
   emailChangedFilter: string | null = null;
 
-  constructor(private studentService: StudentService,
+  constructor(
+    private studentService: StudentService,
     private _fb: FormBuilder,
     private _academicProgramRequestService: AcademicProgramRequestService,
     private userManagementService: UserManagementService,
+    private _logger: SecureLoggerService
   ) {
     this.createStudent();
     this.createUpdateForm();
@@ -243,7 +247,7 @@ export class RegisteredNewStudentListComponent implements OnInit {
             this.userManagementService.updateAdminEmail(applicationUserId, { newEmail })
               .subscribe({
                 next: (userResponse) => {
-                  console.log('User account updated successfully (email, username, password):', userResponse);
+                  this._logger.debug('User account updated successfully');
                   this.updateLoading = false;
                   this.isUpdateModalVisible = false;
                   this.selectedStudent = null;

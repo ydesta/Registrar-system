@@ -198,6 +198,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getNextAcademicTerm() {
     // Only make API call if user is authenticated
+    // Use AuthService.getToken() which checks both sessionStorage and localStorage
     const isAuth = localStorage.getItem('isLogin') === 'true' && this._authService.getToken();
     if (!isAuth) {
       return;

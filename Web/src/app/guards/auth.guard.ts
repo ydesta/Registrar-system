@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { SecureLoggerService } from '../services/secure-logger.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,8 @@ export class AuthGuard implements CanActivate {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private logger: SecureLoggerService
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
@@ -23,7 +25,8 @@ export class AuthGuard implements CanActivate {
     }
 
     const isLoggedIn = localStorage.getItem('isLogin') === 'true';
-    const hasToken = localStorage.getItem('access_token');
+    // Use AuthService.getToken() which checks both sessionStorage and localStorage
+    const hasToken = this.authService.getToken();
     
     // Check if token exists
     if (!hasToken) {
@@ -40,13 +43,13 @@ export class AuthGuard implements CanActivate {
         
         // Check if token is expired or will expire in the next 60 seconds
         if (expirationDate <= now || (expirationDate.getTime() - now.getTime()) < 60000) {
-          console.log('Token is expired or about to expire');
+          this.logger.debug('Token is expired or about to expire');
           this.handleUnauthorizedAccess(state.url, 'token_expired');
           return false;
         }
       }
     } catch (error) {
-      console.error('Error parsing token:', error);
+      this.logger.error('Error parsing token');
       this.handleUnauthorizedAccess(state.url);
       return false;
     }
@@ -60,7 +63,7 @@ export class AuthGuard implements CanActivate {
   }
 
   private handleUnauthorizedAccess(url: string, reason?: string): void {
-    console.log(`Unauthorized access attempt to: ${url}`);
+    this.logger.debug(`Unauthorized access attempt to: ${url}`, { reason });
     
     // Clear any inconsistent auth data
     this.clearAuthData();
@@ -88,6 +91,10 @@ export class AuthGuard implements CanActivate {
   }
 
   private clearAuthData(): void {
+    // Clear tokens from secure storage
+    this.authService.clearTokens();
+    
+    // Clear localStorage data
     localStorage.removeItem('isLogin');
     localStorage.removeItem('userId');
     localStorage.removeItem('firstName');

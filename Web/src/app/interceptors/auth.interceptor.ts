@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { CustomNotificationService } from '../services/custom-notification.service';
 import { Constants } from '../constants';
+import { SecureTokenStorageService } from '../services/secure-token-storage.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -24,7 +25,8 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private notificationService: CustomNotificationService
+    private notificationService: CustomNotificationService,
+    private secureTokenStorage: SecureTokenStorageService
   ) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
@@ -54,12 +56,22 @@ export class AuthInterceptor implements HttpInterceptor {
                            request.url.includes('/authentication/csrf-token');
 
     if (isAuthEndpoint) {
-      // Still add X-Client-App header for auth endpoints (required by backend middleware)
+      // Add X-Client-App header for auth endpoints (required by backend middleware)
+      // This includes: login, register, verify-email, reset-password, forgot-password, etc.
       const authRequest = request.clone({
         setHeaders: {
           'X-Client-App': environment.frontendClientKey
         }
       });
+      
+      // Debug: Log that header is being added for verify-email
+      if (request.url.includes('/authentication/verify-email')) {
+        console.log('AuthInterceptor: Adding X-Client-App header for verify-email request', {
+          url: request.url,
+          headerValue: environment.frontendClientKey?.substring(0, 20) + '...'
+        });
+      }
+      
       return next.handle(authRequest);
     }
 
@@ -102,14 +114,23 @@ export class AuthInterceptor implements HttpInterceptor {
 
     // Add custom client header to identify requests from Angular frontend
     // This header is required by the backend to block testing tools
+    // CRITICAL FIX: Don't override Content-Type for FormData requests
+    // FormData requests need to set their own Content-Type (multipart/form-data)
+    // Overriding it breaks form detection in CSRF middleware, causing 403 errors
+    const isFormData = request.body instanceof FormData;
+    const headers: { [key: string]: string } = {
+      'X-Client-App': environment.frontendClientKey
+    };
+
+    // Only set Content-Type to application/json if it's NOT FormData
+    // FormData requests must keep their original Content-Type header
+    if (environment.production && !isFormData) {
+      headers['Content-Type'] = 'application/json';
+      headers['Accept'] = 'application/json';
+    }
+
     authRequest = authRequest.clone({
-      setHeaders: {
-        'X-Client-App': environment.frontendClientKey,
-        ...(environment.production ? {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        } : {})
-      }
+      setHeaders: headers
     });
 
     // Handle the request and catch any errors
@@ -186,7 +207,10 @@ export class AuthInterceptor implements HttpInterceptor {
       'Your session has expired. Please log in again to continue.'
     );
 
-    // Clear authentication data
+    // Clear tokens from secure storage (sessionStorage)
+    this.secureTokenStorage.clearTokens();
+    
+    // Clear authentication data from localStorage
     localStorage.removeItem('isLogin');
     localStorage.removeItem('userId');
     localStorage.removeItem('firstName');

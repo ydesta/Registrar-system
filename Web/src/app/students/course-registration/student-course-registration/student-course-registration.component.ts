@@ -933,7 +933,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     } else if (type === 'add') {
       if (checked) {
         // Only select courses that are not disabled
-        const enabledCourses = this.filteredAddCourses.filter(course => !this.isRegularCourseDisabled(course));
+        const enabledCourses = this.filteredAddCourses.filter(course => !this.isRegularCourseDisabled(course, 'add'));
         const coursesToSelect = enabledCourses.slice(0, this.maxAddCoursesAllowed);
         coursesToSelect.forEach(course => {
           this.setOfCheckedAddCourses.add(course.courseId);
@@ -1143,21 +1143,23 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   }
 
   updateCoursePriority(courseId: string, priority: number): void {
-    if (priority < 0 || priority > 3) {
-      this._customNotificationService.notification('error', 'Error', 'Priority must be between 1 and 3');
-      return;
-    }
+    // Priority validation commented out - always set to 0
+    // if (priority < 0 || priority > 3) {
+    //   this._customNotificationService.notification('error', 'Error', 'Priority must be between 1 and 3');
+    //   return;
+    // }
 
-    // Check if this priority is already assigned to another course
-    const existingCourseWithPriority = Array.from(this.coursePriorities.entries())
-      .find(([id, p]) => id !== courseId && p === priority);
+    // // Check if this priority is already assigned to another course
+    // const existingCourseWithPriority = Array.from(this.coursePriorities.entries())
+    //   .find(([id, p]) => id !== courseId && p === priority);
 
-    if (existingCourseWithPriority) {
-      this._customNotificationService.notification('error', 'Error', `Priority ${priority} is already assigned to another course`);
-      return;
-    }
+    // if (existingCourseWithPriority) {
+    //   this._customNotificationService.notification('error', 'Error', `Priority ${priority} is already assigned to another course`);
+    //   return;
+    // }
 
-    this.coursePriorities.set(courseId, priority);
+    // Always set priority to 0
+    this.coursePriorities.set(courseId, 0);
   }
 
   getTotalAddedCreditHours(): number {
@@ -1274,15 +1276,15 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
           }
         });
 
-      // Validate add course priorities
-      if (addCourses.length > 0) {
-        const hasUnassignedPriority = addCourses.some(course => course.priority === 0);
-        if (hasUnassignedPriority) {
-          this._customNotificationService.notification('error', 'Error', 'All selected add course requests must have a priority assigned');
-          this.isSubmitting = false;
-          return;
-        }
-      }
+      // Validate add course priorities - COMMENTED OUT
+      // if (addCourses.length > 0) {
+      //   const hasUnassignedPriority = addCourses.some(course => course.priority === 0);
+      //   if (hasUnassignedPriority) {
+      //     this._customNotificationService.notification('error', 'Error', 'All selected add course requests must have a priority assigned');
+      //     this.isSubmitting = false;
+      //     return;
+      //   }
+      // }
 
       // Create student course offering object
       const studentCourseOffering = new StudentCourseOffering();
@@ -1598,12 +1600,32 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     }
   }
 
-  isRegularCourseDisabled(course: any): boolean {
+  isRegularCourseDisabled(course: any, context?: 'regular' | 'add'): boolean {
     // Lock if course is already registered or paid
     if (course.courseStatus === 'Registered' || course.isPaid === true) {
       return true;
     }
 
+    // For add request context, unlock courses regardless of grade (allow re-enrollment)
+    if (context === 'add') {
+      // Only lock if course status prevents enrollment (Registered, Exempted, Inactive, Has Prerequisite)
+      // Allow re-enrollment for all other statuses regardless of grade
+      switch (course.courseStatus) {
+        case 'Not Taken':
+        case 'Dropped':
+        case 'Taken':
+          return false; // Unlock - allow re-enrollment regardless of grade
+        case 'Registered':
+        case 'Exempted':
+        case 'Inactive':
+        case 'Has Prerequisite':
+          return true; // Lock these statuses
+        default:
+          return false; // Default to unlocked for add requests
+      }
+    }
+
+    // Regular context - apply normal grade-based locking
     if (course.currentGrade === 'RA') {
       return true;
     }

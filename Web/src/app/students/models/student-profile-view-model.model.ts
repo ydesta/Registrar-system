@@ -1,3 +1,5 @@
+import { CoursePaymentViewModel } from './course-payment-view-model.model';
+
 export class StudentProfileViewModel {
     public id: string;
     public fullName: string
@@ -64,6 +66,7 @@ export class StudentRegistrationSlipViewModel {
     public bankTransactionId: string;
     public fileName: string;
     public courses: CourseViewModel[]
+    public payments: CoursePaymentViewModel[]
 }
 export class CourseViewModel {
     public id: string

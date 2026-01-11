@@ -10,6 +10,8 @@ import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzInputModule } from 'ng-zorro-antd/input';
 import { ReportsRoutingModule } from './reports-routing.module';
 import { ReportsComponent } from './reports.component';
 import { NgxPrintModule } from 'ngx-print';
@@ -25,6 +27,8 @@ import { AcademicTermRegistrationSlipComponent } from './academic-term-registrat
 import { TranscriptSearchComponent } from './transcript-search/transcript-search.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { StudentSemsterCourseRegistrationSlipComponent } from './student-semster-course-registration-slip/student-semster-course-registration-slip.component';
+import { GradeReportComponent } from './grade-report/grade-report.component';
+import { StudentGradeReportComponent } from './student-grade-report/student-grade-report.component';
 @NgModule({
   declarations: [
     ReportsComponent,
@@ -36,6 +40,8 @@ import { StudentSemsterCourseRegistrationSlipComponent } from './student-semster
     AcademicTermRegistrationSlipComponent,
      TranscriptSearchComponent,
      StudentSemsterCourseRegistrationSlipComponent,
+     GradeReportComponent,
+     StudentGradeReportComponent,
   ],
   imports: [
     CommonModule,
@@ -54,6 +60,8 @@ import { StudentSemsterCourseRegistrationSlipComponent } from './student-semster
     NzSpaceModule,
     NzTagModule,
     NzProgressModule,
+    NzSpinModule,
+    NzInputModule,
     ReactiveFormsModule,
   ],
 })

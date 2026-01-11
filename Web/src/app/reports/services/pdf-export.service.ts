@@ -4,6 +4,7 @@ import jsPDF from 'jspdf';
 import autoTable, { RowInput } from 'jspdf-autotable';
 import { StudentRegistrationSlipViewModel } from 'src/app/students/models/student-profile-view-model.model';
 import { StudentTranscriptViewModel } from '../model/student-transcript-view-model.model';
+import { StudentGradeReportViewModel } from '../model/student-grade-report-view-model.model';
 
 @Injectable({
   providedIn: 'root'
@@ -55,6 +56,32 @@ export class PdfExportService {
     const doc = new jsPDF();
     const slipHeight = 85; // Reduced from 95 to 85
 
+    // Helper function to collect all transaction IDs
+    const getAllTransactionIds = (slip: StudentRegistrationSlipViewModel): string[] => {
+      const transactionIds: string[] = [];
+      
+      // Add transaction ID from slip if it exists and is not empty
+      if (slip.bankTransactionId && slip.bankTransactionId.trim() !== '') {
+        transactionIds.push(slip.bankTransactionId.trim());
+      }
+      
+      // Add transaction IDs from payments array if they exist
+      if (slip.payments && Array.isArray(slip.payments)) {
+        slip.payments.forEach(payment => {
+          if (payment.bankTransactionID && payment.bankTransactionID.trim() !== '') {
+            const txId = payment.bankTransactionID.trim();
+            // Avoid duplicates
+            if (!transactionIds.includes(txId)) {
+              transactionIds.push(txId);
+            }
+          }
+        });
+      }
+      
+      // Return array of transaction IDs, or array with '-' if no transactions
+      return transactionIds.length > 0 ? transactionIds : ['-'];
+    };
+
     slips.forEach((slip, studentIndex) => {
       for (let copy = 0; copy < 3; copy++) {
         const yOffset = 8 + copy * slipHeight; // Reduced from 10 to 8
@@ -75,37 +102,53 @@ export class PdfExportService {
         doc.text('Academic Term:', 110, yOffset + 13); // Reduced from 16 to 13
         doc.text('Own Batch:', 110, yOffset + 17); // Reduced from 21 to 17
         doc.setFont('helvetica', 'normal');
-        doc.text(slip.fullName, 60, yOffset + 13); // Reduced from 16 to 13
-        doc.text(slip.studentCode, 60, yOffset + 17); // Reduced from 21 to 17
-        doc.text(slip.academicTerm, 145, yOffset + 13); // Reduced from 16 to 13
-        doc.text(slip.owenBatchCode, 145, yOffset + 17); // Reduced from 21 to 17
+        doc.text(slip.fullName || '', 60, yOffset + 13); // Reduced from 16 to 13
+        doc.text(slip.studentCode || '', 60, yOffset + 17); // Reduced from 21 to 17
+        doc.text(slip.academicTerm || '', 145, yOffset + 13); // Reduced from 16 to 13
+        doc.text(slip.owenBatchCode || '', 145, yOffset + 17); // Reduced from 21 to 17
 
         // Info box two-column layout for extra fields
         // First row (left)
         doc.setFont('helvetica', 'bold');
         doc.text('Bank:', 30, yOffset + 21); // Reduced from 26 to 21
         doc.setFont('helvetica', 'normal');
-        doc.text(`From: ${slip.fromBank} To: ${slip.toBank}`, 60, yOffset + 21); // Reduced from 26 to 21
+        doc.text(`From: ${slip.fromBank || ''} To: ${slip.toBank || ''}`, 60, yOffset + 21); // Reduced from 26 to 21
 
         doc.setFont('helvetica', 'bold');
         doc.text('FS NO.:', 30, yOffset + 25); // Reduced from 31 to 25
         doc.setFont('helvetica', 'normal');
         doc.text('____________________', 60, yOffset + 25); // Reduced from 31 to 25
 
-        // First row (right)
+        // First row (right) - Swapped positions
         doc.setFont('helvetica', 'bold');
-        doc.text('Bank Transaction Id .:', 110, yOffset + 21); // Reduced from 26 to 21
+        doc.text('Registration Date:', 110, yOffset + 21); // Swapped: Registration Date now at yOffset + 21
         doc.setFont('helvetica', 'normal');
-        doc.text(slip.bankTransactionId, 145, yOffset + 21); // Reduced from 26 to 21
+        doc.text(slip.registrationDate || '', 145, yOffset + 21); // Swapped: Registration Date now at yOffset + 21
 
         doc.setFont('helvetica', 'bold');
-        doc.text('Registration Date:', 110, yOffset + 25); // Reduced from 31 to 25
+        doc.text('Bank Transaction Id .:', 110, yOffset + 25); // Swapped: Bank Transaction Id now at yOffset + 25
         doc.setFont('helvetica', 'normal');
-        doc.text(slip.registrationDate, 145, yOffset + 25); // Reduced from 31 to 25
+        // Get all transaction IDs as an array
+        const transactionIds = getAllTransactionIds(slip);
+        // Display first transaction ID on the first line
+        if (transactionIds.length > 0) {
+          doc.text(transactionIds[0], 145, yOffset + 25);
+          // Display subsequent transaction IDs on new lines
+          for (let i = 1; i < transactionIds.length; i++) {
+            doc.text(transactionIds[i], 145, yOffset + 25 + (i * 4)); // 4 units spacing between lines
+          }
+        }
+
+        // Calculate the maximum Y position of header content (including multiple transaction IDs)
+        // Base position is yOffset + 25, plus spacing for additional transaction IDs
+        const maxHeaderY = transactionIds.length > 1 
+          ? yOffset + 25 + ((transactionIds.length - 1) * 4) + 4 // Add 4 more units for the last transaction ID height
+          : yOffset + 29; // Base case: yOffset + 25 + 4 units for text height
 
         // Table (move up to follow the info box, now below the larger card)
+        // Add spacing (7 units) between header and table to prevent overlap
         autoTable(doc, {
-          startY: yOffset + 32, // Reduced from 40 to 32
+          startY: maxHeaderY + 7, // Add spacing to prevent overlap with header
           margin: { left: 25, right: 25 },
           head: [['Course Code', 'Course Title', 'Credit Hours', 'Total Amount']],
           body: slip.courses.map(c => [
@@ -625,5 +668,269 @@ export class PdfExportService {
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.text(`Date: ${currentDate}`, pageWidth / 2, signatureY + 50, { align: 'center' });
+  }
+
+  exportStudentGradeReportToPdf(
+    studentGradeReport: StudentGradeReportViewModel,
+    fileName: string
+  ): void {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const cardLeftMargin = margin;
+    const cardWidth = pageWidth - (margin * 2);
+    let currentY = margin;
+
+    const profile = studentGradeReport.studentProfile;
+    
+    // ========== HEADER DESIGN (Matching Registration Slip Style) ==========
+    const headerY = currentY;
+    
+    // Main Title - Centered, large, dark blue
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(9, 62, 150); // Dark blue color
+    doc.text('Student Grade Report', pageWidth / 2, headerY + 8, { align: 'center' });
+    
+    // Decorative separator lines (two parallel lines)
+    // Thicker dark blue line
+    doc.setDrawColor(9, 62, 150);
+    doc.setLineWidth(0.7);
+    doc.line(margin, headerY + 12, pageWidth - margin, headerY + 12);
+    
+    // Thinner light blue line
+    doc.setDrawColor(41, 128, 185);
+    doc.setLineWidth(0.3);
+    doc.line(margin, headerY + 13.5, pageWidth - margin, headerY + 13.5);
+    
+    currentY = headerY + 20;
+    
+    // ========== STUDENT INFORMATION BOX (Light Blue with Dark Blue Border) ==========
+    const profileBoxY = currentY;
+    const profileBoxHeight = 32;
+    const profileBoxWidth = pageWidth - (margin * 2);
+    const boxPadding = 10;
+    
+    // Draw light blue rounded rectangle box with dark blue border
+    doc.setFillColor(240, 248, 255); // Light blue background
+    doc.setDrawColor(9, 62, 150); // Dark blue border
+    doc.setLineWidth(0.5);
+    doc.roundedRect(margin, profileBoxY, profileBoxWidth, profileBoxHeight, 2, 2, 'FD');
+    
+    // Profile information in two columns
+    const leftColX = margin + boxPadding;
+    const rightColX = margin + (profileBoxWidth / 2) + boxPadding;
+    let profileY = profileBoxY + 7;
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(9, 62, 150); // Dark blue for labels
+    
+    // Left column
+    doc.text('Student Name:', leftColX, profileY);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(9, 62, 150); // Dark blue for values
+    const fullNameLines = doc.splitTextToSize(profile.fullName || '-', 70);
+    doc.text(fullNameLines, leftColX + 32, profileY);
+    profileY += Math.max(4, fullNameLines.length * 4);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Student ID:', leftColX, profileY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(profile.studentId || '-', leftColX + 32, profileY);
+    profileY += 4;
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Academic Program:', leftColX, profileY);
+    doc.setFont('helvetica', 'normal');
+    const programLines = doc.splitTextToSize(profile.academicProgram || '-', 70);
+    doc.text(programLines, leftColX + 45, profileY);
+    profileY += Math.max(4, programLines.length * 4);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('CGPA:', leftColX, profileY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(studentGradeReport.cgpa.toFixed(2), leftColX + 20, profileY);
+    
+    // Right column
+    profileY = profileBoxY + 7;
+    doc.setFont('helvetica', 'bold');
+    
+    // Get first academic term for display (if available)
+    const firstTerm = studentGradeReport.academicTerms && studentGradeReport.academicTerms.length > 0
+      ? studentGradeReport.academicTerms[0]
+      : null;
+    
+    doc.text('Batch Code:', rightColX, profileY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(profile.batchCode || '-', rightColX + 32, profileY);
+    profileY += 4;
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Entry Year:', rightColX, profileY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(profile.entryYear?.toString() || '-', rightColX + 32, profileY);
+    profileY += 4;
+    
+    if (firstTerm) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('Academic Term:', rightColX, profileY);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${firstTerm.academicTermName} - ${firstTerm.year}`, rightColX + 38, profileY);
+      profileY += 4;
+    }
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Nationality:', rightColX, profileY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(profile.nationality || '-', rightColX + 32, profileY);
+    
+    currentY = profileBoxY + profileBoxHeight + 15;
+
+    // Draw each academic term as a card with blue left border
+    studentGradeReport.academicTerms.forEach((term, termIndex) => {
+      // Check if we need a new page
+      if (currentY > pageHeight - 100) {
+        doc.addPage();
+        currentY = margin;
+      }
+
+      const cardTopY = currentY;
+      const cardPadding = 10;
+      const headerHeight = 15;
+      const tableStartY = cardTopY + cardPadding + headerHeight + 5;
+
+      // Calculate table height
+      const courseCount = term.courses ? term.courses.length : 0;
+      const rowHeight = 8;
+      const tableHeaderHeight = 10;
+      const footerHeight = 16; // Total and GPA rows
+      const estimatedTableHeight = tableHeaderHeight + (courseCount * rowHeight) + footerHeight;
+      
+      const cardHeight = headerHeight + estimatedTableHeight + (cardPadding * 2) + 10;
+
+      // Draw white card background
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.rect(cardLeftMargin, cardTopY, cardWidth, cardHeight, 'FD');
+
+      // Draw blue left border (4px = ~1.4mm)
+      doc.setFillColor(24, 144, 255); // Blue color #1890ff
+      doc.rect(cardLeftMargin, cardTopY, 1.4, cardHeight, 'F');
+
+      // Draw term header
+      currentY = cardTopY + cardPadding;
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text(
+        `${term.academicTermName} - ${term.year}`,
+        cardLeftMargin + cardPadding + 1.4,
+        currentY + 5
+      );
+      currentY = tableStartY;
+
+      // Build table data
+      const tableData: any[] = [];
+      if (term.courses && term.courses.length > 0) {
+        term.courses.forEach((course) => {
+          tableData.push([
+            course.courseCode + ' - ' + course.courseTitle,
+            course.creditHours.toString(),
+            course.grade,
+            (course.points || 0).toString()
+          ]);
+        });
+      }
+
+      // Calculate totals
+      const totalCreditHours = term.courses ? term.courses.reduce((sum, c) => sum + c.creditHours, 0) : 0;
+      const totalPoints = term.courses ? term.courses.reduce((sum, c) => sum + (c.points || 0), 0) : 0;
+      const termGPA = term.termGPA !== null && term.termGPA !== undefined ? term.termGPA.toFixed(2) : '0.00';
+
+      // Draw table with autoTable
+      autoTable(doc, {
+        startY: currentY,
+        margin: { left: cardLeftMargin + cardPadding + 1.4, right: margin, top: 2, bottom: 2 }, // Minimized margins
+        head: [['Course Title', 'Credit Hours', 'Grade', 'Points']],
+        body: tableData,
+        foot: [
+          ['Total', totalCreditHours.toString(), '', totalPoints.toString()],
+          ['GPA', '', '', termGPA]
+        ],
+        theme: 'grid',
+        styles: {
+          fontSize: 9,
+          cellPadding: { top: 2, right: 3, bottom: 2, left: 3 }, // Minimized padding
+          textColor: [0, 0, 0],
+          lineColor: [200, 200, 200],
+          lineWidth: 0.1,
+          minCellHeight: 7 // Minimize row height
+        },
+        headStyles: {
+          fillColor: [250, 250, 250],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold',
+          fontSize: 9,
+          cellPadding: { top: 2, right: 3, bottom: 2, left: 3 }, // Minimized padding
+          lineColor: [200, 200, 200],
+          lineWidth: 0.1,
+          minCellHeight: 8 // Minimize row height
+        },
+        footStyles: {
+          fillColor: [245, 245, 245], // Light grey background for summary rows
+          textColor: [0, 0, 0],
+          fontStyle: 'bold',
+          fontSize: 9,
+          cellPadding: { top: 2, right: 3, bottom: 2, left: 3 }, // Minimized vertical padding
+          lineColor: [200, 200, 200],
+          lineWidth: 0.1,
+          minCellHeight: 8 // Minimize row height
+        },
+        columnStyles: {
+          0: { halign: 'left', cellWidth: 'auto' }, // Course Title
+          1: { halign: 'center', cellWidth: 35 }, // Credit Hours
+          2: { halign: 'center', cellWidth: 30 }, // Grade
+          3: { halign: 'center', cellWidth: 30 } // Points - Center aligned
+        },
+        didParseCell: function (data) {
+          // Minimize footer cell padding and height
+          if (data.section === 'foot') {
+            // Minimize vertical padding to reduce row height
+            data.cell.styles.cellPadding = { top: 2, right: 3, bottom: 2, left: 3 };
+            data.cell.styles.minCellHeight = 8;
+            
+            // Center align footer values in Credit Hours, Grade, and Points columns
+            if (data.column.index === 1 || data.column.index === 3) {
+              // Credit Hours and Points columns - center align
+              data.cell.styles.halign = 'center';
+            }
+          }
+        }
+      });
+
+      // Get the final Y position after the table
+      const finalY = (doc as any).lastAutoTable.finalY || currentY;
+      currentY = finalY + 15; // Add spacing between cards
+    });
+
+    // Add page numbers
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 100, 100);
+      doc.text(
+        `Page ${i} of ${totalPages}`,
+        pageWidth - 20,
+        pageHeight - 10,
+        { align: 'right' }
+      );
+    }
+
+    doc.save(`${fileName}_${new Date().getTime()}.pdf`);
   }
 }

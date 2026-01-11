@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -168,11 +169,14 @@ export class XssSanitizationService {
    * @param context - Context where input was detected
    */
   logPotentialXss(input: string, context: string): void {
+    // Only log in development mode to prevent information leakage
+    if (!environment.production) {
     console.warn(`Potential XSS attempt detected in ${context}:`, {
       input: input.substring(0, 100), // Log first 100 chars only
       timestamp: new Date().toISOString(),
       context: context
     });
+    }
     
     // In production, you might want to send this to a security monitoring service
     // this.securityMonitoringService.logSecurityEvent('potential_xss', { input, context });

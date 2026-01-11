@@ -22,9 +22,9 @@ export class AuthGuardService {
   }
 
   private checkIsUserAuthenticated() {
-    // Use localStorage-based authentication
+    // Use AuthService.getToken() which checks both sessionStorage and localStorage
     const isLoggedIn = localStorage.getItem('isLogin') === 'true';
-    const hasToken = localStorage.getItem('access_token');
+    const hasToken = this._authService.getToken(); // Checks secure storage first, then localStorage
 
     if (isLoggedIn && hasToken) {
       return true;

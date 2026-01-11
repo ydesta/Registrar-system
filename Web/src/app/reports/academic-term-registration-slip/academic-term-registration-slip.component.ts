@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { DomSanitizer } from '@angular/platform-browser';
 import { StaticData } from 'src/app/admission-request/model/StaticData';
 import { TermCourseOfferingService } from 'src/app/colleges/services/term-course-offering.service';
 import { ACADEMIC_TERM_STATUS } from 'src/app/common/constant';
 import { PdfExportService } from '../services/pdf-export.service';
 import { StudentService } from 'src/app/students/services/student.service';
 import { StudentRegistrationSlipViewModel } from 'src/app/students/models/student-profile-view-model.model';
+import { CoursePaymentViewModel } from 'src/app/students/models/course-payment-view-model.model';
 import { environment } from 'src/environments/environment.prod';
 
 @Component({
@@ -34,7 +36,8 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
     private courseTermOfferingService: TermCourseOfferingService,
     private _pdfExportService: PdfExportService,
     private _fb: FormBuilder,
-    private _studentService: StudentService
+    private _studentService: StudentService,
+    private _sanitizer: DomSanitizer
   ) {
     const currentYear = new Date();
     this.yearList = this.getYearRange(currentYear.getFullYear());
@@ -161,7 +164,11 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
   downloadRegistrationSlip(): void {
     const element = document.getElementById('registration-slip');
     if (element) {
-      const blob = new Blob([element.innerHTML], { type: 'text/html' });
+      // Sanitize HTML content to prevent XSS attacks
+      const rawHtml = element.innerHTML;
+      const sanitizedHtml = this.sanitizeHtmlForDownload(rawHtml);
+      
+      const blob = new Blob([sanitizedHtml], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -172,6 +179,39 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
       URL.revokeObjectURL(url);
     }
   }
+
+  /**
+   * Sanitizes HTML content to prevent XSS attacks before downloading
+   * @param html - Raw HTML string to sanitize
+   * @returns Sanitized HTML string safe for download
+   */
+  private sanitizeHtmlForDownload(html: string): string {
+    if (!html) return '';
+    
+    // Remove script tags and their content
+    let sanitized = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    
+    // Remove javascript: protocols
+    sanitized = sanitized.replace(/javascript:/gi, '');
+    
+    // Remove on* event handlers (onclick, onload, etc.)
+    sanitized = sanitized.replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '');
+    sanitized = sanitized.replace(/\son\w+\s*=\s*[^\s>]*/gi, '');
+    
+    // Remove dangerous attributes
+    sanitized = sanitized.replace(/\s(style|onload|onerror|onclick|onmouseover|onfocus|onblur)\s*=\s*["'][^"']*["']/gi, '');
+    
+    // Remove iframe, object, embed tags that could execute code
+    sanitized = sanitized.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+    sanitized = sanitized.replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '');
+    sanitized = sanitized.replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '');
+    
+    // Use Angular's DomSanitizer to further sanitize
+    // SecurityContext.HTML = 1
+    const fullySanitized = this._sanitizer.sanitize(1, sanitized) || '';
+    
+    return fullySanitized;
+  }
   generatePdf(): void {
     const formModel = this.formCourseOffered.getRawValue();
     //if (formModel.termId && formModel.termYear && formModel.batchCode) {
@@ -180,7 +220,6 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
     const startDate = formModel.startDate ? this.formatDate(formModel.startDate) : '';
     const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
     const studentId = formModel.studentId ? formModel.studentId : null;
-    console.log("%%%%           ", formModel.batchCode);
     this._studentService.getListOfTermRegisteredCourseList(formModel.batchCode, startDate, endDate, studentId)
       .subscribe({
         next: (res) => {
@@ -233,6 +272,28 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
       return data.courses.reduce((sum, course) => sum + course.totalAmount, 0);
     }
     return 0;
+  }
+
+  getPaymentDetails(data: any): CoursePaymentViewModel[] {
+    if (data.payments && data.payments.length > 0) {
+      return data.payments;
+    }
+    return [];
+  }
+
+  getTotalPaymentAmount(data: any): number {
+    if (data.payments && data.payments.length > 0) {
+      return data.payments.reduce((sum, payment) => sum + (payment.amount || 0), 0);
+    }
+    return 0;
+  }
+
+  formatToBank(toBank: number): string {
+    if (!toBank || toBank === 0) return '-';
+    const bankNames: { [key: number]: string } = {
+      1: 'Dashen Bank',
+    };
+    return bankNames[toBank] || toBank.toString();
   }
 
   sort(column: string, order: string | null): void {

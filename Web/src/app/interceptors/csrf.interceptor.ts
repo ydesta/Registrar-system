@@ -43,11 +43,26 @@ export class CsrfInterceptor implements HttpInterceptor {
     }
 
     // For non-state-changing requests, still add the client header
+    // Ensure header is added for all API requests, including verify-email
+    const existingHeaders = request.headers.keys();
+    const hasClientHeader = existingHeaders.includes('X-Client-App') || existingHeaders.includes('x-client-app');
+    
     const clientHeaderRequest = request.clone({
       setHeaders: {
         'X-Client-App': environment.frontendClientKey // Required header to identify frontend requests
       }
     });
+    
+    // Debug: Log for verify-email requests
+    if (request.url.includes('/authentication/verify-email')) {
+      console.log('CsrfInterceptor: Adding X-Client-App header for verify-email', {
+        url: request.url,
+        method: request.method,
+        hadHeader: hasClientHeader,
+        headerValue: environment.frontendClientKey?.substring(0, 20) + '...'
+      });
+    }
+    
     return next.handle(clientHeaderRequest);
   }
 

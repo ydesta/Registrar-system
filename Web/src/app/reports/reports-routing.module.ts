@@ -10,6 +10,8 @@ import { CourseOfferedPerAcademicTermComponent } from './course-offered-per-acad
 import { AcademicTermRegistrationSlipComponent } from './academic-term-registration-slip/academic-term-registration-slip.component';
 import { TranscriptSearchComponent } from './transcript-search/transcript-search.component';
 import { StudentSemsterCourseRegistrationSlipComponent } from './student-semster-course-registration-slip/student-semster-course-registration-slip.component';
+import { GradeReportComponent } from './grade-report/grade-report.component';
+import { StudentGradeReportComponent } from './student-grade-report/student-grade-report.component';
 import { AuthGuard } from '../guards/auth.guard';
 
 const routes: Routes = [
@@ -22,6 +24,8 @@ const routes: Routes = [
   { path: 'academic-term-registration-slip', component: AcademicTermRegistrationSlipComponent, canActivate: [AuthGuard] },
   { path: 'transcript-search', component: TranscriptSearchComponent, canActivate: [AuthGuard] },
   { path: 'registration-slip', component: StudentSemsterCourseRegistrationSlipComponent, canActivate: [AuthGuard] },
+  { path: 'grade-report', component: GradeReportComponent, canActivate: [AuthGuard] },
+  { path: 'student-grade-report', component: StudentGradeReportComponent, canActivate: [AuthGuard] },
 ];
 
 @NgModule({

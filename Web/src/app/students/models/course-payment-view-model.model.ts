@@ -5,4 +5,5 @@ export class CoursePaymentViewModel {
     transactionDate: Date
     bankTransactionID: string
     amount: number
+    fileName: string
 }

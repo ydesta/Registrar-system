@@ -9,6 +9,7 @@ import { TermCourseOfferingService } from '../colleges/services/term-course-offe
 import { StaticData } from '../admission-request/model/StaticData';
 import { CourseSectionAssignment } from '../Models/CourseSectionAssignment';
 import { NzModalService } from 'ng-zorro-antd/modal';
+import { AuthService } from '../services/auth.service';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { saveAs } from 'file-saver';
@@ -45,7 +46,8 @@ export class StudentSectionAssignmentsComponent implements OnInit {
     private fb: FormBuilder,
     private studentSectionAssignmentService: StudentSectionAssignmentService,
     private courseTermOfferingService: TermCourseOfferingService,
-    private modalService: NzModalService
+    private modalService: NzModalService,
+    private authService: AuthService
   ) {
     const currentYear = new Date().getFullYear();
     this.yearList = this.getYearRange(currentYear);
@@ -374,12 +376,30 @@ export class StudentSectionAssignmentsComponent implements OnInit {
       isDefaultSection: course.isDefaultSection
     }));
 
-    const request: CourseSectionAssignmentRequest = {
+    // Get current user for CreatedBy and LastModifiedBy
+    const currentUser = this.authService.getCurrentUser();
+    const userId = currentUser?.id || 
+                   localStorage.getItem('userId') || 
+                   sessionStorage.getItem('user_id') || 
+                   sessionStorage.getItem('userId') ||
+                   'system';
+
+    // Ensure userId is not empty
+    if (!userId || userId.trim() === '') {
+      this.errorMessage = 'User information not found. Please log in again.';
+      this.generatingAssignments = false;
+      return;
+    }
+
+    const request: BulkSectionAssignmentRequest = {
       batchCode: batchCode,
       academicTerm: academicTerm,
       year: year,
       numberOfSections: this.numberOfSections,
-      courseAssignments: courseAssignments
+      courseAssignments: courseAssignments,
+      students: [], // Empty array for course assignments (required by backend validation)
+      createdBy: userId,
+      lastModifiedBy: userId
     };
 
     // Validate that we have course assignments data
@@ -389,7 +409,15 @@ export class StudentSectionAssignmentsComponent implements OnInit {
       return;
     }
 
+    // Validate required fields
+    if (!request.createdBy || !request.lastModifiedBy) {
+      this.errorMessage = 'User information is missing. Please log in again.';
+      this.generatingAssignments = false;
+      return;
+    }
+
     console.log('Generating student course section assignments with request: ', request);
+    console.log('CreatedBy:', request.createdBy, 'LastModifiedBy:', request.lastModifiedBy);
 
     // Call the API to generate student course section assignments
     this.studentSectionAssignmentService.assignStudentsToSections(request).subscribe({

@@ -47,6 +47,8 @@ export interface BulkSectionAssignmentRequest {
   numberOfSections?: number;
   students?: StudentLab[]; // For lab section assignments
   courseAssignments?: CourseSectionAssignment[]; // For course section assignments
+  createdBy?: string; // Required by backend - user who created the assignment
+  lastModifiedBy?: string; // Required by backend - user who last modified the assignment
 }
 export interface StudentSectionTransferRequest {
   studentIds: string[];

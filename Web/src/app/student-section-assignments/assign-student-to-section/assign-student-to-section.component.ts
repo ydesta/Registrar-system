@@ -9,6 +9,7 @@ import { StudentRegisteredCoursesResult, StudentRegisteredCoursesModel, CourseIn
 import { SectionViewModel } from 'src/app/Models/SectionViewModel';
 import { StudentProfileViewModel } from 'src/app/students/models/student-profile-view-model.model';
 import { StudentInfo } from 'src/app/Models/StudentInfo';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-assign-student-to-section',
@@ -53,7 +54,8 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private sectionService: StudentSectionAssignmentService,
     private notificationService: CustomNotificationService,
-    private courseTermOfferingService: TermCourseOfferingService
+    private courseTermOfferingService: TermCourseOfferingService,
+    private authService: AuthService
   ) {
     this.createSearchForm();
   }
@@ -251,6 +253,10 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
 
     this.loading = true;
     const assignments = this.prepareStudentSectionAssignments();
+    if (!assignments.length) {
+      this.loading = false;
+      return;
+    }
     
     // Send the array of assignments in a single request
     this.sectionService.addStudentSectionAssignment(assignments)
@@ -273,6 +279,19 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
   }
 
   private prepareStudentSectionAssignments(): any[] {
+    // Resolve current user for audit fields
+    const currentUser = this.authService?.getCurrentUser();
+    const userId = currentUser?.id ||
+      localStorage.getItem('userId') ||
+      sessionStorage.getItem('user_id') ||
+      sessionStorage.getItem('userId') ||
+      'system';
+
+    if (!userId || userId.trim() === '') {
+      this.notificationService.notification('error', 'Error', 'User information not found. Please log in again.');
+      return [];
+    }
+
     return this.courseAssignmentsFormArray.controls.map(control => {
       const formValue = control.value;
 
@@ -300,7 +319,15 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
         sectionType: this.sectionType,
         studentOfferedBatchCode: this.batchCode,
         academicTerm: this.academicTerm,
-        year: this.year
+        year: this.year,
+        // Required by backend validation
+        students: {
+          id: this.studentId,
+          studentCode: this.studentInfo?.studentCode,
+          fullName: this.studentInfo?.fullName
+        },
+        createdBy: userId,
+        lastModifiedBy: userId
       };
     });
   }

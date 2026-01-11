@@ -15,8 +15,4 @@ export class Constants {
   // public static clientRoot = 'http://staging.hilcoe.edu.et';
   // public static idpAuthority = 'https://hilcoe.edu.et:7123';
   // public static clientId = 'angular-client';
-
-
-  // SSL Certificate Validation Bypass
-  public static bypassSslValidation = true;
 }

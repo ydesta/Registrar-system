@@ -1,0 +1,236 @@
+<div class="content-container">
+  <!-- Page Header -->
+  <div class="header-section">
+    <div class="page-title">
+      <h1>Grade Report</h1>
+      <p class="subtitle">View student grades by academic term, year, and batch</p>
+    </div>
+  </div>
+
+  <!-- Collapsible Search Form -->
+  <div class="search-section">
+    <nz-collapse>
+      <nz-collapse-panel [nzHeader]="searchHeader" [nzActive]="!isFormCollapsed"
+        (nzActiveChange)="isFormCollapsed = !$event">
+
+        <ng-template #searchHeader>
+          <span>
+            <i nz-icon nzType="search" nzTheme="outline"></i>
+            Search Filters
+          </span>
+        </ng-template>
+
+        <form nz-form [formGroup]="formGradeReport" (ngSubmit)="getGradeReport()">
+          <div nz-row [nzGutter]="24">
+
+            <!-- Academic Term -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="7" nzRequired>Academic Term</nz-form-label>
+                <nz-form-control [nzSpan]="17">
+                  <nz-select formControlName="termId" nzPlaceHolder="Select Academic Term" nzShowSearch nzAllowClear
+                    style="width: 100%;">
+                    <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
+                      [nzLabel]="item.Description"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Term Year -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6" nzRequired>Term Year</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                  <nz-select formControlName="termYear" nzPlaceHolder="Select Term Year" nzShowSearch nzAllowClear
+                    style="width: 100%;">
+                    <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <!-- Batch Code -->
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">Batch Code</nz-form-label>
+                <nz-form-control [nzSpan]="18">
+                  <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch Code (Optional)" nzShowSearch nzAllowClear
+                    style="width: 100%;">
+                    <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.batchCode"
+                      [nzLabel]="item.batchCode"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div nz-row>
+            <div nz-col [nzSpan]="24" class="form-actions">
+              <button nz-button nzType="default" (click)="loadData()" class="mr-2">
+                <i nz-icon nzType="reload" nzTheme="outline"></i>
+                Clear
+              </button>
+              <button nz-button nzType="primary" type="submit"
+                [disabled]="!formGradeReport.valid" [nzLoading]="isLoading">
+                <i nz-icon nzType="search" nzTheme="outline"></i>
+                Search
+              </button>
+            </div>
+          </div>
+        </form>
+      </nz-collapse-panel>
+    </nz-collapse>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-container" *ngIf="hasSearched">
+    <!-- Table Header with Export Actions -->
+    <div class="table-header" *ngIf="total > 0">
+      <h3>Grade Report Results</h3>
+      <div class="table-actions">
+        <button nz-button nzType="primary" (click)="exportToExcel()" [nzLoading]="isExportingExcel" class="mr-2">
+          <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+          Export Excel
+        </button>
+        <button nz-button nzType="primary" (click)="exportToPdf()" [nzLoading]="isExportingPdf">
+          <span nz-icon nzType="printer" nzTheme="outline"></span>
+          Export PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Table with Expandable Rows -->
+    <div id="print-section" *ngIf="total > 0">
+      <nz-table #expandTable 
+        [nzData]="gradeReportData" 
+        nzBordered 
+        [nzPageSize]="pageSize"
+        [nzPageSizeOptions]="pageSizeOption" 
+        [nzShowSizeChanger]="true" 
+        [nzTotal]="total" 
+        [nzPageIndex]="pageIndex"
+        (nzPageIndexChange)="onPageIndexChange($event)" 
+        (nzPageSizeChange)="onPageSizeChange($event)"
+        [nzFrontPagination]="false" 
+        [nzShowTotal]="rangeTemplate" 
+        [nzLoading]="isLoading" 
+        [nzNoResult]="emptyTpl"
+        [nzShowQuickJumper]="true" 
+        [nzScroll]="{ x: '1200px' }" 
+        style="overflow-x: auto;" 
+        class="mobile-table-container">
+
+        <ng-template #rangeTemplate let-range="range" let-total>
+          {{ getDisplayRange() }}
+        </ng-template>
+
+        <thead>
+          <tr>
+            <th nzWidth="50px"></th>
+            <!-- <th style="min-width: 80px;">#</th> -->
+            <th style="min-width: 200px;" 
+                [nzSortOrder]="sortColumn === 'fullName' ? sortOrder : null" 
+                (nzSortOrderChange)="sort('fullName', $event)">Full Name</th>
+            <th style="min-width: 120px;" 
+                [nzSortOrder]="sortColumn === 'batchCode' ? sortOrder : null" 
+                (nzSortOrderChange)="sort('batchCode', $event)">Batch Code</th>
+            <th style="min-width: 180px;">Academic Program</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let data of expandTable.data; let i = index">
+            <tr>
+              <td class="expand-column">
+                <span class="custom-expand-icon" 
+                      [ngClass]="{ 'expanded': expandSet.has(data.serialNo) }"
+                      (click)="onExpandChange(data.serialNo, !expandSet.has(data.serialNo))"
+                      *ngIf="data.courseGrades && data.courseGrades.length > 0">
+                  <i nz-icon 
+                     [nzType]="expandSet.has(data.serialNo) ? 'minus-square' : 'plus-square'"
+                     [style.color]="expandSet.has(data.serialNo) ? '#ef4444' : '#1890ff'"
+                     style="font-size: 20px;"></i>
+                </span>
+              </td>
+              <!-- <td>
+                <span class="serial-number">
+                  {{ data.serialNo }}
+                </span>
+              </td> -->
+              <td>{{ data.fullName }}</td>
+              <td>{{ data.batchCode }}</td>
+              <td>{{ data.academicProgram }}</td>
+            </tr>
+            <tr [nzExpand]="expandSet.has(data.serialNo)">
+              <td></td>
+              <td [attr.colspan]="4">
+                <div class="child-table-container" *ngIf="data.courseGrades && data.courseGrades.length > 0">
+                  <nz-table 
+                    [nzData]="data.courseGrades" 
+                    nzBordered 
+                    [nzShowPagination]="false"
+                    nzSize="small"
+                    style="margin: 10px 0;">
+                    <thead>
+                      <tr>
+                        <th style="width: 80px;">No</th>
+                        <th style="width: 120px;">Course Code</th>
+                        <th style="width: 300px;">Course Title</th>
+                        <th style="width: 100px;">Grade</th>
+                        <th style="width: 100px;">Points</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let course of data.courseGrades">
+                        <td>{{ course.serialNo }}</td>
+                        <td>{{ course.courseCode }}</td>
+                        <td>{{ course.courseTitle }}</td>
+                        <td>{{ course.grade }}</td>
+                        <td>{{ course.points || '-' }}</td>
+                      </tr>
+                    </tbody>
+                  </nz-table>
+                </div>
+                <div *ngIf="!data.courseGrades || data.courseGrades.length === 0" class="no-course-grades">
+                  <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+                  No course grades available
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+
+        <ng-template #emptyTpl>
+          <div class="no-data">
+            <span nz-icon nzType="book" nzTheme="outline"></span>
+            <p>No grade data found for the selected criteria</p>
+          </div>
+        </ng-template>
+      </nz-table>
+    </div>
+
+    <!-- No Results State -->
+    <div class="no-results-container" *ngIf="total === 0 && !isLoading">
+      <div class="no-results-content">
+        <div class="no-results-icon">
+          <span nz-icon nzType="search" nzTheme="outline"></span>
+        </div>
+        <h3 class="no-results-title">No Results Found</h3>
+        <p class="no-results-description">
+          No grade data found for the selected criteria. Try adjusting your search filters.
+        </p>
+        <div class="no-results-actions">
+          <button nz-button nzType="default" (click)="loadData()" class="mr-2">
+            <i nz-icon nzType="reload" nzTheme="outline"></i>
+            Clear Filters
+          </button>
+          <button nz-button nzType="primary" (click)="isFormCollapsed = false">
+            <i nz-icon nzType="search" nzTheme="outline"></i>
+            Modify Search
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

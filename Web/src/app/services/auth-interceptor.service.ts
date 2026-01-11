@@ -12,12 +12,17 @@ import {
 import { Observable, catchError, from, throwError, switchMap } from 'rxjs';
 import { Constants } from '../constants';
 import { environment } from '../../environments/environment';
+import { SecureLoggerService } from './secure-logger.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthInterceptorService implements HttpInterceptor {
-  constructor(private _authService: AuthService, private _router: Router) {}
+  constructor(
+    private _authService: AuthService,
+    private _router: Router,
+    private _logger: SecureLoggerService
+  ) {}
 
   intercept(
     req: HttpRequest<any>,
@@ -25,7 +30,7 @@ export class AuthInterceptorService implements HttpInterceptor {
   ): Observable<HttpEvent<any>> {
     // Only intercept API requests
     if (req.url.startsWith(Constants.apiRoot)) {
-      console.log('AuthInterceptorService: Intercepting API request to:', req.url);
+      this._logger.debug('AuthInterceptorService: Intercepting API request to:', req.url);
       
       // Skip adding token for authentication endpoints (login, register, etc.)
       const isAuthEndpoint = req.url.includes('/authentication/login') || 
@@ -34,14 +39,14 @@ export class AuthInterceptorService implements HttpInterceptor {
                              req.url.includes('/authentication/database-check');
       
       if (isAuthEndpoint) {
-        console.log('AuthInterceptorService: Skipping token for auth endpoint:', req.url);
+        this._logger.debug('AuthInterceptorService: Skipping token for auth endpoint:', req.url);
         return next.handle(req);
       }
       
       // Use switchMap to properly handle the async token retrieval
       return from(this._authService.getAccessToken()).pipe(
         switchMap((token: string) => {
-          console.log('AuthInterceptorService: Token received:', token ? 'Token exists' : 'No token');
+          this._logger.debug('AuthInterceptorService: Token received:', token ? 'Token exists' : 'No token');
           
           // If no token, proceed with original request
           if (!token) {
@@ -53,7 +58,7 @@ export class AuthInterceptorService implements HttpInterceptor {
             .set('Authorization', `Bearer ${token}`)
             .set('X-Client-App', environment.frontendClientKey); // Required header to identify frontend requests
           const authRequest = req.clone({ headers });
-          console.log('AuthInterceptorService: Making authenticated request to:', authRequest.url);
+          this._logger.debug('AuthInterceptorService: Making authenticated request to:', authRequest.url);
           
           return next.handle(authRequest).pipe(
             catchError((err: HttpErrorResponse) => {
@@ -66,11 +71,11 @@ export class AuthInterceptorService implements HttpInterceptor {
                 message: err?.message || 'unknown message'
               };
               
-              console.error('AuthInterceptorService Error:', errorDetails);
+              this._logger.error('AuthInterceptorService Error:', errorDetails);
 
               if (err && (err.status === 401 || err.status === 403)) {
-                console.log('Unauthorized/Forbidden - redirecting to unauthorized page');
-                console.log('Error details:', {
+                this._logger.debug('Unauthorized/Forbidden - redirecting to unauthorized page');
+                this._logger.debug('Error details:', {
                   status: err.status,
                   url: err.url,
                   userRole: localStorage.getItem('role'),
@@ -80,20 +85,20 @@ export class AuthInterceptorService implements HttpInterceptor {
                 
                 // Don't redirect for UserManagement credentials endpoint - let component handle it
                 if (err.url && err.url.includes('/UserManagement/credentials')) {
-                  console.log('Skipping redirect for UserManagement credentials endpoint');
+                  this._logger.debug('Skipping redirect for UserManagement credentials endpoint');
                   return throwError(() => err);
                 }
                 
                 this._router.navigate(['/unauthorized']);
               } else if (err?.status === 0) {
-                console.error('Network error detected - possible CORS or SSL issue');
-                console.error('This could be due to:');
-                console.error('- CORS policy blocking the request');
-                console.error('- SSL certificate issues');
-                console.error('- Network connectivity problems');
-                console.error('- Server not running or not accessible');
+                this._logger.error('Network error detected - possible CORS or SSL issue');
+                this._logger.debug('This could be due to:');
+                this._logger.debug('- CORS policy blocking the request');
+                this._logger.debug('- SSL certificate issues');
+                this._logger.debug('- Network connectivity problems');
+                this._logger.debug('- Server not running or not accessible');
               } else if (err?.status >= 500) {
-                console.error('Server error detected');
+                this._logger.error('Server error detected');
               }
               
               return throwError(() => err);

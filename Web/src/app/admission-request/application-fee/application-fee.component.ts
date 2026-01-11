@@ -28,6 +28,9 @@ export class ApplicationFeeComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private isMonitoringStarted = false;
   private userId: string;
+  private isRefreshing = false;
+  private lastRefreshTime: number = 0;
+  private readonly MIN_REFRESH_INTERVAL = 5000; // 5 seconds minimum between refreshes
 
   constructor(
     private academicProgramRequestService: AcademicProgramRequestService,
@@ -59,7 +62,7 @@ export class ApplicationFeeComponent implements OnInit, OnDestroy {
   }
 
   private initializeData(): void {
-    // First try to get applicantId from route params
+    console.log("&&&&&&&&&&&&&&&&&     test ");
     this.route.queryParams.subscribe(params => {
       const routeApplicantId = params["id"];
       if (routeApplicantId && routeApplicantId !== this.applicantId) {
@@ -113,10 +116,10 @@ export class ApplicationFeeComponent implements OnInit, OnDestroy {
 
     this.isMonitoringStarted = true;
 
-    // Monitor authentication state changes
+    // Monitor authentication state changes (check every 30 seconds instead of every second)
     this.authCheckInterval = setInterval(() => {
       this.checkAuthenticationAndRefresh();
-    }, 1000);
+    }, 30000); // 30 seconds
 
     // Monitor storage changes (for multi-tab scenarios)
     const storageSub = window.addEventListener('storage', (event) => {
@@ -149,7 +152,8 @@ export class ApplicationFeeComponent implements OnInit, OnDestroy {
 
   private checkAuthenticationAndRefresh(): void {
     const currentUserId = localStorage.getItem('userId');
-    const currentToken = localStorage.getItem('token');
+    // Check both sessionStorage and localStorage for token
+    const currentToken = sessionStorage.getItem('access_token') || localStorage.getItem('token');
 
     // Check if user ID has changed
     if (currentUserId && currentUserId !== this.userId) {
@@ -158,10 +162,21 @@ export class ApplicationFeeComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Prevent multiple simultaneous calls
+    if (this.isRefreshing) {
+      return;
+    }
+
     // Check if we have valid authentication and applicantId
     if (currentUserId && currentToken && this.applicantId) {
-      // Only refresh if we haven't loaded data yet or if it's been a while
-      if (!this.applicationFee || this.shouldRefreshData()) {
+      const now = Date.now();
+      const timeSinceLastRefresh = now - this.lastRefreshTime;
+      
+      // Only refresh if:
+      // 1. We haven't loaded data yet AND enough time has passed since last attempt
+      // 2. OR data exists and it's been more than 5 minutes
+      if ((!this.applicationFee && timeSinceLastRefresh >= this.MIN_REFRESH_INTERVAL) || 
+          (this.applicationFee && this.shouldRefreshData())) {
         this.refreshData();
       }
     }
@@ -203,9 +218,18 @@ export class ApplicationFeeComponent implements OnInit, OnDestroy {
       return;
     }
     
+    // Prevent multiple simultaneous calls
+    if (this.isRefreshing) {
+      return;
+    }
+    
+    this.isRefreshing = true;
     this.loading = true;
+    this.lastRefreshTime = Date.now();
+    
     this.academicProgramRequestService.getApplicationFee(this.applicantId).subscribe({
       next: (response) => {
+        console.log("fee     ",response);
         if (response && Array.isArray(response) && response.length > 0) {
           this.applicationFee = response[0];
           this.paymentStatus = this.applicationFee?.status || 'Not Paid';
@@ -225,6 +249,7 @@ export class ApplicationFeeComponent implements OnInit, OnDestroy {
           this.isPaymentButtonDisabled = false;
         }
         this.loading = false;
+        this.isRefreshing = false;
         this.paymentStatusChange.emit(this.paymentStatus);
         
         // Store last refresh time
@@ -232,6 +257,7 @@ export class ApplicationFeeComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         this.loading = false;
+        this.isRefreshing = false;
         this.applicationFee = {
           paymentType: 'Application Fee',
           amount: 0,

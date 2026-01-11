@@ -49,7 +49,7 @@ namespace SecureAuth.API.Configuration
         // ============================================
         public static class AppSettings
         {
-            public const string FrontendUrl = "https://staging.hilcoe.edu.et";
+            public const string FrontendUrl = "https://hsis.hilcoe.edu.et";
         }
 
         // ============================================

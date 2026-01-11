@@ -13,15 +13,16 @@ export class InstructionComponent implements OnChanges {
   paymentPolicyChecked: boolean = false;
 
   instructions: Instruction[] = [
+    // Degree/General Applicant Instructions
     {
       icon: 'file-text',
       title: 'Document Requirements',
       description: 'The application form should be returned along with one attested copy (non-returnable) of each testimonial (transcript and degree) with the original (returnable).'
     },
     {
-      icon: 'notification',
-      title: 'Application Status',
-      description: 'Applicants will be notified of their admission request status by the office after the required processing of their application.'
+      icon: 'graduation-cap',
+      title: 'Grade 12 Natural Science Requirement',
+      description: 'If you are a Grade 12 completed student, only Natural Science students are allowed to apply.'
     },
     {
       icon: 'edit',
@@ -29,14 +30,25 @@ export class InstructionComponent implements OnChanges {
       description: 'A letter of motivation is required as part of your application package.'
     },
     {
+      icon: 'notification',
+      title: 'Application Status',
+      description: 'Applicants will be notified of their admission request status by the office after the required processing of their application.'
+    },
+    {
       icon: 'info-circle',
       title: 'Acceptance Policy',
       description: 'Applying for admission doesn\'t guarantee acceptance. All applications are subject to review and approval.'
     },
+    // MSc Student Instructions
     {
-      icon: 'graduation-cap',
-      title: 'Grade 12 Natural Science Requirement',
-      description: 'If you are a Grade 12 completed student, only Natural Science students are allowed to apply.'
+      icon: 'file-search',
+      title: 'GAT Results (MSc Students)',
+      description: 'MSc students: Submit your GAT (Graduate Admission Test) results.'
+    },
+    {
+      icon: 'file-protect',
+      title: 'ETA-Authenticated Credentials (MSc Students)',
+      description: 'MSc students: Provide ETA-authenticated copies of all your academic credentials, including degree certificates and student copies (transcripts).'
     }
   ];
 

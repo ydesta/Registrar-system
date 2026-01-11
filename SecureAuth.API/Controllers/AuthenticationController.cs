@@ -63,66 +63,44 @@ namespace SecureAuth.API.Controllers
             }
             catch (Exception ex)
             {
+                // Log the exception but don't expose details
+                var logger = HttpContext.RequestServices.GetRequiredService<ILogger<AuthenticationController>>();
+                logger.LogError(ex, "Health check failed");
+                
                 return StatusCode(500, new
                 {
                     status = "unhealthy",
-                    timestamp = DateTime.UtcNow,
-                    error = ex.Message
+                    timestamp = DateTime.UtcNow
                 });
             }
         }
 
         [HttpGet("database-check")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Super Admin")]
         public async Task<IActionResult> DatabaseCheck()
         {
             try
             {
-                var userManager = HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
-                var roleManager = HttpContext.RequestServices.GetRequiredService<RoleManager<ApplicationRole>>();
                 var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
                 
-                // Check database connection
+                // Check database connection only - no sensitive information
                 var canConnect = await dbContext.Database.CanConnectAsync();
-                
-                // Check if tables exist
-                var usersCount = await dbContext.Users.CountAsync();
-                var rolesCount = await dbContext.Roles.CountAsync();
-                
-                // Check for admin user
-                var adminUser = await userManager.FindByEmailAsync("hilcoeadmin@gmail.com");
-                
-                // Check for Super Admin role
-                var superAdminRole = await roleManager.FindByNameAsync("Super Admin");
                 
                 return Ok(new
                 {
                     databaseConnected = canConnect,
-                    usersCount = usersCount,
-                    rolesCount = rolesCount,
-                    adminUserExists = adminUser != null,
-                    adminUserActive = adminUser?.IsActive ?? false,
-                    adminUserEmailConfirmed = adminUser?.EmailConfirmed ?? false,
-                    superAdminRoleExists = superAdminRole != null,
-                    adminUserDetails = adminUser != null ? new
-                    {
-                        id = adminUser.Id,
-                        email = adminUser.Email,
-                        firstName = adminUser.FirstName,
-                        lastName = adminUser.LastName,
-                        isActive = adminUser.IsActive,
-                        emailConfirmed = adminUser.EmailConfirmed,
-                        createdAt = adminUser.CreatedAt
-                    } : null,
                     timestamp = DateTime.UtcNow
                 });
             }
             catch (Exception ex)
             {
+                // Log the exception but don't expose stack trace
+                var logger = HttpContext.RequestServices.GetRequiredService<ILogger<AuthenticationController>>();
+                logger.LogError(ex, "Database check failed");
+                
                 return StatusCode(500, new
                 {
-                    error = ex.Message,
-                    stackTrace = ex.StackTrace,
+                    error = "Database check failed",
                     timestamp = DateTime.UtcNow
                 });
             }
@@ -195,7 +173,7 @@ namespace SecureAuth.API.Controllers
                 
                 return StatusCode(500, new LoginResponse { 
                     Success = false, 
-                    Message = $"Test login error: {ex.Message}" 
+                    Message = "An error occurred during test login. Please try again later." 
                 });
             }
         }
@@ -464,13 +442,12 @@ namespace SecureAuth.API.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception for debugging
+                // Log the exception for debugging but don't expose details
                 var logger = HttpContext.RequestServices.GetRequiredService<ILogger<AuthenticationController>>();
                 logger.LogError(ex, "Error during email verification for email: {Email}", email);
                 
                 return StatusCode(500, new { 
-                    message = "An error occurred while verifying email. Please try again later.",
-                    error = ex.Message 
+                    message = "An error occurred while verifying email. Please try again later."
                 });
             }
         }
@@ -706,7 +683,10 @@ namespace SecureAuth.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Failed to reset rate limit", error = ex.Message });
+                var logger = HttpContext.RequestServices.GetRequiredService<ILogger<AuthenticationController>>();
+                logger.LogError(ex, "Failed to reset rate limit for user: {UserId}", User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                
+                return StatusCode(500, new { message = "Failed to reset rate limit. Please try again later." });
             }
         }
 
@@ -739,7 +719,10 @@ namespace SecureAuth.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while extending session", error = ex.Message });
+                var logger = HttpContext.RequestServices.GetRequiredService<ILogger<AuthenticationController>>();
+                logger.LogError(ex, "Error extending session for user: {UserId}", User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                
+                return StatusCode(500, new { message = "An error occurred while extending session. Please try again later." });
             }
         }
 
@@ -816,14 +799,20 @@ namespace SecureAuth.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while refreshing token", error = ex.Message });
+                var logger = HttpContext.RequestServices.GetRequiredService<ILogger<AuthenticationController>>();
+                logger.LogError(ex, "Error refreshing token");
+                
+                return StatusCode(500, new { message = "An error occurred while refreshing token. Please try again later." });
             }
         }
 
+#if DEBUG
         [HttpGet("debug-user-info")]
         [Authorize]
         public ActionResult GetUserDebugInfo()
         {
+            // SECURITY: This endpoint is only available in DEBUG mode
+            // It exposes sensitive user information and should never be in production
             try
             {
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -844,14 +833,21 @@ namespace SecureAuth.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                var logger = HttpContext.RequestServices.GetRequiredService<ILogger<AuthenticationController>>();
+                logger.LogError(ex, "Error in debug-user-info endpoint");
+                
+                return StatusCode(500, new { error = "An error occurred while retrieving debug information." });
             }
         }
+#endif
 
+#if DEBUG
         [HttpGet("debug-user-roles")]
         [Authorize]
         public async Task<ActionResult> GetUserRolesDebug()
         {
+            // SECURITY: This endpoint is only available in DEBUG mode
+            // It exposes sensitive role and permission information and should never be in production
             try
             {
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -898,14 +894,21 @@ namespace SecureAuth.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message, stackTrace = ex.StackTrace });
+                // Don't expose stack trace even in debug mode
+                var logger = HttpContext.RequestServices.GetRequiredService<ILogger<AuthenticationController>>();
+                logger.LogError(ex, "Error in debug-user-roles");
+                return StatusCode(500, new { error = "An error occurred while retrieving debug information" });
             }
         }
+#endif
 
+#if DEBUG
         [HttpGet("debug-email-verification")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Super Admin")]
         public async Task<ActionResult> DebugEmailVerification([FromQuery] string email)
         {
+            // SECURITY: This endpoint is only available in DEBUG mode and requires Super Admin role
+            // It exposes sensitive user information and should never be in production
             try
             {
                 if (string.IsNullOrEmpty(email))
@@ -939,10 +942,10 @@ namespace SecureAuth.API.Controllers
                 logger.LogError(ex, "Error in debug email verification for email: {Email}", email);
                 
                 return StatusCode(500, new { 
-                    message = "Error retrieving user information", 
-                    error = ex.Message 
+                    message = "Error retrieving user information. Please try again later."
                 });
             }
         }
+#endif
     }
 }

@@ -45,7 +45,8 @@ export class StudentProfileSummaryComponent implements OnInit {
   ) {
     this.userId = localStorage.getItem('userId');
     this.progStatusId = this.aciveRoute.snapshot.paramMap.get('id');
-    if (this.progStatusId != "null") {
+    // Check if progStatusId is valid (not null, not undefined, not "null" string)
+    if (this.progStatusId && this.progStatusId !== "null" && this.progStatusId.trim() !== "") {
       this.getListStudentProfileByStudentId(this.progStatusId);
     }
     this.getLoggedRole();
@@ -64,7 +65,8 @@ export class StudentProfileSummaryComponent implements OnInit {
       this.getStudentProfileByStudentId();
     }
     this.StudentId.valueChanges.subscribe((res) => {
-      if (res && (this.isUserInstructor || this.isUserAdmin || this.isUserAcademicDirector)) {
+      // Validate res is not null, undefined, empty, or "null" string before making API call
+      if (res && res !== "null" && res.trim() !== "" && (this.isUserInstructor || this.isUserAdmin || this.isUserAcademicDirector)) {
         this.getListStudentProfileByStudentId(res);
       }
     });
@@ -93,6 +95,13 @@ export class StudentProfileSummaryComponent implements OnInit {
       });
   }
   getListStudentProfileByStudentId(studentId: string) {
+    // Validate studentId before making API call
+    if (!studentId || studentId === "null" || studentId.trim() === "") {
+      console.warn('StudentProfileSummaryComponent: Invalid studentId provided:', studentId);
+      this.isLoading = false;
+      return;
+    }
+    
     this.isLoading = true;
     this.studentServices
       .getListStudentProfileByStudentId(studentId)

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { UserManagementService } from '../../../services/user-management.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { environment } from '../../../../environments/environment';
+import { SecureLoggerService } from '../../../services/secure-logger.service';
 import * as XLSX from 'xlsx';
 
 export interface UserCredential {
@@ -46,7 +47,8 @@ export class UserCredentialsComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private userManagementService: UserManagementService,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private logger: SecureLoggerService
   ) {
     this.searchForm = this.fb.group({
       fromDate: [null],
@@ -56,23 +58,23 @@ export class UserCredentialsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log('UserCredentialsComponent initialized');
-    console.log('Current user role:', localStorage.getItem('role'));
-    console.log('Current user type:', localStorage.getItem('userType'));
+    this.logger.debug('UserCredentialsComponent initialized');
+    this.logger.debug('Current user role:', { role: localStorage.getItem('role') });
+    this.logger.debug('Current user type:', { userType: localStorage.getItem('userType') });
     
     // Test API connection first
     this.testApiConnection();
   }
 
   testApiConnection(): void {
-    console.log('Testing API connection...');
+    this.logger.debug('Testing API connection...');
     this.userManagementService.testApiConnection().subscribe({
       next: (response) => {
-        console.log('API connection test successful:', response);
+        this.logger.debug('API connection test successful');
         this.loadUserCredentials();
       },
       error: (error) => {
-        console.error('API connection test failed:', error);
+        this.logger.error('API connection test failed');
         
         if (error.status === 404) {
           this.message.error(`API server not found. Please ensure the SecureAuth API is running on ${environment.secureUrl}`);
@@ -89,7 +91,7 @@ export class UserCredentialsComponent implements OnInit {
     this.loading = true;
     const formValue = this.searchForm.value;
     
-    console.log('Loading user credentials with params:', {
+    this.logger.debug('Loading user credentials with params:', {
       fromDate: formValue.fromDate,
       toDate: formValue.toDate,
       page: this.currentPage,

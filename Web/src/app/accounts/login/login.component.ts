@@ -10,6 +10,7 @@ import { SharedDataService } from 'src/app/services/shared-data.service';
 import { TokenStorageService } from 'src/app/services/token-storage.service';
 import { environment } from 'src/environments/environment';
 import { RouteRefreshService } from '../services/route-refresh.service';
+import { SecureLoggerService } from 'src/app/services/secure-logger.service';
 
 @Component({
   selector: 'app-login',
@@ -39,7 +40,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private _sharedDataService: SharedDataService,
     private _tokenStorageService: TokenStorageService,
     private _routeRefreshService: RouteRefreshService,
-    private _http: HttpClient
+    private _http: HttpClient,
+    private _logger: SecureLoggerService
   ) {
     this.loginForm = _fb.group({
       email: [null, [Validators.required, Validators.email]],
@@ -137,11 +139,11 @@ export class LoginComponent implements OnInit, OnDestroy {
             if (response.token) {
               this.handleSuccessfulLogin(response, loginRequest.email);
             } else {
-              console.error('Login response missing token:', response);
+              this._logger.error('Login response missing token');
               this.incorrectLoginAttempt = 'Login failed. Please try again.';
             }
           } else {
-            console.error('Login failed:', response.message);
+            this._logger.error('Login failed:', { message: response.message });
             this.incorrectLoginAttempt = response.message;
             
             // Show appropriate notification based on lockout status
@@ -153,7 +155,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           }
         },
         error: (error: any) => {
-          console.error('Login error:', error);
+          this._logger.error('Login error occurred');
           this.isLoading = false;
           this.isProcessingLogin = false;
           
@@ -176,7 +178,7 @@ export class LoginComponent implements OnInit, OnDestroy {
             // Extract remaining attempts and lockout info if available
             if (loginResponse.remainingAttempts !== undefined) {
               this.remainingAttempts = loginResponse.remainingAttempts;
-              console.log('Remaining attempts:', this.remainingAttempts);
+              this._logger.debug('Remaining login attempts:', this.remainingAttempts);
             }
             
             if (loginResponse.isLocked) {
@@ -204,10 +206,10 @@ export class LoginComponent implements OnInit, OnDestroy {
       });
     } else if (this.isProcessingLogin) {
       // Prevent multiple login attempts
-      console.log('Login already in progress, ignoring duplicate request');
+      this._logger.debug('Login already in progress, ignoring duplicate request');
       return;
     } else {
-      console.log('Form validation failed');
+      this._logger.debug('Form validation failed');
       Object.values(this.loginForm.controls).forEach((control) => {
         if (control.invalid) {
           control.markAsDirty();
@@ -219,7 +221,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   private handleSuccessfulLogin(response: any, email: string): void {
     try {
-      console.log('Processing successful login:', response);
+      this._logger.debug('Processing successful login');
       
       // Save user data first
       this.saveUserData(response, email);
@@ -245,20 +247,20 @@ export class LoginComponent implements OnInit, OnDestroy {
 
       // Use setTimeout to ensure state is properly set before navigation
       setTimeout(() => {
-        console.log('Navigating to dashboard...');
+        this._logger.debug('Navigating to dashboard...');
         this._router.navigate(['/dashboard']).then(() => {
-          console.log('Navigation successful, reloading page...');
+          this._logger.debug('Navigation successful, reloading page...');
           // Force a page reload to ensure all components are properly initialized
           window.location.reload();
         }).catch((error) => {
-          console.error('Navigation failed:', error);
+          this._logger.error('Navigation failed:', error);
           // Fallback navigation
           window.location.href = '/dashboard';
         });
       }, 100);
 
     } catch (error) {
-      console.error('Error during login processing:', error);
+      this._logger.error('Error during login processing:', error);
       this._notificationService.notification('error', 'Error', 'Failed to complete login process.');
     }
   }
@@ -266,7 +268,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   private saveUserData(response: any, email: string): void {
     // ✅ FIX: Don't save user data if 2FA is pending (no tokens yet)
     if (response.requiresTwoFactor && !response.token) {
-      console.log('2FA pending - skipping user data save');
+      this._logger.debug('2FA pending - skipping user data save');
       return;
     }
     
@@ -275,12 +277,28 @@ export class LoginComponent implements OnInit, OnDestroy {
       this._tokenStorageService.saveUser(response.user);
       this._tokenStorageService.isLogin('true', response.user.id);
       
-      // Save tokens
+      // Save tokens - store in localStorage FIRST for immediate availability
+      // Then also store in sessionStorage for better security
       if (response.token) {
+        // Save to localStorage immediately (ensures immediate availability)
+        localStorage.setItem('access_token', response.token);
+        
+        // Also save to secure token storage (sessionStorage)
+        this._authService.setAccessToken(response.token);
+        
+        // Also save to tokenStorageService for backward compatibility
         this._tokenStorageService.saveToken(response.token, response.user.id);
       }
       
-      // Also save to localStorage for backward compatibility
+      if (response.refreshToken) {
+        // Save to localStorage immediately
+        localStorage.setItem('refresh_token', response.refreshToken);
+        
+        // Also save to secure token storage (sessionStorage)
+        this._authService.setRefreshToken(response.refreshToken);
+      }
+      
+      // Save non-sensitive user data to localStorage
       localStorage.setItem('isLogin', 'true');
       localStorage.setItem('userId', response.user.id || '');
       localStorage.setItem('firstName', response.user.firstName || '');
@@ -289,10 +307,6 @@ export class LoginComponent implements OnInit, OnDestroy {
       const userRoles = response.user.roles || [];
       localStorage.setItem('role', JSON.stringify(userRoles));
       localStorage.setItem('userType', userRoles[0] || '');
-      localStorage.setItem('access_token', response.token || '');
-      if (response.refreshToken) {
-        localStorage.setItem('refresh_token', response.refreshToken);
-      }
 
       // Ensure authentication state is properly set
       this._authService.updateCurrentUser(response.user);

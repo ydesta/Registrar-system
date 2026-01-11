@@ -20,11 +20,17 @@ namespace SecureAuth.API.Configuration
             // Add custom middleware
             app.UseMiddleware<CorsDebugMiddleware>();
             
-            // Note: SecurityHeadersMiddleware and RateLimitingMiddleware
-            // are temporarily disabled for testing and performance reasons
-            // Uncomment when needed:
-            // app.UseMiddleware<SecurityHeadersMiddleware>();
-            // app.UseMiddleware<RateLimitingMiddleware>();
+            // SECURITY: SecurityHeadersMiddleware is ENABLED in Program.cs
+            // This middleware consistently applies security headers to all responses:
+            // - X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+            // - Strict-Transport-Security (HSTS) for HTTPS in production
+            // - Content-Security-Policy (CSP)
+            // - Cross-Origin security headers
+            // - Removes server information headers
+            // app.UseMiddleware<SecurityHeadersMiddleware>(); // Enabled in Program.cs
+            
+            // Rate limiting middleware is enabled in Program.cs
+            // app.UseMiddleware<RateLimitingMiddleware>(); // Enabled in Program.cs
 
             // Add HTTPS redirection for production
             if (!app.Environment.IsDevelopment())
@@ -47,18 +53,22 @@ namespace SecureAuth.API.Configuration
         public static class PipelineOrder
         {
             /// <summary>
-            /// The critical middleware execution order
+            /// The critical middleware execution order (as configured in Program.cs)
             /// </summary>
             public static readonly string[] ExecutionOrder = new[]
             {
                 "1. UseCors - Configure cross-origin resource sharing",
-                "2. UseMiddleware(CorsDebugMiddleware) - CORS debugging and logging",
-                "3. UseHttpsRedirection - Force HTTPS in production",
-                "4. UseExceptionHandler - Global exception handling",
-                "5. UseAuthentication - Validate JWT tokens",
-                "6. UseAntiforgery - Validate CSRF tokens",
-                "7. UseAuthorization - Check role permissions",
-                "8. MapControllers - Route requests to controllers"
+                "2. UseMiddleware(FrontendRequestValidationMiddleware) - Validate frontend requests",
+                "3. UseMiddleware(SecureErrorHandlingMiddleware) - Global exception handling",
+                "4. UseMiddleware(CorsDebugMiddleware) - CORS debugging and logging",
+                "5. UseMiddleware(SecurityHeadersMiddleware) - Apply security headers consistently",
+                "6. UseMiddleware(RateLimitingMiddleware) - Rate limiting protection",
+                "7. UseHttpsRedirection - Force HTTPS in production",
+                "8. UseHsts - HTTP Strict Transport Security",
+                "9. UseAuthentication - Validate JWT tokens",
+                "10. UseAntiforgery - Validate CSRF tokens",
+                "11. UseAuthorization - Check role permissions",
+                "12. MapControllers - Route requests to controllers"
             };
 
             /// <summary>

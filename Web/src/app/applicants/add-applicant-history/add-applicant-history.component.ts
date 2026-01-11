@@ -269,9 +269,65 @@ export class AddApplicantHistoryComponent implements OnInit {
     this.attachmentModal = true;
   }
   transform(url: any) {
-    return (this.attachmentpath = this.sanitizer.bypassSecurityTrustResourceUrl(
-      'https://vadimdez.github.io/ng2-pdf-viewer/assets/pdf-test.pdf'
-    ));
+    // Validate URL before bypassing security
+    const validatedUrl = this.validateAndSanitizeUrl('https://vadimdez.github.io/ng2-pdf-viewer/assets/pdf-test.pdf');
+    return (this.attachmentpath = this.sanitizer.bypassSecurityTrustResourceUrl(validatedUrl));
+  }
+
+  /**
+   * Validates and sanitizes URL before using bypassSecurityTrustResourceUrl
+   * Returns 'about:blank' for invalid URLs
+   */
+  private validateAndSanitizeUrl(url: string): string {
+    if (!url || typeof url !== 'string' || url.trim().length === 0) {
+      return 'about:blank';
+    }
+
+    const trimmedUrl = url.trim().toLowerCase();
+
+    // Block dangerous protocols
+    const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:', 'about:', 'blob:'];
+    for (const protocol of dangerousProtocols) {
+      if (trimmedUrl.startsWith(protocol)) {
+        console.warn('AddApplicantHistoryComponent: Blocked dangerous protocol in URL');
+        return 'about:blank';
+      }
+    }
+
+    try {
+      const urlObj = new URL(url);
+      
+      // Only allow http and https
+      if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+        console.warn('AddApplicantHistoryComponent: Blocked invalid protocol in URL');
+        return 'about:blank';
+      }
+
+      // Validate against allowed origins
+      const allowedOrigins = [
+        'localhost',
+        '127.0.0.1',
+        'hilcoe.edu.et',
+        'staging.hilcoe.edu.et',
+        'hsis.hilcoe.edu.et',
+        'vadimdez.github.io' // For PDF viewer assets
+      ];
+
+      const hostname = urlObj.hostname.toLowerCase();
+      const isAllowed = allowedOrigins.some(allowed => 
+        hostname === allowed || hostname.endsWith('.' + allowed)
+      );
+
+      if (!isAllowed) {
+        console.warn('AddApplicantHistoryComponent: Blocked untrusted origin in URL');
+        return 'about:blank';
+      }
+
+      return url; // URL is valid
+    } catch (error) {
+      console.error('AddApplicantHistoryComponent: Error validating URL:', error);
+      return 'about:blank';
+    }
   }
   handleCancel() {
     this.attachmentModal = false;

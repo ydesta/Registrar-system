@@ -47,7 +47,7 @@ export class StudentSectionAssignmentService {
     return this.http.delete<any>(`${this.apiUrl}/${academicTerm}/${year}/${batchCode}/${sectionType}`);
   }
 
-  assignStudentsToSections(request: CourseSectionAssignmentRequest): Observable<any> {
+  assignStudentsToSections(request: BulkSectionAssignmentRequest): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/assign-sections`, request);
   }
 

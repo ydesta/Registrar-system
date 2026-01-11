@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import { LoginRequest, RegisterRequest, User, AuthenticationInfo } from './auth.interface';
 import { MobileDetectionService } from './mobile-detection.service';
 import { TokenStorageService } from './token-storage.service';
+import { SecureTokenStorageService } from './secure-token-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -25,15 +26,31 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private mobileDetectionService: MobileDetectionService,
-    private tokenStorageService: TokenStorageService
+    private tokenStorageService: TokenStorageService,
+    private secureTokenStorage: SecureTokenStorageService
   ) {
-    // Initialize authentication state
+    // Initialize authentication state first
     this.initializeAuthState();
+    
+    // Migrate tokens from localStorage to sessionStorage after a delay
+    // This prevents migration from interfering with active login process
+    // Only migrate if we don't already have tokens in sessionStorage
+    setTimeout(() => {
+      try {
+        this.secureTokenStorage.migrateFromLocalStorage();
+      } catch (error) {
+        // Ignore migration errors - fallback to localStorage will work
+        if (!environment.production) {
+          console.warn('AuthService: Token migration failed, using localStorage fallback');
+        }
+      }
+    }, 2000); // Increased delay to ensure login completes first
   }
 
   private initializeAuthState(): void {
     const isLogin = localStorage.getItem('isLogin') === 'true';
-    const hasToken = localStorage.getItem('access_token');
+    // Use secure token storage first, fallback to localStorage for backward compatibility
+    const hasToken = this.secureTokenStorage.getAccessToken() || localStorage.getItem('access_token');
     
     if (isLogin && hasToken) {
       const user = this.getCurrentUser();
@@ -67,10 +84,11 @@ export class AuthService {
 
   public isAuthenticated = (): Promise<boolean> => {
     const isLogin = localStorage.getItem('isLogin') === 'true';
-    const hasToken = localStorage.getItem('access_token');
+    // Use secure token storage first, fallback to localStorage
+    const hasToken = this.secureTokenStorage.getAccessToken() || localStorage.getItem('access_token');
     const tokenStorageIsLogin = this.tokenStorageService.getIsLogin();
     
-    // Check both localStorage and token storage service
+    // Check both secure storage and token storage service
     const isAuth = isLogin && hasToken && tokenStorageIsLogin;
     
     // Update the subject
@@ -89,7 +107,10 @@ export class AuthService {
     this._isAuthenticatedSubject.next(false);
     this._loginChangedSubject.next(false);
     
-    // Clear all auth data
+    // Clear tokens from secure storage (sessionStorage)
+    this.secureTokenStorage.clearTokens();
+    
+    // Clear all auth data from localStorage
     localStorage.removeItem('isLogin');
     localStorage.removeItem('userId');
     localStorage.removeItem('firstName');
@@ -116,12 +137,31 @@ export class AuthService {
   };
 
   public getAccessToken = (): Promise<string> => {
+    // Use secure token storage first
+    const secureToken = this.secureTokenStorage.getAccessToken();
+    if (secureToken) {
+      return Promise.resolve(secureToken);
+    }
+    
+    // Fallback to tokenStorageService
     const token = this.tokenStorageService.getToken();
-    return Promise.resolve(token || '');
+    if (token) {
+      return Promise.resolve(token);
+    }
+    
+    // Last fallback to localStorage (backward compatibility)
+    const localStorageToken = localStorage.getItem('access_token');
+    return Promise.resolve(localStorageToken || '');
   };
 
   public getToken(): string | null {
-    // Try tokenStorageService first (user-specific token)
+    // Try secure token storage first (most secure)
+    const secureToken = this.secureTokenStorage.getAccessToken();
+    if (secureToken) {
+      return secureToken;
+    }
+    
+    // Try tokenStorageService (user-specific token)
     const tokenStorageToken = this.tokenStorageService.getToken();
     if (tokenStorageToken) {
       return tokenStorageToken;
@@ -178,7 +218,12 @@ export class AuthService {
   }
 
   register(userRegistration: RegisterRequest): Observable<any> {
-    return this.http.post(`${this.baseUrl}/authentication/register`, userRegistration)
+    // Explicitly add X-Client-App header to ensure it's sent
+    const headers = {
+      'X-Client-App': environment.frontendClientKey
+    };
+    
+    return this.http.post(`${this.baseUrl}/authentication/register`, userRegistration, { headers })
       .pipe(
         timeout(60000), // Add 60-second timeout for registration
         retry(1), // Add retry mechanism
@@ -216,14 +261,24 @@ export class AuthService {
   }
 
   public verifyEmail(email: string, token: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/authentication/verify-email`, { email, token })
+    // Explicitly add X-Client-App header to ensure it's sent
+    const headers = {
+      'X-Client-App': environment.frontendClientKey
+    };
+    
+    return this.http.post(`${this.baseUrl}/authentication/verify-email`, { email, token }, { headers })
       .pipe(
         catchError(this.handleError)
       );
   }
 
   public verifyEmailGet(email: string, token: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/authentication/verify-email?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`)
+    // Explicitly add X-Client-App header to ensure it's sent
+    const headers = {
+      'X-Client-App': environment.frontendClientKey
+    };
+    
+    return this.http.get(`${this.baseUrl}/authentication/verify-email?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`, { headers })
       .pipe(
         catchError((error) => {
           // Fallback to POST method if GET fails
@@ -311,10 +366,56 @@ export class AuthService {
   }
 
   public getRefreshToken(): string | null {
+    // Use secure token storage first
+    const secureRefreshToken = this.secureTokenStorage.getRefreshToken();
+    if (secureRefreshToken) {
+      return secureRefreshToken;
+    }
+    
+    // Fallback to localStorage (backward compatibility)
     return localStorage.getItem('refresh_token');
   }
 
+  /**
+   * Sets access token securely in sessionStorage
+   * @param token - Access token
+   * @returns True if token was stored successfully
+   */
+  public setAccessToken(token: string): boolean {
+    const stored = this.secureTokenStorage.setAccessToken(token);
+    // Also save to localStorage for backward compatibility (fallback if sessionStorage fails)
+    if (token) {
+      try {
+        localStorage.setItem('access_token', token);
+      } catch (error) {
+        // Ignore localStorage errors
+      }
+    }
+    return stored;
+  }
+
+  /**
+   * Sets refresh token securely in sessionStorage
+   * @param token - Refresh token
+   * @returns True if token was stored successfully
+   */
+  public setRefreshToken(token: string): boolean {
+    const stored = this.secureTokenStorage.setRefreshToken(token);
+    // Also save to localStorage for backward compatibility (fallback if sessionStorage fails)
+    if (token) {
+      try {
+        localStorage.setItem('refresh_token', token);
+      } catch (error) {
+        // Ignore localStorage errors
+      }
+    }
+    return stored;
+  }
+
   public clearTokens(): void {
+    // Clear tokens from secure storage
+    this.secureTokenStorage.clearTokens();
+    
     const userId = localStorage.getItem('userId');
     if (userId) {
       this.tokenStorageService.logoutUser(userId);

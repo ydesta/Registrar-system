@@ -1,0 +1,574 @@
+// Content container styling to match student-profile-summary
+.content-container {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.loading-container {
+  text-align: center;
+  padding: 60px 20px;
+  color: #8c8c8c;
+
+  p {
+    margin-top: 16px;
+    font-size: 14px;
+  }
+}
+
+.search-collapse {
+  margin-bottom: 24px;
+}
+
+.student-card {
+  margin-top: 24px;
+  margin-bottom: 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+  }
+
+  ::ng-deep .ant-card-head-title {
+    text-align: left;
+  }
+}
+
+.photo-container {
+  text-align: center;
+  padding: 24px;
+  padding-left: 3px;
+  padding-right: 92px;
+  position: relative;
+}
+
+.default-avatar {
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+  color: #ffffff;
+  background: #1890ff;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+  transition: all 0.3s ease;
+  margin: 0 auto;
+  text-transform: uppercase;
+
+  &:hover {
+    transform: scale(1.05);
+    background: #40a9ff;
+  }
+}
+
+.student-name {
+  margin-top: 16px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #262626;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.student-program {
+  font-size: 16px;
+  color: #595959;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.info-container {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+
+  &:hover {
+    background: #fafafa;
+    border-color: #1890ff;
+  }
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 15px;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(24, 144, 255, 0.05);
+  }
+
+  strong {
+    color: #262626;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: #595959;
+  }
+}
+
+.icon {
+  margin-right: 12px;
+  font-size: 20px;
+  color: #1890ff;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+::ng-deep .ant-card-head {
+  background: linear-gradient(135deg, #1890ff, #40a9ff) !important;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 16px 24px;
+  border-bottom: none;
+}
+
+// Export actions
+.export-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+// Collapse styling - matching student profile
+.custom-collapse {
+  margin-top: 10px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+}
+
+.custom-collapse .ant-collapse-item {
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+}
+
+.custom-collapse .ant-collapse-header {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  background-color: #e9ecef;
+  padding: 12px;
+  border-radius: 8px 8px 0 0;
+}
+
+.custom-collapse .ant-collapse-content-box {
+  padding: 16px;
+}
+
+.academic-year-container {
+  padding: 10px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.academic-term {
+  margin-top: 15px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-left: 4px solid #1890ff;
+  border-radius: 5px;
+
+  h2 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #262626;
+  }
+}
+
+.table-container {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.footer-total {
+  font-weight: bold;
+  background: #f9f9f9;
+
+  td {
+    color: #262626;
+  }
+}
+
+.table-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  width: 100%;
+  margin-top: 24px;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+
+  h3 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .table-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0;
+}
+
+// Form styling
+nz-form-item {
+  margin-bottom: 16px;
+}
+
+// Input styling for search form
+::ng-deep .ant-collapse-content-box {
+  nz-form-item {
+    .ant-form-item-label {
+      padding-right: 12px !important;
+      
+      label {
+        white-space: nowrap;
+        overflow: visible;
+      }
+    }
+    
+    .ant-form-item-control {
+      width: 100%;
+    }
+    
+    nz-select, input {
+      width: 100%;
+      
+      .ant-select-selector {
+        width: 100%;
+        min-width: 200px;
+      }
+    }
+  }
+}
+
+// Table styling
+::ng-deep .ant-table-wrapper {
+  .ant-table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    .ant-table-thead > tr > th {
+      background: #fafafa;
+      font-weight: 600;
+      color: #262626;
+      padding: 16px;
+      border-bottom: 2px solid #f0f0f0;
+      transition: all 0.3s;
+    }
+
+    .ant-table-tbody > tr > td {
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+      transition: all 0.3s;
+    }
+
+    .ant-table-tbody > tr:hover > td {
+      background: rgba(24, 144, 255, 0.05);
+    }
+  }
+}
+
+// Child table styling
+.child-table-container {
+  padding: 10px;
+  background: #fafafa;
+  border-radius: 8px;
+  margin: 10px 0;
+
+  ::ng-deep .ant-table {
+    background: white;
+    
+    .ant-table-thead > tr > th {
+      background: #f0f0f0;
+      font-size: 12px;
+      padding: 8px;
+    }
+
+    .ant-table-tbody > tr > td {
+      padding: 8px;
+      font-size: 12px;
+    }
+  }
+}
+
+.no-course-grades {
+  padding: 20px;
+  text-align: center;
+  color: #8c8c8c;
+  font-size: 14px;
+
+  .anticon {
+    margin-right: 8px;
+  }
+}
+
+// Button styling
+::ng-deep .ant-btn {
+  border-radius: 8px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &.ant-btn-primary {
+    background: linear-gradient(135deg, #1890ff, #096dd9);
+    border: none;
+
+    &:hover {
+      background: linear-gradient(135deg, #40a9ff, #1890ff);
+    }
+  }
+}
+
+// No data styling
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: #8c8c8c;
+
+  .anticon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #d9d9d9;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+// No Results State Styling
+.no-results-container {
+  padding: 60px 20px;
+  text-align: center;
+  background: white;
+  border-radius: 8px;
+  margin: 20px;
+
+  .no-results-content {
+    max-width: 400px;
+    margin: 0 auto;
+
+    .no-results-icon {
+      margin-bottom: 24px;
+
+      .anticon {
+        font-size: 64px;
+        color: #d9d9d9;
+      }
+    }
+
+    .no-results-title {
+      margin: 0 0 16px 0;
+      color: #1f2937;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .no-results-description {
+      margin: 0 0 32px 0;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .no-results-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+
+      .ant-btn {
+        min-width: 120px;
+      }
+    }
+  }
+}
+
+// Serial number styling
+.serial-number {
+  font-weight: 600;
+  color: #1890ff;
+  background: rgba(24, 144, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+// GPA badge styling
+.gpa-badge {
+  font-weight: 600;
+  color: #52c41a;
+  background: rgba(82, 196, 26, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+// Expand icon styling
+.expand-column {
+  width: 50px;
+  text-align: center;
+}
+
+.custom-expand-icon {
+  cursor: pointer;
+  display: inline-block;
+  transition: transform 0.3s;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+  
+  &.expanded {
+    transform: rotate(0deg);
+  }
+}
+
+// Mobile responsive
+@media (max-width: 768px) {
+  .content-container {
+    padding: 16px;
+  }
+
+  .photo-container {
+    padding: 16px;
+    padding-right: 16px;
+  }
+
+  .default-avatar {
+    width: 120px;
+    height: 120px;
+    font-size: 32px;
+  }
+
+  .student-name {
+    font-size: 20px;
+  }
+
+  .student-program {
+    font-size: 14px;
+  }
+
+  .table-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+
+    .table-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+
+    .ant-btn {
+      width: 100%;
+    }
+  }
+
+  .no-results-container {
+    padding: 40px 16px;
+    margin: 16px;
+
+    .no-results-content {
+      .no-results-actions {
+        flex-direction: column;
+        align-items: stretch;
+
+        .ant-btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  ::ng-deep .ant-table-wrapper {
+    .ant-table {
+      .ant-table-thead > tr > th,
+      .ant-table-tbody > tr > td {
+        padding: 12px 8px;
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .content-container {
+    background: white;
+    padding: 0;
+  }
+
+  .ant-collapse,
+  .table-header {
+    display: none;
+  }
+
+  .table-container {
+    box-shadow: none;
+    border: none;
+  }
+}
