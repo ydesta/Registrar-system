@@ -3,11 +3,7 @@ using SecureAuth.APPLICATION.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MailKit.Net.Smtp;
-using MailKit.Security;
 using MimeKit;
-using System.Threading.Tasks;
-using System;
-using System.Linq;
 
 namespace SecureAuth.INFRASTRUCTURE.Services
 {
@@ -297,14 +293,14 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                 }
                 
                 var loginUrl = $"{_frontendUrl}/login";
-                var subject = $"Application Accepted - Your Login Credentials - SecureAuth";
-                var passwordSection = !string.IsNullOrEmpty(newPassword) ? $"\n                Password: {newPassword}" : "";
+                var subject = $"Your New Login Credentials - SecureAuth";
+                var passwordSection = !string.IsNullOrEmpty(newPassword) ? $"\n                New Password: {newPassword}" : "";
                 var content = $@"
                 Dear {firstName} {lastName},
 
-                Congratulations! Your application has been accepted and your account credentials have been updated by the system administrator. Here are your login credentials:
+                Your account credentials have been updated. Here are your new login credentials:
 
-                Username: {username}{passwordSection}
+                New Username: {username}{passwordSection}
 
                 You can log in to your account using the following link:
                 {loginUrl}
@@ -339,10 +335,10 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                                             <p>Dear {firstName} {lastName},</p>
                                             <p>Congratulations! 🎉 Your application has been <strong>accepted</strong> and your account credentials have been updated by the system administrator.</p>
             
-                                            <p>Here are your login credentials:</p>
+                                            <p>Here are your new login credentials:</p>
                                             <div class='credentials'>
-                                                <p><strong>Username:</strong> {username}</p>
-                                                {(!string.IsNullOrEmpty(newPassword) ? $"<p><strong>Password:</strong> {newPassword}</p>" : "")}
+                                                <p><strong>New Username:</strong> {username}</p>
+                                                {(!string.IsNullOrEmpty(newPassword) ? $"<p><strong>New Password:</strong> {newPassword}</p>" : "")}
                                             </div>
 
                                             <div style='text-align: center;'>

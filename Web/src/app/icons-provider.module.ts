@@ -20,7 +20,11 @@ import {
   MessageOutline,
   ExclamationCircleOutline,
   FileTextOutline,
-  AppstoreOutline
+  AppstoreOutline,
+  SearchOutline,
+  CloseCircleOutline,
+  BookOutline,
+  LockOutline
 } from '@ant-design/icons-angular/icons';
 
 const icons = [
@@ -42,7 +46,11 @@ const icons = [
   MessageOutline,
   ExclamationCircleOutline,
   FileTextOutline,
-  AppstoreOutline
+  AppstoreOutline,
+  SearchOutline,
+  CloseCircleOutline,
+  BookOutline,
+  LockOutline
 ];
 
 @NgModule({

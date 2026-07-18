@@ -29,10 +29,11 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   studentId = "";
   debugTime = new Date().toLocaleString();
 
-  pageindex = 1; // 1-based indexing for UI
-  totalRecord = 0;
+  // Pagination properties
+  pageIndex = 1; // 1-based indexing for UI
+  total = 0;
   pageSize = 10;
-  pageSizeOption = [5, 10, 15, 25, 50, 100];
+  pageSizeOptions = [5, 10, 15, 25, 50, 100];
   sortOrder = "";
   sortColumn = "";
   listOfTermNumber: StaticData[] = [];
@@ -44,6 +45,11 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   searchBatch: string = "";
   availableBatches: string[] = [];
   filteredTermCourseOfferings: any[] = [];
+  
+  // Filter properties
+  isActiveFilter: boolean | null = true; // Default to true (active only)
+  yearFilter: number | null = null;
+  yearOptions: number[] = [];
 
   constructor(
     private _customNotificationService: CustomNotificationService,
@@ -56,6 +62,12 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
       termCode: ["", Validators.required],
       studentId: [""]
     });
+    
+    // Generate year options (current year ± 10 years)
+    const currentYear = new Date().getFullYear();
+    for (let i = currentYear - 10; i <= currentYear + 5; i++) {
+      this.yearOptions.push(i);
+    }
   }
 
   ngOnInit(): void {
@@ -79,13 +91,23 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
 
   fetchProgram() {
     this.tbLoading = true;
+    const isActiveParam = this.isActiveFilter !== null ? `&isActive=${this.isActiveFilter}` : '&isActive=true';
+    const yearParam = this.yearFilter !== null ? `&year=${this.yearFilter}` : '';
+    
     this._crudService
       .getList(
-        `/TermCourseOfferings/paginated?searchKey=${this.searchKey}&pageindex=${this.pageindex - 1  // Convert 1-based UI index to 0-based API index
-        }&pageSize=${this.pageSize}&sortColumn=${this.sortColumn}&sortOrder=${this.sortOrder
-        }`
+        `/TermCourseOfferings/paginated?searchKey=${this.searchKey}&pageindex=${this.pageIndex - 1}&pageSize=${this.pageSize}&sortColumn=${this.sortColumn}&sortOrder=${this.sortOrder}${isActiveParam}${yearParam}`
       )
       .subscribe((res: any) => {
+        // Handle case where res.data might be null or undefined
+        if (!res || !res.data) {
+          this.termCourseOfferings = [];
+          this.filteredTermCourseOfferings = [];
+          this.total = 0;
+          this.tbLoading = false;
+          return;
+        }
+        
         this.termCourseOfferings = res.data.map((item: any) => {
           const term = this.listOfTermNumber.find(t => t.Id === item.academicTermSeason);
           let courseDetails: any[] = [];
@@ -124,24 +146,31 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
         // Apply current filter
         this.applyBatchFilter();
         
-        // Try different possible property names for total count
-        this.totalRecord = res.totalRowCount || res.total || res.count || res.totalCount || (res.data ? res.data.length : 0);
+        // Set total count from server response
+        this.total = res.totalRowCount || res.total || res.count || res.totalCount || 0;
         this.tbLoading = false;
-        // Don't override pageSize and pageindex from server response
-        // as it can interfere with pagination state
       }, (error) => {
+        console.error('Error fetching term course offerings:', error);
+        this.termCourseOfferings = [];
+        this.filteredTermCourseOfferings = [];
+        this.total = 0;
         this.tbLoading = false;
+        this._customNotificationService.notification(
+          'error',
+          'Error',
+          'Failed to load term course offerings. Please try again.'
+        );
       });
   }
 
   onPageIndexChange(page: number): void {
-    this.pageindex = page;
+    this.pageIndex = page;
     this.fetchProgram();
   }
 
   onPageSizeChange(size: number): void {
     this.pageSize = size;
-    this.pageindex = 1;
+    this.pageIndex = 1; // Reset to first page when page size changes
     this.fetchProgram();
   }
 
@@ -411,5 +440,17 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
         item => item.batchCode && item.batchCode.toLowerCase().includes(searchTerm)
       );
     }
+  }
+
+  onIsActiveFilterChange(value: boolean | null): void {
+    this.isActiveFilter = value;
+    this.pageIndex = 1; // Reset to first page
+    this.fetchProgram();
+  }
+
+  onYearFilterChange(value: number | null): void {
+    this.yearFilter = value;
+    this.pageIndex = 1; // Reset to first page
+    this.fetchProgram();
   }
 }

@@ -1,113 +1,106 @@
 <div class="content-container">
-  <!-- Header Section -->
   <div class="header-section">
     <div class="header-content">
-      <!-- First Row: Title -->
-      <div class="page-title">
-        <h3 class="title-text">Student Grades</h3>
-        <p class="subtitle-text">Manage and view all student grade information</p>
+      <div class="page-header-row">
+        <div class="page-title">
+          <h2 class="title-text">Student Grades</h2>
+          <p class="subtitle-text">Manage and view all student grade information</p>
+        </div>
+        <div class="header-primary-action">
+          <button
+            routerLink="../import-student-grade"
+            class="grade-submit-btn"
+            nz-button
+            nzType="primary"
+            type="button"
+          >
+            <span nz-icon nzType="file-text" nzTheme="outline"></span>
+            <span>Grade Submission</span>
+          </button>
+        </div>
       </div>
-      
-      <!-- Second Row: Search and Action Buttons -->
-      <div class="search-actions-row">
-        <div class="search-section">
-          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input type="text" nz-input placeholder="Search by Student Code..." [(ngModel)]="searchKey" (ngModelChange)="applySearchAndFilters()" />
+
+      <div class="controls-panel">
+        <div class="controls-panel-search">
+          <span class="controls-label">Search</span>
+          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton" class="grades-search-input">
+            <input
+              type="text"
+              nz-input
+              placeholder="Student code…"
+              [(ngModel)]="searchKey"
+              (ngModelChange)="applySearchAndFilters()"
+            />
           </nz-input-group>
           <ng-template #suffixIconButton>
-            <button nz-button nzType="primary" class="search-btn" nzSearch>
-              <i nz-icon nzType="search"></i>
+            <button nz-button nzType="primary" class="search-btn" nzSearch type="button">
+              <span nz-icon nzType="search" nzTheme="outline"></span>
             </button>
           </ng-template>
         </div>
-        
-        <div class="action-buttons">
-          <button
-            routerLink="../import-student-grade"
-            class="add-btn"
-            nz-button
-            nzType="primary"
-          >
-            <i nz-icon nzType="plus" nzTheme="outline"></i>
-            <span>Add Grade</span>
-          </button>
-          <button nz-button class="export-btn" (click)="exportGrades()">
-            <i nz-icon nzType="file-excel" nzTheme="outline"></i>
-            <span>Export</span>
-          </button>
-          <button
-            class="print-btn"
-            nz-button
-            nzType="default"
-            printTitle="Student Grades List"
-            printSectionId="print-section"
-            ngxPrint
-          >
-            <i nz-icon nzType="printer" nzTheme="outline"></i>
-            <span>Print</span>
-          </button>
+
+        <div class="controls-panel-divider" aria-hidden="true"></div>
+
+        <div class="controls-panel-filters">
+          <span class="controls-label">Filters</span>
+          <div class="filter-chips">
+            <nz-select
+              class="filter-select"
+              nzPlaceHolder="Batch"
+              [(ngModel)]="selectedBatchCode"
+              (ngModelChange)="onBatchCodeFilterChange($event)"
+            >
+              <nz-option nzValue="" nzLabel="All batch codes"></nz-option>
+              <nz-option
+                *ngFor="let batchCode of getUniqueBatchCodes()"
+                [nzValue]="batchCode"
+                [nzLabel]="batchCode"
+              ></nz-option>
+            </nz-select>
+
+            <nz-select
+              class="filter-select filter-select-wide"
+              nzPlaceHolder="Course"
+              [(ngModel)]="selectedCourse"
+              (ngModelChange)="onCourseFilterChange($event)"
+            >
+              <nz-option nzValue="" nzLabel="All courses"></nz-option>
+              <nz-option
+                *ngFor="let course of getUniqueCourses()"
+                [nzValue]="course"
+                [nzLabel]="course"
+              ></nz-option>
+            </nz-select>
+
+            <nz-select
+              class="filter-select filter-select-term"
+              nzPlaceHolder="Academic term"
+              [(ngModel)]="selectedAcademicTerm"
+              (ngModelChange)="onAcademicTermFilterChange($event)"
+            >
+              <nz-option nzValue="" nzLabel="All academic terms"></nz-option>
+              <nz-option
+                *ngFor="let term of getUniqueAcademicTerms()"
+                [nzValue]="term"
+                [nzLabel]="term"
+              ></nz-option>
+            </nz-select>
+
+            <button nz-button nzType="default" class="clear-filters-btn" type="button" (click)="clearFilters()">
+              <span nz-icon nzType="close-circle" nzTheme="outline"></span>
+              Clear
+            </button>
+          </div>
         </div>
-      </div>
-      
-      <!-- Third Row: Filters -->
-      <div class="filter-section">
-        <nz-select 
-          nzPlaceHolder="Filter by Batch Code" 
-          [(ngModel)]="selectedBatchCode"
-          (ngModelChange)="onBatchCodeFilterChange($event)"
-          style="width: 150px; margin-right: 8px;">
-          <nz-option nzValue="" nzLabel="All Batch Codes"></nz-option>
-          <nz-option 
-            *ngFor="let batchCode of getUniqueBatchCodes()" 
-            [nzValue]="batchCode" 
-            [nzLabel]="batchCode">
-          </nz-option>
-        </nz-select>
-        
-        <nz-select 
-          nzPlaceHolder="Filter by Course" 
-          [(ngModel)]="selectedCourse"
-          (ngModelChange)="onCourseFilterChange($event)"
-          style="width: 200px; margin-right: 8px;">
-          <nz-option nzValue="" nzLabel="All Courses"></nz-option>
-          <nz-option 
-            *ngFor="let course of getUniqueCourses()" 
-            [nzValue]="course" 
-            [nzLabel]="course">
-          </nz-option>
-        </nz-select>
-        
-        <nz-select 
-          nzPlaceHolder="Filter by Academic Term" 
-          [(ngModel)]="selectedAcademicTerm"
-          (ngModelChange)="onAcademicTermFilterChange($event)"
-          style="width: 180px; margin-right: 8px;">
-          <nz-option nzValue="" nzLabel="All Academic Terms"></nz-option>
-          <nz-option 
-            *ngFor="let term of getUniqueAcademicTerms()" 
-            [nzValue]="term" 
-            [nzLabel]="term">
-          </nz-option>
-        </nz-select>
-        
-        <button 
-          nz-button 
-          nzType="default" 
-          (click)="clearFilters()"
-          style="margin-right: 8px;">
-          <i nz-icon nzType="clear" nzTheme="outline"></i>
-          Clear Filters
-        </button>
       </div>
     </div>
   </div>
 
-  <!-- Table Card -->
   <div class="table-card">
     <div id="print-section">
-      <nz-table 
-        #basicTable 
-        [nzData]="filteredStudentGrades" 
+      <nz-table
+        #basicTable
+        [nzData]="filteredStudentGrades"
         nzBordered
         [nzPageSize]="pageSize"
         [nzPageSizeOptions]="pageSizeOption"
@@ -157,7 +150,7 @@
         </tbody>
         <ng-template #emptyTpl>
           <div class="no-data">
-            <i nz-icon nzType="book" nzTheme="outline"></i>
+            <span nz-icon nzType="book" nzTheme="outline"></span>
             <p>No grade records available</p>
           </div>
         </ng-template>

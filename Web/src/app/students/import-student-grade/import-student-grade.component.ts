@@ -1,18 +1,33 @@
 import { Component, OnInit, ChangeDetectorRef } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
-import { ACADEMIC_TERM_STATUS, numbersOnlyValidator } from "src/app/common/constant";
+import { forkJoin, of } from "rxjs";
+import { Subscription } from "rxjs";
+import { catchError } from "rxjs/operators";
+import { ACADEMIC_TERM_STATUS, SECTION_TYPE, numbersOnlyValidator } from "src/app/common/constant";
 import { CustomNotificationService } from "src/app/services/custom-notification.service";
 import { StudentService } from "../services/student.service";
 import { TermCourseOfferingService } from "src/app/colleges/services/term-course-offering.service";
-import { CourseOfferingInstructorAssignmentService } from "src/app/colleges/services/course-offering-instructor-assignment.service";
+import { BatchTermService } from "src/app/colleges/services/batch-term.service";
 import { NzUploadChangeParam } from "ng-zorro-antd/upload";
+import { NzUploadFile } from "ng-zorro-antd/upload/interface";
+import { NzUploadXHRArgs } from "ng-zorro-antd/upload";
 import { StaticData } from "src/app/admission-request/model/StaticData";
 import { StaffService } from "src/app/services/staff.service";
-import { StaffModel } from "src/app/Models/StaffModel";
+import { AuthService } from "src/app/services/auth.service";
+import { InstructorSectionService } from "src/app/services/instructor-section.service";
+import { InstructorSectionAssignmentViewModel } from "src/app/Models/InstructorSectionModel";
 
-interface CustomFileList extends FileList {
-  item: (index: number) => File | null;
+export interface GradeImportAssignmentRow extends InstructorSectionAssignmentViewModel {
+  sectionTypeId: number;
+  sectionTypeLabel: string;
+  rowKey: string;
+}
+
+interface UploadFileListLike {
+  readonly length: number;
+  item(index: number): File | null;
+  [Symbol.iterator](): IterableIterator<File>;
 }
 
 interface ErrorItem {
@@ -30,19 +45,22 @@ export class ImportStudentGradeComponent implements OnInit {
   importStudentGradeForm: FormGroup;
   submit = 'Submit';
   formData = new FormData();
-  file_store: CustomFileList;
+  file_store?: FileList | UploadFileListLike;
   file_list: Array<string> = [];
   importStudentGradeFile = "";
   staffList: any[] = [];
-  courseList: any[] = [];
-  yearList: number[] = [];
   listOfTermNumber: StaticData[] = [];
-  currentYear = new Date();
+  listOfSectionType: StaticData[] = [];
   userId: string | null = localStorage.getItem('userId');
-  listOfBatch: any[] = [];
   staffId: string | null;
-  
-  // Modal properties
+  isAdmin = false;
+
+  assignmentTableRows: GradeImportAssignmentRow[] = [];
+  assignmentsLoading = false;
+  selectedRowKey: string | null = null;
+  currentTermLabel = "";
+  instructorDisplayName = "";
+
   isErrorModalVisible = false;
   errorList: ErrorItem[] = [];
   
@@ -51,38 +69,46 @@ export class ImportStudentGradeComponent implements OnInit {
     private _customNotificationService: CustomNotificationService,
     private _studentService: StudentService,
     private _termCourseOfferingService: TermCourseOfferingService,
-    private _courseOfferingInstructorAssignmentService: CourseOfferingInstructorAssignmentService,
+    private _batchTermService: BatchTermService,
     private _router: Router,
-    private courseTermOfferingService: TermCourseOfferingService,
     private staffService: StaffService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService,
+    private instructorSectionService: InstructorSectionService
   ) {
+    this.isAdmin =
+      this.authService.hasRole("Administrator") ||
+      this.authService.hasRole("Admin") ||
+      this.authService.hasRole("Super Admin");
 
     this.createImportStudentGradeForm();
-    this.yearList = this.getYearRange(this.currentYear.getFullYear());
-
   }
 
   ngOnInit(): void {
+    this.setupStaffIdSubscription();
     this.getStaffList();
     this.getListOfAcademicTermStatus();
-    this.getCourseList(this.userId);
-    this.academicTermId.valueChanges.subscribe(res => {
-      if (res) {
-        this.academicTermYearId.valueChanges.subscribe(year => {
-          if (year) {
-            this.getListOfBatch(res, year);
-          }
-        })
-      }
-    });
-    if (this.userId) {
+    this.getListOfSectionType();
+    this.loadActiveAcademicTerm();
+
+    if (this.isAdmin) {
+      this.importStudentGradeForm.patchValue({ staffId: null });
+      this.courseId?.setValue("");
+    } else if (this.userId) {
       this.staffService.getStaffByUserId(this.userId).subscribe((res: any) => {
-        this.staffId = res.data.id;
-        this.importStudentGradeForm.patchValue({
-          staffId: this.staffId
-        });
-      })
+        if (res?.data?.id) {
+          this.staffId = res.data.id;
+          const d = res.data;
+          this.instructorDisplayName =
+            `${d.firstName ?? ""} ${d.lastName ?? ""}`.trim() ||
+            d.fullName ||
+            "";
+          this.importStudentGradeForm.patchValue({
+            staffId: this.staffId
+          });
+          this.tryLoadAssignmentTable();
+        }
+      });
     }
   }
 
@@ -93,7 +119,10 @@ export class ImportStudentGradeComponent implements OnInit {
       academicTermYearId: [0, [Validators.required, numbersOnlyValidator()]],
       ActualFile: ["", []],
       academicTermId: [null, [Validators.required]],
+      sectionType: [null as number | null, [Validators.required]],
+      batchId: [null, [Validators.required]],
       batchCode: [null, [Validators.required]],
+      sectionId: [null, [Validators.required]],
     });
   }
   getListOfAcademicTermStatus() {
@@ -106,25 +135,235 @@ export class ImportStudentGradeComponent implements OnInit {
       this.listOfTermNumber.push(division);
     });
   }
-  private setupFormSubscriptions(): void {
-    this.StaffId.valueChanges.subscribe(staffId => {
-      if (staffId) {
-        this.getCourseList(staffId);
-      } else {
-        this.courseList = [];
-        this.courseId.setValue("");
+
+  getListOfSectionType() {
+    let division: StaticData = new StaticData();
+    SECTION_TYPE.forEach(pair => {
+      division = {
+        Id: pair.Id,
+        Description: pair.Description
+      };
+      this.listOfSectionType.push(division);
+    });
+  }
+
+  private loadActiveAcademicTerm(): void {
+    this._batchTermService.getNextAcademicTerm().subscribe({
+      next: (res: any) => {
+        if (!res) {
+          this._customNotificationService.notification(
+            "warning",
+            "Academic term",
+            "No active academic term is configured. Contact the registrar."
+          );
+          return;
+        }
+        const termId = res.termId ?? res.TermId;
+        const year = res.year ?? res.Year;
+        if (termId == null || year == null) {
+          this._customNotificationService.notification(
+            "warning",
+            "Academic term",
+            "Could not read active term from the server."
+          );
+          return;
+        }
+        this.importStudentGradeForm.patchValue(
+          {
+            academicTermId: Number(termId),
+            academicTermYearId: Number(year)
+          },
+          { emitEvent: false }
+        );
+        this.currentTermLabel = `${this.getAcademicTermDescription(Number(termId))} ${year}`;
+        this.tryLoadAssignmentTable();
+      },
+      error: () => {
+        this._customNotificationService.notification(
+          "error",
+          "Error",
+          "Failed to load the current academic term."
+        );
       }
     });
   }
 
-  private getYearRange(currentYear: number): number[] {
-    const yearList = [];
-    const startYear = currentYear - 15;
-    for (let i = startYear; i <= currentYear; i++) {
-      yearList.push(i);
+  getAcademicTermDescription(termId: number): string {
+    const item = this.listOfTermNumber.find(t => t.Id === termId);
+    return item?.Description ?? `Term ${termId}`;
+  }
 
+  tryLoadAssignmentTable(): void {
+    const staffId = this.importStudentGradeForm.get("staffId")?.value;
+    const term = this.importStudentGradeForm.get("academicTermId")?.value;
+    const year = this.importStudentGradeForm.get("academicTermYearId")?.value;
+
+    this.selectedRowKey = null;
+    this.clearSelectedAssignmentFields();
+
+    if (!staffId || term == null || year == null || year === 0) {
+      this.assignmentTableRows = [];
+      return;
     }
-    return yearList.reverse();
+
+    this.assignmentsLoading = true;
+    const sectionTypes = this.listOfSectionType.length
+      ? this.listOfSectionType
+      : [{ Id: 0, Description: "Class" } as StaticData];
+
+    const requests = sectionTypes.map(st =>
+      this.instructorSectionService
+        .getInstructorSectionAssignmentsByStaff(String(staffId), Number(term), Number(year), Number(st.Id))
+        .pipe(catchError(() => of({ data: [] })))
+    );
+
+    forkJoin(requests).subscribe({
+      next: (results: any[]) => {
+        const merged: GradeImportAssignmentRow[] = [];
+        const seen = new Set<string>();
+        results.forEach((res, idx) => {
+          const st = sectionTypes[idx];
+          const rows = (res?.data || []) as InstructorSectionAssignmentViewModel[];
+          for (const r of rows) {
+            if (!r?.batchId || !r?.courseId || r.sectionId == null) {
+              continue;
+            }
+            const rowKey = `${r.batchId}|${r.courseId}|${r.sectionId}|${st.Id}`;
+            if (seen.has(rowKey)) {
+              continue;
+            }
+            seen.add(rowKey);
+            merged.push({
+              ...r,
+              sectionTypeId: Number(st.Id),
+              sectionTypeLabel: st.Description ?? "",
+              rowKey
+            });
+          }
+        });
+        merged.sort((a, b) => {
+          const bc = (a.batchCode || "").localeCompare(b.batchCode || "");
+          if (bc !== 0) {
+            return bc;
+          }
+          const cc = (a.course || "").localeCompare(b.course || "");
+          if (cc !== 0) {
+            return cc;
+          }
+          return (a.section || "").localeCompare(b.section || "");
+        });
+        this.assignmentTableRows = merged;
+        this.assignmentsLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.assignmentsLoading = false;
+        this.assignmentTableRows = [];
+        this._customNotificationService.notification(
+          "error",
+          "Error",
+          "Failed to load your section assignments for this term."
+        );
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  isAssignmentRowLocked(row: GradeImportAssignmentRow): boolean {
+    return (row.submittedGradeCount ?? 0) > 0;
+  }
+
+  onAssignmentRowClick(row: GradeImportAssignmentRow): void {
+    if (this.isAssignmentRowLocked(row)) {
+      this._customNotificationService.notification(
+        "warning",
+        "Section locked",
+        "Grades are already submitted for this course section."
+      );
+      return;
+    }
+    this.onAssignmentRowKeyChange(row.rowKey);
+  }
+
+  onAssignmentRowKeyChange(rowKey: string | null): void {
+    this.selectedRowKey = rowKey;
+    if (!rowKey) {
+      this.clearSelectedAssignmentFields();
+      return;
+    }
+    const row = this.assignmentTableRows.find(r => r.rowKey === rowKey);
+    if (!row) {
+      this.clearSelectedAssignmentFields();
+      return;
+    }
+    if (this.isAssignmentRowLocked(row)) {
+      this.selectedRowKey = null;
+      this.clearSelectedAssignmentFields();
+      this._customNotificationService.notification(
+        "warning",
+        "Section locked",
+        "Grades are already submitted for this course section."
+      );
+      return;
+    }
+    this.applyAssignmentRowToForm(row);
+  }
+
+  private applyAssignmentRowToForm(row: GradeImportAssignmentRow): void {
+    this.importStudentGradeForm.patchValue(
+      {
+        sectionType: row.sectionTypeId,
+        batchId: row.batchId,
+        batchCode: row.batchCode,
+        courseId: row.courseId,
+        sectionId: row.sectionId
+      },
+      { emitEvent: false }
+    );
+  }
+
+  private clearSelectedAssignmentFields(): void {
+    this.importStudentGradeForm.patchValue(
+      {
+        sectionType: null,
+        batchId: null,
+        batchCode: null,
+        courseId: "",
+        sectionId: null
+      },
+      { emitEvent: false }
+    );
+  }
+
+  private setupStaffIdSubscription(): void {
+    this.importStudentGradeForm.get("staffId")?.valueChanges.subscribe((sid) => {
+      if (sid) {
+        this.staffId = String(sid);
+        this.refreshAdminInstructorDisplayName();
+        this.tryLoadAssignmentTable();
+      } else {
+        this.staffId = null;
+        if (this.isAdmin) {
+          this.instructorDisplayName = "";
+        }
+        this.assignmentTableRows = [];
+        this.selectedRowKey = null;
+        this.clearSelectedAssignmentFields();
+      }
+    });
+  }
+
+  private refreshAdminInstructorDisplayName(): void {
+    if (!this.isAdmin) {
+      return;
+    }
+    const id = this.importStudentGradeForm.get("staffId")?.value;
+    if (!id) {
+      this.instructorDisplayName = "";
+      return;
+    }
+    const match = this.staffList.find((s: { id: string; name: string }) => String(s.id) === String(id));
+    this.instructorDisplayName = match?.name?.trim() ?? "";
   }
 
   private getStaffList(): void {
@@ -133,19 +372,8 @@ export class ImportStudentGradeComponent implements OnInit {
         name: staff.firstName + " " + staff.lastName,
         id: staff.id
       }));
+      this.refreshAdminInstructorDisplayName();
     });
-  }
-
-  private getCourseList(staffId: string): void {
-    this._courseOfferingInstructorAssignmentService
-      .getListOfAssignedCourses(staffId)
-      .subscribe((res: any) => {
-        this.courseList = res;
-      });
-  }
-
-  get StaffId() {
-    return this.importStudentGradeForm.get("StaffId");
   }
 
   get courseId() {
@@ -158,10 +386,21 @@ export class ImportStudentGradeComponent implements OnInit {
   get academicTermId() {
     return this.importStudentGradeForm.get("academicTermId");
   }
-  getListOfBatch(termId: number = 0, termYear: number = 0) {
-    this.courseTermOfferingService.getListOfBatchCodeByAcademicTerm(termId, termYear).subscribe(res => {
-      this.listOfBatch = res;
-    });
+
+  get assignmentTableEmptyMessage(): string {
+    if (this.isAdmin && !this.importStudentGradeForm.get("staffId")?.value) {
+      return "Select an instructor to load assignments.";
+    }
+    return "No section assignments for this staff in the current term.";
+  }
+
+  get selectedAssignmentSummary(): string {
+    const row = this.assignmentTableRows.find(r => r.rowKey === this.selectedRowKey);
+    if (!row) {
+      return "";
+    }
+    const termPart = this.currentTermLabel ? `${this.currentTermLabel} · ` : "";
+    return `${termPart}${row.course} · Section ${row.section} · ${row.batchCode} · ${row.sectionTypeLabel}`;
   }
   handleFileInputChange(files: FileList): void {
     if (files && files.length) {
@@ -189,6 +428,15 @@ export class ImportStudentGradeComponent implements OnInit {
     }
   }
 
+  beforeUpload = (_file: NzUploadFile, _fileList: NzUploadFile[]): boolean => {
+    return false;
+  };
+
+  dummyRequest = (item: NzUploadXHRArgs): Subscription => {
+    item.onSuccess?.({}, item.file, {} as any);
+    return new Subscription();
+  };
+
   handleChange({ file, fileList }: NzUploadChangeParam): void {
     const status = file.status;
 
@@ -201,7 +449,10 @@ export class ImportStudentGradeComponent implements OnInit {
         this.file_store = {
           length: uploadedFiles.length,
           item: (index: number) =>
-            index < uploadedFiles.length ? uploadedFiles[index] : null
+            index < uploadedFiles.length ? uploadedFiles[index] : null,
+          [Symbol.iterator](): IterableIterator<File> {
+            return uploadedFiles[Symbol.iterator]();
+          }
         };
 
         const count =
@@ -218,7 +469,7 @@ export class ImportStudentGradeComponent implements OnInit {
           ActualFile: ""
         });
         this.file_list = [];
-        this.file_store = undefined!;
+        this.file_store = undefined;
       }
     }
 

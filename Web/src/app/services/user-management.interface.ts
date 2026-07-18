@@ -45,6 +45,18 @@ export interface RolePermissionAssignment {
   permissionIds: string[];
 }
 
+export interface BulkUpdateFromExcelResult {
+  successCount: number;
+  failureCount: number;
+  errors: BulkUpdateErrorItem[];
+}
+
+export interface BulkUpdateErrorItem {
+  rowNumber: number;
+  oldUser?: string;
+  message: string;
+}
+
 export interface UserActivity {
   id: string;
   userId: string;
@@ -142,6 +154,9 @@ export interface IUserManagementService {
 
   // Export
   exportUsers(format?: 'csv' | 'excel'): Observable<Blob>;
+
+  /** Bulk update users from uploaded Excel (columns: firstName, lastName, newusername, olduser) */
+  updateUsersFromExcel(file: File): Observable<BulkUpdateFromExcelResult>;
   
   // Statistics
   getUserStatistics(): Observable<{ totalUsers: number, activeUsers: number, inactiveUsers: number }>;

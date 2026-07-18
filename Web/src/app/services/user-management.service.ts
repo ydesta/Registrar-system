@@ -11,7 +11,8 @@ import {
   AdminCreateUserResponse,
   UserStatusUpdate,
   ResetPasswordRequest,
-  RolePermissionAssignment
+  RolePermissionAssignment,
+  BulkUpdateFromExcelResult
 } from './user-management.interface';
 import { ActivityFilterParams, ActivityLogResponse } from '../user-management/components/user-activity/user-activity.interface';
 
@@ -384,6 +385,16 @@ export class UserManagementService implements IUserManagementService {
     return this.http.get(`${this.baseUrl}/UserManagement/users/export?format=${format}`, {
       responseType: 'blob'
     })
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  /** Bulk update users from uploaded Excel (columns: firstName, lastName, newusername, olduser) */
+  updateUsersFromExcel(file: File): Observable<BulkUpdateFromExcelResult> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<BulkUpdateFromExcelResult>(`${this.baseUrl}/UserManagement/users/update-from-excel`, formData)
       .pipe(
         catchError(this.handleError)
       );

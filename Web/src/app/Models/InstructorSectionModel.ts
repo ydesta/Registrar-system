@@ -39,4 +39,6 @@ export interface InstructorSectionAssignmentViewModel {
   year: number;
   courseId: string;
   batchId: string;
+  submittedGradeCount?: number;
+  lastGradeSubmittedAt?: string | null;
 }

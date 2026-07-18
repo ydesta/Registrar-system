@@ -116,9 +116,18 @@ namespace SecureAuth.API.Controllers.Admin
             try
             {
                 // Record current metrics
-                await _systemHealthService.RecordSystemMetricsAsync("MemoryUsage", GC.GetGCMemoryInfo().HeapSizeBytes / (1024 * 1024), "MB");
-                await _systemHealthService.RecordSystemMetricsAsync("ActiveThreads", System.Threading.ThreadPool.ThreadCount, "count");
-                await _systemHealthService.RecordSystemMetricsAsync("Uptime", (DateTime.UtcNow - System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalHours, "hours");
+                var memoryMb = GC.GetGCMemoryInfo().HeapSizeBytes / (1024 * 1024);
+                var threadCount = System.Threading.ThreadPool.ThreadCount;
+                var uptime = 0.0;
+                try
+                {
+                    uptime = (DateTime.UtcNow - System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalHours;
+                    if (!double.IsFinite(uptime) || uptime < 0) uptime = 0;
+                }
+                catch { /* ignore */ }
+                await _systemHealthService.RecordSystemMetricsAsync("MemoryUsage", memoryMb, "MB");
+                await _systemHealthService.RecordSystemMetricsAsync("ActiveThreads", threadCount, "count");
+                await _systemHealthService.RecordSystemMetricsAsync("Uptime", uptime, "hours");
 
                 return Ok(new
                 {
@@ -126,9 +135,9 @@ namespace SecureAuth.API.Controllers.Admin
                     Message = "System metrics recorded and retrieved successfully",
                     Data = new
                     {
-                        MemoryUsage = GC.GetGCMemoryInfo().HeapSizeBytes / (1024 * 1024),
-                        ActiveThreads = System.Threading.ThreadPool.ThreadCount,
-                        Uptime = (DateTime.UtcNow - System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalHours,
+                        MemoryUsage = memoryMb,
+                        ActiveThreads = threadCount,
+                        Uptime = uptime,
                         Timestamp = DateTime.UtcNow
                     }
                 });

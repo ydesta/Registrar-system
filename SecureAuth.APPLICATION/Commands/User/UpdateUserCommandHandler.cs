@@ -66,13 +66,15 @@ namespace SecureAuth.APPLICATION.Commands.User
             if (!string.IsNullOrEmpty(command.UserName) && user.UserName != command.UserName)
             {
                 // Check if username is already taken
-                var existingUser = await _userManager.FindByNameAsync(command.UserName);
+                var existingUser = await _userManager.FindByNameAsync(user.UserName);
                 if (existingUser != null && existingUser.Id != user.Id)
                 {
                     return false; // Username already exists
                 }
                 
-                //user.UserName = command.UserName;
+                user.UserName = command.UserName;
+                user.Email = command.UserName;
+
                 changes.Add("UserName");
                 usernameChanged = true;
             }
@@ -124,23 +126,23 @@ namespace SecureAuth.APPLICATION.Commands.User
                         $"Updated fields: {string.Join(", ", changes)}");
 
                     // Send email notification if username was changed
-                    //if (usernameChanged)
-                    //{
-                    //    try
-                    //    {
-                    //        await _emailService.SendUpdatedCredentialsAsync(
-                    //            user.Email,
-                    //            user.UserName,
-                    //            user.FirstName,
-                    //            user.LastName,
-                    //            "Username");
-                    //    }
-                    //    catch (Exception ex)
-                    //    {
-                    //        // Log the error but don't fail the update
-                    //        // The admin can manually send notification later
-                    //    }
-                    //}
+                    if (usernameChanged)
+                    {
+                        try
+                        {
+                            await _emailService.SendUpdatedCredentialsAsync(
+                                user.Email,
+                                user.UserName,
+                                user.FirstName,
+                                user.LastName,
+                                "Username");
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log the error but don't fail the update
+                            // The admin can manually send notification later
+                        }
+                    }
 
                     await _unitOfWork.SaveChangesAsync();
                     return true;

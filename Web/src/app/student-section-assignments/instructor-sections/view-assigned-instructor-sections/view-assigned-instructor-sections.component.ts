@@ -14,6 +14,7 @@ import { StudentSectionAssignmentService } from 'src/app/services/student-sectio
 import { CourseViewModel } from 'src/app/students/models/course-break-down-offering.model';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-view-assigned-instructor-sections',
@@ -64,6 +65,15 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
     this.getListOfSectionType();
     this.getListOfAcademicTermStatus();
 
+  }
+  private getInstructorName(): string {
+    const staffName = this.staff ? `${this.staff.firstName ?? ''} ${this.staff.lastName ?? ''}`.trim() : '';
+    if (staffName) {
+      return staffName;
+    }
+    const firstName = (localStorage.getItem('firstName') || '').trim();
+    const lastName = (localStorage.getItem('lastName') || '').trim();
+    return `${firstName} ${lastName}`.trim();
   }
   loadStaffProfile(): void {
     const userId = localStorage.getItem('userId');
@@ -183,7 +193,12 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
   }
   getStaffTeachingDataAsync(): void {
     const { academicTerm, year, sectionType } = this.form.value;
-    if (this.year?.value && this.staff?.id) {
+    if (
+      this.staff?.id &&
+      academicTerm != null &&
+      this.year?.value != null &&
+      sectionType != null
+    ) {
       // Set loading states
       this.loadingBatches = true;
       this.loadingCourses = true;
@@ -333,95 +348,46 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
       return;
     }
 
-    // Get form values for header information
     const academicTerm = this.form.get('academicTerm')?.value;
     const year = this.form.get('year')?.value;
     const courseId = this.form.get('courseId')?.value;
     const sectionId = this.form.get('sectionId')?.value;
 
-    // Get course and section information
     const selectedCourse = this.courseList.find(c => c.id === courseId);
     const selectedSection = this.availableSections.find(s => s.id === sectionId);
+    const instructorName = this.getInstructorName();
 
-    // Create HTML table with borders for Excel export
-    let htmlContent = `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-        <head>
-          <meta charset="utf-8">
-          <title>Class Attendance Sheet</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { text-align: center; margin-bottom: 20px; }
-            .school-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
-            .sheet-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; }
-            .info-row { margin-bottom: 10px; }
-            .info-label { font-weight: bold; display: inline-block; width: 100px; }
-            table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-            th, td { 
-              border: 1px solid #000; 
-              padding: 8px; 
-              text-align: center; 
-              mso-border-alt: solid black .5pt;
-            }
-            th { 
-              background-color: #f0f0f0; 
-              font-weight: bold; 
-              mso-pattern: solid #f0f0f0;
-            }
-            .name-col { text-align: left; width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .batch-col { width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .attendance-col { width: 40px; }
-            .no-col { width: 50px; }
-            .header-info { margin-bottom: 15px; }
-            .info-row { margin-bottom: 8px; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="school-title">HILCoE School of Computer Science & Technology</div>
-            <div class="sheet-title">Class Attendance Sheet</div>
-          </div>
-          
-          <div class="header-info">
-            <div class="info-row"><strong>Class:</strong> ${this.form.get('batchId')?.value || 'N/A'}</div>
-            <div class="info-row"><strong>Term:</strong> ${this.getAcademicTermName(academicTerm)} ${year}</div>
-            <div class="info-row"><strong>Section:</strong> ${selectedSection?.sectionName || 'N/A'}</div>
-            <div class="info-row"><strong>Course Code:</strong> ${selectedCourse?.courseCode || 'N/A'}</div>
-            <div class="info-row"><strong>Instructor:</strong> _________________</div>
-          </div>
-          
-          <table>
-            <thead>
-              <tr>
-                <th class="no-col">No.</th>
-                <th class="name-col">Name</th>
-                <th class="batch-col">Batch</th>
-                ${Array.from({ length: 24 }, (_, i) => `<th class="attendance-col">${i + 1}</th>`).join('')}
-              </tr>
-            </thead>
-            <tbody>
-              ${this.sectionAssignedStudents.map((student, index) => `
-                <tr>
-                  <td class="no-col">${index + 1}</td>
-                  <td class="name-col">${student.fullName}</td>
-                  <td class="batch-col">${student.batchCode}</td>
-                  ${Array.from({ length: 24 }, () => '<td class="attendance-col"></td>').join('')}
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `;
+    const days = Array.from({ length: 24 }, (_, i) => `${i + 1}`);
+    const aoa: (string | number)[][] = [];
 
-    // Create blob and download
-    const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `attendance-sheet-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.xls`;
-    link.click();
-    window.URL.revokeObjectURL(url);
+    aoa.push(['HILCoE School of Computer Science & Technology']);
+    aoa.push(['Class Attendance Sheet']);
+    aoa.push([]);
+    aoa.push(['Class:', this.form.get('batchId')?.value || 'N/A']);
+    aoa.push(['Term:', `${this.getAcademicTermName(academicTerm)} ${year}`]);
+    aoa.push(['Section:', selectedSection?.sectionName || 'N/A']);
+    aoa.push(['Course Code:', selectedCourse?.courseCode || 'N/A']);
+    aoa.push(['Instructor:', instructorName || '_________________']);
+    aoa.push([]);
+
+    aoa.push(['No.', 'Name', 'Batch', ...days]);
+    this.sectionAssignedStudents.forEach((student, index) => {
+      aoa.push([index + 1, student.fullName, student.batchCode, ...Array(24).fill('')]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [
+      { wch: 6 },
+      { wch: 32 },
+      { wch: 14 },
+      ...Array.from({ length: 24 }, () => ({ wch: 4 }))
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+
+    const fileName = `attendance-sheet-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
 
     this.notificationService.notification('success', 'Success', 'Attendance sheet exported successfully');
   }
@@ -432,125 +398,55 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
       return;
     }
 
-    // Get form values for header information
     const academicTerm = this.form.get('academicTerm')?.value;
     const year = this.form.get('year')?.value;
     const courseId = this.form.get('courseId')?.value;
     const sectionId = this.form.get('sectionId')?.value;
 
-    // Get course and section information
     const selectedCourse = this.courseList.find(c => c.id === courseId);
     const selectedSection = this.availableSections.find(s => s.id === sectionId);
+    const instructorName = this.getInstructorName();
 
-    // Create HTML table with borders for Excel export
-    let htmlContent = `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-        <head>
-          <meta charset="utf-8">
-          <title>Result Submission Sheet</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { text-align: center; margin-bottom: 20px; }
-            .school-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
-            .sheet-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; }
-            .info-section { margin-bottom: 15px; display: flex; justify-content: space-between; }
-            .left-info { width: 50%; }
-            .right-info { width: 50%; text-align: right; }
-            .info-row { margin-bottom: 8px; }
-            table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-            th, td { 
-              border: 1px solid #000; 
-              padding: 8px; 
-              text-align: center; 
-              mso-border-alt: solid black .5pt;
-            }
-            th { 
-              background-color: #f0f0f0; 
-              font-weight: bold; 
-              mso-pattern: solid #f0f0f0;
-            }
-            .name-col { text-align: left; width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .batch-col { width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .score-col { width: 65px; text-align: right; }
-            .grade-col { width: 60px; }
-            .remark-col { width: 80px; }
-            .scode-col { width: 120px; text-align: left; }
-            .total-col { width: 90px; text-align: right; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="school-title">HILCoE School of Computer Science & Technology</div>
-            <div class="sheet-title">Result Submission Sheet</div>
-          </div>
-          
-          <div class="info-section">
-            <div class="left-info">
-              <div class="info-row"><strong>Class:</strong> ${this.form.get('batchId')?.value || 'N/A'}</div>
-              <div class="info-row"><strong>Term:</strong> ${this.getAcademicTermName(academicTerm)} ${year}</div>
-              <div class="info-row"><strong>Course Code:</strong> ${selectedCourse?.courseCode || 'N/A'}</div>
-              <div class="info-row"><strong>Instructor:</strong> _________________</div>
-            </div>
-            <div class="right-info">
-              <div class="info-row"><strong>Section:</strong> ${selectedSection?.sectionName || 'N/A'}</div>
-              <div class="info-row"><strong>Date of Submission:</strong> ${new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}</div>
-              <div class="info-row"><strong>Signature:</strong> _________________</div>
-            </div>
-          </div>
-          
-          <table style="border-collapse: collapse; border: 1px solid black;">
-            <thead>
-              <tr>
-                <th class="scode-col" style="border: 1px solid black;">Student Code</th>
-                <th class="name-col" style="border: 1px solid black;">Full Name</th>
-                <th class="batch-col" style="border: 1px solid black;">Batch</th>
-                <th class="score-col" style="border: 1px solid black;">30%</th>
-                <th class="score-col" style="border: 1px solid black;">60%</th>
-                <th class="score-col" style="border: 1px solid black;">55%</th>
-                <th class="score-col" style="border: 1px solid black;">15%</th>
-                <th class="total-col" style="border: 1px solid black;">Total(100%)</th>
-                <th class="grade-col" style="border: 1px solid black;">Grade</th>
-                <th class="remark-col" style="border: 1px solid black;">Remark</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${this.sectionAssignedStudents.map((student, index) => `
-                <tr>
-                  <td class="scode-col" style="border: 1px solid black;">${student.studentCode}</td>
-                  <td class="name-col" style="border: 1px solid black;">${student.fullName}</td>
-                  <td class="batch-col" style="border: 1px solid black;">${student.batchCode}</td>
-                  <td class="score-col" style="border: 1px solid black;"></td>
-                  <td class="score-col" style="border: 1px solid black;"></td>
-                  <td class="score-col" style="border: 1px solid black;"></td>
-                  <td class="score-col" style="border: 1px solid black;"></td>
-                  <td class="total-col" style="border: 1px solid black;"></td>
-                  <td class="grade-col" style="border: 1px solid black;"></td>
-                  <td class="remark-col" style="border: 1px solid black;"></td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `;
+    const submissionDate = new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
+    const aoa: (string | number)[][] = [];
 
-    // Create blob and download
-    const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `mark-list-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.xls`;
-    link.click();
-    window.URL.revokeObjectURL(url);
+    aoa.push(['HILCoE School of Computer Science & Technology']);
+    aoa.push(['Result Submission Sheet']);
+    aoa.push([]);
+    aoa.push(['Class:', this.form.get('batchId')?.value || 'N/A', '', '', 'Section:', selectedSection?.sectionName || 'N/A']);
+    aoa.push(['Term:', `${this.getAcademicTermName(academicTerm)} ${year}`, '', '', 'Date of Submission:', submissionDate]);
+    aoa.push(['Course Code:', selectedCourse?.courseCode || 'N/A', '', '', 'Signature:', '_________________']);
+    aoa.push(['Instructor:', instructorName || '_________________']);
+    aoa.push([]);
+
+    aoa.push(['Student Code', 'Full Name', 'Batch', '30%', '60%', '55%', '15%', 'Total(100%)', 'Grade', 'Remark']);
+    this.sectionAssignedStudents.forEach(student => {
+      aoa.push([student.studentCode, student.fullName, student.batchCode, '', '', '', '', '', '', '']);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [
+      { wch: 16 },
+      { wch: 32 },
+      { wch: 14 },
+      { wch: 8 },
+      { wch: 8 },
+      { wch: 8 },
+      { wch: 8 },
+      { wch: 12 },
+      { wch: 10 },
+      { wch: 14 }
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Mark List');
+
+    const fileName = `mark-list-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
 
     this.notificationService.notification('success', 'Success', 'Mark list exported successfully');
   }
 
-  /**
-   * Exports the attendance sheet as a PDF document optimized for printing
-   * Opens the browser's print dialog for immediate printing
-   * @returns void
-   */
   public exportAttendanceSheetPDF(): void {
     try {
       if (this.sectionAssignedStudents.length === 0) {
@@ -558,272 +454,138 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
         return;
       }
 
-      // Get form values for header information
       const academicTerm = this.form.get('academicTerm')?.value;
       const year = this.form.get('year')?.value;
       const courseId = this.form.get('courseId')?.value;
       const sectionId = this.form.get('sectionId')?.value;
 
-      // Get course and section information
       const selectedCourse = this.courseList.find(c => c.id === courseId);
       const selectedSection = this.availableSections.find(s => s.id === sectionId);
+      const instructorName = this.getInstructorName();
 
-      // Create PDF in landscape mode
       const doc = new jsPDF('landscape', 'mm', 'a4');
-    
-      // Add professional header
+
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
       const pageWidth = doc.internal.pageSize.getWidth();
       const textWidth = doc.getTextWidth('HILCoE SCHOOL OF COMPUTER SCIENCE & TECHNOLOGY');
       const centerX = (pageWidth - textWidth) / 2;
       doc.text('HILCoE SCHOOL OF COMPUTER SCIENCE & TECHNOLOGY', centerX, 12);
-      
-      // Add decorative line
+
       doc.setDrawColor(0, 0, 0);
       doc.setLineWidth(0.5);
-      const lineLength = 150; // Length of the decorative line
+      const lineLength = 150;
       const lineStartX = (pageWidth - lineLength) / 2;
       doc.line(lineStartX, 14, lineStartX + lineLength, 14);
-      
+
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
       doc.text('CLASS ATTENDANCE SHEET', 20, 20);
-      
-      // Add course information in a professional box layout
+
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       doc.text(`Class: ${this.form.get('batchId')?.value || 'N/A'}`, 20, 26);
       doc.text(`Term: ${this.getAcademicTermName(academicTerm)} ${year}`, 20, 29);
       doc.text(`Section: ${selectedSection?.sectionName || 'N/A'}`, 20, 32);
       doc.text(`Course Code: ${selectedCourse?.courseCode || 'N/A'}`, 20, 35);
-      doc.text(`Instructor: _________________`, 20, 38);
-      
-      // Add date and signature section
+      doc.text(`Instructor: ${instructorName || '_________________'}`, 20, 38);
+
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Date: ${new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}`, 120, 30);
-      doc.text(`Signature: _________________`, 120, 35);
+      doc.text(
+        `Date: ${new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}`,
+        120,
+        30
+      );
+      doc.text('Signature: _________________', 120, 35);
 
-    // Prepare table data
-    const tableData = this.sectionAssignedStudents.map((student, index) => [
-      index + 1,
-      student.fullName,
-      student.batchCode,
-      ...Array(24).fill('') // Empty cells for attendance marks
-    ]);
+      const tableData = this.sectionAssignedStudents.map((student, index) => [
+        index + 1,
+        student.fullName,
+        student.batchCode,
+        ...Array(24).fill('')
+      ]);
 
-    // Define table columns
-    const columns = [
-      { title: 'No.', dataKey: 'no', width: 15 },
-      { title: 'Full Name', dataKey: 'name', width: 80 },
-      { title: 'Batch', dataKey: 'batch', width: 30 },
-      ...Array.from({ length: 24 }, (_, i) => ({ 
-        title: `${i + 1}`, 
-        dataKey: `day${i + 1}`, 
-        width: 8 
-      }))
-    ];
+      const columns = [
+        { title: 'No.', dataKey: 'no', width: 15 },
+        { title: 'Full Name', dataKey: 'name', width: 80 },
+        { title: 'Batch', dataKey: 'batch', width: 30 },
+        ...Array.from({ length: 24 }, (_, i) => ({
+          title: `${i + 1}`,
+          dataKey: `day${i + 1}`,
+          width: 8
+        }))
+      ];
 
-    // Add table
-    autoTable(doc, {
-      head: [columns.map(col => col.title)],
-      body: tableData,
-      startY: 44,
-      margin: { left: 15, right: 15, top: 20, bottom: 20 },
-      pageBreak: 'auto',
-      rowPageBreak: 'avoid',
-      showHead: 'everyPage',
-      styles: {
-        fontSize: 10,
-        cellPadding: 2,
-        overflow: 'linebreak',
-        halign: 'center',
-        lineColor: [0, 0, 0],
-        lineWidth: 0.2,
-        minCellHeight: 6,
-        font: 'helvetica'
-      },
-      headStyles: {
-        fillColor: [240, 240, 240],
-        textColor: [0, 0, 0],
-        fontStyle: 'bold',
-        lineColor: [0, 0, 0],
-        lineWidth: 0.2,
-        fontSize: 10,
-        cellPadding: 2,
-        font: 'helvetica'
-      },
-      columnStyles: {
-        0: { halign: 'center', cellWidth: 12 }, // No.
-        1: { halign: 'left', cellWidth: 60, fontStyle: 'bold' },   // Full Name - Bold
-        2: { halign: 'center', cellWidth: 25, fontStyle: 'bold' }, // Batch - Bold
-        // Attendance columns - reduced width
-        ...Object.fromEntries(
-          Array.from({ length: 24 }, (_, i) => [i + 3, { halign: 'center', cellWidth: 6 }])
-        )
-      },
-      bodyStyles: {
-        lineColor: [0, 0, 0],
-        lineWidth: 0.2,
-        fontSize: 10,
-        cellPadding: 2,
-        font: 'helvetica'
-      },
-      didDrawPage: (data: any) => {
-        // Add page number
-        const pageCount = doc.getNumberOfPages();
-        doc.setFontSize(8);
-        doc.text(`Page ${data.pageNumber} of ${pageCount}`, 20, doc.internal.pageSize.height - 10);
+      autoTable(doc, {
+        head: [columns.map(col => col.title)],
+        body: tableData,
+        startY: 44,
+        margin: { left: 15, right: 15, top: 20, bottom: 20 },
+        pageBreak: 'auto',
+        rowPageBreak: 'avoid',
+        showHead: 'everyPage',
+        styles: {
+          fontSize: 10,
+          cellPadding: 2,
+          overflow: 'linebreak',
+          halign: 'center',
+          lineColor: [0, 0, 0],
+          lineWidth: 0.2,
+          minCellHeight: 6,
+          font: 'helvetica'
+        },
+        headStyles: {
+          fillColor: [240, 240, 240],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold',
+          lineColor: [0, 0, 0],
+          lineWidth: 0.2,
+          fontSize: 10,
+          cellPadding: 2,
+          font: 'helvetica'
+        },
+        columnStyles: {
+          0: { halign: 'center', cellWidth: 12 },
+          1: { halign: 'left', cellWidth: 60, fontStyle: 'bold' },
+          2: { halign: 'center', cellWidth: 25, fontStyle: 'bold' },
+          ...Object.fromEntries(
+            Array.from({ length: 24 }, (_, i) => [i + 3, { halign: 'center', cellWidth: 6 }])
+          )
+        },
+        bodyStyles: {
+          lineColor: [0, 0, 0],
+          lineWidth: 0.2,
+          fontSize: 10,
+          cellPadding: 2,
+          font: 'helvetica'
+        },
+        didDrawPage: (data: any) => {
+          const pageCount = doc.getNumberOfPages();
+          doc.setFontSize(8);
+          doc.text(`Page ${data.pageNumber} of ${pageCount}`, 20, doc.internal.pageSize.height - 10);
+        }
+      });
+
+      const fileName = `attendance-sheet-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.pdf`;
+      const pdfBlob = doc.output('blob');
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const printWindow = window.open(pdfUrl, '_blank');
+
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print();
+          setTimeout(() => {
+            URL.revokeObjectURL(pdfUrl);
+          }, 1000);
+        };
+      } else {
+        doc.save(fileName);
       }
-    });
 
-    // Save the PDF and open print dialog
-    const fileName = `attendance-sheet-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.pdf`;
-    
-    // Generate PDF blob
-    const pdfBlob = doc.output('blob');
-    
-    // Create object URL and open in new window for printing
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-    const printWindow = window.open(pdfUrl, '_blank');
-    
-    if (printWindow) {
-      printWindow.onload = () => {
-        printWindow.print();
-        // Clean up the URL after printing
-        setTimeout(() => {
-          URL.revokeObjectURL(pdfUrl);
-        }, 1000);
-      };
-    } else {
-      // Fallback: download the PDF if popup is blocked
-      doc.save(fileName);
-    }
-
-    this.notificationService.notification('success', 'Success', 'Attendance sheet ready for printing');
+      this.notificationService.notification('success', 'Success', 'Attendance sheet ready for printing');
     } catch (error) {
       this.notificationService.notification('error', 'Export Error', 'Failed to generate attendance sheet. Please try again.');
     }
-  }
-
-  /**
-   * Export mark list as PDF in landscape format
-   */
-  public exportMarkListPDF(): void {
-    if (this.sectionAssignedStudents.length === 0) {
-      this.notificationService.notification('warning', 'Warning', 'No data to export');
-      return;
-    }
-
-    // Get form values for header information
-    const academicTerm = this.form.get('academicTerm')?.value;
-    const year = this.form.get('year')?.value;
-    const courseId = this.form.get('courseId')?.value;
-    const sectionId = this.form.get('sectionId')?.value;
-
-    // Get course and section information
-    const selectedCourse = this.courseList.find(c => c.id === courseId);
-    const selectedSection = this.availableSections.find(s => s.id === sectionId);
-
-    // Create PDF in landscape mode
-    const doc = new (jsPDF as any)('landscape', 'mm', 'a4');
-    
-    // Add header
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const textWidth = doc.getTextWidth('HILCoE School of Computer Science & Technology');
-    const centerX = (pageWidth - textWidth) / 2;
-    doc.text('HILCoE School of Computer Science & Technology', centerX, 20);
-    
-    doc.setFontSize(16);
-    doc.text('Result Submission Sheet', 20, 30);
-    
-    // Add course information in two columns
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    
-    // Left column
-    doc.text(`Class: ${this.form.get('batchId')?.value || 'N/A'}`, 20, 45);
-    doc.text(`Term: ${this.getAcademicTermName(academicTerm)} ${year}`, 20, 52);
-    doc.text(`Course Code: ${selectedCourse?.courseCode || 'N/A'}`, 20, 59);
-    doc.text(`Instructor: _________________`, 20, 66);
-    
-    // Right column
-    doc.text(`Section: ${selectedSection?.sectionName || 'N/A'}`, 120, 45);
-    doc.text(`Date of Submission: ${new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}`, 120, 52);
-    doc.text(`Signature: _________________`, 120, 59);
-
-    // Prepare table data
-    const tableData = this.sectionAssignedStudents.map((student) => [
-      student.studentCode,
-      student.fullName,
-      student.batchCode,
-      '', // 30%
-      '', // 60%
-      '', // 55%
-      '', // 15%
-      '', // Total
-      '', // Grade
-      ''  // Remark
-    ]);
-
-    // Define table columns
-    const columns = [
-      { title: 'Student Code', dataKey: 'studentCode', width: 35 },
-      { title: 'Full Name', dataKey: 'fullName', width: 60 },
-      { title: 'Batch', dataKey: 'batch', width: 25 },
-      { title: '30%', dataKey: 'score1', width: 20 },
-      { title: '60%', dataKey: 'score2', width: 20 },
-      { title: '55%', dataKey: 'score3', width: 20 },
-      { title: '15%', dataKey: 'score4', width: 20 },
-      { title: 'Total(100%)', dataKey: 'total', width: 25 },
-      { title: 'Grade', dataKey: 'grade', width: 20 },
-      { title: 'Remark', dataKey: 'remark', width: 25 }
-    ];
-
-    // Add table
-    (doc as any).autoTable({
-      head: [columns.map(col => col.title)],
-      body: tableData,
-      startY: 80,
-      margin: { left: 20, right: 20 },
-      styles: {
-        fontSize: 9,
-        cellPadding: 3,
-        overflow: 'linebreak',
-        halign: 'center'
-      },
-      headStyles: {
-        fillColor: [240, 240, 240],
-        textColor: [0, 0, 0],
-        fontStyle: 'bold'
-      },
-      columnStyles: {
-        0: { halign: 'left', cellWidth: 35 },  // Student Code
-        1: { halign: 'left', cellWidth: 60 },  // Full Name
-        2: { halign: 'center', cellWidth: 25 }, // Batch
-        3: { halign: 'center', cellWidth: 20 }, // 30%
-        4: { halign: 'center', cellWidth: 20 }, // 60%
-        5: { halign: 'center', cellWidth: 20 }, // 55%
-        6: { halign: 'center', cellWidth: 20 }, // 15%
-        7: { halign: 'center', cellWidth: 25 }, // Total
-        8: { halign: 'center', cellWidth: 20 }, // Grade
-        9: { halign: 'center', cellWidth: 25 }  // Remark
-      },
-      didDrawPage: (data: any) => {
-        // Add page number
-        const pageCount = doc.getNumberOfPages();
-        doc.setFontSize(8);
-        doc.text(`Page ${data.pageNumber} of ${pageCount}`, 20, doc.internal.pageSize.height - 10);
-      }
-    });
-
-    // Save the PDF
-    const fileName = `mark-list-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.pdf`;
-    doc.save(fileName);
-
-    this.notificationService.notification('success', 'Success', 'Mark list PDF exported successfully');
   }
 }

@@ -22,9 +22,8 @@
   <app-payment-instructions></app-payment-instructions>
 
   <div class="table-section">
-    <!-- Show table only when there's data or loading -->
-    <nz-table 
-      *ngIf="listOfPendingPayments.length > 0 || isLoading"
+    <div class="table-responsive" *ngIf="listOfPendingPayments.length > 0 || isLoading">
+    <nz-table
       #basicTable 
       [nzData]="listOfPendingPayments" 
       [nzShowPagination]="false"
@@ -64,6 +63,7 @@
         </tr>
       </tbody>
     </nz-table>
+    </div>
 
     <!-- Show custom empty state only when not loading and no data -->
     <div *ngIf="!isLoading && listOfPendingPayments.length === 0" class="empty-state">

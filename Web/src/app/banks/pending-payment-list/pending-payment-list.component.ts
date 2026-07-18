@@ -14,7 +14,7 @@ import { takeUntil, finalize, catchError } from 'rxjs/operators';
 })
 export class PendingPaymentListComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
+
   applicantUserId: string;
   listOfPendingPayments: PendingStudentPaymentModel[] = [];
   isLoading = false;
@@ -31,39 +31,38 @@ export class PendingPaymentListComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
- getStudentCoursePendingPayment() {
-  this.isLoading = true;
-  this.listOfPendingPayments = []; // Clear existing data
+  getStudentCoursePendingPayment() {
+    this.isLoading = true;
+    this.listOfPendingPayments = []; // Clear existing data
 
-  forkJoin([
-    this._studentService.getStudentCoursePendingPayment(this.applicantUserId),
-    this._studentService.getStudentCourseAddPendingPayment(this.applicantUserId)
-  ]).pipe(
-    takeUntil(this.destroy$),
-    finalize(() => {
-      this.isLoading = false;
-    }),
-    catchError((error) => {
-      console.error('Error fetching pending payments:', error);
-      this.listOfPendingPayments = [];
-      return [];
-    })
-  ).subscribe(([pendingPayments, addPendingPayments]) => {
-    // Ensure we have arrays to work with
-    const regularPayments = Array.isArray(pendingPayments) ? pendingPayments : [];
-    const addPayments = Array.isArray(addPendingPayments) ? addPendingPayments : [];
-    
-    this.listOfPendingPayments = [
-      ...regularPayments,
-      ...addPayments
-    ].map(payment => ({
-      ...payment,
-      isProcessing: false
-    }));
-  });
-}
+    forkJoin([
+      this._studentService.getStudentCoursePendingPayment(this.applicantUserId),
+      this._studentService.getStudentCourseAddPendingPayment(this.applicantUserId)
+    ]).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.isLoading = false;
+      }),
+      catchError((error) => {
+        console.error('Error fetching pending payments:', error);
+        this.listOfPendingPayments = [];
+        return [];
+      })
+    ).subscribe(([pendingPayments, addPendingPayments]) => {
+      // Ensure we have arrays to work with
+      const regularPayments = Array.isArray(pendingPayments) ? pendingPayments : [];
+      const addPayments = Array.isArray(addPendingPayments) ? addPendingPayments : [];
+      this.listOfPendingPayments = [
+        ...regularPayments,
+        ...addPayments
+      ].map(payment => ({
+        ...payment,
+        isProcessing: false
+      }));
+    });
+  }
 
   goToPaymentPage(data: PendingStudentPaymentModel) {
     data.isProcessing = true;
@@ -78,7 +77,7 @@ export class PendingPaymentListComponent implements OnInit, OnDestroy {
   }
 
   // TrackBy functions for better performance
-  trackByPaymentId: TrackByFunction<PendingStudentPaymentModel> = (index: number, payment: PendingStudentPaymentModel) => 
+  trackByPaymentId: TrackByFunction<PendingStudentPaymentModel> = (index: number, payment: PendingStudentPaymentModel) =>
     payment?.id || index;
 
   trackByIndex: TrackByFunction<any> = (index: number) => index;

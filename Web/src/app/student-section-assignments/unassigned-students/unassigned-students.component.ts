@@ -146,7 +146,7 @@ export class UnassignedStudentsComponent implements OnInit {
             this.sortOrder = null; // Reset sort order when new data is loaded
             this.listOfDisplayData = this.applySorting([...this.students]);
             this.updateSummaryCards();
-          //  this.notificationService.notification('success', 'Success', `Found ${this.students.length} unassigned students`);
+            //  this.notificationService.notification('success', 'Success', `Found ${this.students.length} unassigned students`);
           } else {
             this.notificationService.notification('error', 'Error', response.error || 'No data found');
           }
@@ -202,7 +202,7 @@ export class UnassignedStudentsComponent implements OnInit {
     const sorted = [...data].sort((a, b) => {
       const nameA = a.fullName.toLowerCase();
       const nameB = b.fullName.toLowerCase();
-      
+
       if (this.sortOrder === 'asc') {
         return nameA.localeCompare(nameB);
       } else {
@@ -300,6 +300,8 @@ export class UnassignedStudentsComponent implements OnInit {
   selectedStudent: StudentInfo | null = null;
 
   navigateToNewComponent(student: StudentInfo): void {
+
+    console.log("%%$$$       ", student);
     this.selectedStudent = student;
     this.isModalVisible = true;
   }

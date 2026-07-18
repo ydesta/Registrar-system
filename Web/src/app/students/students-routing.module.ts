@@ -3,6 +3,7 @@ import { StudentCourseRegistrationComponent } from "./course-registration/studen
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { AuthGuard } from '../guards/auth.guard';
+import { InstructorStaffProfileGuard } from '../guards/instructor-staff-profile.guard';
 import { AddCourseAttendanceComponent } from "./add-course-attendance/add-course-attendance.component";
 import { AddGradingSystemComponent } from "./add-grading-system/add-grading-system.component";
 import { AddStudentAcademicStatusHistoryComponent } from "./add-student-academic-status-history/add-student-academic-status-history.component";
@@ -47,7 +48,11 @@ const routes: Routes = [
     component: StudentAcademicStatusHistoryComponent,
     canActivate: [AuthGuard]
   },
-  { path: "StudentGrades", component: StudentGradeComponent, canActivate: [AuthGuard] },
+  {
+    path: "StudentGrades",
+    component: StudentGradeComponent,
+    canActivate: [AuthGuard, InstructorStaffProfileGuard]
+  },
   { path: "grading-system", component: GradingSystemComponent, canActivate: [AuthGuard] },
   { path: "student-attendance", component: CourseAttendanceComponent, canActivate: [AuthGuard] },
   { path: "student-clearance", component: StudentClearanceComponent, canActivate: [AuthGuard] },
@@ -106,7 +111,7 @@ const routes: Routes = [
   {
     path: "import-student-grade",
     component: ImportStudentGradeComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, InstructorStaffProfileGuard]
   },
   {
     path: "student-profile-summary",

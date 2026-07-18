@@ -30,6 +30,12 @@ export class AuthInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    // Skip intercepting Resources paths - these are static files that don't need headers
+    // Browsers don't send custom headers when opening files directly via window.open()
+    if (request.url.includes('/Resources/')) {
+      return next.handle(request);
+    }
+    
     // Check if this is an API request (SecureAuth or College Registration System)
     const isSecureAuthApi = request.url.startsWith(Constants.apiRoot) || 
                            request.url.startsWith(environment.secureUrl);

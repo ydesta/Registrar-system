@@ -19,6 +19,7 @@ import { UserStatusComponent } from './components/user-status/user-status.compon
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { CreateUserComponent } from './components/create-user/create-user.component';
 import { UserCredentialsComponent } from './components/user-credentials/user-credentials.component';
+import { UpdateFromExcelComponent } from './components/update-from-excel/update-from-excel.component';
 
 // Ng-Zorro Modules
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -54,6 +55,7 @@ import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzListModule } from 'ng-zorro-antd/list';
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
+import { NzUploadModule } from 'ng-zorro-antd/upload';
 import { NzModalRef } from 'ng-zorro-antd/modal';
 
 @NgModule({
@@ -71,7 +73,8 @@ import { NzModalRef } from 'ng-zorro-antd/modal';
     UserStatusComponent,
     ResetPasswordComponent,
     CreateUserComponent,
-    UserCredentialsComponent
+    UserCredentialsComponent,
+    UpdateFromExcelComponent
   ],
   imports: [
     CommonModule,
@@ -111,7 +114,8 @@ import { NzModalRef } from 'ng-zorro-antd/modal';
     NzBadgeModule,
     NzListModule,
     NzPageHeaderModule,
-    NzBreadCrumbModule
+    NzBreadCrumbModule,
+    NzUploadModule
   ],
   providers: [
     {

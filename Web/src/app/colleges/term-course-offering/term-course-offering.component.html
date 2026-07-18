@@ -25,18 +25,41 @@
   
   <!-- Filter Section -->
   <div class="filter-section">
-    <nz-input-group [nzSuffix]="suffixIconSearch" class="search-input-group">
-      <input 
-        type="text" 
-        nz-input 
-        [(ngModel)]="searchBatch"
-        (input)="onBatchSearch($event)"
-        placeholder="Search by batch code..." 
-        class="batch-search-input" />
-      <ng-template #suffixIconSearch>
-        <i nz-icon nzType="search" nzTheme="outline"></i>
-      </ng-template>
-    </nz-input-group>
+    <div class="filter-row">
+      <nz-input-group [nzSuffix]="suffixIconSearch" class="search-input-group">
+        <input 
+          type="text" 
+          nz-input 
+          [(ngModel)]="searchBatch"
+          (input)="onBatchSearch($event)"
+          placeholder="Search by batch code..." 
+          class="batch-search-input" />
+        <ng-template #suffixIconSearch>
+          <i nz-icon nzType="search" nzTheme="outline"></i>
+        </ng-template>
+      </nz-input-group>
+      
+      <nz-select 
+        [(ngModel)]="isActiveFilter" 
+        (ngModelChange)="onIsActiveFilterChange($event)"
+        nzPlaceHolder="Filter by Status"
+        class="filter-select"
+        style="width: 150px;">
+        <nz-option [nzValue]="true" nzLabel="Active"></nz-option>
+        <nz-option [nzValue]="false" nzLabel="Inactive"></nz-option>
+        <nz-option [nzValue]="null" nzLabel="All"></nz-option>
+      </nz-select>
+      
+      <nz-select 
+        [(ngModel)]="yearFilter" 
+        (ngModelChange)="onYearFilterChange($event)"
+        nzPlaceHolder="Filter by Year"
+        class="filter-select"
+        [nzAllowClear]="true"
+        style="width: 150px;">
+        <nz-option *ngFor="let year of yearOptions" [nzValue]="year" [nzLabel]="year.toString()"></nz-option>
+      </nz-select>
+    </div>
   </div>
   
   <div class="table-card">
@@ -51,17 +74,17 @@
                 [nzData]="filteredTermCourseOfferings" 
                 nzBordered
                 [nzPageSize]="pageSize"
+                [nzPageIndex]="pageIndex"
+                [nzTotal]="total"
+                [nzPageSizeOptions]="pageSizeOptions"
                 [nzShowSizeChanger]="true"
                 [nzShowPagination]="true"
-                [nzShowQuickJumper]="false"
-                [nzShowTotal]="totalTemplate"
-                [nzTotal]="totalRecord"
-                [nzPageIndex]="pageindex"
-                (nzPageIndexChange)="onPageIndexChange($event)"
-                (nzPageSizeChange)="onPageSizeChange($event)"
+                [nzShowQuickJumper]="true"
                 [nzLoading]="tbLoading"
                 [nzNoResult]="emptyTpl"
                 [nzFrontPagination]="false"
+                (nzPageIndexChange)="onPageIndexChange($event)"
+                (nzPageSizeChange)="onPageSizeChange($event)"
                 class="responsive-table">
         <thead>
           <tr>
@@ -196,9 +219,6 @@
             <span nz-icon nzType="book" nzTheme="outline"></span>
             <p>No course offerings available</p>
           </div>
-        </ng-template>
-        <ng-template #totalTemplate let-total let-range="range">
-          {{ range[0] }}-{{ range[1] }} of {{ total }} term course offerings
         </ng-template>
       </nz-table>
     </div>

@@ -17,6 +17,12 @@ export class CsrfInterceptor implements HttpInterceptor {
   constructor(private http: HttpClient) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    // Skip intercepting Resources paths - these are static files that don't need headers
+    // Browsers don't send custom headers when opening files directly via window.open()
+    if (request.url.includes('/Resources/')) {
+      return next.handle(request);
+    }
+    
     // Check if request is to our API (both secureUrl and baseUrl)
     const isSecureApiRequest = request.url.startsWith(environment.secureUrl);
     const isBaseApiRequest = request.url.startsWith(environment.baseUrl);

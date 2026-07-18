@@ -1,0 +1,98 @@
+<div class="content-container">
+  <!-- Page Header -->
+  <div class="header-section">
+    <div class="page-title">
+      <h1>Update Users from Excel</h1>
+      <p class="subtitle">
+        Upload an Excel file with columns: <strong>firstName</strong>, <strong>lastName</strong>, <strong>newemail</strong>, <strong>olduser</strong>.
+        Row 1 must be headers. <strong>olduser</strong> is the current username (email). For each row, a new password is generated, email and username are set to <strong>newemail</strong> (username = email), and the user is notified by email.
+      </p>
+    </div>
+    <div class="header-actions">
+      <button nz-button nzType="default" routerLink="/user-management" class="back-btn">
+        <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
+        Back to User Management
+      </button>
+    </div>
+  </div>
+
+  <!-- Upload Section -->
+  <div class="upload-section">
+    <div class="upload-card" [class.uploading]="uploading">
+      <div class="upload-card-header">
+        <i nz-icon nzType="file-excel" nzTheme="outline"></i>
+        <span>Upload Excel</span>
+      </div>
+      <div *ngIf="uploading" class="upload-loading">
+        <nz-spin nzSize="large"></nz-spin>
+        <p>Sending file to server...</p>
+      </div>
+      <nz-upload
+        *ngIf="!uploading"
+        nzType="drag"
+        [nzMultiple]="false"
+        [nzBeforeUpload]="beforeUpload"
+        [nzCustomRequest]="customRequest"
+        (nzChange)="handleChange($event)"
+        [nzShowUploadList]="false"
+        accept=".xlsx,.xls"
+        class="upload-area"
+      >
+        <p class="ant-upload-drag-icon">
+          <i nz-icon nzType="inbox" nzTheme="outline"></i>
+        </p>
+        <p class="ant-upload-text">Click or drag Excel file to this area</p>
+        <p class="ant-upload-hint">Supports .xlsx and .xls. Max 10 MB.</p>
+      </nz-upload>
+      <p *ngIf="!uploading" class="upload-hint">Select or drop a file to upload immediately.</p>
+
+      <div *ngIf="selectedFile" class="file-actions">
+        <span class="file-name">
+          <i nz-icon nzType="file-excel" nzTheme="outline"></i>
+          {{ selectedFile.name }}
+        </span>
+        <button nz-button nzType="default" (click)="clearFile()" class="clear-btn">
+          <i nz-icon nzType="delete" nzTheme="outline"></i>
+          Clear
+        </button>
+        <button nz-button nzType="primary" [nzLoading]="uploading" (click)="processFile()" class="process-btn">
+          <i nz-icon nzType="upload" nzTheme="outline"></i>
+          Update from Excel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result Section -->
+  <div class="result-section" *ngIf="result">
+    <div class="result-card">
+      <div class="result-card-header">
+        <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+        <span>Result</span>
+      </div>
+      <div class="result-summary">
+        <nz-tag [nzColor]="'green'">Updated: {{ result.successCount }}</nz-tag>
+        <nz-tag [nzColor]="'red'">Failed: {{ result.failureCount }}</nz-tag>
+      </div>
+      <div *ngIf="result.errors?.length" class="errors-section">
+        <h4 class="errors-title">Errors</h4>
+        <nz-table #errorTable [nzData]="result.errors" [nzShowPagination]="false" [nzSize]="'small'" class="errors-table">
+          <thead>
+            <tr>
+              <th>Row</th>
+              <th>Old User</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of errorTable.data">
+              <td>{{ e.rowNumber }}</td>
+              <td>{{ e.oldUser || '-' }}</td>
+              <td>{{ e.message }}</td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </div>
+    </div>
+  </div>
+</div>

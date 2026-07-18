@@ -84,22 +84,7 @@
               </div>
 
               <div class="form-col">
-                <nz-form-item>
-                  <nz-form-label nzRequired>Batch Term</nz-form-label>
-                  <nz-form-control nzErrorTip="Please select an academic term">
-                    <nz-select formControlName="AcademicTermSeason" nzPlaceHolder="Select Academic Term Season"
-                      [nzShowSearch]="true" [nzDisabled]="true" [nzShowArrow]="true"
-                      [nzDropdownMatchSelectWidth]="false" class="professional-select">
-                      <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
-                        [nzLabel]="item.Description"></nz-option>
-                    </nz-select>
-                  </nz-form-control>
-                </nz-form-item>
-              </div>
-            </div>
 
-            <div class="form-row">
-              <div class="form-col">
                 <nz-form-item>
                   <nz-form-label [nzSpan]="10" nzRequired>Registration Start Date</nz-form-label>
                   <nz-form-control>
@@ -111,6 +96,25 @@
                     </div>
                   </nz-form-control>
                 </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+
+                <nz-form-item>
+                  <nz-form-label nzRequired>Batch Term</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select an academic term">
+                    <nz-select formControlName="AcademicTermSeason" nzPlaceHolder="Select Academic Term Season"
+                      [nzShowSearch]="true" [nzDisabled]="true" [nzShowArrow]="true"
+                      [nzDropdownMatchSelectWidth]="false" class="professional-select">
+                      <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
+                        [nzLabel]="item.Description"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+
+
               </div>
               <div class="form-col">
                 <nz-form-item>
@@ -198,37 +202,23 @@
 
             <div class="search-container">
               <nz-input-group nzSearch class="search-input">
-                <input nz-input 
-                       placeholder="Search courses..." 
-                       [(ngModel)]="searchTextB"
-                       (ngModelChange)="onSearchBreak()" 
-                       (input)="onSearchBreak()"
-                       (keyup)="onSearchBreak()"
-                       class="search-field">
+                <input nz-input placeholder="Search courses..." [(ngModel)]="searchTextB"
+                  (ngModelChange)="onSearchBreak()" (input)="onSearchBreak()" (keyup)="onSearchBreak()"
+                  class="search-field">
                 <!-- <span nz-icon nzType="search" nzTheme="outline"></span> -->
               </nz-input-group>
             </div>
 
             <div class="table-container">
-              <nz-table 
-                nzBordered 
-                #basicTable 
-                [nzData]="listOfCourseBreakDown || []" 
-                [nzShowPagination]="true"
-                nzShowSizeChanger 
-                [nzPageSize]="10"
-                [nzPageSizeOptions]="[5, 10, 20, 50]"
-                (nzCurrentPageDataChange)="onCurrentPageDataChange($event)"
-                class="course-table"
+              <nz-table nzBordered #basicTable [nzData]="listOfCourseBreakDown || []" [nzShowPagination]="true"
+                nzShowSizeChanger [nzPageSize]="10" [nzPageSizeOptions]="[5, 10, 20, 50]"
+                (nzCurrentPageDataChange)="onCurrentPageDataChange($event)" class="course-table"
                 [nzScroll]="{ x: '100%' }">
                 <thead>
                   <tr>
                     <th nzWidth="60px" nzAlign="center" class="checkbox-column">
-                      <label nz-checkbox 
-                        [nzChecked]="checked" 
-                        [nzIndeterminate]="indeterminate"
-                        (nzCheckedChange)="onAllChecked($event)"
-                        class="header-checkbox">
+                      <label nz-checkbox [nzChecked]="checked" [nzIndeterminate]="indeterminate"
+                        (nzCheckedChange)="onAllChecked($event)" class="header-checkbox">
                       </label>
                     </th>
                     <th nzWidth="120px" nzAlign="left" class="course-code-column">Course Code</th>
@@ -239,10 +229,8 @@
                 <tbody>
                   <tr *ngFor="let data of basicTable.data; let i = index" class="course-row">
                     <td nzAlign="center" class="checkbox-cell">
-                      <label nz-checkbox 
-                        [nzChecked]="setOfCheckedId.has(data.courseId)"
-                        (nzCheckedChange)="onItemChecked(data.courseId, $event)" 
-                        class="course-checkbox">
+                      <label nz-checkbox [nzChecked]="setOfCheckedId.has(data.courseId)"
+                        (nzCheckedChange)="onItemChecked(data.courseId, $event)" class="course-checkbox">
                       </label>
                     </td>
                     <td nzAlign="left" class="course-code">{{ data.courseCode }}</td>
@@ -282,13 +270,8 @@
 
             <div class="search-container">
               <nz-input-group nzSearch class="search-input">
-                <input nz-input 
-                       placeholder="Search courses..." 
-                       [(ngModel)]="searchText" 
-                       (ngModelChange)="onSearch()"
-                       (input)="onSearch()"
-                       (keyup)="onSearch()"
-                       class="search-field">
+                <input nz-input placeholder="Search courses..." [(ngModel)]="searchText" (ngModelChange)="onSearch()"
+                  (input)="onSearch()" (keyup)="onSearch()" class="search-field">
                 <!-- <span nz-icon nzType="search" nzTheme="outline"></span> -->
               </nz-input-group>
             </div>
@@ -296,31 +279,21 @@
             <div class="table-container">
               <!-- Show message when no additional courses are available -->
               <div *ngIf="!courses || courses.length === 0" class="no-courses-message">
-                <nz-empty nzNotFoundImage="simple" 
-                          [nzNotFoundContent]="'No additional courses available for this batch/curriculum combination. You can still proceed with creating the term course offering using only the curriculum breakdown courses.'">
+                <nz-empty nzNotFoundImage="simple"
+                  [nzNotFoundContent]="'No additional courses available for this batch/curriculum combination. You can still proceed with creating the term course offering using only the curriculum breakdown courses.'">
                 </nz-empty>
               </div>
-              
+
               <!-- Show table when courses are available -->
-              <nz-table *ngIf="courses && courses.length > 0" 
-                        nzBordered 
-                        #basicTableA 
-                        [nzData]="courses" 
-                        [nzShowPagination]="true" 
-                        nzShowSizeChanger 
-                        [nzPageSize]="10"
-                        [nzPageSizeOptions]="[5, 10, 20, 50]"
-                        (nzCurrentPageDataChange)="onCurrentPageDataChangeA($event)" 
-                        class="course-table"
-                        [nzScroll]="{ x: '100%' }">
+              <nz-table *ngIf="courses && courses.length > 0" nzBordered #basicTableA [nzData]="courses"
+                [nzShowPagination]="true" nzShowSizeChanger [nzPageSize]="10" [nzPageSizeOptions]="[5, 10, 20, 50]"
+                (nzCurrentPageDataChange)="onCurrentPageDataChangeA($event)" class="course-table"
+                [nzScroll]="{ x: '100%' }">
                 <thead>
                   <tr>
                     <th nzWidth="60px" nzAlign="center" class="checkbox-column">
-                      <label nz-checkbox 
-                        [nzChecked]="checkedA" 
-                        [nzIndeterminate]="indeterminateA"
-                        (nzCheckedChange)="onAllCheckedA($event)"
-                        class="header-checkbox">
+                      <label nz-checkbox [nzChecked]="checkedA" [nzIndeterminate]="indeterminateA"
+                        (nzCheckedChange)="onAllCheckedA($event)" class="header-checkbox">
                       </label>
                     </th>
                     <th nzWidth="120px" nzAlign="left" class="course-code-column">Course Code</th>
@@ -331,10 +304,8 @@
                 <tbody>
                   <tr *ngFor="let data of basicTableA.data; let i = index" class="course-row">
                     <td nzAlign="center" class="checkbox-cell">
-                      <label nz-checkbox 
-                        [nzChecked]="setOfCheckedIdA.has(data.courseId)"
-                        (nzCheckedChange)="onItemCheckedA(data.courseId, $event)" 
-                        class="course-checkbox">
+                      <label nz-checkbox [nzChecked]="setOfCheckedIdA.has(data.courseId)"
+                        (nzCheckedChange)="onItemCheckedA(data.courseId, $event)" class="course-checkbox">
                       </label>
                     </td>
                     <td nzAlign="left" class="course-code">{{ data.courseCode }}</td>
@@ -355,8 +326,8 @@
           <span nz-icon nzType="close" nzTheme="outline"></span>
           Cancel
         </button>
-        <button nz-button nzType="primary" class="submit-btn" (click)="submitForm()" 
-                [nzLoading]="loading" [disabled]="isSubmitDisabled">
+        <button nz-button nzType="primary" class="submit-btn" (click)="submitForm()" [nzLoading]="loading"
+          [disabled]="isSubmitDisabled">
           <span nz-icon nzType="save" nzTheme="outline"></span>
           {{ submit }}
         </button>

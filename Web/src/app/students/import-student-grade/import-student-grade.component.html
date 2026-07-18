@@ -1,157 +1,282 @@
 <div class="content-container">
-  <!-- Header Section -->
-  <!-- <div class="header-section">
+  <div class="header-section">
     <div class="header-content">
       <div class="page-title">
-        <h3 class="title-text">{{ action }}</h3>
+        <h2 class="title-text">{{ action }}</h2>
         <p class="subtitle-text">Import student grades from Excel files</p>
       </div>
       <div class="header-actions">
-        <button routerLink="../StudentGrades" nz-button nzType="default" class="back-btn">
-          <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
-          <span>Back to Grades</span>
+        <button
+          routerLink="../StudentGrades"
+          nz-button
+          nzType="default"
+          class="back-btn"
+          type="button"
+        >
+          <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+          Back to Grades
         </button>
       </div>
     </div>
-  </div> -->
+  </div>
 
-  <!-- Form Card -->
-  <div class="form-card">
-    <div class="form-header">
-      <div class="form-icon">
-        <i nz-icon nzType="upload" nzTheme="outline"></i>
-      </div>
-      <div class="form-title">
-        <h4>Grade Import Information</h4>
-        <p>Please select the instructor, course, and upload the grade file</p>
-      </div>
-    </div>
-
-    <form nz-form nzLayout="vertical" [formGroup]="importStudentGradeForm" (ngSubmit)="submitForm()" class="grade-form">
-      <div class="form-grid">
-        <div class="form-row">
-          <nz-form-item class="form-item">
-            <nz-form-label nzRequired>Academic Term</nz-form-label>
-            <nz-form-control nzValidatingTip="Validating...">
-              <nz-select formControlName="academicTermId" nzShowSearch nzPlaceHolder="Select Academic Term" nzAllowClear [nzDropdownMatchSelectWidth]="false">
-                <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
-                  [nzLabel]="item.Description"></nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-
-          <nz-form-item class="form-item">
-            <nz-form-label nzRequired>Academic Term Year</nz-form-label>
-            <nz-form-control nzValidatingTip="Validating...">
-              <nz-select formControlName="academicTermYearId" nzShowSearch nzPlaceHolder="Select Year" nzAllowClear [nzDropdownMatchSelectWidth]="false">
-                <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item">
-                </nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-
-
-
-        </div>
-        <div class="form-row">
-
-          <nz-form-item class="form-item">
-            <nz-form-label nzRequired>Batch Code</nz-form-label>
-            <nz-form-control nzValidatingTip="Validating...">
-              <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch Code" nzShowSearch [nzDropdownMatchSelectWidth]="false">
-                <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.batchCode" [nzLabel]="item.batchCode"></nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-
-          <nz-form-item class="form-item">
-            <nz-form-label nzRequired>Course</nz-form-label>
-            <nz-form-control nzValidatingTip="Validating...">
-              <nz-select formControlName="courseId" nzPlaceHolder="Select Course" nzShowSearch [nzDropdownMatchSelectWidth]="false">
-                <nz-option *ngFor="let item of courseList" [nzLabel]="item.courseCode + ' - ' + item.courseTitle"
-                  [nzValue]="item.id">
-                </nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-
-        </div>
-        <div class="form-row">
-          <nz-form-item class="form-item full-width">
-            <nz-form-label nzRequired>Upload Grade File</nz-form-label>
-            <nz-form-control>
-              <nz-upload nzType="drag" [nzMultiple]="true" nzAction="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-                (nzChange)="handleChange($event)" accept=".xls, .xlsx" class="upload-area">
-                <p class="ant-upload-drag-icon">
-                  <span nz-icon nzType="inbox"></span>
+  <div class="form-container">
+    <div class="form-card">
+      <form
+        nz-form
+        nzLayout="vertical"
+        [formGroup]="importStudentGradeForm"
+        (ngSubmit)="submitForm()"
+        class="grade-form"
+      >
+        <div class="form-sections">
+          <div class="form-section form-section-assignment">
+            <div class="assignment-panel">
+              <div class="assignment-panel-head">
+                <div class="assignment-panel-title-row">
+                  <h4 class="assignment-panel-title">Import target</h4>
+                  <span
+                    nz-icon
+                    nzType="question-circle"
+                    nzTheme="outline"
+                    class="assignment-panel-help"
+                    nz-tooltip
+                    nzTooltipTitle="Pick the section that matches your spreadsheet. Rows are limited to the current academic term and the selected or signed-in instructor."
+                    nzTooltipPlacement="bottomLeft"
+                  ></span>
+                </div>
+                <p class="assignment-panel-lead">
+                  Choose a course section row below. Only assignments for the current term are listed.
                 </p>
-                <p class="ant-upload-text">Click or drag Excel file to this area to upload</p>
-                <p class="ant-upload-hint">Supports .xls and .xlsx files</p>
-              </nz-upload>
-            </nz-form-control>
-          </nz-form-item>
+              </div>
 
+              <div class="assignment-toolbar" *ngIf="isAdmin">
+                <div class="toolbar-field">
+                  <nz-form-item class="toolbar-form-item">
+                    <nz-form-label nzRequired>Instructor</nz-form-label>
+                    <nz-form-control>
+                      <nz-select
+                        formControlName="staffId"
+                        nzPlaceHolder="Search and select instructor"
+                        nzShowSearch
+                        [nzShowArrow]="true"
+                        [nzAllowClear]="true"
+                        [nzDropdownMatchSelectWidth]="false"
+                        class="professional-select"
+                      >
+                        <nz-option
+                          *ngFor="let s of staffList"
+                          [nzValue]="s.id"
+                          [nzLabel]="s.name"
+                        ></nz-option>
+                      </nz-select>
+                    </nz-form-control>
+                  </nz-form-item>
+                </div>
+                <div class="toolbar-aside" *ngIf="currentTermLabel">
+                  <span class="term-pill">
+                    <span nz-icon nzType="calendar" nzTheme="outline" class="term-pill-icon"></span>
+                    {{ currentTermLabel }}
+                  </span>
+                </div>
+              </div>
 
+              <div
+                class="assignment-toolbar assignment-toolbar-readonly"
+                *ngIf="!isAdmin && (currentTermLabel || instructorDisplayName)"
+              >
+                <span class="term-pill" *ngIf="currentTermLabel">
+                  <span nz-icon nzType="calendar" nzTheme="outline" class="term-pill-icon"></span>
+                  {{ currentTermLabel }}
+                </span>
+                <span class="toolbar-middot" *ngIf="currentTermLabel && instructorDisplayName" aria-hidden="true"></span>
+                <span class="instructor-inline" *ngIf="instructorDisplayName">{{ instructorDisplayName }}</span>
+              </div>
 
+              <nz-form-item class="assignment-table-form-item">
+                <nz-form-label nzRequired>Course section</nz-form-label>
+                <nz-form-control nzErrorTip="Select one row to continue.">
+                  <nz-radio-group
+                    [(ngModel)]="selectedRowKey"
+                    (ngModelChange)="onAssignmentRowKeyChange($event)"
+                    [ngModelOptions]="{ standalone: true }"
+                    class="assignment-radio-group"
+                  >
+                    <nz-table
+                      #assignmentTable
+                      class="assignment-table"
+                      [nzData]="assignmentTableRows"
+                      [nzLoading]="assignmentsLoading"
+                      [nzPageSize]="10"
+                      [nzShowSizeChanger]="true"
+                      [nzPageSizeOptions]="[10, 20, 50]"
+                      nzSize="middle"
+                      [nzNoResult]="noAssignmentsTpl"
+                    >
+                      <thead>
+                        <tr>
+                          <th nzWidth="52px" class="th-radio"></th>
+                          <th nzWidth="110px">Type</th>
+                          <th nzWidth="120px">Batch</th>
+                          <th>Course</th>
+                          <th nzWidth="88px" class="th-section">Section</th>
+                          <th nzWidth="88px" class="th-grade-count">Grades</th>
+                          <th nzWidth="140px" class="th-status">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr
+                          *ngFor="let row of assignmentTable.data"
+                          [class.assignment-row-selected]="selectedRowKey === row.rowKey"
+                          [class.assignment-row-locked]="isAssignmentRowLocked(row)"
+                          (click)="onAssignmentRowClick(row)"
+                        >
+                          <td class="td-radio" (click)="$event.stopPropagation()">
+                            <label
+                              nz-radio
+                              [nzValue]="row.rowKey"
+                              [nzDisabled]="isAssignmentRowLocked(row)"
+                              (click)="$event.stopPropagation()"
+                            ></label>
+                          </td>
+                          <td>
+                            <nz-tag nzColor="blue" class="type-tag">{{ row.sectionTypeLabel }}</nz-tag>
+                          </td>
+                          <td><span class="cell-batch">{{ row.batchCode }}</span></td>
+                          <td><span class="cell-course">{{ row.course }}</span></td>
+                          <td class="td-section"><span class="cell-section">{{ row.section }}</span></td>
+                          <td class="td-grade-count">
+                            <span class="grade-count-val" *ngIf="(row.submittedGradeCount ?? 0) > 0">{{ row.submittedGradeCount }}</span>
+                            <span *ngIf="(row.submittedGradeCount ?? 0) === 0" class="grade-count-empty">—</span>
+                          </td>
+                          <td class="td-status">
+                            <nz-tag *ngIf="isAssignmentRowLocked(row)" nzColor="default" class="status-tag status-tag-locked">
+                              <span nz-icon nzType="lock" nzTheme="outline"></span>
+                              Submitted
+                            </nz-tag>
+                            <nz-tag *ngIf="!isAssignmentRowLocked(row)" nzColor="processing" class="status-tag">Open</nz-tag>
+                            <div class="submitted-at" *ngIf="isAssignmentRowLocked(row) && row.lastGradeSubmittedAt">
+                              {{ row.lastGradeSubmittedAt | date:'short' }}
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </nz-table>
+                  </nz-radio-group>
+                  <ng-template #noAssignmentsTpl>
+                    <nz-empty
+                      nzNotFoundImage="simple"
+                      [nzNotFoundContent]="assignmentTableEmptyMessage"
+                    ></nz-empty>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
 
+              <div
+                class="selection-summary selection-summary-confirmed"
+                *ngIf="selectedAssignmentSummary"
+              >
+                <span nz-icon nzType="check-circle" nzTheme="fill" class="selection-summary-icon"></span>
+                <div class="selection-summary-text">
+                  <span class="selection-summary-label">Selected for upload</span>
+                  <span class="selection-summary-value">{{ selectedAssignmentSummary }}</span>
+                </div>
+              </div>
+              <div
+                class="selection-summary selection-summary-pending"
+                *ngIf="!selectedAssignmentSummary && assignmentTableRows.length"
+              >
+                <span nz-icon nzType="info-circle" nzTheme="outline" class="selection-summary-icon-pending"></span>
+                <div class="selection-summary-text">
+                  <span class="selection-summary-label">Next step</span>
+                  <span class="selection-summary-value">
+                    Select a row in the table to confirm batch, course, and section for this import.
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section form-section-upload">
+            <div class="upload-panel">
+              <nz-form-item class="upload-form-item">
+                <nz-form-label nzRequired class="upload-form-label">Grade file</nz-form-label>
+                <nz-form-control>
+                  <p class="upload-field-hint">
+                    Excel workbook (.xlsx or .xls) for the course section selected above.
+                  </p>
+                  <nz-upload
+                    nzType="drag"
+                    [nzMultiple]="true"
+                    nzAction="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                    (nzChange)="handleChange($event)"
+                    accept=".xls, .xlsx"
+                    class="upload-area"
+                  >
+                    <div class="upload-drop-inner">
+                      <span nz-icon nzType="file-text" nzTheme="outline" class="upload-drop-icon"></span>
+                      <p class="ant-upload-text">Drop your file here, or <span class="upload-browse-emphasis">browse</span></p>
+                      <p class="ant-upload-hint">One or more spreadsheets · max size follows your server limits</p>
+                    </div>
+                  </nz-upload>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
         </div>
 
-        <!-- Row 3: Remark -->
-        <!-- <div class="form-row">
-          <nz-form-item class="form-item full-width">
-            <nz-form-label>Remark</nz-form-label>
-            <nz-form-control>
-              <nz-textarea-count [nzMaxCharacterCount]="250">
-                <textarea rows="4" formControlName="remark" nz-input
-                  placeholder="Enter any additional remarks about the grade import">
-                </textarea>
-              </nz-textarea-count>
-            </nz-form-control>
-          </nz-form-item>
-        </div> -->
-      </div>
-
-      <div class="form-actions">
-        <button nz-button nzType="default" class="cancel-btn" type="button" routerLink="../StudentGrades">
-          <i nz-icon nzType="close" nzTheme="outline"></i>
-          <span>Cancel</span>
-        </button>
-        <button nz-button nzType="primary" class="submit-btn" type="submit"
-          [disabled]="!canSave() || !importStudentGradeForm.valid">
-          <i nz-icon nzType="upload" nzTheme="outline"></i>
-          <span>{{ submit }}</span>
-        </button>
-       
-      </div>
-    </form>
+        <div class="form-actions">
+          <button
+            nz-button
+            nzType="default"
+            class="cancel-btn"
+            type="button"
+            routerLink="../StudentGrades"
+          >
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            class="submit-btn"
+            type="submit"
+            [disabled]="!canSave() || !importStudentGradeForm.valid"
+          >
+            <span nz-icon nzType="upload" nzTheme="outline"></span>
+            {{ submit }}
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
-<!-- Error Modal -->
 <nz-modal
   [(nzVisible)]="isErrorModalVisible"
-  nzTitle="Grade Import Errors"
+  nzTitle="Grade Import Issues"
   nzWidth="900px"
   (nzOnCancel)="handleErrorModalCancel()"
   [nzFooter]="null"
   [nzMaskClosable]="false"
-  [nzClosable]="true">
-  
+  [nzClosable]="true"
+>
   <div *nzModalContent>
     <div class="error-summary">
       <nz-alert
         nzType="error"
-        nzMessage="Grade Import Completed with Errors"
-        nzDescription="The following validation errors were found during the grade import process. Please review and correct these issues before re-uploading your file."
+        nzMessage="Grade Import Completed with Issues"
+        nzDescription="The following validation issues were found during the grade import process. Please review and correct these issues before re-uploading your file."
         class="error-alert"
-        [nzShowIcon]="true">
+        [nzShowIcon]="true"
+      >
       </nz-alert>
     </div>
 
     <div class="error-list">
       <h4>
-        <i nz-icon nzType="exclamation-circle" nzTheme="outline" style="margin-right: 8px; color: #1890ff;"></i>
-        Error Details
+        <span nz-icon nzType="exclamation-circle" nzTheme="outline" class="error-list-icon"></span>
+        Issue Details
       </h4>
       <nz-table
         #errorTable
@@ -161,54 +286,52 @@
         [nzShowQuickJumper]="true"
         [nzShowTotal]="totalTemplate"
         class="error-table"
-        [nzScroll]="{ y: '400px' }">
-        
+        [nzScroll]="{ y: '400px' }"
+      >
         <thead>
           <tr>
-            <th nzWidth="120px" style="text-align: center;">
-              <i nz-icon nzType="number" nzTheme="outline" style="margin-right: 4px;"></i>
+            <th nzWidth="120px" class="th-center">
+              <span nz-icon nzType="ordered-list" nzTheme="outline" class="th-icon"></span>
               Row Index
             </th>
             <th>
-              <i nz-icon nzType="message" nzTheme="outline" style="margin-right: 4px;"></i>
-              Error Message
+              <span nz-icon nzType="message" nzTheme="outline" class="th-icon"></span>
+              Issue Message
             </th>
           </tr>
         </thead>
-        
+
         <tbody>
           <tr *ngFor="let error of errorTable.data; let i = index">
-            <td style="text-align: center;">
-              <nz-tag nzColor="red" style="font-weight: 600; padding: 6px 12px;">
-                <i nz-icon nzType="file-exclamation" nzTheme="outline" style="margin-right: 4px;"></i>
+            <td class="td-center">
+              <nz-tag nzColor="red" class="row-tag">
+                <span nz-icon nzType="file-exclamation" nzTheme="outline"></span>
                 {{ error.rowIndex }}
               </nz-tag>
             </td>
             <td>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <i nz-icon nzType="warning" nzTheme="outline" style="color: #faad14; font-size: 16px;"></i>
-                <span style="font-weight: 500;">{{ error.message }}</span>
+              <div class="error-msg-cell">
+                <span nz-icon nzType="warning" nzTheme="outline" class="warn-icon"></span>
+                <span class="error-msg-text">{{ error.message }}</span>
               </div>
             </td>
           </tr>
         </tbody>
       </nz-table>
-      
-      <!-- Custom total template -->
+
       <ng-template #totalTemplate let-total>
-        <span style="color: #666; font-weight: 500;">
-          <i nz-icon nzType="info-circle" nzTheme="outline" style="margin-right: 4px;"></i>
-          Total {{ total }} errors found
+        <span class="error-total">
+          <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+          Total {{ total }} issues found
         </span>
       </ng-template>
     </div>
 
     <div class="modal-actions">
-      <button nz-button nzType="default" (click)="handleErrorModalCancel()" style="border-radius: 8px;">
-        <i nz-icon nzType="close" nzTheme="outline"></i>
+      <button nz-button nzType="default" (click)="handleErrorModalCancel()" class="modal-close-btn">
+        <span nz-icon nzType="close" nzTheme="outline"></span>
         Close
       </button>
-      
     </div>
   </div>
 </nz-modal>

@@ -38,6 +38,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   public isUserAcademicDirector: boolean = false;
   public isUserReception: boolean = false;
   public isUserSectionReportViewer: boolean = false;
+  public isUserDepartmentHead: boolean = false;
   nextAcademicTerm: any;
   nextTerm = '';
   nextTermYear: number;
@@ -314,6 +315,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isUserApplicant = false;
     this.isUserApprovedApplicant = false;
     this.isUserSectionReportViewer = false;
+    this.isUserDepartmentHead = false;
     
     switch (cleanRole) {
       case 'Super Admin':
@@ -361,6 +363,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isUserSectionReportViewer = true;
         this.userType = cleanRole;
         break;
+      case 'Department Head':
+        this.isUserDepartmentHead = true;
+        this.userType = cleanRole;
+        break;
       default:
         break;
     }
@@ -379,6 +385,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isUserAlreadyApplied = false;
     this.isUserFinance = false;
     this.isUserSectionReportViewer = false;
+    this.isUserDepartmentHead = false;
   }
 
   private checkApplicantStatus() {

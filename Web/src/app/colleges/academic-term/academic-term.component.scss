@@ -300,6 +300,136 @@
   }
 }
 
+// Expand Column
+.expand-column {
+  width: 60px;
+  text-align: center;
+}
+
+.custom-expand-icon {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(24, 144, 255, 0.1);
+  }
+
+  i {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+
+  &.expanded i {
+    transform: rotate(0deg);
+  }
+}
+
+// Expanded Content Row
+.expanded-content {
+  background: #f8fafc !important;
+
+  td {
+    padding: 0 !important;
+    background: #f8fafc !important;
+    width: 100%;
+  }
+}
+
+// Batch Terms Container
+.batch-terms-container {
+  padding: 20px;
+  background: white;
+  margin: 0;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.batch-terms-table {
+  width: 100%;
+  overflow-x: auto;
+  
+  ::ng-deep {
+    .nested-table {
+      width: 100% !important;
+      min-width: 100%;
+      
+      .ant-table-wrapper {
+        width: 100% !important;
+      }
+      
+      .ant-table {
+        background: transparent;
+        font-size: 14px;
+        width: 100% !important;
+        min-width: 100%;
+        table-layout: fixed;
+
+        .ant-table-container {
+          width: 100% !important;
+        }
+
+        .ant-table-content {
+          width: 100% !important;
+        }
+
+        .ant-table-body {
+          width: 100% !important;
+        }
+
+        .ant-table-thead > tr > th {
+          background: #f1f5f9;
+          border-bottom: 1px solid #e2e8f0;
+          font-weight: 600;
+          color: #374151;
+          padding: 12px;
+          font-size: 13px;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+
+        .ant-table-tbody > tr > td {
+          border-bottom: 1px solid #f1f5f9;
+          padding: 12px;
+        }
+
+        .ant-table-tbody > tr:hover > td {
+          background: #f8fafc;
+        }
+      }
+    }
+  }
+}
+
+.batch-code-column {
+  min-width: 200px;
+  width: 50%;
+}
+
+.academic-year-column,
+.academic-term-column {
+  min-width: 150px;
+  width: 25%;
+  text-align: center;
+}
+
+.no-batch-terms {
+  padding: 24px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+
+  p {
+    margin: 0;
+  }
+}
+
 // Print Styles
 .logo {
   display: none;
@@ -319,6 +449,14 @@
   }
 
   ::ng-deep .ant-table-pagination {
+    display: none !important;
+  }
+
+  .expand-column {
+    display: none;
+  }
+
+  .expanded-content {
     display: none !important;
   }
 }

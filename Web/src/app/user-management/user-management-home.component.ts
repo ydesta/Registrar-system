@@ -70,6 +70,12 @@ export class UserManagementHomeComponent implements OnInit, OnDestroy {
       description: 'View and manage user credentials',
       route: '/user-management/credentials',
       icon: 'database'
+    },
+    {
+      title: 'Update from Excel',
+      description: 'Bulk update users (firstName, lastName, username) from Excel',
+      route: '/user-management/update-from-excel',
+      icon: 'file-excel'
     }
   ];
 

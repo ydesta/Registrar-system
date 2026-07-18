@@ -9,10 +9,17 @@
       <div class="header-actions">
         <div class="search-section">
           <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input type="text" nz-input placeholder="Search academic terms..." />
+            <input 
+              type="text" 
+              nz-input 
+              placeholder="Search academic terms..." 
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearchChange($event)"
+              (keyup.enter)="onSearch()"
+            />
           </nz-input-group>
           <ng-template #suffixIconButton>
-            <button nz-button nzType="primary" class="search-btn" nzSearch>
+            <button nz-button nzType="primary" class="search-btn" (click)="onSearch()">
               <i nz-icon nzType="search"></i>
             </button>
           </ng-template>
@@ -26,7 +33,13 @@
           <i nz-icon nzType="plus" nzTheme="outline"></i>
           <span>Add Academic Term</span>
         </button>
-        <button nz-button class="export-btn" (click)="exportAcademicTerm()">
+        <button 
+          nz-button 
+          class="export-btn" 
+          (click)="exportAcademicTerm()"
+          [nzLoading]="isExporting"
+          [disabled]="isExporting"
+        >
           <i nz-icon nzType="file-excel" nzTheme="outline"></i>
           <span>Export</span>
         </button>
@@ -49,81 +62,142 @@
   <div class="table-card">
     <div id="print-section">
       <img class="logo" src="../../assets/images/logo.png" />
-      <nz-table
-        #basicTable
-        [nzData]="academicTerms!"
-        nzBordered
-        [nzShowPagination]="false"
-        class="academic-terms-table"
-      >
+      <nz-spin [nzSpinning]="isLoading">
+        <nz-table
+          #basicTable
+          [nzData]="filteredAcademicTerms"
+          nzBordered
+          [nzShowPagination]="true"
+          [nzLoading]="isLoading"
+          [nzPageSize]="pageSize"
+          [nzPageIndex]="pageIndex"
+          [nzTotal]="total"
+          [nzPageSizeOptions]="pageSizeOptions"
+          [nzShowSizeChanger]="true"
+          [nzShowQuickJumper]="true"
+          (nzPageIndexChange)="pageIndex = $event"
+          (nzPageSizeChange)="pageSize = $event; pageIndex = 1"
+          [nzFrontPagination]="true"
+          class="academic-terms-table"
+        >
         <thead>
           <tr>
+            <th class="expand-column">Batch Terms</th>
             <th class="paginate">
               <label nz-checkbox [(ngModel)]="checked">All</label>
             </th>
-            <th>Academic Term Code</th>
+            <th>Term</th>
+            <th>Year</th>
             <th>Start Date</th>
             <th>End Date</th>
-            <th>Remark</th>
+            <th>Current Term</th>
             <th class="action-column">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr tabindex="0" *ngFor="let data of basicTable.data; let i = index">
-            <td class="paginate">
-              <label nz-checkbox [(ngModel)]="checked"></label>
-            </td>
-            <td>{{ data.academicTermCode }}</td>
-            <td>{{ data.startDate | date : "yyyy-MM-dd" }}</td>
-            <td>{{ data.endDate | date : "yyyy-MM-dd" }}</td>
-            <td>{{ data.remark }}</td>
-            <td class="action-column">
-              <button
-                nz-button
-                nz-dropdown
-                [nzDropdownMenu]="menu"
-                nzPlacement="bottomLeft"
-                class="action-button"
-              >
-                <i nz-icon nzType="more" nzTheme="outline"></i>
-              </button>
-              <nz-dropdown-menu #menu="nzDropdownMenu">
-                <ul nz-menu>
-                  <li>
-                    <button nz-button nzType="default" class="action-item detail">
-                      <i nz-icon nzType="eye" nzTheme="fill"></i>
-                      <span>Detail</span>
-                    </button>
-                  </li>
-                  <li>
-                    <a
-                      routerLink="../add-academic-term/{{ data.id }}"
-                      nz-button
-                      nzType="default"
-                      class="action-item edit"
-                    >
-                      <i nz-icon nzType="edit" nzTheme="fill"></i>
-                      <span>Edit</span>
-                    </a>
-                  </li>
-                  <li>
-                    <button
-                      nz-button
-                      nzDanger
-                      nzType="default"
-                      class="action-item delete"
-                      (click)="showDeleteConfirm(data.id)"
-                    >
-                      <i nz-icon nzType="delete" nzTheme="fill"></i>
-                      <span>Delete</span>
-                    </button>
-                  </li>
-                </ul>
-              </nz-dropdown-menu>
-            </td>
-          </tr>
+          <ng-container *ngFor="let data of basicTable.data; trackBy: trackById">
+            <tr class="main-row">
+              <td class="expand-column">
+                <span
+                  class="custom-expand-icon"
+                  [ngClass]="{ 'expanded': expandSet.has(data.id!) }"
+                  (click)="onExpandChange(data.id, !expandSet.has(data.id!))"
+                >
+                  <i
+                    nz-icon
+                    [nzType]="expandSet.has(data.id!) ? 'minus-square' : 'plus-square'"
+                    [style.color]="expandSet.has(data.id!) ? '#ef4444' : '#1890ff'"
+                  ></i>
+                </span>
+              </td>
+              <td class="paginate">
+                <label nz-checkbox [(ngModel)]="checked"></label>
+              </td>
+              <td>{{ getTermName(data.termId) }}</td>
+              <td>{{ data.year }}</td>
+              <td>{{ data.startDate | date : "yyyy-MM-dd" }}</td>
+              <td>{{ data.endDate | date : "yyyy-MM-dd" }}</td>
+              <td>
+                <nz-tag [nzColor]="data.isCurrentTerm ? 'green' : 'default'">
+                  {{ data.isCurrentTerm ? 'Yes' : 'No' }}
+                </nz-tag>
+              </td>
+              <td class="action-column">
+                <button
+                  nz-button
+                  nz-dropdown
+                  [nzDropdownMenu]="menu"
+                  nzPlacement="bottomLeft"
+                  class="action-button"
+                >
+                  <i nz-icon nzType="more" nzTheme="outline"></i>
+                </button>
+                <nz-dropdown-menu #menu="nzDropdownMenu">
+                  <ul nz-menu>
+                    <li>
+                      <button nz-button nzType="default" class="action-item detail">
+                        <i nz-icon nzType="eye" nzTheme="fill"></i>
+                        <span>Detail</span>
+                      </button>
+                    </li>
+                    <li>
+                      <a
+                        routerLink="../add-academic-term/{{ data.id }}"
+                        nz-button
+                        nzType="default"
+                        class="action-item edit"
+                      >
+                        <i nz-icon nzType="edit" nzTheme="fill"></i>
+                        <span>Edit</span>
+                      </a>
+                    </li>
+                    <li>
+                      <button
+                        nz-button
+                        nzDanger
+                        nzType="default"
+                        class="action-item delete"
+                        (click)="showDeleteConfirm(data.id)"
+                      >
+                        <i nz-icon nzType="delete" nzTheme="fill"></i>
+                        <span>Delete</span>
+                      </button>
+                    </li>
+                  </ul>
+                </nz-dropdown-menu>
+              </td>
+            </tr>
+            <tr [nzExpand]="expandSet.has(data.id!)" class="expanded-content">
+              <td colspan="8">
+                <div class="batch-terms-container">
+                  <div class="batch-terms-table" *ngIf="data.batchTerms && data.batchTerms.length > 0">
+                    <nz-table [nzData]="data.batchTerms" nzBordered class="nested-table">
+                      <thead>
+                        <tr>
+                          <th class="batch-code-column">Batch Code</th>
+                          <th class="academic-year-column">Academic Year</th>
+                          <th class="academic-term-column">Academic Term</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let batchTerm of data.batchTerms; trackBy: trackByBatchTermId">
+                          <td class="batch-code-column">{{ batchTerm.batchCode }}</td>
+                          <td class="academic-year-column">{{ getAcademicYearName(batchTerm.academicYear) }}</td>
+                          <td class="academic-term-column">{{ getAcademicTermName(batchTerm.academicTerm) }}</td>
+                        </tr>
+                      </tbody>
+                    </nz-table>
+                  </div>
+                  <div class="no-batch-terms" *ngIf="!data.batchTerms || data.batchTerms.length === 0">
+                    <p>No batch terms associated with this academic term.</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
         </tbody>
       </nz-table>
+      </nz-spin>
     </div>
   </div>
 </div>

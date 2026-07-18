@@ -97,8 +97,15 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                 var threadCount = Process.GetCurrentProcess().Threads.Count;
                 await systemHealthService.RecordSystemMetricsAsync("ActiveThreads", threadCount, "count", "Number of active threads");
 
-                // Record uptime
-                var uptime = (DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalHours;
+                // Record uptime (StartTime can throw on some platforms)
+                var uptime = 0.0;
+                try
+                {
+                    var startTime = Process.GetCurrentProcess().StartTime.ToUniversalTime();
+                    uptime = (DateTime.UtcNow - startTime).TotalHours;
+                    if (!double.IsFinite(uptime) || uptime < 0) uptime = 0;
+                }
+                catch { /* ignore */ }
                 await systemHealthService.RecordSystemMetricsAsync("Uptime", uptime, "hours", "Application uptime");
             }
             catch (Exception ex)
@@ -125,9 +132,11 @@ namespace SecureAuth.INFRASTRUCTURE.Services
 
                 var cpuUsedMs = (endCpu - startCpu).TotalMilliseconds;
                 var totalMsPassed = (endTime - startTime).TotalMilliseconds;
+                if (totalMsPassed <= 0 || Environment.ProcessorCount <= 0)
+                    return 0.0;
                 var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
-
-                return Math.Round(cpuUsageTotal * 100, 2);
+                var percent = Math.Round(cpuUsageTotal * 100, 2);
+                return double.IsFinite(percent) ? percent : 0.0;
             }
             catch
             {

@@ -58,4 +58,8 @@ export class InstructorSectionService {
   getStaffTeachingDataAsync(staffId: string,academicTerm: number, year: number, sectionType: number): Observable<StaffTeachingDataViewModel> {
     return this.http.get<StaffTeachingDataViewModel>(`${this.apiUrl}/${staffId}/${academicTerm}/${year}/${sectionType}`);
   }
+
+  getInstructorSectionAssignmentsByStaff(staffId: string, academicTerm: number, year: number, sectionType: number): Observable<ResponseDtos> {
+    return this.http.get<ResponseDtos>(`${this.apiUrl}/staff/${staffId}/${academicTerm}/${year}/${sectionType}/assignments`);
+  }
 }

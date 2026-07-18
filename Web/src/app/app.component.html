@@ -105,6 +105,9 @@
               <a routerLink="/students">View Students</a>
             </li>
             <li nz-menu-item>
+              <a routerLink="/students/import-student-grade">Import Student Grade</a>
+            </li>
+            <li nz-menu-item>
               <a routerLink="/course/course-exemption-list">Course Exemptions</a>
             </li>
             <!-- <li nz-menu-item>
@@ -137,6 +140,9 @@
               <a routerLink="/user-management/users">User Management</a>
             </li>
             <li nz-menu-item>
+              <a routerLink="/user-management/update-from-excel">Update from Excel</a>
+            </li>
+            <li nz-menu-item>
               <a routerLink="/user-management/roles">Role Management</a>
             </li>
             <!-- <li nz-menu-item>
@@ -165,25 +171,23 @@
 
           </ul>
         </li>
+        <li nz-submenu nzTitle="Course Management" nzIcon="book">
+          <ul>
+            <li nz-menu-item>
+              <a routerLink="/course">Courses</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/course/course-prerequisite">Course Prerequisites</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/course/course-equivalent">Course Equivalents</a>
+            </li>
+          </ul>
+        </li>
         <li nz-submenu nzTitle="Settings" nzIcon="setting">
           <ul>
-
             <li nz-menu-item>
               <a routerLink="/staffs">New Staff</a>
-            </li>
-            <li nz-submenu nzTitle="Course Management" nzIcon="book">
-              <ul>
-                <li nz-menu-item>
-                  <a routerLink="/course">Courses</a>
-                </li>
-                <li nz-menu-item>
-                  <a routerLink="/course/course-prerequisite">Course Prerequisites</a>
-                </li>
-                <li nz-menu-item>
-                  <a routerLink="/course/course-equivalent">Course Equivalents</a>
-                </li>
-
-              </ul>
             </li>
             <li nz-menu-item>
               <a routerLink="/colleges/academic-term">Academic Terms</a>
@@ -191,10 +195,8 @@
             <li nz-menu-item>
               <a routerLink="/graduation/quadrant">Quadrant</a>
             </li>
-
             <li nz-menu-item>
               <a routerLink="/colleges">Colleges</a>
-
             </li>
             <li nz-menu-item>
               <a routerLink="/colleges/academic-term-activity">Academic Term Activities</a>
@@ -202,7 +204,6 @@
             <li nz-menu-item>
               <a routerLink="/colleges/activity">Activities</a>
             </li>
-
           </ul>
         </li>
         <li nz-submenu nzTitle="Reports" nzIcon="form">
@@ -258,7 +259,12 @@
           <i nz-icon nzType="pic-left"></i>
           <span> <a routerLink="/staffs/staff-profile">Profile Summary</a></span>
         </li>
-        <li nz-submenu nzTitle="Student Grade" nzIcon="user">
+        <li nz-menu-item>
+          <i nz-icon nzType="sliders"></i>
+          <span> <a routerLink="/student-section/assigned-instructor-section">Attendance and Mark List </a></span>
+        </li>
+
+        <li nz-submenu nzTitle="Grade Submission" nzIcon="user">
 
           <ul>
             <!-- <li nz-menu-item>
@@ -273,11 +279,6 @@
         <li nz-menu-item>
           <i nz-icon nzType="sliders"></i>
           <span> <a routerLink="/students/grade-change-request">Grade Change Request</a></span>
-        </li>
-
-        <li nz-menu-item>
-          <i nz-icon nzType="sliders"></i>
-          <span> <a routerLink="/student-section/assigned-instructor-section">Assigned Section</a></span>
         </li>
 
       </div>
@@ -399,7 +400,7 @@
             </li>
 
             <li nz-menu-item>
-              <a routerLink="/students/course-add-request">Course Add and Drop</a>
+              <a routerLink="/students/course-add-request">View Course Request</a>
             </li>
             <li nz-menu-item>
               <a routerLink="/reports/registration-slip">Payment Slip</a>
@@ -469,6 +470,15 @@
         </li>
       </div>
       <div *ngIf="isUserSectionReportViewer">
+        <li nz-submenu nzTitle="Section Management" nzIcon="form">
+          <ul>
+            <li nz-menu-item>
+              <a routerLink="/student-section/section-assigned-students">View Generated Sections</a>
+            </li>
+          </ul>
+        </li>
+      </div>
+      <div *ngIf="isUserDepartmentHead">
         <li nz-submenu nzTitle="Section Management" nzIcon="form">
           <ul>
             <li nz-menu-item>

@@ -23,7 +23,7 @@ const routes: Routes = [
     path: 'section-assigned-students',
     component: SectionAssignedStudentsComponent,
     canActivate: [AuthGuardService],
-    data: { roles: ['Section Report Viewer', 'Administrator', 'Admin', 'Super Admin', 'Academic Director'] }
+    data: { roles: ['Section Report Viewer', 'Administrator', 'Admin', 'Super Admin', 'Academic Director', 'Department Head'] }
   },
   {
     path: 'reassigne-student-section',

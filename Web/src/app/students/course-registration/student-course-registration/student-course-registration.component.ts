@@ -29,6 +29,9 @@ import { PrintContentService } from 'src/app/services/print-content.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
+  /** Set to false to restore CGPA-based max credit hour validation. */
+  private readonly DISABLE_MAX_CREDIT_VALIDATION = true;
+
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
   private searchEquivalentSubject = new Subject<string>();
@@ -225,7 +228,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       regularCourses: regularCourses$,
       addableCourses: addableCourses$,
       assessmentCourses: assessmentCourses$,
-    //  equivalentCourses: equivalentCourses$
+      //  equivalentCourses: equivalentCourses$
     }).pipe(
       takeUntil(this.destroy$),
       finalize(() => {
@@ -260,6 +263,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
           this.havePreparedCourseOffering = false;
         } else {
           this.studentTermCourseReg = results.regularCourses;
+          this.applyTemporaryCreditValidationOverride();
           this.regId = this.studentTermCourseReg.id;
           this.batchCode = results.regularCourses.batchCode;
           this.havePreparedCourseOffering = true;
@@ -449,11 +453,11 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
 
   private handleAddCourseSelection(id: string, checked: boolean): void {
     if (checked) {
-      if (this.setOfCheckedAddCourses.size >= this.maxAddCoursesAllowed) {
-        this._customNotificationService.notification('warning', 'Warning',
-          `You can only select up to ${this.maxAddCoursesAllowed} additional courses.`);
-        return;
-      }
+      // if (this.setOfCheckedAddCourses.size >= this.maxAddCoursesAllowed) {
+      //   this._customNotificationService.notification('warning', 'Warning',
+      //     `You can only select up to ${this.maxAddCoursesAllowed} additional courses.`);
+      //   return;
+      // }
       const courseToAdd = this.filteredAddCourses.find(c => c.courseId === id);
       if (this.wouldExceedCreditLimit(courseToAdd)) {
         return;
@@ -557,11 +561,11 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     const isInAddedCourses = this.listOfAddedCourses?.some(
       addedCourse => addedCourse.courseId === course.courseId
     );
-    console.log("34567      ", course);
+    // console.log("34567      ", course);
     const isInCourseOfferings = this.studentTermCourseReg?.courseTermOfferings?.some(
       offeringCourse => offeringCourse.courseId === course.courseId
     );
-    console.log("&&   ##      ", isInCourseOfferings, isInAddedCourses);
+    // console.log("&&   ##      ", isInCourseOfferings, isInAddedCourses);
     // If course exists in either list, it should be unlock (not disabled)
     const existsInLists = isInAddedCourses || isInCourseOfferings;
 
@@ -708,6 +712,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       .getStudentCourseOfferingId(applicantUserId, term, id)
       .subscribe((res) => {
         this.studentTermCourseReg = res;
+        this.applyTemporaryCreditValidationOverride();
         this.batchCode = res.batchCode
       })
   }
@@ -863,6 +868,10 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   }
 
   getMaxAllowedCreditHours(): number {
+    if (this.DISABLE_MAX_CREDIT_VALIDATION) {
+      return this.getTotalAvailableRegularCourseCreditHours();
+    }
+
     // If ignoreGradeLevelValidation is true, return total credit hours of all available regular courses
     if (this.studentTermCourseReg?.ignoreGradeLevelValidation === true) {
       return this.getTotalAvailableRegularCourseCreditHours();
@@ -888,6 +897,12 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       return 14;
     } else {
       return 9;
+    }
+  }
+
+  private applyTemporaryCreditValidationOverride(): void {
+    if (this.DISABLE_MAX_CREDIT_VALIDATION && this.studentTermCourseReg) {
+      this.studentTermCourseReg.ignoreGradeLevelValidation = true;
     }
   }
 
@@ -1234,7 +1249,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
           }
           return course;
         })
-        .filter(course => course &&  course.courseStatus != 'Registered')
+        .filter(course => course && course.courseStatus !== 'Registered' && course.courseStatus !== 'Taken')
         .map(course => ({
           courseId: course.courseId,
           registrationStatus: RegistrationStatus.Regular,
@@ -1578,7 +1593,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     const sorted = [...data].sort((a, b) => {
       const titleA = (a.courseTitle || '').toLowerCase();
       const titleB = (b.courseTitle || '').toLowerCase();
-      
+
       if (sortOrder === 'asc') {
         return titleA.localeCompare(titleB);
       } else {

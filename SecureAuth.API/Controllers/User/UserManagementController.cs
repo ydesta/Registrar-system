@@ -510,7 +510,7 @@ namespace SecureAuth.API.Controllers.User
         }
 
         [HttpPost("UpdateRole/user-role")]
-        [Authorize(Roles = "Super Admin")] // Security fix: Re-enabled authorization
+        [Authorize(Roles = "Super Admin, Reviewer")]
         public async Task<IActionResult> UpdateRole([FromBody] UpdateUserRoleCommand command)
         {
             try
@@ -535,6 +535,33 @@ namespace SecureAuth.API.Controllers.User
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while updating user role", error = ex.Message });
+            }
+        }
+
+        [HttpPost("users/update-from-excel")]
+        [Authorize(Roles = "Super Admin")]
+        [RequestSizeLimit(10_485_760)] // 10 MB
+        public async Task<IActionResult> UpdateUsersFromExcel(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest(new { message = "No file uploaded." });
+                var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                if (ext != ".xlsx" && ext != ".xls")
+                    return BadRequest(new { message = "Only .xlsx or .xls files are allowed." });
+
+                using var memoryStream = new MemoryStream();
+                await file.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
+                var command = new BulkUpdateUsersFromExcelCommand { ExcelStream = memoryStream };
+                var result = await _mediator.SendAsync<BulkUpdateUsersFromExcelCommand, BulkUpdateUsersFromExcelResult>(command);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while updating users from Excel.", error = ex.Message });
             }
         }
 

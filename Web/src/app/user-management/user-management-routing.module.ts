@@ -8,6 +8,7 @@ import { UserActivityComponent } from './components/user-activity/user-activity.
 import { SuspiciousActivityComponent } from './components/suspicious-activity/suspicious-activity.component';
 import { UserDetailsComponent } from './components/user-details/user-details.component';
 import { UserCredentialsComponent } from './components/user-credentials/user-credentials.component';
+import { UpdateFromExcelComponent } from './components/update-from-excel/update-from-excel.component';
 import { AuthGuardService } from '../services/guards/auth-guard.service';
 
 const routes: Routes = [
@@ -58,6 +59,12 @@ const routes: Routes = [
     component: UserCredentialsComponent,
     canActivate: [AuthGuardService],
     data: { roles: ['Super Admin', 'Academic Director'] }
+  },
+  { 
+    path: 'update-from-excel', 
+    component: UpdateFromExcelComponent,
+    canActivate: [AuthGuardService],
+    data: { roles: ['Super Admin'] }
   }
 ];
 

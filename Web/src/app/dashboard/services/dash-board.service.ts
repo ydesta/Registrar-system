@@ -5,6 +5,9 @@ import { mergeMap, retryWhen, take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { KpiCard } from '../models/KpiCard';
 import { GPATrend } from '../models/GPATrend';
+import { CourseCompletion } from '../models/CourseCompletion';
+import { TopCourse } from '../models/TopCourse';
+import { StudentSummary } from '../models/StudentSummary';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +34,36 @@ export class DashBoardService {
     const endpointUrl = `${this.getDashBoardUrl()}/${applicantUserId}/getListOfGPATrend`;
     return this.httpClient
       .get<GPATrend[]>(endpointUrl)
+      .pipe(
+        map(result => result),
+        this.handleRetryLogic()
+      );
+  }
+
+  getCourseCompletion(applicantUserId: string): Observable<CourseCompletion[]> {
+    const endpointUrl = `${this.getDashBoardUrl()}/${applicantUserId}/getCourseCompletion`;
+    return this.httpClient
+      .get<CourseCompletion[]>(endpointUrl)
+      .pipe(
+        map(result => result),
+        this.handleRetryLogic()
+      );
+  }
+
+  getTopCourses(applicantUserId: string): Observable<TopCourse[]> {
+    const endpointUrl = `${this.getDashBoardUrl()}/${applicantUserId}/getTopCourses`;
+    return this.httpClient
+      .get<TopCourse[]>(endpointUrl)
+      .pipe(
+        map(result => result),
+        this.handleRetryLogic()
+      );
+  }
+
+  getStudentSummary(applicantUserId: string): Observable<StudentSummary> {
+    const endpointUrl = `${this.getDashBoardUrl()}/${applicantUserId}/getStudentSummary`;
+    return this.httpClient
+      .get<StudentSummary>(endpointUrl)
       .pipe(
         map(result => result),
         this.handleRetryLogic()

@@ -35,12 +35,12 @@ constructor(
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       gender: ['', Validators.required],
-      birthDate: [null, Validators.required],
+      birthDate: [null],
       mobile: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       employmentType: [null, Validators.required],
       title: ['', Validators.required],
-      nationality: ['', Validators.required]
+      nationality: ['']
   });
  }
 

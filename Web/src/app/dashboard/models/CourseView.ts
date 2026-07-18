@@ -5,5 +5,5 @@ export interface CourseView {
   term: string;
   grade?: number;
   prerequisites?: string[];
-  status?: 'Completed' | 'In Progress';
+  status?: 'Completed' | 'In Progress' | 'Not Registered';
 }

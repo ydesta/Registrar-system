@@ -1,11 +1,18 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { CourseView } from '../models/CourseView';
 import { AcademicEvent } from '../models/AcademicEvent';
 import { Deadline } from '../models/Deadline';
 import { KpiCard } from '../models/KpiCard';
 import { DashBoardService } from '../services/dash-board.service';
+import { StudentService } from 'src/app/students/services/student.service';
+import { BatchTermService } from 'src/app/colleges/services/batch-term.service';
+import { StudentViewModel } from 'src/app/students/models/student-view-model.model';
 import { GPATrend } from '../models/GPATrend';
+import { StaticData } from 'src/app/admission-request/model/StaticData';
+import { ACADEMIC_TERM_STATUS } from 'src/app/common/constant';
 import { curveLinear } from 'd3-shape';
+import { StudentSummary } from '../models/StudentSummary';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -30,81 +37,20 @@ export class StudentDashboardComponent implements OnInit {
     }
   ];
 
-  // Term Courses
-  termCourses: CourseView[] = [
-    {
-      code: 'CS101',
-      name: 'Intro to Programming',
-      credits: 3,
-      term: 'Summer 2023',
-      status: 'Completed'
-    },
-    {
-      code: 'MATH201',
-      name: 'Calculus II',
-      credits: 4,
-      term: 'Summer 2023',
-      status: 'In Progress'
-    },
-    {
-      code: 'PHY301',
-      name: 'Modern Physics',
-      credits: 3,
-      term: 'Spring 2024',
-      status: 'In Progress'
-    },
-    {
-      code: 'CS202',
-      name: 'Data Structures',
-      credits: 4,
-      term: 'Spring 2024',
-      status: 'Completed'
-    }
-  ];
+  // Term Courses - Now loaded from API
+  termCourses: CourseView[] = [];
+  isLoadingCourses: boolean = false;
 
   termChartData = [
     { name: 'Fall 2023', value: 7 },
     { name: 'Spring 2024', value: 7 }
   ];
 
-  // Top Grades
-  topCourses: CourseView[] = [
-    {
-      code: 'CS101',
-      name: 'Intro to Programming',
-      credits: 3,
-      grade: 4.0,
-      term: 'Fall 2023'
-    },
-    {
-      code: 'HIST101',
-      name: 'World History',
-      credits: 2,
-      grade: 3.9,
-      term: 'Fall 2023'
-    },
-    {
-      code: 'MATH201',
-      name: 'Calculus II',
-      credits: 4,
-      grade: 3.8,
-      term: 'Fall 2023'
-    },
-    {
-      code: 'ENG101',
-      name: 'English Composition',
-      credits: 3,
-      grade: 3.7,
-      term: 'Fall 2023'
-    },
-    {
-      code: 'CHEM101',
-      name: 'General Chemistry',
-      credits: 4,
-      grade: 3.6,
-      term: 'Fall 2023'
-    }
-  ];
+  // Top Grades - Now loaded from API
+  topCourses: CourseView[] = [];
+
+  // Student Summary
+  studentSummary: StudentSummary | null = null;
 
   // Next Term Courses
   nextTermCourses: CourseView[] = [
@@ -223,18 +169,50 @@ export class StudentDashboardComponent implements OnInit {
   ];
 
   applicantUserId: string | null = null;
+  studentCode: string | null = null;
+  nextAcademicTerm: any = null;
+  academicTermId: number = 0;
+  listOfTermNumber: StaticData[] = [];
 
-  constructor(private dashBoardService: DashBoardService) {
+  constructor(
+    private dashBoardService: DashBoardService,
+    private studentService: StudentService,
+    private batchTermService: BatchTermService,
+    private router: Router
+  ) {
     this.applicantUserId = localStorage.getItem('userId');
+    this.studentCode = localStorage.getItem('studentCode');
   }
 
   ngOnInit() {
+    // Initialize term status list
+    this.getListOfAcademicTermStatus();
+    
     // Add delay between API calls to avoid rate limiting
     this.getKpiCards();
     setTimeout(() => {
       this.getListOfGPATrend();
     }, 500);
-    this.updateCourseCompletionData();
+    setTimeout(() => {
+      this.getCourseCompletion();
+    }, 1000);
+    setTimeout(() => {
+      this.getTopCourses();
+    }, 1500);
+    setTimeout(() => {
+      this.getStudentSummary();
+    }, 2000);
+    
+    // Get next academic term from sessionStorage or API
+    const next = sessionStorage.getItem('nextAcademicTerm');
+    this.nextAcademicTerm = next ? JSON.parse(next) : null;
+
+    if (this.nextAcademicTerm) {
+      this.academicTermId = this.nextAcademicTerm.termId;
+      this.loadStudentCourseOfferings();
+    } else {
+      this.getNextAcademicTerm();
+    }
   }
   getKpiCards() {
     this.dashBoardService.getListOfKpiCards(this.applicantUserId)
@@ -265,10 +243,121 @@ export class StudentDashboardComponent implements OnInit {
         }
       });
   }
-  updateCourseCompletionData() {
-    this.courseCompletionData = [
-      { name: 'Completed', value: this.termCourses.filter(c => c.status === 'Completed').length },
-      { name: 'In Progress', value: this.termCourses.filter(c => c.status === 'In Progress').length }
-    ];
+  getNextAcademicTerm() {
+    this.batchTermService.getNextAcademicTerm().subscribe({
+      next: (res: any) => {
+        this.nextAcademicTerm = res;
+        this.academicTermId = res.termId;
+        sessionStorage.setItem('nextAcademicTerm', JSON.stringify(res));
+        this.loadStudentCourseOfferings();
+      },
+      error: (error) => {
+        console.error('Error loading academic term:', error);
+        this.isLoadingCourses = false;
+      }
+    });
+  }
+
+  loadStudentCourseOfferings() {
+    if (!this.applicantUserId || !this.nextAcademicTerm || !this.academicTermId) {
+      this.isLoadingCourses = false;
+      return;
+    }
+
+    this.isLoadingCourses = true;
+
+    // Use the same method as student-course-registration component
+    this.studentService.getStudentCourseOfferingId(
+      this.applicantUserId,
+      this.academicTermId,
+      this.nextAcademicTerm.id
+    ).subscribe({
+      next: (data: StudentViewModel) => {
+        if (data && data.courseTermOfferings) {
+          // Use calendar year from nextAcademicTerm if available, otherwise use academicTermYear
+          const displayYear = this.nextAcademicTerm?.year || data.academicTermYear;
+          this.termCourses = data.courseTermOfferings.map(course => ({
+            code: course.courseCode,
+            name: course.courseTitle,
+            credits: course.creditHours,
+            term: `${this.getTermName(data.academicTermSeason)} ${displayYear}`,
+            status: course.isRegistered ? 'In Progress' : 'Not Registered'
+          }));
+        }
+        this.isLoadingCourses = false;
+      },
+      error: (error) => {
+        console.error('Error loading student course offerings:', error);
+        this.isLoadingCourses = false;
+      }
+    });
+  }
+
+  getListOfAcademicTermStatus() {
+    let division: StaticData = new StaticData();
+    ACADEMIC_TERM_STATUS.forEach((pair) => {
+      division = {
+        Id: pair.Id,
+        Description: pair.Description,
+      };
+      this.listOfTermNumber.push(division);
+    });
+  }
+
+  getTermName(season: number): string {
+    const term = this.listOfTermNumber.find((item) => item.Id === season);
+    return term ? term.Description : 'Unknown';
+  }
+
+  getCourseCompletion() {
+    this.dashBoardService.getCourseCompletion(this.applicantUserId).subscribe({
+      next: (data) => {
+        if (data && data.length >= 2) {
+          this.courseCompletionData = data.map(item => ({
+            name: item.name,
+            value: item.value
+          }));
+        }
+      },
+      error: (error) => {
+        console.error('Error loading course completion:', error);
+      }
+    });
+  }
+
+  getTopCourses() {
+    this.dashBoardService.getTopCourses(this.applicantUserId).subscribe({
+      next: (data) => {
+        if (data && data.length > 0) {
+          this.topCourses = data.map(course => ({
+            code: course.code,
+            name: course.name,
+            credits: course.credits,
+            term: course.term,
+            grade: course.grade
+          }));
+        }
+      },
+      error: (error) => {
+        console.error('Error loading top courses:', error);
+      }
+    });
+  }
+
+  getStudentSummary() {
+    this.dashBoardService.getStudentSummary(this.applicantUserId).subscribe({
+      next: (data) => {
+        if (data) {
+          this.studentSummary = data;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading student summary:', error);
+      }
+    });
+  }
+
+  viewCourseOffering() {
+    this.router.navigate(['/colleges/term-course-offering']);
   }
 }

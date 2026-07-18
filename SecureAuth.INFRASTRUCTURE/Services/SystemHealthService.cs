@@ -80,6 +80,13 @@ namespace SecureAuth.INFRASTRUCTURE.Services
         {
             try
             {
+                // SQL Server float does not accept NaN or Infinity - use 0 for invalid values
+                if (!double.IsFinite(value))
+                {
+                    _logger.LogWarning("Invalid metric value for {MetricType}: {Value}. Using 0.", metricType, value);
+                    value = 0;
+                }
+
                 // Round value appropriately to avoid SQL Server float precision issues
                 // For counts (threads, etc.), round to integer; for percentages and measurements, round to 2 decimal places
                 float roundedValue;
@@ -94,6 +101,10 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                     // Round to 2 decimal places for other metrics (CPU, Memory, Uptime, etc.)
                     roundedValue = (float)Math.Round(value, 2);
                 }
+
+                // Ensure rounded value is still valid (e.g. after casting)
+                if (float.IsNaN(roundedValue) || float.IsInfinity(roundedValue))
+                    roundedValue = 0;
 
                 var systemMetric = new SystemMetrics
                 {

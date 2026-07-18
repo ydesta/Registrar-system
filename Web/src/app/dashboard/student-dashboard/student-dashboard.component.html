@@ -54,8 +54,9 @@
     </nz-col>
   </nz-row>
   <div class="section-card">
-    <h3 class="chart-title">Upcoming Course Offering</h3>
-    <nz-table #termTable [nzData]="termCourses" nzSize="middle" class="styled-table">
+    <h3 class="chart-title">Student Course Offering</h3>
+    <nz-spin [nzSpinning]="isLoadingCourses">
+      <nz-table #termTable [nzData]="termCourses" nzSize="middle" class="styled-table" [nzShowPagination]="false">
       <thead>
         <tr>
           <th nzAlign="center">Code</th>
@@ -74,11 +75,14 @@
           </td>
           <td nzAlign="center">{{ course.term }}</td>
           <td nzAlign="center">
-            <nz-badge [nzStatus]="course.status === 'Completed' ? 'success' : 'processing'"></nz-badge>
+            <nz-badge *ngIf="course.status === 'Completed'" nzStatus="success"></nz-badge>
+            <nz-badge *ngIf="course.status === 'In Progress'" nzStatus="processing"></nz-badge>
+            <nz-tag *ngIf="course.status === 'Not Registered'" nzColor="default">Not Registered</nz-tag>
           </td>
         </tr>
       </tbody>
     </nz-table>
+    </nz-spin>
   </div>
   <nz-row [nzGutter]="24" class="chart-row">
     <nz-col nzXs="24" nzLg="12">
@@ -186,22 +190,126 @@
     </nz-col>
 
     <nz-col nzXs="24" nzLg="12">
-      <div class="section-card">
-        <h3 class="section-title">Upcoming Courses</h3>
-        <nz-timeline class="course-timeline">
-          <nz-timeline-item *ngFor="let course of nextTermCourses">
-            <div class="timeline-content">
-              <h4>{{ course.name }}</h4>
-              <div class="course-meta">
-                <nz-tag class="credit-tag">{{ course.credits }} Credits</nz-tag>
-                <div class="prerequisites">
-                  <span>Requires:</span>
-                  <nz-tag *ngFor="let pre of course.prerequisites" class="prereq-tag">{{ pre }}</nz-tag>
-                </div>
-              </div>
-            </div>
-          </nz-timeline-item>
-        </nz-timeline>
+      <div class="section-card highlight-card">
+        <h3 class="section-title">Student Summary</h3>
+        <div *ngIf="studentSummary">
+          <nz-list nzItemLayout="vertical">
+            <nz-list-item>
+              <nz-list-item-meta>
+                <nz-list-item-meta-title>
+                  <div class="summary-header">
+                    <div class="summary-icon">
+                      <i nz-icon nzType="user" nzTheme="outline"></i>
+                    </div>
+                    <div class="summary-info">
+                      <h4>Full Name</h4>
+                      <p class="summary-label">{{ studentSummary.fullName }}</p>
+                    </div>
+                  </div>
+                </nz-list-item-meta-title>
+              </nz-list-item-meta>
+            </nz-list-item>
+            <hr class="summary-divider">
+            <nz-list-item>
+              <nz-list-item-meta>
+                <nz-list-item-meta-title>
+                  <div class="summary-header">
+                    <div class="summary-icon">
+                      <i nz-icon nzType="idcard" nzTheme="outline"></i>
+                    </div>
+                    <div class="summary-info">
+                      <h4>Student ID</h4>
+                      <p class="summary-label">{{ studentSummary.studentId }}</p>
+                    </div>
+                  </div>
+                </nz-list-item-meta-title>
+              </nz-list-item-meta>
+            </nz-list-item>
+            <hr class="summary-divider">
+            <nz-list-item>
+              <nz-list-item-meta>
+                <nz-list-item-meta-title>
+                  <div class="summary-header">
+                    <div class="summary-icon">
+                      <i nz-icon nzType="book" nzTheme="outline"></i>
+                    </div>
+                    <div class="summary-info">
+                      <h4>Program</h4>
+                      <p class="summary-label">{{ studentSummary.program }}</p>
+                    </div>
+                  </div>
+                </nz-list-item-meta-title>
+              </nz-list-item-meta>
+            </nz-list-item>
+            <hr class="summary-divider">
+            <nz-list-item>
+              <nz-list-item-meta>
+                <nz-list-item-meta-title>
+                  <div class="summary-header">
+                    <div class="summary-icon">
+                      <i nz-icon nzType="team" nzTheme="outline"></i>
+                    </div>
+                    <div class="summary-info">
+                      <h4>Batch</h4>
+                      <p class="summary-label">{{ studentSummary.batch }}</p>
+                    </div>
+                  </div>
+                </nz-list-item-meta-title>
+              </nz-list-item-meta>
+            </nz-list-item>
+            <hr class="summary-divider">
+            <nz-list-item>
+              <nz-list-item-meta>
+                <nz-list-item-meta-title>
+                  <div class="summary-header">
+                    <div class="summary-icon">
+                      <i nz-icon nzType="trophy" nzTheme="outline"></i>
+                    </div>
+                    <div class="summary-info">
+                      <h4>CGPA</h4>
+                      <p class="summary-label cgpa-value">{{ studentSummary.cgpa | number:'1.2-2' }}</p>
+                    </div>
+                  </div>
+                </nz-list-item-meta-title>
+              </nz-list-item-meta>
+            </nz-list-item>
+            <hr class="summary-divider">
+            <nz-list-item>
+              <nz-list-item-meta>
+                <nz-list-item-meta-title>
+                  <div class="summary-header">
+                    <div class="summary-icon">
+                      <i nz-icon nzType="check-circle" nzTheme="outline"></i>
+                    </div>
+                    <div class="summary-info">
+                      <h4>Credits Completed</h4>
+                      <p class="summary-label">{{ studentSummary.totalCreditsCompleted }}</p>
+                    </div>
+                  </div>
+                </nz-list-item-meta-title>
+              </nz-list-item-meta>
+            </nz-list-item>
+            <hr class="summary-divider">
+            <nz-list-item>
+              <nz-list-item-meta>
+                <nz-list-item-meta-title>
+                  <div class="summary-header">
+                    <div class="summary-icon">
+                      <i nz-icon nzType="calendar" nzTheme="outline"></i>
+                    </div>
+                    <div class="summary-info">
+                      <h4>Academic Year</h4>
+                      <p class="summary-label">{{ studentSummary.academicYear }}</p>
+                    </div>
+                  </div>
+                </nz-list-item-meta-title>
+              </nz-list-item-meta>
+            </nz-list-item>
+          </nz-list>
+        </div>
+        <div *ngIf="!studentSummary" class="loading-placeholder">
+          <nz-spin [nzSpinning]="true"></nz-spin>
+        </div>
       </div>
     </nz-col>
   </nz-row>

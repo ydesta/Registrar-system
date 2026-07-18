@@ -203,7 +203,7 @@
                       <i nz-icon [nzType]="getSortIcon('add')" class="ml-2" [style.color]="addCoursesSortOrder ? '#1890ff' : '#bfbfbf'"></i>
                     </div>
                   </th>
-                  <th class="th-row">Status</th>
+                  <!-- <th class="th-row">Status</th> -->
                   <!-- <th class="th-row">Grade</th> -->
                   <th class="th-row">Credit Hour</th>
                   <th class="th-row">Total Amount</th>
@@ -238,7 +238,7 @@
                      <td class="batch-code-cell table-data-font" title="{{data.batchCode}}">{{data.batchCode}}</td>
                      <td class="table-data-font">{{data.courseCode}}</td>
                      <td class="course-title-cell table-data-font" title="{{ data.courseTitle }}">{{ data.courseTitle }}</td>
-                     <td class="table-data-font">{{ data.courseStatus }}</td>
+                     <!-- <td class="table-data-font">{{ data.courseStatus }}</td> -->
                     <!-- <td class="table-data-font">{{ data.currentGrade }}</td> -->
                     <td class="text-center table-data-font">{{ data.creditHours }}</td>
                     <td class="text-center table-data-font">{{ data.totalAmount }}</td>
@@ -247,7 +247,7 @@
               </tbody>
               <tfoot class="footer-row">
                 <tr>
-                  <td colspan="5" class="text-bold">Total</td>
+                  <td colspan="4" class="text-bold">Total</td>
                   <td class="text-bold">{{ getTotalAddedCreditHours() }}</td>
                   <td class="text-bold">{{ getTotalAddedAmount() | number:'1.2-2' }}</td>
                 </tr>

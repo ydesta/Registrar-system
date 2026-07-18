@@ -25,7 +25,6 @@ namespace SecureAuth.APPLICATION.Commands.User
 
         public async Task<Result> HandleAsync(UpdateUserRoleCommand command)
         {
-            // Security fix: Get current user and validate Super Admin permission
             var currentUserId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(currentUserId))
             {
@@ -39,9 +38,15 @@ namespace SecureAuth.APPLICATION.Commands.User
             }
 
             var isSuperAdmin = await _userManager.IsInRoleAsync(currentUser, "Super Admin");
-            if (!isSuperAdmin)
+            var isReviewer = await _userManager.IsInRoleAsync(currentUser, "Reviewer");
+            if (!isSuperAdmin && !isReviewer)
             {
-                return Result.Failure("Only Super Admins can modify user roles.");
+                return Result.Failure("Only Reviewer or Super Admin role can modify user roles.");
+            }
+
+            if (isReviewer && !isSuperAdmin && !string.Equals(command.Role, "ApprovedApplicant", StringComparison.OrdinalIgnoreCase))
+            {
+                return Result.Failure("Reviewers can only assign the ApprovedApplicant role.");
             }
 
             // Security fix: Prevent self-promotion to Admin roles

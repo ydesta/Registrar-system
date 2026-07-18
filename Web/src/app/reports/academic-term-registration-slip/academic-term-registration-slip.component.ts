@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { StaticData } from 'src/app/admission-request/model/StaticData';
 import { TermCourseOfferingService } from 'src/app/colleges/services/term-course-offering.service';
@@ -56,14 +56,99 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
       }
     });
 
+    // Subscribe to date changes to update validators dynamically
+    this.startDate.valueChanges.subscribe(() => {
+      this.updateValidators();
+      // Trigger date range validation when start date changes
+      this.endDate?.updateValueAndValidity({ emitEvent: false });
+    });
+
+    this.endDate.valueChanges.subscribe(() => {
+      this.updateValidators();
+      // Trigger date range validation when end date changes
+      this.startDate?.updateValueAndValidity({ emitEvent: false });
+    });
   }
+
+  /**
+   * Updates form validators based on date range selection
+   * If both startDate and endDate are selected: termId, termYear, batchCode are optional
+   * If date range is empty: termId, termYear, batchCode are required
+   */
+  private updateValidators(): void {
+    const hasDateRange = this.startDate?.value && this.endDate?.value;
+    
+    if (hasDateRange) {
+      // If date range is selected, make termId, termYear, batchCode optional
+      this.termId?.setValidators([]);
+      this.termYear?.setValidators([]);
+      this.batchCode?.setValidators([]);
+    } else {
+      // If date range is empty, make termId, termYear, batchCode required
+      this.termId?.setValidators([Validators.required]);
+      this.termYear?.setValidators([Validators.required]);
+      this.batchCode?.setValidators([Validators.required]);
+    }
+    
+    // Update validity
+    this.termId?.updateValueAndValidity({ emitEvent: false });
+    this.termYear?.updateValueAndValidity({ emitEvent: false });
+    this.batchCode?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  /**
+   * Checks if form is valid based on conditional validation rules
+   */
+  get isFormValid(): boolean {
+    const formModel = this.formCourseOffered.getRawValue();
+    const hasDateRange = formModel.startDate && formModel.endDate;
+    const dateRangeError = this.endDate?.errors?.['dateRangeInvalid'];
+    if (dateRangeError) {
+      return false;
+    }
+    
+    if (hasDateRange) {
+      return !dateRangeError;
+    } else {
+      return !!(formModel.termId && formModel.termYear && formModel.batchCode);
+    }
+  }
+
+  /**
+   * Custom validator to check that end date is not less than start date
+   */
+  private endDateValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) {
+      return null; // Don't validate if end date is empty
+    }
+
+    const startDate = this.startDate?.value;
+    if (!startDate) {
+      return null; // Don't validate if start date is empty
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(control.value);
+    
+    // Reset time to compare only dates
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+
+    if (start > end) {
+      return { dateRangeInvalid: true };
+    }
+
+    return null;
+  }
+
   private createCourseOffering() {
+    // Initially, termId, termYear, batchCode are required (since dates are null)
     this.formCourseOffered = this._fb.group({
       termId: [null, [Validators.required]],
       termYear: [null, [Validators.required]],
       batchCode: [null, [Validators.required]],
       startDate: [null],
-      endDate: [null],
+      endDate: [null, [this.endDateValidator.bind(this)]],
       studentId: [null, []],
     });
   }
@@ -121,13 +206,19 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
 
   private loadData(): void {
     const formModel = this.formCourseOffered.getRawValue();
-    if (formModel.termId && formModel.termYear && formModel.batchCode) {
+    const hasDateRange = formModel.startDate && formModel.endDate;
+    const hasRequiredFields = formModel.termId && formModel.termYear && formModel.batchCode;
+    
+    // Validate based on conditional rules
+    if (hasDateRange || hasRequiredFields) {
       this.tbLoading = true;
       this.hasSearched = true;
       const startDate = formModel.startDate ? this.formatDate(formModel.startDate) : '';
       const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
       const studentId = formModel.studentId ? formModel.studentId : null;
-      this._studentService.getListOfTermRegisteredCourseList(formModel.batchCode, startDate, endDate, studentId)
+      const batchCode = formModel.batchCode || null;
+      
+      this._studentService.getListOfTermRegisteredCourseList(batchCode, startDate, endDate, studentId)
         .subscribe({
           next: (res) => {
             this.listOdRegisteredStudent = res;
@@ -148,6 +239,8 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
     this.totalRecord = 0;
     this.hasSearched = false;
     this.isFormCollapsed = false;
+    // Reset validators to initial state (required for termId, termYear, batchCode)
+    this.updateValidators();
   }
 
   getYearRange(currentYear: number): number[] {
@@ -214,30 +307,34 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
   }
   generatePdf(): void {
     const formModel = this.formCourseOffered.getRawValue();
-    //if (formModel.termId && formModel.termYear && formModel.batchCode) {
-    this.tbLoading = true;
-    this.hasSearched = true;
-    const startDate = formModel.startDate ? this.formatDate(formModel.startDate) : '';
-    const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
-    const studentId = formModel.studentId ? formModel.studentId : null;
-    this._studentService.getListOfTermRegisteredCourseList(formModel.batchCode, startDate, endDate, studentId)
-      .subscribe({
-        next: (res) => {
-          this.listOdRegisteredStudent = res;
+    const hasDateRange = formModel.startDate && formModel.endDate;
+    const hasRequiredFields = formModel.termId && formModel.termYear && formModel.batchCode;
+    
+    // Validate based on conditional rules
+    if (hasDateRange || hasRequiredFields) {
+      this.tbLoading = true;
+      this.hasSearched = true;
+      const startDate = formModel.startDate ? this.formatDate(formModel.startDate) : '';
+      const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
+      const studentId = formModel.studentId ? formModel.studentId : null;
+      const batchCode = formModel.batchCode || null;
+      
+      this._studentService.getListOfTermRegisteredCourseList(batchCode, startDate, endDate, studentId)
+        .subscribe({
+          next: (res) => {
+            this.listOdRegisteredStudent = res;
 
-          this.totalRecord = res.length;
-          this.tbLoading = false;
-          this.isFormCollapsed = true;
-          this._pdfExportService.generateRegistrationSlipsPdf(res);
-        },
-        error: (error) => {
-          console.error('Error generating PDF:', error);
-          this.tbLoading = false;
-        }
-      });
-    // } else {
-    //   console.error('Please select all required fields before generating PDF.');
-    // }
+            this.totalRecord = res.length;
+            this.tbLoading = false;
+            this.isFormCollapsed = true;
+            this._pdfExportService.generateRegistrationSlipsPdf(res);
+          },
+          error: (error) => {
+            console.error('Error generating PDF:', error);
+            this.tbLoading = false;
+          }
+        });
+    }
   }
   private formatDate(date: Date): string {
     const year = date.getFullYear();

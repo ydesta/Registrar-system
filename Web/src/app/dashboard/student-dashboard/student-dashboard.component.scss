@@ -220,6 +220,21 @@
     }
   }
   
+  .bottom-row {
+    display: flex;
+    align-items: stretch;
+    
+    nz-col {
+      display: flex;
+      
+      .section-card {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+    }
+  }
+
   .section-card {
     background: white;
     border-radius: 20px;
@@ -248,6 +263,13 @@
     &.highlight-card {
       border-left: 4px solid #1890ff;
       background: linear-gradient(to right, rgba(24,144,255,0.05), white);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      
+      nz-list {
+        flex: 1;
+      }
     }
     
     .section-title {
@@ -646,4 +668,76 @@
       transform: rotate(-30deg);
       text-anchor: end;
     }
+  }
+
+  .summary-header {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    
+    .summary-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1890ff, #096dd9);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+      
+      i {
+        font-size: 1.1rem;
+      }
+    }
+    
+    .summary-info {
+      flex: 1;
+      
+      h4 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #1a1a1a;
+        font-weight: 600;
+        letter-spacing: -0.3px;
+      }
+      
+      .summary-label {
+        color: #666;
+        font-size: 1rem;
+        margin-top: 0.3rem;
+        margin-bottom: 0;
+        
+        &.cgpa-value {
+          color: #52c41a;
+          font-weight: 700;
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
+
+  ::ng-deep {
+    .bottom-row {
+      .ant-list-item {
+        padding: 1rem 0;
+        min-height: 60px;
+      }
+    }
+  }
+
+  .loading-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+  }
+
+  .summary-divider {
+    border: none;
+    height: 2px;
+    background: linear-gradient(90deg, #52c41a, #73d13d);
+    margin: 1rem 0;
+    border-radius: 2px;
+    opacity: 0.6;
   }

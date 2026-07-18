@@ -113,6 +113,32 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
     }
     this.createCourseOffering();
     this.yearList = this.getYearRange(this.currentYear.getFullYear());
+    
+    // Update registration dates after form creation if AcademicTerm data becomes available
+    if (this.termCourseOfferingForm && this.nextAcademicTerm) {
+      const currentStartDate = this.RegistrationStartDate?.value;
+      const currentEndDate = this.RegistrationEndDate?.value;
+      
+      // Update dates from AcademicTerm if form dates are null
+      if (!currentStartDate && this.nextAcademicTerm.startDate) {
+        this.RegistrationStartDate?.patchValue(new Date(this.nextAcademicTerm.startDate));
+      } else if (!currentStartDate) {
+        // If AcademicTerm startDate is also null, use current date
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        this.RegistrationStartDate?.patchValue(today);
+      }
+      
+      if (!currentEndDate && this.nextAcademicTerm.endDate) {
+        this.RegistrationEndDate?.patchValue(new Date(this.nextAcademicTerm.endDate));
+      } else if (!currentEndDate) {
+        // If AcademicTerm endDate is also null, use start date + 10 days
+        const startDate = this.RegistrationStartDate?.value || new Date();
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 10);
+        this.RegistrationEndDate?.patchValue(endDate);
+      }
+    }
   }
 
   ngOnInit(): void {
@@ -226,6 +252,33 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       this.academicTermId = res.id;
       this.nextTermYear = res.year;
       this.nextTerm = this.getAcademicTermStatusDescription(res.termId);
+      
+      // Update registration dates if form exists and dates are null
+      if (this.termCourseOfferingForm) {
+        const currentStartDate = this.RegistrationStartDate?.value;
+        const currentEndDate = this.RegistrationEndDate?.value;
+        
+        // Only update if dates are null and we have AcademicTerm dates
+        if (!currentStartDate && res.startDate) {
+          this.RegistrationStartDate?.patchValue(new Date(res.startDate));
+        }
+        if (!currentEndDate && res.endDate) {
+          this.RegistrationEndDate?.patchValue(new Date(res.endDate));
+        }
+        
+        // If AcademicTerm dates are null, set defaults (current date and +10 days)
+        if (!res.startDate && !currentStartDate) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          this.RegistrationStartDate?.patchValue(today);
+        }
+        if (!res.endDate && !currentEndDate) {
+          const startDate = this.RegistrationStartDate?.value || new Date();
+          const endDate = new Date(startDate);
+          endDate.setDate(endDate.getDate() + 10);
+          this.RegistrationEndDate?.patchValue(endDate);
+        }
+      }
     });
   }
   
@@ -325,7 +378,31 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
     }
   }
 
+  private getDefaultRegistrationDates(): { startDate: Date | null, endDate: Date | null } {
+    // First, try to get dates from nextAcademicTerm
+    if (this.nextAcademicTerm?.startDate && this.nextAcademicTerm?.endDate) {
+      return {
+        startDate: new Date(this.nextAcademicTerm.startDate),
+        endDate: new Date(this.nextAcademicTerm.endDate)
+      };
+    }
+    
+    // If nextAcademicTerm dates are null, use current date for start and current date + 10 days for end
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    
+    const endDate = new Date(today);
+    endDate.setDate(endDate.getDate() + 10); // Add 10 days
+    
+    return {
+      startDate: today,
+      endDate: endDate
+    };
+  }
+
   private createCourseOffering() {
+    const defaultDates = this.getDefaultRegistrationDates();
+    
     this.termCourseOfferingForm = this._fb.group({
       createdBy: ["-"],
       lastModifiedBy: ["-"],
@@ -340,8 +417,8 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       Year: [this.currentYear.getFullYear(), []],
       curriculumCode: ["", []],
       remark: [""],
-      RegistrationStartDate: [this.nextAcademicTerm?.startDate, [Validators.required]],
-      RegistrationEndDate: [this.nextAcademicTerm?.endDate, [Validators.required]]
+      RegistrationStartDate: [defaultDates.startDate, [Validators.required]],
+      RegistrationEndDate: [defaultDates.endDate, [Validators.required]]
     },
       {
         Validators: this.dateRangeValidator('RegistrationStartDate', 'RegistrationEndDate')
@@ -422,8 +499,6 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       return true; // Default to disabled if there's an error
     }
   }
-
-
 
 
 

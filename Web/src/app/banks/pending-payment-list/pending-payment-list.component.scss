@@ -355,6 +355,20 @@
   will-change: transform;
   contain: layout style paint;
 
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #bfbfbf;
+      border-radius: 3px;
+    }
+  }
+
   .empty-state {
     text-align: center;
     padding: 80px 24px;
@@ -569,6 +583,13 @@
       padding: 16px;
       margin-top: 16px;
 
+      .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -16px;
+        padding: 0 16px;
+      }
+
       .empty-state {
         padding: 60px 16px;
 
@@ -595,6 +616,10 @@
   }
 
   ::ng-deep {
+    .ant-table-wrapper {
+      min-width: 700px;
+    }
+
     .ant-table {
       .ant-table-thead > tr > th {
         padding: 12px 8px;
@@ -674,6 +699,11 @@
     .table-section {
       padding: 12px;
 
+      .table-responsive {
+        margin: 0 -12px;
+        padding: 0 12px;
+      }
+
       .empty-state {
         padding: 40px 12px;
 
@@ -706,6 +736,10 @@
   }
 
   ::ng-deep {
+    .ant-table-wrapper {
+      min-width: 600px;
+    }
+
     .ant-table {
       .ant-table-thead > tr > th {
         padding: 8px 4px;

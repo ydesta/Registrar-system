@@ -339,6 +339,7 @@ namespace SecureAuth.INFRASTRUCTURE.DependencyInjection
             services.AddScoped<ICommandHandler<DeleteUserCommand, bool>, DeleteUserCommandHandler>();
             services.AddScoped<ICommandHandler<UpdateUserStatusCommand, bool>, UpdateUserStatusCommandHandler>();
             services.AddScoped<ICommandHandler<UpdateUserRoleCommand, Result>, UpdateUserRoleCommandHandler>();
+            services.AddScoped<ICommandHandler<BulkUpdateUsersFromExcelCommand, BulkUpdateUsersFromExcelResult>, BulkUpdateUsersFromExcelCommandHandler>();
 
             // Register Command Handlers (Security)
             services.AddScoped<ICommandHandler<BlockUserCommand, BlockUserResultModel>, BlockUserCommandHandler>();
