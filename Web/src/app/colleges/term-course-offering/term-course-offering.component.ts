@@ -64,10 +64,14 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
     });
     
     // Generate year options (current year ± 10 years)
-    const currentYear = new Date().getFullYear();
-    for (let i = currentYear - 10; i <= currentYear + 5; i++) {
+/*     const currentYear = new Date().getFullYear();
+    for (let i = currentYear - 20; i <= currentYear + 50; i++) {
       this.yearOptions.push(i);
-    }
+    } */
+    for (let year = 1990; year <= 2100; year++) {
+    this.yearOptions.push(year);
+  }
+
   }
 
   ngOnInit(): void {
