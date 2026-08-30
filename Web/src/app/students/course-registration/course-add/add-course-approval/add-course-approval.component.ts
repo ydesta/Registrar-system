@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CourseViewModel } from 'src/app/students/models/course-break-down-offering.model';
 import { StudentService } from 'src/app/students/services/student.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { StaticData } from 'src/app/admission-request/model/StaticData';
 import { REGISTARAR_APPROVAL_STATUS } from 'src/app/common/constant';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 
 export class StudentAddedViewModel {
   public studentId: string;
@@ -25,7 +26,7 @@ export class CourseTaken {
   templateUrl: './add-course-approval.component.html',
   styleUrls: ['./add-course-approval.component.scss']
 })
-export class AddCourseApprovalComponent implements OnInit {
+export class AddCourseApprovalComponent implements OnInit, OnDestroy {
   listOfAddedCourses: CourseViewModel[] = [];
   listOfStudents: StudentAddedViewModel[] = [];
   formAddedCourses: FormGroup;
@@ -36,6 +37,7 @@ export class AddCourseApprovalComponent implements OnInit {
   indeterminate = false;
   listOfCurrentPageData: readonly any[] = [];
   approvalStatusList: StaticData[] = [];
+  pager: ServerPaginator;
 
   get approvedCount(): number {
     return this.setOfCheckedId.size;
@@ -48,14 +50,21 @@ export class AddCourseApprovalComponent implements OnInit {
   constructor(
     private courseApprovalService: StudentService,
     private _fb: FormBuilder,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private paginator: PaginatorService
   ) {
+    this.pager = this.paginator.create();
     this.createForms();
   }
 
   ngOnInit(): void {
     this.getListOfAddedCourses();
     this.getListOfApprovalStatus();
+    this.pager.init(() => this.getListOfStudentCourseAdded());
+  }
+
+  ngOnDestroy(): void {
+    this.pager.destroy();
   }
 
   createForms() {
@@ -95,48 +104,53 @@ export class AddCourseApprovalComponent implements OnInit {
       this.message.warning('Please select a course');
       return;
     }
-    const approvalStatus = this.approvalStatus.value;
-    this.getListOfStudentCourseAdded(this.courseId.value, approvalStatus);
+    this.pager.pageIndex = 1;
+    this.setOfCheckedId.clear();
+    this.getListOfStudentCourseAdded();
   }
 
-  getListOfStudentCourseAdded(courseId?: string, approvalStatus?: number | string | null) {
+  getListOfStudentCourseAdded() {
+    const courseId = this.courseId.value;
     if (!courseId) {
       return;
     }
+    const approvalStatus = this.approvalStatus.value;
+    this.pager.loading = true;
     this.loading = true;
-    this.courseApprovalService.getListOfStudentCourseAdded(courseId, approvalStatus)
-      .subscribe({
-        next: (data: any[]) => {
-          this.listOfStudents = data.map(item => ({
-            studentId: item.studentId,
-            courseId: item.courseId,
-            studentCourseOfferingId: item.studentCourseOfferingId,
-            courseTakenId: item.courseTakenId,
-            fullName: item.fullName,
-            batchCode: item.batchCode
-          }));
-          
-          // Clear previous selections
-          this.setOfCheckedId.clear();
-          
-          // If filtering by "Approved" (status 3), auto-check all returned students
-          if (approvalStatus === 3 || approvalStatus === '3') {
-            this.listOfStudents.forEach(student => {
-              if (student.courseTakenId) {
-                this.setOfCheckedId.add(student.courseTakenId);
-              }
-            });
-          }
-          
-          this.refreshCheckedStatus();
-          this.loading = false;
-        },
-        error: (error) => {
-          console.error('Error fetching student courses:', error);
-          this.loading = false;
-          this.message.error('Failed to fetch student courses');
+    this.courseApprovalService.getListOfStudentCourseAddedPaginated(
+      courseId,
+      this.pager.query({
+        approvalStatus: approvalStatus === null || approvalStatus === undefined || approvalStatus === '' ? null : approvalStatus
+      })
+    ).subscribe({
+      next: (res: any) => {
+        this.listOfStudents = (res.data || []).map((item: any) => ({
+          studentId: item.studentId || item.sudentId,
+          courseId: item.courseId,
+          studentCourseOfferingId: item.studentCourseOfferingId,
+          courseTakenId: item.courseTakenId != null ? String(item.courseTakenId) : '',
+          fullName: item.fullName,
+          batchCode: item.batchCode
+        }));
+        this.pager.applyResult(res);
+        this.setOfCheckedId.clear();
+        if (approvalStatus === 3 || approvalStatus === '3') {
+          this.listOfStudents.forEach(student => {
+            if (student.courseTakenId) {
+              this.setOfCheckedId.add(student.courseTakenId);
+            }
+          });
         }
-      });
+        this.refreshCheckedStatus();
+        this.loading = false;
+      },
+      error: () => {
+        this.listOfStudents = [];
+        this.pager.fail();
+        this.loading = false;
+        this.message.error('Failed to fetch student courses');
+      }
+    });
   }
 
   getListOfAddedCourses() {
@@ -208,7 +222,7 @@ export class AddCourseApprovalComponent implements OnInit {
             this.indeterminate = false;
             // Reload student list with current filters
             if (currentCourseId) {
-              this.getListOfStudentCourseAdded(currentCourseId, currentApprovalStatus);
+              this.getListOfStudentCourseAdded();
             } else {
               this.listOfStudents = [];
             }

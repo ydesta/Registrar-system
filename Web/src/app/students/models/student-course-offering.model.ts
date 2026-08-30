@@ -2,6 +2,7 @@ export class StudentCourseOffering {
   public termCourseOfferingId: string;
   public studentId: string;
   public academicTermCode: string;
+  public academicTermId: number;
   public isAproved: boolean;
   public registrationStatus: number;
   public selectedCourses: SelectedCourses[];

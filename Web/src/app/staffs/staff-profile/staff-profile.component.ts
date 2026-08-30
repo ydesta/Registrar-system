@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { StaffService } from 'src/app/services/staff.service';
 import { StaffModel } from 'src/app/Models/StaffModel';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
@@ -18,7 +18,6 @@ export class StaffProfileComponent implements OnInit {
   instructorTitles = INSTRUCTOR_TITLES;
 
   constructor(
-    private route: ActivatedRoute,
     private router: Router,
     private staffService: StaffService,
     private notificationService: CustomNotificationService
@@ -29,61 +28,47 @@ export class StaffProfileComponent implements OnInit {
   }
 
   loadStaffProfile(): void {
-    const userId = localStorage.getItem('userId');
+    const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
     if (!userId) {
       this.notificationService.notification('error', 'Error', 'User ID not found');
       this.error = true;
       this.loading = false;
       return;
     }
-
     this.staffService.getStaffByUserId(userId).subscribe({
       next: (response: any) => {
         if (response.status === 'success' && response.data) {
           this.staff = response.data;
           this.loading = false;
-        } else {
-          // Redirect to add-staff/null if no profile
-          this.router.navigate(['/staffs/add-staff', 'null']);
+          return;
         }
+        this.router.navigate(['/staffs/add-staff', 'null']);
       },
-      error: (error) => {
-        console.error('Error loading staff profile:', error);
-        // Redirect to add-staff/null if error (e.g., not found)
+      error: () => {
         this.router.navigate(['/staffs/add-staff', 'null']);
       }
     });
   }
 
   getEmploymentTypeName(typeId: number | string): string {
-    const id = typeof typeId === 'string' ? parseInt(typeId) : typeId;
-    const employmentType = this.employmentTypes.find(type => type.Id === id);
-    return employmentType ? employmentType.Description : 'Unknown';
+    const id = typeof typeId === 'string' ? parseInt(typeId, 10) : typeId;
+    return this.employmentTypes.find(type => type.Id === id)?.Description || 'Unknown';
   }
 
   getTitleName(titleId: number | string): string {
-    const id = typeof titleId === 'string' ? parseInt(titleId) : titleId;
-    const title = this.instructorTitles.find(t => t.Id === id);
-    return title ? title.Description : 'Unknown';
+    const id = typeof titleId === 'string' ? parseInt(titleId, 10) : titleId;
+    return this.instructorTitles.find(t => t.Id === id)?.Description || 'Unknown';
   }
 
   getGenderDisplay(gender: string): string {
-    switch (gender) {
-      case 'Male':
-        return 'Male';
-      case 'Female':
-        return 'Female';
-      case 'Other':
-        return 'Other';
-      default:
-        return gender || 'Not specified';
-    }
+    return gender || 'Not specified';
   }
 
   formatDate(date: Date | string): string {
-    if (!date) return 'Not specified';
-    const dateObj = new Date(date);
-    return dateObj.toLocaleDateString('en-US', {
+    if (!date) {
+      return 'Not specified';
+    }
+    return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'

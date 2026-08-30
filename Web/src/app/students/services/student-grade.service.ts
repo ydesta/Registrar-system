@@ -1,47 +1,41 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { StudentGradeViewModel } from 'src/app/Models/StudentGradeViewModel';
 import { BaseModel } from 'src/app/Models/BaseMode';
 import { environment } from 'src/environments/environment';
 import { StudentInformationView } from '../models/student-information-view .model';
+import { CrudService } from 'src/app/services/crud.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StudentGradeService {
-  private apiUrl = environment.baseUrl;
+  private readonly grades = `/${environment.apiVersion}/grade`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private crud: CrudService) { }
 
- 
   getStudentGrades(userId: string): Observable<StudentGradeViewModel[]> {
-    return this.http.get<BaseModel<StudentGradeViewModel[]>>(`${this.apiUrl}/${environment.apiVersion}/grade/getStudentGrades/${userId}`)
-      .pipe(
-        map(response => response.data || [])
-      );
+    return this.crud.getList<BaseModel<StudentGradeViewModel[]>>(`${this.grades}/getStudentGrades/${userId}`)
+      .pipe(map(response => response.data || []));
   }
 
- 
+  getStudentGradesPaginated(userId: string, query: string): Observable<any> {
+    return this.crud.getPaginated(`${this.grades}/getStudentGrades/${userId}`, query);
+  }
+
   getStudentGradesByQuery(queryParams: any): Observable<StudentGradeViewModel[]> {
-    return this.http.post<BaseModel<StudentGradeViewModel[]>>(`${this.apiUrl}/${environment.apiVersion}/grade/report`, queryParams)
-      .pipe(
-        map(response => response.data || [])
-      );
+    return this.crud.add<BaseModel<StudentGradeViewModel[]>>(`${this.grades}/report`, queryParams)
+      .pipe(map(response => response.data || []));
   }
 
-  
   uploadGrades(formData: FormData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${environment.apiVersion}/grade/uploadGrade`, formData);
+    return this.crud.add(`${this.grades}/uploadGrade`, formData);
   }
-  getStudentInformationWithInstructor(userId: string,studentId:string): Observable<StudentInformationView> {
-    const endpointUrl = `${this.apiUrl}/${environment.apiVersion}/grade/getStudentInformationWithInstructor/${userId}/${studentId}`;
-    return this.http.get<StudentInformationView>(endpointUrl).pipe(
-      catchError((error) => {
-        console.error('Error occurred while fetching student information with instructor:', error);
-        return throwError(() => new Error(error.message || 'Error fetching student information with instructor'));
-      })
+
+  getStudentInformationWithInstructor(userId: string, studentId: string): Observable<StudentInformationView> {
+    return this.crud.getList<StudentInformationView>(
+      `${this.grades}/getStudentInformationWithInstructor/${userId}/${studentId}`
     );
   }
 }

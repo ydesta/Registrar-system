@@ -5,7 +5,6 @@ import { finalize } from 'rxjs';
 import { StaffModel } from '../Models/StaffModel';
 import { CustomNotificationService } from '../services/custom-notification.service';
 import { Router } from '@angular/router';
-
 import {
   FormBuilder,
   FormControl,
@@ -13,6 +12,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { RegisterRequest } from '../services/auth.interface';
+import { ethiopianMobileValidator, normalizeEthiopianMobile } from '../common/constant';
 
 @Component({
   selector: 'app-register',
@@ -30,7 +30,7 @@ export class RegisterComponent implements OnInit {
   isLoading = false;
 
   constructor(
-    private fb: FormBuilder, 
+    private fb: FormBuilder,
     private authService: AuthService,
     private _notificationService: CustomNotificationService,
     private _router: Router
@@ -38,12 +38,12 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit(): void {
     this.validateForm = this.fb.group({
-      firstName: [null, [Validators.required]],
-      lastName: [null, [Validators.required]],
+      nickname: [null, [Validators.required]],
       email: [null, [Validators.email, Validators.required]],
       password: [null, [Validators.required, Validators.minLength(8)]],
       checkPassword: [null, [Validators.required, this.confirmationValidator]],
-      phoneNumber: [null, [Validators.required]],
+      phoneNumberPrefix: ['+251', [Validators.required]],
+      phoneNumber: [null, [Validators.required, ethiopianMobileValidator()]],
       agree: [false, [Validators.requiredTrue]],
     });
   }
@@ -58,22 +58,40 @@ export class RegisterComponent implements OnInit {
   };
 
   updateConfirmValidator(): void {
-    /** wait for refresh value */
     Promise.resolve().then(() =>
       this.validateForm.controls['checkPassword'].updateValueAndValidity()
     );
   }
 
+  onPhoneBlur(): void {
+    const raw = this.validateForm.value.phoneNumber;
+    const combined = this.combinePhone(raw);
+    const normalized = normalizeEthiopianMobile(combined) || normalizeEthiopianMobile(raw);
+    if (normalized) {
+      this.validateForm.get('phoneNumber')?.setValue(normalized, { emitEvent: false });
+      this.validateForm.get('phoneNumberPrefix')?.setValue('+251', { emitEvent: false });
+    }
+  }
+
   submitForm(): void {
     if (this.validateForm.valid) {
       this.isLoading = true;
+      const phoneNumber = normalizeEthiopianMobile(this.combinePhone(this.validateForm.value.phoneNumber))
+        || normalizeEthiopianMobile(this.validateForm.value.phoneNumber);
+      if (!phoneNumber) {
+        this.isLoading = false;
+        this._notificationService.notification('error', 'Invalid Phone', 'Use Ethio Telecom (09) or Safaricom (07).');
+        return;
+      }
+      const fullName = (this.validateForm.value.nickname || '').toString().trim();
+      const nameParts = fullName.split(/\s+/);
       const registerRequest: RegisterRequest = {
-        firstName: this.validateForm.value.firstName,
-        lastName: this.validateForm.value.lastName,
+        firstName: nameParts[0] || fullName,
+        lastName: nameParts.slice(1).join(' ') || fullName,
         email: this.validateForm.value.email,
         password: this.validateForm.value.password,
         confirmPassword: this.validateForm.value.checkPassword,
-        phoneNumber: this.validateForm.value.phoneNumber,
+        phoneNumber,
         isSelfRegistration: true,
         requireEmailConfirmation: true,
         requirePhoneConfirmation: false
@@ -114,5 +132,17 @@ export class RegisterComponent implements OnInit {
         }
       });
     }
+  }
+
+  private combinePhone(raw: unknown): string {
+    const local = (raw ?? '').toString().trim();
+    if (!local) {
+      return '';
+    }
+    if (local.startsWith('+') || local.startsWith('251') || local.startsWith('0')) {
+      return local;
+    }
+    const prefix = this.validateForm.value.phoneNumberPrefix || '+251';
+    return `${prefix}${local}`;
   }
 }

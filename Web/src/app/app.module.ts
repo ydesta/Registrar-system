@@ -1,4 +1,3 @@
-import { MenuComponent } from './main/menu/menu.component';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -23,7 +22,6 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { CsrfInterceptor } from './interceptors/csrf.interceptor';
 import { RouterModule } from '@angular/router';
 import { PortalModule } from './portal/portal.module';
-import { environment } from '../environments/environment';
 
 registerLocaleData(en);
 

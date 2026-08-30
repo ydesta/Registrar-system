@@ -28,7 +28,7 @@
         <!-- <label>Search All Fields</label> -->
         <nz-input-group [nzSuffix]="suffixIconSearch">
           <input type="text" nz-input placeholder="Search by student name, course, college, or grade..."
-            [(ngModel)]="searchValue" (input)="search()" />
+            [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)" />
           <ng-template #suffixIconSearch>
             <i nz-icon nzType="search" nzTheme="outline"></i>
           </ng-template>
@@ -40,28 +40,39 @@
   <!-- Table Card -->
   <div class="table-card">
     <div id="print-section">
-      <nz-table #basicTable [nzData]="listOfDisplayData" nzBordered [nzPageSize]="10" [nzShowPagination]="true"
-        [nzShowSizeChanger]="true" [nzShowQuickJumper]="true" [nzLoading]="loading" [nzNoResult]="emptyTpl"
+      <nz-table #basicTable [nzData]="listOfDisplayData" nzBordered
+        [nzPageSize]="pager.pageSize"
+        [nzPageSizeOptions]="pager.pageSizeOptions"
+        [nzShowPagination]="true"
+        [nzShowSizeChanger]="true"
+        [nzShowQuickJumper]="true"
+        [nzTotal]="pager.total"
+        [nzPageIndex]="pager.pageIndex"
+        (nzPageIndexChange)="pager.onPageIndexChange($event)"
+        (nzPageSizeChange)="pager.onPageSizeChange($event)"
+        [nzFrontPagination]="false"
+        [nzLoading]="pager.loading"
+        [nzNoResult]="emptyTpl"
         class="exemptions-table">
         <thead>
           <tr>
             <th class="sn-column">S/N</th>
-            <th nzSortKey="studentName" (nzSortOrderChange)="sort($event)" nzShowSort>
+            <th nzShowSort (nzSortOrderChange)="pager.onSort($event, 'studentName')">
               Student Name
             </th>
-            <th nzSortKey="exemptionCourseName" (nzSortOrderChange)="sort($event)" nzShowSort>
+            <th nzShowSort (nzSortOrderChange)="pager.onSort($event, 'exemptionCourse')">
               Course Exemption
             </th>
-            <th nzSortKey="exemptionCourseName" (nzSortOrderChange)="sort($event)" nzShowSort>
+            <th nzShowSort (nzSortOrderChange)="pager.onSort($event, 'exemptedCourseName')">
               Exempted Course
             </th>
-            <th nzSortKey="exemptionCourseName" (nzSortOrderChange)="sort($event)" nzShowSort>
+            <th>
               Exempted Course Credit
             </th>
-            <th nzSortKey="exemptedCollegeName" (nzSortOrderChange)="sort($event)" nzShowSort>
+            <th nzShowSort (nzSortOrderChange)="pager.onSort($event, 'exemptedCollegeName')">
              Exempted College
             </th>
-            <th nzSortKey="grade" (nzSortOrderChange)="sort($event)" nzShowSort>
+            <th nzShowSort (nzSortOrderChange)="pager.onSort($event, 'grade')">
               Grade
             </th>
           
@@ -71,7 +82,7 @@
         <tbody>
           <tr *ngFor="let data of basicTable.data; let i = index">
             <td class="sn-column">
-              <span class="sn-badge">{{ i + 1 }}</span>
+              <span class="sn-badge">{{ pager.serial(i) }}</span>
             </td>
             <td>
               <div class="student-info">

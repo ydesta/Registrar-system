@@ -75,8 +75,8 @@
   <div class="table-actions">
     <div class="search-section">
       <nz-input-group [nzSuffix]="suffixIconSearch">
-        <input type="text" nz-input placeholder="Search applicants..." [(ngModel)]="searchText"
-          (ngModelChange)="onSearchTextChanged()" />
+        <input type="text" nz-input placeholder="Search applicants..." [(ngModel)]="pager.searchKey"
+          (ngModelChange)="pager.onSearch($event)" />
       </nz-input-group>
       <ng-template #suffixIconSearch>
         <span nz-icon nzType="search"></span>
@@ -91,15 +91,14 @@
   <!-- Table Card Container -->
   <div class="table-card">
     <div class="table-wrapper">
-      <nz-table #basicTable [nzData]="applicantsList!" nzBordered [nzPageSize]="pageSize"
-        [nzPageSizeOptions]="pageSizeOption" [nzShowSizeChanger]="true" [nzTotal]="total" [nzPageIndex]="pageIndex"
-        (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)"
-        [nzFrontPagination]="false" [nzShowTotal]="rangeTemplate" [nzLoading]="tableLoading" [nzNoResult]="emptyTpl"
-        class="applicant-table">
+      <nz-table #basicTable [nzData]="applicantsList" nzBordered [nzPageSize]="pager.pageSize"
+        [nzPageSizeOptions]="pager.pageSizeOptions" [nzShowSizeChanger]="true" [nzTotal]="pager.total"
+        [nzPageIndex]="pager.pageIndex" (nzPageIndexChange)="pager.onPageIndexChange($event)"
+        (nzPageSizeChange)="pager.onPageSizeChange($event)" [nzFrontPagination]="false" [nzShowTotal]="rangeTemplate"
+        [nzLoading]="pager.loading" [nzNoResult]="emptyTpl" class="applicant-table">
         <ng-template #rangeTemplate let-range="range" let-total>
           <span style="color: #6b7280; font-weight: 500;">
-            {{ getCurrentPageInfo().start }}-{{ getCurrentPageInfo().end }} of {{ getCurrentPageInfo().total }}
-            applicants
+            {{ range[0] }}-{{ range[1] }} of {{ total }} applicants
           </span>
         </ng-template>
         <thead>
@@ -119,7 +118,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let data of basicTable.data; let i = index">
-            <td><span class="sn-badge">{{ (pageIndex - 1) * pageSize + i + 1 }}</span></td>
+            <td><span class="sn-badge">{{ pager.serial(i) }}</span></td>
             <td>{{ data.appliedDate }}</td>
             <td>{{ data.academicProgramme }}</td>
 
@@ -165,7 +164,7 @@
         <ng-template #emptyTpl>
           <div class="no-data">
             <span nz-icon nzType="user" nzTheme="outline"></span>
-            <p>{{ searchText ? 'No matching applicants found' : 'No applicant requests available' }}</p>
+            <p>{{ pager.searchKey ? 'No matching applicants found' : 'No applicant requests available' }}</p>
           </div>
         </ng-template>
       </nz-table>

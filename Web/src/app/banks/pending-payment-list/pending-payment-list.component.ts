@@ -66,7 +66,10 @@ export class PendingPaymentListComponent implements OnInit, OnDestroy {
 
   goToPaymentPage(data: PendingStudentPaymentModel) {
     data.isProcessing = true;
-    this._route.navigateByUrl(`banks/registration/payment-options?registrationid=${data.id}&code=${data.batchCode}&type=${data.requestType}`);
+    const orderNumber = data.orderNumber ? `&orderNumber=${encodeURIComponent(data.orderNumber)}` : '';
+    this._route.navigateByUrl(
+      `banks/registration/payment-options?registrationid=${data.id}&code=${data.batchCode}&type=${data.requestType}${orderNumber}`
+    );
   }
 
   getTotalAmount() {

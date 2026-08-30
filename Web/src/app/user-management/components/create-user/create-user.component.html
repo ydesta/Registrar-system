@@ -93,14 +93,15 @@
                 placeholder=" "
                 [class.error]="isFieldInvalid('phoneNumber')"
                 [class.filled]="userForm.get('phoneNumber')?.value"
-                id="phoneNumber" />
+                id="phoneNumber"
+                (blur)="onPhoneBlur()" />
               <label for="phoneNumber" class="float-label">
                 Phone Number
               </label>
             </div>
                   <ng-template #phoneErrorTpl let-control>
-                    <ng-container *ngIf="control.hasError('pattern')">
-                      Please enter a valid phone number
+                    <ng-container *ngIf="control.hasError('invalidPhoneNumber')">
+                      {{ control.getError('invalidPhoneNumber').message }}
                     </ng-container>
                   </ng-template>
                 </nz-form-control>

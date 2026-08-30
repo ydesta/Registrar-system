@@ -1,129 +1,61 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
+import { CrudService } from 'src/app/services/crud.service';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataMigrationService {
- //  idp = "https://localhost:5001/api/StudentDataMigrations"
- // idp = "https://hilcoe.edu.et:5001/api/StudentDataMigrations"
-  baseUrl = environment.baseUrl;
-  idp = `${environment.baseUrl}/${environment.apiVersion}/migrate/student`;
-  private readonly _settingDataLoads: string = `/${environment.apiVersion}/migrate/setting`;
-  private readonly _batchCodeDataMigrations: string = `/${environment.apiVersion}/migrate/batch`;
-  private readonly _termCourseOfferingDataMigrations: string = `/${environment.apiVersion}/migrate/offering`;
-  private readonly _studentCourseRegistrationDatas: string = `/${environment.apiVersion}/migrate/registration`;
-  private readonly _studentDataMigrations: string = `/${environment.apiVersion}/migrate/student`;
-  getSettingDataLoadsUrl() {
-    return this.baseUrl + this._settingDataLoads;
-  }
-  getBatchCodeDataMigrationsUrl() {
-    return this.baseUrl + this._batchCodeDataMigrations;
-  }
-  getTermCourseOfferingDataMigrationsUrl() {
-    return this.baseUrl + this._termCourseOfferingDataMigrations;
-  }
-  getStudentCourseRegistrationDatasUrl() {
-    return this.baseUrl + this._studentCourseRegistrationDatas;
+  private readonly settings = `/${environment.apiVersion}/migrate/setting`;
+  private readonly batches = `/${environment.apiVersion}/migrate/batch`;
+  private readonly offerings = `/${environment.apiVersion}/migrate/offering`;
+  private readonly registrations = `/${environment.apiVersion}/migrate/registration`;
+  private readonly students = `/${environment.apiVersion}/migrate/student`;
+
+  constructor(private crud: CrudService) { }
+
+  importCurriculumFileAsync(postData: any): Observable<any> {
+    return this.crud.add(this.settings, postData);
   }
 
-  constructor(private httpClient: HttpClient) { }
-  importCurriculumFileAsync(postData: any): Observable<any> {
-    const endpointUrl = `${this.getSettingDataLoadsUrl()}`;
-    return this.httpClient.post<any>(endpointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
-    );
-  }
   getImportProgramFileAsync(postData: any): Observable<any> {
-    const endpointUrl = `${this.getSettingDataLoadsUrl()}/getImportProgramFileAsync`;
-    return this.httpClient.post<any>(endpointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
-    );
+    return this.crud.add(`${this.settings}/getImportProgramFileAsync`, postData);
   }
+
   getImportQuadrantFileAsync(postData: any): Observable<any> {
-    const endpointUrl = `${this.getSettingDataLoadsUrl()}/getImportQuadrantFileAsync/quadrant`;
-    return this.httpClient.post<any>(endpointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
-    );
+    return this.crud.add(`${this.settings}/getImportQuadrantFileAsync/quadrant`, postData);
   }
+
   getImportCourseBreakdownFileAsync(postData: any): Observable<any> {
-    const endpointUrl = `${this.getSettingDataLoadsUrl()}/getImportCourseBreakdownFileAsync/quadrant/breakDown`;
-    return this.httpClient.post<any>(endpointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
-    );
+    return this.crud.add(`${this.settings}/getImportCourseBreakdownFileAsync/quadrant/breakDown`, postData);
   }
 
   getImportStaffFileAsync(postData: any): Observable<any> {
-    const endpointUrl = `${this.getSettingDataLoadsUrl()}/getImportStaffFileAsync/quadrant/load/staff`;
-    return this.httpClient.post<any>(endpointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
-    );
+    return this.crud.add(`${this.settings}/getImportStaffFileAsync/quadrant/load/staff`, postData);
   }
 
   getImportBatchCodeFile(postData: any): Observable<any> {
-    const endpointUrl = `${this.getBatchCodeDataMigrationsUrl()}`;
-    return this.httpClient.post<any>(endpointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
-    );
+    return this.crud.add(this.batches, postData);
   }
 
   getImportTermCourseOfferingFile(postData: any): Observable<any> {
-    const endpointUrl = `${this.getTermCourseOfferingDataMigrationsUrl()}`;
-    return this.httpClient.post<any>(endpointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
-    );
+    return this.crud.add(this.offerings, postData);
   }
 
   getImportStudentCourseRegistrationFile(postData: any): Observable<any> {
-    const endpointUrl = `${this.getStudentCourseRegistrationDatasUrl()}`;
-    return this.httpClient.post<any>(endpointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
-    );
+    return this.crud.add(this.registrations, postData);
   }
 
   getStudentGradeFileAsync(postData: any): Observable<any> {
-    const endpointUrl = `${this.getStudentCourseRegistrationDatasUrl()}/getStudentGradeFileAsync`;
-    return this.httpClient.post<any>(endpointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
-    );
+    return this.crud.add(`${this.registrations}/getStudentGradeFileAsync`, postData);
   }
 
   getCourseFileAsync(postData: any): Observable<any> {
-    const endpointUrl = `${this.getStudentCourseRegistrationDatasUrl()}/getCourseFileAsync/dataMigration`;
-    return this.httpClient.post<any>(endpointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
-    );
+    return this.crud.add(`${this.registrations}/getCourseFileAsync/dataMigration`, postData);
   }
 
   getStudentDataMigration(postData: any): Observable<any> {
-    const endpointUrl = `${this.idp}`;
-    return this.httpClient.post<any>(endpointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
-    );
+    return this.crud.add(this.students, postData);
   }
-
 }

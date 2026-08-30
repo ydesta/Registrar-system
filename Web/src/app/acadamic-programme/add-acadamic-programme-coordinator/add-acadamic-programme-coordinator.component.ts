@@ -37,7 +37,7 @@ ngOnInit(): void {
     this.action="Edit Programme Coordinator"
     this.submit ='Update';
     // GET by ID returns AcadamicProgrammeCoordinator directly, wrapped in BaseModel by getList()
-    this._crudService.getList(`/${environment.apiVersion}/acadamicprogrammecoordinators/${this.progCoordinatorId}`).subscribe((res:any)=>{
+    this._crudService.getById(`/${environment.apiVersion}/acadamicprogrammecoordinators`, this.progCoordinatorId).subscribe((res:any)=>{
       // The object is in res.data since getList() wraps it in BaseModel
       this.patchValues(res.data);
     });

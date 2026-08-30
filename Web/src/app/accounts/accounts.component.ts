@@ -8,27 +8,16 @@ import { filter } from 'rxjs';
   styleUrls: ['./accounts.component.scss']
 })
 export class AccountsComponent implements OnInit {
-
   constructor(
     private router: Router,
     private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
-    // Monitor route changes within accounts module
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: NavigationEnd) => {
-      // Force change detection and refresh
-      setTimeout(() => {
-        this.cdr.detectChanges();
-        this.cdr.markForCheck();
-      }, 0);
-      
-      // Additional refresh mechanism for stubborn cases
-      setTimeout(() => {
-        this.cdr.detectChanges();
-      }, 100);
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.cdr.detectChanges();
     });
   }
 }

@@ -180,15 +180,12 @@ export class StudentDashboardComponent implements OnInit {
     private batchTermService: BatchTermService,
     private router: Router
   ) {
-    this.applicantUserId = localStorage.getItem('userId');
+    this.applicantUserId = localStorage.getItem('userId') || localStorage.getItem('user_id');
     this.studentCode = localStorage.getItem('studentCode');
   }
 
   ngOnInit() {
-    // Initialize term status list
     this.getListOfAcademicTermStatus();
-    
-    // Add delay between API calls to avoid rate limiting
     this.getKpiCards();
     setTimeout(() => {
       this.getListOfGPATrend();
@@ -203,7 +200,6 @@ export class StudentDashboardComponent implements OnInit {
       this.getStudentSummary();
     }, 2000);
     
-    // Get next academic term from sessionStorage or API
     const next = sessionStorage.getItem('nextAcademicTerm');
     this.nextAcademicTerm = next ? JSON.parse(next) : null;
 
@@ -220,9 +216,7 @@ export class StudentDashboardComponent implements OnInit {
         next: (data) => {
           this.kpis = data;
         },
-        error: (error) => {
-          // You could show a user-friendly error message here
-        }
+        error: () => {}
       });
   }
   
@@ -238,9 +232,7 @@ export class StudentDashboardComponent implements OnInit {
             }
           ];
         },
-        error: (error) => {
-          // You could show a user-friendly error message here
-        }
+        error: () => {}
       });
   }
   getNextAcademicTerm() {
@@ -251,8 +243,7 @@ export class StudentDashboardComponent implements OnInit {
         sessionStorage.setItem('nextAcademicTerm', JSON.stringify(res));
         this.loadStudentCourseOfferings();
       },
-      error: (error) => {
-        console.error('Error loading academic term:', error);
+      error: () => {
         this.isLoadingCourses = false;
       }
     });
@@ -265,8 +256,6 @@ export class StudentDashboardComponent implements OnInit {
     }
 
     this.isLoadingCourses = true;
-
-    // Use the same method as student-course-registration component
     this.studentService.getStudentCourseOfferingId(
       this.applicantUserId,
       this.academicTermId,
@@ -274,7 +263,6 @@ export class StudentDashboardComponent implements OnInit {
     ).subscribe({
       next: (data: StudentViewModel) => {
         if (data && data.courseTermOfferings) {
-          // Use calendar year from nextAcademicTerm if available, otherwise use academicTermYear
           const displayYear = this.nextAcademicTerm?.year || data.academicTermYear;
           this.termCourses = data.courseTermOfferings.map(course => ({
             code: course.courseCode,
@@ -286,8 +274,7 @@ export class StudentDashboardComponent implements OnInit {
         }
         this.isLoadingCourses = false;
       },
-      error: (error) => {
-        console.error('Error loading student course offerings:', error);
+      error: () => {
         this.isLoadingCourses = false;
       }
     });
@@ -319,9 +306,7 @@ export class StudentDashboardComponent implements OnInit {
           }));
         }
       },
-      error: (error) => {
-        console.error('Error loading course completion:', error);
-      }
+      error: () => {}
     });
   }
 
@@ -338,9 +323,7 @@ export class StudentDashboardComponent implements OnInit {
           }));
         }
       },
-      error: (error) => {
-        console.error('Error loading top courses:', error);
-      }
+      error: () => {}
     });
   }
 
@@ -351,9 +334,7 @@ export class StudentDashboardComponent implements OnInit {
           this.studentSummary = data;
         }
       },
-      error: (error) => {
-        console.error('Error loading student summary:', error);
-      }
+      error: () => {}
     });
   }
 

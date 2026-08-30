@@ -877,6 +877,11 @@
                         </th>
                         <th class="enhanced-header">
                             <div class="header-content">
+                                <span class="header-text">Applicant Type</span>
+                            </div>
+                        </th>
+                        <th class="enhanced-header">
+                            <div class="header-content">
                                 <span class="header-text">Request Status</span>
                             </div>
                         </th>
@@ -912,6 +917,14 @@
                                 <div class="division-details">
                                     <div class="division-name">{{ getDivisionStatusDescription(data.division) }}</div>
                                     <div class="division-type">Department</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="enhanced-cell">
+                            <div class="division-card">
+                                <div class="division-details">
+                                    <div class="division-name">{{ getApplicantYearDescription(data.applicantYear) }}</div>
+                                    <div class="division-type">Year Level</div>
                                 </div>
                             </div>
                         </td>
@@ -991,6 +1004,7 @@
                 <tr>
                     <th class="table-header">Program</th>
                     <th class="table-header">Division</th>
+                    <th class="table-header">Applicant Type</th>
                     <th class="table-header">Request Status</th>
                     <th class="table-header">Applicant Status</th>
                     <th class="table-header">Application Date</th>
@@ -1001,6 +1015,7 @@
                 <tr *ngFor="let data of basicsTable2.data; let i = index" class="table-row">
                     <td class="table-cell">{{ getAcademicProgramDescription(data.acadamicProgrammeId) }}</td>
                     <td class="table-cell">{{ getDivisionStatusDescription(data.division) }}</td>
+                    <td class="table-cell">{{ getApplicantYearDescription(data.applicantYear) }}</td>
                     <td class="table-cell">
                         <nz-tag [nzColor]="getStatusColor(data.approvalStatus)">
                             {{ getReguestStatus(data.approvalStatus) }}

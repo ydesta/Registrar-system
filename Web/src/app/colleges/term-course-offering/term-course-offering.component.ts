@@ -9,6 +9,7 @@ import {
   ACADEMIC_TERM_STATUS,
   ACADEMIC_YEAR_NUMBER_STATUS
 } from "src/app/common/constant";
+import { PaginatorService, ServerPaginator } from "src/app/reports/services/paginator.service";
 import { CrudService } from "src/app/services/crud.service";
 import { CustomNotificationService } from "src/app/services/custom-notification.service";
 import { CourseOfferingInstructorAssignmentComponent } from "../course-offering-instructor-assignment/course-offering-instructor-assignment.component";
@@ -22,32 +23,16 @@ import { TermCourseOfferingService } from "../services/term-course-offering.serv
 export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   termCourseOfferings: any[] = [];
   reqId = "";
-  searchKey = "";
   checked = false;
   academicTerms: any;
   gradeQueryForm: FormGroup;
   studentId = "";
   debugTime = new Date().toLocaleString();
-
-  // Pagination properties
-  pageIndex = 1; // 1-based indexing for UI
-  total = 0;
-  pageSize = 10;
-  pageSizeOptions = [5, 10, 15, 25, 50, 100];
-  sortOrder = "";
-  sortColumn = "";
+  pager: ServerPaginator;
   listOfTermNumber: StaticData[] = [];
   listOfYearNumber: StaticData[] = [];
   expandSet = new Set<string>();
-  tbLoading = true;
-  
-  // Batch filtering properties
-  searchBatch: string = "";
-  availableBatches: string[] = [];
-  filteredTermCourseOfferings: any[] = [];
-  
-  // Filter properties
-  isActiveFilter: boolean | null = true; // Default to true (active only)
+  isActiveFilter: boolean | null = true;
   yearFilter: number | null = null;
   yearOptions: number[] = [];
 
@@ -56,14 +41,14 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
     private _crudService: CrudService,
     private _fb: FormBuilder,
     private modal: NzModalService,
-    private termCourseOfferingService: TermCourseOfferingService
+    private termCourseOfferingService: TermCourseOfferingService,
+    private paginator: PaginatorService
   ) {
+    this.pager = this.paginator.create();
     this.gradeQueryForm = this._fb.group({
       termCode: ["", Validators.required],
       studentId: [""]
     });
-    
-    // Generate year options (current year ± 10 years)
     const currentYear = new Date().getFullYear();
     for (let i = currentYear - 10; i <= currentYear + 5; i++) {
       this.yearOptions.push(i);
@@ -73,10 +58,12 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.getListOfAcademicTermStatus();
     this.getListOfYearNumberStatus();
+    this.pager.init(() => this.fetchProgram());
     this.fetchProgram();
   }
 
   ngOnDestroy(): void {
+    this.pager.destroy();
   }
   // // populateIntialData() {
   // //   this._crudService
@@ -90,21 +77,18 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   // }
 
   fetchProgram() {
-    this.tbLoading = true;
-    const isActiveParam = this.isActiveFilter !== null ? `&isActive=${this.isActiveFilter}` : '&isActive=true';
-    const yearParam = this.yearFilter !== null ? `&year=${this.yearFilter}` : '';
-    
+    this.pager.loading = true;
+    const query = this.pager.query({
+      isActive: this.isActiveFilter,
+      year: this.yearFilter
+    });
+
     this._crudService
-      .getList(
-        `/TermCourseOfferings/paginated?searchKey=${this.searchKey}&pageindex=${this.pageIndex - 1}&pageSize=${this.pageSize}&sortColumn=${this.sortColumn}&sortOrder=${this.sortOrder}${isActiveParam}${yearParam}`
-      )
+      .getPaginated(`/TermCourseOfferings`, query)
       .subscribe((res: any) => {
-        // Handle case where res.data might be null or undefined
         if (!res || !res.data) {
           this.termCourseOfferings = [];
-          this.filteredTermCourseOfferings = [];
-          this.total = 0;
-          this.tbLoading = false;
+          this.pager.fail();
           return;
         }
         
@@ -117,18 +101,16 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
             courseDetails = item.couse.map((c: any, index: number) => {
               totalCreditHours += c.creditHours || 0;
               totalAssignedInstructors += c.noOfAssignedInstructor || 0;
-              
-              const courseDetail = {
+              return {
                 number: index + 1,
                 title: c.courseTitle,
                 code: c.courseCode,
                 creditHours: c.creditHours,
                 noOfAssignedInstructor: c.noOfAssignedInstructor,
                 courseId: c.id,
-                courseOfferingId: c.courseOfferingId || c.id, // Try to use courseOfferingId if available, fallback to course ID
-                isActive: c.isActive !== undefined ? c.isActive : true // Default to true if not provided
+                courseOfferingId: c.courseOfferingId || c.id,
+                isActive: c.isActive !== undefined ? c.isActive : true
               };
-              return courseDetail;
             });
           }
           return {
@@ -139,39 +121,17 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
             totalAssignedInstructors
           };
         });
-        
-        // Extract unique batch codes for filtering
-        this.availableBatches = [...new Set(this.termCourseOfferings.map(item => item.batchCode).filter(batch => batch))];
-        
-        // Apply current filter
-        this.applyBatchFilter();
-        
-        // Set total count from server response
-        this.total = res.totalRowCount || res.total || res.count || res.totalCount || 0;
-        this.tbLoading = false;
+        this.pager.applyResult(res);
       }, (error) => {
         console.error('Error fetching term course offerings:', error);
         this.termCourseOfferings = [];
-        this.filteredTermCourseOfferings = [];
-        this.total = 0;
-        this.tbLoading = false;
+        this.pager.fail();
         this._customNotificationService.notification(
           'error',
           'Error',
           'Failed to load term course offerings. Please try again.'
         );
       });
-  }
-
-  onPageIndexChange(page: number): void {
-    this.pageIndex = page;
-    this.fetchProgram();
-  }
-
-  onPageSizeChange(size: number): void {
-    this.pageSize = size;
-    this.pageIndex = 1; // Reset to first page when page size changes
-    this.fetchProgram();
   }
 
   showDeleteConfirm(id: any): void {
@@ -307,10 +267,6 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   }
 
 
-  clickSearchKey() {
-    this.fetchProgram();
-  }
-
   academicTermFormSubmit() {
     if (this.gradeQueryForm.value["termCode"] != "") {
       this._crudService
@@ -425,32 +381,13 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
     return item.courseId;
   }
 
-  // Batch filtering methods
-  onBatchSearch(event: any): void {
-    this.searchBatch = event.target.value;
-    this.applyBatchFilter();
-  }
-
-  applyBatchFilter(): void {
-    if (!this.searchBatch || this.searchBatch.trim() === '') {
-      this.filteredTermCourseOfferings = [...this.termCourseOfferings];
-    } else {
-      const searchTerm = this.searchBatch.toLowerCase().trim();
-      this.filteredTermCourseOfferings = this.termCourseOfferings.filter(
-        item => item.batchCode && item.batchCode.toLowerCase().includes(searchTerm)
-      );
-    }
-  }
-
   onIsActiveFilterChange(value: boolean | null): void {
     this.isActiveFilter = value;
-    this.pageIndex = 1; // Reset to first page
-    this.fetchProgram();
+    this.pager.resetPage();
   }
 
   onYearFilterChange(value: number | null): void {
     this.yearFilter = value;
-    this.pageIndex = 1; // Reset to first page
-    this.fetchProgram();
+    this.pager.resetPage();
   }
 }

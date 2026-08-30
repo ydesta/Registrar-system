@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using SecureAuth.APPLICATION.DTOs.Authentication;
+using SecureAuth.APPLICATION.Helpers;
 using SecureAuth.APPLICATION.Interfaces;
 using SecureAuth.DOMAIN.Models;
 using System.Security.Claims;
@@ -60,6 +61,15 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             }
 
             // Create the user
+            if (EthiopianPhoneNumber.TryNormalize(command.PhoneNumber, out var normalizedPhone))
+            {
+                command.PhoneNumber = normalizedPhone!;
+            }
+            else if (string.IsNullOrWhiteSpace(command.PhoneNumber))
+            {
+                command.PhoneNumber = string.Empty;
+            }
+
             var user = new ApplicationUser
             {
                 UserName = command.Email,

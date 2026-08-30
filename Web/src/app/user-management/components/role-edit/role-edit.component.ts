@@ -25,7 +25,6 @@ export class RoleEditComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Get role from modal params
     this.role = this.modalRef.getConfig().nzComponentParams?.['role'];
     if (this.role) {
       this.roleForm.patchValue({

@@ -3,12 +3,15 @@ using SecureAuth.APPLICATION.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MailKit.Net.Smtp;
+using MailKit;
 using MimeKit;
 
 namespace SecureAuth.INFRASTRUCTURE.Services
 {
     public class EmailService : IEmailService
     {
+        private const int MaxRetryAttempts = 3;
+        private const int RetryDelayMilliseconds = 2000;
         private readonly EmailConfiguration _emailConfiguration;
         private readonly string _frontendUrl;
         private readonly EmailTemplateService _emailTemplateService;
@@ -21,7 +24,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                 From = configuration["EmailConfiguration:From"],
                 SmtpServer = configuration["EmailConfiguration:SmtpServer"],
                 Port = int.Parse(configuration["EmailConfiguration:Port"] ?? "587"),
-                UserName = configuration["EmailConfiguration:UserName"],
+                UserName = configuration["EmailConfiguration:Username"],
                 Password = configuration["EmailConfiguration:Password"],
                 BaseUrl = configuration["EmailConfiguration:BaseUrl"]
             };
@@ -29,10 +32,34 @@ namespace SecureAuth.INFRASTRUCTURE.Services
             _frontendUrl = configuration["AppSettings:FrontendUrl"] ?? "http://localhost:4200";
             _emailTemplateService = emailTemplateService;
             _logger = logger;
+            ValidateConfiguration();
             
             // Log email configuration (without sensitive data)
             _logger.LogInformation("EmailService initialized with SMTP Server: {SmtpServer}, Port: {Port}, From: {From}", 
                 _emailConfiguration.SmtpServer, _emailConfiguration.Port, _emailConfiguration.From);
+        }
+
+        private void ValidateConfiguration()
+        {
+            if (string.IsNullOrWhiteSpace(_emailConfiguration.From) ||
+                string.IsNullOrWhiteSpace(_emailConfiguration.SmtpServer) ||
+                string.IsNullOrWhiteSpace(_emailConfiguration.UserName) ||
+                string.IsNullOrWhiteSpace(_emailConfiguration.Password))
+            {
+                throw new InvalidOperationException("EmailConfiguration is incomplete. Please set From, SmtpServer, Username, and Password.");
+            }
+
+            if (_emailConfiguration.Port <= 0)
+            {
+                throw new InvalidOperationException("EmailConfiguration port must be a positive number.");
+            }
+        }
+
+        private MailKit.Security.SecureSocketOptions GetSocketOptions()
+        {
+            return _emailConfiguration.Port == 465
+                ? MailKit.Security.SecureSocketOptions.SslOnConnect
+                : MailKit.Security.SecureSocketOptions.StartTls;
         }
         
         public void SendEmail(Message message)
@@ -464,93 +491,17 @@ namespace SecureAuth.INFRASTRUCTURE.Services
             }
         }
 
-        private void Send(MimeMessage mailMessage)
+        public async Task<bool> TestConnectionAsync()
         {
             using var client = new SmtpClient();
             try
             {
-                _logger.LogInformation("Connecting to SMTP server: {SmtpServer}:{Port}", _emailConfiguration.SmtpServer, _emailConfiguration.Port);
-                client.Timeout = 10000; 
+                client.Timeout = 15000;
                 client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                if (_emailConfiguration.Port == 587)
-                {
-                    client.Connect(_emailConfiguration.SmtpServer, _emailConfiguration.Port, MailKit.Security.SecureSocketOptions.StartTls);
-                }
-                else if (_emailConfiguration.Port == 465)
-                {
-                    client.Connect(_emailConfiguration.SmtpServer, _emailConfiguration.Port, MailKit.Security.SecureSocketOptions.SslOnConnect);
-                }
-                else
-                {
-                    client.Connect(_emailConfiguration.SmtpServer, _emailConfiguration.Port, MailKit.Security.SecureSocketOptions.StartTls);
-                }
-                
+                await client.ConnectAsync(_emailConfiguration.SmtpServer, _emailConfiguration.Port, GetSocketOptions());
                 client.AuthenticationMechanisms.Remove("XOAUTH2");
-                
-                _logger.LogInformation("Authenticating with SMTP server using username: {UserName}", _emailConfiguration.UserName);
-                client.Authenticate(_emailConfiguration.UserName, _emailConfiguration.Password);
-
-                _logger.LogInformation("Sending email to: {To}", string.Join(", ", mailMessage.To.Select(t => t.Name)));
-                client.Send(mailMessage);
-                
-                _logger.LogInformation("Email sent successfully to: {To}", string.Join(", ", mailMessage.To.Select(t => t.Name)));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send email to: {To}. SMTP Server: {SmtpServer}:{Port}, Username: {UserName}. Error: {ErrorMessage}", 
-                    string.Join(", ", mailMessage.To.Select(t => t.Name)), 
-                    _emailConfiguration.SmtpServer, 
-                    _emailConfiguration.Port, 
-                    _emailConfiguration.UserName, 
-                    ex.Message);
-                throw;
-            }
-            finally
-            {
-                if (client.IsConnected)
-                {
-                    client.Disconnect(true);
-                }
-                client.Dispose();
-            }
-        }
-
-        private async Task SendAsync(MimeMessage mailMessage)
-        {
-            using var client = new SmtpClient();
-            try
-            {
-                _logger.LogInformation("Connecting to SMTP server: {SmtpServer}:{Port}", _emailConfiguration.SmtpServer, _emailConfiguration.Port);
-                client.Timeout = 30000; // Increased from 10000 to 30000 for better reliability
-                client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                if (_emailConfiguration.Port == 587)
-                {
-                    await client.ConnectAsync(_emailConfiguration.SmtpServer, _emailConfiguration.Port, MailKit.Security.SecureSocketOptions.StartTls);
-                }
-                else if (_emailConfiguration.Port == 465)
-                {
-                    await client.ConnectAsync(_emailConfiguration.SmtpServer, _emailConfiguration.Port, MailKit.Security.SecureSocketOptions.SslOnConnect);
-                }
-                else
-                {
-                    await client.ConnectAsync(_emailConfiguration.SmtpServer, _emailConfiguration.Port, MailKit.Security.SecureSocketOptions.StartTls);
-                }
-                client.AuthenticationMechanisms.Remove("XOAUTH2");
-                _logger.LogInformation("Authenticating with SMTP server using username: {UserName}", _emailConfiguration.UserName);
                 await client.AuthenticateAsync(_emailConfiguration.UserName, _emailConfiguration.Password);
-                _logger.LogInformation("Sending email to: {To}", string.Join(", ", mailMessage.To.Select(t => t.Name)));
-                await client.SendAsync(mailMessage);
-                _logger.LogInformation("Email sent successfully to: {To}", string.Join(", ", mailMessage.To.Select(t => t.Name)));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send email to: {To}. SMTP Server: {SmtpServer}:{Port}, Username: {UserName}. Error: {ErrorMessage}", 
-                    string.Join(", ", mailMessage.To.Select(t => t.Name)), 
-                    _emailConfiguration.SmtpServer, 
-                    _emailConfiguration.Port, 
-                    _emailConfiguration.UserName, 
-                    ex.Message);
-                throw;
+                return client.IsAuthenticated;
             }
             finally
             {
@@ -559,6 +510,63 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                     await client.DisconnectAsync(true);
                 }
                 client.Dispose();
+            }
+        }
+
+        private void Send(MimeMessage mailMessage)
+        {
+            SendAsync(mailMessage).GetAwaiter().GetResult();
+        }
+
+        private async Task SendAsync(MimeMessage mailMessage)
+        {
+            for (var attempt = 1; attempt <= MaxRetryAttempts; attempt++)
+            {
+                using var client = new SmtpClient();
+                try
+                {
+                    _logger.LogInformation("Connecting to SMTP server: {SmtpServer}:{Port}, attempt {Attempt}/{MaxAttempts}",
+                        _emailConfiguration.SmtpServer, _emailConfiguration.Port, attempt, MaxRetryAttempts);
+                    client.Timeout = 30000;
+                    client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                    await client.ConnectAsync(_emailConfiguration.SmtpServer, _emailConfiguration.Port, GetSocketOptions());
+                    client.AuthenticationMechanisms.Remove("XOAUTH2");
+                    _logger.LogInformation("Authenticating with SMTP server using username: {UserName}", _emailConfiguration.UserName);
+                    await client.AuthenticateAsync(_emailConfiguration.UserName, _emailConfiguration.Password);
+                    _logger.LogInformation("Sending email to: {To}", string.Join(", ", mailMessage.To.Select(t => t.Name)));
+                    await client.SendAsync(mailMessage);
+                    _logger.LogInformation("Email sent successfully to: {To}", string.Join(", ", mailMessage.To.Select(t => t.Name)));
+                    return;
+                }
+                catch (SmtpCommandException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    if (attempt == MaxRetryAttempts)
+                    {
+                        _logger.LogError(ex, "Failed to send email to: {To}. SMTP Server: {SmtpServer}:{Port}, Username: {UserName}. Error: {ErrorMessage}",
+                            string.Join(", ", mailMessage.To.Select(t => t.Name)),
+                            _emailConfiguration.SmtpServer,
+                            _emailConfiguration.Port,
+                            _emailConfiguration.UserName,
+                            ex.Message);
+                        throw;
+                    }
+
+                    _logger.LogWarning(ex, "Transient email send failure on attempt {Attempt}/{MaxAttempts}. Retrying.",
+                        attempt, MaxRetryAttempts);
+                    await Task.Delay(RetryDelayMilliseconds);
+                }
+                finally
+                {
+                    if (client.IsConnected)
+                    {
+                        await client.DisconnectAsync(true);
+                    }
+                    client.Dispose();
+                }
             }
         }
 

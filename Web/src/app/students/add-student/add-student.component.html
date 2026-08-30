@@ -140,7 +140,7 @@
                     <div nz-row [nzGutter]="24">
                         <div nz-col nzSpan="12">
                             <nz-form-item>
-                                <nz-form-label nzRequired class="form-label">First Name (Amharic)</nz-form-label>
+                                <nz-form-label class="form-label">First Name (Amharic)</nz-form-label>
                                 <nz-form-control>
                                     <input nz-input formControlName="firstNameInAmh"
                                         placeholder="First name in Amharic" />
@@ -149,7 +149,7 @@
                         </div>
                         <div nz-col nzSpan="12">
                             <nz-form-item>
-                                <nz-form-label nzRequired class="form-label">Father's Name (Amharic)</nz-form-label>
+                                <nz-form-label class="form-label">Father's Name (Amharic)</nz-form-label>
                                 <nz-form-control>
                                     <input nz-input formControlName="fatherNameInAmh"
                                         placeholder="Father's name in Amharic" />
@@ -160,7 +160,7 @@
                     <div nz-row [nzGutter]="24">
                         <div nz-col nzSpan="12">
                             <nz-form-item>
-                                <nz-form-label nzRequired class="form-label">Grandfather's Name
+                                <nz-form-label class="form-label">Grandfather's Name
                                     (Amharic)</nz-form-label>
                                 <nz-form-control>
                                     <input nz-input formControlName="grandFatherNameInAmh"
@@ -214,7 +214,7 @@
                     <nz-form-item>
                         <nz-form-label class="form-label">Office Phone</nz-form-label>
                         <nz-form-control>
-                            <input nz-input formControlName="telephonOffice" placeholder="Office phone number" />
+                            <input nz-input formControlName="telephonOffice" placeholder="+2519… / 09… / 07…" (blur)="onTelephonOfficeBlur()" />
                         </nz-form-control>
                     </nz-form-item>
                 </div>
@@ -222,7 +222,7 @@
                     <nz-form-item>
                         <nz-form-label class="form-label">Home Phone</nz-form-label>
                         <nz-form-control>
-                            <input nz-input formControlName="telephonHome" placeholder="Home phone number" />
+                            <input nz-input formControlName="telephonHome" placeholder="+2519… / 09… / 07…" (blur)="onTelephonHomeBlur()" />
                         </nz-form-control>
                     </nz-form-item>
                 </div>
@@ -233,7 +233,7 @@
                     <nz-form-item>
                         <nz-form-label nzRequired class="form-label">Mobile Number</nz-form-label>
                         <nz-form-control>
-                            <input nz-input formControlName="mobile" placeholder="Mobile number" />
+                            <input nz-input formControlName="mobile" placeholder="+2519… / 09… / 07…" (blur)="onMobileBlur()" />
                         </nz-form-control>
                     </nz-form-item>
                 </div>
@@ -258,7 +258,7 @@
                 </div>
                 <div nz-col nzSpan="12">
                     <nz-form-item>
-                        <nz-form-label nzRequired class="form-label">Region</nz-form-label>
+                        <nz-form-label class="form-label">Region</nz-form-label>
                         <nz-form-control>
                             <input nz-input formControlName="region" placeholder="Region" />
                         </nz-form-control>
@@ -269,12 +269,23 @@
             <div nz-row [nzGutter]="24">
                 <div nz-col nzSpan="12">
                     <nz-form-item>
+                        <nz-form-label class="form-label">City</nz-form-label>
+                        <nz-form-control>
+                            <input nz-input formControlName="city" placeholder="City" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+                <div nz-col nzSpan="12">
+                    <nz-form-item>
                         <nz-form-label class="form-label">Woreda</nz-form-label>
                         <nz-form-control>
                             <input nz-input formControlName="woreda" placeholder="Woreda" />
                         </nz-form-control>
                     </nz-form-item>
                 </div>
+            </div>
+
+            <div nz-row [nzGutter]="24">
                 <div nz-col nzSpan="12">
                     <nz-form-item>
                         <nz-form-label class="form-label">Kebele</nz-form-label>

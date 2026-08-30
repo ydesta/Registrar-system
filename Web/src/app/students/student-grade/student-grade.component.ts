@@ -1,21 +1,19 @@
-import { HttpClient, HttpEventType, HttpRequest } from "@angular/common/http";
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { StudentGradeViewModel } from "src/app/Models/StudentGradeViewModel";
 import { ColumnItem } from "src/app/curricula/models/ColumnItem";
-import { CrudService } from "src/app/services/crud.service";
 import { CustomNotificationService } from "src/app/services/custom-notification.service";
-import { FilesService } from "src/app/services/files.service";
 import { StudentGradeService } from "../services/student-grade.service";
+import { PaginatorService, ServerPaginator } from "src/app/reports/services/paginator.service";
 
 @Component({
   selector: "app-student-grade",
   templateUrl: "./student-grade.component.html",
   styleUrls: ["./student-grade.component.scss"]
 })
-export class StudentGradeComponent implements OnInit {
+export class StudentGradeComponent implements OnInit, OnDestroy {
   studentGrades?: StudentGradeViewModel[];
   reqId = "";
   checked = false;
@@ -31,16 +29,8 @@ export class StudentGradeComponent implements OnInit {
   uploadFileLabel: string | undefined = "Choose an Excel to upload";
   uploadProgress: number | undefined;
   uploadUrl: string | undefined;
-  searchKey = "";
-  pageindex = 1;
-  pageSize = 5;
-  sortOrder = "";
-  sortColumn = "";
-  pageSizeOption = [5, 10, 15, 25, 50, 100];
-  totalRecord = 0;
-  tbLoading = true;
-  isLoading = false;
   userId: string = "";
+  pager: ServerPaginator;
   
   // Filter properties
   selectedBatchCode: string = "";
@@ -147,14 +137,13 @@ export class StudentGradeComponent implements OnInit {
   
   constructor(
     private _customNotificationService: CustomNotificationService,
-    private _crudService: CrudService,
     private modal: NzModalService,
     private _fb: FormBuilder,
     private _route: Router,
-    private _file: FilesService,
-    private http: HttpClient,
-    private _studentGradeService: StudentGradeService
+    private _studentGradeService: StudentGradeService,
+    private paginator: PaginatorService
   ) {
+    this.pager = this.paginator.create();
     this.gradeQueryForm = this._fb.group({
       academicProgrammeCode: ["", Validators.required],
       batchCode: ["", Validators.required],
@@ -166,52 +155,57 @@ export class StudentGradeComponent implements OnInit {
 
   ngOnInit(): void {
     this.userId = localStorage.getItem("userId") || "";
+    this.pager.init(() => this.fetchStudentGrades());
     this.fetchStudentGrades();
   }
 
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   fetchStudentGrades() {
-    this.isLoading = true;
-    
     if (!this.userId) {
       this._customNotificationService.notification('error', 'Error', 'User ID not found. Please login again.');
-      this.isLoading = false;
+      this.pager.fail();
       return;
     }
-    
-    this._studentGradeService.getStudentGrades(this.userId).subscribe({
-      next: (res: StudentGradeViewModel[]) => {
-        this.studentGrades = Array.isArray(res) ? res : [];
-        this.filteredStudentGrades = [...this.studentGrades];
-        this.totalRecord = this.studentGrades.length;
+
+    this.pager.loading = true;
+    this._studentGradeService.getStudentGradesPaginated(this.userId, this.pager.query({
+      batchCode: this.selectedBatchCode,
+      course: this.selectedCourse,
+      academicTerm: this.selectedAcademicTerm
+    })).subscribe({
+      next: (res: any) => {
+        this.studentGrades = res.data || [];
+        this.filteredStudentGrades = this.studentGrades;
+        this.pager.applyResult(res);
         this.populateFilterOptions();
-        this.isLoading = false;
       },
-      error: (error) => {
-        console.error('Error fetching student grades:', error);
-        this._customNotificationService.notification('error', 'Error', 'Failed to load student grades');
+      error: () => {
         this.studentGrades = [];
-        this.totalRecord = 0;
-        this.isLoading = false;
+        this.filteredStudentGrades = [];
+        this.pager.fail();
+        this._customNotificationService.notification('error', 'Error', 'Failed to load student grades');
       }
     });
   }
 
   gradeQueryFormSubmit() {
     if (this.gradeQueryForm.valid) {
-      this.isLoading = true;
+      this.pager.loading = true;
       this._studentGradeService.getStudentGradesByQuery(this.gradeQueryForm.value).subscribe({
         next: (res: StudentGradeViewModel[]) => {
           this.studentGrades = Array.isArray(res) ? res : [];
           this.filteredStudentGrades = [...this.studentGrades];
-          this.totalRecord = this.studentGrades.length;
-          this.isLoading = false;
+          this.pager.loading = false;
         },
         error: (error) => {
           console.error('Error fetching grades by query:', error);
           this._customNotificationService.notification('error', 'Error', 'Failed to fetch grades');
           this.studentGrades = [];
-          this.totalRecord = 0;
-          this.isLoading = false;
+          this.filteredStudentGrades = [];
+          this.pager.loading = false;
         }
       });
     } else {
@@ -226,17 +220,12 @@ export class StudentGradeComponent implements OnInit {
       nzOkText: 'Yes',
       nzOkType: 'primary',
       nzOkDanger: true,
-      nzOnOk: () => {
-        // Add delete logic here
-        console.log('Delete grade with ID:', id);
-      },
+      nzOnOk: () => {},
       nzCancelText: 'No',
     });
   }
   
   exportGrades() {
-    // Add export logic here
-    console.log('Exporting grades...');
     this._customNotificationService.notification('info', 'Info', 'Export feature coming soon');
   }
   
@@ -281,17 +270,15 @@ export class StudentGradeComponent implements OnInit {
   }
   
   clickSearchKey() {
-    this.applySearchAndFilters();
+    this.pager.onSearch(this.pager.searchKey);
   }
 
   paginatedIndexEvent(event: any) {
-    this.pageindex = event;
-    this.fetchStudentGrades();
+    this.pager.onPageIndexChange(event);
   }
   
   paginatedSizeEvent(event: any) {
-    this.pageSize = event;
-    this.fetchStudentGrades();
+    this.pager.onPageSizeChange(event);
   }
   
   populateFilterOptions(): void {
@@ -362,48 +349,33 @@ export class StudentGradeComponent implements OnInit {
   // Filter methods
   onBatchCodeFilterChange(value: string): void {
     this.selectedBatchCode = value;
-    this.applyFilters();
+    this.pager.onFilterChange();
   }
 
   onCourseFilterChange(value: string): void {
     this.selectedCourse = value;
-    this.applyFilters();
+    this.pager.onFilterChange();
   }
 
   onAcademicTermFilterChange(value: string): void {
     this.selectedAcademicTerm = value;
-    this.applyFilters();
+    this.pager.onFilterChange();
   }
 
   applySearchAndFilters(): void {
-    this.filteredStudentGrades = this.studentGrades?.filter(grade => {
-      // Search by student code
-      const searchMatch = !this.searchKey || 
-        grade.studentCode?.toLowerCase().includes(this.searchKey.toLowerCase()) ||
-        grade.fullName?.toLowerCase().includes(this.searchKey.toLowerCase());
-      
-      // Filter by dropdown selections
-      const batchCodeMatch = !this.selectedBatchCode || grade.batchCode === this.selectedBatchCode;
-      const courseMatch = !this.selectedCourse || grade.course === this.selectedCourse;
-      const academicTermMatch = !this.selectedAcademicTerm || grade.academicTerm === this.selectedAcademicTerm;
-      
-      return searchMatch && batchCodeMatch && courseMatch && academicTermMatch;
-    }) || [];
-    
-    this.totalRecord = this.filteredStudentGrades.length;
+    this.pager.onSearch(this.pager.searchKey);
   }
 
   applyFilters(): void {
-    this.applySearchAndFilters();
+    this.pager.onFilterChange();
   }
 
   clearFilters(): void {
     this.selectedBatchCode = "";
     this.selectedCourse = "";
     this.selectedAcademicTerm = "";
-    this.searchKey = "";
-    this.filteredStudentGrades = [...this.studentGrades];
-    this.totalRecord = this.studentGrades.length;
+    this.pager.searchKey = "";
+    this.pager.onSearch("");
   }
 
   getUniqueBatchCodes(): string[] {

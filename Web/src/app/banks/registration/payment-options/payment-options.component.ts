@@ -21,6 +21,9 @@ export class PaymentOptionsComponent implements OnInit, OnDestroy {
 
   numberOfCourses = 0;
   totalAmount = 0;
+  courseAmount = 0;
+  penaltyAmount = 0;
+  isLateRegistration = false;
   currency = 'ETB';
   orderNumber: string;
   paymentOrderId: string;
@@ -47,10 +50,10 @@ export class PaymentOptionsComponent implements OnInit, OnDestroy {
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
-        console.log("%%%     ", params);
         this.registrationId = params['registrationid'];
         this.batchCode = params['code'];
         this.semester = params['type'];
+        this.orderNumber = params['orderNumber'] || this.orderNumber;
         this.requestType = this.getRequestType(params['type']);
         if (this.registrationId) {
           this.loadRegistrationData();
@@ -81,14 +84,20 @@ export class PaymentOptionsComponent implements OnInit, OnDestroy {
       if (response.status === 'success' && response.data) {
         const data = response.data;
         const result = response.data.paymentDetails;
-        this.registrationData = data.registration;
+        const registration = response.data.registration;
+        this.registrationData = registration;
         this.selectedCourses = data.paymentOrder?.selectedCourses || [];
         this.numberOfCourses = data.paymentOrder?.numberOfCourses || 0;
         this.orderNumber = data.paymentOrder?.orderNumber || '';
         this.academicTerm = data.paymentOrder?.academicTerm || '';
         this.academicYear = data.paymentOrder?.academicYear || '';
-        this.totalAmount = result.amount || 0;
-        this.paymentOrderId = data.paymentOrder.id;
+        this.totalAmount = result?.amount || 0;
+        this.penaltyAmount = result?.penaltyAmount ?? registration?.unpaidPenaltyAmount ?? 0;
+        this.isLateRegistration = !!(result?.isLateRegistration ?? registration?.isLateRegistration);
+        this.courseAmount = result?.courseAmount != null
+          ? result.courseAmount
+          : Math.max(0, this.totalAmount - this.penaltyAmount);
+        this.paymentOrderId = data.paymentOrder?.id;
         if (data.isPaid) {
           this.successMessage = 'Payment already completed for this registration';
           this.router.navigate(['/registration/success'], {
@@ -239,7 +248,8 @@ export class PaymentOptionsComponent implements OnInit, OnDestroy {
       queryParams: {
         registrationid: this.registrationId,
         code: this.batchCode,
-        type: semester
+        type: semester,
+        orderNumber: this.orderNumber || undefined
       }
     });
   }

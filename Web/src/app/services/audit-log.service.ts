@@ -1,4 +1,3 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -11,216 +10,152 @@ import {
   UserRiskAssessmentViewModel,
   SuspiciousActivityFilterParams
 } from '../Models/SuspiciousActivityModels';
+import { CrudService, QueryValue } from 'src/app/services/crud.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuditLogService {
-  baseUrl = environment.baseUrl;
-  private readonly _auditLogUrl: string = `/${environment.apiVersion}/audit`;
+  private readonly audit = `/${environment.apiVersion}/audit`;
 
-  getAuditLogUrl(): string {
-    return this.baseUrl + this._auditLogUrl;
+  constructor(private crud: CrudService) { }
+
+  getSuspiciousActivityByIp(
+    ipAddress: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Observable<BaseModel<SuspiciousActivityViewModel[]>> {
+    return this.crud.getList<BaseModel<SuspiciousActivityViewModel[]>>(
+      `${this.audit}/suspicious/by-ip/${ipAddress}`,
+      this.dateQuery(startDate, endDate)
+    );
   }
 
-  constructor(private httpClient: HttpClient) { }
-
-  /**
-   * Get suspicious activity by IP address
-   */
-  getSuspiciousActivityByIp(ipAddress: string, startDate?: Date, endDate?: Date): Observable<BaseModel<SuspiciousActivityViewModel[]>> {
-    const endpointUrl = `${this.getAuditLogUrl()}/suspicious/by-ip/${ipAddress}`;
-    let params = new HttpParams();
-    
-    if (startDate) {
-      params = params.append('startDate', startDate.toISOString());
-    }
-    if (endDate) {
-      params = params.append('endDate', endDate.toISOString());
-    }
-    
-    return this.httpClient.get<BaseModel<SuspiciousActivityViewModel[]>>(endpointUrl, { params });
+  getSuspiciousActivityByUser(
+    userId: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Observable<BaseModel<SuspiciousActivityViewModel[]>> {
+    return this.crud.getList<BaseModel<SuspiciousActivityViewModel[]>>(
+      `${this.audit}/suspicious/by-user/${userId}`,
+      this.dateQuery(startDate, endDate)
+    );
   }
 
-  /**
-   * Get suspicious activity by user ID
-   */
-  getSuspiciousActivityByUser(userId: string, startDate?: Date, endDate?: Date): Observable<BaseModel<SuspiciousActivityViewModel[]>> {
-    const endpointUrl = `${this.getAuditLogUrl()}/suspicious/by-user/${userId}`;
-    let params = new HttpParams();
-    
-    if (startDate) {
-      params = params.append('startDate', startDate.toISOString());
-    }
-    if (endDate) {
-      params = params.append('endDate', endDate.toISOString());
-    }
-    
-    return this.httpClient.get<BaseModel<SuspiciousActivityViewModel[]>>(endpointUrl, { params });
+  getSuspiciousActivityDetails(
+    filterParams: SuspiciousActivityFilterParams
+  ): Observable<BaseModel<SuspiciousActivityDetailViewModel[]>> {
+    return this.crud.getList<BaseModel<SuspiciousActivityDetailViewModel[]>>(
+      `${this.audit}/suspicious/details`,
+      this.dateQuery(filterParams.startDate, filterParams.endDate, {
+        ipAddress: filterParams.ipAddress,
+        userId: filterParams.userId,
+        pageIndex: filterParams.pageIndex,
+        pageSize: filterParams.pageSize
+      })
+    );
   }
 
-  /**
-   * Get suspicious activity details with filtering
-   */
-  getSuspiciousActivityDetails(filterParams: SuspiciousActivityFilterParams): Observable<BaseModel<SuspiciousActivityDetailViewModel[]>> {
-    const endpointUrl = `${this.getAuditLogUrl()}/suspicious/details`;
-    let params = new HttpParams();
-    
-    if (filterParams.ipAddress) {
-      params = params.append('ipAddress', filterParams.ipAddress);
-    }
-    if (filterParams.userId) {
-      params = params.append('userId', filterParams.userId);
-    }
-    if (filterParams.startDate) {
-      params = params.append('startDate', filterParams.startDate.toISOString());
-    }
-    if (filterParams.endDate) {
-      params = params.append('endDate', filterParams.endDate.toISOString());
-    }
-    if (filterParams.pageIndex !== undefined) {
-      params = params.append('pageIndex', filterParams.pageIndex.toString());
-    }
-    if (filterParams.pageSize !== undefined) {
-      params = params.append('pageSize', filterParams.pageSize.toString());
-    }
-    
-    return this.httpClient.get<BaseModel<SuspiciousActivityDetailViewModel[]>>(endpointUrl, { params });
+  getSuspiciousActivityDetailsPaginated(query: string): Observable<any> {
+    return this.crud.getList(`${this.audit}/suspicious/details`, query);
   }
 
-  /**
-   * Get suspicious activity statistics
-   */
-  getSuspiciousActivityStatistics(startDate?: Date, endDate?: Date): Observable<BaseModel<SuspiciousActivityStatisticsViewModel>> {
-    const endpointUrl = `${this.getAuditLogUrl()}/suspicious/statistics`;
-    let params = new HttpParams();
-    
-    if (startDate) {
-      params = params.append('startDate', startDate.toISOString());
-    }
-    if (endDate) {
-      params = params.append('endDate', endDate.toISOString());
-    }
-    
-    return this.httpClient.get<BaseModel<SuspiciousActivityStatisticsViewModel>>(endpointUrl, { params });
+  getSuspiciousActivityStatistics(
+    startDate?: Date,
+    endDate?: Date
+  ): Observable<BaseModel<SuspiciousActivityStatisticsViewModel>> {
+    return this.crud.getList<BaseModel<SuspiciousActivityStatisticsViewModel>>(
+      `${this.audit}/suspicious/statistics`,
+      this.dateQuery(startDate, endDate)
+    );
   }
 
-  /**
-   * Get IP risk assessment
-   */
-  getIpRiskAssessment(ipAddress: string, startDate?: Date, endDate?: Date): Observable<BaseModel<IpRiskAssessmentViewModel>> {
-    const endpointUrl = `${this.getAuditLogUrl()}/risk-assessment/ip/${ipAddress}`;
-    let params = new HttpParams();
-    
-    if (startDate) {
-      params = params.append('startDate', startDate.toISOString());
-    }
-    if (endDate) {
-      params = params.append('endDate', endDate.toISOString());
-    }
-    
-    return this.httpClient.get<BaseModel<IpRiskAssessmentViewModel>>(endpointUrl, { params });
+  getIpRiskAssessment(
+    ipAddress: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Observable<BaseModel<IpRiskAssessmentViewModel>> {
+    return this.crud.getList<BaseModel<IpRiskAssessmentViewModel>>(
+      `${this.audit}/risk-assessment/ip/${ipAddress}`,
+      this.dateQuery(startDate, endDate)
+    );
   }
 
-  /**
-   * Get user risk assessment
-   */
-  getUserRiskAssessment(userId: string, startDate?: Date, endDate?: Date): Observable<BaseModel<UserRiskAssessmentViewModel>> {
-    const endpointUrl = `${this.getAuditLogUrl()}/risk-assessment/user/${userId}`;
-    let params = new HttpParams();
-    
-    if (startDate) {
-      params = params.append('startDate', startDate.toISOString());
-    }
-    if (endDate) {
-      params = params.append('endDate', endDate.toISOString());
-    }
-    
-    return this.httpClient.get<BaseModel<UserRiskAssessmentViewModel>>(endpointUrl, { params });
+  getUserRiskAssessment(
+    userId: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Observable<BaseModel<UserRiskAssessmentViewModel>> {
+    return this.crud.getList<BaseModel<UserRiskAssessmentViewModel>>(
+      `${this.audit}/risk-assessment/user/${userId}`,
+      this.dateQuery(startDate, endDate)
+    );
   }
 
-  /**
-   * Get top risky IPs
-   */
-  getTopRiskyIPs(topCount: number = 10, startDate?: Date, endDate?: Date): Observable<BaseModel<IpRiskAssessmentViewModel[]>> {
-    const endpointUrl = `${this.getAuditLogUrl()}/risk-assessment/top-ips/${topCount}`;
-    let params = new HttpParams();
-    
-    if (startDate) {
-      params = params.append('startDate', startDate.toISOString());
-    }
-    if (endDate) {
-      params = params.append('endDate', endDate.toISOString());
-    }
-    
-    return this.httpClient.get<BaseModel<IpRiskAssessmentViewModel[]>>(endpointUrl, { params });
+  getTopRiskyIPs(
+    topCount: number = 10,
+    startDate?: Date,
+    endDate?: Date
+  ): Observable<BaseModel<IpRiskAssessmentViewModel[]>> {
+    return this.crud.getList<BaseModel<IpRiskAssessmentViewModel[]>>(
+      `${this.audit}/risk-assessment/top-ips/${topCount}`,
+      this.dateQuery(startDate, endDate)
+    );
   }
 
-  /**
-   * Get top risky users
-   */
-  getTopRiskyUsers(topCount: number = 10, startDate?: Date, endDate?: Date): Observable<BaseModel<UserRiskAssessmentViewModel[]>> {
-    const endpointUrl = `${this.getAuditLogUrl()}/risk-assessment/top-users/${topCount}`;
-    let params = new HttpParams();
-    
-    if (startDate) {
-      params = params.append('startDate', startDate.toISOString());
-    }
-    if (endDate) {
-      params = params.append('endDate', endDate.toISOString());
-    }
-    
-    return this.httpClient.get<BaseModel<UserRiskAssessmentViewModel[]>>(endpointUrl, { params });
+  getTopRiskyUsers(
+    topCount: number = 10,
+    startDate?: Date,
+    endDate?: Date
+  ): Observable<BaseModel<UserRiskAssessmentViewModel[]>> {
+    return this.crud.getList<BaseModel<UserRiskAssessmentViewModel[]>>(
+      `${this.audit}/risk-assessment/top-users/${topCount}`,
+      this.dateQuery(startDate, endDate)
+    );
   }
 
-  /**
-   * Get IPs with repeated failures
-   */
-  getIpsWithRepeatedFailures(minFailures: number = 5, startDate?: Date, endDate?: Date): Observable<BaseModel<string[]>> {
-    const endpointUrl = `${this.getAuditLogUrl()}/suspicious/ips-repeated-failures`;
-    let params = new HttpParams().append('minFailures', minFailures.toString());
-    
-    if (startDate) {
-      params = params.append('startDate', startDate.toISOString());
-    }
-    if (endDate) {
-      params = params.append('endDate', endDate.toISOString());
-    }
-    
-    return this.httpClient.get<BaseModel<string[]>>(endpointUrl, { params });
+  getIpsWithRepeatedFailures(
+    minFailures: number = 5,
+    startDate?: Date,
+    endDate?: Date
+  ): Observable<BaseModel<string[]>> {
+    return this.crud.getList<BaseModel<string[]>>(
+      `${this.audit}/suspicious/ips-repeated-failures`,
+      this.dateQuery(startDate, endDate, { minFailures })
+    );
   }
 
-  /**
-   * Get users with repeated failures
-   */
-  getUsersWithRepeatedFailures(minFailures: number = 5, startDate?: Date, endDate?: Date): Observable<BaseModel<string[]>> {
-    const endpointUrl = `${this.getAuditLogUrl()}/suspicious/users-repeated-failures`;
-    let params = new HttpParams().append('minFailures', minFailures.toString());
-    
-    if (startDate) {
-      params = params.append('startDate', startDate.toISOString());
-    }
-    if (endDate) {
-      params = params.append('endDate', endDate.toISOString());
-    }
-    
-    return this.httpClient.get<BaseModel<string[]>>(endpointUrl, { params });
+  getUsersWithRepeatedFailures(
+    minFailures: number = 5,
+    startDate?: Date,
+    endDate?: Date
+  ): Observable<BaseModel<string[]>> {
+    return this.crud.getList<BaseModel<string[]>>(
+      `${this.audit}/suspicious/users-repeated-failures`,
+      this.dateQuery(startDate, endDate, { minFailures })
+    );
   }
 
-  /**
-   * Get IPs with high request rate
-   */
-  getIpsWithHighRequestRate(minRequestsPerMinute: number = 30, startDate?: Date, endDate?: Date): Observable<BaseModel<string[]>> {
-    const endpointUrl = `${this.getAuditLogUrl()}/suspicious/ips-high-rate`;
-    let params = new HttpParams().append('minRequestsPerMinute', minRequestsPerMinute.toString());
-    
-    if (startDate) {
-      params = params.append('startDate', startDate.toISOString());
-    }
-    if (endDate) {
-      params = params.append('endDate', endDate.toISOString());
-    }
-    
-    return this.httpClient.get<BaseModel<string[]>>(endpointUrl, { params });
+  getIpsWithHighRequestRate(
+    minRequestsPerMinute: number = 30,
+    startDate?: Date,
+    endDate?: Date
+  ): Observable<BaseModel<string[]>> {
+    return this.crud.getList<BaseModel<string[]>>(
+      `${this.audit}/suspicious/ips-high-rate`,
+      this.dateQuery(startDate, endDate, { minRequestsPerMinute })
+    );
+  }
+
+  private dateQuery(
+    startDate?: Date,
+    endDate?: Date,
+    extra?: Record<string, QueryValue>
+  ): Record<string, QueryValue> {
+    return {
+      ...extra,
+      startDate: startDate?.toISOString(),
+      endDate: endDate?.toISOString()
+    };
   }
 }

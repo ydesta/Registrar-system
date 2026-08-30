@@ -41,7 +41,7 @@ export class AddCollegeComponent implements OnInit {
       this.action = 'Edit College';
       this.submit = 'Update';
       this._crudService
-        .getList('/Colleges' + '/' + this.progStatusId)
+        .getById('/Colleges', this.progStatusId)
         .subscribe((res: any) => {
           this.patchValues(res.data);
         });

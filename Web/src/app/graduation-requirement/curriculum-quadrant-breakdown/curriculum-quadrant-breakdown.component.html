@@ -27,7 +27,8 @@
 
     <div nz-col nzSpan="5" style="width: 300px">
       <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-        <input type="text" nz-input placeholder="search..." />
+        <input type="text" nz-input placeholder="search..." [(ngModel)]="pager.searchKey"
+          (ngModelChange)="pager.onSearch($event)" />
       </nz-input-group>
       <ng-template #suffixIconButton>
         <button nz-button nzType="primary" nzSearch class="main-color">
@@ -39,7 +40,16 @@
   <nz-divider></nz-divider>
   <div id="print-section">
     <img class="logo" src="../../assets/images/logo.png" />
-    <nz-table #basicTable [nzData]="curriculumQuadrantBreakdowns!" nzBordered>
+    <nz-table #basicTable [nzData]="curriculumQuadrantBreakdowns!" nzBordered
+      [nzPageSize]="pager.pageSize"
+      [nzPageSizeOptions]="pager.pageSizeOptions"
+      [nzShowSizeChanger]="true"
+      [nzTotal]="pager.total"
+      [nzPageIndex]="pager.pageIndex"
+      (nzPageIndexChange)="pager.onPageIndexChange($event)"
+      (nzPageSizeChange)="pager.onPageSizeChange($event)"
+      [nzFrontPagination]="false"
+      [nzLoading]="pager.loading">
       <thead class="table-header-row">
         <tr class="table-header-row">
           <!-- <th><label nz-checkbox [(ngModel)]="checked">All</label></th> -->

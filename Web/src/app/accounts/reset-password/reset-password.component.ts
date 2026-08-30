@@ -34,7 +34,6 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Get token and email from URL parameters
     this._route.queryParams.subscribe(params => {
       this.token = params['token'];
       this.email = params['email'];
@@ -43,8 +42,6 @@ export class ResetPasswordComponent implements OnInit {
         this._routeRefreshService.navigateWithRefresh(['/accounts/forgot-password']);
       }
     });
-
-    // Check if user is already authenticated
     this._authService.isAuthenticated().then(isAuth => {
       if (isAuth) {
         this._routeRefreshService.navigateWithRefresh(['/dashboard']);
@@ -52,64 +49,57 @@ export class ResetPasswordComponent implements OnInit {
     });
   }
 
-  // Custom validator to check if passwords match
   passwordMatchValidator(form: FormGroup) {
     const newPassword = form.get('newPassword');
     const confirmPassword = form.get('confirmPassword');
-    
     if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
       confirmPassword.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
     }
-    
-    if (confirmPassword && confirmPassword.errors) {
+    if (confirmPassword?.errors) {
       delete confirmPassword.errors['passwordMismatch'];
       if (Object.keys(confirmPassword.errors).length === 0) {
         confirmPassword.setErrors(null);
       }
     }
-    
     return null;
   }
 
   submitForm(): void {
-    if (this.resetPasswordForm.valid && this.token && this.email) {
-      this.isLoading = true;
-
-      this._authService.resetPassword(
-        this.email, 
-        this.token, 
-        this.resetPasswordForm.value.newPassword, 
-        this.resetPasswordForm.value.confirmPassword
-      ).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          this.passwordReset = true;
-          this._notificationService.notification(
-            'success',
-            'Password Reset Successful',
-            'Your password has been reset successfully. You can now login with your new password.'
-          );
-        },
-        error: (error) => {
-          this.isLoading = false;
-          
-          let errorMessage = 'An error occurred while resetting your password. Please try again.';
-          if (error.error && error.error.message) {
-            errorMessage = error.error.message;
-          }
-          
-          this._notificationService.notification('error', 'Reset Failed', errorMessage);
-        }
-      });
-    } else {
-      Object.values(this.resetPasswordForm.controls).forEach((control) => {
+    if (!this.resetPasswordForm.valid || !this.token || !this.email) {
+      Object.values(this.resetPasswordForm.controls).forEach(control => {
         if (control.invalid) {
           control.markAsDirty();
           control.updateValueAndValidity({ onlySelf: true });
         }
       });
+      return;
     }
+    this.isLoading = true;
+    this._authService.resetPassword(
+      this.email,
+      this.token,
+      this.resetPasswordForm.value.newPassword,
+      this.resetPasswordForm.value.confirmPassword
+    ).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.passwordReset = true;
+        this._notificationService.notification(
+          'success',
+          'Password Reset Successful',
+          'Your password has been reset successfully. You can now login with your new password.'
+        );
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this._notificationService.notification(
+          'error',
+          'Reset Failed',
+          error.error?.message || 'An error occurred while resetting your password. Please try again.'
+        );
+      }
+    });
   }
 
   goToLogin(): void {
@@ -132,7 +122,11 @@ export class ResetPasswordComponent implements OnInit {
     this.confirmPasswordVisible = !this.confirmPasswordVisible;
   }
 
-  // Getter methods for form validation
-  get newPassword() { return this.resetPasswordForm.get('newPassword'); }
-  get confirmPassword() { return this.resetPasswordForm.get('confirmPassword'); }
-} 
+  get newPassword() {
+    return this.resetPasswordForm.get('newPassword');
+  }
+
+  get confirmPassword() {
+    return this.resetPasswordForm.get('confirmPassword');
+  }
+}

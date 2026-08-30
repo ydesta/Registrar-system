@@ -1,11 +1,9 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 import { UserManagementRoutingModule } from './user-management-routing.module';
 import { UserManagementHomeComponent } from './user-management-home.component';
 
-// Component imports
 import { UserListComponent } from './components/user-list/user-list.component';
 import { RoleManagementComponent } from './components/role-management/role-management.component';
 import { RoleCreateComponent } from './components/role-create/role-create.component';
@@ -21,7 +19,6 @@ import { CreateUserComponent } from './components/create-user/create-user.compon
 import { UserCredentialsComponent } from './components/user-credentials/user-credentials.component';
 import { UpdateFromExcelComponent } from './components/update-from-excel/update-from-excel.component';
 
-// Ng-Zorro Modules
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -80,7 +77,6 @@ import { NzModalRef } from 'ng-zorro-antd/modal';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    HttpClientModule,
     UserManagementRoutingModule,
     NzCardModule,
     NzButtonModule,

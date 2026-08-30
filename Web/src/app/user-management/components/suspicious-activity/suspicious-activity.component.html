@@ -225,20 +225,24 @@
     <!-- Activity Details Tab -->
     <nz-tab nzTitle="Activity Details">
       <div class="table-container">
-        <nz-card [nzLoading]="loading">
+        <nz-card [nzLoading]="loading || pager.loading">
+          <div style="margin-bottom: 12px;">
+            <input nz-input placeholder="Search by IP, user, path, or reason..." [(ngModel)]="searchKey"
+              (ngModelChange)="search()" style="max-width: 320px;" />
+          </div>
           <nz-table 
             #activityTable
             [nzData]="suspiciousActivities" 
             nzBordered
-            [nzPageSize]="pageSize"
-            [nzPageSizeOptions]="pageSizeOptions"
+            [nzPageSize]="pager.pageSize"
+            [nzPageSizeOptions]="pager.pageSizeOptions"
             [nzShowSizeChanger]="true"
-            [nzTotal]="total"
-            [nzPageIndex]="pageIndex"
+            [nzTotal]="pager.total"
+            [nzPageIndex]="pager.pageIndex"
             (nzPageIndexChange)="onPageIndexChange($event)"
             (nzPageSizeChange)="onPageSizeChange($event)"
             [nzFrontPagination]="false"
-            [nzLoading]="loading"
+            [nzLoading]="loading || pager.loading"
             [nzScroll]="{ x: '1400px' }">
             <thead>
               <tr>

@@ -55,11 +55,11 @@ namespace SecureAuth.API.Configuration
         // ============================================
         public static class Email
         {
-            public const string From = "hilcoeregistrarsystem@gmail.com";
-            public const string SmtpServer = "smtp.gmail.com";
-            public const int Port = 587;
-            public const string Username = "hilcoeregistrarsystem@gmail.com";
-            public const string Password = "eaxfhyikdusxmeyz"; // Dev email password
+            public const string From = "hsis@hilcoeschool.com";
+            public const string SmtpServer = "mail.hilcoeschool.com";
+            public const int Port = 465;
+            public const string Username = "hsis@hilcoeschool.com";
+            public const string Password = "7EjPlvFN@fFa{v,B";
             public const string BaseUrl = "https://localhost:7123";
         }
 

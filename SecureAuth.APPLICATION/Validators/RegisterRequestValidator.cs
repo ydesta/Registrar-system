@@ -1,5 +1,6 @@
 using FluentValidation;
 using SecureAuth.APPLICATION.DTOs.Authentication;
+using SecureAuth.APPLICATION.Helpers;
 
 namespace SecureAuth.APPLICATION.Validators
 {
@@ -19,7 +20,6 @@ namespace SecureAuth.APPLICATION.Validators
                 .NotEmpty().WithMessage("Email is required")
                 .EmailAddress().WithMessage("Invalid email format");
 
-            // Password is required for self-registration
             RuleFor(x => x.Password)
                 .NotEmpty().When(x => x.IsSelfRegistration)
                 .WithMessage("Password is required for self-registration")
@@ -29,30 +29,27 @@ namespace SecureAuth.APPLICATION.Validators
                 .When(x => x.IsSelfRegistration)
                 .WithMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character");
 
-            // Confirm password is required for self-registration
             RuleFor(x => x.ConfirmPassword)
                 .NotEmpty().When(x => x.IsSelfRegistration)
                 .WithMessage("Please confirm your password")
                 .Equal(x => x.Password).When(x => x.IsSelfRegistration)
                 .WithMessage("Passwords do not match");
 
-            // Password should not be provided for non-self-registration
             RuleFor(x => x.Password)
                 .Empty().When(x => !x.IsSelfRegistration)
                 .WithMessage("Password should not be provided for admin-created accounts");
 
-            // Confirm password should not be provided for non-self-registration
             RuleFor(x => x.ConfirmPassword)
                 .Empty().When(x => !x.IsSelfRegistration)
                 .WithMessage("Confirm password should not be provided for admin-created accounts");
 
             RuleFor(x => x.PhoneNumber)
+                .NotEmpty().When(x => x.IsSelfRegistration)
+                .WithMessage("Phone number is required")
                 .MaximumLength(20).WithMessage("Phone number cannot exceed 20 characters")
-                .Matches(@"^(\+[1-9]\d{1,14}|(09|07)\d{8}|0\d{9})$")
-                .When(x => !string.IsNullOrEmpty(x.PhoneNumber))
-                .WithMessage("Phone number must be in valid format: +251xxxxxxxxx, +33xxxxxxxxx, 09xxxxxxxx, 07xxxxxxxx, or 0xxxxxxxxx (10 digits)");
+                .Must(phone => string.IsNullOrWhiteSpace(phone) || EthiopianPhoneNumber.IsValid(phone))
+                .WithMessage(EthiopianPhoneNumber.ErrorMessage);
 
-            // Role names should not be provided for self-registration
             RuleFor(x => x.RoleNames)
                 .Empty().When(x => x.IsSelfRegistration)
                 .WithMessage("Roles cannot be specified for self-registration. You will be assigned the 'Applicant' role automatically.");
@@ -68,4 +65,4 @@ namespace SecureAuth.APPLICATION.Validators
                 .WithMessage("A user cannot have more than 5 roles");
         }
     }
-} 
+}

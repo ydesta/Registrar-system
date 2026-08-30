@@ -156,11 +156,11 @@
   </div>
 
   <!-- Results Table -->
-  <div class="table-container" *ngIf="sectionAssignedStudents.length > 0">
+  <div class="table-container" *ngIf="hasSearched && (pager.total > 0 || pager.searchKey)">
     <div class="table-header">
       <div class="page-info">
         <span class="text-muted">
-          Found {{ sectionAssignedStudents.length }} students in the selected section
+          Found {{ pager.total }} students in the selected section
         </span>
       </div>
       <div class="search-box">
@@ -169,8 +169,16 @@
       </div>
     </div>
 
-    <nz-table #basicTable [nzData]="listOfDisplayData" [nzLoading]="loading" [nzShowPagination]="false"
-      [nzPageSize]="9999" [nzNoResult]="emptyTpl" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;" class="mobile-table-container">
+    <nz-table #basicTable [nzData]="listOfDisplayData" [nzLoading]="pager.loading"
+      [nzPageSize]="pager.pageSize"
+      [nzPageSizeOptions]="pager.pageSizeOptions"
+      [nzShowSizeChanger]="true"
+      [nzTotal]="pager.total"
+      [nzPageIndex]="pager.pageIndex"
+      (nzPageIndexChange)="pager.onPageIndexChange($event)"
+      (nzPageSizeChange)="pager.onPageSizeChange($event)"
+      [nzFrontPagination]="false"
+      [nzNoResult]="emptyTpl" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;" class="mobile-table-container">
 
       <thead>
         <tr>
@@ -184,7 +192,7 @@
         <tr *ngFor="let student of basicTable.data; let i = index">
           <td>
             <span class="serial-number">
-              {{ i + 1 }}
+              {{ pager.serial(i) }}
             </span>
           </td>
           <td>
@@ -209,7 +217,7 @@
   </div>
 
   <!-- Empty State -->
-  <div class="empty-state" *ngIf="!loading && sectionAssignedStudents.length === 0 && searchForm.get('batchCode')?.value">
+  <div class="empty-state" *ngIf="!pager.loading && hasSearched && pager.total === 0 && !pager.searchKey">
     <nz-card class="empty-card">
       <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="notFoundContent">
         <ng-template #notFoundContent>

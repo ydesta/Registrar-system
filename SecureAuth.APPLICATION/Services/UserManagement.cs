@@ -14,6 +14,7 @@ using DaynamicAuthorizationAndAuthentication.Service.Models.Authentication.User;
 using SecureAuth.APPLICATION.DTOs.User;
 using SecureAuth.APPLICATION.DTOs.Authentication;
 using SecureAuth.APPLICATION.DTOs.Auth;
+using SecureAuth.APPLICATION.Helpers;
 using SecureAuth.DOMAIN.Models.SignUp;
 using SecureAuth.DOMAIN.Models.User;
 using SecureAuth.DOMAIN.Models.LogIn;
@@ -49,12 +50,13 @@ namespace SecureAuth.APPLICATION.Services
             }
 
             // Add the user in the database
+            var phoneNumber = EthiopianPhoneNumber.NormalizeOrNull(registerUser.PhoneNumber) ?? registerUser.PhoneNumber;
             ApplicationUser user = new()
             {
                 FirstName = registerUser.FirstName,
                 MiddleName = registerUser.MiddleName,
                 LastName = registerUser.LastName,
-                PhoneNumber = registerUser.PhoneNumber,
+                PhoneNumber = phoneNumber,
                 Email = registerUser.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = registerUser.Username,
@@ -265,7 +267,7 @@ namespace SecureAuth.APPLICATION.Services
                         Email = user.Email ?? string.Empty,
                         FirstName = user.FirstName ?? string.Empty,
                         LastName = user.LastName ?? string.Empty,
-                        PhoneNumber = user.PhoneNumber,
+                        PhoneNumber = EthiopianPhoneNumber.NormalizeOptional(user.PhoneNumber),
                         EmailConfirmed = user.EmailConfirmed,
                         PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                         TwoFactorEnabled = user.TwoFactorEnabled,

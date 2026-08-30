@@ -68,4 +68,83 @@ export class ExcelExportService {
     });
     saveAs(blob, `${fileName}_${new Date().getTime()}.xlsx`);
   }
+
+  exportTranscript(transcript: any, fileName: string): void {
+    if (!transcript) {
+      console.warn('No transcript to export');
+      return;
+    }
+
+    const rows: any[][] = [];
+    rows.push(['HiLCoE School of Computer Science & Technology']);
+    rows.push(['Student Transcript']);
+    rows.push([]);
+    rows.push(['Full Name', transcript.fullName || '']);
+    rows.push(['Gender', transcript.gender || '']);
+    rows.push(['Date of Birth', transcript.dateOfBirth ? new Date(transcript.dateOfBirth).toLocaleDateString() : '']);
+    rows.push(['Place of Birth', transcript.placeOfBirth || '']);
+    rows.push(['Admission Date', transcript.admissionDate ? new Date(transcript.admissionDate).toLocaleDateString() : '']);
+    rows.push(['Programme', transcript.programme || '']);
+    rows.push(['Division', transcript.division || '']);
+    rows.push(['Status', transcript.status || '']);
+    rows.push(['Major', transcript.major || '']);
+    rows.push([
+      'Award Date',
+      transcript.awardDate ? new Date(transcript.awardDate).toLocaleDateString() : ''
+    ]);
+    rows.push([]);
+
+    const terms = transcript.academicTerms || [];
+    for (const term of terms) {
+      rows.push([`Term: ${term.termName || ''}`]);
+      rows.push(['Course Code', 'Course Title', 'Credit Hour', 'Grade', 'Grade Point']);
+
+      for (const course of term.courses || []) {
+        rows.push([
+          course.courseCode || '',
+          course.courseTitle || '',
+          course.creditHours ?? '',
+          course.grade || '',
+          course.gradePoint != null ? Number(course.gradePoint).toFixed(2) : ''
+        ]);
+      }
+
+      rows.push(['', 'Total:', term.totalCreditHours ?? '', '', '']);
+      rows.push(['', 'Average:', term.termGPA != null ? Number(term.termGPA).toFixed(2) : '', '', '']);
+      rows.push([
+        '',
+        'Total Credit Hour:',
+        term.totalCreditHours != null ? Number(term.totalCreditHours).toFixed(2) : '',
+        '',
+        ''
+      ]);
+      rows.push([
+        '',
+        'CGPA:',
+        term.cumulativeGPA != null ? Number(term.cumulativeGPA).toFixed(2) : '',
+        '',
+        ''
+      ]);
+      rows.push([
+        '',
+        'Major CGPA:',
+        term.cumulativeMajorGPA != null ? Number(term.cumulativeMajorGPA).toFixed(2) : '',
+        '',
+        ''
+      ]);
+      rows.push([]);
+    }
+
+    rows.push(['Overall Total Credit Hours', transcript.totalCreditHours ?? '']);
+    rows.push([
+      'Overall CGPA',
+      transcript.overallCGPA != null ? Number(transcript.overallCGPA).toFixed(2) : ''
+    ]);
+    rows.push([
+      'Major CGPA',
+      transcript.majorCGPA != null ? Number(transcript.majorCGPA).toFixed(2) : ''
+    ]);
+
+    this.exportWithCustomLayout(rows, fileName, 'Transcript');
+  }
 }

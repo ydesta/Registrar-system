@@ -108,5 +108,27 @@ namespace SecureAuth.INFRASTRUCTURE.Services.Repositories
 
             return result;
         }
+
+        public async Task<Dictionary<string, string>> GetPrimaryRoleNamesByUserIdsAsync(IEnumerable<string> userIds)
+        {
+            var idList = userIds?.Distinct().ToList() ?? new List<string>();
+            if (!idList.Any())
+            {
+                return new Dictionary<string, string>();
+            }
+
+            var rows = await (
+                from ur in _context.UserRoles
+                join r in _context.Roles on ur.RoleId equals r.Id
+                where idList.Contains(ur.UserId)
+                select new { ur.UserId, RoleName = r.Name ?? string.Empty }
+            ).ToListAsync();
+
+            return rows
+                .GroupBy(x => x.UserId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => string.Join(", ", g.Select(x => x.RoleName).Where(n => !string.IsNullOrEmpty(n)).OrderBy(n => n).Distinct()));
+        }
     }
 } 

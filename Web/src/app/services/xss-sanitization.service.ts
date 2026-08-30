@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { environment } from '../../environments/environment';
+import { normalizeEthiopianMobile } from '../common/constant';
 
 @Injectable({
   providedIn: 'root'
@@ -98,18 +99,7 @@ export class XssSanitizationService {
    */
   sanitizePhone(phone: string): string {
     if (!phone) return '';
-    
-    // Remove all non-digit characters except + at the beginning
-    let sanitized = phone.replace(/[^\d+]/g, '');
-    
-    // Ensure + is only at the beginning
-    if (sanitized.includes('+')) {
-      sanitized = '+' + sanitized.replace(/\+/g, '');
-    }
-    
-    // Basic phone validation (7-15 digits)
-    const phoneRegex = /^(\+)?[1-9]\d{6,14}$/;
-    return phoneRegex.test(sanitized) ? sanitized : '';
+    return normalizeEthiopianMobile(phone) || '';
   }
 
   /**

@@ -415,5 +415,32 @@ namespace SecureAuth.API.Controllers.Admin
                 });
             }
         }
+
+        [HttpPost("normalize-phones")]
+        public async Task<ActionResult<ApiResponse<NormalizeUserPhonesResult>>> NormalizeUserPhones()
+        {
+            try
+            {
+                var result = await _mediator.SendAsync<NormalizeUserPhonesCommand, NormalizeUserPhonesResult>(
+                    new NormalizeUserPhonesCommand());
+                return Ok(new ApiResponse<NormalizeUserPhonesResult>
+                {
+                    IsSuccess = result.Success,
+                    Message = result.Message,
+                    Response = result,
+                    StatusCode = 200
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new ApiResponse<NormalizeUserPhonesResult>
+                {
+                    IsSuccess = false,
+                    Message = "An error occurred while normalizing user phone numbers",
+                    Response = null,
+                    StatusCode = 500
+                });
+            }
+        }
     }
 } 

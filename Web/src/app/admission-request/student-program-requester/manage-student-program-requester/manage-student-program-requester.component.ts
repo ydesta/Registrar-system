@@ -5,6 +5,8 @@ import { StudentProgramRequesterFormComponent } from "../student-program-request
 import { ApplicantReviewerDecisionComponent } from "../../reviewer/applicant-reviewer-decision/applicant-reviewer-decision.component";
 import {
   ACADEMIC_STUDENT_STATUS_DESCRIPTIONS,
+  ACADEMIC_YEAR_NUMBER_STATUS,
+  APPLICANT_TYPE_STATUS,
   Division_Status,
   REQUEST_STATUS_DESCRIPTIONS
 } from "src/app/common/constant";
@@ -403,7 +405,7 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
       },
       nzMaskClosable: false,
       nzFooter: null,
-      nzWidth: "60%"
+      nzWidth: 520
     });
     
     modal.afterClose.subscribe(() => {
@@ -443,7 +445,7 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
       },
       nzMaskClosable: false,
       nzFooter: null,
-      nzWidth: "60%"
+      nzWidth: 520
     });
     
     modal.afterClose.subscribe(() => {
@@ -547,6 +549,15 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
   getDivisionStatusDescription(Id: any) {
     const program = this.divisionStatusist.find(item => item.Id == Id);
     return program ? program.Description : "";
+  }
+
+  getApplicantYearDescription(year: number) {
+    const typeMatch = APPLICANT_TYPE_STATUS.find(item => item.Id == year);
+    if (typeMatch) {
+      return typeMatch.Description;
+    }
+    const match = ACADEMIC_YEAR_NUMBER_STATUS.find(item => item.Id == year);
+    return match ? match.Description : (year ? String(year) : "");
   }
 
   ngOnDestroy() {

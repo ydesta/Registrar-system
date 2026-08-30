@@ -77,11 +77,11 @@
           <!-- Action Buttons -->
           <div nz-row>
             <div nz-col [nzSpan]="24" class="text-right">
-              <button nz-button nzType="default" (click)="loadData()" class="mr-2">
+              <button nz-button nzType="default" (click)="onReset()" class="mr-2">
                 <i nz-icon nzType="reload" nzTheme="outline"></i>
                 Reset
               </button>
-              <button nz-button nzType="primary" (click)="onSearch()" [nzLoading]="tbLoading">
+              <button nz-button nzType="primary" (click)="onSearch()" [nzLoading]="pager.loading">
                 <i nz-icon nzType="search" nzTheme="outline"></i>
                 Search
               </button>
@@ -136,12 +136,12 @@
       </div>
     </div>
 
-    <nz-table #basicTable [nzData]="filteredStudents" nzBordered [nzPageSize]="pageSize"
-      [nzShowSizeChanger]="true" [nzTotal]="totalRecord" [nzPageIndex]="pageindex"
-      (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)"
-      [nzLoading]="tbLoading" [nzNoResult]="emptyTpl" [nzShowQuickJumper]="true" [nzShowTotal]="totalTemplate"
-      [nzPageSizeOptions]="pageSizeOption" [nzScroll]="{ x: '1200px' }" style="overflow-x: auto;"
-      class="mobile-table-container">
+    <nz-table #basicTable [nzData]="filteredStudents" nzBordered [nzPageSize]="pager.pageSize"
+      [nzShowSizeChanger]="true" [nzTotal]="pager.total" [nzPageIndex]="pager.pageIndex"
+      (nzPageIndexChange)="pager.onPageIndexChange($event)" (nzPageSizeChange)="pager.onPageSizeChange($event)"
+      [nzFrontPagination]="false" [nzLoading]="pager.loading" [nzNoResult]="emptyTpl" [nzShowQuickJumper]="true"
+      [nzShowTotal]="totalTemplate" [nzPageSizeOptions]="pager.pageSizeOptions" [nzScroll]="{ x: '1200px' }"
+      style="overflow-x: auto;" class="mobile-table-container">
       <thead>
         <tr>
           <th style="min-width: 50px;">#</th>
@@ -168,7 +168,7 @@
           <tr>
             <td>
               <span class="serial-number">
-                {{ (pageindex - 1) * pageSize + i + 1 }}
+                {{ pager.serial(i) }}
               </span>
             </td>
             <td>{{ data.fullName }}</td>

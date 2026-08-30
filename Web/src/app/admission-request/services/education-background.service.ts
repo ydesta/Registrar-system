@@ -1,46 +1,29 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable, map } from "rxjs";
-import { environment } from "src/environments/environment";
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { CrudService } from 'src/app/services/crud.service';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: "root"
+  providedIn: 'root'
 })
 export class EducationBackgroundService {
-  baseUrl = environment.baseUrl;
-  private readonly _educationBackgroundUrl: string = `/${environment.apiVersion}/applicanteducationbackgrounds`;
-  getEducationBackgroundUrl() {
-    return this.baseUrl + this._educationBackgroundUrl;
+  private readonly education = `/${environment.apiVersion}/applicanteducationbackgrounds`;
+
+  constructor(private crud: CrudService) {}
+
+  getApplicantEducationByApplicantId(id: string): Observable<any> {
+    return this.crud.getList(`${this.education}/applicantId/${id}`);
   }
 
-  constructor(private httpClient: HttpClient) {}
-  getApplicantEducationByApplicantId(id: string): Observable<any> {
-    const endpointUrl = `${this.getEducationBackgroundUrl()}/applicantId/${id}`;
-    return this.httpClient.get(endpointUrl).pipe(map(result => result as any));
-  }
   createEducation(educationBackground: any): Observable<any> {
-    const endPointUrl = `${this.getEducationBackgroundUrl()}`;
-    return this.httpClient.post<any>(endPointUrl, educationBackground).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.add(this.education, educationBackground);
   }
 
   update(id: string, educationBackground: any): Observable<any> {
-    const endPointUrl = `${this.getEducationBackgroundUrl()}/${id}`;
-    return this.httpClient.patch<any>(endPointUrl, educationBackground).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.update(this.education, id, educationBackground);
   }
+
   delete(id: string): Observable<any> {
-    const endPointUrl = `${this.getEducationBackgroundUrl()}/${id}`;
-    return this.httpClient.delete<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.delete(this.education, id);
   }
 }

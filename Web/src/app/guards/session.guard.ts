@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { SessionManagementService } from '../services/session-management.service';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
+import { isPublicAuthRoute } from '../constants';
 
 @Injectable({
   providedIn: 'root'
@@ -14,17 +15,9 @@ export class SessionGuard implements CanActivate {
     private router: Router
   ) {}
 
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<boolean> {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     return new Observable<boolean>(observer => {
-      // Skip session check for auth routes
-      if (state.url.includes('/accounts/login') || 
-          state.url.includes('/accounts/register') ||
-          state.url.includes('/accounts/forgot-password') ||
-          state.url.includes('/accounts/reset-password') ||
-          state.url.includes('/accounts/verify-email')) {
+      if (isPublicAuthRoute(state.url)) {
         observer.next(true);
         observer.complete();
         return;
@@ -32,9 +25,7 @@ export class SessionGuard implements CanActivate {
 
       this.authService.isAuthenticated().then(isAuthenticated => {
         if (!isAuthenticated) {
-          this.router.navigate(['/accounts/login'], { 
-            queryParams: { returnUrl: state.url } 
-          });
+          this.router.navigate(['/accounts/login'], { queryParams: { returnUrl: state.url } });
           observer.next(false);
           observer.complete();
           return;
@@ -43,27 +34,20 @@ export class SessionGuard implements CanActivate {
         const sessionInfo = this.sessionManagementService.getSessionInfo();
         if (!sessionInfo.isActive) {
           this.authService.logout();
-          this.router.navigate(['/accounts/login'], { 
-            queryParams: { returnUrl: state.url, reason: 'session_expired' } 
+          this.router.navigate(['/accounts/login'], {
+            queryParams: { returnUrl: state.url, reason: 'session_expired' }
           });
           observer.next(false);
           observer.complete();
           return;
         }
 
-        if (sessionInfo.isWarning) {
-          // Show warning but allow access
-          console.warn('Session warning: Session will expire soon');
-        }
-
         observer.next(true);
         observer.complete();
-      }).catch(error => {
-        console.error('Session guard error:', error);
-        // On error, allow access but log the issue
+      }).catch(() => {
         observer.next(true);
         observer.complete();
       });
     });
   }
-} 
+}

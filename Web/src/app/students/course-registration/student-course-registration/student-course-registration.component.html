@@ -44,7 +44,7 @@
               <span class="card-title">Max Allowed</span>
             </div>
             <div class="card-value max-value">{{ getMaxAllowedCreditHours() }}</div>
-            <div class="card-subtitle">{{ studentTermCourseReg?.ignoreGradeLevelValidation ? 'All Available Courses' : (studentTermCourseReg?.cgpa === 0 ? 'All Available Courses' : 'Based on CGPA') }}</div>
+            <div class="card-subtitle">{{ !creditHourLimitsEnabled || studentTermCourseReg?.ignoreGradeLevelValidation ? 'All Available Courses' : (studentTermCourseReg?.cgpa === 0 ? 'All Available Courses' : creditHourLimitSourceLabel) }}</div>
           </div>
 
           <div class="summary-card selected-credits">
@@ -81,10 +81,7 @@
 
       </div>
 
-      <nz-card nzType="inner" [nzTitle]="courseSectionTitle" class="card-section">
-        <nz-alert nzType="info" nzShowIcon [nzMessage]="'Regular Term Registration'"
-          [nzDescription]="'Select the courses you want to register for the current term. These are your primary course selections.'"
-          class="mb-16"></nz-alert>
+      <nz-card nzType="inner" [nzTitle]="courseSectionTitle" class="card-section" *ngIf="registrationVisibility.showRegular">
         <div id="print-section" class="print-section">
           <!-- <button class="print-button" (click)="printSlip()">
             <span nz-icon nzType="printer" nzTheme="outline"></span>
@@ -169,7 +166,7 @@
           </div>
         </nz-spin>
       </nz-card>
-      <nz-card nzType="inner" [nzTitle]="courseAddTitle" class="card-section" *ngIf="listOfAddedCourses && listOfAddedCourses.length > 0">
+      <nz-card nzType="inner" [nzTitle]="courseAddTitle" class="card-section" *ngIf="registrationVisibility.showAdd && listOfAddedCourses && listOfAddedCourses.length > 0">
         <nz-alert nzType="info" nzShowIcon [nzMessage]="'Add Course Request'"
           [nzDescription]="'You can select up to 3 additional courses.'"
           class="mb-16"></nz-alert>
@@ -256,7 +253,7 @@
           </div>
         </nz-spin>
       </nz-card>
-      <nz-card nzType="inner" [nzTitle]="courseAssessmentTitle" class="card-section" *ngIf="listOfCourseAssessment && listOfCourseAssessment.length > 0">
+      <nz-card nzType="inner" [nzTitle]="courseAssessmentTitle" class="card-section" *ngIf="registrationVisibility.showAssessment && listOfCourseAssessment && listOfCourseAssessment.length > 0">
         <nz-alert nzType="info" nzShowIcon [nzMessage]="'Course Assessment'"
           [nzDescription]="'Select courses that you need to retake or reassess. These courses will be marked for assessment purposes.'"
           class="mb-16"></nz-alert>
@@ -327,7 +324,7 @@
         </nz-spin>
       </nz-card>
 
-      <nz-card nzType="inner" [nzTitle]="courseEquivalentTitle" class="card-section" *ngIf="listOfEquivalentCourses && listOfEquivalentCourses.length > 0">
+      <nz-card nzType="inner" [nzTitle]="courseEquivalentTitle" class="card-section" *ngIf="registrationVisibility.showEquivalent && listOfEquivalentCourses && listOfEquivalentCourses.length > 0">
         <nz-alert nzType="info" nzShowIcon [nzMessage]="'Equivalent Courses'"
           [nzDescription]="'Select equivalent courses that can substitute for required courses. These courses provide alternative options for meeting academic requirements.'"
           class="mb-16"></nz-alert>
@@ -412,16 +409,24 @@
         </nz-spin>
       </nz-card>
 
+      <nz-alert *ngIf="getPenaltyAmount() > 0"
+        nzType="warning" nzShowIcon class="mb-16 late-registration-alert"
+        nzMessage="Late registration"
+        [nzDescription]="getLateRegistrationMessage()"></nz-alert>
+
       <!-- Selected Courses Summary -->
       <div class="selection-summary-container">
         <div class="selection-summary">
           <span>Selected Courses</span>
           <ul>
-            <li><span>Semester</span><strong>{{ setOfCheckedId.size }}</strong></li>
-            <li *ngIf="listOfAddedCourses && listOfAddedCourses.length > 0"><span>Add Request</span><strong>{{ setOfCheckedAddCourses.size }}</strong></li>
-            <li *ngIf="listOfCourseAssessment && listOfCourseAssessment.length > 0"><span>Assessment</span><strong>{{ setOfCheckedAssessmentCourses.size }}</strong></li>
-            <li *ngIf="listOfEquivalentCourses && listOfEquivalentCourses.length > 0"><span>Equivalent</span><strong>{{ setOfCheckedEquivalentCourses.size }}</strong></li>
-            <li><span>Total Credit Hours</span><strong>{{ totalSelectedCreditHours }}</strong></li>
+            <li *ngIf="registrationVisibility.showRegular"><span>Semester</span><strong>{{ selectedSemesterCourseCount }}</strong></li>
+            <li *ngIf="registrationVisibility.showAdd && listOfAddedCourses && listOfAddedCourses.length > 0"><span>Add Request</span><strong>{{ selectedAddCourseCount }}</strong></li>
+            <li *ngIf="registrationVisibility.showAssessment && listOfCourseAssessment && listOfCourseAssessment.length > 0"><span>Assessment</span><strong>{{ selectedAssessmentCourseCount }}</strong></li>
+            <li *ngIf="registrationVisibility.showEquivalent && listOfEquivalentCourses && listOfEquivalentCourses.length > 0"><span>Equivalent</span><strong>{{ selectedEquivalentCourseCount }}</strong></li>
+            <li><span>Total Credit Hours</span><strong>{{ summarySelectedCreditHours }}</strong></li>
+            <li><span>Selected Courses</span><strong>{{ getTotalAmount() | number:'1.2-2' }} ETB</strong></li>
+            <li *ngIf="getPenaltyAmount() > 0"><span>Late Penalty</span><strong>{{ getPenaltyAmount() | number:'1.2-2' }} ETB</strong></li>
+            <li><span>Amount to Pay</span><strong>{{ getAmountToPay() | number:'1.2-2' }} ETB</strong></li>
           </ul>
         </div>
       </div>
@@ -435,7 +440,7 @@
           </div>
           
           <button nz-button nzType="primary"
-            [disabled]="(setOfCheckedId.size === 0 && setOfCheckedAddCourses.size === 0 && setOfCheckedAssessmentCourses.size === 0 && setOfCheckedEquivalentCourses.size === 0) || (totalSelectedCreditHours > getMaxAllowedCreditHours() && !studentTermCourseReg?.ignoreGradeLevelValidation)"
+            [disabled]="!hasNewCourseSelection || (totalSelectedCreditHours > getMaxAllowedCreditHours() && !studentTermCourseReg?.ignoreGradeLevelValidation)"
              (click)="onSubmitClicked()">
             Submit
           </button>
@@ -735,6 +740,7 @@
           <thead class="table-header-row">
             <tr class="table-header-row">
               <th class="th-row">Transaction Id</th>
+              <th class="th-row">Paid For</th>
               <th class="th-row">From Bank</th>
               <th class="th-row">To Bank</th>
               <th class="th-row">Transaction Date</th>
@@ -745,6 +751,7 @@
             <ng-container tabindex="0" *ngFor="let data of basicTable.data; let i = index">
               <tr>
                 <td>{{data.bankTransactionID}}</td>
+                <td>{{ data.paidFor || 'Semester fee' }}</td>
                 <td>{{ data.fromBank }}</td>
                 <td>{{ getBankDescription(data.toBank) }}</td>
                 <td>{{ data.transactionDate | date:'short' }}</td>
@@ -754,9 +761,8 @@
           </tbody>
           <tfoot class="footer-row">
             <tr>
-              <td colspan="4" class="text-bold">Total</td>
-              <td class="footer-total-center"> {{studentTermCourseReg?.courseTermOfferings ?
-                getTotalAmount():0 }}</td>
+              <td colspan="5" class="text-bold">Total</td>
+              <td class="footer-total-center">{{ getPaymentTotal() | number:'1.2-2' }}</td>
             </tr>
           </tfoot>
         </nz-table>

@@ -4,7 +4,7 @@
   width: 100%;
   border-radius: 8px;
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   background: #fff;
   margin: 0;
@@ -12,11 +12,12 @@
 
   ::ng-deep {
     .ant-tabs-nav {
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       background: #fff;
-      border-radius: 4px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      padding: 0 16px;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0 8px;
+      border-bottom: 1px solid #f0f0f0;
 
       &::before {
         border: none;
@@ -28,13 +29,14 @@
         justify-content: space-between;
 
         .ant-tabs-tab {
-          padding: 12px 24px;
+          padding: 14px 20px;
           margin: 0;
           font-size: 14px;
           font-weight: 500;
           color: #595959;
-          transition: all 0.3s;
+          transition: all 0.2s ease;
           border: none;
+          background: transparent;
           position: relative;
 
           &:hover {
@@ -46,23 +48,12 @@
           }
 
           &.ant-tabs-tab-active {
-            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-            color: #ffffff;
+            background: transparent;
+            color: #1890ff;
             
             .ant-tabs-tab-btn {
-              color: #ffffff !important;
+              color: #1890ff !important;
               font-weight: 600;
-            }
-
-            &::after {
-              content: '';
-              position: absolute;
-              bottom: 0;
-              left: 0;
-              width: 100%;
-              height: 2px;
-              background: #ffffff;
-              border-radius: 2px 2px 0 0;
             }
           }
 
@@ -78,9 +69,11 @@
       }
     }
 
-    // Active tab indicator
     .ant-tabs-ink-bar {
-      display: none;
+      display: block;
+      height: 3px;
+      background: #1890ff;
+      border-radius: 3px 3px 0 0;
     }
   }
 }
@@ -92,9 +85,9 @@
   min-height: inherit;
   position: relative;
   background: #fff;
-  padding: 16px;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 8px 4px 16px;
+  border-radius: 0;
+  box-shadow: none;
   overflow: visible;
 }
 

@@ -87,6 +87,19 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
+                  <nz-form-label>Middle Name</nz-form-label>
+                  <nz-form-control>
+                    <input
+                      nz-input
+                      formControlName="middleName"
+                      class="form-input"
+                      placeholder="Enter middle name"
+                    />
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div class="form-col">
+                <nz-form-item>
                   <nz-form-label nzRequired>Last Name</nz-form-label>
                   <nz-form-control>
                     <input
@@ -98,6 +111,9 @@
                   </nz-form-control>
                 </nz-form-item>
               </div>
+            </div>
+
+            <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
                   <nz-form-label>Gender</nz-form-label>
@@ -116,9 +132,6 @@
                   </nz-form-control>
                 </nz-form-item>
               </div>
-            </div>
-
-            <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
                   <nz-form-label>Birth Date</nz-form-label>
@@ -133,18 +146,33 @@
                   </nz-form-control>
                 </nz-form-item>
               </div>
+            </div>
+
+            <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
                   <nz-form-label>Nationality</nz-form-label>
                   <nz-form-control>
-                    <input
-                      nz-input
+                    <nz-select
                       formControlName="nationality"
-                      class="form-input"
-                      placeholder="Enter nationality"
-                    />
+                      nzPlaceHolder="Select nationality"
+                      [nzShowSearch]="true"
+                      [nzShowArrow]="true"
+                      [nzAllowClear]="true"
+                      [nzFilterOption]="filterNationality"
+                      [nzDropdownMatchSelectWidth]="false"
+                      class="professional-select"
+                    >
+                      <nz-option
+                        *ngFor="let country of countries"
+                        [nzValue]="country.nationality"
+                        [nzLabel]="country.name + ' (' + country.nationality + ')'"
+                      ></nz-option>
+                    </nz-select>
                   </nz-form-control>
                 </nz-form-item>
+              </div>
+              <div class="form-col">
               </div>
             </div>
 
@@ -157,7 +185,8 @@
                       nz-input
                       formControlName="mobile"
                       class="form-input"
-                      placeholder="Enter mobile number"
+                      placeholder="+2519… / 09… / 07…"
+                      (blur)="onPhoneBlur()"
                     />
                   </nz-form-control>
                 </nz-form-item>

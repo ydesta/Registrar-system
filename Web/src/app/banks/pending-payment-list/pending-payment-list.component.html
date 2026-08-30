@@ -31,6 +31,7 @@
       [nzShowSizeChanger]="true">
       <thead>
         <tr>
+          <th>Order Number</th>
           <th>Batch Code</th>
           <th>Request Type</th>
           <th>Total Courses</th>
@@ -42,6 +43,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let data of basicTable.data; trackBy: trackByPaymentId">
+          <td>{{ data.orderNumber || 'N/A' }}</td>
           <td>{{ data.batchCode }}</td>
           <td>{{ data.requestType }}</td>
           <td>{{ data.numberOfRegistered }}</td>

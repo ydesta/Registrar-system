@@ -12,6 +12,7 @@ import { TranscriptSearchComponent } from './transcript-search/transcript-search
 import { StudentSemsterCourseRegistrationSlipComponent } from './student-semster-course-registration-slip/student-semster-course-registration-slip.component';
 import { GradeReportComponent } from './grade-report/grade-report.component';
 import { StudentGradeReportComponent } from './student-grade-report/student-grade-report.component';
+import { LateRegistrationComponent } from './late-registration/late-registration.component';
 import { AuthGuard } from '../guards/auth.guard';
 
 const routes: Routes = [
@@ -20,6 +21,7 @@ const routes: Routes = [
   { path: 'course-report', component: CourseReportComponent, canActivate: [AuthGuard] },
   { path: 'registered-student', component: RegisteredStudentPerCourseComponent, canActivate: [AuthGuard] },
   { path: 'registered-student-per-batch', component: RegisteredStudentPerBatchComponent, canActivate: [AuthGuard] },
+  { path: 'late-registration', component: LateRegistrationComponent, canActivate: [AuthGuard] },
   { path: 'course-offered-per-term', component: CourseOfferedPerAcademicTermComponent, canActivate: [AuthGuard] },
   { path: 'academic-term-registration-slip', component: AcademicTermRegistrationSlipComponent, canActivate: [AuthGuard] },
   { path: 'transcript-search', component: TranscriptSearchComponent, canActivate: [AuthGuard] },

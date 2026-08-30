@@ -12,6 +12,7 @@ import {
   NzCollapseComponent,
   NzCollapsePanelComponent
 } from "ng-zorro-antd/collapse";
+import { ethiopianMobileValidator, ethiopianHomePhoneValidator, normalizeEthiopianMobile, normalizeEthiopianHomePhone, applyEthiopianMobileControl, applyEthiopianHomePhoneControl } from "src/app/common/constant";
 
 @Component({
   selector: "app-add-applicant",
@@ -98,9 +99,9 @@ export class AddApplicantComponent implements OnInit {
       ApplicantUserId: [localStorage.getItem("userId")]
     });
     this.applicantAddressForm = this._fb.group({
-      telephonOffice: [""],
-      telephonHome: [""],
-      mobile: ["", Validators.required],
+      telephonOffice: ["", [ethiopianMobileValidator()]],
+      telephonHome: ["", [ethiopianHomePhoneValidator()]],
+      mobile: ["", [Validators.required, ethiopianMobileValidator()]],
       postalAddress: [""],
       emailAddress: ["", Validators.required],
       region: ["", Validators.required],
@@ -113,8 +114,8 @@ export class AddApplicantComponent implements OnInit {
       lastModifiedBy: ["-"],
       applicantID: [""],
       fullName: ["", Validators.required],
-      telephoneOffice: ["", Validators.required],
-      telephoneHome: [""],
+      telephoneOffice: ["", [Validators.required, ethiopianMobileValidator()]],
+      telephoneHome: ["", [ethiopianHomePhoneValidator()]],
       relation: ["", Validators.required]
     });
     this.applicantEducationBacgroundForm = this._fb.group({
@@ -229,7 +230,7 @@ export class AddApplicantComponent implements OnInit {
       this.action = "Edit Applicant";
       this.submit = "Update";
       this._crudService
-        .getList("/Applicants" + "/" + this.progStatusId)
+        .getById("/Applicants", this.progStatusId)
         .subscribe((res: any) => {
           this.patchValues(res.data);
         });
@@ -252,13 +253,13 @@ export class AddApplicantComponent implements OnInit {
     this.applicantForm.value.city = this.applicantAddressForm.value.city;
     this.applicantForm.value.emailAddress = this.applicantAddressForm.value.emailAddress;
     this.applicantForm.value.kebele = this.applicantAddressForm.value.kebele;
-    this.applicantForm.value.mobile = this.applicantAddressForm.value.mobile;
+    this.applicantForm.value.mobile = normalizeEthiopianMobile(this.applicantAddressForm.value.mobile) || this.applicantAddressForm.value.mobile;
     this.applicantForm.value.postalAddress = this.applicantAddressForm.value.postalAddress;
     this.applicantForm.value.region = this.applicantAddressForm.value.region;
     this.applicantForm.value.selfConfirmedApplicantInformation = this.selfConfirmedApplicantInformation;
     this.applicantForm.value.dateOfApply = this.dateOfApply;
-    this.applicantForm.value.telephonHome = this.applicantAddressForm.value.telephonHome;
-    this.applicantForm.value.telephonOffice = this.applicantAddressForm.value.telephonOffice;
+    this.applicantForm.value.telephonHome = normalizeEthiopianHomePhone(this.applicantAddressForm.value.telephonHome) || this.applicantAddressForm.value.telephonHome || '';
+    this.applicantForm.value.telephonOffice = normalizeEthiopianMobile(this.applicantAddressForm.value.telephonOffice) || this.applicantAddressForm.value.telephonOffice || '';
     this.applicantForm.value.woreda = this.applicantAddressForm.value.woreda;
     this.applicantForm.value.howDidYouComeKnow = this.otherForm.value.howDidYouComeKnow;
     this.applicantForm.value.sourceOfFinance = this.otherForm.value.sourceOfFinance;
@@ -323,7 +324,12 @@ export class AddApplicantComponent implements OnInit {
         .add("/ApplicantWorkExperiences", this.applicantWorkExpForm.value)
         .subscribe((res: any) => {});
     }
+    applyEthiopianHomePhoneControl(this.applicantContactPersonForm.get('telephoneHome'));
     this.applicantContactPersonForm.value.applicantID = id;
+    this.applicantContactPersonForm.value.telephoneHome =
+      normalizeEthiopianHomePhone(this.applicantContactPersonForm.value.telephoneHome)
+      || this.applicantContactPersonForm.value.telephoneHome
+      || '';
     this._crudService
       .add("/ApplicantContactPersons", this.applicantContactPersonForm.value)
       .subscribe((res: any) => {});
@@ -336,6 +342,9 @@ export class AddApplicantComponent implements OnInit {
     });
   }
   patchValues(data: any) {
+    const mobile = normalizeEthiopianMobile(data.mobile) || data.mobile || '';
+    const telephonHome = normalizeEthiopianHomePhone(data.telephonHome) || data.telephonHome || '';
+    const telephonOffice = normalizeEthiopianMobile(data.telephonOffice) || data.telephonOffice || '';
     this.applicantForm.patchValue({
       applicantID: data.applicantID,
       photo: data.photo,
@@ -348,9 +357,9 @@ export class AddApplicantComponent implements OnInit {
       birthDate: data.birthDate,
       birthPlace: data.birthPlace,
       nationality: data.nationality,
-      telephonOffice: data.telephonOffice,
-      telephonHome: data.telephonHome,
-      mobile: data.mobile,
+      telephonOffice,
+      telephonHome,
+      mobile,
       postalAddress: data.postalAddress,
       emailAddress: data.emailAddress,
       region: data.region,
@@ -358,6 +367,17 @@ export class AddApplicantComponent implements OnInit {
       woreda: data.woreda,
       kebele: data.kebele,
       acadamicProgrammeCode: data.acadamicProgrammeCode
+    });
+    this.applicantAddressForm.patchValue({
+      telephonOffice,
+      telephonHome,
+      mobile,
+      postalAddress: data.postalAddress,
+      emailAddress: data.emailAddress,
+      region: data.region,
+      city: data.city,
+      woreda: data.woreda,
+      kebele: data.kebele
     });
   }
 
@@ -502,5 +522,25 @@ export class AddApplicantComponent implements OnInit {
       this.activePanelIndex--;
       this.collapsePanels.toArray()[this.activePanelIndex].nzActive = true;
     }
+  }
+
+  onMobileBlur(): void {
+    applyEthiopianMobileControl(this.applicantAddressForm.get('mobile'));
+  }
+
+  onTelephonHomeBlur(): void {
+    applyEthiopianHomePhoneControl(this.applicantAddressForm.get('telephonHome'));
+  }
+
+  onTelephonOfficeBlur(): void {
+    applyEthiopianMobileControl(this.applicantAddressForm.get('telephonOffice'));
+  }
+
+  onContactTelephoneOfficeBlur(): void {
+    applyEthiopianMobileControl(this.applicantContactPersonForm.get('telephoneOffice'));
+  }
+
+  onContactTelephoneHomeBlur(): void {
+    applyEthiopianHomePhoneControl(this.applicantContactPersonForm.get('telephoneHome'));
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { StaticData } from 'src/app/admission-request/model/StaticData';
@@ -12,6 +12,7 @@ import { InstructorSectionService } from 'src/app/services/instructor-section.se
 import { StaffService } from 'src/app/services/staff.service';
 import { StudentSectionAssignmentService } from 'src/app/services/student-section-assignment.service';
 import { CourseViewModel } from 'src/app/students/models/course-break-down-offering.model';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -21,7 +22,7 @@ import * as XLSX from 'xlsx';
   templateUrl: './view-assigned-instructor-sections.component.html',
   styleUrls: ['./view-assigned-instructor-sections.component.scss']
 })
-export class ViewAssignedInstructorSectionsComponent implements OnInit {
+export class ViewAssignedInstructorSectionsComponent implements OnInit, OnDestroy {
   staff: StaffModel | null = null;
   loading = true;
   error = false;
@@ -46,6 +47,8 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
   loadingBatches = false;
   loadingCourses = false;
   loadingSections = false;
+  hasSearched = false;
+  pager: ServerPaginator;
   constructor(
     private router: Router,
     private staffService: StaffService,
@@ -53,18 +56,23 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
     private fb: FormBuilder,
     private studentSectionAssignmentService: StudentSectionAssignmentService,
     private instructorSectionService: InstructorSectionService,
-
+    private paginator: PaginatorService
   ) {
+    this.pager = this.paginator.create();
     const currentYear = new Date().getFullYear();
     this.yearList = this.getYearRange(currentYear);
     this.createForm();
   }
 
   ngOnInit(): void {
+    this.pager.init(() => this.searchSectionAssignedStudents(false));
     this.loadStaffProfile();
     this.getListOfSectionType();
     this.getListOfAcademicTermStatus();
+  }
 
+  ngOnDestroy(): void {
+    this.pager.destroy();
   }
   private getInstructorName(): string {
     const staffName = this.staff ? `${this.staff.firstName ?? ''} ${this.staff.lastName ?? ''}`.trim() : '';
@@ -157,39 +165,51 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
     return yearList.reverse();
   }
 
-  searchSectionAssignedStudents(): void {
-    if (this.form.valid) {
-      this.loading = true;
-      this.errorMessage = '';
-      this.successMessage = '';
-
-      const { batchId, academicTerm, year, sectionType, courseId, sectionId } = this.form.value;
-      this.studentSectionAssignmentService
-        .getListOfSectionAssignedStudents(batchId, academicTerm, year, sectionType, courseId || undefined, sectionId || undefined)
-        .subscribe({
-          next: (response) => {
-            this.loading = false;
-            this.isSearchCollapsed = true;
-            if (response.status === 'success' && response.data) {
-              this.sectionAssignedStudents = response.data;
-              this.listOfData = [...this.sectionAssignedStudents];
-              this.listOfDisplayData = [...this.sectionAssignedStudents];
-              this.successMessage = `Found ${this.sectionAssignedStudents.length} section assigned students`;
-              this.notificationService.notification('success', 'Success', this.successMessage);
-            } else {
-              this.errorMessage = response.error || 'No data found';
-              this.notificationService.notification('error', 'Error', this.errorMessage);
-            }
-          },
-          error: (error) => {
-            this.loading = false;
-            this.errorMessage = 'Error retrieving section assigned students. Please try again.';
-            this.notificationService.notification('error', 'Error', this.errorMessage);
-          }
-        });
-    } else {
+  searchSectionAssignedStudents(resetPage = true): void {
+    if (!this.form.valid) {
       this.notificationService.notification('error', 'Validation Error', 'Please fill in all required fields.');
+      return;
     }
+    if (resetPage) {
+      this.pager.pageIndex = 1;
+    }
+    this.loading = true;
+    this.pager.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.hasSearched = true;
+    const { batchId, academicTerm, year, sectionType, courseId, sectionId } = this.form.value;
+    this.studentSectionAssignmentService
+      .getListOfSectionAssignedStudentsPaginated(
+        batchId,
+        academicTerm,
+        year,
+        this.pager.query({
+          sectionType,
+          courseId: courseId || null,
+          sectionId: sectionId || null
+        })
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.sectionAssignedStudents = res.data || [];
+          this.listOfData = [...this.sectionAssignedStudents];
+          this.listOfDisplayData = [...this.sectionAssignedStudents];
+          this.pager.applyResult(res);
+          this.successMessage = `Found ${this.pager.total} section assigned students`;
+          this.isSearchCollapsed = true;
+          this.loading = false;
+        },
+        error: () => {
+          this.sectionAssignedStudents = [];
+          this.listOfData = [];
+          this.listOfDisplayData = [];
+          this.pager.fail();
+          this.loading = false;
+          this.errorMessage = 'Error retrieving section assigned students. Please try again.';
+          this.notificationService.notification('error', 'Error', this.errorMessage);
+        }
+      });
   }
   getStaffTeachingDataAsync(): void {
     const { academicTerm, year, sectionType } = this.form.value;
@@ -242,11 +262,7 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
 
   // Add missing methods
   search(): void {
-    const filterFunc = (item: SectionAssignedStudentInfo) =>
-      (this.searchValue ? item.fullName.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1 : true);
-
-    const data = this.listOfData.filter(item => filterFunc(item));
-    this.listOfDisplayData = data;
+    this.pager.onSearch(this.searchValue);
   }
 
   resetSearch(): void {
@@ -260,6 +276,10 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
     this.availableSections = [];
     this.listOfBatch = [];
     this.courseList = [];
+    this.hasSearched = false;
+    this.pager.pageIndex = 1;
+    this.pager.total = 0;
+    this.pager.searchKey = '';
   }
 
   // Handle form field changes to populate dependent dropdowns
@@ -311,17 +331,35 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
     }
   }
 
-  // Export functionality - copied exactly from SectionAssignedStudents
-  exportToCSV(): void {
-    if (this.sectionAssignedStudents.length === 0) {
+  private loadAllForExport(onLoaded: (rows: SectionAssignedStudentInfo[]) => void): void {
+    if (this.pager.total === 0) {
       this.notificationService.notification('warning', 'Warning', 'No data to export');
       return;
     }
+    const { batchId, academicTerm, year, sectionType, courseId, sectionId } = this.form.value;
+    this.studentSectionAssignmentService
+      .getListOfSectionAssignedStudents(batchId, academicTerm, year, sectionType, courseId || undefined, sectionId || undefined)
+      .subscribe({
+        next: (response) => {
+          const rows = response?.data || [];
+          if (!rows.length) {
+            this.notificationService.notification('warning', 'Warning', 'No data to export');
+            return;
+          }
+          onLoaded(rows);
+        },
+        error: () => {
+          this.notificationService.notification('error', 'Error', 'Failed to load data for export');
+        }
+      });
+  }
 
+  exportToCSV(): void {
+    this.loadAllForExport((sectionAssignedStudents) => {
     const headers = ['Student Code', 'Batch Code', 'Full Name', 'Section', 'Course Code', 'Course Title'];
     const csvContent = [
       headers.join(','),
-      ...this.sectionAssignedStudents.map(student => [
+      ...sectionAssignedStudents.map(student => [
         student.studentCode,
         student.batchCode,
         student.fullName,
@@ -340,14 +378,11 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
     window.URL.revokeObjectURL(url);
 
     this.notificationService.notification('success', 'Success', 'Data exported successfully');
+    });
   }
 
   exportAttendanceSheet(): void {
-    if (this.sectionAssignedStudents.length === 0) {
-      this.notificationService.notification('warning', 'Warning', 'No data to export');
-      return;
-    }
-
+    this.loadAllForExport((sectionAssignedStudents) => {
     const academicTerm = this.form.get('academicTerm')?.value;
     const year = this.form.get('year')?.value;
     const courseId = this.form.get('courseId')?.value;
@@ -371,7 +406,7 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
     aoa.push([]);
 
     aoa.push(['No.', 'Name', 'Batch', ...days]);
-    this.sectionAssignedStudents.forEach((student, index) => {
+    sectionAssignedStudents.forEach((student, index) => {
       aoa.push([index + 1, student.fullName, student.batchCode, ...Array(24).fill('')]);
     });
 
@@ -390,14 +425,11 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
     XLSX.writeFile(wb, fileName);
 
     this.notificationService.notification('success', 'Success', 'Attendance sheet exported successfully');
+    });
   }
 
   exportMarkList(): void {
-    if (this.sectionAssignedStudents.length === 0) {
-      this.notificationService.notification('warning', 'Warning', 'No data to export');
-      return;
-    }
-
+    this.loadAllForExport((sectionAssignedStudents) => {
     const academicTerm = this.form.get('academicTerm')?.value;
     const year = this.form.get('year')?.value;
     const courseId = this.form.get('courseId')?.value;
@@ -420,7 +452,7 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
     aoa.push([]);
 
     aoa.push(['Student Code', 'Full Name', 'Batch', '30%', '60%', '55%', '15%', 'Total(100%)', 'Grade', 'Remark']);
-    this.sectionAssignedStudents.forEach(student => {
+    sectionAssignedStudents.forEach(student => {
       aoa.push([student.studentCode, student.fullName, student.batchCode, '', '', '', '', '', '', '']);
     });
 
@@ -445,15 +477,12 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
     XLSX.writeFile(wb, fileName);
 
     this.notificationService.notification('success', 'Success', 'Mark list exported successfully');
+    });
   }
 
   public exportAttendanceSheetPDF(): void {
+    this.loadAllForExport((sectionAssignedStudents) => {
     try {
-      if (this.sectionAssignedStudents.length === 0) {
-        this.notificationService.notification('warning', 'Warning', 'No data to export');
-        return;
-      }
-
       const academicTerm = this.form.get('academicTerm')?.value;
       const year = this.form.get('year')?.value;
       const courseId = this.form.get('courseId')?.value;
@@ -499,7 +528,7 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
       );
       doc.text('Signature: _________________', 120, 35);
 
-      const tableData = this.sectionAssignedStudents.map((student, index) => [
+      const tableData = sectionAssignedStudents.map((student, index) => [
         index + 1,
         student.fullName,
         student.batchCode,
@@ -587,5 +616,6 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit {
     } catch (error) {
       this.notificationService.notification('error', 'Export Error', 'Failed to generate attendance sheet. Please try again.');
     }
+    });
   }
 }

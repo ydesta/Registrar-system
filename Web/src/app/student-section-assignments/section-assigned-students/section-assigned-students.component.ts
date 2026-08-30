@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SectionAssignedStudentInfo } from '../../Models/SectionAssignedStudentModel';
 import { SectionViewModel } from '../../Models/SectionViewModel';
@@ -11,13 +11,14 @@ import { StudentRegisteredCoursesModel, StudentRegisteredCoursesResult } from 's
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 
 @Component({
   selector: 'app-section-assigned-students',
   templateUrl: './section-assigned-students.component.html',
   styleUrls: ['./section-assigned-students.component.scss']
 })
-export class SectionAssignedStudentsComponent implements OnInit {
+export class SectionAssignedStudentsComponent implements OnInit, OnDestroy {
   searchForm: FormGroup;
   sectionAssignedStudents: SectionAssignedStudentInfo[] = [];
   availableSections: SectionViewModel[] = [];
@@ -40,12 +41,16 @@ export class SectionAssignedStudentsComponent implements OnInit {
   listOfSections: SectionViewModel[] = [];
   registeredCourses: StudentRegisteredCoursesModel[] = [];
   isSearchCollapsed = false;
+  hasSearched = false;
+  pager: ServerPaginator;
   constructor(
     private fb: FormBuilder,
     private studentSectionAssignmentService: StudentSectionAssignmentService,
     private notificationService: CustomNotificationService,
-    private courseTermOfferingService: TermCourseOfferingService
+    private courseTermOfferingService: TermCourseOfferingService,
+    private paginator: PaginatorService
   ) {
+    this.pager = this.paginator.create();
     const currentYear = new Date().getFullYear();
     this.yearList = this.getYearRange(currentYear);
     this.getListOfAcademicTermStatus();
@@ -58,6 +63,7 @@ export class SectionAssignedStudentsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.pager.init(() => this.searchSectionAssignedStudents(false));
     this.getListOfSectionType();
     this.academicTerm.valueChanges.subscribe(res => {
       if (res && this.year.value) {
@@ -95,6 +101,10 @@ export class SectionAssignedStudentsComponent implements OnInit {
 
     });
     
+  }
+
+  ngOnDestroy(): void {
+    this.pager.destroy();
   }
 
   private createSearchForm() {
@@ -235,40 +245,50 @@ export class SectionAssignedStudentsComponent implements OnInit {
       });
   }
 
-  searchSectionAssignedStudents(): void {
-    if (this.searchForm.valid) {
-      this.loading = true;
-      this.errorMessage = '';
-      this.successMessage = '';
-
-      const { batchCode, academicTerm, year, sectionType, courseId, sectionId } = this.searchForm.value;
-
-      this.studentSectionAssignmentService
-        .getListOfSectionAssignedStudents(batchCode, academicTerm, year, sectionType, courseId || undefined, sectionId || undefined)
-        .subscribe({
-          next: (response) => {
-            this.loading = false;
-            this.isSearchCollapsed = true;
-            if (response.status === 'success' && response.data) {
-              this.sectionAssignedStudents = response.data;
-              this.listOfData = [...this.sectionAssignedStudents];
-              this.listOfDisplayData = [...this.sectionAssignedStudents];
-              this.successMessage = `Found ${this.sectionAssignedStudents.length} section assigned students`;
-              this.notificationService.notification('success', 'Success', this.successMessage);
-            } else {
-              this.errorMessage = response.error || 'No data found';
-              this.notificationService.notification('error', 'Error', this.errorMessage);
-            }
-          },
-          error: (error) => {
-            this.loading = false;
-            this.errorMessage = 'Error retrieving section assigned students. Please try again.';
-            this.notificationService.notification('error', 'Error', this.errorMessage);
-          }
-        });
-    } else {
+  searchSectionAssignedStudents(resetPage = true): void {
+    if (!this.searchForm.valid) {
       this.notificationService.notification('error', 'Validation Error', 'Please fill in all required fields.');
+      return;
     }
+    if (resetPage) {
+      this.pager.pageIndex = 1;
+    }
+    this.loading = true;
+    this.pager.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.hasSearched = true;
+    const { batchCode, academicTerm, year, sectionType, courseId, sectionId } = this.searchForm.value;
+    this.studentSectionAssignmentService
+      .getListOfSectionAssignedStudentsPaginated(
+        batchCode,
+        academicTerm,
+        year,
+        this.pager.query({
+          sectionType,
+          courseId: courseId || null,
+          sectionId: sectionId || null
+        })
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.sectionAssignedStudents = res.data || [];
+          this.listOfData = [...this.sectionAssignedStudents];
+          this.listOfDisplayData = [...this.sectionAssignedStudents];
+          this.pager.applyResult(res);
+          this.successMessage = `Found ${this.pager.total} section assigned students`;
+          this.isSearchCollapsed = true;
+          this.loading = false;
+        },
+        error: () => {
+          this.sectionAssignedStudents = [];
+          this.listOfDisplayData = [];
+          this.pager.fail();
+          this.loading = false;
+          this.errorMessage = 'Error retrieving section assigned students. Please try again.';
+          this.notificationService.notification('error', 'Error', this.errorMessage);
+        }
+      });
   }
 
   resetSearch(): void {
@@ -281,6 +301,10 @@ export class SectionAssignedStudentsComponent implements OnInit {
     this.listOfDisplayData = [];
     this.errorMessage = '';
     this.successMessage = '';
+    this.hasSearched = false;
+    this.pager.pageIndex = 1;
+    this.pager.total = 0;
+    this.pager.searchKey = '';
   }
 
   loadSections(): void {
@@ -377,174 +401,56 @@ export class SectionAssignedStudentsComponent implements OnInit {
       return;
     }
 
-    // Get form values for header information
     const academicTerm = this.academicTerm.value;
     const year = this.year.value;
     const courseId = this.searchForm.get('courseId')?.value;
     const sectionId = this.searchForm.get('sectionId')?.value;
 
-    // Get course and section information
     const selectedCourse = this.registeredCourses.find(c => c.courseId === courseId);
     const selectedSection = this.listOfSections.find(s => s.id === sectionId);
     const instructorName = this.getInstructorName();
+    const submissionDate = new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
 
-    // Create HTML table with borders for Excel export
-    let htmlContent = `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-        <head>
-          <meta charset="utf-8">
-          <title>Result Submission Sheet</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { text-align: center; margin-bottom: 20px; }
-            .school-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
-            .sheet-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; }
-            .info-section { margin-bottom: 15px; display: flex; justify-content: space-between; }
-            .left-info { width: 50%; }
-            .right-info { width: 50%; text-align: right; }
-            .info-row { margin-bottom: 8px; }
-            table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-            th, td { 
-              border: 1px solid #000; 
-              padding: 8px; 
-              text-align: center; 
-              mso-border-alt: solid black .5pt;
-            }
-            th { 
-              background-color: #f0f0f0; 
-              font-weight: bold; 
-              mso-pattern: solid #f0f0f0;
-            }
-            .name-col { text-align: left; width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .batch-col { width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .score-col { width: 65px; text-align: right; }
-            .grade-col { width: 60px; }
-            .remark-col { width: 80px; }
-            .scode-col { width: 120px; text-align: left; }
-            .total-col { width: 90px; text-align: right; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="school-title">HILCoE School of Computer Science & Technology</div>
-            <div class="sheet-title">Result Submission Sheet</div>
-          </div>
-          
-          <div class="info-section">
-            <div class="left-info">
-              <div class="info-row"><strong>Class:</strong> ${this.batchCode.value || 'N/A'}</div>
-              <div class="info-row"><strong>Term:</strong> ${this.getAcademicTermName(academicTerm)} ${year}</div>
-              <div class="info-row"><strong>Course Code:</strong> ${selectedCourse?.courseCode || 'N/A'}</div>
-              <div class="info-row"><strong>Instructor:</strong> ${instructorName || '_________________'}</div>
-            </div>
-            <div class="right-info">
-              <div class="info-row"><strong>Section:</strong> ${selectedSection?.sectionName || 'N/A'}</div>
-              <div class="info-row"><strong>Date of Submission:</strong> ${new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}</div>
-              <div class="info-row"><strong>Signature:</strong> _________________</div>
-            </div>
-          </div>
-          
-          <table style="border-collapse: collapse; border: 1px solid black;">
-            <thead>
-              <tr>
-                <th class="scode-col" style="border: 1px solid black;">Student Code</th>
-                <th class="name-col" style="border: 1px solid black;">Full Name</th>
-                <th class="batch-col" style="border: 1px solid black;">Batch</th>
-                <th class="score-col" style="border: 1px solid black;">30%</th>
-                <th class="score-col" style="border: 1px solid black;">60%</th>
-                <th class="score-col" style="border: 1px solid black;">55%</th>
-                <th class="score-col" style="border: 1px solid black;">15%</th>
-                <th class="total-col" style="border: 1px solid black;">Total(100%)</th>
-                <th class="grade-col" style="border: 1px solid black;">Grade</th>
-                <th class="remark-col" style="border: 1px solid black;">Remark</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${this.sectionAssignedStudents.map((student, index) => `
-                <tr>
-                  <td class="scode-col" style="border: 1px solid black;">${student.studentCode}</td>
-                  <td class="name-col" style="border: 1px solid black;">${student.fullName}</td>
-                  <td class="batch-col" style="border: 1px solid black;">${student.batchCode}</td>
-                  <td class="score-col" style="border: 1px solid black;"></td>
-                  <td class="score-col" style="border: 1px solid black;"></td>
-                  <td class="score-col" style="border: 1px solid black;"></td>
-                  <td class="score-col" style="border: 1px solid black;"></td>
-                  <td class="total-col" style="border: 1px solid black;"></td>
-                  <td class="grade-col" style="border: 1px solid black;"></td>
-                  <td class="remark-col" style="border: 1px solid black;"></td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `;
+    const aoa: (string | number)[][] = [];
+    aoa.push(['HILCoE School of Computer Science & Technology']);
+    aoa.push(['Result Submission Sheet']);
+    aoa.push([]);
+    aoa.push(['Class:', this.batchCode.value || 'N/A', '', '', 'Section:', selectedSection?.sectionName || 'N/A']);
+    aoa.push(['Term:', `${this.getAcademicTermName(academicTerm)} ${year}`, '', '', 'Date of Submission:', submissionDate]);
+    aoa.push(['Course Code:', selectedCourse?.courseCode || 'N/A', '', '', 'Signature:', '_________________']);
+    aoa.push(['Instructor:', instructorName || '_________________']);
+    aoa.push([]);
+    aoa.push(['Student Code', 'Full Name', 'Batch', '30%', '60%', '55%', '15%', 'Total(100%)', 'Grade', 'Remark']);
 
-    // Create CSV content with proper formatting for Excel
-    const csvRows = [];
-
-    // Add header information
-    csvRows.push(['HILCoE School of Computer Science & Technology', '', '', '', '', '', '', '', '', '']);
-    csvRows.push(['Result Submission Sheet', '', '', '', '', '', '', '', '', '']);
-    csvRows.push([]); // Empty row
-    csvRows.push(['Class:', this.batchCode.value || 'N/A', '', '', 'Section:', selectedSection?.sectionName || 'N/A']);
-    csvRows.push(['Term:', `${this.getAcademicTermName(academicTerm)} ${year}`, '', '', 'Date of Submission:', new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })]);
-    csvRows.push(['Course Code:', selectedCourse?.courseCode || 'N/A', '', '', 'Signature:', '']);
-    csvRows.push(['Instructor:', instructorName || '_________________', '', '', '', '']);
-    csvRows.push([]); // Empty row
-
-    // Create table headers
-    const tableHeaders = ['Student Code', 'Full Name', 'Batch', '30%', '60%', '55%', '15%', 'Total(100%)', 'Grade', 'Remark'];
-    csvRows.push(tableHeaders);
-
-    // Add student data
-    this.sectionAssignedStudents.forEach((student, index) => {
-      const row = [
-        student.studentCode,
-        student.fullName,
-        student.batchCode,
-        '', // 30%
-        '', // 60%
-        '', // 55%
-        '', // 15%
-        '', // Total
-        '', // Grade
-        ''  // Remark
-      ];
-      csvRows.push(row);
+    this.sectionAssignedStudents.forEach(student => {
+      aoa.push([student.studentCode, student.fullName, student.batchCode, '', '', '', '', '', '', '']);
     });
 
-    // Convert to CSV string
-    const csvContent = csvRows.map(row =>
-      row.map(cell => {
-        // Escape quotes and wrap in quotes if contains comma or newline
-        const escaped = cell.replace(/"/g, '""');
-        return cell.includes(',') || cell.includes('\n') || cell.includes('"') ? `"${escaped}"` : escaped;
-      }).join(',')
-    ).join('\n');
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [
+      { wch: 16 },
+      { wch: 32 },
+      { wch: 14 },
+      { wch: 8 },
+      { wch: 8 },
+      { wch: 8 },
+      { wch: 8 },
+      { wch: 12 },
+      { wch: 10 },
+      { wch: 14 }
+    ];
 
-    // Add BOM for Excel compatibility
-    const BOM = '\uFEFF';
-    const csvWithBOM = BOM + csvContent;
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Mark List');
 
-    // Create blob and download
-    const blob = new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `mark-list-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    window.URL.revokeObjectURL(url);
+    const fileName = `mark-list-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
 
     this.notificationService.notification('success', 'Success', 'Mark list exported successfully');
   }
 
   search(): void {
-    const filterFunc = (item: SectionAssignedStudentInfo) =>
-      (this.searchValue ? item.fullName.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1 : true);
-
-    const data = this.listOfData.filter(item => filterFunc(item));
-    this.listOfDisplayData = data;
+    this.pager.onSearch(this.searchValue);
   }
 
 

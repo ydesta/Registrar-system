@@ -34,7 +34,7 @@ ngOnInit(): void {
   if(this.progStatusId!="null"){
     this.action="Edit Applicant Work Experience"
     this.submit ='Update';
-    this._crudService.getList('/ApplicantWorkExperiences' + '/' + this.progStatusId).subscribe((res:any)=>{
+    this._crudService.getById('/ApplicantWorkExperiences', this.progStatusId).subscribe((res:any)=>{
       this.patchValues(res.data);
     });
   }

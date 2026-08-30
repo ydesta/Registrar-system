@@ -5,6 +5,7 @@ import { StudentService } from '../services/student.service';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { TermCourseOfferingService } from 'src/app/colleges/services/term-course-offering.service';
+import { ethiopianMobileValidator, normalizeEthiopianMobile, applyEthiopianMobileControl } from 'src/app/common/constant';
 
 @Component({
   selector: 'app-add-student',
@@ -43,7 +44,6 @@ export class AddStudentComponent implements OnInit {
       this.action = 'Edit Student';
       this.submit = 'Update';
       this._studentService.getStudentById(this.progStatusId).subscribe((res: any) => {
-        console.log("%%%          ", res);
         this.patchValues(res.data);
       });
     }
@@ -68,28 +68,28 @@ export class AddStudentComponent implements OnInit {
       firstName: ["", [Validators.required]],
       fatherName: ["", Validators.required],
       grandFatherName: ["", Validators.required],
-      firstNameInAmh: ["", [Validators.required]],
-      fatherNameInAmh: ["", [Validators.required]],
-      grandFatherNameInAmh: ["", [Validators.required]],
+      firstNameInAmh: [""],
+      fatherNameInAmh: [""],
+      grandFatherNameInAmh: [""],
       sirName: [""],
       motherName: ["", [Validators.required]],
       gender: ["", [Validators.required]],
       birthDate: [null, [Validators.required]],
       birthPlace: ["", [Validators.required]],
       nationality: ["", [Validators.required]],
-      telephonOffice: [""],
-      telephonHome: [""],
-      mobile: ["", [Validators.required]],
+      telephonOffice: ["", [ethiopianMobileValidator()]],
+      telephonHome: ["", [ethiopianMobileValidator()]],
+      mobile: ["", [Validators.required, ethiopianMobileValidator()]],
       postalAddress: [""],
       emailAddress: ["", [Validators.required]],
-      region: ["", [Validators.required]],
+      region: [""],
       city: [""],
       woreda: [""],
       kebele: [""],
       areaType: [""],
-      nationalExaminationId: ["", [Validators.required]],
+      nationalExaminationId: [""],
       tin: [""],
-      nationalId: ["", [Validators.required]],
+      nationalId: [""],
       selfConfirmedApplicantInformation: false,
       dateOfApply: null,
       sourceOfFinance: [""],
@@ -97,16 +97,13 @@ export class AddStudentComponent implements OnInit {
       division: [""],
       ApplicantUserId: [localStorage.getItem("userId")],
       ActualFile: [""],
-      // Academic fields
       curriculumCode: ['', Validators.required],
       batchCode: ['', Validators.required],
       entryYear: ['', Validators.required],
       studentId: ['', Validators.required],
       tuitionPerCredit: [0, Validators.required],
-      // Registration fields
       isAllowedToRegister: [0, Validators.required],
       offerBatchCode: [''],
-      // Student Status
       studentStatus: [1, Validators.required]
     });
   }
@@ -124,33 +121,77 @@ export class AddStudentComponent implements OnInit {
   }
 
   submitForm() {
-    // if (this.form.valid) {
-    this.loading = true;
-    if (this.progStatusId == "null") {
-      this._studentService.addStudent(this.form.value).subscribe((res: any) => {
-        this._customNotificationService.notification('success', 'Success', res.data);
-        this._route.navigateByUrl('students');
-        this.loading = false;
-      }, error => {
-        this.loading = false;
+    if (this.form.invalid) {
+      Object.values(this.form.controls).forEach(control => {
+        control.markAsDirty();
+        control.updateValueAndValidity({ onlySelf: true });
       });
-    } else if (this.progStatusId != "null") {
-      console.log("$$$          ", this.form.value);
-      this._studentService.updateStudent(this.progStatusId, this.form.value).subscribe((res: any) => {
-        if (res.status == 'success') {
+      this._customNotificationService.notification('error', 'Error', 'Please fill all required fields correctly.');
+      return;
+    }
+
+    this.loading = true;
+    const payload = {
+      ...this.form.value,
+      mobile: normalizeEthiopianMobile(this.form.value.mobile) || this.form.value.mobile,
+      telephonHome: normalizeEthiopianMobile(this.form.value.telephonHome) || this.form.value.telephonHome || '',
+      telephonOffice: normalizeEthiopianMobile(this.form.value.telephonOffice) || this.form.value.telephonOffice || '',
+      tin: this.form.value.tin || null,
+      lastModifiedBy: localStorage.getItem('userId') || '-'
+    };
+    if (this.progStatusId == "null") {
+      this._studentService.addStudent(payload).subscribe({
+        next: (res: any) => {
           this._customNotificationService.notification('success', 'Success', res.data);
           this._route.navigateByUrl('students');
-        } else {
-          this._customNotificationService.notification('error', 'Error', res.data);
+          this.loading = false;
+        },
+        error: (error) => {
+          this.loading = false;
+          this._customNotificationService.notification(
+            'error',
+            'Error',
+            this.getErrorMessage(error) || 'Failed to add student.'
+          );
         }
-        this.loading = false;
-      }, error => {
-        this.loading = false;
+      });
+    } else if (this.progStatusId != "null") {
+      this._studentService.updateStudent(this.progStatusId, payload).subscribe({
+        next: (res: any) => {
+          if (res.status == 'success') {
+            this._customNotificationService.notification('success', 'Success', res.data);
+            this._route.navigateByUrl('students');
+          } else {
+            this._customNotificationService.notification('error', 'Error', res.data);
+          }
+          this.loading = false;
+        },
+        error: (error) => {
+          this.loading = false;
+          this._customNotificationService.notification(
+            'error',
+            'Error',
+            this.getErrorMessage(error) || 'Failed to update student.'
+          );
+        }
       });
     }
-    // } else {
-    //   this._customNotificationService.notification('error', 'error', 'Enter valid data.');
-    // }
+  }
+
+  private getErrorMessage(error: any): string {
+    const errors = error?.error?.errors;
+    if (errors && typeof errors === 'object') {
+      const messages = Object.values(errors)
+        .flat()
+        .filter((m): m is string => typeof m === 'string');
+      if (messages.length) {
+        return messages.join(' ');
+      }
+    }
+    if (typeof error?.error === 'string') {
+      return error.error;
+    }
+    return error?.error?.title || error?.message || '';
   }
 
   patchValues(data: any) {
@@ -168,16 +209,16 @@ export class AddStudentComponent implements OnInit {
       birthDate: data.birthDate,
       birthPlace: data.birthPlace,
       nationality: data.nationality,
-      telephonOffice: data.telephonOffice,
-      telephonHome: data.telephonHome,
-      mobile: data.mobile,
+      telephonOffice: normalizeEthiopianMobile(data.telephonOffice) || data.telephonOffice || '',
+      telephonHome: normalizeEthiopianMobile(data.telephonHome) || data.telephonHome || '',
+      mobile: normalizeEthiopianMobile(data.mobile) || data.mobile || '',
       postalAddress: data.postalAddress,
       emailAddress: data.emailAddress,
-      region: data.region,
-      city: data.city,
-      woreda: data.woreda,
-      kebele: data.kebele,
-      areaType: data.areaType,
+      region: data.region || '',
+      city: data.city || '',
+      woreda: data.woreda || '',
+      kebele: data.kebele || '',
+      areaType: data.areaType || '',
       nationalExaminationId: data.nationalExaminationId,
       tin: data.tin,
       nationalId: data.nationalId,
@@ -186,15 +227,24 @@ export class AddStudentComponent implements OnInit {
       entryYear: data.entryYear,
       studentId: data.studentId,
       sourceOfFinance: data.sourceOfFinance,
+      howDidYouComeKnow: data.howDidYouComeKnow || '',
       tuitionPerCredit: data.tuitionPerCredit,
       isAllowedToRegister: data.isAllowedToRegister !== undefined ? data.isAllowedToRegister : 0,
       offerBatchCode: data.offerBatchCode || data.batchCode || '',
       studentStatus: (data.studentStatus !== undefined && data.studentStatus !== null && data.studentStatus > 0) ? data.studentStatus : 1
     });
+  }
 
-    // Debug: Check if the value was set correctly
-    setTimeout(() => {
-    }, 100);
+  onMobileBlur(): void {
+    applyEthiopianMobileControl(this.form.get('mobile'));
+  }
+
+  onTelephonHomeBlur(): void {
+    applyEthiopianMobileControl(this.form.get('telephonHome'));
+  }
+
+  onTelephonOfficeBlur(): void {
+    applyEthiopianMobileControl(this.form.get('telephonOffice'));
   }
 
   goBack() {

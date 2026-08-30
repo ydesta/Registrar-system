@@ -44,6 +44,15 @@
                   </nz-select>
                 </nz-form-control>
               </nz-form-item>
+              <nz-form-item class="form-item-search">
+                <nz-form-label [nzSpan]="24">Search</nz-form-label>
+                <nz-form-control [nzSpan]="24">
+                  <input nz-input placeholder="Name, batch, or student ID"
+                    [(ngModel)]="pager.searchKey"
+                    [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="pager.onSearch($event)" />
+                </nz-form-control>
+              </nz-form-item>
               <nz-form-item class="form-item-button">
                 <nz-form-control [nzSpan]="24">
                   <button 
@@ -61,15 +70,15 @@
             </div>
           </form>
         </div>
-        <div class="student-count" *ngIf="listOfStudents.length > 0">
-          <span class="count-badge">{{ listOfStudents.length }} Students</span>
+        <div class="student-count" *ngIf="pager.total > 0">
+          <span class="count-badge">{{ pager.total }} Students</span>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Table Card Container -->
-  <div class="table-card" *ngIf="listOfStudents.length > 0">
+  <div class="table-card" *ngIf="courseId.value">
     <div class="table-header">
       <div class="table-actions">
         <nz-button-group>
@@ -98,9 +107,15 @@
     <nz-table 
       #studentTable 
       [nzData]="listOfStudents" 
-      [nzLoading]="loading" 
-      [nzPageSize]="10" 
+      [nzLoading]="pager.loading" 
+      [nzPageSize]="pager.pageSize"
+      [nzPageSizeOptions]="pager.pageSizeOptions"
       [nzShowSizeChanger]="true"
+      [nzTotal]="pager.total"
+      [nzPageIndex]="pager.pageIndex"
+      (nzPageIndexChange)="pager.onPageIndexChange($event)"
+      (nzPageSizeChange)="pager.onPageSizeChange($event)"
+      [nzFrontPagination]="false"
       [nzShowTotal]="totalTemplate" 
       (nzCurrentPageDataChange)="onCurrentPageDataChange($event)" 
       nzBordered
@@ -129,7 +144,7 @@
       <tbody>
         <tr *ngFor="let student of studentTable.data; let i = index">
           <td style="text-align: center;">
-            <span class="sn-badge">{{ i + 1 }}</span>
+            <span class="sn-badge">{{ pager.serial(i) }}</span>
           </td>
           <td style="text-align: center;">
             <label 
@@ -160,7 +175,7 @@
   </div>
 
   <!-- Approval Summary Card -->
-  <div class="summary-card" *ngIf="listOfStudents.length > 0">
+  <div class="summary-card" *ngIf="courseId.value && pager.total > 0">
     <div class="summary-header">
       <h3 class="summary-title">Approval Summary</h3>
     </div>
@@ -190,7 +205,7 @@
           </div>
           <div class="stat-info">
             <div class="stat-label">Total Students</div>
-            <div class="stat-value">{{ listOfStudents.length }}</div>
+            <div class="stat-value">{{ pager.total }}</div>
           </div>
         </div>
       </div>
@@ -210,8 +225,8 @@
   </div>
 
   <!-- Empty State -->
-  <div class="no-data" *ngIf="listOfStudents.length === 0 && !loading">
+  <div class="no-data" *ngIf="!courseId.value && !pager.loading">
     <span nz-icon nzType="inbox" nzTheme="outline"></span>
-    <p>No students found for the selected course</p>
+    <p>Select a course to review student registrations</p>
   </div>
 </div>

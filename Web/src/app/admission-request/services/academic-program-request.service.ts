@@ -1,107 +1,66 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable, map, catchError, of } from "rxjs";
-import { environment } from "src/environments/environment";
-import { AcadamicProgramme } from "../model/acadamic-programme.model";
-import { ApplicantFeeViewModel } from "../model/applicant-fee-view-model.model";
+import { HttpResponse } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable, catchError, map, of } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { ApplicantFeeViewModel } from '../model/applicant-fee-view-model.model';
+import { CrudService } from 'src/app/services/crud.service';
 
 @Injectable({
-  providedIn: "root"
+  providedIn: 'root'
 })
 export class AcademicProgramRequestService {
-  baseUrl = environment.baseUrl;
-  private readonly acadamicPrgram: string = `/${environment.apiVersion}/academicprogramrequest`;
-  private readonly acadamicPrgramList: string = `/${environment.apiVersion}/program`;
-  getacadamicPrgramUrl() {
-    return this.baseUrl + this.acadamicPrgram;
-  }
-  getAcadamicPrgramListUrl() {
-    return this.baseUrl + this.acadamicPrgramList;
-  }
-  constructor(private httpClient: HttpClient) {}
+  private readonly requests = `/${environment.apiVersion}/academicprogramrequest`;
+  private readonly programmes = `/${environment.apiVersion}/program`;
+
+  constructor(private crud: CrudService) {}
+
   getApplicantacadamicPrgramtId(id: string): Observable<any> {
-    const endpointUrl = `${this.getacadamicPrgramUrl()}/applicant/${id}`;
-    return this.httpClient.get(endpointUrl).pipe(map(result => result as any));
+    return this.crud.getList(`${this.requests}/applicant/${id}`);
   }
+
   create(experience: any): Observable<any> {
-    const endPointUrl = `${this.getacadamicPrgramUrl()}`;
-    return this.httpClient.post<any>(endPointUrl, experience, {
-      observe: 'response'
-    }).pipe(
-      map(response => {
-        // Handle different response structures
-        if (response.body) {
-          return response.body;
-        } else if (response.status === 200) {
-          return "success";
-        }
-        return response;
-      }),
-      catchError(error => {
-        // If it's a 200 status but treated as error, treat it as success
-        if (error.status === 200) {
-          return of("success");
-        }
-        throw error;
-      })
+    return this.crud.addResponse(this.requests, experience).pipe(
+      map(response => this.unwrap(response)),
+      catchError(error => this.asSuccess(error))
     );
   }
+
   getAacadamicPrgramtList(): Observable<any> {
-    const endpointUrl = `${this.getAcadamicPrgramListUrl()}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.getList(this.programmes);
   }
+
   update(id: number, educationBackground: any): Observable<any> {
-    const endPointUrl = `${this.getacadamicPrgramUrl()}/${id}`;
-    return this.httpClient.patch<any>(endPointUrl, educationBackground, {
-      observe: 'response'
-    }).pipe(
-      map(response => {
-        // Handle different response structures
-        if (response.body) {
-          return response.body;
-        } else if (response.status === 200) {
-          return "success";
-        }
-        return response;
-      }),
-      catchError(error => {
-        // If it's a 200 status but treated as error, treat it as success
-        if (error.status === 200) {
-          return of("success");
-        }
-        throw error;
-      })
+    return this.crud.updateResponse(this.requests, id, educationBackground).pipe(
+      map(response => this.unwrap(response)),
+      catchError(error => this.asSuccess(error))
     );
   }
+
   delete(id: number): Observable<any> {
-    const endPointUrl = `${this.getacadamicPrgramUrl()}/${id}`;
-    return this.httpClient.delete<any>(endPointUrl, {
-      observe: 'response'
-    }).pipe(
-      map(response => {
-        // Handle different response structures
-        if (response.body) {
-          return response.body;
-        } else if (response.status === 200) {
-          return "success";
-        }
-        return response;
-      }),
-      catchError(error => {
-        // If it's a 200 status but treated as error, treat it as success
-        if (error.status === 200) {
-          return of("success");
-        }
-        throw error;
-      })
+    return this.crud.deleteResponse(this.requests, id).pipe(
+      map(response => this.unwrap(response)),
+      catchError(error => this.asSuccess(error))
     );
   }
+
   getApplicationFee(id: string): Observable<ApplicantFeeViewModel> {
-    const endpointUrl = `${this.getacadamicPrgramUrl()}/getApplicationFee/applicant/${id}`;
-    return this.httpClient.get<ApplicantFeeViewModel>(endpointUrl).pipe(
-      map(result => result as ApplicantFeeViewModel)
-    );
+    return this.crud.getList<ApplicantFeeViewModel>(`${this.requests}/getApplicationFee/applicant/${id}`);
+  }
+
+  private unwrap(response: HttpResponse<any>): any {
+    if (response.body) {
+      return response.body;
+    }
+    if (response.status === 200) {
+      return 'success';
+    }
+    return response;
+  }
+
+  private asSuccess(error: any): Observable<any> {
+    if (error.status === 200) {
+      return of('success');
+    }
+    throw error;
   }
 }

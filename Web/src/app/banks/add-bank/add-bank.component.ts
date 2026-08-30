@@ -36,7 +36,7 @@ export class AddBankComponent implements OnInit {
     if (this.progStatusId != "null") {
       this.action = "Edit Bank"
       this.submit = 'Update';
-      this._crudService.getList('/Banks' + '/' + this.progStatusId).subscribe((res: any) => {
+      this._crudService.getById('/Banks', this.progStatusId).subscribe((res: any) => {
         this.patchValues(res.data);
       });
     }

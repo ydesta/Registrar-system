@@ -597,7 +597,9 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
       const filterValue = this.registeredCoursesFilter.toLowerCase();
       this.filteredRegisteredCourses = this.courseList.filter(course =>
         course.courseCode?.toLowerCase().includes(filterValue) ||
-        course.courseTitle?.toLowerCase().includes(filterValue)
+        course.courseTitle?.toLowerCase().includes(filterValue) ||
+        course.currentGrade?.toLowerCase().includes(filterValue) ||
+        course.grade?.toLowerCase().includes(filterValue)
       );
     }
   }

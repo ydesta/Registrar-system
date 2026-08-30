@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
 
@@ -38,7 +37,6 @@ import { CourseExemptionFormComponent } from './course-exemption-form/course-exe
     CourseRoutingModule,
     SharedModule,
     NgxPrintModule,
-    HttpClientModule,
     NzMessageModule,
     NzSpaceModule
   ],

@@ -37,7 +37,6 @@ export class RegisteredSemesterCoursesComponent implements OnInit {
       .getStudentCourseTakenList(applicantUserId)
       .subscribe((res) => {
         this.studentTermCourseReg = res;
-        console.log("list  ",this.studentTermCourseReg);
       });
 
   }

@@ -1,6 +1,10 @@
 export interface CurriculumBreakdown {
-  id: string;
+  id: number;
   quadrantCode: string;
+  quadrantsID?: string;
+  curriculumId?: string;
+  minimumCreditHours?: number;
+  remark?: string;
   course: Course[];
 }
 export interface Course {
@@ -9,4 +13,6 @@ export interface Course {
   creditHours: number;
   lectureHours: number;
   labHours: number;
+  courseId?: string;
+  parentId?: number;
 }

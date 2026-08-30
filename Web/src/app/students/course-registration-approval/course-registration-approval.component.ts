@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { NzModalRef, NzModalService } from 'ng-zorro-antd/modal';
 import { BaseModel } from 'src/app/Models/BaseMode';
@@ -11,13 +11,14 @@ import { StaticData } from 'src/app/admission-request/model/StaticData';
 import { ACADEMIC_TERM_STATUS, ACADEMIC_YEAR_NUMBER_STATUS, APPROVAL_STATUS, REGISTARAR_APPROVAL_STATUS } from 'src/app/common/constant';
 import { WorkFlowFormComponent } from '../common/work-flow-form/work-flow-form.component';
 import { AuthService } from 'src/app/services/auth.service';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 
 @Component({
   selector: 'app-course-registration-approval',
   templateUrl: './course-registration-approval.component.html',
   styleUrls: ['./course-registration-approval.component.scss'],
 })
-export class CourseRegistrationApprovalComponent implements OnInit {
+export class CourseRegistrationApprovalComponent implements OnInit, OnDestroy {
   gradeQueryForm: FormGroup;
   studentId: string = '';
   academicTerms: any;
@@ -34,24 +35,29 @@ export class CourseRegistrationApprovalComponent implements OnInit {
   inputTextValue = "";
   acceptButtonDisabled: boolean[] = [];
   rejectButtonDisabled: boolean[] = [];
+  pager: ServerPaginator;
   constructor(
     private _crudService: CrudService,
     private _fb: FormBuilder,
     private _customNotificationService: CustomNotificationService,
     private _studentService: StudentService,
     private _modal: NzModalService,
-    private _authService: AuthService
+    private _authService: AuthService,
+    private paginator: PaginatorService
   ) {
-
+    this.pager = this.paginator.create();
     this.createForm();
   }
   ngOnInit(): void {
     this.getListOfAcademicTermStatus();
     this.getListOfYearNumberStatus();
     this.getListOfApprovalStatus();
-    this.getStudentCourseRegistrationList();
     this.getListOfRegisteraApprovalStatus();
-
+    this.pager.init(() => this.getStudentCourseRegistrationList());
+    this.getStudentCourseRegistrationList();
+  }
+  ngOnDestroy(): void {
+    this.pager.destroy();
   }
   private createForm() {
     this.gradeQueryForm = this._fb.group({
@@ -125,9 +131,17 @@ export class CourseRegistrationApprovalComponent implements OnInit {
   }
 
   getStudentCourseRegistrationList() {
-    this._studentService.getStudentCourseRegistrationList().subscribe(res => {
-      this.studentTermCourseReg = res;
-    })
+    this.pager.loading = true;
+    this._studentService.getStudentCourseRegistrationListPaginated(this.pager.query()).subscribe({
+      next: (res: any) => {
+        this.studentTermCourseReg = res.data || [];
+        this.pager.applyResult(res);
+      },
+      error: () => {
+        this.studentTermCourseReg = [];
+        this.pager.fail();
+      }
+    });
   }
 
   onExpandChange(id: string, checked: boolean): void {

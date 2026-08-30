@@ -34,97 +34,146 @@ export function numbersOnlyValidator(): ValidatorFn {
   };
 }
 
-export function phoneValidator(): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } | null => {
-    if (control.value === null || control.value === "") {
-      return null; // No validation for empty input
-    }
+export const ETHIOPIAN_MOBILE_ERROR =
+  'Use Ethio Telecom (09) or Safaricom (07). Examples: +2519xxxxxxxx, 09xxxxxxxx, 9xxxxxxxx, 07xxxxxxxx';
 
-    const phoneNumber = control.value.toString().trim();
-    
-    // Remove any spaces, dashes, or parentheses for validation
-    const cleanPhoneNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
-    
-    // Patterns for different phone number formats
-    const patterns = {
-      // International formats: +251, +33, etc.
-      international: /^\+[1-9]\d{1,14}$/,
-      
-      // Ethiopian local formats: 09xxxxxxxx, 07xxxxxxxx (10 digits)
-      ethiopianLocal: /^(09|07)\d{8}$/,
-      
-      // Other local formats: 0xxxxxxxxx (10 digits starting with 0)
-      otherLocal: /^0\d{9}$/,
-      
-      // Basic numeric format (fallback)
-      basic: /^[+]?[0-9]+$/
-    };
+export const ETHIOPIAN_HOME_PHONE_ERROR =
+  'Use +251, 01, 03, 04, 09, or 07. Examples: +2519xxxxxxxx, 011xxxxxxx, 0342xxxxxx, 09xxxxxxxx, 07xxxxxxxx';
 
-    // Check if it matches any of the valid patterns
-    const isValidFormat = 
-      patterns.international.test(cleanPhoneNumber) ||
-      patterns.ethiopianLocal.test(cleanPhoneNumber) ||
-      patterns.otherLocal.test(cleanPhoneNumber) ||
-      patterns.basic.test(cleanPhoneNumber);
-
-    // Length validation for different formats
-    const isValidLength = 
-      // International: 7-15 digits (including country code)
-      (cleanPhoneNumber.startsWith('+') && cleanPhoneNumber.length >= 7 && cleanPhoneNumber.length <= 15) ||
-      // Local formats: exactly 10 digits
-      (!cleanPhoneNumber.startsWith('+') && cleanPhoneNumber.length === 10) ||
-      // Basic numeric: 7-15 digits
-      (!cleanPhoneNumber.startsWith('+') && cleanPhoneNumber.length >= 7 && cleanPhoneNumber.length <= 15);
-
-    if (!isValidFormat || !isValidLength) {
-      return {
-        invalidPhoneNumber: {
-          valid: false,
-          message: 'Invalid phone number format. Supported formats: +251xxxxxxxxx, +33xxxxxxxxx, 09xxxxxxxx, 07xxxxxxxx, or 0xxxxxxxxx (10 digits)'
-        }
-      };
-    }
-
+function toEthiopianHomeNationalDigits(value: unknown): string | null {
+  if (value === null || value === undefined) {
     return null;
+  }
+  const raw = value.toString().trim();
+  if (!raw) {
+    return null;
+  }
+  const cleaned = raw.replace(/[\s\-\(\)]/g, '');
+  if (!/^\+?\d+$/.test(cleaned)) {
+    return null;
+  }
+  let digits = cleaned.startsWith('+') ? cleaned.slice(1) : cleaned;
+  if (digits.length < 9 || digits.length > 15) {
+    return null;
+  }
+  if (digits.startsWith('251')) {
+    digits = digits.slice(3);
+    if (digits.startsWith('0')) {
+      digits = digits.slice(1);
+    }
+  } else if (digits.startsWith('0')) {
+    digits = digits.slice(1);
+  }
+  if (digits.length < 8 || digits.length > 12) {
+    return null;
+  }
+  if (!/^[13479]\d+$/.test(digits)) {
+    return null;
+  }
+  return digits;
+}
+
+function toEthiopianNationalDigits(value: unknown): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  const raw = value.toString().trim();
+  if (!raw) {
+    return null;
+  }
+  const cleaned = raw.replace(/[\s\-\(\)]/g, '');
+  if (!/^\+?\d+$/.test(cleaned)) {
+    return null;
+  }
+  const digits = cleaned.startsWith('+') ? cleaned.slice(1) : cleaned;
+  if (digits.startsWith('251') && digits.length === 12) {
+    return digits.slice(3);
+  }
+  if (digits.startsWith('0') && digits.length === 10) {
+    return digits.slice(1);
+  }
+  if (digits.length === 9) {
+    return digits;
+  }
+  return null;
+}
+
+export function normalizeEthiopianMobile(value: unknown): string | null {
+  const national = toEthiopianNationalDigits(value);
+  if (!national || !/^[79]\d{8}$/.test(national)) {
+    return null;
+  }
+  return `+251${national}`;
+}
+
+export function normalizeEthiopianHomePhone(value: unknown): string | null {
+  const national = toEthiopianHomeNationalDigits(value);
+  if (!national) {
+    return null;
+  }
+  return `+251${national}`;
+}
+
+export function ethiopianMobileValidator(): ValidatorFn {
+  return (control: AbstractControl): { [key: string]: any } | null => {
+    if (control.value === null || control.value === undefined || control.value === '') {
+      return null;
+    }
+    if (normalizeEthiopianMobile(control.value)) {
+      return null;
+    }
+    return {
+      invalidPhoneNumber: {
+        valid: false,
+        message: ETHIOPIAN_MOBILE_ERROR
+      }
+    };
   };
 }
 
-export function phoneValidator9To14(): ValidatorFn {
+export function ethiopianHomePhoneValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
-    if (control.value === null || control.value === "") {
-      return null; // No validation for empty input
+    if (control.value === null || control.value === undefined || control.value === '') {
+      return null;
     }
-
-    const phoneNumber = control.value.toString().trim();
-    
-    // Remove any spaces, dashes, or parentheses for validation
-    const cleanPhoneNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
-    
-    // Check if it's a valid phone number with 9-14 digits
-    const phoneRegex = /^(\+[1-9]\d{1,14}|(09|07)\d{8}|0\d{9}|\d{9,14})$/;
-    
-    if (!phoneRegex.test(cleanPhoneNumber)) {
-      return {
-        invalidPhoneNumber: {
-          valid: false,
-          message: 'Phone number must be 9-14 digits. Supported formats: +251xxxxxxxxx, 09xxxxxxxx, 07xxxxxxxx, or 0xxxxxxxxx'
-        }
-      };
+    if (normalizeEthiopianHomePhone(control.value)) {
+      return null;
     }
-
-    // Additional length validation for 9-14 digits
-    const digitCount = cleanPhoneNumber.replace(/[^0-9]/g, '').length;
-    if (digitCount < 9 || digitCount > 14) {
-      return {
-        invalidPhoneNumber: {
-          valid: false,
-          message: `Phone number must be 9-14 digits. Current length: ${digitCount} digits`
-        }
-      };
-    }
-
-    return null;
+    return {
+      invalidPhoneNumber: {
+        valid: false,
+        message: ETHIOPIAN_HOME_PHONE_ERROR
+      }
+    };
   };
+}
+
+export function phoneValidator(): ValidatorFn {
+  return ethiopianMobileValidator();
+}
+
+export function phoneValidator9To14(): ValidatorFn {
+  return ethiopianMobileValidator();
+}
+
+export function applyEthiopianMobileControl(control: AbstractControl | null | undefined): void {
+  if (!control) {
+    return;
+  }
+  const normalized = normalizeEthiopianMobile(control.value);
+  if (normalized && normalized !== control.value) {
+    control.setValue(normalized, { emitEvent: false });
+  }
+}
+
+export function applyEthiopianHomePhoneControl(control: AbstractControl | null | undefined): void {
+  if (!control) {
+    return;
+  }
+  const normalized = normalizeEthiopianHomePhone(control.value);
+  if (normalized && normalized !== control.value) {
+    control.setValue(normalized, { emitEvent: false });
+  }
 }
 
 export function emailValidator(): ValidatorFn {
@@ -207,6 +256,12 @@ export const ACADEMIC_TERM_STATUS: any[] = [
   { Id: 3, Description: "Summer" },
   { Id: 4, Description: "Autumn" },
 ];
+export const CREDIT_HOUR_LIMIT_LEVEL: any[] = [
+  { Id: 0, Description: "Student" },
+  { Id: 1, Description: "Batch" },
+  { Id: 2, Description: "Term / Year" },
+  { Id: 3, Description: "Global" },
+];
 export const ACADEMIC_SEMESTER_LIST: any[] = [
   { Id: 1, Description: "Semester I" },
   { Id: 2, Description: "Semester II" },
@@ -219,6 +274,10 @@ export const ACADEMIC_YEAR_NUMBER_STATUS: any[] = [
   { Id: 3, Description: "Third Year " },
   { Id: 4, Description: "Fourth Year " },
   { Id: 5, Description: "Fifth Year " }
+];
+export const APPLICANT_TYPE_STATUS: any[] = [
+  { Id: 1, Description: "Fresh" },
+  { Id: 2, Description: "Transfer" }
 ];
 export const APPROVAL_STATUS: any[] = [
   { Id: 1, Description: "Registered" },

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RegisteredStudentPerCourse } from '../model/registered-student-per-course.model';
 import { ReportService } from '../services/report.service';
 import { ExcelExportService } from '../services/excel-export.service';
@@ -11,12 +11,13 @@ import { SearchQueryParams } from '../SearchParam/search-query-params';
 import { StudentInformation } from '../model/student-information.model';
 import * as XLSX from 'xlsx';
 import { TermCourseOfferingService } from 'src/app/colleges/services/term-course-offering.service';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 @Component({
   selector: 'app-registered-student-per-course',
   templateUrl: './registered-student-per-course.component.html',
   styleUrls: ['./registered-student-per-course.component.scss']
 })
-export class RegisteredStudentPerCourseComponent implements OnInit {
+export class RegisteredStudentPerCourseComponent implements OnInit, OnDestroy {
   data: RegisteredStudentPerCourse;
   registeredStudentInformation: StudentInformation[] = [];
   isLoading = true;
@@ -34,14 +35,17 @@ export class RegisteredStudentPerCourseComponent implements OnInit {
   sortOrder = '';
   sortColumn = '';
   paginatedRegisteredStudent: StudentInformation[] = [];
+  pager: ServerPaginator;
   constructor(
     private _reportService: ReportService,
     private _excelExportService: ExcelExportService,
     private _pdfExportService: PdfExportService,
     private _fb: FormBuilder,
     private _crudService: CrudService,
-    private _termCourseOfferingService: TermCourseOfferingService
+    private _termCourseOfferingService: TermCourseOfferingService,
+    private paginator: PaginatorService
   ) {
+    this.pager = this.paginator.create();
     const currentYear = new Date();
     this.yearList = this.getYearRange(currentYear.getFullYear());
     this.createCourseOffering();
@@ -49,6 +53,7 @@ export class RegisteredStudentPerCourseComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.pager.init(() => this.getRegisteredStudentPerCourse(false));
     this.getListOfAcademicTermStatus();
     this.termId.valueChanges.subscribe(res => {
       if (res && this.termYear.value) {
@@ -116,107 +121,111 @@ export class RegisteredStudentPerCourseComponent implements OnInit {
     }
     return yearList.reverse();
   }
-  getRegisteredStudentPerCourse() {
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
+  getRegisteredStudentPerCourse(resetPage = true) {
+    if (!this.formRegisteredStudentPerCourse.valid) {
+      return;
+    }
+    if (resetPage) {
+      this.pager.pageIndex = 1;
+    }
     this.isLoading = true;
+    this.pager.loading = true;
     this.hasSearched = true;
     const formModel = this.getStudentRegistered();
-    this._reportService.getListOfRegisteredStudentPerCourse(formModel)
-      .subscribe({
-        next: (res: any) => {
-          this.data = res;
-
-          // Check if response exists and has data
-          if (res && Array.isArray(res) && res.length > 0 && res[0] && res[0].studentInformation) {
-            this.registeredStudentInformation = res[0].studentInformation;
-            this.total = this.registeredStudentInformation.length;
-          } else {
-            // No data found
-            this.registeredStudentInformation = [];
-            this.total = 0;
-            this.data = null;
-          }
-
-          this.updatePaginatedRegisteredStudent();
-          this.isLoading = false;
-
-          // Collapse the search form when results are returned
-          this.isFormCollapsed = true;
-        },
-        error: (error) => {
-          console.error('Error fetching registered students:', error);
-          this.registeredStudentInformation = [];
-          this.total = 0;
-          this.data = null;
-          this.updatePaginatedRegisteredStudent();
-          this.isLoading = false;
-
-          // Collapse the search form even on error
-          this.isFormCollapsed = true;
-        }
-      });
+    this._reportService.getListOfRegisteredStudentPerCoursePaginated(
+      formModel.termId,
+      formModel.termYear,
+      formModel.courseId,
+      this.pager.query()
+    ).subscribe({
+      next: (res: any) => {
+        this.registeredStudentInformation = res.data || [];
+        this.paginatedRegisteredStudent = [...this.registeredStudentInformation];
+        this.pager.applyResult(res);
+        this.total = this.pager.total;
+        this.isLoading = false;
+        this.isFormCollapsed = true;
+      },
+      error: () => {
+        this.registeredStudentInformation = [];
+        this.paginatedRegisteredStudent = [];
+        this.pager.fail();
+        this.total = 0;
+        this.data = null;
+        this.isLoading = false;
+        this.isFormCollapsed = true;
+      }
+    });
   }
   exportToExcel(): void {
-    // Check if data exists and has the required structure
-    if (!this.data || !Array.isArray(this.data) || this.data.length === 0 || !this.data[0]) {
-      console.error('No data available for export');
-      return;
-    }
-
-    const term = this.data[0].academicTerm || 'N/A';
-    const course = `${this.data[0].courseCode || 'N/A'} - ${this.data[0].courseTitle || 'N/A'}`;
-    const studentData = this.data[0].studentInformation || [];
-
-    const excelData = [
-      [`Academic Term: ${term}`],
-      [`Course: ${course}`],
-      ["SerialNo", "StudentCode", "FullName", "BatchCode"],
-      ...studentData.map(student => [
-        student.serialNo || '',
-        student.studentCode || '',
-        student.fullName || '',
-        student.batchCode || ''
-      ])
-    ];
-    const merges: XLSX.Range[] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } }
-    ];
-
-    this._excelExportService.exportWithCustomLayout(
-      excelData,
-      'Registered_Students',
-      'Students',
-      merges
-    );
+    const formModel = this.getStudentRegistered();
+    this._reportService.getListOfRegisteredStudentPerCourse(formModel).subscribe({
+      next: (res: any) => {
+        const rows = Array.isArray(res) ? res : [];
+        if (!rows.length || !rows[0]) {
+          return;
+        }
+        this.data = rows[0];
+        const term = rows[0].academicTerm || 'N/A';
+        const course = `${rows[0].courseCode || 'N/A'} - ${rows[0].courseTitle || 'N/A'}`;
+        const studentData = rows[0].studentInformation || [];
+        const excelData = [
+          [`Academic Term: ${term}`],
+          [`Course: ${course}`],
+          ["SerialNo", "StudentCode", "FullName", "BatchCode"],
+          ...studentData.map(student => [
+            student.serialNo || '',
+            student.studentCode || '',
+            student.fullName || '',
+            student.batchCode || ''
+          ])
+        ];
+        const merges: XLSX.Range[] = [
+          { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
+          { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } }
+        ];
+        this._excelExportService.exportWithCustomLayout(
+          excelData,
+          'Registered_Students',
+          'Students',
+          merges
+        );
+      }
+    });
   }
   exportToPdf(): void {
-    // Check if data exists and has the required structure
-    if (!this.data || !Array.isArray(this.data) || this.data.length === 0 || !this.data[0]) {
-      console.error('No data available for export');
-      return;
-    }
-
-    const headerLines = [
-      `Academic Term: ${this.data[0].academicTerm || 'N/A'}`,
-      `Course: ${this.data[0].courseCode || 'N/A'} - ${this.data[0].courseTitle || 'N/A'}`
-    ];
-
-    const tableHeaders = ['Serial No', 'Student Code', 'Full Name', 'Batch Code'];
-    const studentData = this.data[0].studentInformation || [];
-
-    const tableData = studentData.map(student => [
-      student.serialNo || '',
-      student.studentCode || '',
-      student.fullName || '',
-      student.batchCode || ''
-    ]);
-
-    this._pdfExportService.exportToPdf(
-      headerLines,
-      tableHeaders,
-      tableData,
-      'Registered_Students_Report'
-    );
+    const formModel = this.getStudentRegistered();
+    this._reportService.getListOfRegisteredStudentPerCourse(formModel).subscribe({
+      next: (res: any) => {
+        const rows = Array.isArray(res) ? res : [];
+        if (!rows.length || !rows[0]) {
+          return;
+        }
+        this.data = rows[0];
+        const headerLines = [
+          `Academic Term: ${rows[0].academicTerm || 'N/A'}`,
+          `Course: ${rows[0].courseCode || 'N/A'} - ${rows[0].courseTitle || 'N/A'}`
+        ];
+        const tableHeaders = ['Serial No', 'Student Code', 'Full Name', 'Batch Code'];
+        const studentData = rows[0].studentInformation || [];
+        const tableData = studentData.map(student => [
+          student.serialNo || '',
+          student.studentCode || '',
+          student.fullName || '',
+          student.batchCode || ''
+        ]);
+        this._pdfExportService.exportToPdf(
+          headerLines,
+          tableHeaders,
+          tableData,
+          'Registered_Students_Report'
+        );
+      }
+    });
   }
   getStudentRegistered(): SearchQueryParams {
     const formModel = this.formRegisteredStudentPerCourse.getRawValue();
@@ -226,35 +235,27 @@ export class RegisteredStudentPerCourseComponent implements OnInit {
     params.courseId = formModel.courseId;
     return params;
   }
-  updatePaginatedRegisteredStudent(): void {
-    const startIndex = (this.pageIndex - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.paginatedRegisteredStudent = this.registeredStudentInformation.slice(startIndex, endIndex);
+  search(): void {
+    this.pager.onSearch(this.searchKey);
   }
-
   onPageIndexChange(page: number): void {
-    this.pageIndex = page;
-    this.updatePaginatedRegisteredStudent();
+    this.pager.onPageIndexChange(page);
   }
-
   onPageSizeChange(size: number): void {
-    this.pageSize = size;
-    this.pageIndex = 1;
-    this.updatePaginatedRegisteredStudent();
+    this.pager.onPageSizeChange(size);
   }
-
   onSort(sort: { key: string; value: string }): void {
-    this.sortColumn = sort.key;
-    this.sortOrder = sort.value;
-    this.updatePaginatedRegisteredStudent();
+    this.pager.onSort(sort);
   }
-
   loadData(): void {
     this.formRegisteredStudentPerCourse.reset();
     this.registeredStudentInformation = [];
+    this.paginatedRegisteredStudent = [];
     this.total = 0;
-    this.pageIndex = 1;
     this.hasSearched = false;
-    this.updatePaginatedRegisteredStudent();
+    this.searchKey = '';
+    this.pager.pageIndex = 1;
+    this.pager.total = 0;
+    this.pager.searchKey = '';
   }
 }

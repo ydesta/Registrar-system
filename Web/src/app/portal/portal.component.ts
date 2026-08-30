@@ -1,123 +1,79 @@
-import { Component, OnInit, HostListener } from '@angular/core';
-import { AuthService } from '../services/auth.service';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-portal',
   templateUrl: './portal.component.html',
   styleUrls: ['./portal.component.scss']
 })
-export class PortalComponent implements OnInit {
-  public isUserApplicant: boolean = false;
-  public isAuthenticated: boolean = false;
-  public currentUser: any = null;
-  public isMobileMenuOpen: boolean = false;
-  currentYear: number = new Date().getFullYear();
+export class PortalComponent implements OnInit, OnDestroy {
+  isUserApplicant = false;
+  isAuthenticated = false;
+  currentUser: any = null;
+  isMobileMenuOpen = false;
+  currentYear = new Date().getFullYear();
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private _authService: AuthService,
     private _router: Router
-  ) {
-    
-   }
+  ) {}
 
   ngOnInit(): void {
-    this._authService.isAuthenticated().then(isAuth => {
-      this.isAuthenticated = isAuth;
-      this.currentUser = this._authService.getCurrentUser();
-      if (localStorage.getItem('role') == '"Applicant"') {
-        this.isUserApplicant = true;
-      }
-    }).catch((error) => {
-      // Set default state on error
-      this.isAuthenticated = false;
-      this.currentUser = null;
-      this.isUserApplicant = false;
+    this._authService.isAuthenticated().then(isAuth => this.applyAuth(isAuth)).catch(() => this.resetAuth());
+    this._authService.currentUser$.pipe(takeUntil(this.destroy$)).subscribe(user => {
+      this.applyAuth(!!user, user);
     });
   }
 
-  public login = () => {
-    // Close mobile menu first
-    this.closeMobileMenu();
-    
-    // Use absolute navigation to ensure it works from any portal route
-    this._router.navigate(['/accounts/login']).then(() => {
-      // Navigation successful
-    }).catch((error) => {
-      // Fallback: try using window.location
-      window.location.href = '/accounts/login';
-    });
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  login = () => {
+    this.navigate('/accounts/login');
   };
 
-  public register = () => {
-    // Close mobile menu first
-    this.closeMobileMenu();
-    
-    // Use absolute navigation to ensure it works from any portal route
-    this._router.navigate(['/accounts/register']).then(() => {
-      // Navigation successful
-    }).catch((error) => {
-      // Fallback: try using window.location
-      window.location.href = '/accounts/register';
-    });
+  register = () => {
+    this.navigate('/accounts/register');
   };
 
-  public logout = () => {
+  logout = () => {
     this.closeMobileMenu();
-    
+    this.resetAuth();
     this._authService.logout();
-    
-    // Reset component state
-    this.isAuthenticated = false;
-    this.currentUser = null;
-    this.isUserApplicant = false;
-    
-    // Navigate to portal home
-    this.goToHome();
   };
 
-  public goToHome = () => {
-    this._router.navigate(['/portal']).then(() => {
-      // Navigation successful
-    }).catch((error) => {
-      // Navigation failed
-    });
+  goToHome = () => {
+    this._router.navigate(['/portal']);
   };
 
-  public goToDashboard = () => {
-    this._router.navigate(['/dashboard']).then(() => {
-      // Navigation successful
-    }).catch((error) => {
-      // Navigation failed
-    });
+  goToDashboard = () => {
+    this._router.navigate(['/dashboard']);
   };
 
-  public isOnMainPortalRoute(): boolean {
+  isOnMainPortalRoute(): boolean {
     const currentUrl = this._router.url;
-    
-    // Only show main portal content when on exact /portal route
-    // Don't show it when on child routes like /portal/about, /portal/programs, etc.
-    const isMainRoute = currentUrl === '/portal' || currentUrl === '/portal/';
-    return isMainRoute;
+    return currentUrl === '/portal' || currentUrl === '/portal/';
   }
 
-  public isLinkActive(route: string): boolean {
-    const currentUrl = this._router.url;
-    const isActive = currentUrl.includes(route);
-    return isActive;
+  isLinkActive(route: string): boolean {
+    return this._router.url.includes(route);
   }
 
-  public toggleMobileMenu(): void {
+  toggleMobileMenu(): void {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
   }
 
-  public closeMobileMenu(): void {
+  closeMobileMenu(): void {
     this.isMobileMenuOpen = false;
   }
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any): void {
-    // Close mobile menu when screen size increases beyond mobile breakpoint
     if (event.target.innerWidth > 768 && this.isMobileMenuOpen) {
       this.isMobileMenuOpen = false;
     }
@@ -125,13 +81,29 @@ export class PortalComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: any): void {
-    // Close mobile menu when clicking outside
     const target = event.target as HTMLElement;
-    const mobileMenu = target.closest('.main-nav');
-    const mobileToggle = target.closest('.mobile-menu-toggle');
-    
-    if (this.isMobileMenuOpen && !mobileMenu && !mobileToggle) {
+    if (this.isMobileMenuOpen && !target.closest('.main-nav') && !target.closest('.mobile-menu-toggle')) {
       this.closeMobileMenu();
     }
   }
-} 
+
+  private applyAuth(isAuth: boolean, user: any = this._authService.getCurrentUser()): void {
+    this.isAuthenticated = isAuth;
+    this.currentUser = user;
+    this.isUserApplicant = this._authService.hasRole('Applicant')
+      || localStorage.getItem('role') === '"Applicant"';
+  }
+
+  private resetAuth(): void {
+    this.isAuthenticated = false;
+    this.currentUser = null;
+    this.isUserApplicant = false;
+  }
+
+  private navigate(path: string): void {
+    this.closeMobileMenu();
+    this._router.navigate([path]).catch(() => {
+      window.location.href = path;
+    });
+  }
+}

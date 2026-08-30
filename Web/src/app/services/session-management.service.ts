@@ -1,7 +1,6 @@
-import { Injectable, NgZone } from '@angular/core';
-import { Router } from '@angular/router';
+import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
-import { BehaviorSubject, fromEvent, merge } from 'rxjs';
+import { BehaviorSubject, Subject, fromEvent, merge } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import {
@@ -19,14 +18,13 @@ import { SESSION_CONSTANTS } from './session-management.constants';
 })
 export class SessionManagementService implements ISessionManagementService {
   private sessionConfig: SessionConfig = SESSION_CONSTANTS.DEFAULT_CONFIG;
-
   private inactivityTimer: any;
   private sessionTimer: any;
   private warningTimer: any;
   private lastActivityTime: Date = new Date();
   private sessionStartTime: Date = new Date();
   private isSessionActive = false;
-  private destroy$ = new BehaviorSubject<boolean>(false);
+  private destroy$ = new Subject<void>();
 
   private sessionStateSubject = new BehaviorSubject<SessionState>({
     isActive: false,
@@ -36,22 +34,19 @@ export class SessionManagementService implements ISessionManagementService {
 
   public sessionState$ = this.sessionStateSubject.asObservable();
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private ngZone: NgZone
-  ) {
+  constructor(private authService: AuthService) {
     this.loadSessionConfig();
     this.initializeSessionManagement();
   }
 
   private loadSessionConfig(): void {
     const savedConfig = localStorage.getItem(SESSION_CONSTANTS.STORAGE_KEYS.SESSION_CONFIG);
-    if (savedConfig) {
-      try {
-        this.sessionConfig = { ...this.sessionConfig, ...JSON.parse(savedConfig) };
-      } catch (error) {
-      }
+    if (!savedConfig) {
+      return;
+    }
+    try {
+      this.sessionConfig = { ...this.sessionConfig, ...JSON.parse(savedConfig) };
+    } catch {
     }
   }
 
@@ -80,54 +75,43 @@ export class SessionManagementService implements ISessionManagementService {
   }
 
   private setupActivityTracking(): void {
-    const eventStreams = SESSION_CONSTANTS.ACTIVITY_EVENTS.map(event => fromEvent(document, event));
-
-    merge(...eventStreams)
+    merge(...SESSION_CONSTANTS.ACTIVITY_EVENTS.map(event => fromEvent(document, event)))
       .pipe(
         debounceTime(SESSION_CONSTANTS.TIMERS.ACTIVITY_DEBOUNCE_MS),
         distinctUntilChanged(),
         takeUntil(this.destroy$)
       )
-      .subscribe(() => {
-        this.updateActivity();
-      });
+      .subscribe(() => this.updateActivity());
   }
 
   private setupTabSync(): void {
-    window.addEventListener('storage', (event) => {
-      if (event.key === SESSION_CONSTANTS.STORAGE_KEYS.SESSION_DATA) {
-        try {
-          const sessionData = JSON.parse(event.newValue || '{}');
-          this.syncSessionData(sessionData);
-        } catch (error) {
-        }
+    window.addEventListener('storage', event => {
+      if (event.key !== SESSION_CONSTANTS.STORAGE_KEYS.SESSION_DATA) {
+        return;
+      }
+      try {
+        this.syncSessionData(JSON.parse(event.newValue || '{}'));
+      } catch {
       }
     });
     this.broadcastSessionData();
   }
 
   private setupBrowserCloseDetection(): void {
-    window.addEventListener('beforeunload', (event) => {
-      if (this.isSessionActive) {
-      }
-    });
-    window.addEventListener('pagehide', (event) => {
-      if (this.isSessionActive) {
-        if (event.persisted === false) {
-          setTimeout(() => {
-            this.handleBrowserClose();
-          }, 100);
-        }
+    window.addEventListener('pagehide', event => {
+      if (this.isSessionActive && event.persisted === false) {
+        setTimeout(() => this.handleBrowserClose(), SESSION_CONSTANTS.TIMERS.BROWSER_CLOSE_DELAY_MS);
       }
     });
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden' && this.isSessionActive) {
-        this.handleTabHidden();
-      } else if (document.visibilityState === 'visible' && this.isSessionActive) {
-        this.handleTabVisible();
+      if (!this.isSessionActive) {
+        return;
+      }
+      if (document.visibilityState === 'visible') {
+        this.checkAuthenticationStatus();
       }
     });
-    window.addEventListener('storage', (event) => {
+    window.addEventListener('storage', event => {
       if (event.key === SESSION_CONSTANTS.STORAGE_KEYS.BROWSER_CLOSING && event.newValue === 'true') {
         this.handleBrowserClose();
       }
@@ -144,10 +128,10 @@ export class SessionManagementService implements ISessionManagementService {
     if (this.inactivityTimer) {
       clearTimeout(this.inactivityTimer);
     }
-
-    this.inactivityTimer = setTimeout(() => {
-      this.handleInactivityTimeout();
-    }, this.sessionConfig.inactivityTimeoutMinutes * 60 * 1000);
+    this.inactivityTimer = setTimeout(
+      () => this.handleInactivityTimeout(),
+      this.sessionConfig.inactivityTimeoutMinutes * 60 * 1000
+    );
   }
 
   private startSession(): void {
@@ -171,24 +155,18 @@ export class SessionManagementService implements ISessionManagementService {
     if (this.sessionTimer) {
       clearInterval(this.sessionTimer);
     }
-
-    this.sessionTimer = setInterval(() => {
-      this.checkSessionTimeout();
-    }, 60000);
+    this.sessionTimer = setInterval(() => this.checkSessionTimeout(), 60000);
   }
 
   private checkSessionTimeout(): void {
-    const sessionDuration = new Date().getTime() - this.sessionStartTime.getTime();
-    const maxSessionDuration = this.sessionConfig.sessionTimeoutMinutes * 60 * 1000;
-
-    if (sessionDuration >= maxSessionDuration) {
+    const timeRemaining = this.remainingMs();
+    if (timeRemaining <= 0) {
       this.handleSessionTimeout();
-    } else {
-      const timeRemaining = maxSessionDuration - sessionDuration;
-      const warningTime = this.sessionConfig.warningTimeMinutes * 60 * 1000;
-      if (timeRemaining <= warningTime && !this.warningTimer) {
-        this.showSessionWarning(timeRemaining);
-      }
+      return;
+    }
+    const warningTime = this.sessionConfig.warningTimeMinutes * 60 * 1000;
+    if (timeRemaining <= warningTime && !this.warningTimer) {
+      this.showSessionWarning(timeRemaining);
     }
   }
 
@@ -202,7 +180,7 @@ export class SessionManagementService implements ISessionManagementService {
 
   private showInactivityWarning(): void {
     const warningMessage = `You have been inactive for ${this.sessionConfig.inactivityTimeoutMinutes} minutes. You will be logged out in ${this.sessionConfig.warningTimeMinutes} minutes.`;
-    if (confirm(warningMessage + '\n\nClick OK to stay logged in or Cancel to logout now.')) {
+    if (confirm(`${warningMessage}\n\nClick OK to stay logged in or Cancel to logout now.`)) {
       this.updateActivity();
     } else {
       this.logout('Logged out due to inactivity');
@@ -210,9 +188,11 @@ export class SessionManagementService implements ISessionManagementService {
   }
 
   private showSessionWarning(timeRemaining: number): void {
+    this.warningTimer = setTimeout(() => {
+      this.warningTimer = null;
+    }, timeRemaining);
     const minutes = Math.floor(timeRemaining / 60000);
-    const warningMessage = `Your session will expire in ${minutes} minutes. Do you want to extend your session?`;
-    if (confirm(warningMessage)) {
+    if (confirm(`Your session will expire in ${minutes} minutes. Do you want to extend your session?`)) {
       this.extendSession();
     } else {
       this.logout('Session expired');
@@ -221,14 +201,12 @@ export class SessionManagementService implements ISessionManagementService {
 
   private extendSession(): void {
     this.authService.extendSession().subscribe({
-      next: (response) => {
+      next: () => {
         this.sessionStartTime = new Date();
         this.updateActivity();
         this.clearWarningTimer();
       },
-      error: (error) => {
-        this.logout('Failed to extend session');
-      }
+      error: () => this.logout('Failed to extend session')
     });
   }
 
@@ -242,15 +220,7 @@ export class SessionManagementService implements ISessionManagementService {
   private logout(reason: string): void {
     this.stopSession();
     this.clearSessionData();
-    localStorage.removeItem('isLogin');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('firstName');
-    localStorage.removeItem('lastName');
-    localStorage.removeItem('email');
-    localStorage.removeItem('role');
-    localStorage.removeItem('userType');
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    SESSION_CONSTANTS.AUTH_KEYS.forEach(key => localStorage.removeItem(key));
   }
 
   private clearTimers(): void {
@@ -272,7 +242,6 @@ export class SessionManagementService implements ISessionManagementService {
       lastActivityTime: this.lastActivityTime.toISOString(),
       timestamp: new Date().toISOString()
     };
-
     localStorage.setItem(SESSION_CONSTANTS.STORAGE_KEYS.SESSION_DATA, JSON.stringify(sessionData));
   }
 
@@ -304,23 +273,16 @@ export class SessionManagementService implements ISessionManagementService {
         reason: 'Browser close',
         timestamp: new Date().toISOString()
       };
-
       const formData = new FormData();
       formData.append('action', logoutData.action);
       formData.append('reason', logoutData.reason);
       formData.append('timestamp', logoutData.timestamp);
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon(`${environment.secureUrl}${SESSION_CONSTANTS.API_ENDPOINTS.BEACON_LOGOUT}`, formData);
-      }
-    } catch (error) {
+      navigator.sendBeacon?.(
+        `${environment.secureUrl}${SESSION_CONSTANTS.API_ENDPOINTS.BEACON_LOGOUT}`,
+        formData
+      );
+    } catch {
     }
-  }
-
-  private handleTabHidden(): void {
-  }
-
-  private handleTabVisible(): void {
-    this.checkAuthenticationStatus();
   }
 
   private checkAuthenticationStatus(): void {
@@ -331,29 +293,22 @@ export class SessionManagementService implements ISessionManagementService {
     });
   }
 
-  private handlePageUnload(): void {
-    this.clearSessionData();
+  private remainingMs(): number {
+    const sessionDuration = Date.now() - this.sessionStartTime.getTime();
+    const maxSessionDuration = this.sessionConfig.sessionTimeoutMinutes * 60 * 1000;
+    return Math.max(0, maxSessionDuration - sessionDuration);
   }
 
   private updateSessionState(): void {
     if (!this.isSessionActive) {
-      this.sessionStateSubject.next({
-        isActive: false,
-        timeRemaining: 0,
-        isWarning: false
-      });
+      this.sessionStateSubject.next({ isActive: false, timeRemaining: 0, isWarning: false });
       return;
     }
-
-    const sessionDuration = new Date().getTime() - this.sessionStartTime.getTime();
-    const maxSessionDuration = this.sessionConfig.sessionTimeoutMinutes * 60 * 1000;
-    const timeRemaining = Math.max(0, maxSessionDuration - sessionDuration);
-    const isWarning = timeRemaining <= (this.sessionConfig.warningTimeMinutes * 60 * 1000);
-
+    const timeRemaining = this.remainingMs();
     this.sessionStateSubject.next({
       isActive: true,
       timeRemaining,
-      isWarning
+      isWarning: timeRemaining <= this.sessionConfig.warningTimeMinutes * 60 * 1000
     });
   }
 
@@ -367,17 +322,13 @@ export class SessionManagementService implements ISessionManagementService {
   }
 
   public getSessionInfo(): SessionInfo {
-    const sessionDuration = new Date().getTime() - this.sessionStartTime.getTime();
-    const maxSessionDuration = this.sessionConfig.sessionTimeoutMinutes * 60 * 1000;
-    const timeRemaining = Math.max(0, maxSessionDuration - sessionDuration);
-    const isWarning = timeRemaining <= (this.sessionConfig.warningTimeMinutes * 60 * 1000);
-
+    const timeRemaining = this.remainingMs();
     return {
       isActive: this.isSessionActive,
       sessionStartTime: this.sessionStartTime,
       lastActivityTime: this.lastActivityTime,
       timeRemaining,
-      isWarning
+      isWarning: timeRemaining <= this.sessionConfig.warningTimeMinutes * 60 * 1000
     };
   }
 
@@ -388,7 +339,7 @@ export class SessionManagementService implements ISessionManagementService {
   }
 
   public destroy(): void {
-    this.destroy$.next(true);
+    this.destroy$.next();
     this.destroy$.complete();
     this.clearTimers();
     this.stopSession();
@@ -402,7 +353,8 @@ export class SessionManagementService implements ISessionManagementService {
   public disableBrowserCloseDetection(): void {
     this.sessionConfig.enableBrowserCloseDetection = false;
   }
+
   public testLogout(): void {
     this.logout('Test logout');
   }
-} 
+}

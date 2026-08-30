@@ -396,20 +396,14 @@ export class PdfExportService {
       const term1 = terms[i];
       const term2 = terms[i + 1];
       
-      // Calculate the height needed for both tables
-      let maxHeight = 0;
+      // Align left/right tables by padding to the larger course count
+      const maxCourses = Math.max(
+        term1?.courses?.length || 0,
+        term2?.courses?.length || 0
+      );
 
-      // Left table (Term 1)
-      if (term1) {
-        const height1 = this.calculateTableHeight(term1);
-        maxHeight = Math.max(maxHeight, height1);
-      }
-
-      // Right table (Term 2)
-      if (term2) {
-        const height2 = this.calculateTableHeight(term2);
-        maxHeight = Math.max(maxHeight, height2);
-      }
+      // Calculate the height needed for both tables (same padded height)
+      const maxHeight = this.calculateTableHeight(maxCourses);
 
       // Check if we need a new page based on available space
       const pageHeight = doc.internal.pageSize.height;
@@ -432,12 +426,12 @@ export class PdfExportService {
 
       // Draw left table (Term 1)
       if (term1) {
-        this.drawSingleTermTable(doc, term1, leftX, currentY, columnWidth);
+        this.drawSingleTermTable(doc, term1, leftX, currentY, columnWidth, maxCourses);
       }
 
       // Draw right table (Term 2)
       if (term2) {
-        this.drawSingleTermTable(doc, term2, rightX, currentY, columnWidth);
+        this.drawSingleTermTable(doc, term2, rightX, currentY, columnWidth, maxCourses);
       }
 
       // Move to next row with reduced spacing
@@ -445,14 +439,12 @@ export class PdfExportService {
     }
   }
 
-  private calculateTableHeight(term: any): number {
-    // Estimate height based on number of courses + header + footer
-    const courseCount = term.courses ? term.courses.length : 0;
-    const headerHeight = 15; // Reduced term header height from 20 to 15
-    const tableHeaderHeight = 12; // Reduced table header height from 15 to 12
-    const courseRowHeight = 10; // Reduced course row height from 12 to 10
-    const footerHeight = 30; // Reduced footer height from 35 to 30
-    const spacing = 5; // Reduced spacing from 10 to 5
+  private calculateTableHeight(courseCount: number): number {
+    const headerHeight = 15;
+    const tableHeaderHeight = 12;
+    const courseRowHeight = 10;
+    const footerHeight = 30;
+    const spacing = 5;
     
     return headerHeight + tableHeaderHeight + (courseRowHeight * courseCount) + footerHeight + spacing;
   }
@@ -462,7 +454,8 @@ export class PdfExportService {
     term: any,
     x: number,
     y: number,
-    columnWidth: number
+    columnWidth: number,
+    targetCourseCount: number = 0
   ): void {
     // Styled term header with background
     const headerWidth = columnWidth + 40; // Increased from 30 to 40 for better coverage
@@ -491,13 +484,18 @@ export class PdfExportService {
     doc.line(x - 9, y + headerHeight - 2, x + headerWidth - 9, y + headerHeight - 2);
 
     // Build table data
-    const body = term.courses.map((c: any) => [
+    const body = (term.courses || []).map((c: any) => [
       c.courseCode,
       c.courseTitle,
       String(c.creditHours),
       c.grade,
       c.gradePoint.toFixed(2),
     ]);
+
+    const paddedRowCount = Math.max(targetCourseCount, body.length);
+    while (body.length < paddedRowCount) {
+      body.push(['', '', '', '', '']);
+    }
 
     // Add summary rows to the table footer with proper alignment
     const foot = [
@@ -522,7 +520,8 @@ export class PdfExportService {
         font: 'helvetica',
         textColor: [0, 0, 0],
         lineColor: [0, 0, 0],
-        lineWidth: 0.1
+        lineWidth: 0.1,
+        minCellHeight: 10
       },
             headStyles: { 
               fillColor: [240, 240, 240], 

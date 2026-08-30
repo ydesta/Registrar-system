@@ -5,11 +5,10 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root',
 })
 export class SharedDataService {
-  authorizationInfo!: any;
-  public content = new BehaviorSubject<any>(this.authorizationInfo);
-  public share = this.content.asObservable();
-  constructor() {}
-  getLatestValue(data) {
+  private readonly content = new BehaviorSubject<any>(null);
+  readonly share = this.content.asObservable();
+
+  getLatestValue(data: any): void {
     this.content.next(data);
   }
 }

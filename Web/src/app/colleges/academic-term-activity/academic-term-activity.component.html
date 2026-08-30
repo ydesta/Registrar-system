@@ -9,7 +9,7 @@
       <div class="header-actions">
         <div class="search-section">
           <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input type="text" nz-input placeholder="Search activities..." />
+            <input type="text" nz-input placeholder="Search activities..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)" />
           </nz-input-group>
           <ng-template #suffixIconButton>
             <button nz-button nzType="primary" class="search-btn" nzSearch>
@@ -52,16 +52,16 @@
         #basicTable 
         [nzData]="academicTermActivities" 
         nzBordered
-        [nzPageSize]="pageSize"
-        [nzPageSizeOptions]="pageSizeOption"
+        [nzPageSize]="pager.pageSize"
+        [nzPageSizeOptions]="pager.pageSizeOptions"
         [nzShowSizeChanger]="true"
-        [nzTotal]="total"
-        [nzPageIndex]="pageIndex"
-        (nzPageIndexChange)="onPageIndexChange($event)"
-        (nzPageSizeChange)="onPageSizeChange($event)"
+        [nzTotal]="pager.total"
+        [nzPageIndex]="pager.pageIndex"
+        (nzPageIndexChange)="pager.onPageIndexChange($event)"
+        (nzPageSizeChange)="pager.onPageSizeChange($event)"
         [nzFrontPagination]="false"
         [nzShowTotal]="rangeTemplate"
-        [nzLoading]="isLoading"
+        [nzLoading]="pager.loading"
         [nzNoResult]="emptyTpl"
         class="activities-table"
       >
@@ -82,7 +82,7 @@
         <tbody>
           <tr *ngFor="let activity of basicTable.data; let i = index">
             <td class="sn-column">
-              <span class="sn-badge">{{ (pageIndex - 1) * pageSize + i + 1 }}</span>
+              <span class="sn-badge">{{ pager.serial(i) }}</span>
             </td>
             <td>{{activity.academicTerm}}</td>
             <td>{{ activity.title }}</td>

@@ -37,7 +37,7 @@ ngOnInit(): void {
   if(this.progStatusId!="null"){
     this.action="Edit Student Registration"
     this.submit ='Update';
-    this._crudService.getList('/StudentRegistrations' + '/' + this.progStatusId).subscribe((res:any)=>{
+    this._crudService.getById('/StudentRegistrations', this.progStatusId).subscribe((res:any)=>{
       this.patchValues(res.data);
     });
   }
@@ -55,7 +55,6 @@ ngOnInit(): void {
   });
 }
 submitForm(){
-  console.log(this.staffForm.value)
  if(this.staffForm.valid){
    if(this.progStatusId=="null") {
   this._crudService.add('/StudentRegistrations',this.staffForm.value).subscribe((res:any)=>{

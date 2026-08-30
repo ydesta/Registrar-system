@@ -5,6 +5,8 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class EnvironmentUrlService {
-  public urlAddress: string = environment.urlAddress;
-  constructor() {}
+  readonly baseUrl = environment.baseUrl;
+  readonly secureUrl = environment.secureUrl;
+  readonly fileUrl = environment.fileUrl;
+  readonly urlAddress = environment.baseUrl;
 }

@@ -19,6 +19,9 @@ export class StudentCourseRegistrationView {
     public batchCode: string;
     public isAllowedToRegister: number;
     public ignoreGradeLevelValidation: boolean;
+    public isLateRegistration: boolean;
+    public penaltyAmount: number;
+    public isPenaltyPaid: boolean;
     public courseTermOfferings: CourseBreakDownOffering[];
     public coursePayment: CoursePaymentViewModel[]
 }

@@ -4,7 +4,12 @@ import { ApplicantContactPersonRequest } from "../../model/applicant-contact-per
 import { NzModalRef } from "ng-zorro-antd/modal";
 import {
   alphabetsWithSpecialCharsValidator,
-  phoneValidator
+  ethiopianMobileValidator,
+  ethiopianHomePhoneValidator,
+  normalizeEthiopianMobile,
+  normalizeEthiopianHomePhone,
+  applyEthiopianMobileControl,
+  applyEthiopianHomePhoneControl
 } from "src/app/common/constant";
 import { CustomNotificationService } from "src/app/services/custom-notification.service";
 import { ApplicantContactPersonService } from "../../services/applicant-contact-person.service";
@@ -19,10 +24,8 @@ export class ContactPersonFormComponent implements OnInit {
   @Input() contactPerson: ApplicantContactPersonRequest;
   applicantContactPersonForm: FormGroup;
   contactId: string;
-  /**
-   *
-   */
   @Output() dataUpdated = new EventEmitter<void>();
+
   constructor(
     private modalRef: NzModalRef,
     private _fb: FormBuilder,
@@ -35,34 +38,44 @@ export class ContactPersonFormComponent implements OnInit {
   ngOnInit(): void {
     if (this.contactPerson != undefined) {
       this.contactId = this.contactPerson.id;
-      this.applicantContactPersonForm.patchValue(this.contactPerson);
+      this.applicantContactPersonForm.patchValue({
+        ...this.contactPerson,
+        telephoneOffice: normalizeEthiopianMobile(this.contactPerson.telephoneOffice) || this.contactPerson.telephoneOffice || '',
+        telephoneHome: normalizeEthiopianHomePhone(this.contactPerson.telephoneHome) || this.contactPerson.telephoneHome || ''
+      });
     }
   }
+
   closeModal(): void {
     this.modalRef.close();
   }
+
   createEducationBackground() {
     this.applicantContactPersonForm = this._fb.group({
       createdBy: ["-"],
       lastModifiedBy: ["-"],
       applicantID: [""],
-      fullName: ["", [Validators.required, alphabetsWithSpecialCharsValidator]],
-      telephoneHome: ["", [phoneValidator()]],
-      telephoneOffice: ["", [phoneValidator()]],
+      fullName: ["", [Validators.required, alphabetsWithSpecialCharsValidator()]],
+      telephoneHome: ["", [ethiopianHomePhoneValidator()]],
+      telephoneOffice: ["", [Validators.required, ethiopianMobileValidator()]],
       relation: ["", Validators.required]
     });
   }
+
   private getApplicantContactPerson(): ApplicantContactPersonRequest {
+    applyEthiopianMobileControl(this.telephoneOffice);
+    applyEthiopianHomePhoneControl(this.telephoneHome);
     const formModel = this.applicantContactPersonForm.getRawValue();
     const contact = new ApplicantContactPersonRequest();
     contact.applicantID = this.applicationId;
     contact.createdBy = "";
     contact.fullName = formModel.fullName;
-    contact.telephoneHome = formModel.telephoneHome;
-    contact.telephoneOffice = formModel.telephoneOffice;
+    contact.telephoneHome = normalizeEthiopianHomePhone(formModel.telephoneHome) || formModel.telephoneHome || '';
+    contact.telephoneOffice = normalizeEthiopianMobile(formModel.telephoneOffice) || formModel.telephoneOffice;
     contact.relation = formModel.relation;
     return contact;
   }
+
   get fullName() {
     return this.applicantContactPersonForm.get("fullName");
   }
@@ -75,8 +88,37 @@ export class ContactPersonFormComponent implements OnInit {
   get relation() {
     return this.applicantContactPersonForm.get("relation");
   }
+
+  onTelephoneOfficeBlur(): void {
+    applyEthiopianMobileControl(this.telephoneOffice);
+  }
+
+  onTelephoneHomeBlur(): void {
+    applyEthiopianHomePhoneControl(this.telephoneHome);
+  }
+
   onSubmit() {
+    Object.values(this.applicantContactPersonForm.controls).forEach(control => {
+      control.markAsDirty();
+      control.updateValueAndValidity({ onlySelf: true });
+    });
+    if (this.applicantContactPersonForm.invalid) {
+      this._customNotificationService.notification(
+        "error",
+        "Error",
+        "Enter a valid Ethio Telecom (09) or Safaricom (07) mobile number."
+      );
+      return;
+    }
     const postData = this.getApplicantContactPerson();
+    if (!normalizeEthiopianMobile(postData.telephoneOffice)) {
+      this._customNotificationService.notification(
+        "error",
+        "Error",
+        "Cell phone must be a valid Ethiopian mobile (09 / 07)."
+      );
+      return;
+    }
     if (this.contactId == undefined) {
       this._applicantContactPersonService.create(postData).subscribe(res => {
         if (res != null) {
@@ -85,9 +127,7 @@ export class ContactPersonFormComponent implements OnInit {
             "Success",
             "Applicant Contact  is save succesfully."
           );
-          // Emit the event when data is successfully saved
           this.dataUpdated.emit();
-          // Close the modal here if needed
           this.modalRef.close();
         } else {
           this._customNotificationService.notification(
@@ -109,9 +149,7 @@ export class ContactPersonFormComponent implements OnInit {
               "Success",
               "Applicant Contact  is update succesfully."
             );
-            // Emit the event when data is successfully saved
             this.dataUpdated.emit();
-            // Close the modal here if needed
             this.modalRef.close();
           } else {
             this._customNotificationService.notification(

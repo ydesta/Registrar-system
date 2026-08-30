@@ -1,164 +1,97 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable, map } from "rxjs";
-import { environment } from "src/environments/environment";
-import { TermCourseOfferingRequest } from "../model/term-course-offering-request.model";
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { TermCourseOfferingRequest } from '../model/term-course-offering-request.model';
+import { CrudService } from 'src/app/services/crud.service';
 
 @Injectable({
-  providedIn: "root"
+  providedIn: 'root'
 })
 export class TermCourseOfferingService {
-  baseUrl = environment.baseUrl;
-  private readonly _entrys: string = `/${environment.apiVersion}/entrys`;
-  private readonly _academicTerms: string = `/${environment.apiVersion}/term`;
-  private readonly _staffs: string = `/${environment.apiVersion}/staff`;
-  private readonly _termCourseOfferings: string = `/${environment.apiVersion}/offering`;
-  private readonly _batchs: string = `/${environment.apiVersion}/batch`;
+  private readonly entries = `/${environment.apiVersion}/entrys`;
+  private readonly terms = `/${environment.apiVersion}/term`;
+  private readonly staff = `/${environment.apiVersion}/staff`;
+  private readonly offerings = `/${environment.apiVersion}/offering`;
+  private readonly batches = `/${environment.apiVersion}/batch`;
   pageindex = 1;
   totalRecord = 0;
   pageSize = 10;
   pageSizeOption = [5, 10, 15, 25, 50, 100];
-  sortOrder = "";
-  searchKey = "";
-  sortColumn = "";
-  getEntrysUrl() {
-    return this.baseUrl + this._entrys;
-  }
+  sortOrder = '';
+  searchKey = '';
+  sortColumn = '';
 
-  getAcademicTermsUrl() {
-    return this.baseUrl + this._academicTerms;
-  }
-
-  getStaffsUrl() {
-    return this.baseUrl + this._staffs;
-  }
-  getTermCourseOfferingsUrl() {
-    return this.baseUrl + this._termCourseOfferings;
-  }
-  getBatchsUrl() {
-    return this.baseUrl + this._batchs;
-  }
-  constructor(private httpClient: HttpClient) { }
+  constructor(private crud: CrudService) { }
 
   create(postData: TermCourseOfferingRequest): Observable<any> {
-    const endPointUrl = `${this.getTermCourseOfferingsUrl()}`;
-    return this.httpClient.post<any>(endPointUrl, postData).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.add(this.offerings, postData);
   }
+
   update(id: string, postData: TermCourseOfferingRequest): Observable<any> {
-    const endPointUrl = `${this.getTermCourseOfferingsUrl()}/${id}`;
-    return this.httpClient.patch<any>(endPointUrl, postData).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.update(this.offerings, id, postData);
   }
+
   deactivate(id: string): Observable<any> {
-    const url = `${this.getTermCourseOfferingsUrl()}/${id}`;
-    return this.httpClient.put<any>(url, {}).pipe(map(response => response));
+    return this.crud.put(`${this.offerings}/${id}`, {});
   }
+
   deactivateCourseOfering(id: number): Observable<any> {
-    const url = `${this.getTermCourseOfferingsUrl()}/activate/${id}`;
-    return this.httpClient.put<any>(url, {}).pipe(map(response => response));
+    return this.crud.put(`${this.offerings}/activate/${id}`, {});
   }
 
   activateCourseOffering(id: number): Observable<any> {
-    const url = `${this.getTermCourseOfferingsUrl()}/activate/${id}`;
-    return this.httpClient.put<any>(url, {}).pipe(map(response => response));
+    return this.crud.put(`${this.offerings}/activate/${id}`, {});
   }
-
 
   delete(id: string): Observable<any> {
-    const endPointUrl = `${this.getTermCourseOfferingsUrl()}/${id}`;
-    return this.httpClient.delete<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.delete(this.offerings, id);
   }
+
   getEntryList(): Observable<any> {
-    const endpointUrl = `${this.getEntrysUrl()}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.getList(this.entries);
   }
 
   getAcademicTermList(): Observable<any> {
-    const endpointUrl = `${this.getAcademicTermsUrl()}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.getList(this.terms);
   }
 
   getStaffList(): Observable<any> {
-    const endpointUrl = `${this.getStaffsUrl()}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.getList(this.staff);
   }
 
   getBatchList(): Observable<any> {
-    const endpointUrl = `${this.getBatchsUrl()}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
-  }
-  getCourseBreakDownList(
-    curriculumId: string,
-    seasonTerm: number,
-    termYear: number
-  ): Observable<any> {
-    const endPointUrl = `${this.getTermCourseOfferingsUrl()}/${curriculumId}/${seasonTerm}/${termYear}`;
-    return this.httpClient.get<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
-    );
-  }
-  getListOfBatchCodeByAcademicTerm(
-    academicTerm: number,
-    year: number
-  ): Observable<any> {
-    const endPointUrl = `${this.getTermCourseOfferingsUrl()}/${academicTerm}/${year}/getListOfBatchCodeByAcademicTerm`;
-    return this.httpClient.get<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
-    );
-  }
-  getTermCourseOfferingById(id: string): Observable<any> {
-    const endpointUrl = `${this.getTermCourseOfferingsUrl()}/${id}`;
-    return this.httpClient.get(endpointUrl).pipe(map(result => result as any));
-  }
-  getTermCourseOfferingList(): Observable<any> {
-    const endpointUrl = `${this.getTermCourseOfferingsUrl()}paginated?searchKey=${this.searchKey}&pageindex=${this.pageindex - 1}&pageSize=${this.pageSize}&sortColumn=${this.sortColumn}&sortOrder=${this.sortOrder}`;
-    return this.httpClient.get(endpointUrl).pipe(map(result => result as any));
-  }
-  getListOfCourseByAcademicTerm(
-    termId: number,
-    termYear: number
-  ): Observable<any> {
-    const endPointUrl = `${this.getTermCourseOfferingsUrl()}/${termId}/${termYear}`;
-    return this.httpClient.get<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.getList(this.batches);
   }
 
-    getListOfCourseByAcademicTermAndBatch(
-    termId: number,
-    termYear: number,
-    batchCode: string
-  ): Observable<any> {
-    const endPointUrl = `${this.getTermCourseOfferingsUrl()}/getListOfCourseByAcademicTermAndBatch/${termId}/${termYear}/${batchCode}`;
-    return this.httpClient.get<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
+  getCourseBreakDownList(curriculumId: string, seasonTerm: number, termYear: number): Observable<any> {
+    return this.crud.getList(`${this.offerings}/${curriculumId}/${seasonTerm}/${termYear}`);
+  }
+
+  getListOfBatchCodeByAcademicTerm(academicTerm: number, year: number): Observable<any> {
+    return this.crud.getList(`${this.offerings}/${academicTerm}/${year}/getListOfBatchCodeByAcademicTerm`);
+  }
+
+  getTermCourseOfferingById(id: string): Observable<any> {
+    return this.crud.getById(this.offerings, id);
+  }
+
+  getTermCourseOfferingList(): Observable<any> {
+    return this.crud.getPaginated(this.offerings, {
+      searchKey: this.searchKey,
+      pageindex: this.pageindex - 1,
+      pageSize: this.pageSize,
+      sortColumn: this.sortColumn,
+      sortOrder: this.sortOrder
+    });
+  }
+
+  getListOfCourseByAcademicTerm(termId: number, termYear: number): Observable<any> {
+    return this.crud.getList(`${this.offerings}/${termId}/${termYear}`);
+  }
+
+  getListOfCourseByAcademicTermAndBatch(termId: number, termYear: number, batchCode: string): Observable<any> {
+    return this.crud.getList(
+      `${this.offerings}/getListOfCourseByAcademicTermAndBatch/${termId}/${termYear}/${batchCode}`
     );
   }
 }

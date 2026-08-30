@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CourseModel } from 'src/app/Models/CourseModel';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 import { CrudService } from 'src/app/services/crud.service';
 
 @Component({
@@ -7,47 +8,39 @@ import { CrudService } from 'src/app/services/crud.service';
   templateUrl: './course-report.component.html',
   styleUrls: ['./course-report.component.scss'],
 })
-export class CourseReportComponent implements OnInit {
+export class CourseReportComponent implements OnInit, OnDestroy {
   courses: CourseModel[] = [];
-  pageindex = 1;
-  totalRecord = 0;
-  pageSize = 5;
-  pageSizeOption = [5, 10, 15, 25, 50, 100];
-  sortOrder = '';
-  sortColumn = '';
-  searchKey = '';
-  constructor(private _crudService: CrudService) {}
+  pager: ServerPaginator;
+
+  constructor(
+    private _crudService: CrudService,
+    private paginator: PaginatorService
+  ) {
+    this.pager = this.paginator.create();
+  }
+
   ngOnInit(): void {
+    this.pager.init(() => this.fetchProgram());
     this.fetchProgram();
   }
+
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   fetchProgram() {
+    this.pager.loading = true;
     this._crudService
-      .getList(
-        '/Courses/paginated?searchKey=' +
-          this.searchKey +
-          '&pageindex=' +
-          (this.pageindex - 1) +
-          '&pageSize=' +
-          this.pageSize +
-          '&sortColumn=' +
-          this.sortColumn +
-          '&sortOrder=' +
-          this.sortOrder
-      )
-      .subscribe((res: any) => {
-        this.courses = res.data;
-        this.totalRecord = this.courses.length;
-        this.pageSize = res.itemPerPage;
-        this.pageindex = res.currentPage + 1;
-        this.totalRecord = res.totalRowCount;
+      .getPaginated(`/Courses`, this.pager.query())
+      .subscribe({
+        next: (res: any) => {
+          this.courses = res.data || [];
+          this.pager.applyResult(res);
+        },
+        error: () => {
+          this.courses = [];
+          this.pager.fail();
+        }
       });
-  }
-  paginatedIndexEvent(event: any) {
-    this.pageindex = event;
-    this.fetchProgram();
-  }
-  paginatedSizeEvent(event: any) {
-    this.pageSize = event;
-    this.fetchProgram();
   }
 }

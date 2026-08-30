@@ -35,7 +35,7 @@
         <nz-form-item>
           <nz-form-label nzFor="phoneNumber">Phone Number</nz-form-label>
           <nz-form-control [nzValidateStatus]="userForm.controls['phoneNumber']">
-            <input nz-input formControlName="phoneNumber" id="phoneNumber" placeholder="Phone Number" />
+            <input nz-input formControlName="phoneNumber" id="phoneNumber" placeholder="+2519… / 09… / 07…" (blur)="onPhoneBlur()" />
           </nz-form-control>
         </nz-form-item>
       </div>

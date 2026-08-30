@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ExcelExportService } from '../services/excel-export.service';
 import { PdfExportService } from '../services/pdf-export.service';
 import { ReportService } from '../services/report.service';
@@ -12,12 +12,13 @@ import { CrudService } from 'src/app/services/crud.service';
 import * as XLSX from 'xlsx';
 import { StudentInformation } from '../model/student-information.model';
 import { TermCourseOfferingService } from 'src/app/colleges/services/term-course-offering.service';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 @Component({
   selector: 'app-registered-student-per-batch',
   templateUrl: './registered-student-per-batch.component.html',
   styleUrls: ['./registered-student-per-batch.component.scss']
 })
-export class RegisteredStudentPerBatchComponent implements OnInit {
+export class RegisteredStudentPerBatchComponent implements OnInit, OnDestroy {
   data: RegisteredStudentPerBatch;
   registeredStudentInformation: StudentInformation[] = [];
   paginatedRegisteredStudent: StudentInformation[] = [];
@@ -36,6 +37,7 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
   searchKey = '';
   sortOrder = '';
   sortColumn = '';
+  pager: ServerPaginator;
   constructor(
     private _reportService: ReportService,
     private _excelExportService: ExcelExportService,
@@ -44,13 +46,16 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
     private _fb: FormBuilder,
     private _crudService: CrudService,
     private courseTermOfferingService: TermCourseOfferingService,
+    private paginator: PaginatorService
   ) {
+    this.pager = this.paginator.create();
     const currentYear = new Date();
     this.yearList = this.getYearRange(currentYear.getFullYear());
     this.createRegisteredStudentPerBatch();
   }
 
   ngOnInit(): void {
+    this.pager.init(() => this.getRegisteredStudentPerBatch(false));
     this.termId.valueChanges.subscribe(res => {
       if (res && this.termYear.value) {
         this.getListOfCourseOffering(res, this.termYear.value);
@@ -65,7 +70,6 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
       }
     });
     this.batchCode.valueChanges.subscribe(res => {
-      console.log("$$       ",res);
       if (this.termYear.value && this.termId.value && res) {
         this.getListOfCourseOffering(this.termId.value, this.termYear.value, res);
       }
@@ -113,18 +117,46 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
       this.listOfBatch = res;
     });
   }
-  getRegisteredStudentPerBatch() {
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
+  getRegisteredStudentPerBatch(resetPage = true) {
+    if (!this.formRegisteredStudentPerBatch.valid) {
+      return;
+    }
+    if (resetPage) {
+      this.pager.pageIndex = 1;
+    }
     this.isLoading = true;
+    this.pager.loading = true;
     this.hasSearched = true;
     const formModel = this.getStudentRegistered();
-    this._reportService.getListOfRegisteredStudentPerBatch(formModel)
-      .subscribe((res: any) => {
-        this.data = res;
-        this.registeredStudentInformation = this.data[0]?.studentInformation;;
-        this.total = this.registeredStudentInformation.length;
-        this.updatePaginatedRegisteredStudent();
+    this._reportService.getListOfRegisteredStudentPerBatchPaginated(
+      formModel.termId,
+      formModel.termYear,
+      formModel.batchCode,
+      this.pager.query({
+        courseId: formModel.courseId || null
+      })
+    ).subscribe({
+      next: (res: any) => {
+        this.registeredStudentInformation = res.data || [];
+        this.paginatedRegisteredStudent = [...this.registeredStudentInformation];
+        this.pager.applyResult(res);
+        this.total = this.pager.total;
         this.isLoading = false;
-      });
+        this.isFormCollapsed = true;
+      },
+      error: () => {
+        this.registeredStudentInformation = [];
+        this.paginatedRegisteredStudent = [];
+        this.pager.fail();
+        this.total = 0;
+        this.isLoading = false;
+        this.isFormCollapsed = true;
+      }
+    });
   }
 
   loadData() {
@@ -133,7 +165,11 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
     this.paginatedRegisteredStudent = [];
     this.total = 0;
     this.hasSearched = false;
+    this.searchKey = '';
     this.isFormCollapsed = true;
+    this.pager.pageIndex = 1;
+    this.pager.total = 0;
+    this.pager.searchKey = '';
   }
   getStudentRegistered(): SearchQueryParams {
     const formModel = this.formRegisteredStudentPerBatch.getRawValue();
@@ -154,153 +190,117 @@ export class RegisteredStudentPerBatchComponent implements OnInit {
     return this.formRegisteredStudentPerBatch.get("batchCode");
   }
   exportToExcel(): void {
-    // Check if data exists and has the required structure
-    if (!this.data || !Array.isArray(this.data) || this.data.length === 0) {
-      console.error('No data available for export');
-      return;
-    }
-
-    const firstDataItem = this.data[0];
-    if (!firstDataItem) {
-      console.error('Invalid data structure for export');
-      return;
-    }
-
-    // Get form values to determine course information
-    const formValues = this.formRegisteredStudentPerBatch.getRawValue();
-    const selectedCourseId = formValues.courseId;
-
-    // Safely extract data with fallbacks
-    const term = firstDataItem.academicTerm || 'N/A';
-    const batch = firstDataItem.batchCode || 'N/A';
-
-    // Determine course information
-    let courseInfo = 'All Courses';
-    if (selectedCourseId && this.courses) {
-      // Find the selected course from the dropdown
-      const selectedCourse = this.courses.find(course => course.courseId === selectedCourseId);
-      if (selectedCourse) {
-        courseInfo = `${selectedCourse.courseCode} - ${selectedCourse.courseTitle}`;
+    const formModel = this.getStudentRegistered();
+    this._reportService.getListOfRegisteredStudentPerBatch(formModel).subscribe({
+      next: (res: any) => {
+        const rows = Array.isArray(res) ? res : [];
+        if (!rows.length || !rows[0]) {
+          return;
+        }
+        this.data = rows[0];
+        const firstDataItem = rows[0];
+        const formValues = this.formRegisteredStudentPerBatch.getRawValue();
+        const selectedCourseId = formValues.courseId;
+        const term = firstDataItem.academicTerm || 'N/A';
+        const batch = firstDataItem.batchCode || 'N/A';
+        let courseInfo = 'All Courses';
+        if (selectedCourseId && this.courses) {
+          const selectedCourse = this.courses.find(course => course.courseId === selectedCourseId || course.id === selectedCourseId);
+          if (selectedCourse) {
+            courseInfo = `${selectedCourse.courseCode} - ${selectedCourse.courseTitle}`;
+          }
+        } else if (firstDataItem.courseCode && firstDataItem.courseTitle) {
+          courseInfo = `${firstDataItem.courseCode} - ${firstDataItem.courseTitle}`;
+        }
+        const studentInfo = firstDataItem.studentInformation || [];
+        const excelData = [
+          [`Academic Term: ${term}`],
+          [`Course: ${courseInfo}`],
+          [`Batch Code: ${batch}`],
+          ["Serial No", "Course Code", "Course Title", "Student Code", "Full Name"],
+          ...studentInfo.map(student => [
+            student.serialNo || 'N/A',
+            student.courseCode || 'N/A',
+            student.courseTitle || 'N/A',
+            student.studentCode || 'N/A',
+            student.fullName || 'N/A'
+          ])
+        ];
+        const merges: XLSX.Range[] = [
+          { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
+          { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
+          { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } }
+        ];
+        this._excelExportService.exportWithCustomLayout(
+          excelData,
+          'Registered_Students_Per_Batch_Report',
+          'Students',
+          merges
+        );
       }
-    } else if (firstDataItem.courseCode && firstDataItem.courseTitle) {
-      // Use course info from API response if available
-      courseInfo = `${firstDataItem.courseCode} - ${firstDataItem.courseTitle}`;
-    }
-
-    // Check if student information exists
-    const studentInfo = firstDataItem.studentInformation || [];
-    if (!Array.isArray(studentInfo) || studentInfo.length === 0) {
-      console.warn('No student information available for export');
-    }
-
-    const excelData = [
-      [`Academic Term: ${term}`],
-      [`Course: ${courseInfo}`],
-      [`Batch Code: ${batch}`],
-      ["Serial No", "Course Code", "Course Title", "Student Code", "Full Name"],
-      ...studentInfo.map(student => [
-        student.serialNo || 'N/A',
-        student.courseCode || 'N/A',
-        student.courseTitle || 'N/A',
-        student.studentCode || 'N/A',
-        student.fullName || 'N/A'
-      ])
-    ];
-
-    const merges: XLSX.Range[] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
-      { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } }
-    ];
-
-    this._excelExportService.exportWithCustomLayout(
-      excelData,
-      'Registered_Students_Per_Batch_Report',
-      'Students',
-      merges
-    );
+    });
   }
   exportToPdf(): void {
-    // Check if data exists and has the required structure
-    if (!this.data || !Array.isArray(this.data) || this.data.length === 0) {
-      console.error('No data available for PDF export');
-      return;
-    }
-
-    const firstDataItem = this.data[0];
-    if (!firstDataItem) {
-      console.error('Invalid data structure for PDF export');
-      return;
-    }
-
-    // Get form values to determine course information
-    const formValues = this.formRegisteredStudentPerBatch.getRawValue();
-    const selectedCourseId = formValues.courseId;
-
-    // Safely extract data with fallbacks
-    const term = firstDataItem.academicTerm || 'N/A';
-    const batch = firstDataItem.batchCode || 'N/A';
-
-    // Determine course information
-    let courseInfo = 'All Courses';
-    if (selectedCourseId && this.courses) {
-      // Find the selected course from the dropdown
-      const selectedCourse = this.courses.find(course => course.courseId === selectedCourseId);
-      if (selectedCourse) {
-        courseInfo = `${selectedCourse.courseCode} - ${selectedCourse.courseTitle}`;
+    const formModel = this.getStudentRegistered();
+    this._reportService.getListOfRegisteredStudentPerBatch(formModel).subscribe({
+      next: (res: any) => {
+        const rows = Array.isArray(res) ? res : [];
+        if (!rows.length || !rows[0]) {
+          return;
+        }
+        this.data = rows[0];
+        const firstDataItem = rows[0];
+        const formValues = this.formRegisteredStudentPerBatch.getRawValue();
+        const selectedCourseId = formValues.courseId;
+        const term = firstDataItem.academicTerm || 'N/A';
+        const batch = firstDataItem.batchCode || 'N/A';
+        let courseInfo = 'All Courses';
+        if (selectedCourseId && this.courses) {
+          const selectedCourse = this.courses.find(course => course.courseId === selectedCourseId || course.id === selectedCourseId);
+          if (selectedCourse) {
+            courseInfo = `${selectedCourse.courseCode} - ${selectedCourse.courseTitle}`;
+          }
+        } else if (firstDataItem.courseCode && firstDataItem.courseTitle) {
+          courseInfo = `${firstDataItem.courseCode} - ${firstDataItem.courseTitle}`;
+        }
+        const headerLines = [
+          `Academic Term: ${term}`,
+          `Course: ${courseInfo}`,
+          `Batch Code: ${batch}`
+        ];
+        const tableHeaders = ['Serial No', 'Course Code', 'Course Title', 'Student Code', 'Full Name'];
+        const studentInfo = firstDataItem.studentInformation || [];
+        const tableData = studentInfo.map(student => [
+          student.serialNo || 'N/A',
+          student.courseCode || 'N/A',
+          student.courseTitle || 'N/A',
+          student.studentCode || 'N/A',
+          student.fullName || 'N/A',
+        ]);
+        this._pdfExportService.exportToPdf(
+          headerLines,
+          tableHeaders,
+          tableData,
+          'Registered_Students_Per_Batch_Report'
+        );
       }
-    } else if (firstDataItem.courseCode && firstDataItem.courseTitle) {
-      // Use course info from API response if available
-      courseInfo = `${firstDataItem.courseCode} - ${firstDataItem.courseTitle}`;
-    }
-
-    const headerLines = [
-      `Academic Term: ${term}`,
-      `Course: ${courseInfo}`,
-      `Batch Code: ${batch}`
-    ];
-
-    const tableHeaders = ['Serial No', 'Course Code', 'Course Title', 'Student Code', 'Full Name'];
-
-    // Check if student information exists
-    const studentInfo = firstDataItem.studentInformation || [];
-    const tableData = studentInfo.map(student => [
-      student.serialNo || 'N/A',
-      student.courseCode || 'N/A',
-      student.courseTitle || 'N/A',
-      student.studentCode || 'N/A',
-      student.fullName || 'N/A',
-    ]);
-
-    this._pdfExportService.exportToPdf(
-      headerLines,
-      tableHeaders,
-      tableData,
-      'Registered_Students_Per_Batch_Report'
-    );
+    });
   }
 
-  updatePaginatedRegisteredStudent(): void {
-    const startIndex = (this.pageIndex - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.paginatedRegisteredStudent = this.registeredStudentInformation.slice(startIndex, endIndex);
+  search(): void {
+    this.pager.onSearch(this.searchKey);
   }
 
   onPageIndexChange(page: number): void {
-    this.pageIndex = page;
-    this.updatePaginatedRegisteredStudent();
+    this.pager.onPageIndexChange(page);
   }
 
   onPageSizeChange(size: number): void {
-    this.pageSize = size;
-    this.pageIndex = 1;
-    this.updatePaginatedRegisteredStudent();
+    this.pager.onPageSizeChange(size);
   }
 
   onSort(sort: { key: string; value: string }): void {
-    this.sortColumn = sort.key;
-    this.sortOrder = sort.value;
-    this.updatePaginatedRegisteredStudent();
+    this.pager.onSort(sort);
   }
   getListOfCourseOffering(termId: number, termYear: number, batchCode?: string) {
     this.courses = null;

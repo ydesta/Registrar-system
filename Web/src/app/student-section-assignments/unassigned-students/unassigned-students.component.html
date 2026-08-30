@@ -124,7 +124,7 @@
   </div>
 
   <!-- Export Actions -->
-  <div class="export-section" *ngIf="students.length > 0">
+  <div class="export-section" *ngIf="pager.total > 0">
     <div class="export-buttons">
       <button nz-button nzType="default" (click)="exportToCSV()" class="export-btn">
         <i nz-icon nzType="file-excel" nzTheme="outline"></i>
@@ -134,11 +134,11 @@
   </div>
 
   <!-- Results Table -->
-  <div class="table-container" *ngIf="students.length > 0">
+  <div class="table-container" *ngIf="pager.total > 0 || pager.searchKey">
     <div class="table-header">
       <div class="page-info">
         <span class="text-muted">
-          Found {{ students.length }} unassigned students
+          Found {{ pager.total }} unassigned students
         </span>
       </div>
       <div class="search-box">
@@ -147,8 +147,16 @@
       </div>
     </div>
 
-    <nz-table #basicTable [nzData]="listOfDisplayData" [nzLoading]="loading" [nzShowPagination]="false"
-      [nzPageSize]="9999" [nzNoResult]="emptyTpl" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;"
+    <nz-table #basicTable [nzData]="listOfDisplayData" [nzLoading]="pager.loading"
+      [nzPageSize]="pager.pageSize"
+      [nzPageSizeOptions]="pager.pageSizeOptions"
+      [nzShowSizeChanger]="true"
+      [nzTotal]="pager.total"
+      [nzPageIndex]="pager.pageIndex"
+      (nzPageIndexChange)="pager.onPageIndexChange($event)"
+      (nzPageSizeChange)="pager.onPageSizeChange($event)"
+      [nzFrontPagination]="false"
+      [nzNoResult]="emptyTpl" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;"
       class="mobile-table-container">
 
       <thead>
@@ -170,7 +178,7 @@
         <tr *ngFor="let student of basicTable.data; let i = index">
           <td>
             <span class="serial-number">
-              {{ i + 1 }}
+              {{ pager.serial(i) }}
             </span>
           </td>
           <td>
@@ -211,7 +219,7 @@
   </div>
 
   <!-- Empty State -->
-  <div class="empty-state" *ngIf="!loading && students.length === 0 && searchForm.get('batchCode')?.value">
+  <div class="empty-state" *ngIf="!pager.loading && pager.total === 0 && !pager.searchKey && searchForm.get('batchCode')?.value">
     <nz-card class="empty-card">
       <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="notFoundContent">
         <ng-template #notFoundContent>

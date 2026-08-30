@@ -30,8 +30,8 @@
         <input 
           type="text" 
           nz-input 
-          [(ngModel)]="searchBatch"
-          (input)="onBatchSearch($event)"
+          [(ngModel)]="pager.searchKey"
+          (ngModelChange)="pager.onSearch($event)"
           placeholder="Search by batch code..." 
           class="batch-search-input" />
         <ng-template #suffixIconSearch>
@@ -71,28 +71,32 @@
     </div>
     <div class="table-responsive">
       <nz-table #basicTable 
-                [nzData]="filteredTermCourseOfferings" 
+                [nzData]="termCourseOfferings" 
                 nzBordered
-                [nzPageSize]="pageSize"
-                [nzPageIndex]="pageIndex"
-                [nzTotal]="total"
-                [nzPageSizeOptions]="pageSizeOptions"
+                [nzPageSize]="pager.pageSize"
+                [nzPageIndex]="pager.pageIndex"
+                [nzTotal]="pager.total"
+                [nzPageSizeOptions]="pager.pageSizeOptions"
                 [nzShowSizeChanger]="true"
                 [nzShowPagination]="true"
                 [nzShowQuickJumper]="true"
-                [nzLoading]="tbLoading"
+                [nzShowTotal]="rangeTemplate"
+                [nzLoading]="pager.loading"
                 [nzNoResult]="emptyTpl"
                 [nzFrontPagination]="false"
-                (nzPageIndexChange)="onPageIndexChange($event)"
-                (nzPageSizeChange)="onPageSizeChange($event)"
+                (nzPageIndexChange)="pager.onPageIndexChange($event)"
+                (nzPageSizeChange)="pager.onPageSizeChange($event)"
                 class="responsive-table">
+        <ng-template #rangeTemplate let-range="range" let-total>
+          <span class="pagination-range">{{ range[0] }}-{{ range[1] }} of {{ total }} offerings</span>
+        </ng-template>
         <thead>
           <tr>
             <th class="expand-column">Courses</th>
-            <th class="batch-column">Batch Code</th>
-            <th class="term-column">Academic Term</th>
-            <th class="date-column">Registration Start Date</th>
-            <th class="date-column">Registration End Date</th>
+            <th class="batch-column" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'BatchCode')">Batch Code</th>
+            <th class="term-column" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'AcademicTermYear')">Academic Term</th>
+            <th class="date-column" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'RegistrationStartDate')">Registration Start Date</th>
+            <th class="date-column" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'RegistrationEndDate')">Registration End Date</th>
             <th class="action-column">Action</th>
           </tr>
         </thead>

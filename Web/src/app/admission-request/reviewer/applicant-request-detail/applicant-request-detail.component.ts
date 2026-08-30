@@ -7,8 +7,11 @@ import {
   alphabetsOnlyValidator,
   alphabetsWithSpecialCharsValidator,
   phoneValidator,
+  normalizeEthiopianMobile,
   emailValidator,
   ACADEMIC_STUDENT_STATUS_DESCRIPTIONS,
+  ACADEMIC_YEAR_NUMBER_STATUS,
+  APPLICANT_TYPE_STATUS,
   Division_Status,
   REQUEST_STATUS_DESCRIPTIONS
 } from "src/app/common/constant";
@@ -186,8 +189,8 @@ export class ApplicantRequestDetailComponent implements OnInit {
   //#endregion
   createAcademicProgramRequest() {
     this.otherForm = this.fb.group({
-      sourceOfFinance: ["", [Validators.required]],
-      howDidYouComeKnow: ["", [Validators.required]],
+      sourceOfFinance: ["", []],
+      howDidYouComeKnow: ["", []],
       selfConfirmedApplicantInformation: [null, [Validators.required]],
       dateOfApply: ["", []]
     });
@@ -205,6 +208,9 @@ export class ApplicantRequestDetailComponent implements OnInit {
         const applicantData = this.extractResponseData<any>(res);
         
         if (applicantData) {
+          applicantData.mobile = normalizeEthiopianMobile(applicantData.mobile) || applicantData.mobile || '';
+          applicantData.telephonHome = normalizeEthiopianMobile(applicantData.telephonHome) || applicantData.telephonHome || '';
+          applicantData.telephonOffice = normalizeEthiopianMobile(applicantData.telephonOffice) || applicantData.telephonOffice || '';
           this.form.patchValue(applicantData);
           this.otherForm.patchValue(applicantData);
           this.profilePicture =
@@ -329,6 +335,14 @@ export class ApplicantRequestDetailComponent implements OnInit {
   getDivisionStatusDescription(Id: any) {
     const program = this.divisionStatusist.find(item => item.Id == Id);
     return program ? program.Description : "";
+  }
+  getApplicantYearDescription(year: number) {
+    const typeMatch = APPLICANT_TYPE_STATUS.find(item => item.Id == year);
+    if (typeMatch) {
+      return typeMatch.Description;
+    }
+    const match = ACADEMIC_YEAR_NUMBER_STATUS.find(item => item.Id == year);
+    return match ? match.Description : (year ? String(year) : "");
   }
   nextTab() {
     const maxTabIndex = this.isUserReviewer ? 6 : 5;

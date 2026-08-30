@@ -5,7 +5,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { RegisterRequest } from 'src/app/services/auth.interface';
 import { AuthService } from 'src/app/services/auth.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
-import { phoneValidator, phoneValidator9To14 } from 'src/app/common/constant';
+import { phoneValidator9To14, normalizeEthiopianMobile, applyEthiopianMobileControl } from 'src/app/common/constant';
 import { RegistrationSuccessDialogComponent } from './registration-success-dialog/registration-success-dialog.component';
 import { RouteRefreshService } from '../services/route-refresh.service';
 
@@ -19,7 +19,7 @@ export class UserRegisterComponent implements OnInit {
   isLoading = false;
   passwordVisible = false;
   confirmPasswordVisible = false;
-  isRegistrationLocked = false; 
+  isRegistrationLocked = false;
   lockMessage = 'Application is currently closed. It can be reopened anytime. For inquiries or assistance, please contact us:\n📍 Arat Kilo HiLCoE Admission office\n📧 Email: info@hilcoe.edu.et\n📞 Phone: +251 111 564 888';
 
   constructor(
@@ -49,23 +49,19 @@ export class UserRegisterComponent implements OnInit {
     });
   }
 
-  // Custom validator to check if passwords match
   passwordMatchValidator(form: AbstractControl) {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
-    
     if (password && confirmPassword && password.value !== confirmPassword.value) {
       confirmPassword?.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
     }
-    
     if (confirmPassword?.errors) {
       delete confirmPassword.errors['passwordMismatch'];
       if (Object.keys(confirmPassword.errors).length === 0) {
         confirmPassword.setErrors(null);
       }
     }
-    
     return null;
   }
 
@@ -74,77 +70,46 @@ export class UserRegisterComponent implements OnInit {
       this._notificationService.notification('warning', 'Registration Closed', this.lockMessage);
       return;
     }
-
-    if (this.registerForm.valid) {
-      this.isLoading = true;
-
-      const registerRequest: RegisterRequest = {
-        firstName: this.registerForm.value.firstName,
-        lastName: this.registerForm.value.lastName,
-        email: this.registerForm.value.email,
-        password: this.registerForm.value.password,
-        confirmPassword: this.registerForm.value.confirmPassword,
-        phoneNumber: this.registerForm.value.phoneNumber,
-        isSelfRegistration: true,
-        requireEmailConfirmation: true,
-        requirePhoneConfirmation: false
-      };
-
-      this._authService.register(registerRequest).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          
-          if (response.success) {
-            this.showRegistrationSuccessDialog();
-            this.registerForm.reset();
-          } else {
-            this._notificationService.notification('error', 'Registration Failed', response.message || 'Registration failed. Please try again.');
-          }
-        },
-        error: (error) => {
-          this.isLoading = false;
-          
-          let errorMessage = 'An error occurred during registration. Please try again.';
-          if (error.message) {
-            errorMessage = error.message;
-          } else if (error.error && error.error.message) {
-            errorMessage = error.error.message;
-          }
-          
-          this._notificationService.notification('error', 'Registration Failed', errorMessage);
-        }
-      });
-    } else {
+    if (!this.registerForm.valid) {
       this.markFormGroupTouched();
+      return;
     }
-  }
-
-  private showRegistrationSuccessDialog(): void {
-    const modalRef = this._modal.create({
-      nzContent: RegistrationSuccessDialogComponent,
-      nzComponentParams: {
-        userEmail: this.registerForm.value.email
+    this.isLoading = true;
+    const phoneNumber = normalizeEthiopianMobile(this.registerForm.value.phoneNumber);
+    if (!phoneNumber) {
+      this.isLoading = false;
+      this._notificationService.notification('error', 'Invalid Phone', 'Use Ethio Telecom (09) or Safaricom (07). Examples: +2519xxxxxxxx, 09xxxxxxxx, 9xxxxxxxx');
+      return;
+    }
+    this.registerForm.get('phoneNumber')?.setValue(phoneNumber, { emitEvent: false });
+    const registerRequest: RegisterRequest = {
+      firstName: this.registerForm.value.firstName,
+      lastName: this.registerForm.value.lastName,
+      email: this.registerForm.value.email,
+      password: this.registerForm.value.password,
+      confirmPassword: this.registerForm.value.confirmPassword,
+      phoneNumber,
+      isSelfRegistration: true,
+      requireEmailConfirmation: true,
+      requirePhoneConfirmation: false
+    };
+    this._authService.register(registerRequest).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        if (response.success) {
+          this.showRegistrationSuccessDialog();
+          this.registerForm.reset();
+          return;
+        }
+        this._notificationService.notification('error', 'Registration Failed', response.message || 'Registration failed. Please try again.');
       },
-      nzWidth: 500,
-      nzCentered: true,
-      nzMaskClosable: false,
-      nzClosable: false,
-      nzFooter: null,
-      nzBodyStyle: { padding: '0' },
-      nzStyle: { borderRadius: '12px' }
-    });
-
-    modalRef.afterClose.subscribe(() => {
-      this._router.navigate(['/accounts/login']);
-    });
-  }
-
-  private markFormGroupTouched(): void {
-    Object.keys(this.registerForm.controls).forEach(key => {
-      const control = this.registerForm.get(key);
-      if (control) {
-        control.markAsTouched();
-        control.updateValueAndValidity({ onlySelf: true });
+      error: (error) => {
+        this.isLoading = false;
+        this._notificationService.notification(
+          'error',
+          'Registration Failed',
+          error.message || error.error?.message || 'An error occurred during registration. Please try again.'
+        );
       }
     });
   }
@@ -165,12 +130,14 @@ export class UserRegisterComponent implements OnInit {
     this._router.navigate(['/']);
   }
 
-  // Method to toggle registration lock (for admin use)
   toggleRegistrationLock(): void {
     this.isRegistrationLocked = !this.isRegistrationLocked;
   }
 
-  // Getter methods for form validation
+  onPhoneBlur(): void {
+    applyEthiopianMobileControl(this.registerForm.get('phoneNumber'));
+  }
+
   get firstName() { return this.registerForm.get('firstName'); }
   get lastName() { return this.registerForm.get('lastName'); }
   get email() { return this.registerForm.get('email'); }
@@ -178,4 +145,33 @@ export class UserRegisterComponent implements OnInit {
   get confirmPassword() { return this.registerForm.get('confirmPassword'); }
   get phoneNumber() { return this.registerForm.get('phoneNumber'); }
   get acceptTerms() { return this.registerForm.get('acceptTerms'); }
+
+  private showRegistrationSuccessDialog(): void {
+    const modalRef = this._modal.create({
+      nzContent: RegistrationSuccessDialogComponent,
+      nzComponentParams: {
+        userEmail: this.registerForm.value.email
+      },
+      nzWidth: 500,
+      nzCentered: true,
+      nzMaskClosable: false,
+      nzClosable: false,
+      nzFooter: null,
+      nzBodyStyle: { padding: '0' },
+      nzStyle: { borderRadius: '12px' }
+    });
+    modalRef.afterClose.subscribe(() => {
+      this._router.navigate(['/accounts/login']);
+    });
+  }
+
+  private markFormGroupTouched(): void {
+    Object.keys(this.registerForm.controls).forEach(key => {
+      const control = this.registerForm.get(key);
+      if (control) {
+        control.markAsTouched();
+        control.updateValueAndValidity({ onlySelf: true });
+      }
+    });
+  }
 }

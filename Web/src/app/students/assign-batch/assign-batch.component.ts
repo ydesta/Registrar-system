@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { BaseModel } from 'src/app/Models/BaseMode';
@@ -7,13 +7,14 @@ import { StudentModel } from 'src/app/Models/StudentModel';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { environment } from 'src/environments/environment';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 
 @Component({
   selector: 'app-assign-batch',
   templateUrl: './assign-batch.component.html',
   styleUrls: ['./assign-batch.component.scss']
 })
-export class AssignBatchComponent implements OnInit {
+export class AssignBatchComponent implements OnInit, OnDestroy {
   students?:StudentModel[];
   reqId = '';
   checked = false;
@@ -28,13 +29,16 @@ export class AssignBatchComponent implements OnInit {
   batches:any;
   entries:any;
   assignBatchForm:FormGroup;
+  pager: ServerPaginator;
  
     constructor(
        private _fb: FormBuilder,
        private _customNotificationService:CustomNotificationService,
       private _crudService: CrudService,
-      private modal: NzModalService
-      ) { 
+      private modal: NzModalService,
+      private paginator: PaginatorService
+      ) {
+        this.pager = this.paginator.create(); 
         this.assignBatchForm = this._fb.group({
           createdBy :  ['-'] ,
           lastModifiedBy :  ['-'] ,
@@ -48,26 +52,35 @@ export class AssignBatchComponent implements OnInit {
       }
   
     ngOnInit(): void {
-
+     this.pager.init(() => this.fetchProgram());
      this.fetchProgram();
      this._crudService.getList('/Curriculums').subscribe((res:any)=>{
-      
       this.curricula =res.data
     });
     this._crudService.getList('/batchs').subscribe((res:any)=>{
-      
       this.batches =res.data
     });
     this._crudService.getList('/entrys').subscribe((res:any)=>{
-      
       this.entries =res.data
     });
     }
+
+    ngOnDestroy(): void {
+      this.pager.destroy();
+    }
     
     fetchProgram(){
-      this._crudService.getList( '/ApplicantHistorys').subscribe((res:BaseModel<StudentModel[]>)=>{
-        this.students =res.data
-        })
+      this.pager.loading = true;
+      this._crudService.getPaginated(`/ApplicantHistorys`, this.pager.query()).subscribe({
+        next: (res: any) => {
+          this.students = res.data || [];
+          this.pager.applyResult(res);
+        },
+        error: () => {
+          this.students = [];
+          this.pager.fail();
+        }
+      });
     }
     AddApplicantToList(event:any,applicantId:string){
     
@@ -112,7 +125,7 @@ export class AssignBatchComponent implements OnInit {
              })
         },
         nzCancelText: 'No',
-        nzOnCancel: () => console.log('Cancel')
+        nzOnCancel: () => {}
       });
     }
     exportStudents(){
@@ -123,7 +136,7 @@ export class AssignBatchComponent implements OnInit {
         }
         else{
           let fileLists = res.data.split('/');
-          this._crudService.expoerExcel( '/' + res.data).subscribe((data:any)=>{          
+          this._crudService.exportExcel( '/' + res.data).subscribe((data:any)=>{          
             let downloadURL = window.URL.createObjectURL(data);
             let link = document.createElement('a');
             link.href = downloadURL;

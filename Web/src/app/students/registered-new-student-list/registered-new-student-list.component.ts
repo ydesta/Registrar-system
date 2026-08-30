@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RegisteredNewStudentViewModel } from '../models/student-profile-view-model.model';
 import { AcadamicProgramme } from 'src/app/admission-request/model/acadamic-programme.model';
 import { StudentService } from '../services/student.service';
@@ -6,24 +6,18 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AcademicProgramRequestService } from 'src/app/admission-request/services/academic-program-request.service';
 import { UserManagementService } from 'src/app/services/user-management.service';
 import { SecureLoggerService } from 'src/app/services/secure-logger.service';
-import { environment } from 'src/environments/environment';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 
 @Component({
   selector: 'app-registered-new-student-list',
   templateUrl: './registered-new-student-list.component.html',
   styleUrls: ['./registered-new-student-list.component.scss']
 })
-export class RegisteredNewStudentListComponent implements OnInit {
+export class RegisteredNewStudentListComponent implements OnInit, OnDestroy {
   expandSet = new Set<string>();
-  tbLoading = false;
-  pageindex = 1;
-  totalRecord = 0;
-  pageSize = 10;
-  pageSizeOption = [5, 10, 15, 25, 50, 100];
-  sortOrder = "";
-  sortColumn = "";
   listOdRegisteredStudent: RegisteredNewStudentViewModel[] = [];
   filteredStudents: RegisteredNewStudentViewModel[] = [];
+  pager: ServerPaginator;
   isFormCollapsed = false;
   acadamicProgrammes: AcadamicProgramme[] = [];
   formStudent: FormGroup;
@@ -43,15 +37,22 @@ export class RegisteredNewStudentListComponent implements OnInit {
     private _fb: FormBuilder,
     private _academicProgramRequestService: AcademicProgramRequestService,
     private userManagementService: UserManagementService,
-    private _logger: SecureLoggerService
+    private _logger: SecureLoggerService,
+    private paginator: PaginatorService
   ) {
+    this.pager = this.paginator.create();
     this.createStudent();
     this.createUpdateForm();
   }
 
   ngOnInit(): void {
+    this.pager.init(() => this.loadData());
     this.loadData();
     this.loadAcademicProgrammes();
+  }
+
+  ngOnDestroy(): void {
+    this.pager.destroy();
   }
 
   private createStudent() {
@@ -71,102 +72,61 @@ export class RegisteredNewStudentListComponent implements OnInit {
 
   public loadData(): void {
     const formModel = this.formStudent.getRawValue();
-    this.tbLoading = true;
-    const academicProgrameCode = formModel.academicProgrameCode || null;
-    const entryYear = formModel.entryYear || null;
-    const startDate = formModel.startDate ? this.formatDate(formModel.startDate) : '';
-    const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
-
-    this.studentService.getRegisteredNewStudentList(academicProgrameCode, entryYear, startDate, endDate)
+    this.pager.loading = true;
+    const extra = {
+      academicProgrameCode: formModel.academicProgrameCode || null,
+      entryYear: formModel.entryYear || null,
+      startDate: formModel.startDate ? this.formatDate(formModel.startDate) : '',
+      endDate: formModel.endDate ? this.formatDate(formModel.endDate) : '',
+      name: this.nameFilter,
+      email: this.emailFilter,
+      phone: this.phoneFilter,
+      isEmailChanged: this.emailChangedFilter
+    };
+    this.studentService.getRegisteredNewStudentListPaginated(this.pager.query(extra))
       .subscribe({
-        next: (res) => {
-          this.listOdRegisteredStudent = res;
-          this.applyFilters();
-          this.totalRecord = this.filteredStudents.length;
-          this.tbLoading = false;
-          if (res.length > 0) {
+        next: (res: any) => {
+          this.filteredStudents = res.data || [];
+          this.listOdRegisteredStudent = this.filteredStudents;
+          this.pager.applyResult(res);
+          if (this.pager.total > 0) {
             this.isFormCollapsed = true;
           }
         },
-        error: (error) => {
-          console.error('Error loading data:', error);
-          this.tbLoading = false;
+        error: () => {
+          this.filteredStudents = [];
+          this.listOdRegisteredStudent = [];
+          this.pager.fail();
         }
       });
   }
 
-  // Apply all filters to the data
-  private applyFilters(): void {
-    this.filteredStudents = this.listOdRegisteredStudent.filter(student => {
-      // Name filter
-      if (this.nameFilter && !student.fullName.toLowerCase().includes(this.nameFilter.toLowerCase())) {
-        return false;
-      }
-
-      // Email filter (check both current and previous email)
-      if (this.emailFilter) {
-        const currentEmailMatch = student.currentEmail?.toLowerCase().includes(this.emailFilter.toLowerCase());
-        const previousEmailMatch = student.previousEmail?.toLowerCase().includes(this.emailFilter.toLowerCase());
-        if (!currentEmailMatch && !previousEmailMatch) {
-          return false;
-        }
-      }
-
-      // Phone filter
-      if (this.phoneFilter && student.phoneNumber && !student.phoneNumber.includes(this.phoneFilter)) {
-        return false;
-      }
-
-      // Email changed filter
-      if (this.emailChangedFilter !== null) {
-        const isChanged = this.emailChangedFilter === 'true';
-        if (student.isEmailChanged !== isChanged) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }
-
-  // Filter methods
   onNameFilterChange(value: string): void {
     this.nameFilter = value;
-    this.applyFilters();
-    this.totalRecord = this.filteredStudents.length;
-    this.pageindex = 1;
+    this.pager.onFilterChange();
   }
 
   onEmailFilterChange(value: string): void {
     this.emailFilter = value;
-    this.applyFilters();
-    this.totalRecord = this.filteredStudents.length;
-    this.pageindex = 1;
+    this.pager.onFilterChange();
   }
 
   onPhoneFilterChange(value: string): void {
     this.phoneFilter = value;
-    this.applyFilters();
-    this.totalRecord = this.filteredStudents.length;
-    this.pageindex = 1;
+    this.pager.onFilterChange();
   }
 
   onEmailChangedFilterChange(value: string | null): void {
     this.emailChangedFilter = value;
-    this.applyFilters();
-    this.totalRecord = this.filteredStudents.length;
-    this.pageindex = 1;
+    this.pager.resetPage();
   }
 
-  // Clear all filters
   clearAllFilters(): void {
     this.nameFilter = '';
     this.emailFilter = '';
     this.phoneFilter = '';
     this.emailChangedFilter = null;
-    this.applyFilters();
-    this.totalRecord = this.filteredStudents.length;
-    this.pageindex = 1;
+    this.pager.resetPage();
   }
 
   private formatDate(date: Date): string {
@@ -185,26 +145,18 @@ export class RegisteredNewStudentListComponent implements OnInit {
     }
   }
 
-  onPageIndexChange(page: number): void {
-    this.pageindex = page;
-  }
-
-  onPageSizeChange(size: number): void {
-    this.pageSize = size;
-    this.pageindex = 1;
-  }
-
   onSearch(): void {
-    this.pageindex = 1;
-    this.loadData();
     this.isFormCollapsed = true;
+    this.pager.resetPage();
   }
 
   onReset(): void {
     this.formStudent.reset();
-    this.clearAllFilters();
-    this.pageindex = 1;
-    this.loadData();
+    this.nameFilter = '';
+    this.emailFilter = '';
+    this.phoneFilter = '';
+    this.emailChangedFilter = null;
+    this.pager.resetPage();
   }
 
   trackByStudentId(index: number, student: RegisteredNewStudentViewModel): string {
@@ -216,7 +168,6 @@ export class RegisteredNewStudentListComponent implements OnInit {
   }
 
   editStudent(student: RegisteredNewStudentViewModel): void {
-    console.log('Edit student:', student);
     this.selectedStudent = student;
     this.updateForm.reset();
     this.isUpdateModalVisible = true;
@@ -232,15 +183,11 @@ export class RegisteredNewStudentListComponent implements OnInit {
     if (this.updateForm.valid && this.selectedStudent) {
       this.updateLoading = true;
       const newEmail = this.updateForm.value.newEmail;
-      console.log("5555 newEmail     ",newEmail);
       this.studentService.updateStudentEmail(this.selectedStudent.id, newEmail)
         .subscribe({
           next: (response) => {
-            console.log('Student email updated successfully:', response);
             const applicationUserId = this.selectedStudent.applicationUserId;
-            console.log('ApplicationUserId:  ', applicationUserId);
             if (response.data != 'success') {
-              console.error('ApplicationUserId not found for student:', this.selectedStudent);
               this.updateLoading = false;
               return;
             }
@@ -278,43 +225,6 @@ export class RegisteredNewStudentListComponent implements OnInit {
   }
 
   sort(column: string, order: string | null): void {
-    this.sortColumn = column;
-    this.sortOrder = order || '';
-
-    if (order) {
-      this.filteredStudents.sort((a, b) => {
-        const aValue = this.getPropertyValue(a, column);
-        const bValue = this.getPropertyValue(b, column);
-
-        if (order === 'ascend') {
-          return aValue > bValue ? 1 : -1;
-        } else {
-          return aValue < bValue ? 1 : -1;
-        }
-      });
-    }
-  }
-
-  private getPropertyValue(obj: any, property: string): any {
-    switch (property) {
-      case 'fullName':
-        return obj.fullName || '';
-      case 'academicProgram':
-        return obj.academicProgram || '';
-      case 'entryYear':
-        return obj.entryYear || 0;
-      case 'registeredDate':
-        return new Date(obj.registeredDate || '');
-      case 'currentEmail':
-        return obj.currentEmail || '';
-      case 'previousEmail':
-        return obj.previousEmail || '';
-      case 'phoneNumber':
-        return obj.phoneNumber || '';
-      case 'isEmailChanged':
-        return obj.isEmailChanged ? 1 : 0;
-      default:
-        return '';
-    }
+    this.pager.onSort(order, column);
   }
 }

@@ -1,63 +1,37 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable, map } from "rxjs";
-import { environment } from "src/environments/environment";
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { CrudService } from 'src/app/services/crud.service';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: "root"
+  providedIn: 'root'
 })
 export class CurriculumService {
-  baseUrl = environment.baseUrl;
-  private readonly _curriculums: string = `/${environment.apiVersion}/curriculum`;
-  getCurriculumsUrl() {
-    return this.baseUrl + this._curriculums;
-  }
-  constructor(private httpClient: HttpClient) {}
+  private readonly curricula = `/${environment.apiVersion}/curriculum`;
+
+  constructor(private crud: CrudService) {}
 
   create(postData: any): Observable<any> {
-    const endPointUrl = `${this.getCurriculumsUrl()}`;
-    return this.httpClient.post<any>(endPointUrl, postData).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.add(this.curricula, postData);
   }
+
   update(id: string, postData: any): Observable<any> {
-    const endPointUrl = `${this.getCurriculumsUrl()}/${id}`;
-    return this.httpClient.patch<any>(endPointUrl, postData).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.update(this.curricula, id, postData);
   }
 
   delete(id: string): Observable<any> {
-    const endPointUrl = `${this.getCurriculumsUrl()}/${id}`;
-    return this.httpClient.delete<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
-    );
-  }
-  getCurriculumList(): Observable<any> {
-    const endpointUrl = `${this.getCurriculumsUrl()}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.delete(this.curricula, id);
   }
 
-  getCurriculumStatusTrackingByCurriculumId(
-    curriculumId: string
-  ): Observable<any> {
-    const endpointUrl = `${this.getCurriculumsUrl()}/getCurriculumStatusTracking/${curriculumId}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+  getCurriculumList(): Observable<any> {
+    return this.crud.getList(this.curricula);
   }
-  getCurriculumById(id:string): Observable<any> {
-    const endpointUrl = `${this.getCurriculumsUrl()}/${id}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+
+  getCurriculumStatusTrackingByCurriculumId(curriculumId: string): Observable<any> {
+    return this.crud.getList(`${this.curricula}/getCurriculumStatusTracking/${curriculumId}`);
+  }
+
+  getCurriculumById(id: string): Observable<any> {
+    return this.crud.getById(this.curricula, id);
   }
 }

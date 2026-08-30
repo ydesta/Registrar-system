@@ -54,9 +54,15 @@
     </div>
   </div>
 
-  <!-- Export Action -->
   <div class="export-section">
     <div class="export-actions">
+      <nz-input-group [nzSuffix]="suffixIconSearch" style="width: 280px; margin-right: 12px;">
+        <input type="text" nz-input placeholder="Search incomplete applicants..."
+          [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)" />
+      </nz-input-group>
+      <ng-template #suffixIconSearch>
+        <span nz-icon nzType="search"></span>
+      </ng-template>
       <button nz-button nzType="default" (click)="exportToExcel()" class="export-btn">
         <span nz-icon nzType="file-excel" nzTheme="outline"></span>
         Export to Excel
@@ -68,23 +74,23 @@
   <div class="table-card">
     <div class="table-wrapper">
       <nz-table #basicTable 
-                [nzData]="incompleteApplicantsList!" 
+                [nzData]="incompleteApplicantsList" 
                 nzBordered
-                [nzPageSize]="pageSize"
-                [nzPageSizeOptions]="pageSizeOption"
+                [nzPageSize]="pager.pageSize"
+                [nzPageSizeOptions]="pager.pageSizeOptions"
                 [nzShowSizeChanger]="true"
-                [nzTotal]="total"
-                [nzPageIndex]="pageIndex"
-                (nzPageIndexChange)="onPageIndexChange($event)"
-                (nzPageSizeChange)="onPageSizeChange($event)"
+                [nzTotal]="pager.total"
+                [nzPageIndex]="pager.pageIndex"
+                (nzPageIndexChange)="pager.onPageIndexChange($event)"
+                (nzPageSizeChange)="pager.onPageSizeChange($event)"
                 [nzFrontPagination]="false"
                 [nzShowTotal]="rangeTemplate"
-                [nzLoading]="tableLoading"
+                [nzLoading]="pager.loading"
                 [nzNoResult]="emptyTpl"
                 class="incomplete-table">
         <ng-template #rangeTemplate let-range="range" let-total>
           <span style="color: #6b7280; font-weight: 500;">
-            {{ getCurrentPageInfo().start }}-{{ getCurrentPageInfo().end }} of {{ getCurrentPageInfo().total }} incomplete applications
+            {{ range[0] }}-{{ range[1] }} of {{ total }} incomplete applications
           </span>
         </ng-template>
         <thead>
@@ -104,7 +110,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let data of basicTable.data; let i = index">
-            <td><span class="sn-badge">{{ (pageIndex - 1) * pageSize + i + 1 }}</span></td>
+            <td><span class="sn-badge">{{ pager.serial(i) }}</span></td>
             <td>{{ data.applicantId }}</td>
             <td>
               <div class="applicant-info">

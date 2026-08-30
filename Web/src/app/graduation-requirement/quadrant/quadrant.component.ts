@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { BaseModel } from 'src/app/Models/BaseMode';
 import { QuadrantModel } from 'src/app/Models/QuadrantModel';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 
@@ -10,85 +10,54 @@ import { CustomNotificationService } from 'src/app/services/custom-notification.
   templateUrl: './quadrant.component.html',
   styleUrls: ['./quadrant.component.scss']
 })
-export class QuadrantComponent implements OnInit {
-
-  quadrants?: QuadrantModel[];
-  allQuadrants?: QuadrantModel[]; // Store all data for client-side pagination
+export class QuadrantComponent implements OnInit, OnDestroy {
+  quadrants: QuadrantModel[] = [];
   reqId = '';
   checked = false;
-  pageindex = 1;
-  totalRecord = 0;
-  pageSize = 5;
-  pageSizeOption = [5, 10, 15, 25, 50, 100];
-  sortOrder = '';
-  sortColumn = '';
-  searchKey = '';
-  isLoading = false;
+  pager: ServerPaginator;
   @ViewChild('emptyTpl') emptyTpl!: TemplateRef<void>;
 
   constructor(
     private _customNotificationService: CustomNotificationService,
     private _crudService: CrudService,
-    private modal: NzModalService
-  ) { }
+    private modal: NzModalService,
+    private paginator: PaginatorService
+  ) {
+    this.pager = this.paginator.create();
+  }
 
   ngOnInit(): void {
+    this.pager.init(() => this.fetchProgram());
     this.fetchProgram();
   }
 
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   fetchProgram() {
-    this.isLoading = true;
-    this._crudService.getList('/quadrants').subscribe((res: BaseModel<QuadrantModel[]>) => {
-      this.allQuadrants = res.data;
-      this.updateDisplayedData();
-      this.isLoading = false;
-    }, (error) => {
-      console.error('Error fetching quadrants:', error);
-      this.isLoading = false;
-      this._customNotificationService.notification('error', 'Error', 'Failed to load quadrants');
+    this.pager.loading = true;
+    this._crudService.getPaginated(`/quadrants`, this.pager.query()).subscribe({
+      next: (res: any) => {
+        this.quadrants = res.data;
+        this.pager.applyResult(res);
+      },
+      error: () => {
+        this.quadrants = [];
+        this.pager.fail();
+      }
     });
-  }
-
-  updateDisplayedData() {
-    if (!this.allQuadrants) {
-      this.quadrants = [];
-      return;
-    }
-
-    // Filter data based on search key
-    let filteredData = this.allQuadrants;
-    if (this.searchKey && this.searchKey.trim() !== '') {
-      const searchLower = this.searchKey.toLowerCase();
-      filteredData = this.allQuadrants.filter(item => 
-        (item.quadrantsID && item.quadrantsID.toLowerCase().includes(searchLower)) ||
-        (item.quadrantHeading && item.quadrantHeading.toLowerCase().includes(searchLower)) ||
-        (item.remark && item.remark.toLowerCase().includes(searchLower))
-      );
-    }
-
-    // Update total record count for filtered data
-    this.totalRecord = filteredData.length;
-
-    // Let nz-table handle the pagination automatically
-    this.quadrants = filteredData;
-  }
-
-  clickSearchKey() {
-    this.pageindex = 1; // Reset to first page when searching
-    this.updateDisplayedData();
   }
 
   showDeleteConfirm(id: any): void {
     this.reqId = id;
     this.modal.confirm({
       nzTitle: 'Are you sure delete this quadrant?',
-      // nzContent: '<b style="color: red;">Some descriptions</b>',
       nzOkText: 'Yes',
       nzOkType: 'primary',
       nzOkDanger: true,
       nzOnOk: () => {
         this._crudService.delete('/quadrants', this.reqId).subscribe((res: any) => {
-
           this.fetchProgram();
           if (res.status == "success") {
             this._customNotificationService.notification('success', 'Success', res.data)
@@ -99,8 +68,7 @@ export class QuadrantComponent implements OnInit {
         })
       },
       nzCancelText: 'No',
-      nzOnCancel: () => console.log('Cancel')
+      nzOnCancel: () => {}
     });
   }
 }
-  

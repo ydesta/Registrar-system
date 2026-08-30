@@ -10,6 +10,14 @@
 
 <div class="payment-info-section">
   <nz-alert
+    *ngIf="orderNumber"
+    nzType="success"
+    nzShowIcon
+    [nzMessage]="'Payment Order Number'"
+    [nzDescription]="'Order Number: ' + orderNumber"
+    style="margin-bottom: 16px;">
+  </nz-alert>
+  <nz-alert
     nzType="info"
     nzShowIcon
     [nzMessage]="'Payment Process Information'"
@@ -56,6 +64,20 @@
         </tr>
       </tfoot>
     </nz-table>
+  </div>
+  <div class="payment-breakdown" *ngIf="getPenaltyAmount() > 0">
+    <div class="breakdown-row">
+      <span>Selected courses</span>
+      <strong>{{ getTotalAmount() | number:'1.2-2' }} ETB</strong>
+    </div>
+    <div class="breakdown-row">
+      <span>Late penalty</span>
+      <strong>{{ getPenaltyAmount() | number:'1.2-2' }} ETB</strong>
+    </div>
+    <div class="breakdown-row total">
+      <span>Amount to pay</span>
+      <strong>{{ getAmountToPay() | number:'1.2-2' }} ETB</strong>
+    </div>
   </div>
 
   <div class="action-buttons">

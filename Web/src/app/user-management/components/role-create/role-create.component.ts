@@ -42,8 +42,7 @@ export class RoleCreateComponent {
           this.permissions = permissions;
           setTimeout(() => this.cdr.detectChanges());
         },
-        error: (error) => {
-          console.error('Error loading permissions:', error);
+        error: () => {
           this.message.error('Failed to load permissions');
         }
       });

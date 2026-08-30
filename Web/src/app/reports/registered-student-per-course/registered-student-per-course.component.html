@@ -57,7 +57,7 @@
                   <nz-select formControlName="courseId" nzPlaceHolder="Select Course" nzShowSearch nzAllowClear
                     style="width: 100%;">
                     <nz-option *ngFor="let item of courses" [nzValue]="item.id"
-                      [nzLabel]="item.courseTitle"></nz-option>
+                      [nzLabel]="item.courseCode + ' - ' + item.courseTitle"></nz-option>
                   </nz-select>
                 </nz-form-control>
               </nz-form-item>
@@ -89,9 +89,11 @@
   <!-- Data Table -->
   <div class="table-container" *ngIf="hasSearched">
     <!-- Table Header with Export Actions -->
-    <div class="table-header" *ngIf="total > 0">
+    <div class="table-header" *ngIf="pager.total > 0 || pager.searchKey">
       <h3>Registered Students per Course</h3>
       <div class="table-actions">
+        <input nz-input placeholder="Search by name, code, or batch..." [(ngModel)]="searchKey"
+          (ngModelChange)="search()" style="max-width: 280px; margin-right: 8px;" />
         <button nz-button nzType="primary" (click)="exportToExcel()" class="mr-2">
           <span nz-icon nzType="file-excel" nzTheme="outline"></span>
           Export To Excel
@@ -104,11 +106,12 @@
     </div>
 
     <!-- Results Table -->
-    <div id="print-section" *ngIf="total > 0">
-      <nz-table #basicTable [nzData]="paginatedRegisteredStudent" nzBordered [nzPageSize]="pageSize"
-        [nzPageSizeOptions]="pageSizeOption" [nzShowSizeChanger]="true" [nzTotal]="total" [nzPageIndex]="pageIndex"
+    <div id="print-section" *ngIf="pager.total > 0 || pager.searchKey">
+      <nz-table #basicTable [nzData]="paginatedRegisteredStudent" nzBordered [nzPageSize]="pager.pageSize"
+        [nzPageSizeOptions]="pager.pageSizeOptions" [nzShowSizeChanger]="true" [nzTotal]="pager.total"
+        [nzPageIndex]="pager.pageIndex"
         (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)"
-        [nzFrontPagination]="false" [nzShowTotal]="rangeTemplate" [nzLoading]="isLoading" [nzNoResult]="emptyTpl"
+        [nzFrontPagination]="false" [nzShowTotal]="rangeTemplate" [nzLoading]="pager.loading" [nzNoResult]="emptyTpl"
         [nzShowQuickJumper]="true" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;" class="mobile-table-container">
 
         <ng-template #rangeTemplate let-range="range" let-total>
@@ -117,16 +120,16 @@
 
         <thead>
           <tr>
-            <th style="min-width: 80px;">Serial No.</th>
-            <th style="min-width: 120px;">Student Code</th>
-            <th style="min-width: 200px;">Full Name</th>
-            <th style="min-width: 120px;">Batch Code</th>
+            <th nzWidth="72px" class="sn-column">S/N</th>
+            <th nzWidth="140px">Student Code</th>
+            <th>Full Name</th>
+            <th nzWidth="140px">Batch Code</th>
           </tr>
         </thead>
         <tbody>
           <ng-container tabindex="0" *ngFor="let reg of basicTable.data; let i = index">
             <tr>
-              <td>
+              <td class="sn-column">
                 <span class="serial-number">
                   {{ reg.serialNo }}
                 </span>
@@ -148,7 +151,7 @@
     </div>
 
     <!-- No Results State -->
-    <div class="no-results-container" *ngIf="total === 0 && !isLoading">
+    <div class="no-results-container" *ngIf="pager.total === 0 && !pager.loading && !pager.searchKey">
       <div class="no-results-content">
         <div class="no-results-icon">
           <span nz-icon nzType="search" nzTheme="outline"></span>

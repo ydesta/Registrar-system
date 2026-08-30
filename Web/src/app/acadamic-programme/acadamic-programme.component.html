@@ -9,7 +9,7 @@
       <div class="header-actions">
         <div class="search-section">
           <nz-input-group [nzSuffix]="suffixIconSearch">
-            <input type="text" nz-input placeholder="Search by code, title, or remark..." [(ngModel)]="searchKey" (ngModelChange)="onSearch()"/>
+            <input type="text" nz-input placeholder="Search by code, title, or remark..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)"/>
           </nz-input-group>
           <ng-template #suffixIconSearch>
             <span nz-icon nzType="search"></span>
@@ -19,14 +19,14 @@
           <span nz-icon nzType="plus" nzTheme="outline"></span>
           Add Programme
         </button>
-        <button nz-button nzType="default" (click)="exportAcadamicProgram()" class="export-btn">
+        <!-- <button nz-button nzType="default" (click)="exportAcadamicProgram()" class="export-btn">
           <span nz-icon nzType="file-excel" nzTheme="outline"></span>
           Export
         </button>
         <button nz-button nzType="default" printTitle="." [useExistingCss]="true" printSectionId="print-section" ngxPrint class="print-btn">
           <span nz-icon nzType="printer" nzTheme="outline"></span>
           Print
-        </button>
+        </button> -->
       </div>
     </div>
   </div>
@@ -37,28 +37,30 @@
       <nz-table #basicTable 
                 [nzData]="acadamicPrograms" 
                 nzBordered
-                [nzPageSize]="pageSize"
+                [nzPageSize]="pager.pageSize"
+                [nzPageSizeOptions]="pager.pageSizeOptions"
                 [nzShowSizeChanger]="true"
-                [nzTotal]="totalRecord"
-                [nzPageIndex]="pageindex"
-                (nzPageIndexChange)="paginatedIndexEvent($event)"
-                (nzPageSizeChange)="paginatedSizeEvent($event)"
-                [nzLoading]="tbLoading"
+                [nzTotal]="pager.total"
+                [nzPageIndex]="pager.pageIndex"
+                (nzPageIndexChange)="pager.onPageIndexChange($event)"
+                (nzPageSizeChange)="pager.onPageSizeChange($event)"
+                [nzFrontPagination]="false"
+                [nzLoading]="pager.loading"
                 [nzNoResult]="emptyTpl"
                 class="academic-table">
         <thead>
           <tr>
             <th style="min-width: 60px;">S/N</th>
-            <th style="min-width: 140px;" [nzSortFn]="true" (nzSortOrderChange)="changeSortColumn($event, 'AcadamicProgrammeCode')">Programme Code</th>
-            <th style="min-width: 200px;" [nzSortFn]="true" (nzSortOrderChange)="changeSortColumn($event, 'AcadamicProgrammeTitle')">Programme Title</th>
-            <th style="min-width: 150px;" [nzSortFn]="true" (nzSortOrderChange)="changeSortColumn($event, 'Remark')">Remark</th>
-            <th style="min-width: 120px;" [nzSortFn]="true" (nzSortOrderChange)="changeSortColumn($event, 'CreatedDate')">Created Date</th>
+            <th style="min-width: 140px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'AcadamicProgrammeCode')">Programme Code</th>
+            <th style="min-width: 200px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'AcadamicProgrammeTitle')">Programme Title</th>
+            <th style="min-width: 150px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'Remark')">Remark</th>
+            <th style="min-width: 120px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'CreatedDate')">Created Date</th>
             <th style="min-width: 100px;">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let data of basicTable.data; let i = index">
-            <td><span class="sn-badge">{{ (pageindex - 1) * pageSize + i + 1 }}</span></td>
+            <td><span class="sn-badge">{{ pager.serial(i) }}</span></td>
             <td>{{ data.acadamicProgrammeCode }}</td>
             <td>{{ data.acadamicProgrammeTitle }}</td>
             <td>{{ data.remark }}</td>

@@ -6,6 +6,7 @@ import { FileModel } from 'src/app/Models/FileModel';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { environment } from 'src/environments/environment';
+import { ethiopianMobileValidator, ethiopianHomePhoneValidator, normalizeEthiopianMobile, normalizeEthiopianHomePhone } from 'src/app/common/constant';
 
 @Component({
   selector: 'app-add-applicant-history',
@@ -104,8 +105,8 @@ export class AddApplicantHistoryComponent implements OnInit {
       lastModifiedBy: ['-'],
       applicantID: [''],
       fullName: ['', Validators.required],
-      telephoneOffice: ['', Validators.required],
-      telephoneHome: [''],
+      telephoneOffice: ['', [Validators.required, ethiopianMobileValidator()]],
+      telephoneHome: ['', [ethiopianHomePhoneValidator()]],
       relation: ['', Validators.required],
     });
   }
@@ -115,7 +116,7 @@ export class AddApplicantHistoryComponent implements OnInit {
     if (this.applicantId != 'null') {
       this.action = 'Applicant Review';
       this._crudService
-        .getList('/Applicants' + '/' + this.applicantId)
+        .getById('/Applicants', this.applicantId)
         .subscribe((res: any) => {
           this.applicant = res.data;
           this.applicantFiles = res.data.files;
@@ -246,9 +247,9 @@ export class AddApplicantHistoryComponent implements OnInit {
       birthDate: data.birthDate,
       birthPlace: data.birthPlace,
       nationality: data.nationality,
-      telephonOffice: data.telephonOffice,
-      telephonHome: data.telephonHome,
-      mobile: data.mobile,
+      telephonOffice: normalizeEthiopianMobile(data.telephonOffice) || data.telephonOffice || '',
+      telephonHome: normalizeEthiopianHomePhone(data.telephonHome) || data.telephonHome || '',
+      mobile: normalizeEthiopianMobile(data.mobile) || data.mobile || '',
       postalAddress: data.postalAddress,
       emailAddress: data.emailAddress,
       region: data.region,
@@ -343,8 +344,14 @@ export class AddApplicantHistoryComponent implements OnInit {
       lastModifiedBy: value.lastModifiedBy,
       applicantID: value.applicantID,
       fullName: value.fullName,
-      telephoneOffice: value.telephoneOffice,
-      telephoneHome: value.telephoneHome,
+      telephoneOffice: [
+        normalizeEthiopianMobile(value.telephoneOffice) || value.telephoneOffice || '',
+        [Validators.required, ethiopianMobileValidator()]
+      ],
+      telephoneHome: [
+        normalizeEthiopianHomePhone(value.telephoneHome) || value.telephoneHome || '',
+        [ethiopianHomePhoneValidator()]
+      ],
       relation: value.relation,
     });
   }

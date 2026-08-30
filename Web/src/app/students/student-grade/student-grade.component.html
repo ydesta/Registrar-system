@@ -28,8 +28,8 @@
               type="text"
               nz-input
               placeholder="Student code…"
-              [(ngModel)]="searchKey"
-              (ngModelChange)="applySearchAndFilters()"
+              [(ngModel)]="pager.searchKey"
+              (ngModelChange)="pager.onSearch($event)"
             />
           </nz-input-group>
           <ng-template #suffixIconButton>
@@ -102,16 +102,16 @@
         #basicTable
         [nzData]="filteredStudentGrades"
         nzBordered
-        [nzPageSize]="pageSize"
-        [nzPageSizeOptions]="pageSizeOption"
+        [nzPageSize]="pager.pageSize"
+        [nzPageSizeOptions]="pager.pageSizeOptions"
         [nzShowSizeChanger]="true"
-        [nzTotal]="totalRecord"
-        [nzPageIndex]="pageindex"
-        (nzPageIndexChange)="paginatedIndexEvent($event)"
-        (nzPageSizeChange)="paginatedSizeEvent($event)"
+        [nzTotal]="pager.total"
+        [nzPageIndex]="pager.pageIndex"
+        (nzPageIndexChange)="pager.onPageIndexChange($event)"
+        (nzPageSizeChange)="pager.onPageSizeChange($event)"
         [nzFrontPagination]="false"
         [nzShowTotal]="rangeTemplate"
-        [nzLoading]="isLoading"
+        [nzLoading]="pager.loading"
         [nzNoResult]="emptyTpl"
         class="grades-table"
       >
@@ -135,7 +135,7 @@
         <tbody>
           <tr *ngFor="let data of basicTable.data; let i = index">
             <td class="sn-column">
-              <span class="sn-badge">{{ (pageindex - 1) * pageSize + i + 1 }}</span>
+              <span class="sn-badge">{{ pager.serial(i) }}</span>
             </td>
             <td>{{ data.studentCode }}</td>
             <td>{{ data.fullName }}</td>

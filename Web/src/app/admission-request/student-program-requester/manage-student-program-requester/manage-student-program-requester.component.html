@@ -17,6 +17,7 @@
             <tr>
                 <th>Application Program</th>
                 <th>Division</th>
+                <th>Applicant Type</th>
                 <th>Request Status</th>
                 <th>Applicant Status</th>
                 <th>Created Date</th>
@@ -27,6 +28,7 @@
             <tr *ngFor="let data of basicTable.data; let i = index">
                 <td>{{ getAcademicProgramDescription(data.acadamicProgrammeId) }}</td>
                 <td>{{ getDivisionStatusDescription(data.division) }}</td>
+                <td>{{ getApplicantYearDescription(data.applicantYear) }}</td>
                 <td>
                     <button class="status-button" 
                             [ngClass]="{

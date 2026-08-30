@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { forkJoin, of } from "rxjs";
 import { Subscription } from "rxjs";
-import { catchError } from "rxjs/operators";
+import { catchError, distinctUntilChanged } from "rxjs/operators";
 import { ACADEMIC_TERM_STATUS, SECTION_TYPE, numbersOnlyValidator } from "src/app/common/constant";
 import { CustomNotificationService } from "src/app/services/custom-notification.service";
 import { StudentService } from "../services/student.service";
@@ -17,6 +17,7 @@ import { StaffService } from "src/app/services/staff.service";
 import { AuthService } from "src/app/services/auth.service";
 import { InstructorSectionService } from "src/app/services/instructor-section.service";
 import { InstructorSectionAssignmentViewModel } from "src/app/Models/InstructorSectionModel";
+import { TermViewModel } from "src/app/colleges/model/term-view-model";
 
 export interface GradeImportAssignmentRow extends InstructorSectionAssignmentViewModel {
   sectionTypeId: number;
@@ -51,6 +52,7 @@ export class ImportStudentGradeComponent implements OnInit {
   staffList: any[] = [];
   listOfTermNumber: StaticData[] = [];
   listOfSectionType: StaticData[] = [];
+  academicTermOptions: TermViewModel[] = [];
   userId: string | null = localStorage.getItem('userId');
   staffId: string | null;
   isAdmin = false;
@@ -60,6 +62,9 @@ export class ImportStudentGradeComponent implements OnInit {
   selectedRowKey: string | null = null;
   currentTermLabel = "";
   instructorDisplayName = "";
+  activeTermId: number | null = null;
+  activeTermYear: number | null = null;
+  selectedTermConfigId: number | null = null;
 
   isErrorModalVisible = false;
   errorList: ErrorItem[] = [];
@@ -86,9 +91,11 @@ export class ImportStudentGradeComponent implements OnInit {
 
   ngOnInit(): void {
     this.setupStaffIdSubscription();
+    this.setupTermSubscription();
     this.getStaffList();
     this.getListOfAcademicTermStatus();
     this.getListOfSectionType();
+    this.loadAcademicTermOptions();
     this.loadActiveAcademicTerm();
 
     if (this.isAdmin) {
@@ -100,7 +107,7 @@ export class ImportStudentGradeComponent implements OnInit {
           this.staffId = res.data.id;
           const d = res.data;
           this.instructorDisplayName =
-            `${d.firstName ?? ""} ${d.lastName ?? ""}`.trim() ||
+            `${d.firstName ?? ""} ${d.middleName ?? ""} ${d.lastName ?? ""}`.trim() ||
             d.fullName ||
             "";
           this.importStudentGradeForm.patchValue({
@@ -125,6 +132,25 @@ export class ImportStudentGradeComponent implements OnInit {
       sectionId: [null, [Validators.required]],
     });
   }
+
+  private loadAcademicTermOptions(): void {
+    this._batchTermService.GetAcademicTermList().subscribe({
+      next: (res: TermViewModel[]) => {
+        this.academicTermOptions = (res || []).map((t: any) => ({
+          id: t.id ?? t.Id,
+          termId: t.termId ?? t.TermId,
+          year: t.year ?? t.Year,
+          academicTerm: t.academicTerm ?? t.AcademicTerm
+        }));
+        this.syncSelectedTermConfigId();
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.academicTermOptions = [];
+      }
+    });
+  }
+
   getListOfAcademicTermStatus() {
     let division: StaticData = new StaticData();
     ACADEMIC_TERM_STATUS.forEach(pair => {
@@ -168,6 +194,8 @@ export class ImportStudentGradeComponent implements OnInit {
           );
           return;
         }
+        this.activeTermId = Number(termId);
+        this.activeTermYear = Number(year);
         this.importStudentGradeForm.patchValue(
           {
             academicTermId: Number(termId),
@@ -175,7 +203,8 @@ export class ImportStudentGradeComponent implements OnInit {
           },
           { emitEvent: false }
         );
-        this.currentTermLabel = `${this.getAcademicTermDescription(Number(termId))} ${year}`;
+        this.refreshCurrentTermLabel();
+        this.syncSelectedTermConfigId();
         this.tryLoadAssignmentTable();
       },
       error: () => {
@@ -191,6 +220,60 @@ export class ImportStudentGradeComponent implements OnInit {
   getAcademicTermDescription(termId: number): string {
     const item = this.listOfTermNumber.find(t => t.Id === termId);
     return item?.Description ?? `Term ${termId}`;
+  }
+
+  private refreshCurrentTermLabel(): void {
+    const term = this.importStudentGradeForm.get("academicTermId")?.value;
+    const year = this.importStudentGradeForm.get("academicTermYearId")?.value;
+    if (term == null || year == null || year === 0) {
+      this.currentTermLabel = "";
+      return;
+    }
+    this.currentTermLabel = `${this.getAcademicTermDescription(Number(term))} ${year}`;
+  }
+
+  private syncSelectedTermConfigId(): void {
+    const term = Number(this.importStudentGradeForm.get("academicTermId")?.value);
+    const year = Number(this.importStudentGradeForm.get("academicTermYearId")?.value);
+    if (!term || !year || !this.academicTermOptions.length) {
+      return;
+    }
+    const match = this.academicTermOptions.find(
+      t => Number(t.termId) === term && Number(t.year) === year
+    );
+    this.selectedTermConfigId = match?.id ?? null;
+  }
+
+  onAcademicTermConfigChange(configId: number | null): void {
+    this.selectedTermConfigId = configId;
+    if (configId == null) {
+      return;
+    }
+    const match = this.academicTermOptions.find(t => Number(t.id) === Number(configId));
+    if (!match) {
+      return;
+    }
+    this.importStudentGradeForm.patchValue({
+      academicTermId: Number(match.termId),
+      academicTermYearId: Number(match.year)
+    });
+  }
+
+  private setupTermSubscription(): void {
+    this.importStudentGradeForm.get("academicTermId")?.valueChanges
+      .pipe(distinctUntilChanged())
+      .subscribe(() => {
+        this.refreshCurrentTermLabel();
+        this.syncSelectedTermConfigId();
+        this.tryLoadAssignmentTable();
+      });
+    this.importStudentGradeForm.get("academicTermYearId")?.valueChanges
+      .pipe(distinctUntilChanged())
+      .subscribe(() => {
+        this.refreshCurrentTermLabel();
+        this.syncSelectedTermConfigId();
+        this.tryLoadAssignmentTable();
+      });
   }
 
   tryLoadAssignmentTable(): void {
@@ -269,8 +352,22 @@ export class ImportStudentGradeComponent implements OnInit {
     });
   }
 
+  private isSelectedCurrentActiveTerm(): boolean {
+    const term = Number(this.importStudentGradeForm.get("academicTermId")?.value);
+    const year = Number(this.importStudentGradeForm.get("academicTermYearId")?.value);
+    return (
+      this.activeTermId != null &&
+      this.activeTermYear != null &&
+      term === this.activeTermId &&
+      year === this.activeTermYear
+    );
+  }
+
   isAssignmentRowLocked(row: GradeImportAssignmentRow): boolean {
-    return (row.submittedGradeCount ?? 0) > 0;
+    if ((row.submittedGradeCount ?? 0) <= 0) {
+      return false;
+    }
+    return this.isSelectedCurrentActiveTerm();
   }
 
   onAssignmentRowClick(row: GradeImportAssignmentRow): void {
@@ -278,7 +375,7 @@ export class ImportStudentGradeComponent implements OnInit {
       this._customNotificationService.notification(
         "warning",
         "Section locked",
-        "Grades are already submitted for this course section."
+        "Grades are already submitted for this course section in the current term."
       );
       return;
     }
@@ -302,7 +399,7 @@ export class ImportStudentGradeComponent implements OnInit {
       this._customNotificationService.notification(
         "warning",
         "Section locked",
-        "Grades are already submitted for this course section."
+        "Grades are already submitted for this course section in the current term."
       );
       return;
     }
@@ -391,7 +488,10 @@ export class ImportStudentGradeComponent implements OnInit {
     if (this.isAdmin && !this.importStudentGradeForm.get("staffId")?.value) {
       return "Select an instructor to load assignments.";
     }
-    return "No section assignments for this staff in the current term.";
+    if (!this.importStudentGradeForm.get("academicTermId")?.value) {
+      return "Select an academic term to load assignments.";
+    }
+    return "No section assignments for this staff in the selected term.";
   }
 
   get selectedAssignmentSummary(): string {
@@ -483,9 +583,6 @@ export class ImportStudentGradeComponent implements OnInit {
     if (this.importStudentGradeForm.valid && this.canSave()) {
       this.prepareFormData();
       this._studentService.uploadGrade(this.formData).subscribe(res => {
-        console.log('API Response:', res);
-        
-        // Check if there are errors in the response - multiple ways to detect errors
         const hasErrors = res && (
           (res.errors && res.errors.length > 0) ||
           (res.error && res.error.length > 0) ||
@@ -506,14 +603,10 @@ export class ImportStudentGradeComponent implements OnInit {
             errors = res.data.error;
           }
           
-          console.log('Errors detected:', errors);
           this.errorList = errors;
           this.isErrorModalVisible = true;
-          this.cdr.detectChanges(); // Force change detection to show modal immediately
-          console.log('Modal should be visible now:', this.isErrorModalVisible);
+          this.cdr.detectChanges();
         } else {
-          // Success case
-          console.log('No errors detected, showing success message');
           this._customNotificationService.notification(
             "success",
             "Success",

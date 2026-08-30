@@ -1,6 +1,5 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError, map, throwError } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { StudentViewModel } from '../models/student-view-model.model';
 import { RegisteredNewStudentViewModel, StudentAddedViewModel, StudentCoursesTaken, StudentProfileViewModel, StudentRegistrationSlipViewModel } from '../models/student-profile-view-model.model';
@@ -11,173 +10,135 @@ import { CourseTaken } from '../course-registration/course-add/add-course-approv
 import { StudentTranscriptViewModel } from 'src/app/reports/model/student-transcript-view-model.model';
 import { SpecialCaseManualRegistrationRequest } from '../models/special-case-manual-registration-request .model';
 import { StudentInformationView } from '../models/student-information-view .model';
+import { CrudService } from 'src/app/services/crud.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StudentService {
-  private apiUrl = 'assets/student-profile-mock.json';
-  baseUrl = environment.baseUrl;
-  private readonly studentUrlList: string = `/${environment.apiVersion}/std`;
-  private readonly studentUrl: string = `/${environment.apiVersion}/studentcourseofferings`;
-  private readonly studentSemesterUrl: string = `/${environment.apiVersion}/registrarworkflows`;
-  private readonly studentGradesUrl: string = `/${environment.apiVersion}/grade`;
-  getStudentUrlList() {
-    return this.baseUrl + this.studentUrlList;
-  }
+  private readonly students = `/${environment.apiVersion}/std`;
+  private readonly offerings = `/${environment.apiVersion}/studentcourseofferings`;
+  private readonly workflows = `/${environment.apiVersion}/registrarworkflows`;
+  private readonly grades = `/${environment.apiVersion}/grade`;
 
-  getStudentUrl() {
-    return this.baseUrl + this.studentUrl;
-  }
+  constructor(private crud: CrudService) { }
 
-  getRegistrarWorkFlowsUrl() {
-    return this.baseUrl + this.studentSemesterUrl;
-  }
-  getStudentGradesUrl() {
-    return this.baseUrl + this.studentGradesUrl;
-  }
-  constructor(private httpClient: HttpClient) { }
   getStudentCourseOfferingId(
     applicantUserId: string,
     term: number,
     id: number
   ): Observable<StudentViewModel> {
-    const endpointUrl = `${this.getStudentUrl()}/getTermCourseOffering/${applicantUserId}/${term}/${id}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map((result) => result as StudentViewModel));
-  }
-  getTermStudentCourseRegistration(
-    applicantUserId: string,
-    term: number
-  ): Observable<StudentViewModel> {
-    const endpointUrl = `${this.getStudentUrl()}/${applicantUserId}/${term}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map((result) => result as StudentViewModel));
-  }
-  create(postData: any): Observable<any> {
-    const endPointUrl = `${this.getStudentUrl()}`;
-    return this.httpClient.post<any>(endPointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
-    );
-  }
-  updateStudentCourseRegistration(id: string, postData: any): Observable<any> {
-    const endpointUrl = `${this.getStudentUrl()}/${id}`;
-    return this.httpClient.patch<any>(endpointUrl, postData).pipe(
-      catchError((error) => {
-        console.error('Error occurred while updating student course registration:', error);
-        return throwError(() => new Error(error.message || 'Error updating student course registration'));
-      })
+    return this.crud.getList<StudentViewModel>(
+      `${this.offerings}/getTermCourseOffering/${applicantUserId}/${term}/${id}`
     );
   }
 
-  getStudentCourseTakenList(
-    applicatUserId: string
-  ): Observable<StudentCourseRegistrationView[]> {
-    const endpointUrl = `${this.getStudentUrl()}/getStudentCourseTaken/${applicatUserId}`;
-    return this.httpClient.get<StudentCourseRegistrationView[]>(endpointUrl);
+  getTermStudentCourseRegistration(applicantUserId: string, term: number): Observable<StudentViewModel> {
+    return this.crud.getList<StudentViewModel>(`${this.offerings}/${applicantUserId}/${term}`);
+  }
+
+  create(postData: any): Observable<any> {
+    return this.crud.add(this.offerings, postData);
+  }
+
+  updateStudentCourseRegistration(id: string, postData: any): Observable<any> {
+    return this.crud.update(this.offerings, id, postData).pipe(
+      catchError((error) => throwError(() => new Error(error.message || 'Error updating student course registration')))
+    );
+  }
+
+  getStudentCourseTakenList(applicatUserId: string): Observable<StudentCourseRegistrationView[]> {
+    return this.crud.getList<StudentCourseRegistrationView[]>(
+      `${this.offerings}/getStudentCourseTaken/${applicatUserId}`
+    );
   }
 
   getStudentCourseRegistrationList(): Observable<StudentViewModel[]> {
-    const endpointUrl = `${this.getStudentUrl()}/getStudentCourseRegistrationList`;
-    return this.httpClient.get<StudentViewModel[]>(endpointUrl);
+    return this.crud.getList<StudentViewModel[]>(`${this.offerings}/getStudentCourseRegistrationList`);
   }
+
+  getStudentCourseRegistrationListPaginated(query: string): Observable<any> {
+    return this.crud.getPaginated(`${this.offerings}/getStudentCourseRegistrationList`, query);
+  }
+
   addWorkFlow(postData: any): Observable<any> {
-    const endPointUrl = `${this.getRegistrarWorkFlowsUrl()}`;
-    return this.httpClient.post<any>(endPointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
-    );
+    return this.crud.add(this.workflows, postData);
   }
+
   updateStudentCourseTaken(id: number, status: number): Observable<any> {
-    const endpointUrl = `${this.getStudentUrl()}/updateStudentCourseTaken/${id}/${status}`;
-    return this.httpClient.get<any[]>(endpointUrl);
+    return this.crud.getList(`${this.offerings}/updateStudentCourseTaken/${id}/${status}`);
   }
+
   updateStudentCourseOffering(id: string): Observable<any> {
-    const endpointUrl = `${this.getStudentUrl()}/updateStudentCourseOffering/${id}`;
-    return this.httpClient.get<any[]>(endpointUrl);
+    return this.crud.getList(`${this.offerings}/updateStudentCourseOffering/${id}`);
   }
-  getUnAssignedBatchStudents(
-    acadamicProgrammeCode: string,
-    entryTerm: string
-  ): Observable<StudentViewModel[]> {
-    const endpointUrl = `${this.getStudentUrlList()}/getUnAssignedBatchStudents/${acadamicProgrammeCode}/${entryTerm}`;
-    return this.httpClient.get<StudentViewModel[]>(endpointUrl);
-  }
-  batchAssign(postData: any): Observable<any> {
-    const endPointUrl = `${this.getStudentUrlList()}/batch-assign`;
-    return this.httpClient.post<any>(endPointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
+
+  getUnAssignedBatchStudents(acadamicProgrammeCode: string, entryTerm: string): Observable<StudentViewModel[]> {
+    return this.crud.getList<StudentViewModel[]>(
+      `${this.students}/getUnAssignedBatchStudents/${acadamicProgrammeCode}/${entryTerm}`
     );
   }
 
-  uploadGrade(postData: any): Observable<any> {
-    const endPointUrl = `${this.getStudentGradesUrl()}/upload/excel`;
-    return this.httpClient.post<any>(endPointUrl, postData).pipe(
-      map((data) => {
-        return data;
-      })
+  getUnAssignedBatchStudentsPaginated(
+    acadamicProgrammeCode: string,
+    entryTerm: string,
+    query: string
+  ): Observable<any> {
+    return this.crud.getPaginated(
+      `${this.students}/getUnAssignedBatchStudents/${acadamicProgrammeCode}/${entryTerm}`,
+      query
     );
   }
-  getStudentProfileByStudentId(
-    applicantUserId: string
-  ): Observable<StudentProfileViewModel> {
-    const endpointUrl = `${this.getStudentUrlList()}/student/profile/${applicantUserId}`;
-    return this.httpClient.get<StudentProfileViewModel>(endpointUrl);
+
+  batchAssign(postData: any): Observable<any> {
+    return this.crud.add(`${this.students}/batch-assign`, postData);
   }
-  getStudentProfileById(): Observable<StudentProfileViewModel> {
-    return this.httpClient.get<StudentProfileViewModel>(`${this.apiUrl}`);
+
+  uploadGrade(postData: any): Observable<any> {
+    return this.crud.add(`${this.grades}/upload/excel`, postData);
   }
-  getListStudentProfileByStudentId(
-    studentId: string
-  ): Observable<StudentProfileViewModel> {
-    // Validate studentId to prevent null/undefined values in URL
-    if (!studentId || studentId === "null" || studentId.trim() === "") {
+
+  getStudentProfileByStudentId(applicantUserId: string): Observable<StudentProfileViewModel> {
+    return this.crud.getList<StudentProfileViewModel>(`${this.students}/student/profile/${applicantUserId}`);
+  }
+
+  getListStudentProfileByStudentId(studentId: string): Observable<StudentProfileViewModel> {
+    if (!studentId || studentId === 'null' || studentId.trim() === '') {
       throw new Error('StudentService: Invalid studentId provided. studentId cannot be null, undefined, or empty.');
     }
-    const endpointUrl = `${this.getStudentUrlList()}/getListStudentProfile/student/profile/${studentId}`;
-    return this.httpClient.get<StudentProfileViewModel>(endpointUrl);
+    return this.crud.getList<StudentProfileViewModel>(
+      `${this.students}/getListStudentProfile/student/profile/${studentId}`
+    );
   }
-  getStudentProfileByApplicationId(
-    applicationId: string
-  ): Observable<StudentProfileViewModel> {
-    const endpointUrl = `${this.getStudentUrlList()}/getStudentProfileByApplicationId/app/student/profile/${applicationId}`;
-    return this.httpClient.get<StudentProfileViewModel>(endpointUrl);
+
+  getStudentProfileByApplicationId(applicationId: string): Observable<StudentProfileViewModel> {
+    return this.crud.getList<StudentProfileViewModel>(
+      `${this.students}/getStudentProfileByApplicationId/app/student/profile/${applicationId}`
+    );
   }
+
   getAllStudentList(): Observable<any> {
-    const endpointUrl = `${this.getStudentUrlList()}`;
-    return this.httpClient.get<any>(endpointUrl);
+    return this.crud.getList(this.students);
   }
+
   searchStudents(query: string): Observable<any> {
-    return this.httpClient.get(`${this.getStudentUrlList()}/getSearchStudent/student`, { params: { query } });
+    return this.crud.getList(`${this.students}/getSearchStudent/student`, { queryParms: query });
   }
-  getStudentRegisteredCourse(
-    id: string,
-    batchCode: string,
-    type: number
-  ): Observable<StudentViewModel> {
-    const endpointUrl = `${this.getStudentUrl()}/getStudentRegisteredCourse/semester/${id}/${batchCode}/${type}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map((result) => result as StudentViewModel));
+
+  getStudentRegisteredCourse(id: string, batchCode: string, type: number): Observable<StudentViewModel> {
+    return this.crud.getList<StudentViewModel>(
+      `${this.offerings}/getStudentRegisteredCourse/semester/${id}/${batchCode}/${type}`
+    );
   }
+
   getStudentCoursePendingPayment(id: string): Observable<PendingStudentPaymentModel[]> {
-    const endpointUrl = `${this.getStudentUrl()}/${id}/getStudentCoursePendingPayment`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as PendingStudentPaymentModel[]));
+    return this.crud.getList<PendingStudentPaymentModel[]>(`${this.offerings}/${id}/getStudentCoursePendingPayment`);
   }
+
   getStudentCourseAddPendingPayment(id: string): Observable<PendingStudentPaymentModel[]> {
-    const endpointUrl = `${this.getStudentUrl()}/${id}/addRequest/getStudentCourseAddPendingPayment`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as PendingStudentPaymentModel[]));
+    return this.crud.getList<PendingStudentPaymentModel[]>(
+      `${this.offerings}/${id}/addRequest/getStudentCourseAddPendingPayment`
+    );
   }
 
   getListOfAddableTermCourseOffering(
@@ -185,123 +146,114 @@ export class StudentService {
     term: number,
     id: number
   ): Observable<CourseBreakDownOffering[]> {
-    const endpointUrl = `${this.getStudentUrl()}/addable/${applicantUserId}/${term}/${id}/getListOfAddableTermCourseOffering`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map((result) => result as CourseBreakDownOffering[]));
+    return this.crud.getList<CourseBreakDownOffering[]>(
+      `${this.offerings}/addable/${applicantUserId}/${term}/${id}/getListOfAddableTermCourseOffering`
+    );
   }
+
   getListOfRetakeTermCourseOffering(
     applicantUserId: string,
     term: number,
     id: number
   ): Observable<CourseBreakDownOffering[]> {
-    const endpointUrl = `${this.getStudentUrl()}/getListOfRetakeTermCourseOffering/${applicantUserId}/getListOfRetake/${term}/${id}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map((result) => result as CourseBreakDownOffering[]));
+    return this.crud.getList<CourseBreakDownOffering[]>(
+      `${this.offerings}/getListOfRetakeTermCourseOffering/${applicantUserId}/getListOfRetake/${term}/${id}`
+    );
   }
+
   getListOfAddedCourse(): Observable<CourseViewModel[]> {
-    const endpointUrl = `${this.getStudentUrl()}/course/getListOfAddedCourse`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map((result) => result as CourseViewModel[]));
+    return this.crud.getList<CourseViewModel[]>(`${this.offerings}/course/getListOfAddedCourse`);
   }
+
   getListOfStudentCourseAdded(
     courseId: string,
     approvalStatus?: number | string | null
   ): Observable<StudentAddedViewModel[]> {
-    const endpointUrl = `${this.getStudentUrl()}/course/student/getListOfStudentCourseAdded/${courseId}`;
-    let params = new HttpParams();
-    
-    if (approvalStatus !== null && approvalStatus !== undefined) {
-      params = params.append('approvalStatus', approvalStatus.toString());
-    }
-    
-    return this.httpClient
-      .get<StudentAddedViewModel[]>(endpointUrl, { params })
-      .pipe(map((result) => result as StudentAddedViewModel[]));
+    return this.crud.getList<StudentAddedViewModel[]>(
+      `${this.offerings}/course/student/getListOfStudentCourseAdded/${courseId}`,
+      { approvalStatus }
+    );
   }
+
+  getListOfStudentCourseAddedPaginated(courseId: string, query: string): Observable<any> {
+    return this.crud.getPaginated(
+      `${this.offerings}/course/student/getListOfStudentCourseAdded/${courseId}`,
+      query
+    );
+  }
+
   submitCourseTakenApproval(courseTakens: CourseTaken[]): Observable<any> {
-    const endpointUrl = `${this.getStudentUrl()}`;
-    return this.httpClient
-      .put(endpointUrl, courseTakens)
-      .pipe(map(result => result as any));
+    return this.crud.put(this.offerings, courseTakens);
   }
+
   getListOfAllAddDropCourse(applicantId: string): Observable<StudentCoursesTaken[]> {
-    const endpointUrl = `${this.getStudentUrl()}/student/${applicantId}/getListOfAllAddDropCourse`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map((result) => result as StudentCoursesTaken[]));
+    return this.crud.getList<StudentCoursesTaken[]>(
+      `${this.offerings}/student/${applicantId}/getListOfAllAddDropCourse`
+    );
   }
+
   getListOfAddDropCourse(applicantUserId: string, seasonTerm: number): Observable<StudentProfileViewModel> {
-    const endpointUrl = `${this.getStudentUrl()}/student/${applicantUserId}/${seasonTerm}/getListOfAddDropCourse`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map((result) => result as StudentProfileViewModel));
+    return this.crud.getList<StudentProfileViewModel>(
+      `${this.offerings}/student/${applicantUserId}/${seasonTerm}/getListOfAddDropCourse`
+    );
   }
 
-  getListOfTermRegisteredCourseList(termId: string, startDate: string,
-    endDate: string, studentId): Observable<StudentRegistrationSlipViewModel[]> {
-    const endpointUrl = `${this.getStudentUrl()}/student/getListOfTermRegisteredCourseList`;
-    let params = new HttpParams()
-    if (studentId && studentId.trim() !== '' && studentId != null) {
-      params = params.append('studentId', studentId);
-    }
-    if (termId && termId.trim() !== '' && termId != null) {
-      params = params.append('termId', termId);
-    }
-    if (startDate && startDate.trim() !== '') {
-      params = params.append('startDate', startDate);
-    }
-    if (endDate && endDate.trim() !== '') {
-      params = params.append('endDate', endDate);
-    }
-    return this.httpClient
-      .get(endpointUrl, { params })
-      .pipe(map((result) => result as StudentRegistrationSlipViewModel[]));
+  getListOfTermRegisteredCourseList(
+    termId: string,
+    startDate: string,
+    endDate: string,
+    studentId
+  ): Observable<StudentRegistrationSlipViewModel[]> {
+    return this.crud.getList<StudentRegistrationSlipViewModel[]>(
+      `${this.offerings}/student/getListOfTermRegisteredCourseList`,
+      { studentId, termId, startDate, endDate }
+    );
   }
-  getRegisteredNewStudentList(academicProgrameCode: string, entryYear: number, startDate: string, endDate: string): Observable<RegisteredNewStudentViewModel[]> {
-    const endpointUrl = `${this.getStudentUrlList()}/student/getRegisteredNewStudentList/new`;
-    let params = new HttpParams();
 
-    if (academicProgrameCode && academicProgrameCode.trim() !== '' || academicProgrameCode != null) {
-      params = params.append('academicProgrameCode', academicProgrameCode);
-    }
-    if (entryYear && entryYear !== 0 || entryYear != undefined) {
-      params = params.append('entryYear', entryYear);
-    }
-    if (startDate && startDate.trim() !== '') {
-      params = params.append('startDate', startDate);
-    }
-    if (endDate && endDate.trim() !== '') {
-      params = params.append('endDate', endDate);
-    }
+  getListOfTermRegisteredCourseListPaginated(
+    termId: string,
+    startDate: string,
+    endDate: string,
+    studentId: string,
+    query: string
+  ): Observable<any> {
+    return this.crud.getPaginated(
+      `${this.offerings}/student/getListOfTermRegisteredCourseList`,
+      query,
+      { studentId, termId, startDate, endDate }
+    );
+  }
 
-    return this.httpClient
-      .get(endpointUrl, { params })
-      .pipe(map((result) => result as RegisteredNewStudentViewModel[]));
+  getRegisteredNewStudentList(
+    academicProgrameCode: string,
+    entryYear: number,
+    startDate: string,
+    endDate: string
+  ): Observable<RegisteredNewStudentViewModel[]> {
+    return this.crud.getList<RegisteredNewStudentViewModel[]>(
+      `${this.students}/student/getRegisteredNewStudentList/new`,
+      { academicProgrameCode, entryYear, startDate, endDate }
+    );
+  }
+
+  getRegisteredNewStudentListPaginated(query: string): Observable<any> {
+    return this.crud.getPaginated(`${this.students}/student/getRegisteredNewStudentList/new`, query);
   }
 
   updateStudentEmail(studentId: string, newEmail: string): Observable<any> {
-    const endpointUrl = `${this.getStudentUrlList()}/UpdateStudentEmail/${studentId}/${newEmail}`;
-    return this.httpClient.put<any>(endpointUrl, null).pipe(
-      catchError((error) => {
-        console.error('Error occurred while updating student email:', error);
-        return throwError(() => new Error(error.message || 'Error updating student email'));
-      })
+    return this.crud.put(`${this.students}/UpdateStudentEmail/${studentId}/${newEmail}`).pipe(
+      catchError((error) => throwError(() => new Error(error.message || 'Error updating student email')))
     );
   }
-  getStudentTranscriptByStudentId(
-    studentId: string
-  ): Observable<StudentTranscriptViewModel> {
-    const endpointUrl = `${this.getStudentUrlList()}/transcript/${studentId}`;
-    return this.httpClient.get<StudentTranscriptViewModel>(endpointUrl);
+
+  getStudentTranscriptByStudentId(studentId: string): Observable<StudentTranscriptViewModel> {
+    return this.crud.getList<StudentTranscriptViewModel>(`${this.students}/transcript/${studentId}`);
   }
 
   getCalculatedCGPA(studentId: string): Observable<number> {
-    const endpointUrl = `${this.getStudentUrlList()}/cgpa/${studentId}`;
-    return this.httpClient.get<number>(endpointUrl);
+    return this.crud.getList<number>(`${this.students}/cgpa/${studentId}`);
   }
+
   getStudentsPaginated(
     studentCode: string = '',
     batchCode: string = '',
@@ -310,85 +262,72 @@ export class StudentService {
     sortColumn: string = 'studentid',
     sortOrder: string = 'asc'
   ): Observable<any> {
-    const endpointUrl = `${this.getStudentUrlList()}/paginated`;
-    let params = new HttpParams()
-      .append('pageIndex', pageIndex.toString())
-      .append('pageSize', pageSize.toString())
-      .append('sortColumn', sortColumn)
-      .append('sortOrder', sortOrder);
-
-    if (studentCode && studentCode.trim() !== '') {
-      params = params.append('studentCode', studentCode);
-    }
-    if (batchCode && batchCode.trim() !== '') {
-      params = params.append('batchCode', batchCode);
-    }
-
-    return this.httpClient.get<any>(endpointUrl, { params });
+    return this.crud.getPaginated(this.students, undefined, {
+      pageIndex,
+      pageSize,
+      sortColumn,
+      sortOrder,
+      studentCode,
+      batchCode
+    });
   }
 
   deleteStudent(id: string): Observable<any> {
-    const endpointUrl = `${this.getStudentUrlList()}/${id}`;
-    return this.httpClient.delete<any>(endpointUrl);
+    return this.crud.delete(this.students, id);
   }
 
   activateStudent(id: string): Observable<any> {
-    const endpointUrl = `${this.getStudentUrlList()}/activate/${id}`;
-    return this.httpClient.patch<any>(endpointUrl, null);
+    return this.crud.update(`${this.students}/activate`, id, null);
   }
 
   getStudentById(id: string): Observable<any> {
-    const endpointUrl = `${this.getStudentUrlList()}/student/${id}`;
-    return this.httpClient.get<any>(endpointUrl);
+    return this.crud.getList(`${this.students}/student/${id}`);
   }
 
   updateStudent(id: string, data: any): Observable<any> {
-    const endpointUrl = `${this.getStudentUrlList()}/${id}`;
-    return this.httpClient.patch<any>(endpointUrl, data);
+    return this.crud.update(this.students, id, data);
   }
 
   addStudent(data: any): Observable<any> {
-    const endpointUrl = `${this.getStudentUrlList()}`;
-    return this.httpClient.post<any>(endpointUrl, data);
+    return this.crud.add(this.students, data);
   }
 
   exportStudentsExcel(): Observable<any> {
-    const endpointUrl = `${this.getStudentUrlList()}/excel`;
-    return this.httpClient.get<any>(endpointUrl);
+    return this.crud.getList(`${this.students}/excel`);
   }
+
   getCoursesNotOnStudentProfile(studentCode: string): Observable<CourseBreakDownOffering[]> {
-    const endpointUrl = `${this.getStudentUrl()}/studentProfile/getUnRegisterCourse/${studentCode}/getCoursesNotOnStudentProfile`;
-    return this.httpClient.get<CourseBreakDownOffering[]>(endpointUrl);
+    return this.crud.getList<CourseBreakDownOffering[]>(
+      `${this.offerings}/studentProfile/getUnRegisterCourse/${studentCode}/getCoursesNotOnStudentProfile`
+    );
   }
+
   getStudentRegisteredCourseList(studentCode: string): Observable<StudentViewModel> {
-    const endpointUrl = `${this.getStudentUrl()}/${studentCode}/getStudentRegisteredCourseList/registeredCourses`;
-    return this.httpClient.get<StudentViewModel>(endpointUrl);
+    return this.crud.getList<StudentViewModel>(
+      `${this.offerings}/${studentCode}/getStudentRegisteredCourseList/registeredCourses`
+    );
   }
 
   updateTakenCourses(ids: number[], modifiedBy: string): Observable<any> {
-    const payload = { ids, modifiedBy };
-    const endpointUrl = `${this.getStudentUrl()}/updateTakenCourses`;
-    return this.httpClient.post(endpointUrl, payload);
+    return this.crud.add(`${this.offerings}/updateTakenCourses`, { ids, modifiedBy });
   }
+
   addStudentManualCourseOfferingAsync(request: SpecialCaseManualRegistrationRequest): Observable<any> {
-    const endpointUrl = `${this.getStudentUrl()}/manual/semester-registration`;
-    return this.httpClient.post(endpointUrl, request);
+    return this.crud.add(`${this.offerings}/manual/semester-registration`, request);
   }
 
   getStudentInformationWithInstructor(userId: string, studentId: string): Observable<StudentInformationView> {
-    const endpointUrl = `${this.getStudentGradesUrl()}/getStudentInformationWithInstructor/${userId}/${studentId}`;
-    return this.httpClient.get<StudentInformationView>(endpointUrl).pipe(
-      catchError((error) => {
-        console.error('Error occurred while fetching student information with instructor:', error);
-        return throwError(() => new Error(error.message || 'Error fetching student information with instructor'));
-      })
+    return this.crud.getList<StudentInformationView>(
+      `${this.grades}/getStudentInformationWithInstructor/${userId}/${studentId}`
+    ).pipe(
+      catchError((error) => throwError(() => new Error(error.message || 'Error fetching student information with instructor')))
     );
   }
+
   getListOfCourseRegistrationSlipList(applicationUserId: string): Observable<StudentRegistrationSlipViewModel[]> {
-    const endpointUrl = `${this.getStudentUrl()}/student/getListOfCourseRegistrationSlipList/${applicationUserId}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map((result) => result as StudentRegistrationSlipViewModel[]));
+    return this.crud.getList<StudentRegistrationSlipViewModel[]>(
+      `${this.offerings}/student/getListOfCourseRegistrationSlipList/${applicationUserId}`
+    );
   }
 
   getAddableCoursesWithEquivalentsAsync(
@@ -396,15 +335,18 @@ export class StudentService {
     term: number,
     id: number
   ): Observable<CourseBreakDownOffering[]> {
-    const endpointUrl = `${this.getStudentUrl()}/addable-with-equivalents/${applicantUserId}/${term}/${id}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map((result) => result as CourseBreakDownOffering[]));
+    return this.crud.getList<CourseBreakDownOffering[]>(
+      `${this.offerings}/addable-with-equivalents/${applicantUserId}/${term}/${id}`
+    );
   }
 
-  getManualTermCourseOfferingProgramBased(studentCode: string, seasonTerm: number, academicYear: number): Observable<CourseBreakDownOffering[]> {
-    const endpointUrl = `${this.getStudentUrl()}/manual-program-based/${studentCode}/${seasonTerm}/${academicYear}`;
-    return this.httpClient.get<CourseBreakDownOffering[]>(endpointUrl);
+  getManualTermCourseOfferingProgramBased(
+    studentCode: string,
+    seasonTerm: number,
+    academicYear: number
+  ): Observable<CourseBreakDownOffering[]> {
+    return this.crud.getList<CourseBreakDownOffering[]>(
+      `${this.offerings}/manual-program-based/${studentCode}/${seasonTerm}/${academicYear}`
+    );
   }
 }
-

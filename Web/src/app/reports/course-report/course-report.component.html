@@ -33,14 +33,14 @@
     </nz-table>
     <div class="paginate">
       <nz-pagination
-        [nzPageSizeOptions]="pageSizeOption"
-        (nzPageSizeChange)="paginatedSizeEvent($event)"
-        (nzPageIndexChange)="paginatedIndexEvent($event)"
+        [nzPageSizeOptions]="pager.pageSizeOptions"
+        (nzPageSizeChange)="pager.onPageSizeChange($event)"
+        (nzPageIndexChange)="pager.onPageIndexChange($event)"
         style="float: right"
-        [nzPageIndex]="pageindex"
-        [nzTotal]="totalRecord"
+        [nzPageIndex]="pager.pageIndex"
+        [nzTotal]="pager.total"
         nzShowSizeChanger
-        [nzPageSize]="pageSize"
+        [nzPageSize]="pager.pageSize"
       ></nz-pagination>
     </div>
   </div>

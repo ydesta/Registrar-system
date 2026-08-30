@@ -1,7 +1,7 @@
 <div class="content-container">
   <!-- Header Section -->
   <div class="header-section">
-    <button nz-button nzType="default" class="back-btn" routerLink="../curriculum">
+    <button nz-button nzType="default" class="back-btn" type="button" (click)="goBack()">
       <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
       Back to Curricula
     </button>
@@ -240,7 +240,7 @@
         </div>
 
         <div class="form-actions">
-          <button nz-button nzType="default" class="cancel-btn" type="button" routerLink="../curriculum">
+          <button nz-button nzType="default" class="cancel-btn" type="button" (click)="goBack()">
             <span nz-icon nzType="close" nzTheme="outline"></span>
             Cancel
           </button>

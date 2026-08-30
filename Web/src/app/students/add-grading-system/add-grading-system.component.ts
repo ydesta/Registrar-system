@@ -38,7 +38,7 @@ export class AddGradingSystemComponent implements OnInit {
       this.action = 'Edit Grading System';
       this.submit = 'Update';
       this._crudService
-        .getList('/GradingSystems' + '/' + this.progStatusId)
+        .getById('/GradingSystems', this.progStatusId)
         .subscribe((res: any) => {
           this.patchValues(res.data);
         });

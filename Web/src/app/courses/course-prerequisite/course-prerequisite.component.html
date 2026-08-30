@@ -9,7 +9,7 @@
       <div class="header-actions">
         <div class="search-section">
           <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input type="text" nz-input placeholder="Search prerequisites..." [(ngModel)]="searchKey" (ngModelChange)="onSearch()" />
+            <input type="text" nz-input placeholder="Search prerequisites..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)" />
           </nz-input-group>
           <ng-template #suffixIconButton>
             <button nz-button nzType="primary" class="search-btn" nzSearch>
@@ -35,18 +35,18 @@
     <div id="print-section">
       <nz-table 
         #basicTable 
-        [nzData]="paginatedPrerequisites" 
+        [nzData]="coursePrerequisites" 
         nzBordered
-        [nzPageSize]="pageSize"
-        [nzPageSizeOptions]="pageSizeOption"
+        [nzPageSize]="pager.pageSize"
+        [nzPageSizeOptions]="pager.pageSizeOptions"
         [nzShowSizeChanger]="true"
-        [nzTotal]="total"
-        [nzPageIndex]="pageIndex"
-        (nzPageIndexChange)="onPageIndexChange($event)"
-        (nzPageSizeChange)="onPageSizeChange($event)"
+        [nzTotal]="pager.total"
+        [nzPageIndex]="pager.pageIndex"
+        (nzPageIndexChange)="pager.onPageIndexChange($event)"
+        (nzPageSizeChange)="pager.onPageSizeChange($event)"
         [nzFrontPagination]="false"
         [nzShowTotal]="rangeTemplate"
-        [nzLoading]="isLoading"
+        [nzLoading]="pager.loading"
         [nzNoResult]="emptyTpl"
         class="prerequisites-table"
       >
@@ -65,9 +65,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let prerequisite of paginatedPrerequisites; let i = index">
+          <tr *ngFor="let prerequisite of coursePrerequisites; let i = index">
             <td class="sn-column">
-              <span class="sn-badge">{{ (pageIndex - 1) * pageSize + i + 1 }}</span>
+              <span class="sn-badge">{{ pager.serial(i) }}</span>
             </td>
             <td>{{ prerequisite.courseCode }}</td>
             <td>{{ prerequisite.courseTitle }}</td>

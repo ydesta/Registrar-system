@@ -30,7 +30,7 @@
         </div>
       </div>
 
-      <form nz-form [formGroup]="quadrantBreakdownForm" class="curriculum-form">
+      <form nz-form [formGroup]="quadrantBreakdownForm" class="curriculum-form" (ngSubmit)="submitForm()">
         <div class="form-sections">
           <!-- Basic Information Section -->
           <div class="form-section">
@@ -71,10 +71,11 @@
                       formControlName="quadrantsId" 
                       nzPlaceHolder="Select Quadrant" 
                       nzShowSearch
+                      [nzDisabled]="isQuadrantLocked"
                       class="professional-select"
                     >
                       <nz-option *ngFor="let item of quadrants" [nzValue]="item.id"
-                        [nzLabel]="item.quadrantHeading"></nz-option>
+                        [nzLabel]="(item.quadrantsID ? item.quadrantsID + ' - ' : '') + item.quadrantHeading"></nz-option>
                     </nz-select>
                   </nz-form-control>
                 </nz-form-item>
@@ -118,13 +119,15 @@
           </div>
         </div>
           <!-- Course Selection Section -->
-          <div class="form-section" *ngIf="numberOfCourseList > 0">
+          <div class="form-section" *ngIf="numberOfCourseList > 0 || numberOfSelectiveCourse > 0 || editMode">
             <div class="section-header">
               <h4 class="section-title">
                 <span nz-icon nzType="book" nzTheme="outline"></span>
                 Course Selection
               </h4>
-              <p class="section-description">Select courses for this quadrant from the available course list</p>
+              <p class="section-description">
+                {{ editMode ? 'Update courses for this quadrant' : 'Select courses for this quadrant from the available course list' }}
+              </p>
             </div>
 
             <div class="course-transfer-container">
@@ -159,7 +162,7 @@
             Cancel
           </button>
           <button nz-button nzType="primary" class="submit-btn" type="submit" 
-            [disabled]="quadrantBreakdownForm.invalid || numberOfSelectiveCourse == 0">
+            [disabled]="(isQuadrantLocked ? false : quadrantBreakdownForm.invalid) || numberOfSelectiveCourse == 0">
             <span nz-icon nzType="save" nzTheme="outline"></span>
             {{ submit }}
           </button>

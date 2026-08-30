@@ -164,21 +164,21 @@
                 <nz-form-item>
                   <nz-form-label [nzSpan]="8">Office Phone</nz-form-label>
                   <nz-form-control [nzSpan]="10">
-                    <input (change)="passSteps()" nz-input formControlName="telephonOffice"
-                      placeholder="Enter office phone number" />
+                    <input (change)="passSteps()" (blur)="onTelephonOfficeBlur()" nz-input formControlName="telephonOffice"
+                      placeholder="+2519… / 09… / 07…" />
                   </nz-form-control>
                 </nz-form-item>
                 <nz-form-item>
                   <nz-form-label [nzSpan]="8">Home Phone</nz-form-label>
                   <nz-form-control [nzSpan]="10">
-                    <input (change)="passSteps()" nz-input formControlName="telephonHome"
-                      placeholder="Enter home phone number" />
+                    <input (change)="passSteps()" (blur)="onTelephonHomeBlur()" nz-input formControlName="telephonHome"
+                      placeholder="+251… / 01… / 03… / 04… / 09… / 07…" />
                   </nz-form-control>
                 </nz-form-item>
                 <nz-form-item>
                   <nz-form-label [nzSpan]="8" nzRequired>Mobile Number</nz-form-label>
                   <nz-form-control [nzSpan]="10">
-                    <input (change)="passSteps()" nz-input formControlName="mobile" placeholder="Enter mobile number" />
+                    <input (change)="passSteps()" (blur)="onMobileBlur()" nz-input formControlName="mobile" placeholder="+2519… / 09… / 07…" />
                   </nz-form-control>
                 </nz-form-item>
                 <nz-form-item>
@@ -389,15 +389,15 @@
                 <nz-form-item>
                   <nz-form-label [nzSpan]="8" required>Telephone Office</nz-form-label>
                   <nz-form-control [nzSpan]="10">
-                    <input (change)="passSteps()" nz-input formControlName="telephoneOffice"
-                      placeholder="enter telephone office" />
+                    <input (change)="passSteps()" (blur)="onContactTelephoneOfficeBlur()" nz-input formControlName="telephoneOffice"
+                      placeholder="+2519… / 09… / 07…" />
                   </nz-form-control>
                 </nz-form-item>
                 <nz-form-item>
                   <nz-form-label [nzSpan]="8">Telephone Home </nz-form-label>
                   <nz-form-control [nzSpan]="10">
-                    <input (change)="passSteps()" nz-input formControlName="telephoneHome"
-                      placeholder="enter telephone home" />
+                    <input (change)="passSteps()" (blur)="onContactTelephoneHomeBlur()" nz-input formControlName="telephoneHome"
+                      placeholder="+251… / 01… / 03… / 04… / 09… / 07…" />
                   </nz-form-control>
                 </nz-form-item>
 

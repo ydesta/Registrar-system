@@ -13,6 +13,10 @@ export interface AcademicTermModel {
   startDate?: Date | string;
   endDate?: Date | string;
   isCurrentTerm: boolean;
+  showRegular?: boolean;
+  showAdd?: boolean;
+  showAssessment?: boolean;
+  showEquivalent?: boolean;
   batchTerms?: BatchTermItem[];
   createdDate?: Date;
   lastModifiedDate?: Date;

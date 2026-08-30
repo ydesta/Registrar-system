@@ -1,8 +1,9 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { BaseModel } from 'src/app/Models/BaseMode';
 import { CourseExemptionModel } from 'src/app/Models/CourseExemptionModel';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 import { CourseExemptionService } from 'src/app/services/course-exemption.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 
@@ -12,59 +13,46 @@ import { CustomNotificationService } from 'src/app/services/custom-notification.
   styleUrls: ['./course-exemption-list.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class CourseExemptionListComponent implements OnInit {
-  courseExemptions: CourseExemptionModel[] = [];
-  loading = false;
-  searchValue = '';
-  filteredData: CourseExemptionModel[] = [];
-
-
-
-  // Table configuration
-  listOfData: CourseExemptionModel[] = [];
+export class CourseExemptionListComponent implements OnInit, OnDestroy {
   listOfDisplayData: CourseExemptionModel[] = [];
-  sortName: string | null = null;
-  sortValue: string | null = null;
+  pager: ServerPaginator;
 
   constructor(
     private courseExemptionService: CourseExemptionService,
     private customNotificationService: CustomNotificationService,
     private modal: NzModalService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private paginator: PaginatorService
+  ) {
+    this.pager = this.paginator.create();
+  }
 
   ngOnInit(): void {
+    this.pager.init(() => this.loadCourseExemptions());
     this.loadCourseExemptions();
   }
 
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   loadCourseExemptions(): void {
-    this.loading = true;
-    this.courseExemptionService.getCourseExemptions().subscribe({
-      next: (response: BaseModel<CourseExemptionModel[]>) => {
-        console.log("$$$       ", response);
-        if (response.status === 'success') {
-          this.courseExemptions = response.data;
-          this.listOfData = [...this.courseExemptions];
-          this.listOfDisplayData = [...this.courseExemptions];
-          this.filteredData = [...this.courseExemptions];
-        } else {
-          this.customNotificationService.notification('error', 'Error', 'Failed to load course exemptions');
-        }
-        this.loading = false;
+    this.pager.loading = true;
+    this.courseExemptionService.getCourseExemptionsPaginated(this.pager.query()).subscribe({
+      next: (response: any) => {
+        this.listOfDisplayData = response.data || [];
+        this.pager.applyResult(response);
       },
-      error: (error) => {
+      error: () => {
+        this.listOfDisplayData = [];
+        this.pager.fail();
         this.customNotificationService.notification('error', 'Error', 'Failed to load course exemptions');
-        this.loading = false;
       }
     });
   }
 
   addCourseExemption(): void {
     this.router.navigate(['/course/course-exemption-form']);
-  }
-
-  editCourseExemption(id: number): void {
-    this.router.navigate(['/course/course-exemption-form', id]);
   }
 
   showDeleteConfirm(id: number): void {
@@ -78,7 +66,7 @@ export class CourseExemptionListComponent implements OnInit {
         this.deleteCourseExemption(id);
       },
       nzCancelText: 'No',
-      nzOnCancel: () => console.log('Cancel')
+      nzOnCancel: () => {}
     });
   }
 
@@ -92,54 +80,10 @@ export class CourseExemptionListComponent implements OnInit {
           this.customNotificationService.notification('error', 'Error', response.data);
         }
       },
-      error: (error) => {
+      error: () => {
         this.customNotificationService.notification('error', 'Error', 'Failed to delete course exemption');
       }
     });
-  }
-
-  // Search functionality
-  search(): void {
-    const filterFunc = (item: CourseExemptionModel) => {
-      return (
-        item.exemptedCourseName?.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1 ||
-        item.exemptedCourseCode?.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1 ||
-        item.exemptedCollegeName?.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1 ||
-        item.studentName?.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1 ||
-        item.exemptionCourse?.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1 ||
-        item.grade?.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1
-      );
-    };
-
-    this.filteredData = this.courseExemptions.filter(item => filterFunc(item));
-    this.listOfDisplayData = this.filteredData;
-  }
-
-  reset(): void {
-    this.searchValue = '';
-    this.search();
-  }
-
-  // Sorting functionality
-  sort(sort: { key: string; value: string } | string): void {
-    if (typeof sort === 'string') {
-      // Handle nz-table sort event
-      this.sortName = sort;
-      this.sortValue = this.sortValue === 'ascend' ? 'descend' : 'ascend';
-    } else {
-      // Handle object format
-      this.sortName = sort.key;
-      this.sortValue = sort.value;
-    }
-    this.search();
-  }
-
-  getStatusColor(approvedDate: Date | undefined): string {
-    return approvedDate ? 'green' : 'orange';
-  }
-
-  getStatusText(approvedDate: Date | undefined): string {
-    return approvedDate ? 'Approved' : 'Pending';
   }
 
   getGradeColor(gradeLetter: string | undefined): string {

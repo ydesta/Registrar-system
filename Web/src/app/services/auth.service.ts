@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, Subject, throwError } from 'rxjs';
 import { catchError, timeout, retry, shareReplay } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
@@ -7,61 +7,45 @@ import { LoginRequest, RegisterRequest, User, AuthenticationInfo } from './auth.
 import { MobileDetectionService } from './mobile-detection.service';
 import { TokenStorageService } from './token-storage.service';
 import { SecureTokenStorageService } from './secure-token-storage.service';
+import { CrudService } from './crud.service';
+import { SESSION_CONSTANTS } from './session-management.constants';
+import { isJwtExpired } from '../constants';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private baseUrl = environment.secureUrl;
   private _loginChangedSubject = new Subject<boolean>();
   private _currentUserSubject = new BehaviorSubject<User | null>(null);
   private _isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
-  
+
   authorizationInfo!: any;
-  
+
   public loginChanged = this._loginChangedSubject.asObservable();
   public currentUser$ = this._currentUserSubject.asObservable();
   public isAuthenticated$ = this._isAuthenticatedSubject.asObservable();
 
+  private readonly authKeys = SESSION_CONSTANTS.AUTH_KEYS;
+
   constructor(
-    private http: HttpClient,
+    private crud: CrudService,
     private mobileDetectionService: MobileDetectionService,
     private tokenStorageService: TokenStorageService,
     private secureTokenStorage: SecureTokenStorageService
   ) {
-    // Initialize authentication state first
     this.initializeAuthState();
-    
-    // Migrate tokens from localStorage to sessionStorage after a delay
-    // This prevents migration from interfering with active login process
-    // Only migrate if we don't already have tokens in sessionStorage
     setTimeout(() => {
       try {
         this.secureTokenStorage.migrateFromLocalStorage();
-      } catch (error) {
-        // Ignore migration errors - fallback to localStorage will work
-        if (!environment.production) {
-          console.warn('AuthService: Token migration failed, using localStorage fallback');
-        }
+      } catch {
       }
-    }, 2000); // Increased delay to ensure login completes first
+    }, 2000);
   }
 
   private initializeAuthState(): void {
     const isLogin = localStorage.getItem('isLogin') === 'true';
-    // Use secure token storage first, fallback to localStorage for backward compatibility
-    const hasToken = this.secureTokenStorage.getAccessToken() || localStorage.getItem('access_token');
-    
-    if (isLogin && hasToken) {
-      const user = this.getCurrentUser();
-      this._currentUserSubject.next(user);
-      this._isAuthenticatedSubject.next(true);
-      this._loginChangedSubject.next(true);
-    } else {
-      this._currentUserSubject.next(null);
-      this._isAuthenticatedSubject.next(false);
-      this._loginChangedSubject.next(false);
-    }
+    const hasToken = this.getToken();
+    this.setAuthState(!!(isLogin && hasToken));
   }
 
   public login = () => {
@@ -69,31 +53,21 @@ export class AuthService {
   };
 
   public loginWithCredentials(loginRequest: LoginRequest): Observable<any> {
-    // Adjust timeout based on device type and environment
-    const timeoutValue = this.mobileDetectionService.isMobileDevice() ? 60000 : 45000; // Increased timeout for production
+    const timeoutValue = this.mobileDetectionService.isMobileDevice() ? 60000 : 45000;
     const retryCount = this.mobileDetectionService.isSlowConnection() ? 3 : 2;
-    
-    return this.http.post(`${this.baseUrl}/authentication/login`, loginRequest)
-      .pipe(
-        timeout(timeoutValue), // Longer timeout for production
-        retry(retryCount), // More retries for slow connections
-        catchError(this.handleError),
-        shareReplay(1) // Share the result with multiple subscribers
-      );
+    return this.crud.secure.post('/authentication/login', loginRequest).pipe(
+      timeout(timeoutValue),
+      retry(retryCount),
+      catchError(this.handleError),
+      shareReplay(1)
+    );
   }
 
   public isAuthenticated = (): Promise<boolean> => {
-    const isLogin = localStorage.getItem('isLogin') === 'true';
-    // Use secure token storage first, fallback to localStorage
-    const hasToken = this.secureTokenStorage.getAccessToken() || localStorage.getItem('access_token');
-    const tokenStorageIsLogin = this.tokenStorageService.getIsLogin();
-    
-    // Check both secure storage and token storage service
-    const isAuth = isLogin && hasToken && tokenStorageIsLogin;
-    
-    // Update the subject
+    const isAuth = localStorage.getItem('isLogin') === 'true'
+      && !!this.getToken()
+      && this.tokenStorageService.getIsLogin();
     this._isAuthenticatedSubject.next(isAuth);
-    
     return Promise.resolve(isAuth);
   };
 
@@ -103,90 +77,35 @@ export class AuthService {
 
   public logout = () => {
     this.tokenStorageService.signOut();
-    this._currentUserSubject.next(null);
-    this._isAuthenticatedSubject.next(false);
-    this._loginChangedSubject.next(false);
-    
-    // Clear tokens from secure storage (sessionStorage)
+    this.setAuthState(false);
     this.secureTokenStorage.clearTokens();
-    
-    // Clear all auth data from localStorage
-    localStorage.removeItem('isLogin');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('firstName');
-    localStorage.removeItem('lastName');
-    localStorage.removeItem('email');
-    localStorage.removeItem('role');
-    localStorage.removeItem('userType');
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('currentUserId');
-    
-    // Clear application-specific cached data
-    localStorage.removeItem('parent_applicant_id');
-    localStorage.removeItem('isApplicantProfile');
-    
+    this.authKeys.forEach(key => localStorage.removeItem(key));
     window.location.href = '/accounts/login';
   };
 
   public finishLogout = () => {
-    this._currentUserSubject.next(null);
-    this._isAuthenticatedSubject.next(false);
-    this._loginChangedSubject.next(false);
+    this.setAuthState(false);
     return Promise.resolve();
   };
 
   public getAccessToken = (): Promise<string> => {
-    // Use secure token storage first
-    const secureToken = this.secureTokenStorage.getAccessToken();
-    if (secureToken) {
-      return Promise.resolve(secureToken);
-    }
-    
-    // Fallback to tokenStorageService
-    const token = this.tokenStorageService.getToken();
-    if (token) {
-      return Promise.resolve(token);
-    }
-    
-    // Last fallback to localStorage (backward compatibility)
-    const localStorageToken = localStorage.getItem('access_token');
-    return Promise.resolve(localStorageToken || '');
+    return Promise.resolve(this.getToken() || '');
   };
 
   public getToken(): string | null {
-    // Try secure token storage first (most secure)
-    const secureToken = this.secureTokenStorage.getAccessToken();
-    if (secureToken) {
-      return secureToken;
+    const token = this.secureTokenStorage.getAccessToken()
+      || this.tokenStorageService.getToken()
+      || localStorage.getItem('access_token');
+    if (!token || isJwtExpired(token)) {
+      return null;
     }
-    
-    // Try tokenStorageService (user-specific token)
-    const tokenStorageToken = this.tokenStorageService.getToken();
-    if (tokenStorageToken) {
-      return tokenStorageToken;
-    }
-    
-    // Fallback to localStorage (backward compatibility)
-    const localStorageToken = localStorage.getItem('access_token');
-    if (localStorageToken) {
-      return localStorageToken;
-    }
-    
-    return null;
+    return token;
   }
 
   public checkIfUserIsAdmin = (): Promise<boolean> => {
-    const userRole = localStorage.getItem('role');
-    const userType = localStorage.getItem('userType');
-    const isAdmin = userRole === 'Super Admin' || 
-                   userRole === 'Administrator' || 
-                   userRole === 'Admin' ||
-                   userType === 'Super Admin' ||
-                   userType === 'Administrator' ||
-                   userType === 'Admin';
-    
-    return Promise.resolve(isAdmin);
+    return Promise.resolve(
+      this.hasRole('Super Admin') || this.hasRole('Administrator') || this.hasRole('Admin')
+    );
   };
 
   public hasRole(role: string): boolean {
@@ -195,110 +114,75 @@ export class AuthService {
     if (userRole) {
       try {
         const roles = JSON.parse(userRole);
-        const result = Array.isArray(roles) ? roles.includes(role) : roles === role;
-        return result;
+        return Array.isArray(roles) ? roles.includes(role) : roles === role;
       } catch {
-        const result = userRole === role;
-        return result;
+        return userRole === role;
       }
     }
-    const result = userType === role;
-    return result;
+    return userType === role;
   }
 
   getAuthenticationInfo(isLogin: boolean, user: User): AuthenticationInfo {
-    const auth: AuthenticationInfo = (this.authorizationInfo = {
+    return this.authorizationInfo = {
       isLogin,
       _user: user,
       user,
       roles: user?.roles || [],
       permissions: user?.permissions || []
-    });
-    return auth;
+    };
   }
 
   register(userRegistration: RegisterRequest): Observable<any> {
-    // Explicitly add X-Client-App header to ensure it's sent
-    const headers = {
-      'X-Client-App': environment.frontendClientKey
-    };
-    
-    return this.http.post(`${this.baseUrl}/authentication/register`, userRegistration, { headers })
-      .pipe(
-        timeout(60000), // Add 60-second timeout for registration
-        retry(1), // Add retry mechanism
-        catchError(this.handleError)
-      );
+    return this.crud.secure.post('/authentication/register', userRegistration, undefined, this.clientHeaders()).pipe(
+      timeout(60000),
+      retry(1),
+      catchError(this.handleError)
+    );
   }
 
   public verifyOtp(email: string, otp: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/authentication/verify-otp`, { email, otp })
-      .pipe(
-        catchError(this.handleError),
-        shareReplay(1)
-      );
+    return this.crud.secure.post('/authentication/verify-otp', { email, otp }).pipe(
+      catchError(this.handleError),
+      shareReplay(1)
+    );
   }
 
   public resetPassword(email: string, token: string, newPassword: string, confirmPassword: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/authentication/reset-password`, {
+    return this.crud.secure.post('/authentication/reset-password', {
       email,
       token,
       newPassword,
       confirmPassword
-    }).pipe(
-      catchError(this.handleError)
-    );
+    }).pipe(catchError(this.handleError));
   }
 
   public changePassword(currentPassword: string, newPassword: string, confirmPassword: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/authentication/change-password`, {
+    return this.crud.secure.post('/authentication/change-password', {
       currentPassword,
       newPassword,
       confirmPassword
-    }).pipe(
-      catchError(this.handleError)
-    );
+    }).pipe(catchError(this.handleError));
   }
 
   public verifyEmail(email: string, token: string): Observable<any> {
-    // Explicitly add X-Client-App header to ensure it's sent
-    const headers = {
-      'X-Client-App': environment.frontendClientKey
-    };
-    
-    return this.http.post(`${this.baseUrl}/authentication/verify-email`, { email, token }, { headers })
-      .pipe(
-        catchError(this.handleError)
-      );
+    return this.crud.secure.post('/authentication/verify-email', { email, token }, undefined, this.clientHeaders())
+      .pipe(catchError(this.handleError));
   }
 
   public verifyEmailGet(email: string, token: string): Observable<any> {
-    // Explicitly add X-Client-App header to ensure it's sent
-    const headers = {
-      'X-Client-App': environment.frontendClientKey
-    };
-    
-    return this.http.get(`${this.baseUrl}/authentication/verify-email?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`, { headers })
-      .pipe(
-        catchError((error) => {
-          // Fallback to POST method if GET fails
-          return this.verifyEmail(email, token);
-        })
-      );
+    return this.crud.secure.get('/authentication/verify-email', { email, token }, this.clientHeaders()).pipe(
+      catchError(() => this.verifyEmail(email, token))
+    );
   }
 
   public resendVerificationEmail(email: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/authentication/resend-verification-email`, { email })
-      .pipe(
-        catchError(this.handleError)
-      );
+    return this.crud.secure.post('/authentication/resend-verification-email', { email })
+      .pipe(catchError(this.handleError));
   }
 
   public resendOtp(email: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/authentication/resend-otp`, { email })
-      .pipe(
-        catchError(this.handleError)
-      );
+    return this.crud.secure.post('/authentication/resend-otp', { email })
+      .pipe(catchError(this.handleError));
   }
 
   public updateCurrentUser(user: User | null): void {
@@ -311,7 +195,7 @@ export class AuthService {
   }
 
   public getCurrentUser(): any {
-    const user: User = {
+    return {
       id: localStorage.getItem('userId') || '',
       email: localStorage.getItem('email') || '',
       firstName: localStorage.getItem('firstName') || '',
@@ -321,44 +205,26 @@ export class AuthService {
       roles: this.parseRoles(localStorage.getItem('role')),
       permissions: []
     };
-
-    return user;
-  }
-
-  private parseRoles(rolesString: string | null): string[] {
-    if (!rolesString) return [];
-    try {
-      const roles = JSON.parse(rolesString);
-      return Array.isArray(roles) ? roles : [roles];
-    } catch {
-      return [rolesString];
-    }
   }
 
   public forgotPassword(email: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/authentication/forgot-password`, { email })
-      .pipe(
-        catchError(this.handleError)
-      );
+    return this.crud.secure.post('/authentication/forgot-password', { email })
+      .pipe(catchError(this.handleError));
   }
 
   public extendSession(): Observable<any> {
-    return this.http.post(`${this.baseUrl}/authentication/extend-session`, {})
-      .pipe(
-        catchError(this.handleError)
-      );
+    return this.crud.secure.post('/authentication/extend-session', {})
+      .pipe(catchError(this.handleError));
   }
 
   public refreshToken(accessToken: string, refreshToken: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/authentication/refresh-token`, {
-      accessToken,
-      refreshToken
-    }).pipe(
-      catchError(this.handleError)
-    );
+    return this.crud.secure.post('/authentication/refresh-token', { accessToken, refreshToken })
+      .pipe(catchError(this.handleError));
   }
 
   public saveTokens(accessToken: string, refreshToken: string): void {
+    this.setAccessToken(accessToken);
+    this.setRefreshToken(refreshToken);
     const userId = localStorage.getItem('userId');
     if (userId) {
       this.tokenStorageService.saveToken(accessToken, userId);
@@ -366,63 +232,39 @@ export class AuthService {
   }
 
   public getRefreshToken(): string | null {
-    // Use secure token storage first
-    const secureRefreshToken = this.secureTokenStorage.getRefreshToken();
-    if (secureRefreshToken) {
-      return secureRefreshToken;
-    }
-    
-    // Fallback to localStorage (backward compatibility)
-    return localStorage.getItem('refresh_token');
+    return this.secureTokenStorage.getRefreshToken() || localStorage.getItem('refresh_token');
   }
 
-  /**
-   * Sets access token securely in sessionStorage
-   * @param token - Access token
-   * @returns True if token was stored successfully
-   */
   public setAccessToken(token: string): boolean {
     const stored = this.secureTokenStorage.setAccessToken(token);
-    // Also save to localStorage for backward compatibility (fallback if sessionStorage fails)
     if (token) {
       try {
         localStorage.setItem('access_token', token);
-      } catch (error) {
-        // Ignore localStorage errors
+      } catch {
       }
     }
     return stored;
   }
 
-  /**
-   * Sets refresh token securely in sessionStorage
-   * @param token - Refresh token
-   * @returns True if token was stored successfully
-   */
   public setRefreshToken(token: string): boolean {
     const stored = this.secureTokenStorage.setRefreshToken(token);
-    // Also save to localStorage for backward compatibility (fallback if sessionStorage fails)
     if (token) {
       try {
         localStorage.setItem('refresh_token', token);
-      } catch (error) {
-        // Ignore localStorage errors
+      } catch {
       }
     }
     return stored;
   }
 
   public clearTokens(): void {
-    // Clear tokens from secure storage
     this.secureTokenStorage.clearTokens();
-    
     const userId = localStorage.getItem('userId');
     if (userId) {
       this.tokenStorageService.logoutUser(userId);
     }
   }
 
-  // Multi-user support methods
   public switchToUser(userId: string): boolean {
     return this.tokenStorageService.switchToUser(userId);
   }
@@ -435,44 +277,51 @@ export class AuthService {
     this.tokenStorageService.logoutUser(userId);
   }
 
-  private handleBrowserClose(): void {
-    // Clear sensitive data when browser is closed
-    sessionStorage.clear();
-    // Note: localStorage persists across browser sessions
+  private setAuthState(isLoggedIn: boolean): void {
+    this._currentUserSubject.next(isLoggedIn ? this.getCurrentUser() : null);
+    this._isAuthenticatedSubject.next(isLoggedIn);
+    this._loginChangedSubject.next(isLoggedIn);
+  }
+
+  private parseRoles(rolesString: string | null): string[] {
+    if (!rolesString) {
+      return [];
+    }
+    try {
+      const roles = JSON.parse(rolesString);
+      return Array.isArray(roles) ? roles : [roles];
+    } catch {
+      return [rolesString];
+    }
+  }
+
+  private clientHeaders(): Record<string, string> {
+    return { 'X-Client-App': environment.frontendClientKey };
   }
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An error occurred';
-    
-    
     if (error.error instanceof ErrorEvent) {
-      // Client-side error
       errorMessage = error.error.message;
+    } else if (error.status === 0) {
+      errorMessage = 'Network error: Unable to connect to the server. Please check your internet connection and try again.';
+    } else if (error.status === 400) {
+      errorMessage = error.error?.message || 'Bad request. Please check your verification link and try again.';
+    } else if (error.status === 401) {
+      errorMessage = error.error?.message || 'Authentication failed. Please check your credentials.';
+    } else if (error.status === 403) {
+      errorMessage = 'Access denied. You do not have permission to access this resource.';
+    } else if (error.status === 404) {
+      errorMessage = 'Service not found. Please contact support.';
+    } else if (error.status === 422) {
+      errorMessage = error.error?.message || 'Invalid verification data. Please check your email and token.';
+    } else if (error.status >= 500) {
+      errorMessage = error.status === 500
+        ? 'Server error. Please try again later or contact support.'
+        : 'Server error. Please try again later.';
     } else {
-      // Server-side error
-      if (error.status === 0) {
-        errorMessage = 'Network error: Unable to connect to the server. Please check your internet connection and try again.';
-      } else if (error.status === 400) {
-        errorMessage = error.error?.message || 'Bad request. Please check your verification link and try again.';
-      } else if (error.status === 401) {
-        // Extract the actual error message from the backend response
-        errorMessage = error.error?.message || 'Authentication failed. Please check your credentials.';
-      } else if (error.status === 403) {
-        errorMessage = 'Access denied. You do not have permission to access this resource.';
-      } else if (error.status === 404) {
-        errorMessage = 'Service not found. Please contact support.';
-      } else if (error.status === 422) {
-        errorMessage = error.error?.message || 'Invalid verification data. Please check your email and token.';
-      } else if (error.status === 500) {
-        errorMessage = 'Server error. Please try again later or contact support.';
-      } else if (error.status >= 500) {
-        errorMessage = 'Server error. Please try again later.';
-      } else {
-        errorMessage = error.error?.message || error.message || 'Server error';
-      }
+      errorMessage = error.error?.message || error.message || 'Server error';
     }
-    
-    // Return the original error with the proper message so the component can access error.error
     const customError = new Error(errorMessage);
     (customError as any).originalError = error;
     (customError as any).error = error.error;

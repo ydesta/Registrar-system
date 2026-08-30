@@ -101,7 +101,8 @@
           <nz-form-control>
             <input 
               nz-input 
-              [(ngModel)]="searchTerm" 
+              [(ngModel)]="pager.searchKey"
+              (ngModelChange)="pager.onSearch($event)"
               placeholder="Search by student, course, or instructor..."
               nzSize="large">
           </nz-form-control>
@@ -110,28 +111,19 @@
     </div>
   </div>
 
-  <!-- Loading State -->
-  <div class="loading-container" *ngIf="loading">
-    <nz-spin nzSize="large"></nz-spin>
-    <div class="loading-text">Loading grade change requests...</div>
-  </div>
-
-  <!-- Empty State -->
-  <div *ngIf="!loading && gradeChangeRequests.length === 0" class="empty-container">
-    <nz-result
-      nzStatus="info"
-      nzTitle="No Grade Change Requests"
-      nzSubTitle="There are no grade change requests to display at this time.">
-    </nz-result>
-  </div>
-
-  <!-- Data Table -->
-  <div class="table-container" *ngIf="!loading && gradeChangeRequests.length > 0">
+  <div class="table-container">
     <nz-table 
       #basicTable 
-      [nzData]="getFilteredRequests()"
-      [nzPageSize]="10"
+      [nzData]="gradeChangeRequests"
+      [nzPageSize]="pager.pageSize"
+      [nzPageSizeOptions]="pager.pageSizeOptions"
       [nzShowSizeChanger]="true"
+      [nzTotal]="pager.total"
+      [nzPageIndex]="pager.pageIndex"
+      (nzPageIndexChange)="pager.onPageIndexChange($event)"
+      (nzPageSizeChange)="pager.onPageSizeChange($event)"
+      [nzFrontPagination]="false"
+      [nzLoading]="pager.loading"
       [nzShowQuickJumper]="true">
       
       <thead>

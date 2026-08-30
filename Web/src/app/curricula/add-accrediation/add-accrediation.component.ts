@@ -35,7 +35,7 @@ ngOnInit(): void {
   if(this.progId!="null"){
     this.action="Edit Accredition"
     this.submit ='Updated';
-    this._crudService.getList('/CurriculumAccrediations' + '/' + this.progId).subscribe((res:any)=>{
+    this._crudService.getById('/CurriculumAccrediations', this.progId).subscribe((res:any)=>{
       this.patchValues(res.data);
     });
   }

@@ -71,28 +71,32 @@
       </nz-form-control>
     </nz-form-item>
 
-    <!-- Information Cards -->
-    <div class="info-cards">
-      <div class="info-card">
-        <div class="card-icon">
-          <i nz-icon nzType="info-circle" nzTheme="outline"></i>
-        </div>
-        <div class="card-content">
-          <h4>Important Note</h4>
-          <p>Please ensure you have selected the correct academic program and division. This selection will determine your course of study.</p>
-        </div>
-      </div>
-      
-      <div class="info-card">
-        <div class="card-icon">
-          <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
-        </div>
-        <div class="card-content">
-          <h4>Processing Time</h4>
-          <p>Your request will be reviewed within 2-3 business days. You'll receive a notification once processed.</p>
-        </div>
-      </div>
-    </div>
+    <nz-form-item>
+      <nz-form-control [nzErrorTip]="applicantYearErrorTpl">
+        <nz-select
+          formControlName="applicantYear"
+          placeholder=" "
+          id="applicantYear"
+          class="select-with-floating-label"
+          nzAllowClear="true">
+          <nz-option
+            *ngFor="let item of applicantYearOptions"
+            [nzValue]="item.Id"
+            [nzLabel]="item.Description">
+          </nz-option>
+        </nz-select>
+        <label for="applicantYear" class="floating-label">
+          <i nz-icon nzType="user" nzTheme="outline"></i>
+          Applicant Type <span class="required">*</span>
+        </label>
+        <ng-template #applicantYearErrorTpl let-control>
+          <div class="error-message" *ngIf="control.hasError('required')">
+            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+            Applicant Type is required
+          </div>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
 
     <!-- Form Actions -->
     <div class="form-actions">

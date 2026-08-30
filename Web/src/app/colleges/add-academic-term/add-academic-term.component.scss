@@ -551,3 +551,27 @@
 ::ng-deep .ant-spin-nested-loading {
   min-height: 200px;
 }
+
+.registration-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  min-height: 52px;
+
+  .registration-toggle-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #262626;
+  }
+
+  .registration-toggle-control {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+}

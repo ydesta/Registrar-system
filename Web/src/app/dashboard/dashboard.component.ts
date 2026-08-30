@@ -1,45 +1,31 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
-export class DashboardComponent implements OnInit, OnDestroy {
-  public isUserAdmin: boolean = false;
-  public isUserInstructor: boolean = false;
-  public isUserStudent: boolean = false;
-  public isUserApplicant: boolean = false;
-  public isUserReviewer: boolean = false;
-  public isUserAuthenticated: boolean = false;
-  public isUserApprovedApplicant: boolean = false;
-  public isUserAlreadyApplied: boolean = false;
-  public isUserAcademicDirector: boolean = false;
-  public isUserReception: boolean = false;
-  constructor(private _http: HttpClient) {
-    this.getLoggedRole();
-  }
+export class DashboardComponent {
+  isUserAdmin = false;
+  isUserInstructor = false;
+  isUserStudent = false;
+  isUserApplicant = false;
+  isUserReviewer = false;
+  isUserApprovedApplicant = false;
+  isUserAcademicDirector = false;
+  isUserReception = false;
 
-  ngOnInit(): void {
-
-  }
-
-  ngOnDestroy(): void {
-  }
-
-  getLoggedRole() {
-    const role = (localStorage.getItem('role') || '').replace(/"/g, '');
-    const userType = (localStorage.getItem('userType') || '').replace(/"/g, '');
-    const effectiveRole = userType || role;
-    this.isUserAdmin = effectiveRole === 'Administrator' || effectiveRole === 'Admin' || effectiveRole === 'Super Admin';
-    this.isUserInstructor = effectiveRole === 'Instructor';
-    this.isUserStudent = effectiveRole === 'Student';
-    this.isUserReviewer = effectiveRole === 'Reviewer';
-    this.isUserApplicant = effectiveRole === 'Applicant';
-    this.isUserApprovedApplicant = effectiveRole === 'ApprovedApplicant';
-    this.isUserAcademicDirector = effectiveRole === 'Academic Director';
-    this.isUserReception = effectiveRole === 'Reception';
-
+  constructor(private authService: AuthService) {
+    this.isUserAdmin = this.authService.hasRole('Administrator')
+      || this.authService.hasRole('Admin')
+      || this.authService.hasRole('Super Admin');
+    this.isUserInstructor = this.authService.hasRole('Instructor');
+    this.isUserStudent = this.authService.hasRole('Student');
+    this.isUserReviewer = this.authService.hasRole('Reviewer');
+    this.isUserApplicant = this.authService.hasRole('Applicant');
+    this.isUserApprovedApplicant = this.authService.hasRole('ApprovedApplicant');
+    this.isUserAcademicDirector = this.authService.hasRole('Academic Director');
+    this.isUserReception = this.authService.hasRole('Reception');
   }
 }

@@ -90,10 +90,7 @@ export class InstructorSectionFormComponent implements OnInit {
         const batch = this.listOfBatch.find(b => b.Id === this.batchId.value) ||
           this.listOfBatch.find(b => b.id === this.batchId.value) ||
           this.listOfBatch.find(b => b.batchId === this.batchId.value);
-        console.log("%%    batch    ", batch);
         const batchCode = batch?.batchCode || batch?.code || '';
-        
-        console.log("%%%  Mukera     ", this.academicTerm.value, this.year.value, this.batchId.value, sectionType);
         this.getListOfCourse(batchCode);
       } else {
         // Clear courses and sections if section type is not selected
@@ -229,12 +226,9 @@ export class InstructorSectionFormComponent implements OnInit {
       });
   }
   getListOfCourse(batchCode: string) {
-    console.log("&&&   ff      ", batchCode);
-    // Validate all required parameters before making API call
     if (!this.batchId.value || !this.academicTerm.value || !this.year.value || !batchCode || batchCode.trim() === '') {
       return;
     }
-    console.log("$$   333   ", batchCode, this.academicTerm.value, this.year.value, this.sectionType.value);
     this.loadingCourses = true;
     this.registeredCourses = [];
 
@@ -463,6 +457,6 @@ export class InstructorSectionFormComponent implements OnInit {
 
   // Get submit button text
   getSubmitButtonText(): string {
-    return this.isEditMode ? 'Update Instructor Section' : 'Create Instructor Section';
+    return 'Save';
   }
 }

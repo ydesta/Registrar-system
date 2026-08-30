@@ -1,0 +1,109 @@
+.limit-form {
+  padding: 4px 4px 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16px;
+  row-gap: 16px;
+  align-items: start;
+}
+
+.form-field {
+  min-width: 0;
+
+  &.full {
+    grid-column: 1 / -1;
+  }
+}
+
+::ng-deep {
+  nz-form-item {
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  nz-form-label {
+    padding: 0 0 6px;
+    line-height: 22px;
+    font-weight: 600;
+    color: #374151;
+    font-size: 13px;
+
+    label {
+      height: auto;
+    }
+  }
+
+  nz-form-control {
+    min-height: 40px;
+  }
+
+  .ant-select,
+  .ant-input-number {
+    width: 100%;
+  }
+
+  .ant-select-selector,
+  .ant-input-number,
+  .ant-input {
+    min-height: 40px !important;
+    border-radius: 8px !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .ant-select-selector {
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 11px !important;
+  }
+
+  .ant-input-number-input {
+    height: 38px;
+  }
+
+  textarea.ant-input {
+    min-height: 88px !important;
+    padding: 10px 12px !important;
+    line-height: 1.5;
+    resize: vertical;
+  }
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+}
+
+.switch-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+
+  button {
+    min-width: 96px;
+    height: 38px;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 576px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

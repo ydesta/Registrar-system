@@ -22,6 +22,10 @@ import { SharedModule } from '../shared-module/shared/shared.module';
 import { NgxPrintModule } from 'ngx-print';
 import { CourseOfferingInstructorAssignmentComponent } from './course-offering-instructor-assignment/course-offering-instructor-assignment.component';
 import { NzModalRef } from 'ng-zorro-antd/modal';
+import { AdmissionLookupComponent } from './admission-lookup/admission-lookup.component';
+import { AddAdmissionLookupComponent } from './add-admission-lookup/add-admission-lookup.component';
+import { CgpaCreditHourLimitComponent } from './cgpa-credit-hour-limit/cgpa-credit-hour-limit.component';
+import { AddCgpaCreditHourLimitComponent } from './add-cgpa-credit-hour-limit/add-cgpa-credit-hour-limit.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +45,11 @@ import { NzModalRef } from 'ng-zorro-antd/modal';
     AddAcademicStatusComponent,
     AddEntryComponent,
     EntryComponent,
-    CourseOfferingInstructorAssignmentComponent
+    CourseOfferingInstructorAssignmentComponent,
+    AdmissionLookupComponent,
+    AddAdmissionLookupComponent,
+    CgpaCreditHourLimitComponent,
+    AddCgpaCreditHourLimitComponent
   ],
   imports: [
     CommonModule,

@@ -1,14 +1,11 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { Subject, filter, takeUntil } from 'rxjs';
 import { AuthService } from './services/auth.service';
 import { SharedDataService } from './services/shared-data.service';
 import { CrudService } from './services/crud.service';
 import { BatchTermService } from './colleges/services/batch-term.service';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
 import { SessionManagementService } from './services/session-management.service';
-import { Subscription } from 'rxjs';
-import { environment } from '../environments/environment';
-
 
 @Component({
   selector: 'app-root',
@@ -16,7 +13,6 @@ import { environment } from '../environments/environment';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
-  isDarkTheme = true;
   isCollapsed = true;
   isLogin = false;
   isAuthRoute = false;
@@ -24,30 +20,47 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   currentDate = Date();
   shortUserName = 'Welcome';
   userType = '';
-  userAvatarUrl: string | null = null;
   userEmail: string | null = null;
-  public isUserAdmin: boolean = false;
-  public isUserInstructor: boolean = false;
-  public isUserStudent: boolean = false;
-  public isUserApplicant: boolean = false;
-  public isUserReviewer: boolean = false;
-  public isUserAuthenticated: boolean = false;
-  public isUserApprovedApplicant: boolean = false;
-  public isUserAlreadyApplied: boolean = false;
-  public isUserFinance: boolean = false;
-  public isUserAcademicDirector: boolean = false;
-  public isUserReception: boolean = false;
-  public isUserSectionReportViewer: boolean = false;
-  public isUserDepartmentHead: boolean = false;
-  nextAcademicTerm: any;
-  nextTerm = '';
-  nextTermYear: number;
-  academicTermId = 0;
-  public currentUser: any = null;
+  isUserAdmin = false;
+  isUserInstructor = false;
+  isUserStudent = false;
+  isUserApplicant = false;
+  isUserReviewer = false;
+  isUserAuthenticated = false;
+  isUserApprovedApplicant = false;
+  isUserAlreadyApplied = false;
+  isUserFinance = false;
+  isUserAcademicDirector = false;
+  isUserReception = false;
+  isUserSectionReportViewer = false;
+  isUserDepartmentHead = false;
+  currentUser: any = null;
+
   private redirectInProgress = false;
   private initialLoadComplete = false;
-
-  private sessionSubscription: Subscription = new Subscription();
+  private readonly destroy$ = new Subject<void>();
+  private readonly authRoutes = [
+    '/accounts/login',
+    '/accounts/register',
+    '/accounts/forgot-password',
+    '/accounts/reset-password',
+    '/accounts/verify-email',
+    '/accounts/change-password',
+    '/forgot-password',
+    '/reset-password'
+  ];
+  private readonly reviewerRoutes = [
+    '/student-application/applicant-request-list',
+    '/student-application/applicant-request-detail',
+    '/student-application/applicant-incomplete'
+  ];
+  private readonly storageListener = (event: StorageEvent) => {
+    if (event.key === 'isLogin') {
+      this.initializeUserData();
+      this.redirectApplicantToAdmissionRequest();
+      this.cdRef.detectChanges();
+    }
+  };
 
   constructor(
     private _authService: AuthService,
@@ -56,45 +69,24 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     private cdRef: ChangeDetectorRef,
     private batchTermService: BatchTermService,
     private _router: Router,
-    private sessionManagementService: SessionManagementService,
-
-  ) {
-  }
+    private sessionManagementService: SessionManagementService
+  ) {}
 
   ngOnInit(): void {
     this.initializeUserData();
-    
-    // Subscribe to authentication state changes
     this._authService.isAuthenticated().then(isAuth => {
-      this.isUserAuthenticated = isAuth;
-      this.currentUser = this._authService.getCurrentUser();
-      this.isUserAdmin = this._authService.hasRole('Administrator') || this._authService.hasRole('Admin');
-      this.initializeUserData();
-      
-      // Only make API calls if user is authenticated
+      this.applyAuth(isAuth);
       if (isAuth) {
         this.getNextAcademicTerm();
       }
-      
-      this.cdRef.detectChanges();
-    }).catch(() => {
-      // If authentication check fails, clear cache and retry
-      this.handleAuthFailure();
+    }).catch(() => this.handleAuthFailure());
+
+    this._authService.currentUser$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: user => this.applyAuth(!!user, user),
+      error: () => this.handleAuthFailure()
     });
 
-    // Subscribe to current user changes
-    this._authService.currentUser$.subscribe(user => {
-      this.isUserAuthenticated = !!user;
-      this.currentUser = user;
-      this.isUserAdmin = this._authService.hasRole('Administrator') || this._authService.hasRole('Admin');
-      this.initializeUserData();
-      this.cdRef.detectChanges();
-    }, () => {
-      this.handleAuthFailure();
-    });
-
-    // Subscribe to authentication state changes
-    this._authService.isAuthenticated$.subscribe(isAuth => {
+    this._authService.isAuthenticated$.pipe(takeUntil(this.destroy$)).subscribe(isAuth => {
       this.isUserAuthenticated = isAuth;
       if (isAuth) {
         this.initializeUserData();
@@ -104,88 +96,36 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cdRef.detectChanges();
     });
 
-    // Monitor route changes
     this._router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: NavigationEnd) => {
-      // Mark initial load as complete after first route change
-      if (!this.initialLoadComplete) {
-        this.initialLoadComplete = true;
-      }
-      
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.initialLoadComplete = true;
       const shouldBeLoggedIn = localStorage.getItem('isLogin') === 'true';
       if (this.isLogin !== shouldBeLoggedIn) {
         this.isLogin = shouldBeLoggedIn;
         if (shouldBeLoggedIn) {
           this.initializeUserData();
         }
-        this.cdRef.detectChanges();
       }
       this.checkIfAuthRoute();
-      this.cdRef.detectChanges(); // Trigger change detection after route check
-      if (this.isUserApplicant || this.userType === 'Applicant') {
-        this.redirectApplicantToAdmissionRequest();
-      }
+      this.redirectApplicantToAdmissionRequest();
+      this.cdRef.detectChanges();
     });
 
-    // Handle login success events
-    this.sharedDataService.share.subscribe((data: any) => {
-      if (data && data.type === 'LOGIN_SUCCESS') {
-        this.isCollapsed = false; // Open the sidebar
-        if (data.user) {
-          if (data.user.id) localStorage.setItem('user_id', data.user.id);
-          if (data.user.firstName) localStorage.setItem('firstName', data.user.firstName);
-          if (data.user.lastName) localStorage.setItem('lastName', data.user.lastName);
-          if (data.user.email) localStorage.setItem('email', data.user.email);
-          if (data.user.role) {
-            if (Array.isArray(data.user.role)) {
-              localStorage.setItem('role', JSON.stringify(data.user.role));
-              localStorage.setItem('userType', data.user.role[0] || '');
-            } else {
-              localStorage.setItem('role', data.user.role);
-              localStorage.setItem('userType', data.user.role);
-            }
-          }
-        }
-        this.initializeUserData();
-        if (this.isUserApplicant || this.userType === 'Applicant') {
-          this.redirectApplicantToAdmissionRequest();
-        }
-        
-        this.cdRef.detectChanges();
+    this.sharedDataService.share.pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
+      if (data?.type !== 'LOGIN_SUCCESS') {
+        return;
       }
+      this.isCollapsed = false;
+      this.persistLoginUser(data.user);
+      this.initializeUserData();
+      this.redirectApplicantToAdmissionRequest();
+      this.cdRef.detectChanges();
     });
 
-    // Monitor localStorage changes
-    window.addEventListener('storage', (event) => {
-      if (event.key === 'isLogin') {
-        this.initializeUserData();
-        if (this.isUserApplicant || this.userType === 'Applicant') {
-          this.redirectApplicantToAdmissionRequest();
-        }
-        
-        this.cdRef.detectChanges();
-      }
-    });
-
+    window.addEventListener('storage', this.storageListener);
     this.checkIfAuthRoute();
-  }
-
-  private checkIfAuthRoute() {
-    const currentUrl = this._router.url;
-    
-    this.isAuthRoute = currentUrl.includes('/accounts/login') ||
-      currentUrl.includes('/accounts/register') ||
-      currentUrl.includes('/accounts/forgot-password') ||
-      currentUrl.includes('/accounts/reset-password') ||
-      currentUrl.includes('/accounts/verify-email') ||
-      currentUrl.includes('/accounts/change-password') ||
-      currentUrl.includes('/forgot-password') ||
-      currentUrl.includes('/reset-password');
-    this.isPortalRoute = currentUrl.includes('/portal');
-    
-    // Trigger change detection to ensure UI updates immediately
-    this.cdRef.detectChanges();
   }
 
   ngAfterViewInit(): void {
@@ -193,120 +133,127 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.sessionSubscription.unsubscribe();
+    window.removeEventListener('storage', this.storageListener);
+    this.destroy$.next();
+    this.destroy$.complete();
     this.sessionManagementService.destroy();
   }
 
-  getNextAcademicTerm() {
-    // Only make API call if user is authenticated
-    // Use AuthService.getToken() which checks both sessionStorage and localStorage
-    const isAuth = localStorage.getItem('isLogin') === 'true' && this._authService.getToken();
-    if (!isAuth) {
+  login = () => {
+    this._router.navigate(['/accounts/login']);
+  };
+
+  logout = () => {
+    this.resetUserData();
+    this._authService.logout();
+  };
+
+  goToHome = () => {
+    this._router.navigate(['/portal']);
+  };
+
+  goToProgram = () => {
+    this._router.navigate(['/acadamic-programme']);
+  };
+
+  changePassword = () => {
+    this._router.navigate(['/accounts/change-password']);
+  };
+
+  goToProfile = () => {
+    const userId = this.currentUser?.id || this.storedUserId();
+    this._router.navigate(userId ? ['/user-management/user', userId] : ['/user-management/users']);
+  };
+
+  get currentUrl(): string {
+    return this._router.url;
+  }
+
+  private applyAuth(isAuth: boolean, user: any = this._authService.getCurrentUser()): void {
+    this.isUserAuthenticated = isAuth;
+    this.currentUser = user;
+    this.isUserAdmin = this._authService.hasRole('Administrator') || this._authService.hasRole('Admin');
+    this.initializeUserData();
+    this.cdRef.detectChanges();
+  }
+
+  private persistLoginUser(user: any): void {
+    if (!user) {
       return;
     }
-    
+    if (user.id) {
+      localStorage.setItem('userId', user.id);
+      localStorage.setItem('user_id', user.id);
+    }
+    if (user.firstName) {
+      localStorage.setItem('firstName', user.firstName);
+    }
+    if (user.lastName) {
+      localStorage.setItem('lastName', user.lastName);
+    }
+    if (user.email) {
+      localStorage.setItem('email', user.email);
+    }
+    if (!user.role) {
+      return;
+    }
+    if (Array.isArray(user.role)) {
+      localStorage.setItem('role', JSON.stringify(user.role));
+      localStorage.setItem('userType', user.role[0] || '');
+      return;
+    }
+    localStorage.setItem('role', user.role);
+    localStorage.setItem('userType', user.role);
+  }
+
+  private checkIfAuthRoute(): void {
+    const currentUrl = this._router.url;
+    this.isAuthRoute = this.authRoutes.some(route => currentUrl.includes(route));
+    this.isPortalRoute = currentUrl.includes('/portal');
+  }
+
+  private getNextAcademicTerm(): void {
+    if (localStorage.getItem('isLogin') !== 'true' || !this._authService.getToken()) {
+      return;
+    }
     this.batchTermService.getNextAcademicTerm().subscribe({
-      next: (res: any) => {
-        sessionStorage.setItem('nextAcademicTerm', JSON.stringify(res));
-      },
-      error: (error) => {
-        // Silently handle errors - don't show notifications for unauthenticated requests
-      }
+      next: (res: any) => sessionStorage.setItem('nextAcademicTerm', JSON.stringify(res)),
+      error: () => {}
     });
   }
 
-  private initializeUserData() {
+  private initializeUserData(): void {
     try {
-      if (localStorage.getItem('isLogin') === 'true') {
-        this.isLogin = true;
-        this.isCollapsed = false;
-        const firstName = localStorage.getItem('firstName');
-        const lastName = localStorage.getItem('lastName');
-        this.userEmail = localStorage.getItem('email');
-        const userType = localStorage.getItem('userType');
-        const role = localStorage.getItem('role');
-                
-        if (firstName || lastName) {
-          const names = [firstName, lastName].filter(Boolean);
-          this.shortUserName = names.join(' ');
-        } else if (this.userEmail) {
-          this.shortUserName = this.userEmail;
-        } else {
-          this.shortUserName = 'Welcome';
-        }
-        if (userType) {
-          this.setUserRole(userType);
-        } else if (role) {
-          try {
-            const roles = JSON.parse(role);
-            if (Array.isArray(roles) && roles.length > 0) {
-              this.setUserRole(roles[0]);
-            } else {
-              this.setUserRole(role);
-            }
-          } catch {
-            this.setUserRole(role);
-          }
-        }
-        if (this.isUserApplicant || userType === 'Applicant' || role === 'Applicant') {
-          this.redirectApplicantToAdmissionRequest();
-        }
-        if (this.isUserReviewer || userType === 'Reviewer' || role === 'Reviewer') {
-          // Add a small delay to ensure route is fully loaded
-          setTimeout(() => {
-            this.redirectReviewerToApplicantRequestList();
-          }, 100);
-        }
-        this.getUserDataFromApi();
-      } else {
+      if (localStorage.getItem('isLogin') !== 'true') {
         this.resetUserData();
+        return;
       }
-    } catch (ex) {
+      this.isLogin = true;
+      this.isCollapsed = false;
+      const firstName = localStorage.getItem('firstName');
+      const lastName = localStorage.getItem('lastName');
+      const userType = localStorage.getItem('userType');
+      const role = localStorage.getItem('role');
+      this.userEmail = localStorage.getItem('email');
+      this.shortUserName = [firstName, lastName].filter(Boolean).join(' ') || this.userEmail || 'Welcome';
+      this.userType = userType || this.firstRole(role) || '';
+      if (this.userType) {
+        this.setUserRole(this.userType);
+      } else if (role) {
+        this.setUserRole(this.firstRole(role) || role);
+      }
+      if (this.isApplicant(userType, role)) {
+        this.redirectApplicantToAdmissionRequest();
+      }
+      if (this.isReviewer(userType, role)) {
+        setTimeout(() => this.redirectReviewerToApplicantRequestList(), 100);
+      }
+    } catch {
       this.resetUserData();
     }
   }
 
-  private getUserDataFromApi() {
-    const firstName = localStorage.getItem('firstName');
-    const lastName = localStorage.getItem('lastName');
-    const email = localStorage.getItem('email');
-    const userType = localStorage.getItem('userType');
-    const role = localStorage.getItem('role');
-    this.shortUserName = [firstName, lastName].filter(Boolean).join(' ') || email || 'Welcome';
-    this.userEmail = email;
-    this.userType = userType || role || '';
-    if (this.userType) {
-      this.setUserRole(this.userType);
-    } else if (role) {
-      try {
-        const roles = JSON.parse(role);
-        if (Array.isArray(roles) && roles.length > 0) {
-          this.setUserRole(roles[0]);
-        } else {
-          this.setUserRole(role);
-        }
-      } catch {
-        this.setUserRole(role);
-      }
-    }
-
-    // Check if user is applicant and redirect if needed
-    if (this.isUserApplicant || this.userType === 'Applicant' || role === 'Applicant') {
-      this.redirectApplicantToAdmissionRequest();
-    }
-    
-    
-    if (this.isUserReviewer || this.userType === 'Reviewer' || role === 'Reviewer') {
-      // Add a small delay to ensure route is fully loaded
-      setTimeout(() => {
-        this.redirectReviewerToApplicantRequestList();
-      }, 100);
-    }
-
-    this.cdRef.detectChanges();
-  }
-
-  private setUserRole(role: string) {
+  private setUserRole(role: string): void {
     const cleanRole = role.replace(/"/g, '').trim();
     this.isUserAdmin = false;
     this.isUserInstructor = false;
@@ -314,68 +261,62 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isUserReviewer = false;
     this.isUserApplicant = false;
     this.isUserApprovedApplicant = false;
+    this.isUserFinance = false;
+    this.isUserReception = false;
+    this.isUserAcademicDirector = false;
     this.isUserSectionReportViewer = false;
     this.isUserDepartmentHead = false;
-    
     switch (cleanRole) {
       case 'Super Admin':
       case 'Admin':
       case 'Administrator':
         this.isUserAdmin = true;
-        this.userType = cleanRole;
         break;
       case 'Instructor':
         this.isUserInstructor = true;
-        this.userType = cleanRole;
         break;
       case 'Student':
         this.isUserStudent = true;
-        this.userType = cleanRole;
         break;
       case 'Reviewer':
         this.isUserReviewer = true;
-        this.userType = cleanRole;
-       // this.redirectReviewerToApplicantRequestList();
         break;
       case 'Applicant':
         this.checkApplicantStatus();
         this.isUserApplicant = true;
-        this.userType = cleanRole;
         this.redirectApplicantToAdmissionRequest();
         break;
       case 'ApprovedApplicant':
         this.isUserApprovedApplicant = true;
         this.userType = 'Student';
-        break;
+        return;
       case 'Finance':
         this.isUserFinance = true;
-        this.userType = cleanRole;
         break;
       case 'Reception':
         this.isUserReception = true;
-        this.userType = cleanRole;
         break;
       case 'Academic Director':
         this.isUserAcademicDirector = true;
-        this.userType = cleanRole;
         break;
       case 'Section Report Viewer':
         this.isUserSectionReportViewer = true;
-        this.userType = cleanRole;
         break;
       case 'Department Head':
         this.isUserDepartmentHead = true;
-        this.userType = cleanRole;
         break;
       default:
-        break;
+        return;
     }
+    this.userType = cleanRole;
   }
 
-  private resetUserData() {
+  private resetUserData(): void {
     this.isLogin = false;
     this.shortUserName = 'Welcome';
     this.userType = '';
+    this.userEmail = null;
+    this.currentUser = null;
     this.isUserAdmin = false;
     this.isUserInstructor = false;
     this.isUserStudent = false;
@@ -384,118 +325,92 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isUserApprovedApplicant = false;
     this.isUserAlreadyApplied = false;
     this.isUserFinance = false;
+    this.isUserReception = false;
+    this.isUserAcademicDirector = false;
     this.isUserSectionReportViewer = false;
     this.isUserDepartmentHead = false;
+    this.isUserAuthenticated = false;
   }
 
-  private checkApplicantStatus() {
-    const userId = localStorage.getItem('user_id');
-    if (userId) {
-      this._crudService
-        .getList('/Applicants/ByApplicantUserId/' + userId)
-        .subscribe({
-          next: (res: any) => {
-            if (res.data) {
-              this.isUserAlreadyApplied = true;
-            } else {
-              this.isUserApplicant = true;
-            }
-            this.cdRef.detectChanges(); 
-          },
-          error: (error) => {
-            this.isUserApplicant = true;
-            this.cdRef.detectChanges(); 
-          }
-        });
-    }
-  }
-
-  private redirectApplicantToAdmissionRequest() {
-    const currentUrl = this._router.url;
-    const shouldRedirect = !currentUrl.includes('/student-application') && 
-                          !currentUrl.includes('/accounts') &&
-                          !currentUrl.includes('/portal');
-    
-    if (shouldRedirect) {
-      this._router.navigate(['/student-application/admission-request']);
-    }
-  }
-
-  private redirectReviewerToApplicantRequestList() {
-    // Prevent multiple redirects
-    if (this.redirectInProgress) {
+  private checkApplicantStatus(): void {
+    const userId = this.storedUserId();
+    if (!userId) {
       return;
     }
+    this._crudService.getList('/Applicants/ByApplicantUserId/' + userId).subscribe({
+      next: (res: any) => {
+        this.isUserAlreadyApplied = !!res.data;
+        this.isUserApplicant = !res.data;
+        this.cdRef.detectChanges();
+      },
+      error: () => {
+        this.isUserApplicant = true;
+        this.cdRef.detectChanges();
+      }
+    });
+  }
 
-    // Don't redirect during initial page load
-    if (!this.initialLoadComplete) {
+  private redirectApplicantToAdmissionRequest(): void {
+    if (!this.isUserApplicant && this.userType !== 'Applicant') {
       return;
     }
-
     const currentUrl = this._router.url;
-    
-    // Don't redirect if user is already on a reviewer page
-    const isOnReviewerPage = currentUrl.includes('/student-application/applicant-request-list') || 
-                            currentUrl.includes('/student-application/applicant-request-detail') ||
-                            currentUrl.includes('/student-application/applicant-incomplete');
-    
-    // Also check if we're on the root or any other non-reviewer page
-    const isOnRootOrOtherPage = currentUrl === '/' || 
-                               currentUrl === '/student-application' ||
-                               (!currentUrl.includes('/student-application/') && !currentUrl.includes('/accounts') && !currentUrl.includes('/portal'));
-    
-    const shouldRedirect = !isOnReviewerPage && isOnRootOrOtherPage;
-    
-    if (shouldRedirect) {
-      this.redirectInProgress = true;
-      this._router.navigate(['/student-application/applicant-request-list']).then(() => {
-        this.redirectInProgress = false;
-      });
+    if (
+      currentUrl.includes('/student-application') ||
+      currentUrl.includes('/accounts') ||
+      currentUrl.includes('/portal')
+    ) {
+      return;
     }
+    this._router.navigate(['/student-application/admission-request']);
   }
 
-  public login = () => {
-    this._router.navigate(['/accounts/login']);
-  };
-
-  public logout = () => {
-    this.resetUserData();
-    localStorage.clear();
-    this._authService.logout();
-  };
-
-  public goToHome = () => {
-    this._router.navigate(['/portal']);
-  };
-
-  public goToProgram = () => {
-    this._router.navigate(['/acadamic-programme']);
-  };
-
-  public changePassword = () => {
-    this._router.navigate(['/accounts/change-password']);
-  };
-
-  public goToProfile = () => {
-    const userId = this.currentUser?.id || localStorage.getItem('user_id');
-    if (userId) {
-      this._router.navigate(['/user-management/user', userId]);
-    } else {
-      this._router.navigate(['/user-management/users']);
+  private redirectReviewerToApplicantRequestList(): void {
+    if (this.redirectInProgress || !this.initialLoadComplete) {
+      return;
     }
-  };
-  onMenuClick(route: string) {
+    const currentUrl = this._router.url;
+    if (this.reviewerRoutes.some(route => currentUrl.includes(route))) {
+      return;
+    }
+    const isOnRootOrOtherPage = currentUrl === '/'
+      || currentUrl === '/student-application'
+      || (!currentUrl.includes('/student-application/') && !currentUrl.includes('/accounts') && !currentUrl.includes('/portal'));
+    if (!isOnRootOrOtherPage) {
+      return;
+    }
+    this.redirectInProgress = true;
+    this._router.navigate(['/student-application/applicant-request-list']).then(() => {
+      this.redirectInProgress = false;
+    });
   }
-
-  // Public getter for current URL
-  get currentUrl(): string {
-    return this._router.url;
-  }
-
-
 
   private handleAuthFailure(): void {
-    this.initializeUserData(); // Re-initialize user data to force a fresh login attempt
+    this.initializeUserData();
     this.cdRef.detectChanges();
+  }
+
+  private storedUserId(): string | null {
+    return localStorage.getItem('userId') || localStorage.getItem('user_id');
+  }
+
+  private firstRole(role: string | null): string {
+    if (!role) {
+      return '';
+    }
+    try {
+      const roles = JSON.parse(role);
+      return Array.isArray(roles) ? (roles[0] || '') : role;
+    } catch {
+      return role;
+    }
+  }
+
+  private isApplicant(userType: string | null, role: string | null): boolean {
+    return this.isUserApplicant || userType === 'Applicant' || role === 'Applicant';
+  }
+
+  private isReviewer(userType: string | null, role: string | null): boolean {
+    return this.isUserReviewer || userType === 'Reviewer' || role === 'Reviewer';
   }
 }

@@ -1,0 +1,129 @@
+<div class="content-container">
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h3 class="title-text">Admission Lookup</h3>
+        <p class="subtitle-text">Map program, division, and applicant year to batch codes</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-section">
+          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+            <input
+              type="text"
+              nz-input
+              placeholder="Search by program, division, or batch..."
+              [(ngModel)]="pager.searchKey"
+              (ngModelChange)="pager.onSearch($event)"
+            />
+          </nz-input-group>
+          <ng-template #suffixIconButton>
+            <button nz-button nzType="primary" class="search-btn" nzSearch>
+              <i nz-icon nzType="search"></i>
+            </button>
+          </ng-template>
+        </div>
+        <button class="add-btn" nz-button nzType="primary" routerLink="../add-admission-lookup/null">
+          <i nz-icon nzType="plus" nzTheme="outline"></i>
+          <span>Add Lookup</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <nz-table
+      #basicTable
+      [nzData]="lookups"
+      nzBordered
+      [nzPageSize]="pager.pageSize"
+      [nzPageSizeOptions]="pager.pageSizeOptions"
+      [nzShowSizeChanger]="true"
+      [nzTotal]="pager.total"
+      [nzPageIndex]="pager.pageIndex"
+      (nzPageIndexChange)="pager.onPageIndexChange($event)"
+      (nzPageSizeChange)="pager.onPageSizeChange($event)"
+      [nzFrontPagination]="false"
+      [nzLoading]="pager.loading"
+      [nzNoResult]="emptyTpl"
+      class="activities-table"
+    >
+      <thead>
+        <tr>
+          <th class="sn-column">S/N</th>
+          <th>Term</th>
+          <th>Year</th>
+          <th>Academic Program</th>
+          <th>Division</th>
+          <th>Applicant Type</th>
+          <th>Batch Code</th>
+          <th>Active</th>
+          <th>Remark</th>
+          <th class="action-column">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of basicTable.data; let i = index">
+          <td class="sn-column">
+            <span class="sn-badge">{{ pager.serial(i) }}</span>
+          </td>
+          <td>{{ getTermLabel(data.term) }}</td>
+          <td>{{ data.year }}</td>
+          <td>{{ getProgramTitle(data.acadamicProgrammeId) }}</td>
+          <td>{{ getDivisionLabel(data.division) }}</td>
+          <td>{{ getApplicantYearLabel(data.applicantYear) }}</td>
+          <td>{{ data.batchCode }}</td>
+          <td>
+            <nz-tag [nzColor]="data.isActive ? 'green' : 'default'">
+              {{ data.isActive ? 'Active' : 'Inactive' }}
+            </nz-tag>
+          </td>
+          <td>{{ data.remark || '-' }}</td>
+          <td class="action-column">
+            <button
+              nz-button
+              nz-dropdown
+              [nzDropdownMenu]="menu"
+              nzPlacement="bottomLeft"
+              class="action-button"
+            >
+              <i nz-icon nzType="more" nzTheme="outline"></i>
+            </button>
+            <nz-dropdown-menu #menu="nzDropdownMenu">
+              <ul nz-menu>
+                <li>
+                  <button
+                    nz-button
+                    nzType="default"
+                    class="action-item edit"
+                    [routerLink]="['../add-admission-lookup', data.id]"
+                  >
+                    <i nz-icon nzType="edit" nzTheme="fill"></i>
+                    <span>Edit</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    nz-button
+                    nzDanger
+                    nzType="default"
+                    class="action-item delete"
+                    (click)="showDeleteConfirm(data.id)"
+                  >
+                    <i nz-icon nzType="delete" nzTheme="fill"></i>
+                    <span>Delete</span>
+                  </button>
+                </li>
+              </ul>
+            </nz-dropdown-menu>
+          </td>
+        </tr>
+      </tbody>
+      <ng-template #emptyTpl>
+        <div class="no-data">
+          <i nz-icon nzType="database" nzTheme="outline"></i>
+          <p>No admission lookup records available</p>
+        </div>
+      </ng-template>
+    </nz-table>
+  </div>
+</div>

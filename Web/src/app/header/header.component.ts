@@ -1,16 +1,18 @@
-import { AuthService } from '../services/auth.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
 })
-export class HeaderComponent implements OnInit {
-  public isUserAuthenticated: boolean = false;
-  public currentUser: any = null;
-  public isUserApplicant: boolean = false;
+export class HeaderComponent implements OnInit, OnDestroy {
+  isUserAuthenticated = false;
+  currentUser: any = null;
+  isUserApplicant = false;
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private _authService: AuthService,
@@ -18,30 +20,29 @@ export class HeaderComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Check authentication status
-    this._authService.isAuthenticated().then(isAuth => {
-      this.isUserAuthenticated = isAuth;
-      this.currentUser = this._authService.getCurrentUser();
-      
-      // Check if user is applicant
-      this.isUserApplicant = this._authService.hasRole('Applicant') || 
-                            localStorage.getItem('role') === '"Applicant"';
-    });
-    
-    // Subscribe to authentication changes
-    this._authService.currentUser$.subscribe(user => {
-      this.isUserAuthenticated = !!user;
-      this.currentUser = user;
-      this.isUserApplicant = this._authService.hasRole('Applicant') || 
-                            localStorage.getItem('role') === '"Applicant"';
+    this._authService.isAuthenticated().then(isAuth => this.applyAuth(isAuth));
+    this._authService.currentUser$.pipe(takeUntil(this.destroy$)).subscribe(user => {
+      this.applyAuth(!!user, user);
     });
   }
 
-  public login = () => {
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  login = () => {
     this._router.navigate(['/accounts/login']);
   };
 
-  public logout = () => {
+  logout = () => {
     this._authService.logout();
   };
+
+  private applyAuth(isAuth: boolean, user: any = this._authService.getCurrentUser()): void {
+    this.isUserAuthenticated = isAuth;
+    this.currentUser = user;
+    this.isUserApplicant = this._authService.hasRole('Applicant')
+      || localStorage.getItem('role') === '"Applicant"';
+  }
 }

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using SecureAuth.APPLICATION.DTOs.Authentication;
+using SecureAuth.APPLICATION.Helpers;
 using SecureAuth.APPLICATION.Interfaces;
 using SecureAuth.APPLICATION.Services;
 using SecureAuth.DOMAIN.Models;
@@ -64,6 +65,15 @@ namespace SecureAuth.APPLICATION.Commands.Auth
 
             // Generate a temporary password
             var generatedPassword = _passwordGenerator.GenerateReadablePassword(10);
+
+            if (EthiopianPhoneNumber.TryNormalize(command.PhoneNumber, out var normalizedPhone))
+            {
+                command.PhoneNumber = normalizedPhone!;
+            }
+            else if (string.IsNullOrWhiteSpace(command.PhoneNumber))
+            {
+                command.PhoneNumber = string.Empty;
+            }
 
             // Create the user
             var user = new ApplicationUser

@@ -42,13 +42,12 @@
               <div class="form-row">
                 <div class="form-col">
                   <nz-form-item>
-                    <nz-form-label nzRequired>Term</nz-form-label>
-                    <nz-form-control nzErrorTip="Please select a term">
-                      <nz-select formControlName="termId" nzPlaceHolder="Select Term" [nzShowSearch]="true"
-                        [nzAllowClear]="true" [nzShowArrow]="true" [nzDropdownMatchSelectWidth]="false"
-                        class="professional-select">
-                        <nz-option *ngFor="let term of termStatusList" [nzValue]="term.Id"
-                          [nzLabel]="term.Description"></nz-option>
+                    <nz-form-label nzRequired>Year</nz-form-label>
+                    <nz-form-control nzErrorTip="Please select a year">
+                      <nz-select formControlName="year" nzPlaceHolder="Select Year" [nzShowSearch]="true"
+                        [nzShowArrow]="true" [nzDropdownMatchSelectWidth]="false" class="professional-select">
+                        <nz-option *ngFor="let year of yearOptions" [nzValue]="year"
+                          [nzLabel]="year.toString()"></nz-option>
                       </nz-select>
                     </nz-form-control>
                   </nz-form-item>
@@ -72,18 +71,16 @@
               <div class="form-row">
                 <div class="form-col">
                   <nz-form-item>
-                    <nz-form-label nzRequired>Year</nz-form-label>
-                    <nz-form-control nzErrorTip="Please select a year">
-                      <nz-select formControlName="year" nzPlaceHolder="Select Year" [nzShowSearch]="true"
-                        [nzShowArrow]="true" [nzDropdownMatchSelectWidth]="false" class="professional-select">
-                        <nz-option *ngFor="let year of yearOptions" [nzValue]="year"
-                          [nzLabel]="year.toString()"></nz-option>
+                    <nz-form-label nzRequired>Term</nz-form-label>
+                    <nz-form-control nzErrorTip="Please select a term">
+                      <nz-select formControlName="termId" nzPlaceHolder="Select Term" [nzShowSearch]="true"
+                        [nzAllowClear]="true" [nzShowArrow]="true" [nzDropdownMatchSelectWidth]="false"
+                        class="professional-select">
+                        <nz-option *ngFor="let term of termStatusList" [nzValue]="term.Id"
+                          [nzLabel]="term.Description"></nz-option>
                       </nz-select>
                     </nz-form-control>
                   </nz-form-item>
-
-
-
                 </div>
 
                 <div class="form-col">
@@ -106,10 +103,90 @@
                   <nz-form-item>
                     <nz-form-control>
                       <label nz-checkbox formControlName="isCurrentTerm">
-                        Set as Current Term
+                        IS Current Term
                       </label>
                       <div class="form-help-text">
                         Check this box if this is the current active academic term
+                      </div>
+                    </nz-form-control>
+                  </nz-form-item>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-header">
+                <h4 class="section-title">
+                  <span nz-icon nzType="eye" nzTheme="outline"></span>
+                  Course Registration UI
+                </h4>
+                <p class="section-description">Toggle which registration sections students can see for this term</p>
+              </div>
+
+              <div class="form-row">
+                <div class="form-col">
+                  <nz-form-item>
+                    <nz-form-control>
+                      <div class="registration-toggle">
+                        <span class="registration-toggle-label">Regular Registration</span>
+                        <div class="registration-toggle-control">
+                          <nz-switch
+                            formControlName="showRegular"
+                            nzCheckedChildren="Show"
+                            nzUnCheckedChildren="Hide">
+                          </nz-switch>
+                        </div>
+                      </div>
+                    </nz-form-control>
+                  </nz-form-item>
+                </div>
+                <div class="form-col">
+                  <nz-form-item>
+                    <nz-form-control>
+                      <div class="registration-toggle">
+                        <span class="registration-toggle-label">ADD</span>
+                        <div class="registration-toggle-control">
+                          <nz-switch
+                            formControlName="showAdd"
+                            nzCheckedChildren="Show"
+                            nzUnCheckedChildren="Hide">
+                          </nz-switch>
+                        </div>
+                      </div>
+                    </nz-form-control>
+                  </nz-form-item>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-col">
+                  <nz-form-item>
+                    <nz-form-control>
+                      <div class="registration-toggle">
+                        <span class="registration-toggle-label">Assessment</span>
+                        <div class="registration-toggle-control">
+                          <nz-switch
+                            formControlName="showAssessment"
+                            nzCheckedChildren="Show"
+                            nzUnCheckedChildren="Hide">
+                          </nz-switch>
+                        </div>
+                      </div>
+                    </nz-form-control>
+                  </nz-form-item>
+                </div>
+                <div class="form-col">
+                  <nz-form-item>
+                    <nz-form-control>
+                      <div class="registration-toggle">
+                        <span class="registration-toggle-label">Equivalent</span>
+                        <div class="registration-toggle-control">
+                          <nz-switch
+                            formControlName="showEquivalent"
+                            nzCheckedChildren="Show"
+                            nzUnCheckedChildren="Hide">
+                          </nz-switch>
+                        </div>
                       </div>
                     </nz-form-control>
                   </nz-form-item>

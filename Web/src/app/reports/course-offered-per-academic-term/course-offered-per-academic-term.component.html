@@ -67,9 +67,11 @@
   <!-- Data Table -->
   <div class="table-container" *ngIf="hasSearched">
     <!-- Table Header with Export Actions -->
-    <div class="table-header" *ngIf="total > 0">
+    <div class="table-header" *ngIf="pager.total > 0 || pager.searchKey">
       <h3>Courses Offered Per Academic Term</h3>
       <div class="table-actions">
+        <input nz-input placeholder="Search by batch, code, or title..." [(ngModel)]="searchKey"
+          (ngModelChange)="search()" style="max-width: 280px; margin-right: 8px;" />
         <button nz-button nzType="primary" (click)="exportToExcel()" class="mr-2">
           <span nz-icon nzType="file-excel" nzTheme="outline"></span>
           Export To Excel
@@ -82,12 +84,14 @@
     </div>
 
     <!-- Results Table -->
-    <div id="print-section" *ngIf="total > 0">
-      <nz-table #basicTable [nzData]="paginatedRegisteredStudent" nzBordered [nzPageSize]="pageSize"
-        [nzPageSizeOptions]="pageSizeOption" [nzShowSizeChanger]="true" [nzTotal]="total" [nzPageIndex]="pageIndex"
+    <div id="print-section" *ngIf="pager.total > 0 || pager.searchKey">
+      <nz-table #basicTable [nzData]="courses" nzBordered [nzPageSize]="pager.pageSize"
+        [nzPageSizeOptions]="pager.pageSizeOptions" [nzShowSizeChanger]="true" [nzTotal]="pager.total"
+        [nzPageIndex]="pager.pageIndex"
         (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)"
-        [nzFrontPagination]="false" [nzShowTotal]="rangeTemplate" [nzLoading]="isLoading" [nzNoResult]="emptyTpl"
-        [nzShowQuickJumper]="true" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;" class="mobile-table-container">
+        [nzFrontPagination]="false" [nzShowTotal]="rangeTemplate" [nzLoading]="isLoading || pager.loading"
+        [nzNoResult]="emptyTpl" [nzShowQuickJumper]="true" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;"
+        class="mobile-table-container">
         
         <ng-template #rangeTemplate let-range="range" let-total>
           Showing {{ range[0] }}-{{ range[1] }} of {{ total }} items
@@ -107,7 +111,7 @@
             <tr>
               <td>
                 <span class="serial-number">
-                  {{ reg.serialNo }}
+                  {{ pager.serial(i) }}
                 </span>
               </td>
               <td>{{ reg.batchCode }}</td>
@@ -128,7 +132,7 @@
     </div>
 
     <!-- No Results State -->
-    <div class="no-results-container" *ngIf="total === 0 && !isLoading">
+    <div class="no-results-container" *ngIf="pager.total === 0 && !isLoading && !pager.loading">
       <div class="no-results-content">
         <div class="no-results-icon">
           <span nz-icon nzType="search" nzTheme="outline"></span>

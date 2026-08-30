@@ -19,5 +19,6 @@ namespace SecureAuth.APPLICATION.Interfaces
         Task SendUpdatedCredentialsAsync(string email, string username, string firstName, string lastName, string updateType, string newPassword = null);
         Task SendOtpEmailAsync(string email, string otp, string purpose, DateTime expiresAt);
         Task SendActionEmailAsync(string email, string token, string actionType, string actionUrl, DateTime expiresAt, string customMessage = null);
+        Task<bool> TestConnectionAsync();
     }
 } 

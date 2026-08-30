@@ -243,12 +243,13 @@ namespace SecureAuth.API.Controllers
                 var validationResult = await _registerValidator.ValidateAsync(request);
                 if (!validationResult.IsValid)
                 {
-                    return BadRequest(new RegisterResponse { Success = false, Message = "Invalid registration request" });
+                    var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
+                    return BadRequest(new RegisterResponse { Success = false, Message = $"Invalid registration request: {errors}" });
                 }
 
                 var command = new RegisterCommand
                 {
-                    Email = request.Email,
+                    Email = request.Email.Trim().ToLowerInvariant(),
                     Password = request.Password,
                     ConfirmPassword = request.ConfirmPassword,
                     FirstName = request.FirstName,
@@ -580,6 +581,62 @@ namespace SecureAuth.API.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while fetching available roles" });
+            }
+        }
+
+        [HttpGet("register-status")]
+        [Authorize(Roles = "Super Admin,Admin")]
+        public async Task<IActionResult> GetRegisterStatus([FromQuery] string email)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    return BadRequest(new { success = false, message = "Email is required" });
+                }
+
+                var normalizedEmail = email.Trim().ToLowerInvariant();
+                var userManager = HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
+                var user = await userManager.FindByEmailAsync(normalizedEmail);
+
+                if (user == null)
+                {
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "User not found",
+                        data = new
+                        {
+                            email = normalizedEmail,
+                            exists = false
+                        }
+                    });
+                }
+
+                var roles = await userManager.GetRolesAsync(user);
+                return Ok(new
+                {
+                    success = true,
+                    message = "User registration status retrieved successfully",
+                    data = new
+                    {
+                        email = user.Email,
+                        userName = user.UserName,
+                        userId = user.Id,
+                        exists = true,
+                        emailConfirmed = user.EmailConfirmed,
+                        isActive = user.IsActive,
+                        createdAt = user.CreatedAt,
+                        updatedAt = user.UpdatedAt,
+                        roles = roles
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                var logger = HttpContext.RequestServices.GetRequiredService<ILogger<AuthenticationController>>();
+                logger.LogError(ex, "Error retrieving registration status for email: {Email}", email);
+                return StatusCode(500, new { success = false, message = "Failed to retrieve registration status" });
             }
         }
 

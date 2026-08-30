@@ -1,23 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { EnvironmentUrlService } from './environment-url.service';
+import { CrudService } from './crud.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RepositoryService {
-  constructor(
-    private http: HttpClient,
-    private envUrl: EnvironmentUrlService
-  ) {}
+  constructor(private crud: CrudService) {}
 
   public getData = (route: string) => {
-    return this.http.get(
-      this.createCompleteRoute(route, this.envUrl.urlAddress)
-    );
-  };
-
-  private createCompleteRoute = (route: string, envAddress: string) => {
-    return `${envAddress}/${route}`;
+    return this.crud.getList(route);
   };
 }

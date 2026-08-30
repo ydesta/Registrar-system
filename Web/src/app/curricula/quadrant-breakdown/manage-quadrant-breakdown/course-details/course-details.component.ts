@@ -16,8 +16,8 @@ export class CourseDetailsComponent implements OnInit {
   }
   ngOnInit(): void {}
   calculateTotalCreditHours(): number {
-    return this.courses.reduce(
-      (total, course) => total + course.creditHours,
+    return (this.courses || []).reduce(
+      (total, course) => total + (course.creditHours || 0),
       0
     );
   }

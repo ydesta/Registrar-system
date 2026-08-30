@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { GeneralInformationService } from '../../services/general-information.service';
 import { ApplicantIncompleteResponse } from '../../model/applicant-acedamic-request-view-model.model';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { ExcelExportService } from 'src/app/reports/services/excel-export.service';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -10,69 +11,53 @@ import * as XLSX from 'xlsx';
   templateUrl: './applicant-incomplete.component.html',
   styleUrls: ['./applicant-incomplete.component.scss']
 })
-export class ApplicantIncompleteComponent implements OnInit {
+export class ApplicantIncompleteComponent implements OnInit, OnDestroy {
   incompleteApplicants: ApplicantIncompleteResponse[] = [];
   incompleteApplicantsList: ApplicantIncompleteResponse[] = [];
-  tableLoading = true;
-  
-  // Pagination
-  pageIndex = 1;
-  pageSize = 10;
-  pageSizeOption = [5, 10, 15, 25, 50, 100];
-  total = 0;
+  pager: ServerPaginator;
 
   constructor(
     private generalInformationService: GeneralInformationService,
     private _customNotificationService: CustomNotificationService,
-    private _excelExportService: ExcelExportService
-  ) { }
+    private _excelExportService: ExcelExportService,
+    private paginator: PaginatorService
+  ) {
+    this.pager = this.paginator.create();
+  }
 
   ngOnInit(): void {
+    this.pager.init(() => this.getIncompleteApplicants());
     this.getIncompleteApplicants();
   }
 
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   getIncompleteApplicants() {
-    this.tableLoading = true;
-    this.generalInformationService.getIncompleteApplicants()
+    this.pager.loading = true;
+    this.generalInformationService.getIncompleteApplicantsPaginated(this.pager.query())
       .subscribe({
-        next: (response) => {
-          this.incompleteApplicants = response;
-          this.total = response.length;
-          this.updatePaginatedData();
-          this.tableLoading = false;
+        next: (response: any) => {
+          this.incompleteApplicantsList = response.data || [];
+          this.incompleteApplicants = this.incompleteApplicantsList;
+          this.pager.applyResult(response);
         },
-        error: (error) => {
+        error: () => {
+          this.incompleteApplicantsList = [];
+          this.incompleteApplicants = [];
+          this.pager.fail();
           this._customNotificationService.notification(
             "error",
             "Error",
             "Failed to load incomplete applicants. Please try again."
           );
-          this.tableLoading = false;
         }
       });
   }
 
-  updatePaginatedData() {
-    const startIndex = (this.pageIndex - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.incompleteApplicantsList = this.incompleteApplicants.slice(startIndex, endIndex);
-  }
-
-  onPageIndexChange(page: number): void {
-    this.pageIndex = page;
-    this.updatePaginatedData();
-  }
-
-  onPageSizeChange(size: number): void {
-    this.pageSize = size;
-    this.pageIndex = 1; // Reset to first page when changing page size
-    this.updatePaginatedData();
-  }
-
-  getCurrentPageInfo(): { start: number; end: number; total: number } {
-    const start = (this.pageIndex - 1) * this.pageSize + 1;
-    const end = Math.min(this.pageIndex * this.pageSize, this.total);
-    return { start, end, total: this.total };
+  get total(): number {
+    return this.pager.total;
   }
 
   // Method to get completion status text

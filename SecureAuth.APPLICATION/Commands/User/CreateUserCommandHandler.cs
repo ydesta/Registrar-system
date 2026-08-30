@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using SecureAuth.APPLICATION.Commands.User;
 using SecureAuth.APPLICATION.DTOs.User;
+using SecureAuth.APPLICATION.Helpers;
 using SecureAuth.APPLICATION.Interfaces;
 using SecureAuth.DOMAIN.Models;
 
@@ -35,6 +36,21 @@ namespace SecureAuth.APPLICATION.Commands.User
                 };
             }
 
+            var phoneNumber = string.Empty;
+            if (!string.IsNullOrWhiteSpace(command.PhoneNumber))
+            {
+                if (!EthiopianPhoneNumber.TryNormalize(command.PhoneNumber, out var normalizedPhone))
+                {
+                    return new CreateUserCommandResponse
+                    {
+                        Success = false,
+                        Message = EthiopianPhoneNumber.ErrorMessage,
+                        UserId = null
+                    };
+                }
+                phoneNumber = normalizedPhone!;
+            }
+
             // Create user
             var user = new ApplicationUser
             {
@@ -42,7 +58,7 @@ namespace SecureAuth.APPLICATION.Commands.User
                 Email = command.Email,
                 FirstName = command.FirstName,
                 LastName = command.LastName,
-                PhoneNumber = command.PhoneNumber,
+                PhoneNumber = phoneNumber,
                 IsActive = command.IsActive,
                 EmailConfirmed = !command.RequireEmailConfirmation,
                 CreatedAt = DateTime.UtcNow

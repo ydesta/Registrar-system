@@ -298,6 +298,21 @@ nz-form-item {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
+  display: inline-block;
+  min-width: 28px;
+  text-align: center;
+}
+
+::ng-deep .ant-table {
+  .sn-column {
+    width: 72px !important;
+    max-width: 72px !important;
+    min-width: 72px !important;
+    text-align: center;
+    white-space: nowrap;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
 }
 
 // Mobile responsive

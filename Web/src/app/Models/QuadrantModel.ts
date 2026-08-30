@@ -2,6 +2,7 @@ export interface QuadrantModel{
     id : string ,
     quadrantsID: string,
     quadrantHeading: string,
+    curriculumCode: string,
     remark : string ,
     createdDate : Date,
     lastModifiedDate : Date ,

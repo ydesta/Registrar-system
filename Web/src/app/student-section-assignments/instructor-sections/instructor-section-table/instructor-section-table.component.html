@@ -96,9 +96,22 @@
   </div>
 
   <!-- Data Table -->
-  <div *ngIf="filteredInstructorSections.length > 0">
-    <nz-table #instructorSectionsTable [nzData]="filteredInstructorSections" [nzLoading]="loading" [nzPageSize]="10"
-      [nzShowSizeChanger]="true" [nzShowQuickJumper]="true" [nzShowTotal]="totalTemplate">
+  <div *ngIf="hasSearched && (pager.total > 0 || pager.searchKey)">
+    <div class="table-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <span class="text-muted">Found {{ pager.total }} instructor sections</span>
+      <input nz-input placeholder="Search by name, section, course, or batch..." [(ngModel)]="searchValue"
+        (ngModelChange)="search()" style="max-width: 320px;" />
+    </div>
+    <nz-table #instructorSectionsTable [nzData]="filteredInstructorSections" [nzLoading]="pager.loading"
+      [nzPageSize]="pager.pageSize"
+      [nzPageSizeOptions]="pager.pageSizeOptions"
+      [nzShowSizeChanger]="true"
+      [nzTotal]="pager.total"
+      [nzPageIndex]="pager.pageIndex"
+      (nzPageIndexChange)="pager.onPageIndexChange($event)"
+      (nzPageSizeChange)="pager.onPageSizeChange($event)"
+      [nzFrontPagination]="false"
+      [nzShowTotal]="totalTemplate">
 
       <thead>
         <tr>
@@ -115,7 +128,7 @@
 
       <tbody>
         <tr *ngFor="let item of instructorSectionsTable.data; let i = index">
-          <td><span class="sn-badge">{{ i + 1 }}</span></td>
+          <td><span class="sn-badge">{{ pager.serial(i) }}</span></td>
           <td>{{ item.fullName }}</td>
           <td>{{ item.section }}</td>
           <td>
@@ -158,12 +171,12 @@
     </nz-table>
 
     <ng-template #totalTemplate let-total>
-      Total {{ total }} items
+      Total {{ pager.total }} items
     </ng-template>
   </div>
 
   <!-- No Data Message -->
-  <div *ngIf="filteredInstructorSections.length === 0 && !loading" class="no-data-message">
+  <div *ngIf="!pager.loading && hasSearched && pager.total === 0 && !pager.searchKey" class="no-data-message">
     <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="noDataContent">
     </nz-empty>
 

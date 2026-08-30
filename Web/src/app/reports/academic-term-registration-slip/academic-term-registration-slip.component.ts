@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { StaticData } from 'src/app/admission-request/model/StaticData';
@@ -9,36 +9,35 @@ import { StudentService } from 'src/app/students/services/student.service';
 import { StudentRegistrationSlipViewModel } from 'src/app/students/models/student-profile-view-model.model';
 import { CoursePaymentViewModel } from 'src/app/students/models/course-payment-view-model.model';
 import { environment } from 'src/environments/environment.prod';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 
 @Component({
   selector: 'app-academic-term-registration-slip',
   templateUrl: './academic-term-registration-slip.component.html',
   styleUrls: ['./academic-term-registration-slip.component.scss']
 })
-export class AcademicTermRegistrationSlipComponent implements OnInit {
+export class AcademicTermRegistrationSlipComponent implements OnInit, OnDestroy {
   listOfTermNumber: StaticData[] = [];
   yearList: number[] = [];
   formCourseOffered: FormGroup;
   listOfBatch: any[] = [];
   expandSet = new Set<string>();
   tbLoading = false;
-  pageindex = 1;
-  totalRecord = 0;
-  pageSize = 10;
-  pageSizeOption = [5, 10, 15, 25, 50, 100];
-  sortOrder = "";
-  sortColumn = "";
   listOdRegisteredStudent: StudentRegistrationSlipViewModel[] = [];
   isFormCollapsed = false;
   hasSearched = false;
+  searchKey = '';
+  pager: ServerPaginator;
 
   constructor(
     private courseTermOfferingService: TermCourseOfferingService,
     private _pdfExportService: PdfExportService,
     private _fb: FormBuilder,
     private _studentService: StudentService,
-    private _sanitizer: DomSanitizer
+    private _sanitizer: DomSanitizer,
+    private paginator: PaginatorService
   ) {
+    this.pager = this.paginator.create();
     const currentYear = new Date();
     this.yearList = this.getYearRange(currentYear.getFullYear());
     this.getListOfAcademicTermStatus();
@@ -46,6 +45,7 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.pager.init(() => this.loadData(false));
     this.termId.valueChanges.subscribe(res => {
       if (res) {
         this.termYear.valueChanges.subscribe(year => {
@@ -68,23 +68,26 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
       // Trigger date range validation when end date changes
       this.startDate?.updateValueAndValidity({ emitEvent: false });
     });
+
+    this.studentId.valueChanges.subscribe(() => {
+      this.updateValidators();
+    });
   }
 
   /**
-   * Updates form validators based on date range selection
-   * If both startDate and endDate are selected: termId, termYear, batchCode are optional
-   * If date range is empty: termId, termYear, batchCode are required
+   * Updates form validators based on date range / student id selection
+   * If both startDate and endDate are selected, or studentId has a value: termId, termYear, batchCode are optional
+   * Otherwise: termId, termYear, batchCode are required
    */
   private updateValidators(): void {
     const hasDateRange = this.startDate?.value && this.endDate?.value;
+    const hasStudentId = !!this.studentId?.value?.toString()?.trim();
     
-    if (hasDateRange) {
-      // If date range is selected, make termId, termYear, batchCode optional
+    if (hasDateRange || hasStudentId) {
       this.termId?.setValidators([]);
       this.termYear?.setValidators([]);
       this.batchCode?.setValidators([]);
     } else {
-      // If date range is empty, make termId, termYear, batchCode required
       this.termId?.setValidators([Validators.required]);
       this.termYear?.setValidators([Validators.required]);
       this.batchCode?.setValidators([Validators.required]);
@@ -102,16 +105,17 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
   get isFormValid(): boolean {
     const formModel = this.formCourseOffered.getRawValue();
     const hasDateRange = formModel.startDate && formModel.endDate;
+    const hasStudentId = !!(formModel.studentId && formModel.studentId.toString().trim());
     const dateRangeError = this.endDate?.errors?.['dateRangeInvalid'];
     if (dateRangeError) {
       return false;
     }
     
-    if (hasDateRange) {
-      return !dateRangeError;
-    } else {
-      return !!(formModel.termId && formModel.termYear && formModel.batchCode);
+    if (hasDateRange || hasStudentId) {
+      return true;
     }
+
+    return !!(formModel.termId && formModel.termYear && formModel.batchCode);
   }
 
   /**
@@ -193,53 +197,70 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
       this.expandSet.delete(id);
     }
   }
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   onPageIndexChange(page: number): void {
-    this.pageindex = page;
-    this.loadData();
+    this.pager.onPageIndexChange(page);
   }
 
   onPageSizeChange(size: number): void {
-    this.pageSize = size;
-    this.pageindex = 1;
-    this.loadData();
+    this.pager.onPageSizeChange(size);
   }
 
-  private loadData(): void {
+  search(): void {
+    this.pager.onSearch(this.searchKey);
+  }
+
+  private loadData(resetPage = true): void {
     const formModel = this.formCourseOffered.getRawValue();
     const hasDateRange = formModel.startDate && formModel.endDate;
     const hasRequiredFields = formModel.termId && formModel.termYear && formModel.batchCode;
-    
-    // Validate based on conditional rules
-    if (hasDateRange || hasRequiredFields) {
-      this.tbLoading = true;
-      this.hasSearched = true;
-      const startDate = formModel.startDate ? this.formatDate(formModel.startDate) : '';
-      const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
-      const studentId = formModel.studentId ? formModel.studentId : null;
-      const batchCode = formModel.batchCode || null;
-      
-      this._studentService.getListOfTermRegisteredCourseList(batchCode, startDate, endDate, studentId)
-        .subscribe({
-          next: (res) => {
-            this.listOdRegisteredStudent = res;
-            this.totalRecord = res.length;
-            this.tbLoading = false;
-          },
-          error: (error) => {
-            console.error('Error loading data:', error);
-            this.tbLoading = false;
-          }
-        });
+    const hasStudentId = !!(formModel.studentId && formModel.studentId.toString().trim());
+    if (!(hasDateRange || hasRequiredFields || hasStudentId)) {
+      return;
     }
+    if (resetPage) {
+      this.pager.pageIndex = 1;
+    }
+    this.tbLoading = true;
+    this.pager.loading = true;
+    this.hasSearched = true;
+    const startDate = formModel.startDate ? this.formatDate(formModel.startDate) : '';
+    const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
+    const studentId = formModel.studentId ? formModel.studentId.toString().trim() : null;
+    const batchCode = formModel.batchCode || null;
+    this._studentService.getListOfTermRegisteredCourseListPaginated(
+      batchCode,
+      startDate,
+      endDate,
+      studentId,
+      this.pager.query()
+    ).subscribe({
+      next: (res: any) => {
+        this.listOdRegisteredStudent = res.data || [];
+        this.pager.applyResult(res);
+        this.tbLoading = false;
+        this.isFormCollapsed = true;
+      },
+      error: () => {
+        this.listOdRegisteredStudent = [];
+        this.pager.fail();
+        this.tbLoading = false;
+      }
+    });
   }
 
   public resetData(): void {
     this.formCourseOffered.reset();
     this.listOdRegisteredStudent = [];
-    this.totalRecord = 0;
     this.hasSearched = false;
+    this.searchKey = '';
     this.isFormCollapsed = false;
-    // Reset validators to initial state (required for termId, termYear, batchCode)
+    this.pager.pageIndex = 1;
+    this.pager.total = 0;
+    this.pager.searchKey = '';
     this.updateValidators();
   }
 
@@ -309,28 +330,24 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
     const formModel = this.formCourseOffered.getRawValue();
     const hasDateRange = formModel.startDate && formModel.endDate;
     const hasRequiredFields = formModel.termId && formModel.termYear && formModel.batchCode;
+    const hasStudentId = !!(formModel.studentId && formModel.studentId.toString().trim());
     
     // Validate based on conditional rules
-    if (hasDateRange || hasRequiredFields) {
+    if (hasDateRange || hasRequiredFields || hasStudentId) {
       this.tbLoading = true;
       this.hasSearched = true;
       const startDate = formModel.startDate ? this.formatDate(formModel.startDate) : '';
       const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
-      const studentId = formModel.studentId ? formModel.studentId : null;
+      const studentId = formModel.studentId ? formModel.studentId.toString().trim() : null;
       const batchCode = formModel.batchCode || null;
       
       this._studentService.getListOfTermRegisteredCourseList(batchCode, startDate, endDate, studentId)
         .subscribe({
           next: (res) => {
-            this.listOdRegisteredStudent = res;
-
-            this.totalRecord = res.length;
             this.tbLoading = false;
-            this.isFormCollapsed = true;
             this._pdfExportService.generateRegistrationSlipsPdf(res);
           },
-          error: (error) => {
-            console.error('Error generating PDF:', error);
+          error: () => {
             this.tbLoading = false;
           }
         });
@@ -394,21 +411,11 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
   }
 
   sort(column: string, order: string | null): void {
-    this.sortColumn = column;
-    this.sortOrder = order || '';
+    this.pager.onSort(order, column);
+  }
 
-    if (order) {
-      this.listOdRegisteredStudent.sort((a, b) => {
-        const aValue = this.getPropertyValue(a, column);
-        const bValue = this.getPropertyValue(b, column);
-
-        if (order === 'ascend') {
-          return aValue > bValue ? 1 : -1;
-        } else {
-          return aValue < bValue ? 1 : -1;
-        }
-      });
-    }
+  getRegistrationSlips(): void {
+    this.loadData(true);
   }
   getFileName(fileName: string) {
     if (!fileName) return;
@@ -417,24 +424,6 @@ export class AcademicTermRegistrationSlipComponent implements OnInit {
       "/Resources/coursepayment/" +
       fileName;
     window.open(profilePicture, '_blank');
-  }
-  private getPropertyValue(obj: any, property: string): any {
-    switch (property) {
-      case 'studentCode':
-        return obj.studentCode || '';
-      case 'fullName':
-        return obj.fullName || '';
-      case 'registrationDate':
-        return new Date(obj.registrationDate || '');
-      case 'fromBank':
-        return obj.fromBank || '';
-      case 'toBank':
-        return obj.toBank || '';
-      case 'bankTransactionId':
-        return obj.bankTransactionId || '';
-      default:
-        return '';
-    }
   }
 
   toggleFormCollapse(): void {

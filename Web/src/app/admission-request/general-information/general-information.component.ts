@@ -9,6 +9,11 @@ import {
   flexibleNameValidator,
   englishOnlyValidator,
   phoneValidator9To14,
+  ethiopianHomePhoneValidator,
+  normalizeEthiopianMobile,
+  normalizeEthiopianHomePhone,
+  applyEthiopianMobileControl,
+  applyEthiopianHomePhoneControl,
   COUNTRIES
 } from "src/app/common/constant";
 import { ApplicationRequest } from "../model/application-request.model";
@@ -32,9 +37,9 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
   selectedTabIndex = 0;
   form: FormGroup;
   activeTab = 1;
-  formData = new FormData();
   profilePicture = "";
   file_store: FileList;
+  selectedFiles: File[] = [];
   file_list: Array<string> = [];
   selectedDate = null;
   id: string;
@@ -81,6 +86,9 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
 
     route.queryParams.subscribe(p => {
       this.id = p["id"];
+      if (p["submitted"] === "1") {
+        this.isApplicationSubmitted = true;
+      }
       if (this.id != undefined) {
         this.getApplicantById(this.id);
       }
@@ -88,6 +96,7 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.applyLoggedInEmail();
 
     if (this.id == undefined && this.userId != null && !this.hasAttemptedApplicantFetch) {
       const userId = localStorage.getItem('userId');
@@ -183,14 +192,14 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
       ],
       nationality: ["", [Validators.required]],
       telephonOffice: ["", [phoneValidator9To14()]],
-      telephonHome: ["", [phoneValidator9To14()]],
+      telephonHome: ["", [ethiopianHomePhoneValidator()]],
       mobile: ["", [Validators.required, phoneValidator9To14()]],
       postalAddress: ["", []],
-      emailAddress: ["", [Validators.required, emailValidator()]],
+      emailAddress: [this.getLoggedInEmail(), [Validators.required, emailValidator()]],
       region: ["", [Validators.required, alphabetsOnlyValidator()]],
-      city: ["", []],
-      woreda: ["", []],
-      kebele: ["", []],
+      city: ["", [Validators.required]],
+      woreda: ["", [Validators.required]],
+      kebele: ["", [Validators.required]],
       areaType: ["", []],
       selfConfirmedApplicantInformation: false,
       dateOfApply: [new Date(), []],
@@ -199,9 +208,9 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
       division: ["", []],
       applicantUserId: [localStorage.getItem("userId")],
       ActualFile: ["", []],
-      nationalExaminationId: ["", []],
+      nationalExaminationId: ["", [Validators.required]],
       tin: ["", []],
-      nationalId: ["", []]
+      nationalId: ["", [Validators.required]]
     });
   }
 
@@ -210,6 +219,18 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
   }
   get emailAddress() {
     return this.form.get("emailAddress");
+  }
+
+  private getLoggedInEmail(): string {
+    return (localStorage.getItem("email") || "").trim();
+  }
+
+  private applyLoggedInEmail(): void {
+    const email = this.getLoggedInEmail();
+    if (!email) {
+      return;
+    }
+    this.form.get("emailAddress")?.setValue(email, { emitEvent: false });
   }
   get mobile() {
     return this.form.get("mobile");
@@ -220,6 +241,19 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
   get telephonOffice() {
     return this.form.get("telephonOffice");
   }
+
+  onMobileBlur(): void {
+    applyEthiopianMobileControl(this.mobile);
+  }
+
+  onTelephonHomeBlur(): void {
+    applyEthiopianHomePhoneControl(this.telephonHome);
+  }
+
+  onTelephonOfficeBlur(): void {
+    applyEthiopianMobileControl(this.telephonOffice);
+  }
+
   get nationality() {
     return this.form.get("nationality");
   }
@@ -335,6 +369,10 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
 
   get isAcademicProgramProcessed(): boolean {
     return this.isSubmittedApplicationForm === 1;
+  }
+
+  get showSubmittedBanner(): boolean {
+    return this.isApplicationSubmitted || this.isSubmittedApplicationForm > 0;
   }
 
   // Debug method to check validation status
@@ -552,13 +590,13 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
     generalUserInfo.nationality = formModel.nationality;
 
     generalUserInfo.city = formModel.city;
-    generalUserInfo.emailAddress = formModel.emailAddress;
+    generalUserInfo.emailAddress = this.getLoggedInEmail() || formModel.emailAddress;
     generalUserInfo.kebele = formModel.kebele;
-    generalUserInfo.mobile = formModel.mobile;
+    generalUserInfo.mobile = normalizeEthiopianMobile(formModel.mobile) || formModel.mobile;
     generalUserInfo.postalAddress = formModel.postalAddress;
     generalUserInfo.region = formModel.region;
-    generalUserInfo.telephonHome = formModel.telephonHome;
-    generalUserInfo.telephonOffice = formModel.telephonOffice;
+    generalUserInfo.telephonHome = normalizeEthiopianHomePhone(formModel.telephonHome) || formModel.telephonHome || '';
+    generalUserInfo.telephonOffice = normalizeEthiopianMobile(formModel.telephonOffice) || formModel.telephonOffice || '';
     generalUserInfo.woreda = formModel.woreda;
 
     generalUserInfo.selfConfirmedApplicantInformation =
@@ -626,7 +664,12 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
           formData.dateOfApply = new Date();
         }
 
+        formData.mobile = normalizeEthiopianMobile(formData.mobile) || formData.mobile || '';
+        formData.telephonHome = normalizeEthiopianHomePhone(formData.telephonHome) || formData.telephonHome || '';
+        formData.telephonOffice = normalizeEthiopianMobile(formData.telephonOffice) || formData.telephonOffice || '';
+
         this.form.patchValue(formData);
+        this.applyLoggedInEmail();
 
         const academicProgramData = {
           sourceOfFinance: applicantData.sourceOfFinance || applicantData.sourceOfFinanceId || applicantData.financeSource || '',
@@ -702,18 +745,16 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
 
   submitForm() {
     this.validateAllFormFields(this.form);
-    setTimeout(() => {
-      this.form.updateValueAndValidity();
-      if (!this.form.valid) {
-        this._customNotificationService.notification(
-          "warn",
-          "Validation Error",
-          "Please fix the validation errors before saving."
-        );
-        return;
-      }
-      this.continueFormSubmission();
-    }, 100);
+    this.form.updateValueAndValidity();
+    if (!this.form.valid) {
+      this._customNotificationService.notification(
+        "warn",
+        "Validation Error",
+        "Please fix the validation errors before saving."
+      );
+      return;
+    }
+    this.continueFormSubmission();
   }
 
   private continueFormSubmission(): void {
@@ -723,7 +764,6 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
 
     const postData = this.getApplicantGeneralInfo();
     postData.applicantUserId = this.userId;
-    console.log("%%%    applicantUserId:", postData.applicantUserId);
     if (this.id != undefined) {
       postData.id = this.id;
     }
@@ -776,10 +816,8 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
       });
     }
 
-    if (this.file_store != undefined) {
-      for (let i = 0; i < this.file_store.length; i++) {
-        formData.append("ActualFile", this.file_store[i]);
-      }
+    if (this.selectedFiles.length > 0) {
+      this.selectedFiles.forEach(file => formData.append("ActualFile", file));
     }
 
     if (this.id == undefined) {
@@ -989,6 +1027,7 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
 
   handleFileInputChange(l: FileList): void {
     this.file_store = l;
+    this.selectedFiles = Array.from(l);
     if (l.length) {
       const f = l[0];
       const count = l.length > 1 ? `(+${l.length - 1} files)` : "";
@@ -1002,6 +1041,7 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
       };
       reader.readAsDataURL(f);
     } else {
+      this.selectedFiles = [];
       this.form.patchValue({
         ActualFile: "",
         profilePicture: ""
@@ -1021,8 +1061,8 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
 
   createAcademicProgramRequest() {
     this.otherForm = this.fb.group({
-      sourceOfFinance: ["", [Validators.required]],
-      howDidYouComeKnow: ["", [Validators.required]],
+      sourceOfFinance: ["", []],
+      howDidYouComeKnow: ["", []],
       selfConfirmedApplicantInformation: [false, [Validators.required]]
     });
 
@@ -1095,14 +1135,18 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
           this.currentModalRef.close();
         }
 
-        this._customNotificationService.notification(
-          "success",
-          "Success",
-          "Your application has been submitted successfully!"
-        );
-        this.router.navigateByUrl(
-          `/student-application/admission-request?id=${this.id}`
-        );
+        this.modal.success({
+          nzTitle: "Application submitted",
+          nzContent: "Your application has been submitted successfully and is under review.",
+          nzOkText: "OK",
+          nzCentered: true,
+          nzMaskClosable: false,
+          nzOnOk: () => {
+            this.router.navigateByUrl(
+              `/student-application/admission-request?id=${this.id}&submitted=1`
+            );
+          }
+        });
       },
       error: (error) => {
         this.reviewSubmissionLoading = false;

@@ -12,7 +12,9 @@ export class CourseBreakDownOffering {
   public batchCode: string;
   public previousRAGrade: string;
   public currentGrade: string;
+  public grade: string;
   public courseStatus: string;
+  public approvalStatus?: number;
 
    // Equivalent course properties
   public equivalentCourseId: string;

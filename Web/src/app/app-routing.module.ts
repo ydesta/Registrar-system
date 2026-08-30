@@ -3,13 +3,11 @@ import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
 
 const routes: Routes = [
-  // Load accounts module first to ensure authentication routes work properly
   {
     path: "accounts",
     loadChildren: () =>
       import("./accounts/accounts.module").then(m => m.AccountsModule)
   },
-  // Then load portal module
   {
     path: 'portal',
     loadChildren: () => import('./portal/portal.module').then((m) => m.PortalModule),
@@ -52,7 +50,6 @@ const routes: Routes = [
     loadChildren: () =>
       import("./students/students.module").then(m => m.StudentsModule)
   },
-
   {
     path: "Semester",
     loadChildren: () =>
@@ -60,7 +57,6 @@ const routes: Routes = [
         m => m.SemestersModule
       )
   },
-
   {
     path: "banks",
     loadChildren: () => import("./banks/banks.module").then(m => m.BanksModule)
@@ -107,9 +103,7 @@ const routes: Routes = [
       )
   },
   { path: "", pathMatch: "full", redirectTo: "/portal" },
-  // Add a more specific root route to prevent conflicts
   { path: "home", redirectTo: "/portal" },
-  // Add a catch-all route at the end to handle any unmatched routes
   { path: "**", redirectTo: "/portal" }
 ];
 

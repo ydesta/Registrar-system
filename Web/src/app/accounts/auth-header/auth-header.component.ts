@@ -6,19 +6,15 @@ import { Component } from '@angular/core';
   styleUrls: ['./auth-header.component.scss']
 })
 export class AuthHeaderComponent {
-
   goToHome(): void {
-    // Use window.location to avoid routing conflicts
     window.location.href = '/portal';
   }
 
   goToLogin(): void {
-    // Use window.location to avoid routing conflicts
     window.location.href = '/accounts/login';
   }
 
   goToRegister(): void {
-    // Use window.location to avoid routing conflicts
     window.location.href = '/accounts/register';
   }
-} 
+}

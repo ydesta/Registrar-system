@@ -1,11 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { BaseModel } from 'src/app/Models/BaseMode';
 import { BatchModel } from 'src/app/Models/BatchModel';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { StaticData } from 'src/app/admission-request/model/StaticData';
 import { ACADEMIC_TERM_STATUS } from 'src/app/common/constant';
 
@@ -14,67 +12,46 @@ import { ACADEMIC_TERM_STATUS } from 'src/app/common/constant';
   templateUrl: './batch.component.html',
   styleUrls: ['./batch.component.scss']
 })
-export class BatchComponent implements OnInit {
+export class BatchComponent implements OnInit, OnDestroy {
   batches: BatchModel[] = [];
-  pageIndex = 1;
-  pageSize = 10;
-  pageSizeOption = [5, 10, 15, 25, 50, 100];
-  total = 0;
-  isLoading = true;
-  searchKey = '';
-  sortOrder = '';
-  sortColumn = '';
-  private searchSubject = new Subject<string>();
+  pager: ServerPaginator;
   paginatedBatches: BatchModel[] = [];
-  filteredBatches: BatchModel[] = [];
   listOfTermNumber: StaticData[] = [];
+
   constructor(
     private _customNotificationService: CustomNotificationService,
     private _crudService: CrudService,
-    private modal: NzModalService
+    private modal: NzModalService,
+    private paginator: PaginatorService
   ) {
-    // Initialize search with debounce
-
+    this.pager = this.paginator.create();
   }
 
   ngOnInit(): void {
     this.getListOfAcademicTermStatus();
+    this.pager.init(() => this.fetchBatches());
     this.fetchBatches();
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged()
-    ).subscribe(searchText => {
-      this.filteredBatches = this.batches.filter(batch =>
-        batch.batchCode.toLowerCase().includes(searchText.toLowerCase()) ||
-        batch.curriculum.curriculumCode.toLowerCase().includes(searchText.toLowerCase()) ||
-        batch.entryYear.toString().includes(searchText)
-      );
-      this.total = this.filteredBatches.length;
-      this.updatePaginatedBatches();
-    });
   }
 
-  onSearch(): void {
-    this.searchSubject.next(this.searchKey);
+  ngOnDestroy(): void {
+    this.pager.destroy();
   }
 
   fetchBatches() {
-    this.isLoading = true;
+    this.pager.loading = true;
     this._crudService
-      .getList('/batchs')
+      .getPaginated(`/batchs`, this.pager.query())
       .subscribe({
-        next: (res: BaseModel<BatchModel[]>) => {
-          this.batches = res.data.map((item: any) => {
+        next: (res: any) => {
+          const rows = res?.data || [];
+          this.paginatedBatches = rows.map((item: any) => {
             const term = this.listOfTermNumber.find(t => t.Id == item.entryTerm);
             return {
               ...item,
               academicTerm: term ? term.Description : ''
             };
           });
-          this.filteredBatches = [...this.batches]
-          this.total = this.filteredBatches.length;
-          this.updatePaginatedBatches();
-          this.isLoading = false;
+          this.pager.applyResult(res);
         },
         error: (error) => {
           this._customNotificationService.notification(
@@ -82,33 +59,12 @@ export class BatchComponent implements OnInit {
             'Error',
             error.error?.message || 'Failed to fetch batch data. Please check your connection and try again.'
           );
-          this.isLoading = false;
+          this.paginatedBatches = [];
+          this.pager.fail();
         }
       });
   }
 
-  updatePaginatedBatches(): void {
-    const startIndex = (this.pageIndex - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.paginatedBatches = this.filteredBatches.slice(startIndex, endIndex);
-  }
-
-  onPageIndexChange(page: number): void {
-    this.pageIndex = page;
-    this.updatePaginatedBatches();
-  }
-  
-  onPageSizeChange(size: number): void {
-    this.pageSize = size;
-    this.pageIndex = 1;  // Reset to first page when changing page size
-    this.updatePaginatedBatches();
-  }
-
-  onSort(sort: { key: string; value: string }): void {
-    this.sortColumn = sort.key;
-    this.sortOrder = sort.value;
-    this.updatePaginatedBatches();
-  }
   getListOfAcademicTermStatus() {
     let division: StaticData = new StaticData();
     ACADEMIC_TERM_STATUS.forEach(pair => {
@@ -119,6 +75,7 @@ export class BatchComponent implements OnInit {
       this.listOfTermNumber.push(division);
     });
   }
+
   showDeleteConfirm(id: string): void {
     this.modal.confirm({
       nzTitle: 'Are you sure you want to delete this batch?',
@@ -145,7 +102,7 @@ export class BatchComponent implements OnInit {
                 );
               }
             },
-            error: (error) => {
+            error: () => {
               this._customNotificationService.notification(
                 'error',
                 'Error',
@@ -168,7 +125,7 @@ export class BatchComponent implements OnInit {
           );
         } else {
           const fileLists = res.data.split('/');
-          this._crudService.expoerExcel('/' + res.data).subscribe((data: any) => {
+          this._crudService.exportExcel('/' + res.data).subscribe((data: any) => {
             const downloadURL = window.URL.createObjectURL(data);
             const link = document.createElement('a');
             link.href = downloadURL;
@@ -182,7 +139,7 @@ export class BatchComponent implements OnInit {
           });
         }
       },
-      error: (error) => {
+      error: () => {
         this._customNotificationService.notification(
           'error',
           'Error',

@@ -330,8 +330,7 @@ export class ManageEducationComponent implements OnInit {
         applicationId: this.applicantId
       },
       nzMaskClosable: false,
-      nzFooter: null,
-      nzWidth: "50%"
+      nzFooter: null
     });
     
     // Listen to modal close and data updates
@@ -350,14 +349,13 @@ export class ManageEducationComponent implements OnInit {
 
   editModal(education: ApplicantEducationBackgroundRequest): void {
     const modal: NzModalRef = this._modal.create({
-      nzTitle: "Education Background",
+      nzTitle: "Edit Education Background",
       nzContent: EducationFormComponent,
       nzComponentParams: {
         educationBackground: education
       },
       nzMaskClosable: false,
-      nzFooter: null,
-      nzWidth: "50%"
+      nzFooter: null
     });
     
     // Listen to modal close and data updates

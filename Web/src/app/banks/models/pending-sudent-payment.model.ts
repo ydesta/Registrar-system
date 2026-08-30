@@ -8,4 +8,5 @@ export interface PendingStudentPaymentModel {
     totalPayment: number;
     isProcessing?: boolean;
     requestType: string;
+    orderNumber?: string;
 }

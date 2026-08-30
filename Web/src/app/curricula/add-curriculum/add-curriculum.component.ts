@@ -77,7 +77,7 @@ export class AddCurriculumComponent implements OnInit {
               "Success",
               "Curriculum registered successfully."
             );
-            this._route.navigateByUrl("curricula");
+            this._route.navigateByUrl("/curricula");
             
           });
       } else {
@@ -98,7 +98,7 @@ export class AddCurriculumComponent implements OnInit {
                 "Success",
                 res.data
               );
-              this._route.navigateByUrl("curricula");
+              this._route.navigateByUrl("/curricula");
             } else {
               this._customNotificationService.notification(
                 "error",
@@ -115,6 +115,10 @@ export class AddCurriculumComponent implements OnInit {
         );
       }
     }
+  }
+
+  goBack(): void {
+    this._route.navigateByUrl("/curricula");
   }
 
   getListOfCurriculumStatus() {

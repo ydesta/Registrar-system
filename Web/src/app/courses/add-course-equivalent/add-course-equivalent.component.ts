@@ -43,9 +43,7 @@ export class AddCourseEquivalentComponent implements OnInit {
       this.action = "Edit Course Equivalent";
       this.submit = 'Update';
       this.isEditMode = true;
-      this._crudService.getList('/CourseEquivalents' + '/' + this.progId).subscribe((res: any) => {
-
-        console.log("###   ", res);
+      this._crudService.getById('/CourseEquivalents', this.progId).subscribe((res: any) => {
         this.patchValues(res.data);
       });
     }

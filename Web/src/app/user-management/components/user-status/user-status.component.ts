@@ -13,10 +13,9 @@ import { User } from '../../../types/user-management.types';
 })
 export class UserStatusComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
   user: User | null = null;
   loading = false;
-  userId: string = '';
+  userId = '';
 
   constructor(
     private userManagementService: UserManagementService,
@@ -39,42 +38,38 @@ export class UserStatusComponent implements OnInit, OnDestroy {
 
   loadUser(): void {
     this.loading = true;
-    this.userManagementService.getUserById(this.userId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (user) => {
-          this.user = user;
-          this.loading = false;
-        },
-        error: (error) => {
-          this.message.error('Failed to load user: ' + error.message);
-          this.loading = false;
-        }
-      });
+    this.userManagementService.getUserById(this.userId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (user) => {
+        this.user = user;
+        this.loading = false;
+      },
+      error: (error) => {
+        this.message.error('Failed to load user: ' + error.message);
+        this.loading = false;
+      }
+    });
   }
 
   onToggleStatus(): void {
-    if (this.user) {
-      const statusUpdate: UserStatusUpdate = {
-        userId: this.user.id,
-        isActive: !this.user.isActive
-      };
-
-      this.userManagementService.updateUserStatus(statusUpdate)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.message.success(`User ${this.user?.isActive ? 'deactivated' : 'activated'} successfully`);
-            this.loadUser();
-          },
-          error: (error) => {
-            this.message.error('Failed to update user status: ' + error.message);
-          }
-        });
+    if (!this.user) {
+      return;
     }
+    const statusUpdate: UserStatusUpdate = {
+      userId: this.user.id,
+      isActive: !this.user.isActive
+    };
+    this.userManagementService.updateUserStatus(statusUpdate).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.message.success(`User ${this.user?.isActive ? 'deactivated' : 'activated'} successfully`);
+        this.loadUser();
+      },
+      error: (error) => {
+        this.message.error('Failed to update user status: ' + error.message);
+      }
+    });
   }
 
   onBack(): void {
     this.router.navigate(['/user-management/users']);
   }
-} 
+}

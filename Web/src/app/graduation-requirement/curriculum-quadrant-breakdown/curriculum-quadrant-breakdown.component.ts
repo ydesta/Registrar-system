@@ -1,8 +1,6 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { NzModalService } from "ng-zorro-antd/modal";
-import { BaseModel } from "src/app/Models/BaseMode";
 import { CurriculumQuadrantBreakdownModel } from "src/app/Models/CurriculumQuadrantBreakdownModel";
-import { RequirementQuadrantModel } from "src/app/Models/RequirementQuadrantModel";
 import { CrudService } from "src/app/services/crud.service";
 import { CustomNotificationService } from "src/app/services/custom-notification.service";
 import { CurriculumQuadrantBreakdownService } from "../services/curriculum-quadrant-breakdown.service";
@@ -11,31 +9,43 @@ import {
   ACADEMIC_TERM_STATUS,
   ACADEMIC_YEAR_NUMBER_STATUS
 } from "src/app/common/constant";
+import { PaginatorService, ServerPaginator } from "src/app/reports/services/paginator.service";
 
 @Component({
   selector: "app-curriculum-quadrant-breakdown",
   templateUrl: "./curriculum-quadrant-breakdown.component.html",
   styleUrls: ["./curriculum-quadrant-breakdown.component.scss"]
 })
-export class CurriculumQuadrantBreakdownComponent implements OnInit {
-  curriculumQuadrantBreakdowns?: CurriculumQuadrantBreakdownModel[];
+export class CurriculumQuadrantBreakdownComponent implements OnInit, OnDestroy {
+  curriculumQuadrantBreakdowns: CurriculumQuadrantBreakdownModel[] = [];
   reqId = "";
   checked = false;
   expandSet = new Set<number>();
   listOfTermNumber: StaticData[] = [];
   listOfYearNumber: StaticData[] = [];
+  pager: ServerPaginator;
+
   constructor(
     private _customNotificationService: CustomNotificationService,
     private _crudService: CrudService,
     private modal: NzModalService,
-    private _curriculumQuadrantBreakdownService: CurriculumQuadrantBreakdownService
-  ) {}
+    private _curriculumQuadrantBreakdownService: CurriculumQuadrantBreakdownService,
+    private paginator: PaginatorService
+  ) {
+    this.pager = this.paginator.create();
+  }
 
   ngOnInit(): void {
     this.getListOfAcademicTermStatus();
     this.getListOfYearNumberStatus();
+    this.pager.init(() => this.fetchProgram());
     this.fetchProgram();
   }
+
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   onExpandChange(id: number, checked: boolean): void {
     if (checked) {
       this.expandSet.add(id);
@@ -43,18 +53,27 @@ export class CurriculumQuadrantBreakdownComponent implements OnInit {
       this.expandSet.delete(id);
     }
   }
+
   fetchProgram() {
+    this.pager.loading = true;
     this._curriculumQuadrantBreakdownService
-      .getCurriculumQuadrantBreakdownList()
-      .subscribe((res: any) => {
-        this.curriculumQuadrantBreakdowns = res.data;
+      .getCurriculumQuadrantBreakdownListPaginated(this.pager.query())
+      .subscribe({
+        next: (res: any) => {
+          this.curriculumQuadrantBreakdowns = res.data || [];
+          this.pager.applyResult(res);
+        },
+        error: () => {
+          this.curriculumQuadrantBreakdowns = [];
+          this.pager.fail();
+        }
       });
   }
+
   showDeleteConfirm(id: any): void {
     this.reqId = id;
     this.modal.confirm({
       nzTitle: "Are you sure delete this Curriculum Quadrant Breakdown?",
-      // nzContent: '<b style="color: red;">Some descriptions</b>',
       nzOkText: "Yes",
       nzOkType: "primary",
       nzOkDanger: true,
@@ -62,7 +81,6 @@ export class CurriculumQuadrantBreakdownComponent implements OnInit {
         this._crudService
           .delete("/CurriculumQuadrantBreakdowns", this.reqId)
           .subscribe((res: any) => {
-            
             this.fetchProgram();
             if (res.status == "success") {
               this._customNotificationService.notification(
@@ -81,16 +99,10 @@ export class CurriculumQuadrantBreakdownComponent implements OnInit {
           });
       },
       nzCancelText: "No",
-      nzOnCancel: () => console.log("Cancel")
+      nzOnCancel: () => {}
     });
   }
 
-  // getCourseTitles(data: any): string[] {
-  //   if (data.course && data.course.length > 0) {
-  //     return data.course.map((c, index) => `${index + 1}. ${c.courseTitle}`);
-  //   }
-  //   return [];
-  // }
   getCourseDetails(data: any): any[] {
     if (data.course && data.course.length > 0) {
       return data.course.map((c, index) => {
@@ -104,6 +116,7 @@ export class CurriculumQuadrantBreakdownComponent implements OnInit {
     }
     return [];
   }
+
   getTotalCreditHours(data: any): number {
     let totalCreditHours = 0;
     if (data.course && data.course.length > 0) {
@@ -113,6 +126,7 @@ export class CurriculumQuadrantBreakdownComponent implements OnInit {
     }
     return totalCreditHours;
   }
+
   getListOfAcademicTermStatus() {
     let division: StaticData = new StaticData();
     ACADEMIC_TERM_STATUS.forEach(pair => {

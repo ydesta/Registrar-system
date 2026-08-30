@@ -93,10 +93,14 @@ export class CurriculumBreakdownFormComponent implements OnInit {
     });
   }
   getQuadrantsList() {
+    if (!this.curriculumCode) {
+      this.quadrants = [];
+      return;
+    }
     this._curriculumQuadrantBreakdownService
-      .getQuadratList()
+      .getQuadratListByCurriculumCode(this.curriculumCode)
       .subscribe((res: any) => {
-        this.quadrants = res.data;
+        this.quadrants = res.data || [];
       });
   }
 

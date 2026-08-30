@@ -1,20 +1,21 @@
 <div class="content-container">
   <!-- Header Section -->
   <div class="header-section">
-    <button nz-button nzType="default" class="back-btn" (click)="goToCurriculum()">
-      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
-      Back to Course Offerings
-    </button>
     <div class="header-content">
       <div class="page-title">
         <h2 class="title-text">{{ action }}</h2>
         <p class="subtitle-text">Create and manage term course offerings for academic programs</p>
-        <div class="term-info">
-          <span nz-icon nzType="calendar" nzTheme="outline"></span>
-          <span class="term-duration">Term Duration: {{startDate | date: 'dd-MMM-yy' }} - {{endDate | date:
-            'dd-MMM-yy'}}</span>
-          <span class="term-name">{{nextTerm}} {{nextTermYear}}</span>
-        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button nz-button nzType="default" class="back-btn" (click)="goToCurriculum()">
+        <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+        Back to Course Offerings
+      </button>
+      <div class="term-info" *ngIf="startDate || endDate || nextTerm">
+        <span nz-icon nzType="calendar" nzTheme="outline"></span>
+        <span class="term-duration">Term Duration: {{startDate | date: 'dd-MMM-yy' }} - {{endDate | date: 'dd-MMM-yy'}}</span>
+        <span class="term-name" *ngIf="nextTerm">{{nextTerm}} {{nextTermYear}}</span>
       </div>
     </div>
   </div>
@@ -175,7 +176,100 @@
       </div>
 
       <div class="course-tabs">
-        <!-- Curriculum Course Breakdown Tab -->
+        <!-- List of Courses -->
+        <div class="course-section">
+          <div class="section-card">
+            <div class="card-header">
+              <div class="header-content">
+                <h4 class="card-title">
+                  <span nz-icon nzType="plus-circle" nzTheme="outline"></span>
+                  List of Courses
+                </h4>
+                <p class="card-description">Select additional list of courses </p>
+              </div>
+              <div class="header-actions">
+                <nz-select
+                  class="quadrant-filter"
+                  [(ngModel)]="selectedQuadrantId"
+                  [ngModelOptions]="{standalone: true}"
+                  (ngModelChange)="onQuadrantFilterChange($event)"
+                  nzAllowClear
+                  nzPlaceHolder="Course quadrant"
+                  nzShowSearch
+                  [nzDisabled]="!quadrantOptions.length">
+                  <nz-option
+                    *ngFor="let quadrant of quadrantOptions"
+                    [nzValue]="quadrant.id"
+                    [nzLabel]="quadrant.label">
+                  </nz-option>
+                </nz-select>
+                <div class="header-stats">
+                  <div class="stat-item">
+                    <span nz-icon nzType="book" nzTheme="outline"></span>
+                    <span class="stat-label">Total Courses:</span>
+                    <span class="stat-value">{{courses?.length || 0}}</span>
+                  </div>
+                  <div class="stat-item">
+                    <span nz-icon nzType="check-square" nzTheme="outline"></span>
+                    <span class="stat-label">Selected Credits:</span>
+                    <span class="stat-value">{{selectedAdditionalCreditHours}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="search-container">
+              <nz-input-group nzSearch class="search-input">
+                <input nz-input placeholder="Search courses..." [(ngModel)]="searchText" (ngModelChange)="onSearch()"
+                  (input)="onSearch()" (keyup)="onSearch()" class="search-field">
+              </nz-input-group>
+            </div>
+
+            <div class="table-container">
+              <div *ngIf="!courses || courses.length === 0" class="no-courses-message">
+                <nz-empty nzNotFoundImage="simple"
+                  [nzNotFoundContent]="(originalCourses?.length && (selectedQuadrantId || searchText))
+                    ? 'No courses match the current quadrant/search filters.'
+                    : 'No additional courses available for this batch/curriculum combination. You can still proceed with creating the term course offering using only the curriculum breakdown courses.'">
+                </nz-empty>
+              </div>
+
+              <nz-table *ngIf="courses && courses.length > 0" nzBordered #basicTableA [nzData]="courses"
+                [nzShowPagination]="true" nzShowSizeChanger [nzPageSize]="10" [nzPageSizeOptions]="[5, 10, 20, 50]"
+                (nzCurrentPageDataChange)="onCurrentPageDataChangeA($event)" class="course-table"
+                [nzScroll]="{ x: '100%' }">
+                <thead>
+                  <tr>
+                    <th nzWidth="60px" nzAlign="center" class="checkbox-column">
+                      <label nz-checkbox [nzChecked]="checkedA" [nzIndeterminate]="indeterminateA"
+                        (nzCheckedChange)="onAllCheckedA($event)" class="header-checkbox">
+                      </label>
+                    </th>
+                    <th nzWidth="120px" nzAlign="left" class="course-code-column">Course Code</th>
+                    <th nzAlign="left" class="course-title-column">Course Title</th>
+                    <th nzWidth="140px" nzAlign="left" class="quadrant-column">Quadrant</th>
+                    <th nzWidth="100px" nzAlign="center" class="credit-hours-column">Credit Hours</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let data of basicTableA.data; let i = index" class="course-row">
+                    <td nzAlign="center" class="checkbox-cell">
+                      <label nz-checkbox [nzChecked]="setOfCheckedIdA.has(data.courseId)"
+                        (nzCheckedChange)="onItemCheckedA(data.courseId, $event)" class="course-checkbox">
+                      </label>
+                    </td>
+                    <td nzAlign="left" class="course-code">{{ data.courseCode }}</td>
+                    <td nzAlign="left" class="course-title">{{ data.courseTitle }}</td>
+                    <td nzAlign="left" class="quadrant-cell">{{ data.quadrantHeading || data.quadrantCode || '—' }}</td>
+                    <td nzAlign="center" class="credit-hours">{{ data.creditHours }}</td>
+                  </tr>
+                </tbody>
+              </nz-table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Curriculum Course Breakdown -->
         <div class="course-section">
           <div class="section-card">
             <div class="card-header">
@@ -186,16 +280,33 @@
                 </h4>
                 <p class="card-description">Select courses from the curriculum breakdown (optional)</p>
               </div>
-              <div class="header-stats">
-                <div class="stat-item">
-                  <span nz-icon nzType="book" nzTheme="outline"></span>
-                  <span class="stat-label">Total Courses:</span>
-                  <span class="stat-value">{{listOfCourseBreakDown?.length || 0}}</span>
-                </div>
-                <div class="stat-item">
-                  <span nz-icon nzType="check-square" nzTheme="outline"></span>
-                  <span class="stat-label">Selected Credits:</span>
-                  <span class="stat-value">{{selectedCreditHours}}</span>
+              <div class="header-actions">
+                <nz-select
+                  class="quadrant-filter"
+                  [(ngModel)]="selectedBreakdownQuadrantId"
+                  [ngModelOptions]="{standalone: true}"
+                  (ngModelChange)="onBreakdownQuadrantFilterChange($event)"
+                  nzAllowClear
+                  nzPlaceHolder="Course quadrant"
+                  nzShowSearch
+                  [nzDisabled]="!breakdownQuadrantOptions.length">
+                  <nz-option
+                    *ngFor="let quadrant of breakdownQuadrantOptions"
+                    [nzValue]="quadrant.id"
+                    [nzLabel]="quadrant.label">
+                  </nz-option>
+                </nz-select>
+                <div class="header-stats">
+                  <div class="stat-item">
+                    <span nz-icon nzType="book" nzTheme="outline"></span>
+                    <span class="stat-label">Total Courses:</span>
+                    <span class="stat-value">{{listOfCourseBreakDown?.length || 0}}</span>
+                  </div>
+                  <div class="stat-item">
+                    <span nz-icon nzType="check-square" nzTheme="outline"></span>
+                    <span class="stat-label">Selected Credits:</span>
+                    <span class="stat-value">{{selectedCreditHours}}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -205,7 +316,6 @@
                 <input nz-input placeholder="Search courses..." [(ngModel)]="searchTextB"
                   (ngModelChange)="onSearchBreak()" (input)="onSearchBreak()" (keyup)="onSearchBreak()"
                   class="search-field">
-                <!-- <span nz-icon nzType="search" nzTheme="outline"></span> -->
               </nz-input-group>
             </div>
 
@@ -223,6 +333,7 @@
                     </th>
                     <th nzWidth="120px" nzAlign="left" class="course-code-column">Course Code</th>
                     <th nzAlign="left" class="course-title-column">Course Title</th>
+                    <th nzWidth="140px" nzAlign="left" class="quadrant-column">Quadrant</th>
                     <th nzWidth="100px" nzAlign="center" class="credit-hours-column">Credit Hours</th>
                   </tr>
                 </thead>
@@ -235,81 +346,7 @@
                     </td>
                     <td nzAlign="left" class="course-code">{{ data.courseCode }}</td>
                     <td nzAlign="left" class="course-title">{{ data.courseTitle }}</td>
-                    <td nzAlign="center" class="credit-hours">{{ data.creditHours }}</td>
-                  </tr>
-                </tbody>
-              </nz-table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Additional Courses Tab -->
-        <div class="course-section">
-          <div class="section-card">
-            <div class="card-header">
-              <div class="header-content">
-                <h4 class="card-title">
-                  <span nz-icon nzType="plus-circle" nzTheme="outline"></span>
-                  List of Courses
-                </h4>
-                <p class="card-description">Select additional list of courses </p>
-              </div>
-              <div class="header-stats">
-                <div class="stat-item">
-                  <span nz-icon nzType="book" nzTheme="outline"></span>
-                  <span class="stat-label">Total Courses:</span>
-                  <span class="stat-value">{{courses?.length || 0}}</span>
-                </div>
-                <div class="stat-item">
-                  <span nz-icon nzType="check-square" nzTheme="outline"></span>
-                  <span class="stat-label">Selected Credits:</span>
-                  <span class="stat-value">{{selectedAdditionalCreditHours}}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="search-container">
-              <nz-input-group nzSearch class="search-input">
-                <input nz-input placeholder="Search courses..." [(ngModel)]="searchText" (ngModelChange)="onSearch()"
-                  (input)="onSearch()" (keyup)="onSearch()" class="search-field">
-                <!-- <span nz-icon nzType="search" nzTheme="outline"></span> -->
-              </nz-input-group>
-            </div>
-
-            <div class="table-container">
-              <!-- Show message when no additional courses are available -->
-              <div *ngIf="!courses || courses.length === 0" class="no-courses-message">
-                <nz-empty nzNotFoundImage="simple"
-                  [nzNotFoundContent]="'No additional courses available for this batch/curriculum combination. You can still proceed with creating the term course offering using only the curriculum breakdown courses.'">
-                </nz-empty>
-              </div>
-
-              <!-- Show table when courses are available -->
-              <nz-table *ngIf="courses && courses.length > 0" nzBordered #basicTableA [nzData]="courses"
-                [nzShowPagination]="true" nzShowSizeChanger [nzPageSize]="10" [nzPageSizeOptions]="[5, 10, 20, 50]"
-                (nzCurrentPageDataChange)="onCurrentPageDataChangeA($event)" class="course-table"
-                [nzScroll]="{ x: '100%' }">
-                <thead>
-                  <tr>
-                    <th nzWidth="60px" nzAlign="center" class="checkbox-column">
-                      <label nz-checkbox [nzChecked]="checkedA" [nzIndeterminate]="indeterminateA"
-                        (nzCheckedChange)="onAllCheckedA($event)" class="header-checkbox">
-                      </label>
-                    </th>
-                    <th nzWidth="120px" nzAlign="left" class="course-code-column">Course Code</th>
-                    <th nzAlign="left" class="course-title-column">Course Title</th>
-                    <th nzWidth="100px" nzAlign="center" class="credit-hours-column">Credit Hours</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let data of basicTableA.data; let i = index" class="course-row">
-                    <td nzAlign="center" class="checkbox-cell">
-                      <label nz-checkbox [nzChecked]="setOfCheckedIdA.has(data.courseId)"
-                        (nzCheckedChange)="onItemCheckedA(data.courseId, $event)" class="course-checkbox">
-                      </label>
-                    </td>
-                    <td nzAlign="left" class="course-code">{{ data.courseCode }}</td>
-                    <td nzAlign="left" class="course-title">{{ data.courseTitle }}</td>
+                    <td nzAlign="left" class="quadrant-cell">{{ data.quadrantHeading || data.quadrantCode || '—' }}</td>
                     <td nzAlign="center" class="credit-hours">{{ data.creditHours }}</td>
                   </tr>
                 </tbody>

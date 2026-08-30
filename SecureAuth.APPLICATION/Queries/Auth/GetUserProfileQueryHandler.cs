@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using SecureAuth.APPLICATION.DTOs.Authentication;
+using SecureAuth.APPLICATION.Helpers;
 using SecureAuth.APPLICATION.Interfaces;
 using SecureAuth.DOMAIN.Models;
 
@@ -37,7 +38,7 @@ namespace SecureAuth.APPLICATION.Queries.Auth
                     Email = user.Email,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
-                    PhoneNumber = user.PhoneNumber,
+                    PhoneNumber = EthiopianPhoneNumber.NormalizeOptional(user.PhoneNumber),
                     EmailConfirmed = user.EmailConfirmed,
                     PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                     TwoFactorEnabled = user.TwoFactorEnabled,

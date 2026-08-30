@@ -330,6 +330,7 @@ namespace SecureAuth.INFRASTRUCTURE.DependencyInjection
             services.AddScoped<ICommandHandler<DeleteRoleCommand, bool>, DeleteRoleCommandHandler>();
             services.AddScoped<ICommandHandler<AssignPermissionsToRoleCommand, bool>, AssignPermissionsToRoleCommandHandler>();
             services.AddScoped<ICommandHandler<RemovePermissionsFromRoleCommand, bool>, RemovePermissionsFromRoleCommandHandler>();
+            services.AddScoped<ICommandHandler<NormalizeUserPhonesCommand, NormalizeUserPhonesResult>, NormalizeUserPhonesCommandHandler>();
 
             // Register Command Handlers (User)
             services.AddScoped<ICommandHandler<CreateUserCommand, CreateUserCommandResponse>, CreateUserCommandHandler>();
@@ -339,7 +340,10 @@ namespace SecureAuth.INFRASTRUCTURE.DependencyInjection
             services.AddScoped<ICommandHandler<DeleteUserCommand, bool>, DeleteUserCommandHandler>();
             services.AddScoped<ICommandHandler<UpdateUserStatusCommand, bool>, UpdateUserStatusCommandHandler>();
             services.AddScoped<ICommandHandler<UpdateUserRoleCommand, Result>, UpdateUserRoleCommandHandler>();
+            services.AddScoped<ICommandHandler<AdminUpdateUserRolesCommand, AdminUpdateUserRolesResult>, AdminUpdateUserRolesCommandHandler>();
             services.AddScoped<ICommandHandler<BulkUpdateUsersFromExcelCommand, BulkUpdateUsersFromExcelResult>, BulkUpdateUsersFromExcelCommandHandler>();
+            services.AddScoped<ICommandHandler<AdminConfirmEmailCommand, AdminConfirmEmailResult>, AdminConfirmEmailCommandHandler>();
+            services.AddScoped<ICommandHandler<AdminResendEmailVerificationCommand, ResendVerificationResponse>, AdminResendEmailVerificationCommandHandler>();
 
             // Register Command Handlers (Security)
             services.AddScoped<ICommandHandler<BlockUserCommand, BlockUserResultModel>, BlockUserCommandHandler>();

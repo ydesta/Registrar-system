@@ -1,25 +1,32 @@
 import { SearchQueryParams } from './../SearchParam/search-query-params';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { NzModalService } from 'ng-zorro-antd/modal';
-import { BaseModel } from 'src/app/Models/BaseMode';
-import { StudentGradeModel } from 'src/app/Models/StudentGradeModel';
 import { CrudService } from 'src/app/services/crud.service';
-import { CustomNotificationService } from 'src/app/services/custom-notification.service';
+import { ReportService } from 'src/app/reports/services/report.service';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 
 @Component({
   selector: 'app-registered-student',
   templateUrl: './registered-student.component.html',
   styleUrls: ['./registered-student.component.scss'],
 })
-export class RegisteredStudentComponent implements OnInit {
+export class RegisteredStudentComponent implements OnInit, OnDestroy {
   academicTerms: any;
   courses: any;
   gradeQueryForm: FormGroup;
-  registeredStudents: any;
-  courseTitle: any;
+  registeredStudents: any[] | null = null;
   radioValues = ['Accepted', 'Rejected'];
-  constructor(private _crudService: CrudService, private _fb: FormBuilder) {
+  searchKey = '';
+  pager: ServerPaginator;
+  loading = false;
+
+  constructor(
+    private _crudService: CrudService,
+    private _reportService: ReportService,
+    private _fb: FormBuilder,
+    private paginator: PaginatorService
+  ) {
+    this.pager = this.paginator.create();
     this.gradeQueryForm = this._fb.group({
       termCode: ['', Validators.required],
       courseCode: ['', [Validators.required]],
@@ -28,7 +35,7 @@ export class RegisteredStudentComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    //this.populateIntialData();
+    this.pager.init(() => this.acadamicTermFormSubmit(false));
     this._crudService.getList('/Courses').subscribe((res: any) => {
       this.courses = res.data;
     });
@@ -37,32 +44,51 @@ export class RegisteredStudentComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   getRegisteredStud(): SearchQueryParams {
     const formModel = this.gradeQueryForm.getRawValue();
-
     const params = new SearchQueryParams();
-
     params.AcademicTerm = formModel.termCode;
     params.Course = formModel.courseCode;
     params.Status = formModel.radio;
-
     return params;
   }
 
-  acadamicTermFormSubmit() {
-    if (this.gradeQueryForm.value['termCode'] != '') {
-      this._crudService
-        .getRegisteredStud(this.getRegisteredStud())
-        // .add(
-        //   '/StudentRegistrations/RegisteredStudent/',
-        //   this.gradeQueryForm.value
-        // )
-        .subscribe((res: any) => {
-          this.registeredStudents = res.data;
-          
-        });
-    } else {
-      alert('Please select!');
+  acadamicTermFormSubmit(resetPage = true) {
+    if (!this.gradeQueryForm.valid) {
+      return;
     }
+    if (resetPage) {
+      this.pager.pageIndex = 1;
+    }
+    this.loading = true;
+    this.pager.loading = true;
+    this._reportService.getRegisteredStudentsPaginated(this.getRegisteredStud(), this.pager.query()).subscribe({
+      next: (res: any) => {
+        this.registeredStudents = res.data || [];
+        this.pager.applyResult(res);
+        this.loading = false;
+      },
+      error: () => {
+        this.registeredStudents = [];
+        this.pager.fail();
+        this.loading = false;
+      }
+    });
+  }
+
+  search(): void {
+    this.pager.onSearch(this.searchKey);
+  }
+
+  onPageIndexChange(page: number): void {
+    this.pager.onPageIndexChange(page);
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pager.onPageSizeChange(size);
   }
 }

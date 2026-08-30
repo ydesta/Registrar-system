@@ -9,7 +9,7 @@
       <div class="header-actions">
         <div class="search-section">
           <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input type="text" nz-input placeholder="Search staffs..." />
+            <input type="text" nz-input placeholder="Search staffs..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)" />
           </nz-input-group>
           <ng-template #suffixIconButton>
             <button nz-button nzType="primary" class="search-btn" nzSearch>
@@ -54,11 +54,17 @@
         [nzData]="staffs!"
         nzBordered
         [nzShowPagination]="true"
-        [nzPageSize]="10"
-        [nzPageSizeOptions]="[5, 10, 20, 50]"
+        [nzPageSize]="pager.pageSize"
+        [nzPageIndex]="pager.pageIndex"
+        [nzTotal]="pager.total"
+        [nzPageSizeOptions]="pager.pageSizeOptions"
         [nzShowSizeChanger]="true"
         [nzShowQuickJumper]="true"
         [nzShowTotal]="totalTemplate"
+        [nzFrontPagination]="false"
+        [nzLoading]="pager.loading"
+        (nzPageIndexChange)="pager.onPageIndexChange($event)"
+        (nzPageSizeChange)="pager.onPageSizeChange($event)"
         class="staffs-table"
       >
         <thead>
@@ -73,7 +79,7 @@
         <tbody>
           <tr *ngFor="let data of basicTable.data; let i = index">
             <td>{{ data.staffCode }}</td>
-            <td>{{ data.firstName + " " + data.lastName }}</td>
+            <td>{{ data.firstName + (data.middleName ? ' ' + data.middleName : '') + ' ' + data.lastName }}</td>
             <td>{{ data.gender }}</td>
             <td>{{ data.birthDate | date : "yyyy-MM-dd" }}</td>
             <td class="action-column">

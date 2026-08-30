@@ -159,25 +159,13 @@ export class StudentSemsterCourseRegistrationSlipComponent implements OnInit {
     window.print();
   }
 
-  downloadPDF(): void {
-    // Implement PDF download functionality
-    console.log('Downloading PDF...');
-  }
+  downloadPDF(): void {}
 
-  viewStudentCourses(data: any): void {
-    // Implement view student courses functionality
-    console.log('Viewing courses for:', data.fullName);
-  }
+  viewStudentCourses(_data: any): void {}
 
-  downloadStudentReport(data: any): void {
-    // Implement download student report functionality
-    console.log('Downloading report for:', data.fullName);
-  }
+  downloadStudentReport(_data: any): void {}
 
-  printStudentSlip(data: any): void {
-    // Implement print specific student slip functionality
-    console.log('Printing slip for:', data.fullName);
-    // You can implement specific print functionality for individual student slip here
+  printStudentSlip(_data: any): void {
     window.print();
   }
 

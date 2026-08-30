@@ -6,13 +6,7 @@
     </p>
   </div>
   
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
-    <nz-spin nzSize="large"></nz-spin>
-  </div>
-  
-  <!-- Quick Links -->
-  <div *ngIf="!isLoading" class="quick-links">
+  <div class="quick-links">
     <a 
       *ngFor="let link of quickLinks" 
       class="quick-link"

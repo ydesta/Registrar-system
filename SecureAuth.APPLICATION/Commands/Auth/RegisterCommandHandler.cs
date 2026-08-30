@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using SecureAuth.APPLICATION.DTOs.Authentication;
+using SecureAuth.APPLICATION.Helpers;
 using SecureAuth.APPLICATION.Interfaces;
 using SecureAuth.APPLICATION.Services;
 using SecureAuth.DOMAIN.Models;
@@ -33,6 +34,11 @@ namespace SecureAuth.APPLICATION.Commands.Auth
         {
             try
             {
+                command.Email = command.Email.Trim().ToLowerInvariant();
+                if (EthiopianPhoneNumber.TryNormalize(command.PhoneNumber, out var normalizedPhone))
+                {
+                    command.PhoneNumber = normalizedPhone!;
+                }
                 _logger.LogInformation("Starting registration process for email: {Email}, IsSelfRegistration: {IsSelfRegistration}", 
                     command.Email, command.IsSelfRegistration);
 
@@ -167,29 +173,16 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                     }
                 }
 
-                // Send email verification if required (non-blocking)
+                // Send email verification if required
                 if (command.RequireEmailConfirmation)
                 {
                     try
                     {
                         _logger.LogInformation("Sending email verification to user: {UserId}, Email: {Email}", user.Id, user.Email);
                         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                        
-                        // Fire and forget email sending to avoid blocking registration
-                        _ = Task.Run(async () =>
-                        {
-                            try
-                            {
-                                await _emailService.SendEmailConfirmationAsync(user.Email, token);
-                                _logger.LogInformation("Email verification sent successfully to user: {UserId}", user.Id);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, "Failed to send email verification to user: {UserId}, Email: {Email}. Error: {ErrorMessage}", 
-                                    user.Id, user.Email, ex.Message);
-                            }
-                        });
-                        
+
+                        await _emailService.SendEmailConfirmationAsync(user.Email, token);
+                        _logger.LogInformation("Email verification sent successfully to user: {UserId}", user.Id);
                         verificationSent = true;
                     }
                     catch (Exception ex)

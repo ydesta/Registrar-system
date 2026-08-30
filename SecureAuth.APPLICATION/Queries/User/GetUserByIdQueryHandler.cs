@@ -1,5 +1,6 @@
 using SecureAuth.APPLICATION.Queries.User;
 using SecureAuth.APPLICATION.DTOs.User;
+using SecureAuth.APPLICATION.Helpers;
 using SecureAuth.APPLICATION.Interfaces;
 using SecureAuth.DOMAIN.Models;
 
@@ -32,7 +33,7 @@ namespace SecureAuth.APPLICATION.Queries.User
             {
                 Id = user.Id,
                 Email = user.Email ?? string.Empty,
-                PhoneNumber = user.PhoneNumber ?? string.Empty,
+                PhoneNumber = EthiopianPhoneNumber.NormalizeOptional(user.PhoneNumber) ?? string.Empty,
                 FirstName = user.FirstName ?? string.Empty,
                 LastName = user.LastName ?? string.Empty,
                 IsActive = user.IsActive,

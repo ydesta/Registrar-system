@@ -206,6 +206,80 @@ namespace SecureAuth.API.Controllers.User
             }
         }
 
+        [HttpPost("users/{id}/confirm-email")]
+        [Authorize(Roles = "Super Admin, Admin")]
+        public async Task<IActionResult> ConfirmEmail(string id)
+        {
+            try
+            {
+                var result = await _mediator.SendAsync<AdminConfirmEmailCommand, AdminConfirmEmailResult>(
+                    new AdminConfirmEmailCommand { UserId = id });
+
+                if (result.Success)
+                {
+                    return Ok(new { success = true, message = result.Message, emailConfirmed = result.EmailConfirmed });
+                }
+
+                return BadRequest(new { success = false, message = result.Message, emailConfirmed = result.EmailConfirmed });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while confirming email.", error = ex.Message });
+            }
+        }
+
+        [HttpPost("users/{id}/resend-email-verification")]
+        [Authorize(Roles = "Super Admin, Admin")]
+        public async Task<IActionResult> ResendEmailVerification(string id)
+        {
+            try
+            {
+                var result = await _mediator.SendAsync<AdminResendEmailVerificationCommand, ResendVerificationResponse>(
+                    new AdminResendEmailVerificationCommand { UserId = id });
+
+                if (result.Success)
+                {
+                    return Ok(new { success = true, message = result.Message });
+                }
+
+                return BadRequest(new { success = false, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while resending verification email.", error = ex.Message });
+            }
+        }
+
+        [HttpPut("users/{id}/roles")]
+        [Authorize(Roles = "Super Admin, Admin, Reviewer")]
+        public async Task<IActionResult> UpdateUserRoles(string id, [FromBody] AdminUpdateUserRolesRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    return BadRequest(new { success = false, message = "User id is required." });
+                }
+
+                var result = await _mediator.SendAsync<AdminUpdateUserRolesCommand, AdminUpdateUserRolesResult>(
+                    new AdminUpdateUserRolesCommand
+                    {
+                        UserId = id,
+                        Roles = request?.Roles ?? new List<string>()
+                    });
+
+                if (result.Success)
+                {
+                    return Ok(new { success = true, message = result.Message });
+                }
+
+                return BadRequest(new { success = false, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while updating user roles.", error = ex.Message });
+            }
+        }
 
         [HttpGet("profile")]
         public async Task<ActionResult<UserProfileResponseModel>> GetProfile()

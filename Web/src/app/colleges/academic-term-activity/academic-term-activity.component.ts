@@ -1,53 +1,56 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { BaseModel } from 'src/app/Models/BaseMode';
 import { AcademicTermActivityModel } from 'src/app/Models/AcademicTermActivityModel';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { AcademicTermActivitiesService } from '../services/academic-term-activities.service';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 
 @Component({
   selector: 'app-academic-term-activity',
   templateUrl: './academic-term-activity.component.html',
   styleUrls: ['./academic-term-activity.component.scss']
 })
-export class AcademicTermActivityComponent implements OnInit {
-  academicTermActivities?: AcademicTermActivityModel[];
+export class AcademicTermActivityComponent implements OnInit, OnDestroy {
+  academicTermActivities: AcademicTermActivityModel[] = [];
   reqId = '';
   checked = false;
-  pageIndex = 1;
-  pageSize = 10;
-  pageSizeOption = [5, 10, 15, 25, 50, 100];
-  total = 0;
-  isLoading = true;
-  sortOrder = "";
-  sortColumn = "";
-  
+  pager: ServerPaginator;
+
   constructor(
     private _customNotificationService: CustomNotificationService,
     private academicTermActivitiesService: AcademicTermActivitiesService,
-    private modal: NzModalService) { }
+    private modal: NzModalService,
+    private paginator: PaginatorService
+  ) {
+    this.pager = this.paginator.create();
+  }
 
   ngOnInit(): void {
+    this.pager.init(() => this.fetchProgram());
     this.fetchProgram();
   }
 
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   fetchProgram() {
-    this.isLoading = true;
+    this.pager.loading = true;
     this.academicTermActivitiesService
-      .getAcademicTermActivityList()
+      .getAcademicTermActivityListPaginated(this.pager.query())
       .subscribe({
-        next: (res: BaseModel<AcademicTermActivityModel[]>) => {
-          this.academicTermActivities = res.data;
-          this.total = res.data.length;
-          this.isLoading = false;
+        next: (res: any) => {
+          this.academicTermActivities = res.data || [];
+          this.pager.applyResult(res);
         },
         error: (error) => {
+          this.academicTermActivities = [];
+          this.pager.fail();
           this._customNotificationService.notification(
             'error',
             'Error',
             error.error?.message || 'Failed to fetch batch data. Please check your connection and try again.'
           );
-          this.isLoading = false;
         }
       });
   }
@@ -61,7 +64,6 @@ export class AcademicTermActivityComponent implements OnInit {
       nzOkDanger: true,
       nzOnOk: () => {
         this.academicTermActivitiesService.delete(this.reqId).subscribe((res: any) => {
-          
           this.fetchProgram();
           if (res.status == "success") {
             this._customNotificationService.notification('success', 'Success', res.data)
@@ -75,6 +77,7 @@ export class AcademicTermActivityComponent implements OnInit {
       nzOnCancel: () => {}
     });
   }
+
   exportTermActivity() {
     this.academicTermActivitiesService
       .getAcademicTermActivityList()
@@ -104,15 +107,4 @@ export class AcademicTermActivityComponent implements OnInit {
         }
       });
   }
-  onPageIndexChange(page: number): void {
-    this.pageIndex = page;
-    this.fetchProgram();
-  }
-
-  onPageSizeChange(size: number): void {
-    this.pageSize = size;
-    this.pageIndex = 1;
-    this.fetchProgram();
-  }
-
 }

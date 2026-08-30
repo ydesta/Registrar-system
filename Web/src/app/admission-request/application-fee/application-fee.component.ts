@@ -62,7 +62,6 @@ export class ApplicationFeeComponent implements OnInit, OnDestroy {
   }
 
   private initializeData(): void {
-    console.log("&&&&&&&&&&&&&&&&&     test ");
     this.route.queryParams.subscribe(params => {
       const routeApplicantId = params["id"];
       if (routeApplicantId && routeApplicantId !== this.applicantId) {
@@ -229,7 +228,6 @@ export class ApplicationFeeComponent implements OnInit, OnDestroy {
     
     this.academicProgramRequestService.getApplicationFee(this.applicantId).subscribe({
       next: (response) => {
-        console.log("fee     ",response);
         if (response && Array.isArray(response) && response.length > 0) {
           this.applicationFee = response[0];
           this.paymentStatus = this.applicationFee?.status || 'Not Paid';

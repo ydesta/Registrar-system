@@ -50,6 +50,10 @@
           <nz-form-label [nzSpan]="24">Total Amount</nz-form-label>
           <nz-form-control>
             <input nz-input [value]="totalAmount | currency:'ETB '" class="readonly-input" />
+            <div class="amount-breakdown" *ngIf="penaltyAmount > 0">
+              <div>Courses: {{ courseAmount | currency:'ETB ' }}</div>
+              <div>Late penalty: {{ penaltyAmount | currency:'ETB ' }}</div>
+            </div>
           </nz-form-control>
         </nz-form-item>
 

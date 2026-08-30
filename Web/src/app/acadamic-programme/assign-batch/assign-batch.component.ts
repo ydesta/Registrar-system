@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { AcadamicProgramme } from "src/app/admission-request/model/acadamic-programme.model";
 import { AcademicProgramRequestService } from "src/app/admission-request/services/academic-program-request.service";
@@ -8,13 +8,14 @@ import { StudentService } from "src/app/students/services/student.service";
 import { BatchAssignModel } from "../models/batch-assign.model";
 import { CustomNotificationService } from "src/app/services/custom-notification.service";
 import { Router } from "@angular/router";
+import { PaginatorService, ServerPaginator } from "src/app/reports/services/paginator.service";
 
 @Component({
   selector: "app-assign-batch",
   templateUrl: "./assign-batch.component.html",
   styleUrls: ["./assign-batch.component.scss"]
 })
-export class AssignBatchComponent implements OnInit {
+export class AssignBatchComponent implements OnInit, OnDestroy {
   /**
  *
  */
@@ -32,6 +33,7 @@ export class AssignBatchComponent implements OnInit {
   isSearchCollapsed = false;
   searchLoading = false;
   hasSearched = false;
+  pager: ServerPaginator;
   
   constructor(
     private _batchServices: BatchService,
@@ -39,16 +41,23 @@ export class AssignBatchComponent implements OnInit {
     private _fb: FormBuilder,
     private _studentServices: StudentService,
     private _customNotificationService: CustomNotificationService,
-    private _route: Router
+    private _route: Router,
+    private paginator: PaginatorService
   ) {
+    this.pager = this.paginator.create();
     const currentYear = new Date();
     this.yearList = this.getYearRange(currentYear.getFullYear());
     this.createAssignBatchForStudent();
   }
   
   ngOnInit(): void {
+    this.pager.init(() => this.getUnAssignedBatchStudents());
     this.getBatchList();
     this.getAcademicProgramList();
+  }
+
+  ngOnDestroy(): void {
+    this.pager.destroy();
   }
 
   goBack(): void {
@@ -61,7 +70,8 @@ export class AssignBatchComponent implements OnInit {
   }
 
   onSearchButtonClick(): void {
-    // Handle search button click specifically
+    this.pager.pageIndex = 1;
+    this.setOfCheckedId.clear();
     this.getUnAssignedBatchStudents();
   }
 
@@ -73,6 +83,9 @@ export class AssignBatchComponent implements OnInit {
     this.indeterminate = false;
     this.isSearchCollapsed = false;
     this.hasSearched = false;
+    this.pager.pageIndex = 1;
+    this.pager.total = 0;
+    this.pager.searchKey = '';
     this.assignBatchForm.patchValue({
       academicProgram: null,
       entryYear: null,
@@ -119,33 +132,38 @@ export class AssignBatchComponent implements OnInit {
   
   getUnAssignedBatchStudents() {
     const formModel = this.assignBatchForm.getRawValue();
+    if (!formModel.academicProgram || formModel.entryYear == null) {
+      return;
+    }
     this.searchLoading = true;
     this.hasSearched = true;
+    this.pager.loading = true;
     this._studentServices
-      .getUnAssignedBatchStudents(
+      .getUnAssignedBatchStudentsPaginated(
         formModel.academicProgram,
-        formModel.entryYear
+        formModel.entryYear,
+        this.pager.query()
       )
       .subscribe({
-        next: (res) => {
-          this.numberOfListOfStudent = res.length;
-          this.studentList = res;
-          // Collapse the search form after successful search
+        next: (res: any) => {
+          this.studentList = res.data || [];
+          this.pager.applyResult(res);
+          this.numberOfListOfStudent = this.pager.total;
+          this.refreshCheckedStatus();
           this.isSearchCollapsed = true;
           this.searchLoading = false;
         },
-        error: (error) => {
+        error: () => {
+          this.studentList = [];
+          this.pager.fail();
+          this.numberOfListOfStudent = 0;
           this.searchLoading = false;
-          // Handle error if needed
-          console.error('Error fetching unassigned students:', error);
         }
       });
   }
   
   submitForm() {
-    const selectedStudentIds = this.studentList
-      .filter(data => this.setOfCheckedId.has(data.id))
-      .map(data => data.id);
+    const selectedStudentIds = Array.from(this.setOfCheckedId);
     const formModel = this.assignBatchForm.getRawValue();
     const studentBatchAssign = new BatchAssignModel();
     studentBatchAssign.batchCode = formModel.batchCode;
@@ -153,8 +171,9 @@ export class AssignBatchComponent implements OnInit {
     this._studentServices.batchAssign(studentBatchAssign).subscribe(res => {
       if(res == true){
         this._customNotificationService.notification("success", "Successfully Batch Assigned",formModel.batchCode);
-        this._route.navigateByUrl("acadamic-programme/assign-batch");
-        this.numberOfListOfStudent = 0;
+        this.setOfCheckedId.clear();
+        this.pager.pageIndex = 1;
+        this.getUnAssignedBatchStudents();
       }
      
     })
@@ -169,8 +188,8 @@ export class AssignBatchComponent implements OnInit {
   }
   
   refreshCheckedStatus(): void {
-    const listOfEnabledData = this.listOfCurrentPageData.filter(({ disabled }) => !disabled);
-    this.checked = listOfEnabledData.every(({ id }) => this.setOfCheckedId.has(id));
+    const listOfEnabledData = this.studentList.filter(item => item.id);
+    this.checked = listOfEnabledData.length > 0 && listOfEnabledData.every(({ id }) => this.setOfCheckedId.has(id));
     this.indeterminate = listOfEnabledData.some(({ id }) => this.setOfCheckedId.has(id)) && !this.checked;
   }
 
@@ -180,9 +199,9 @@ export class AssignBatchComponent implements OnInit {
   }
 
   onAllChecked(checked: boolean): void {
-    this.listOfCurrentPageData
-      .filter(({ disabled }) => !disabled)
-      .forEach(({ id }) => this.updateCheckedSet(id, checked));
+    this.studentList
+      .filter(item => item.id)
+      .forEach(item => this.updateCheckedSet(item.id, checked));
     this.refreshCheckedStatus();
   }
   

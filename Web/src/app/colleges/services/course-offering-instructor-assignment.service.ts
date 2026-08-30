@@ -1,52 +1,37 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable, map } from "rxjs";
-import { environment } from "src/environments/environment";
-import { CourseOfferingInstructorAssignment } from "../model/course-offering-instructor-assignment.model";
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { CrudService } from 'src/app/services/crud.service';
+import { environment } from 'src/environments/environment';
+import { CourseOfferingInstructorAssignment } from '../model/course-offering-instructor-assignment.model';
 
 @Injectable({
-  providedIn: "root"
+  providedIn: 'root'
 })
 export class CourseOfferingInstructorAssignmentService {
-  baseUrl = environment.baseUrl;
-  private readonly _courseOfferingInstructorAssignment: string = `/${environment.apiVersion}/courseofferinginstructorassignment`;
-  getCourseOfferingInstructorAssignmentUrl() {
-    return this.baseUrl + this._courseOfferingInstructorAssignment;
-  }
-  constructor(private httpClient: HttpClient) { }
+  private readonly assignments = `/${environment.apiVersion}/courseofferinginstructorassignment`;
+
+  constructor(private crud: CrudService) { }
+
   create(postData: CourseOfferingInstructorAssignment): Observable<any> {
-    const endPointUrl = `${this.getCourseOfferingInstructorAssignmentUrl()}`;
-    return this.httpClient.post<any>(endPointUrl, postData).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.add(this.assignments, postData);
   }
-  getCourseOfferingInstructorAssigned(
-    courseId: string,
-    offeringId: number
-  ): Observable<any> {
-    const endPointUrl = `${this.getCourseOfferingInstructorAssignmentUrl()}/${courseId}/${offeringId}`;
-    return this.httpClient.get<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
-    );
+
+  getCourseOfferingInstructorAssigned(courseId: string, offeringId: number): Observable<any> {
+    return this.crud.getList(`${this.assignments}/${courseId}/${offeringId}`);
   }
+
   getListOfAssignedCourses(staffId: string): Observable<any> {
-    const endPointUrl = `${this.getCourseOfferingInstructorAssignmentUrl()}/getListOfAssignedCourses/${staffId}`;
-    return this.httpClient.get<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.getList(`${this.assignments}/getListOfAssignedCourses/${staffId}`);
   }
-  getAssignedInstructors(academicTerm: number, year: number, batchId: string, courseId: string): Observable<any> {
-    const endPointUrl = `${this.getCourseOfferingInstructorAssignmentUrl()}/getAssignedInstructors/${academicTerm}/${year}/${batchId}/${courseId}`;
-    return this.httpClient.get<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
+
+  getAssignedInstructors(
+    academicTerm: number,
+    year: number,
+    batchId: string,
+    courseId: string
+  ): Observable<any> {
+    return this.crud.getList(
+      `${this.assignments}/getAssignedInstructors/${academicTerm}/${year}/${batchId}/${courseId}`
     );
   }
 }

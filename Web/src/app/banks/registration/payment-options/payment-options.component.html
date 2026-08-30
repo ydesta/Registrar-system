@@ -36,6 +36,14 @@
           <span class="label">Number of Courses</span>
           <span class="value">{{numberOfCourses || 0}}</span>
         </div>
+        <div class="summary-item" *ngIf="isLateRegistration && penaltyAmount > 0">
+          <span class="label">Course Amount</span>
+          <span class="value">{{formatCurrency(courseAmount, currency)}}</span>
+        </div>
+        <div class="summary-item" *ngIf="isLateRegistration && penaltyAmount > 0">
+          <span class="label">Late Penalty</span>
+          <span class="value">{{formatCurrency(penaltyAmount, currency)}}</span>
+        </div>
         <div class="summary-item total-amount">
           <span class="label">Total Amount</span>
           <span class="value">{{formatCurrency(totalAmount, currency)}}</span>

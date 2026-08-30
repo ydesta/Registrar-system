@@ -1,33 +1,36 @@
-<nz-table #courseTable [nzData]="courses" [nzBordered]="false" [nzShowPagination]="false">
-    <thead>
-        <tr>
-            <!-- <th nzWidth="5%">#</th> -->
-            <th nzWidth="7%">Course Code</th>
-            <th nzWidth="20%">Course Title</th>
-            <!-- <th nzWidth="20%">Credit Hours</th>
-            <th nzWidth="20%">Lecture Hours</th>
-            <th nzWidth="20%">Lab Hours</th> -->
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let course of courses ;let i = index">
-            <!-- <td>{{ i+1 }}</td> -->
-
-            <td>{{ course.courseCode }}</td>
-            <td>{{ course.courseTitle }}</td>
-            <!-- <td>{{ course.creditHours }}</td>
-            <td>{{ course.lectureHours }}</td>
-            <td>{{ course.labHours }}</td> -->
-        </tr>
-    </tbody>
-    <!-- <tfoot class="footer-row">
-        <tr>
-            <td>Total:</td>
-            <td></td>
-            <td></td>
-            <td>{{ calculateTotalCreditHours() }}</td>
-            <td>{{ calculateTotalLectureHours() }}</td>
-            <td>{{ calculateTotalLabHours() }}</td>
-        </tr>
-    </tfoot> -->
+<nz-table
+  #courseTable
+  [nzData]="courses || []"
+  nzBordered
+  [nzShowPagination]="false"
+  [nzSize]="'small'"
+  [nzNoResult]="emptyCourses"
+>
+  <thead>
+    <tr>
+      <th nzWidth="64px">S/N</th>
+      <th>Course Code</th>
+      <th>Course Title</th>
+      <th nzWidth="120px">Credit Hours</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let course of courseTable.data; let i = index">
+      <td>{{ i + 1 }}</td>
+      <td>{{ course.courseCode }}</td>
+      <td>{{ course.courseTitle }}</td>
+      <td>{{ course.creditHours }}</td>
+    </tr>
+  </tbody>
+  <tfoot *ngIf="courses?.length">
+    <tr>
+      <td></td>
+      <td></td>
+      <td>Total Credit Hours</td>
+      <td>{{ calculateTotalCreditHours() }}</td>
+    </tr>
+  </tfoot>
+  <ng-template #emptyCourses>
+    <span>No courses assigned to this quadrant</span>
+  </ng-template>
 </nz-table>

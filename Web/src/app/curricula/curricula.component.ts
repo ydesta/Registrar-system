@@ -1,9 +1,9 @@
-import { Component, OnInit } from "@angular/core";
-import { NzModalRef, NzModalService } from "ng-zorro-antd/modal";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { NzModalService } from "ng-zorro-antd/modal";
+import { PaginatorService, ServerPaginator } from "../reports/services/paginator.service";
 import { CrudService } from "../services/crud.service";
 import { CustomNotificationService } from "../services/custom-notification.service";
 import { Router } from "@angular/router";
-import { ColumnItem } from "./models/ColumnItem";
 import { StaticData } from "../admission-request/model/StaticData";
 import { CURRICULUM_STATUS } from "../common/constant";
 import { CurriculumStatusTrackingListComponent } from "./curriculum-status-tracking-list/curriculum-status-tracking-list.component";
@@ -13,136 +13,70 @@ import { CurriculumStatusTrackingListComponent } from "./curriculum-status-track
   templateUrl: "./curricula.component.html",
   styleUrls: ["./curricula.component.scss"]
 })
-export class CurriculaComponent implements OnInit {
-  curriculums: any;
+export class CurriculaComponent implements OnInit, OnDestroy {
+  curriculums: any[] = [];
   progId = "";
   checked = false;
-  searchKey = "";
-  pageindex = 1;
-  pageSize = 5;
-  sortOrder = "";
-  sortColumn = "";
-  pageSizeOption = [5, 10, 15, 25, 50, 100];
-  totalRecord = 0;
-  tbLoading = true;
-  listOfColumns: ColumnItem[] = [
-    {
-      name: "Curriculum Code",
-      sortOrder: null,
-      sortFn: (a: any, b: any) =>
-        a.curriculumCode.localeCompare(b.curriculumCode),
-      sortDirections: ["ascend", "descend", null],
-      filterMultiple: true,
-      listOfFilter: [],
-      filterFn: (list: string[], item: any) =>
-        list.some(name => item.curriculumCode.indexOf(name) !== -1)
-    },
-    {
-      name: "Programme Title",
-      sortOrder: "descend",
-      sortFn: (a: any, b: any) =>
-        a.acadamicProgramme.acadamicProgrammeTitle.localeCompare(
-          b.acadamicProgramme.acadamicProgrammeTitle
-        ),
-      sortDirections: ["descend", null],
-      listOfFilter: [],
-      filterFn: null,
-      filterMultiple: true
-    },
-    {
-      name: "Minimum Cumulative GPA",
-      sortOrder: null,
-      sortDirections: ["ascend", "descend", null],
-      sortFn: (a: any, b: any) => a.minimumCumlativGPA,
-      filterMultiple: false,
-      listOfFilter: [],
-      filterFn: null
-    },
-    {
-      name: "Minimum Major GPA",
-      sortOrder: "descend",
-      sortFn: (a: any, b: any) =>
-        a.minimumMajorGPA,
-      sortDirections: ["descend", null],
-      listOfFilter: [],
-      filterFn: null,
-      filterMultiple: false
-    },
-    {
-      name: "Min Total Credit Hours",
-      sortOrder: null,
-      sortDirections: ["ascend", "descend", null],
-      sortFn: (a: any, b: any) => a.minTotalCreditHours,
-      filterMultiple: false,
-      listOfFilter: [],
-      filterFn: null
-    },
-    {
-      name: "Passing Grade",
-      sortOrder: null,
-      sortDirections: ["ascend", "descend", null],
-      sortFn: (a: any, b: any) => a.passingGrade,
-      filterMultiple: false,
-      listOfFilter: [],
-      filterFn: null
-    },
-    {
-      name: "Status",
-      sortOrder: null,
-      sortDirections: ["ascend", "descend", null],
-      sortFn: (a: any, b: any) => a.status.length - b.status.length,
-      filterMultiple: false,
-      listOfFilter: [],
-      filterFn: null
-    }
-  ];
+  pager: ServerPaginator;
   listOfCurriculumStatus: StaticData[] = [];
+
   constructor(
     private _customNotificationService: CustomNotificationService,
     private _crudService: CrudService,
     private modal: NzModalService,
     private router: Router,
-    private _modal: NzModalService
-  ) {}
+    private _modal: NzModalService,
+    private paginator: PaginatorService
+  ) {
+    this.pager = this.paginator.create();
+  }
 
   ngOnInit(): void {
-    this.fetchProgram();
     this.getListOfCurriculumStatus();
+    this.pager.init(() => this.fetchProgram());
+    this.fetchProgram();
   }
+
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   fetchProgram() {
-    this.tbLoading = true;
+    this.pager.loading = true;
     this._crudService
-      .getList(
-        `/Curriculums/paginated?searchKey=${this.searchKey}&pageindex=${
-          this.pageindex - 1
-        }&pageSize=${this.pageSize}&sortColumn=${this.sortColumn}&sortOrder=${
-          this.sortOrder
-        }`
-      )
+      .getPaginated(`/Curriculums`, this.pager.query())
       .subscribe({
         next: (res: any) => {
-          this.curriculums = res.data;
-          this.totalRecord = res.totalRowCount;
-          this.pageSize = res.itemPerPage;
-          this.pageindex = res.currentPage + 1;
-          this.populateFilterOptions();
-          this.tbLoading = false;
+          this.curriculums = res?.data ?? [];
+          this.pager.applyResult(res);
         },
-        error: (error) => {
+        error: () => {
           this._customNotificationService.notification(
             "error",
             "Error",
             "Failed to fetch curricula"
           );
-          this.tbLoading = false;
+          this.pager.fail();
         }
       });
   }
+
+  onPageIndexChange(page: number): void {
+    this.pager.onPageIndexChange(page);
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pager.onPageSizeChange(size);
+  }
+
+  onSort(event: string | null, column: string): void {
+    this.pager.onSort(event, column);
+  }
+
   showDeleteConfirm(id: any): void {
     this.progId = id;
     this.modal.confirm({
       nzTitle: "Are you sure delete this Curriculum?",
-      // nzContent: '<b style="color: red;">Some descriptions</b>',
       nzOkText: "Yes",
       nzOkType: "primary",
       nzOkDanger: true,
@@ -150,7 +84,6 @@ export class CurriculaComponent implements OnInit {
         this._crudService
           .delete("/Curriculums", this.progId)
           .subscribe((res: any) => {
-            
             this.fetchProgram();
             if (res.status == "success") {
               this._customNotificationService.notification(
@@ -172,29 +105,9 @@ export class CurriculaComponent implements OnInit {
       nzOnCancel: () => {}
     });
   }
-  clickSearchKey() {
-    this.fetchProgram();
-  }
-
-  onSearch() {
-    this.pageindex = 1;
-    this.fetchProgram();
-  }
-
-  paginatedIndexEvent(event: number): void {
-    this.pageindex = event;
-    this.fetchProgram();
-  }
-
-  paginatedSizeEvent(event: number): void {
-    this.pageSize = event;
-    this.pageindex = 1; // Reset to first page when page size changes
-    this.fetchProgram();
-  }
 
   exportCurriculum() {
     this._crudService.getList("/Curriculums/excel").subscribe((res: any) => {
-      //acadamic-programme
       if (res.data.toString() == "No data found") {
         this._customNotificationService.notification(
           "error",
@@ -203,7 +116,7 @@ export class CurriculaComponent implements OnInit {
         );
       } else {
         let fileLists = res.data.split("/");
-        this._crudService.expoerExcel("/" + res.data).subscribe((data: any) => {
+        this._crudService.exportExcel("/" + res.data).subscribe((data: any) => {
           let downloadURL = window.URL.createObjectURL(data);
           let link = document.createElement("a");
           link.href = downloadURL;
@@ -218,33 +131,21 @@ export class CurriculaComponent implements OnInit {
       }
     });
   }
+
   goToQuadrantBreakdown(data: any) {
     this.router.navigateByUrl(
       `/curricula/quadrant-break-down?id=${data.id}&code=${data.curriculumCode}&programme=${data
         .acadamicProgramme.acadamicProgrammeTitle}`
     );
   }
+
   goToCurriculumBreakdown(data: any) {
     this.router.navigateByUrl(
       `/curricula/curriculum-break-down?id=${data.id}&code=${data.curriculumCode}&programme=${data
         .acadamicProgramme.acadamicProgrammeTitle}`
     );
   }
-  populateFilterOptions(): void {
-    this.listOfColumns.forEach(column => {
-      if (column.name === "Curriculum Code") {
-        const values = new Set<string>();
-        this.curriculums.forEach(data => {
-          values.add(data.curriculumCode);
-        });
-        column.listOfFilter = Array.from(values).map(value => ({
-          text: value,
-          value
-        }));
-      }
-      // Add similar logic for other columns if needed
-    });
-  }
+
   goToCurriculumTermYearBreakdown(data: any) {
     const id = 0;
     this.router.navigateByUrl(
@@ -252,6 +153,7 @@ export class CurriculaComponent implements OnInit {
         .acadamicProgramme.acadamicProgrammeTitle}`
     );
   }
+
   goToCurriculumQuadrantBreakdown(data: any) {
     const id = 0;
     this.router.navigateByUrl(
@@ -259,6 +161,14 @@ export class CurriculaComponent implements OnInit {
         .acadamicProgramme.acadamicProgrammeTitle}`
     );
   }
+
+  goToEditQuadrantBreakdown(data: any) {
+    this.router.navigateByUrl(
+      `/curricula/quadrant-break-down?id=${data.id}&code=${data.curriculumCode}&programme=${data
+        .acadamicProgramme.acadamicProgrammeTitle}&mode=edit`
+    );
+  }
+
   getListOfCurriculumStatus() {
     let division: StaticData = new StaticData();
     CURRICULUM_STATUS.forEach(pair => {
@@ -269,10 +179,12 @@ export class CurriculaComponent implements OnInit {
       this.listOfCurriculumStatus.push(division);
     });
   }
+
   getCurriculumStatusDescription(Id: any) {
     const program = this.listOfCurriculumStatus.find(item => item.Id == Id);
     return program ? program.Description : "";
   }
+
   setTaxStatusColor(status) {
     const statusColors = {
       1: "green",
@@ -282,6 +194,7 @@ export class CurriculaComponent implements OnInit {
 
     return statusColors[status] || "black";
   }
+
   cellStyles(status) {
     const color = this.setTaxStatusColor(status);
     const fontSize = 16;
@@ -291,6 +204,7 @@ export class CurriculaComponent implements OnInit {
       "font-size": `${fontSize}px`
     };
   }
+
   openModal(id: string): void {
     this._modal.create({
       nzTitle: "Curriculum Status Tracking List",

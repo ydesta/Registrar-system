@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { GradeChangeRequestService } from '../../../services/grade-change-request.service';
 import { GradeChangeRequestViewModel } from '../../../Models/GradeChangeRequestViewModel';
 import { CustomNotificationService } from '../../../services/custom-notification.service';
-import { Subject, takeUntil } from 'rxjs';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 
 @Component({
   selector: 'app-manage-grade-change-request',
@@ -12,34 +12,34 @@ import { Subject, takeUntil } from 'rxjs';
 })
 export class ManageGradeChangeRequestComponent implements OnInit, OnDestroy {
   gradeChangeRequests: GradeChangeRequestViewModel[] = [];
-  loading = false;
   staffId: string | null = null;
-  private destroy$ = new Subject<void>();
+  pager: ServerPaginator;
 
   constructor(
     private gradeChangeRequestService: GradeChangeRequestService,
     private notificationService: CustomNotificationService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private paginator: PaginatorService
+  ) {
+    this.pager = this.paginator.create();
+  }
 
   ngOnInit(): void {
-    this.initializeComponent();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  private initializeComponent(): void {
-    // Get staff ID from localStorage (assuming it's stored there)
     this.staffId = localStorage.getItem('staffId') || localStorage.getItem('userId');
-    
     if (this.staffId) {
+      this.pager.init(() => this.loadGradeChangeRequests());
       this.loadGradeChangeRequests();
     } else {
       this.notificationService.notification('error', 'Error', 'Staff ID not found. Please ensure you are logged in with a valid staff account.');
     }
+  }
+
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
+  get loading(): boolean {
+    return this.pager.loading;
   }
 
   loadGradeChangeRequests(): void {
@@ -48,29 +48,24 @@ export class ManageGradeChangeRequestComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loading = true;
-    this.gradeChangeRequestService.getGradeChangeRequestByStaffId(this.staffId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (requests: GradeChangeRequestViewModel[]) => {
-          this.gradeChangeRequests = requests;
-          this.loading = false;
-          this.notificationService.notification('success', 'Success', `Loaded ${requests.length} grade change requests`);
-        },
-        error: (error) => {
-          console.error('Error loading grade change requests:', error);
-          this.loading = false;
-          this.notificationService.notification('error', 'Error', 'Failed to load grade change requests. Please try again.');
-        }
-      });
+    this.pager.loading = true;
+    this.gradeChangeRequestService.getGradeChangeRequestByStaffIdPaginated(this.staffId, this.pager.query()).subscribe({
+      next: (res: any) => {
+        this.gradeChangeRequests = res.data || [];
+        this.pager.applyResult(res);
+      },
+      error: () => {
+        this.gradeChangeRequests = [];
+        this.pager.fail();
+        this.notificationService.notification('error', 'Error', 'Failed to load grade change requests. Please try again.');
+      }
+    });
   }
 
-  // Method to refresh the data
   refreshData(): void {
     this.loadGradeChangeRequests();
   }
 
-  // Get status color based on status string
   getStatusColor(status: string): string {
     switch (status) {
       case 'Pending': return 'orange';
@@ -80,26 +75,18 @@ export class ManageGradeChangeRequestComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Get status text based on status string (just return the status as is)
   getStatusText(status: string): string {
     return status || 'Unknown';
   }
 
-  // View request details
   viewDetails(request: GradeChangeRequestViewModel): void {
-    console.log('Viewing details for request:', request);
-    // TODO: Implement modal or navigation to detail view
     this.notificationService.notification('info', 'Info', 'View details functionality will be implemented soon.');
   }
 
-  // Review request (approve/reject)
   reviewRequest(request: GradeChangeRequestViewModel): void {
-    console.log('Reviewing request:', request);
-    // TODO: Implement review modal or form
     this.notificationService.notification('info', 'Info', 'Review functionality will be implemented soon.');
   }
 
-  // Navigate to new grade change request form
   navigateToNewRequest(): void {
     this.router.navigate(['/students/grade-change-request-form']);
   }

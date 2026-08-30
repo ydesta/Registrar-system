@@ -63,7 +63,7 @@ export class AddStudentGradeComponent implements OnInit {
       this.action = 'Edit Student Grade';
       this.submit = 'Update';
       this._crudService
-        .getList('/StudentGrades' + '/' + this.progStatusId)
+        .getById('/StudentGrades', this.progStatusId)
         .subscribe((res: any) => {
           this.patchValues(res.data);
         });

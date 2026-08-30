@@ -32,7 +32,7 @@ export class UpdateFromExcelComponent {
     this.selectedFile = raw ?? null;
     this.result = null;
     this.cdr.detectChanges();
-    return true; // allow upload so nzCustomRequest runs
+    return true;
   };
 
   handleChange(event: { file: NzUploadFile; fileList: NzUploadFile[] }): void {
@@ -44,7 +44,6 @@ export class UpdateFromExcelComponent {
     }
   }
 
-  /** Custom upload: send file to our API when user selects a file (no extra button click). */
   customRequest = (item: NzUploadXHRArgs): Subscription => {
     const file = (item.file.originFileObj || item.file) as File;
     if (!file || !(file instanceof File)) {
@@ -58,49 +57,20 @@ export class UpdateFromExcelComponent {
     this.uploading = true;
     this.result = null;
     this.cdr.detectChanges();
-
     return this.userManagementService.updateUsersFromExcel(file).subscribe({
       next: (res: any) => {
         const result = this.normalizeResult(res);
-        this.uploading = false;
-        this.result = result;
-        this.cdr.detectChanges();
+        this.finishUpload(result);
         item.onSuccess!(result, item.file, null);
-        const sc = result.successCount;
-        const fc = result.failureCount;
-        const errs = result.errors || [];
-        if (fc === 0 && errs.length === 0) {
-          this.message.success(`Successfully updated ${sc} user(s).`);
-        } else if (sc > 0) {
-          this.message.warning(`Updated ${sc} user(s). ${fc} failed.`);
-        } else {
-          this.message.error(`All rows failed. Check errors below (e.g. 'olduser' must match existing username/email; 'newemail' required).`);
-        }
       },
       error: (err) => {
         this.uploading = false;
         this.cdr.detectChanges();
-        const msg = err?.error?.message || err?.message || 'Failed to process Excel file.';
-        this.message.error(msg);
+        this.message.error(err?.error?.message || err?.message || 'Failed to process Excel file.');
         item.onError!(err, item.file);
       }
     });
   };
-
-  /** Normalize API response (handles both camelCase and PascalCase from C#). */
-  private normalizeResult(res: any): BulkUpdateFromExcelResult {
-    const successCount = res?.successCount ?? res?.SuccessCount ?? 0;
-    const failureCount = res?.failureCount ?? res?.FailureCount ?? 0;
-    const rawErrors = res?.errors ?? res?.Errors ?? [];
-    const errors = Array.isArray(rawErrors)
-      ? rawErrors.map((e: any) => ({
-          rowNumber: e.rowNumber ?? e.RowNumber ?? 0,
-          oldUser: e.oldUser ?? e.OldUser,
-          message: e.message ?? e.Message ?? ''
-        }))
-      : [];
-    return { successCount, failureCount, errors };
-  }
 
   clearFile(): void {
     this.selectedFile = null;
@@ -118,27 +88,45 @@ export class UpdateFromExcelComponent {
     this.result = null;
     this.cdr.detectChanges();
     this.userManagementService.updateUsersFromExcel(this.selectedFile).subscribe({
-      next: (res: any) => {
-        const result = this.normalizeResult(res);
-        this.uploading = false;
-        this.result = result;
-        this.cdr.detectChanges();
-        const sc = result.successCount;
-        const fc = result.failureCount;
-        const errs = result.errors || [];
-        if (fc === 0 && errs.length === 0) {
-          this.message.success(`Successfully updated ${sc} user(s).`);
-        } else if (sc > 0) {
-          this.message.warning(`Updated ${sc} user(s). ${fc} failed.`);
-        } else {
-          this.message.error(`All rows failed. Check errors below (e.g. 'olduser' must match existing username/email; 'newemail' required).`);
-        }
-      },
+      next: (res: any) => this.finishUpload(this.normalizeResult(res)),
       error: (err) => {
         this.uploading = false;
         this.cdr.detectChanges();
         this.message.error(err?.error?.message || 'Failed to process Excel file.');
       }
     });
+  }
+
+  private finishUpload(result: BulkUpdateFromExcelResult): void {
+    this.uploading = false;
+    this.result = result;
+    this.cdr.detectChanges();
+    const sc = result.successCount;
+    const fc = result.failureCount;
+    const errs = result.errors || [];
+    if (fc === 0 && errs.length === 0) {
+      this.message.success(`Successfully updated ${sc} user(s).`);
+      return;
+    }
+    if (sc > 0) {
+      this.message.warning(`Updated ${sc} user(s). ${fc} failed.`);
+      return;
+    }
+    this.message.error(`All rows failed. Check errors below (e.g. 'olduser' must match existing username/email; 'newemail' required).`);
+  }
+
+  private normalizeResult(res: any): BulkUpdateFromExcelResult {
+    const rawErrors = res?.errors ?? res?.Errors ?? [];
+    return {
+      successCount: res?.successCount ?? res?.SuccessCount ?? 0,
+      failureCount: res?.failureCount ?? res?.FailureCount ?? 0,
+      errors: Array.isArray(rawErrors)
+        ? rawErrors.map((e: any) => ({
+            rowNumber: e.rowNumber ?? e.RowNumber ?? 0,
+            oldUser: e.oldUser ?? e.OldUser,
+            message: e.message ?? e.Message ?? ''
+          }))
+        : []
+    };
   }
 }

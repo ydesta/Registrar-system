@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { UserManagementService } from '../../../services/user-management.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { environment } from '../../../../environments/environment';
-import { SecureLoggerService } from '../../../services/secure-logger.service';
 import * as XLSX from 'xlsx';
 
 export interface UserCredential {
@@ -47,8 +46,7 @@ export class UserCredentialsComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private userManagementService: UserManagementService,
-    private message: NzMessageService,
-    private logger: SecureLoggerService
+    private message: NzMessageService
   ) {
     this.searchForm = this.fb.group({
       fromDate: [null],
@@ -58,49 +56,12 @@ export class UserCredentialsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.logger.debug('UserCredentialsComponent initialized');
-    this.logger.debug('Current user role:', { role: localStorage.getItem('role') });
-    this.logger.debug('Current user type:', { userType: localStorage.getItem('userType') });
-    
-    // Test API connection first
-    this.testApiConnection();
-  }
-
-  testApiConnection(): void {
-    this.logger.debug('Testing API connection...');
-    this.userManagementService.testApiConnection().subscribe({
-      next: (response) => {
-        this.logger.debug('API connection test successful');
-        this.loadUserCredentials();
-      },
-      error: (error) => {
-        this.logger.error('API connection test failed');
-        
-        if (error.status === 404) {
-          this.message.error(`API server not found. Please ensure the SecureAuth API is running on ${environment.secureUrl}`);
-        } else if (error.status === 0) {
-          this.message.error(`Cannot connect to API server. Please check if the server is running on ${environment.secureUrl}`);
-        } else {
-          this.message.error(`API connection failed: ${error.message || 'Unknown error'}`);
-        }
-      }
-    });
+    this.loadUserCredentials();
   }
 
   loadUserCredentials(): void {
     this.loading = true;
     const formValue = this.searchForm.value;
-    
-    this.logger.debug('Loading user credentials with params:', {
-      fromDate: formValue.fromDate,
-      toDate: formValue.toDate,
-      page: this.currentPage,
-      pageSize: this.pageSize,
-      emailFilter: formValue.emailFilter || null,
-      sortBy: 'CreatedAt',
-      sortDescending: true
-    });
-    
     this.userManagementService.getUserCredentials({
       fromDate: formValue.fromDate,
       toDate: formValue.toDate,
@@ -122,18 +83,7 @@ export class UserCredentialsComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error loading user credentials:', error);
-        
-        if (error.status === 403) {
-          this.message.error('Access denied. You do not have permission to view user credentials. Please contact your administrator.');
-        } else if (error.status === 404) {
-          this.message.error('API endpoint not found. Please ensure the SecureAuth API is running.');
-        } else if (error.status === 0) {
-          this.message.error(`Cannot connect to API server. Please check if the server is running on ${environment.secureUrl}`);
-        } else {
-          this.message.error(`Failed to load user credentials: ${error.message || 'Unknown error'}`);
-        }
-        
+        this.message.error(this.credentialsError(error, 'Failed to load user credentials'));
         this.loading = false;
       }
     });
@@ -144,9 +94,9 @@ export class UserCredentialsComponent implements OnInit {
       this.listOfDisplayData = [...this.userCredentials];
       return;
     }
-    
+    const key = this.searchValue.toLowerCase();
     this.listOfDisplayData = this.userCredentials.filter(credential =>
-      credential.email.toLowerCase().includes(this.searchValue.toLowerCase())
+      credential.email.toLowerCase().includes(key)
     );
   }
 
@@ -173,6 +123,10 @@ export class UserCredentialsComponent implements OnInit {
     });
   }
 
+  testApiConnection(): void {
+    this.loadUserCredentials();
+  }
+
   trackByFn(index: number, item: UserCredential): number {
     return item.id;
   }
@@ -180,7 +134,6 @@ export class UserCredentialsComponent implements OnInit {
   exportToExcel(): void {
     this.loading = true;
     const formValue = this.searchForm.value;
-    
     this.userManagementService.getUserCredentialsForExport({
       fromDate: formValue.fromDate,
       toDate: formValue.toDate,
@@ -198,58 +151,43 @@ export class UserCredentialsComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error exporting to Excel:', error);
-        
-        if (error.status === 403) {
-          this.message.error('Access denied. You do not have permission to export user credentials.');
-        } else if (error.status === 404) {
-          this.message.error('API endpoint not found. Please ensure the SecureAuth API is running.');
-        } else if (error.status === 0) {
-          this.message.error(`Cannot connect to API server. Please check if the server is running on ${environment.secureUrl}`);
-        } else {
-          this.message.error(`Failed to export to Excel: ${error.message || 'Unknown error'}`);
-        }
-        
+        this.message.error(this.credentialsError(error, 'Failed to export to Excel'));
         this.loading = false;
       }
     });
   }
 
+  onPageIndexChange(pageIndex: number): void {
+    this.currentPage = pageIndex;
+    this.loadUserCredentials();
+  }
+
+  onPageSizeChange(pageSize: number): void {
+    this.pageSize = pageSize;
+    this.currentPage = 1;
+    this.loadUserCredentials();
+  }
+
+  onCurrentPageDataChange(_listOfCurrentPageData: readonly UserCredential[]): void {
+  }
+
   private generateExcelFile(data: UserCredential[]): void {
-    // Prepare data for Excel
     const excelData = data.map(item => ({
-      'ID': item.id,
-      'Email': item.email,
-      'Password': item.password,
+      ID: item.id,
+      Email: item.email,
+      Password: item.password,
       'Created At': this.formatDateForExcel(item.createdAt)
     }));
-
-    // Create workbook and worksheet
     const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(excelData);
+    ws['!cols'] = [{ wch: 8 }, { wch: 30 }, { wch: 20 }, { wch: 25 }];
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'User Credentials');
-
-    // Set column widths
-    const colWidths = [
-      { wch: 8 },   // ID
-      { wch: 30 },  // Email
-      { wch: 20 },  // Password
-      { wch: 25 }   // Created At
-    ];
-    ws['!cols'] = colWidths;
-
-    // Generate filename with current date and time
-    const now = new Date();
-    const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
-    const filename = `User_Credentials_${timestamp}.xlsx`;
-
-    // Save file
-    XLSX.writeFile(wb, filename);
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    XLSX.writeFile(wb, `User_Credentials_${timestamp}.xlsx`);
   }
 
   private formatDateForExcel(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
+    return new Date(dateString).toLocaleString('en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -260,23 +198,16 @@ export class UserCredentialsComponent implements OnInit {
     });
   }
 
-  // Pagination methods
-  onPageIndexChange(pageIndex: number): void {
-    console.log('Page index changed to:', pageIndex);
-    this.currentPage = pageIndex;
-    this.loadUserCredentials();
-  }
-
-  onPageSizeChange(pageSize: number): void {
-    console.log('Page size changed to:', pageSize);
-    this.pageSize = pageSize;
-    this.currentPage = 1; // Reset to first page when changing page size
-    this.loadUserCredentials();
-  }
-
-  onCurrentPageDataChange(listOfCurrentPageData: readonly UserCredential[]): void {
-    console.log('Current page data changed:', listOfCurrentPageData);
-    // This method is called when the current page data changes
-    // Useful for tracking which items are currently visible
+  private credentialsError(error: any, fallback: string): string {
+    if (error.status === 403) {
+      return 'Access denied. You do not have permission to view user credentials. Please contact your administrator.';
+    }
+    if (error.status === 404) {
+      return 'API endpoint not found. Please ensure the SecureAuth API is running.';
+    }
+    if (error.status === 0) {
+      return `Cannot connect to API server. Please check if the server is running on ${environment.secureUrl}`;
+    }
+    return `${fallback}: ${error.message || 'Unknown error'}`;
   }
 }

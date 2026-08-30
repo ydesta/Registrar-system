@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using SecureAuth.APPLICATION.Commands.User;
+using SecureAuth.APPLICATION.Helpers;
 using SecureAuth.APPLICATION.Interfaces;
 using SecureAuth.DOMAIN.Models;
 using System.Security.Claims;
@@ -59,7 +60,11 @@ namespace SecureAuth.APPLICATION.Commands.User
 
             if (!string.IsNullOrEmpty(command.PhoneNumber) && user.PhoneNumber != command.PhoneNumber)
             {
-                user.PhoneNumber = command.PhoneNumber;
+                if (!EthiopianPhoneNumber.TryNormalize(command.PhoneNumber, out var normalizedPhone))
+                {
+                    return false;
+                }
+                user.PhoneNumber = normalizedPhone;
                 changes.Add("PhoneNumber");
             }
 

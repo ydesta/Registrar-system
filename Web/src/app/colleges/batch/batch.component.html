@@ -9,7 +9,7 @@
       <div class="header-actions">
         <div class="search-section">
           <nz-input-group [nzSuffix]="suffixIconSearch">
-            <input type="text" nz-input placeholder="Search by code, curriculum, or year..." [(ngModel)]="searchKey" (ngModelChange)="onSearch()"/>
+            <input type="text" nz-input placeholder="Search by code, curriculum, or year..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)"/>
           </nz-input-group>
           <ng-template #suffixIconSearch>
             <span nz-icon nzType="search"></span>
@@ -37,16 +37,16 @@
       <nz-table #basicTable 
                 [nzData]="paginatedBatches" 
                 nzBordered
-                [nzPageSize]="pageSize"
-                [nzPageSizeOptions]="pageSizeOption"
+                [nzPageSize]="pager.pageSize"
+                [nzPageSizeOptions]="pager.pageSizeOptions"
                 [nzShowSizeChanger]="true"
-                [nzTotal]="total"
-                [nzPageIndex]="pageIndex"
-                (nzPageIndexChange)="onPageIndexChange($event)"
-                (nzPageSizeChange)="onPageSizeChange($event)"
+                [nzTotal]="pager.total"
+                [nzPageIndex]="pager.pageIndex"
+                (nzPageIndexChange)="pager.onPageIndexChange($event)"
+                (nzPageSizeChange)="pager.onPageSizeChange($event)"
                 [nzFrontPagination]="false"
                 [nzShowTotal]="rangeTemplate"
-                [nzLoading]="isLoading"
+                [nzLoading]="pager.loading"
                 [nzNoResult]="emptyTpl"
                 class="batch-table">
         <ng-template #rangeTemplate let-range="range" let-total>
@@ -67,7 +67,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let batch of paginatedBatches; let i = index">
-            <td><span class="sn-badge">{{ (pageIndex - 1) * pageSize + i + 1 }}</span></td>
+            <td><span class="sn-badge">{{ pager.serial(i) }}</span></td>
             <td>{{ batch.batchCode }}</td>
             <td>{{ batch.curriculum.curriculumCode }}</td>
             <td>{{ batch.academicTerm }}</td>

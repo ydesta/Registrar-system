@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 
@@ -8,65 +9,46 @@ import { CustomNotificationService } from 'src/app/services/custom-notification.
   templateUrl: './accrediation.component.html',
   styleUrls: ['./accrediation.component.scss'],
 })
-export class AccrediationComponent implements OnInit {
+export class AccrediationComponent implements OnInit, OnDestroy {
   curriculums: any[] = [];
-  pageindex = 1;
-  pageSize = 5;
-  pageSizeOption = [5, 10, 15, 25, 50, 100];
-  totalRecord = 0;
-  tbLoading = true;
-  searchKey = '';
-  sortOrder = '';
-  sortColumn = '';
+  pager: ServerPaginator;
 
   constructor(
     private _customNotificationService: CustomNotificationService,
     private _crudService: CrudService,
-    private modal: NzModalService
-  ) {}
+    private modal: NzModalService,
+    private paginator: PaginatorService
+  ) {
+    this.pager = this.paginator.create();
+  }
 
   ngOnInit(): void {
+    this.pager.init(() => this.fetchAccreditation());
     this.fetchAccreditation();
   }
 
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   fetchAccreditation() {
-    this.tbLoading = true;
+    this.pager.loading = true;
     this._crudService
-      .getList(
-        `/Accreditation/paginated?searchKey=${this.searchKey}&pageindex=${
-          this.pageindex - 1
-        }&pageSize=${this.pageSize}&sortColumn=${this.sortColumn}&sortOrder=${
-          this.sortOrder
-        }`
-      )
+      .getPaginated(`/CurriculumAccrediations`, this.pager.query())
       .subscribe({
         next: (res: any) => {
           this.curriculums = res.data;
-          this.totalRecord = res.totalRowCount;
-          this.pageSize = res.itemPerPage;
-          this.pageindex = res.currentPage + 1;
-          this.tbLoading = false;
+          this.pager.applyResult(res);
         },
-        error: (error) => {
+        error: () => {
           this._customNotificationService.notification(
             'error',
             'Error',
             'Failed to fetch accreditation data'
           );
-          this.tbLoading = false;
+          this.pager.fail();
         }
       });
-  }
-
-  paginatedIndexEvent(event: number): void {
-    this.pageindex = event;
-    this.fetchAccreditation();
-  }
-
-  paginatedSizeEvent(event: number): void {
-    this.pageSize = event;
-    this.pageindex = 1; // Reset to first page when page size changes
-    this.fetchAccreditation();
   }
 
   showDeleteConfirm(id: string): void {
@@ -95,7 +77,7 @@ export class AccrediationComponent implements OnInit {
                 );
               }
             },
-            error: (error) => {
+            error: () => {
               this._customNotificationService.notification(
                 'error',
                 'Error',
@@ -118,7 +100,7 @@ export class AccrediationComponent implements OnInit {
           );
         } else {
           const fileLists = res.data.split('/');
-          this._crudService.expoerExcel('/' + res.data).subscribe((data: any) => {
+          this._crudService.exportExcel('/' + res.data).subscribe((data: any) => {
             const downloadURL = window.URL.createObjectURL(data);
             const link = document.createElement('a');
             link.href = downloadURL;
@@ -132,7 +114,7 @@ export class AccrediationComponent implements OnInit {
           });
         }
       },
-      error: (error) => {
+      error: () => {
         this._customNotificationService.notification(
           'error',
           'Error',

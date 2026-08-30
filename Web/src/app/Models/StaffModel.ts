@@ -2,6 +2,7 @@ export interface StaffModel {
     id: string,
     staffCode: string,
     firstName: string,
+    middleName?: string,
     lastName: string,
     gender: string,
     birthDate: Date,

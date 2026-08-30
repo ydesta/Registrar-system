@@ -1,12 +1,10 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable, map, of, shareReplay, catchError, throwError, BehaviorSubject, finalize, filter, take } from "rxjs";
-import { environment } from "src/environments/environment";
-import { ApplicationRequest } from "../model/application-request.model";
-import { ApplicantAcedamicRequestViewModel, ApplicantIncompleteResponse } from "../model/applicant-acedamic-request-view-model.model";
+import { Injectable } from '@angular/core';
+import { Observable, of, throwError, BehaviorSubject } from 'rxjs';
+import { catchError, filter, finalize, map, take } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
+import { ApplicantAcedamicRequestViewModel, ApplicantIncompleteResponse } from '../model/applicant-acedamic-request-view-model.model';
+import { CrudService } from 'src/app/services/crud.service';
 
-// Add interfaces for API responses
-// Most API responses in this system follow a consistent pattern with data, message, success, and status fields
 interface ApiResponse<T> {
   data: T;
   message?: string;
@@ -37,67 +35,75 @@ interface ReviewerDecisionResponse extends CreateUpdateResponse {
 }
 
 @Injectable({
-  providedIn: "root"
+  providedIn: 'root'
 })
 export class GeneralInformationService {
-  baseUrl = environment.baseUrl;
-  private readonly _generalUserInformation: string = `/${environment.apiVersion}/applicant`;
+  private readonly applicants = `/${environment.apiVersion}/applicant`;
   private parentApplicantIdSubject = new BehaviorSubject<string | null>(null);
   private isFetching = false;
   private lastFetchTime = 0;
   private readonly FETCH_COOLDOWN = 5000;
 
-  getApplicantUrl() {
-    return this.baseUrl + this._generalUserInformation;
+  constructor(private crud: CrudService) { }
+
+  createGeneralInformation(
+    generalUserInformation: any
+  ): Observable<ApiResponse<CreateUpdateResponse> | CreateUpdateResponse> {
+    return this.crud.add<ApiResponse<CreateUpdateResponse> | CreateUpdateResponse>(
+      this.applicants,
+      generalUserInformation
+    );
   }
 
-  constructor(private httpClient: HttpClient) { }
-
-  createGeneralInformation(generalUserInformation: any): Observable<ApiResponse<CreateUpdateResponse> | CreateUpdateResponse> {
-    const endPointUrl = `${this.getApplicantUrl()}`;
-    return this.httpClient.post<ApiResponse<CreateUpdateResponse> | CreateUpdateResponse>(endPointUrl, generalUserInformation);
-  }
   getApplicantByUserId(id: string): Observable<ApiResponse<ApplicantResponse> | ApplicantResponse> {
-    const endpointUrl = `${this.getApplicantUrl()}/ByApplicantUserId/${id}`;
-    return this.httpClient.get<ApiResponse<ApplicantResponse> | ApplicantResponse>(endpointUrl);
+    return this.crud.getList<ApiResponse<ApplicantResponse> | ApplicantResponse>(
+      `${this.applicants}/ByApplicantUserId/${id}`
+    );
   }
 
   getApplicantById(id: string): Observable<ApiResponse<ApplicantResponse> | ApplicantResponse> {
-    const endpointUrl = `${this.getApplicantUrl()}/${id}`;
-    return this.httpClient.get<ApiResponse<ApplicantResponse> | ApplicantResponse>(endpointUrl);
+    return this.crud.getById<ApiResponse<ApplicantResponse> | ApplicantResponse>(this.applicants, id);
   }
+
   finalSubmit(id: string, finalRequest: any): Observable<ApiResponse<CreateUpdateResponse> | CreateUpdateResponse> {
-    const endPointUrl = `${this.getApplicantUrl()}/RequestApplicant/${id}`;
-    return this.httpClient.patch<ApiResponse<CreateUpdateResponse> | CreateUpdateResponse>(endPointUrl, finalRequest);
+    return this.crud.update<ApiResponse<CreateUpdateResponse> | CreateUpdateResponse>(
+      `${this.applicants}/RequestApplicant`,
+      id,
+      finalRequest
+    );
   }
-  updateApplicant(id: string, generalUserInformation: any): Observable<ApiResponse<CreateUpdateResponse> | CreateUpdateResponse> {
-    const endPointUrl = `${this.getApplicantUrl()}/${id}`;
-    return this.httpClient.patch<ApiResponse<CreateUpdateResponse> | CreateUpdateResponse>(endPointUrl, generalUserInformation);
+
+  updateApplicant(
+    id: string,
+    generalUserInformation: any
+  ): Observable<ApiResponse<CreateUpdateResponse> | CreateUpdateResponse> {
+    return this.crud.update<ApiResponse<CreateUpdateResponse> | CreateUpdateResponse>(
+      this.applicants,
+      id,
+      generalUserInformation
+    );
   }
+
   getApplicantRequestList(academicProgrammeId?: string, status?: number): Observable<ApplicantAcedamicRequestViewModel[]> {
-    let endpointUrl = `${this.getApplicantUrl()}/request`;
-    const queryParams = new URLSearchParams();
-    if (academicProgrammeId) {
-      queryParams.append('academicProgrammeId', academicProgrammeId);
-    }
-    if (status !== null && status !== undefined) {
-      queryParams.append('status', status.toString());
-    }
-    const queryString = queryParams.toString();
-    if (queryString) {
-      endpointUrl += `?${queryString}`;
-    }
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as ApplicantAcedamicRequestViewModel[]));
+    return this.crud.getList<ApplicantAcedamicRequestViewModel[]>(`${this.applicants}/request`, {
+      academicProgrammeId,
+      status
+    });
+  }
+
+  getApplicantRequestListPaginated(query: string): Observable<any> {
+    return this.crud.getPaginated(`${this.applicants}/request`, query);
   }
 
   applicantReviewerDecision(
     id: number,
     accedamicProgramRequest: any
   ): Observable<ApiResponse<ReviewerDecisionResponse> | ReviewerDecisionResponse> {
-    const endPointUrl = `${this.getApplicantUrl()}/ReviewerDecision/${id}`;
-    return this.httpClient.patch<ApiResponse<ReviewerDecisionResponse> | ReviewerDecisionResponse>(endPointUrl, accedamicProgramRequest);
+    return this.crud.update<ApiResponse<ReviewerDecisionResponse> | ReviewerDecisionResponse>(
+      `${this.applicants}/ReviewerDecision`,
+      id,
+      accedamicProgramRequest
+    );
   }
 
   getOrStoreParentApplicantId(userId: string): Observable<string | null> {
@@ -132,48 +138,42 @@ export class GeneralInformationService {
     this.isFetching = true;
     this.lastFetchTime = now;
 
-    const endpointUrl = `${this.getApplicantUrl()}/ByApplicantUserId/${userId}`;
-
-    return this.httpClient
-      .get<ApiResponse<ApplicantResponse> | ApplicantResponse>(endpointUrl)
-      .pipe(
-        map(res => {
-          const applicantData = this.extractResponseData<ApplicantResponse>(res);
-          if (!applicantData?.id) {
-            // Don't throw an error for "no data found" - this is a valid state
-            // Instead, return a special value that components can handle
-            this.parentApplicantIdSubject.next(null);
-            return null;
-          }
-          const applicantId = applicantData.id;
-          localStorage.setItem('parent_applicant_id', applicantId);
-          this.parentApplicantIdSubject.next(applicantId);
-          return applicantId;
-        }),
-        catchError(error => {
-          this.clearParentApplicantIdCache();
-          
-          let errorMessage = 'Unable to load applicant data. ';
-          if (error.status === 404) {
-            errorMessage += 'No applicant found for this user.';
-          } else if (error.status === 0) {
-            errorMessage += 'Network error: Unable to connect to the server.';
-          } else if (error.status >= 500) {
-            errorMessage += 'Server error: Please try again later.';
-          } else if (error.status === 401) {
-            errorMessage += 'Authentication failed: Please login again.';
-          } else if (error.status === 403) {
-            errorMessage += 'Access denied: You do not have permission to access this resource.';
-          } else {
-            errorMessage += error.message || 'Unknown error occurred.';
-          }
-          
-          return throwError(() => new Error(errorMessage));
-        }),
-        finalize(() => {
-          this.isFetching = false;
-        })
-      );
+    return this.crud.getList<ApiResponse<ApplicantResponse> | ApplicantResponse>(
+      `${this.applicants}/ByApplicantUserId/${userId}`
+    ).pipe(
+      map(res => {
+        const applicantData = this.extractResponseData<ApplicantResponse>(res);
+        if (!applicantData?.id) {
+          this.parentApplicantIdSubject.next(null);
+          return null;
+        }
+        const applicantId = applicantData.id;
+        localStorage.setItem('parent_applicant_id', applicantId);
+        this.parentApplicantIdSubject.next(applicantId);
+        return applicantId;
+      }),
+      catchError(error => {
+        this.clearParentApplicantIdCache();
+        let errorMessage = 'Unable to load applicant data. ';
+        if (error.status === 404) {
+          errorMessage += 'No applicant found for this user.';
+        } else if (error.status === 0) {
+          errorMessage += 'Network error: Unable to connect to the server.';
+        } else if (error.status >= 500) {
+          errorMessage += 'Server error: Please try again later.';
+        } else if (error.status === 401) {
+          errorMessage += 'Authentication failed: Please login again.';
+        } else if (error.status === 403) {
+          errorMessage += 'Access denied: You do not have permission to access this resource.';
+        } else {
+          errorMessage += error.message || 'Unknown error occurred.';
+        }
+        return throwError(() => new Error(errorMessage));
+      }),
+      finalize(() => {
+        this.isFetching = false;
+      })
+    );
   }
 
   clearParentApplicantIdCache() {
@@ -203,10 +203,12 @@ export class GeneralInformationService {
     }
     return null;
   }
+
   getIncompleteApplicants(): Observable<ApplicantIncompleteResponse[]> {
-    let endpointUrl = `${this.getApplicantUrl()}/getIncompleteApplicants/request`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as ApplicantIncompleteResponse[]));
+    return this.crud.getList<ApplicantIncompleteResponse[]>(`${this.applicants}/getIncompleteApplicants/request`);
+  }
+
+  getIncompleteApplicantsPaginated(query: string): Observable<any> {
+    return this.crud.getPaginated(`${this.applicants}/getIncompleteApplicants/request`, query);
   }
 }

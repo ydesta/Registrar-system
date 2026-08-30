@@ -9,7 +9,7 @@
       <div class="header-actions">
         <div class="search-section">
           <nz-input-group [nzSuffix]="suffixIconSearch">
-            <input type="text" nz-input placeholder="Search by student ID, course, or amount..." [(ngModel)]="searchKey" (ngModelChange)="onSearch()"/>
+            <input type="text" nz-input placeholder="Search by student ID, course, or amount..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)"/>
           </nz-input-group>
           <ng-template #suffixIconSearch>
             <span nz-icon nzType="search"></span>
@@ -37,29 +37,31 @@
       <nz-table #basicTable 
                 [nzData]="studentPayments!" 
                 nzBordered
-                [nzPageSize]="pageSize"
+                [nzPageSize]="pager.pageSize"
+                [nzPageSizeOptions]="pager.pageSizeOptions"
                 [nzShowSizeChanger]="true"
-                [nzTotal]="totalRecord"
-                [nzPageIndex]="pageindex"
-                (nzPageIndexChange)="paginatedIndexEvent($event)"
-                (nzPageSizeChange)="paginatedSizeEvent($event)"
-                [nzLoading]="tbLoading"
+                [nzTotal]="pager.total"
+                [nzPageIndex]="pager.pageIndex"
+                (nzPageIndexChange)="pager.onPageIndexChange($event)"
+                (nzPageSizeChange)="pager.onPageSizeChange($event)"
+                [nzFrontPagination]="false"
+                [nzLoading]="pager.loading"
                 [nzNoResult]="emptyTpl"
                 class="student-payments-table">
         <thead>
           <tr>
             <th style="min-width: 60px;">S/N</th>
-            <th style="min-width: 140px;" [nzSortFn]="true" (nzSortOrderChange)="changeSortColumn($event, 'StudentID')">Student ID</th>
-            <th style="min-width: 200px;" [nzSortFn]="true" (nzSortOrderChange)="changeSortColumn($event, 'CourseTitle')">Course</th>
-            <th style="min-width: 160px;" [nzSortFn]="true" (nzSortOrderChange)="changeSortColumn($event, 'BankTransactionID')">Bank Transaction ID</th>
-            <th style="min-width: 120px;" [nzSortFn]="true" (nzSortOrderChange)="changeSortColumn($event, 'Amount')">Amount</th>
-            <th style="min-width: 150px;" [nzSortFn]="true" (nzSortOrderChange)="changeSortColumn($event, 'Remark')">Remark</th>
+            <th style="min-width: 140px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'StudentID')">Student ID</th>
+            <th style="min-width: 200px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'CourseTitle')">Course</th>
+            <th style="min-width: 160px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'BankTransactionID')">Bank Transaction ID</th>
+            <th style="min-width: 120px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'Amount')">Amount</th>
+            <th style="min-width: 150px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'Remark')">Remark</th>
             <th style="min-width: 100px;">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let data of basicTable.data; let i = index">
-            <td><span class="sn-badge">{{ (pageindex - 1) * pageSize + i + 1 }}</span></td>
+            <td><span class="sn-badge">{{ pager.serial(i) }}</span></td>
             <td>{{ data.studentID }}</td>
             <td>{{ data.course?.courseTitle }}</td>
             <td>{{ data.bankTransactionID }}</td>

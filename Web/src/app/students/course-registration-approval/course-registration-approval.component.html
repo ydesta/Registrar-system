@@ -6,6 +6,15 @@
         <h2 class="title-text">Student Course Registration Approval</h2>
         <p class="subtitle-text">Review and approve course registrations for students</p>
       </div>
+      <div style="width: 300px; margin-top: 12px;">
+        <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+          <input type="text" nz-input placeholder="search..." [(ngModel)]="pager.searchKey"
+            (ngModelChange)="pager.onSearch($event)" />
+        </nz-input-group>
+        <ng-template #suffixIconButton>
+          <button nz-button nzType="primary" nzSearch><i nz-icon nzType="search"></i></button>
+        </ng-template>
+      </div>
     </div>
   </div>
 
@@ -16,8 +25,15 @@
         #basicTable 
         [nzData]="studentTermCourseReg!" 
         nzBordered
-        [nzPageSize]="10"
+        [nzPageSize]="pager.pageSize"
+        [nzPageSizeOptions]="pager.pageSizeOptions"
         [nzShowSizeChanger]="true"
+        [nzTotal]="pager.total"
+        [nzPageIndex]="pager.pageIndex"
+        (nzPageIndexChange)="pager.onPageIndexChange($event)"
+        (nzPageSizeChange)="pager.onPageSizeChange($event)"
+        [nzFrontPagination]="false"
+        [nzLoading]="pager.loading"
         [nzShowTotal]="totalTemplate"
         class="registration-table">
         <ng-template #totalTemplate let-range="range" let-total>
@@ -42,7 +58,7 @@
           <ng-container *ngFor="let data of basicTable.data; let i = index">
             <tr>
               <td style="text-align: center;">
-                <span class="sn-badge">{{ i + 1 }}</span>
+                <span class="sn-badge">{{ pager.serial(i) }}</span>
               </td>
               <td>
                 <div class="student-info">

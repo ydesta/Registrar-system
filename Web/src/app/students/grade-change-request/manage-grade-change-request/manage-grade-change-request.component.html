@@ -21,16 +21,7 @@
     </div>
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="loading" class="loading-container">
-    <nz-spin nzSize="large">
-      <span nz-icon nzType="loading"></span>
-      <div class="loading-text">Loading grade change requests...</div>
-    </nz-spin>
-  </div>
-
-  <!-- Error State -->
-  <div *ngIf="!loading && !staffId" class="error-container">
+  <div *ngIf="!staffId" class="error-container">
     <nz-result
       nzStatus="error"
       nzTitle="Staff ID Not Found"
@@ -38,22 +29,28 @@
     </nz-result>
   </div>
 
-  <!-- Empty State -->
-  <div *ngIf="!loading && staffId && gradeChangeRequests.length === 0" class="empty-container">
-    <nz-result
-      nzStatus="info"
-      nzTitle="No Grade Change Requests"
-      nzSubTitle="There are no grade change requests to display.">
-    </nz-result>
-  </div>
-
-  <!-- Data Table -->
-  <div *ngIf="!loading && staffId && gradeChangeRequests.length > 0" class="table-container">
+  <div *ngIf="staffId" class="table-container">
+    <div style="width: 300px; margin-bottom: 12px;">
+      <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+        <input type="text" nz-input placeholder="search..." [(ngModel)]="pager.searchKey"
+          (ngModelChange)="pager.onSearch($event)" />
+      </nz-input-group>
+      <ng-template #suffixIconButton>
+        <button nz-button nzType="primary" nzSearch><i nz-icon nzType="search"></i></button>
+      </ng-template>
+    </div>
     <nz-table 
       #gradeChangeTable 
       [nzData]="gradeChangeRequests"
-      [nzPageSize]="10"
+      [nzPageSize]="pager.pageSize"
+      [nzPageSizeOptions]="pager.pageSizeOptions"
       [nzShowSizeChanger]="true"
+      [nzTotal]="pager.total"
+      [nzPageIndex]="pager.pageIndex"
+      (nzPageIndexChange)="pager.onPageIndexChange($event)"
+      (nzPageSizeChange)="pager.onPageSizeChange($event)"
+      [nzFrontPagination]="false"
+      [nzLoading]="pager.loading"
       [nzShowQuickJumper]="true">
       
       <!-- Student Code Column -->

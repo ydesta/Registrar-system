@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { StudentSectionAssignmentService } from '../../services/student-section-assignment.service';
 import { ACADEMIC_TERM_STATUS, SECTION_TYPE } from '../../common/constant';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 import { StaticData } from '../../admission-request/model/StaticData';
 import { StudentInfo, UnassignedStudentsResult } from 'src/app/Models/StudentInfo';
 import { CustomNotificationService } from '../../services/custom-notification.service';
@@ -13,7 +14,7 @@ import { TermCourseOfferingService } from 'src/app/colleges/services/term-course
   templateUrl: './unassigned-students.component.html',
   styleUrls: ['./unassigned-students.component.scss']
 })
-export class UnassignedStudentsComponent implements OnInit {
+export class UnassignedStudentsComponent implements OnInit, OnDestroy {
   searchForm: FormGroup;
   loading: boolean = false;
   data: UnassignedStudentsResult | null = null;
@@ -35,17 +36,21 @@ export class UnassignedStudentsComponent implements OnInit {
   // Summary cards data
   summaryData: any[] = [];
   listOfSectionType: StaticData[] = [];
+  pager: ServerPaginator;
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private sectionService: StudentSectionAssignmentService,
     private notificationService: CustomNotificationService,
-    private courseTermOfferingService: TermCourseOfferingService
+    private courseTermOfferingService: TermCourseOfferingService,
+    private paginator: PaginatorService
   ) {
+    this.pager = this.paginator.create();
     this.createSearchForm();
   }
 
   ngOnInit(): void {
+    this.pager.init(() => this.loadUnassignedStudents(false));
     this.getListOfAcademicTermStatus();
     this.getListOfSectionType();
     this.listOfYears = this.getYearRange(new Date().getFullYear());
@@ -61,6 +66,10 @@ export class UnassignedStudentsComponent implements OnInit {
       }
     });
 
+  }
+
+  ngOnDestroy(): void {
+    this.pager.destroy();
   }
 
   private createSearchForm(): void {
@@ -127,38 +136,49 @@ export class UnassignedStudentsComponent implements OnInit {
       this.listOfBatch = res;
     });
   }
-  loadUnassignedStudents(): void {
-    if (this.searchForm.valid) {
-      this.loading = true;
-      this.data = null;
-      this.students = [];
-
-      const { batchCode, academicTerm, year, sectionType } = this.searchForm.value;
-
-      this.sectionService.getUnassignedStudents(batchCode, academicTerm, year, sectionType).subscribe(
-        (response) => {
-          this.loading = false;
-          this.isSearchCollapsed = true;
-          if (response.status === 'success' && response.data) {
-            this.data = response.data;
-            this.students = response.data.students;
-            this.listOfData = [...this.students];
-            this.sortOrder = null; // Reset sort order when new data is loaded
-            this.listOfDisplayData = this.applySorting([...this.students]);
-            this.updateSummaryCards();
-            //  this.notificationService.notification('success', 'Success', `Found ${this.students.length} unassigned students`);
-          } else {
-            this.notificationService.notification('error', 'Error', response.error || 'No data found');
-          }
-        },
-        (error) => {
-          this.loading = false;
-          this.notificationService.notification('error', 'Error', 'Error loading unassigned students. Please try again.');
-        }
-      );
-    } else {
+  loadUnassignedStudents(resetPage = true): void {
+    if (!this.searchForm.valid) {
       this.notificationService.notification('error', 'Validation Error', 'Please fill in all required fields.');
+      return;
     }
+    if (resetPage) {
+      this.pager.pageIndex = 1;
+    }
+    this.loading = true;
+    this.pager.loading = true;
+    const { batchCode, academicTerm, year, sectionType } = this.searchForm.value;
+    this.sectionService.getUnassignedStudentsPaginated(
+      batchCode,
+      academicTerm,
+      year,
+      this.pager.query({ sectionType })
+    ).subscribe({
+      next: (res: any) => {
+        this.students = res.data || [];
+        this.listOfData = [...this.students];
+        this.listOfDisplayData = [...this.students];
+        this.pager.applyResult(res);
+        const total = this.pager.total;
+        const recommended = total > 0 ? Math.ceil(total / 30) : 0;
+        this.data = {
+          totalUnassignedStudents: total,
+          recommendedNumberOfSections: recommended,
+          studentsPerSection: recommended > 0 ? Math.floor(total / recommended) : 0,
+          remainingStudents: recommended > 0 ? total % recommended : 0,
+          students: this.students
+        };
+        this.updateSummaryCards();
+        this.isSearchCollapsed = true;
+        this.loading = false;
+      },
+      error: () => {
+        this.students = [];
+        this.listOfDisplayData = [];
+        this.pager.fail();
+        this.loading = false;
+        this.notificationService.notification('error', 'Error', 'Error loading unassigned students. Please try again.');
+      }
+    });
   }
 
   resetSearch(): void {
@@ -170,14 +190,15 @@ export class UnassignedStudentsComponent implements OnInit {
     this.data = null;
     this.searchValue = '';
     this.sortOrder = null;
+    this.pager.pageIndex = 1;
+    this.pager.total = 0;
+    this.pager.searchKey = '';
+    this.pager.sortColumn = '';
+    this.pager.sortOrder = '';
   }
 
   search(): void {
-    const filterFunc = (item: StudentInfo) =>
-      (this.searchValue ? item.fullName.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1 : true);
-
-    const data = this.listOfData.filter(item => filterFunc(item));
-    this.listOfDisplayData = this.applySorting(data);
+    this.pager.onSearch(this.searchValue);
   }
 
   sortByFullName(): void {
@@ -186,7 +207,7 @@ export class UnassignedStudentsComponent implements OnInit {
     } else {
       this.sortOrder = 'desc';
     }
-    this.listOfDisplayData = this.applySorting(this.listOfDisplayData);
+    this.pager.onSort(this.sortOrder === 'desc' ? 'desc' : 'asc', 'FullName');
   }
 
   getSortIcon(): string {
@@ -301,7 +322,6 @@ export class UnassignedStudentsComponent implements OnInit {
 
   navigateToNewComponent(student: StudentInfo): void {
 
-    console.log("%%$$$       ", student);
     this.selectedStudent = student;
     this.isModalVisible = true;
   }

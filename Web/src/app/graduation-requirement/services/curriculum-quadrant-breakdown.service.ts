@@ -1,120 +1,83 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable, map } from "rxjs";
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import {
-  Course,
   CurriculumBreakdown
-} from "src/app/curricula/models/curriculum-breakdown.model";
-import { environment } from "src/environments/environment";
+} from 'src/app/curricula/models/curriculum-breakdown.model';
+import { CrudService } from 'src/app/services/crud.service';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: "root"
+  providedIn: 'root'
 })
 export class CurriculumQuadrantBreakdownService {
-  baseUrl = environment.baseUrl;
-  private readonly curriculumQuadrantBreakdowns: string = `/${environment.apiVersion}/curriculumquadrantbreakdowns`;
-  private readonly Quadrants: string = `/${environment.apiVersion}/quadrants`;
-  private readonly Courses: string = `/${environment.apiVersion}/courses`;
-  private readonly curriculum: string = `/${environment.apiVersion}/curriculum`;
-  getcurriculumQuadrantBreakdownsUrl() {
-    return this.baseUrl + this.curriculumQuadrantBreakdowns;
-  }
-  getQuadrantsUrl() {
-    return this.baseUrl + this.Quadrants;
-  }
-  getCoursesUrl() {
-    return this.baseUrl + this.Courses;
-  }
-  getCurriculumsUrl() {
-    return this.baseUrl + this.curriculum;
-  }
-  constructor(private httpClient: HttpClient) {}
+  private readonly breakdowns = `/${environment.apiVersion}/curriculumquadrantbreakdowns`;
+  private readonly quadrants = `/${environment.apiVersion}/quadrants`;
+  private readonly courses = `/${environment.apiVersion}/courses`;
+  private readonly curriculum = `/${environment.apiVersion}/curriculum`;
+
+  constructor(private crud: CrudService) {}
+
   getCurriculumQuadrantBreakdownId(id: number): Observable<any> {
-    const endpointUrl = `${this.getcurriculumQuadrantBreakdownsUrl()}/${id}`;
-    return this.httpClient.get(endpointUrl).pipe(map(result => result as any));
+    return this.crud.getById(this.breakdowns, id);
   }
+
   create(postData: any): Observable<any> {
-    const endPointUrl = `${this.getcurriculumQuadrantBreakdownsUrl()}`;
-    return this.httpClient.post<any>(endPointUrl, postData).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.add(this.breakdowns, postData);
   }
+
   createCurriculumBreakdown(postData: any): Observable<any> {
-    const endPointUrl = `${this.getcurriculumQuadrantBreakdownsUrl()}`;
-    return this.httpClient.post<any>(endPointUrl, postData).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.add(this.breakdowns, postData);
   }
-  getCurriculumQuadrantBreakdownByCurriculumId(
-    id: string
-  ): Observable<CurriculumBreakdown[]> {
-    const endpointUrl = `${this.getcurriculumQuadrantBreakdownsUrl()}/breakdown/${id}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as CurriculumBreakdown[]));
+
+  getCurriculumQuadrantBreakdownByCurriculumId(id: string): Observable<CurriculumBreakdown[]> {
+    return this.crud.getList<CurriculumBreakdown[]>(`${this.breakdowns}/breakdown/${id}`);
   }
+
   getCurriculumQuadrantBreakdownList(): Observable<any> {
-    const endpointUrl = `${this.getcurriculumQuadrantBreakdownsUrl()}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.getList(this.breakdowns);
   }
+
+  getCurriculumQuadrantBreakdownListPaginated(query: string): Observable<any> {
+    return this.crud.getPaginated(this.breakdowns, query);
+  }
+
   update(id: number, postData: any): Observable<any> {
-    const endPointUrl = `${this.getcurriculumQuadrantBreakdownsUrl()}/${id}`;
-    return this.httpClient.patch<any>(endPointUrl, postData).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.update(this.breakdowns, id, postData);
   }
+
   delete(id: number): Observable<any> {
-    const endPointUrl = `${this.getcurriculumQuadrantBreakdownsUrl()}/${id}`;
-    return this.httpClient.delete<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.delete(this.breakdowns, id);
   }
+
   getCourseList(): Observable<any> {
-    const endpointUrl = `${this.getCoursesUrl()}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.getList(this.courses);
   }
 
   getQuadratList(): Observable<any> {
-    const endpointUrl = `${this.getQuadrantsUrl()}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.getList(this.quadrants);
   }
+
+  getQuadratListByCurriculumCode(curriculumCode: string): Observable<any> {
+    return this.crud.getList(`${this.quadrants}/by-curriculum/${encodeURIComponent(curriculumCode)}`);
+  }
+
   getCurriculumList(): Observable<any> {
-    const endpointUrl = `${this.getCurriculumsUrl()}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.getList(this.curriculum);
   }
-  getListOfUnRegisteredCourseById(id: string,quadrantId: string): Observable<any[]> {
-    const endpointUrl = `${this.getcurriculumQuadrantBreakdownsUrl()}/getListOfUnRegisteredCourseById/${id}/${quadrantId}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+
+  getListOfUnRegisteredCourseById(id: string, quadrantId: string): Observable<any[]> {
+    return this.crud.getList<any[]>(
+      `${this.breakdowns}/getListOfUnRegisteredCourseById/${id}/${quadrantId}`
+    );
   }
+
   getListOfCurriculumByProgramId(id: string): Observable<any[]> {
-    const endpointUrl = `${this.getcurriculumQuadrantBreakdownsUrl()}/getListOfCurriculumByProgramId/${id}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.getList<any[]>(`${this.breakdowns}/getListOfCurriculumByProgramId/${id}`);
   }
+
   getSavedCourses(curId: string, quadrantId: string): Observable<any[]> {
-    const endpointUrl = `${this.getcurriculumQuadrantBreakdownsUrl()}/getCurriculumQuadrantCourseBreakdowns/${curId}/${quadrantId}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.getList<any[]>(
+      `${this.breakdowns}/getCurriculumQuadrantCourseBreakdowns/${curId}/${quadrantId}`
+    );
   }
-  
 }

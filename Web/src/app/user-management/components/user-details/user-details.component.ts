@@ -1,12 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subject, takeUntil, forkJoin, of, Observable } from 'rxjs';
-import { switchMap, catchError } from 'rxjs/operators';
+import { Subject, takeUntil, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzModalService } from 'ng-zorro-antd/modal';
 import { UserManagementService } from '../../../services/user-management.service';
 import { User, Role } from '../../../types/user-management.types';
+import { ethiopianMobileValidator, normalizeEthiopianMobile, applyEthiopianMobileControl } from 'src/app/common/constant';
 
 @Component({
   selector: 'app-user-details',
@@ -15,10 +15,9 @@ import { User, Role } from '../../../types/user-management.types';
 })
 export class UserDetailsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-
   user: User | null = null;
   loading = false;
-  userId: string = '';
+  userId = '';
   isEditing = false;
   form!: FormGroup;
   availableRoles: Role[] = [];
@@ -29,15 +28,19 @@ export class UserDetailsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private message: NzMessageService,
-    private fb: FormBuilder,
-    private modalService: NzModalService
+    private fb: FormBuilder
   ) {
-    this.initForm();
+    this.form = this.fb.group({
+      firstName: ['', [Validators.required]],
+      lastName: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
+      phoneNumber: ['', [ethiopianMobileValidator()]],
+      selectedRoles: [[]]
+    });
   }
 
   ngOnInit(): void {
     this.userId = this.route.snapshot.paramMap.get('id') || '';
-
     if (this.userId) {
       this.loadUser();
       this.loadRoles();
@@ -49,66 +52,34 @@ export class UserDetailsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private initForm(): void {
-    this.form = this.fb.group({
-      firstName: ['', [Validators.required]],
-      lastName: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      phoneNumber: [''],
-      selectedRoles: [[]]
-    });
-  }
-
   loadUser(): void {
     this.loading = true;
-    this.userManagementService.getUserById(this.userId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (user) => {
-          this.user = user;
-          this.populateForm();
-
-          // Check if edit mode is requested via query parameter
-          const editMode = this.route.snapshot.queryParamMap.get('edit');
-          if (editMode === 'true') {
-            this.isEditing = true; // Start in edit mode
-          }
-
-          this.loading = false;
-        },
-        error: (error) => {
-          this.message.error('Failed to load user: ' + error.message);
-          this.loading = false;
-        }
-      });
+    this.userManagementService.getUserById(this.userId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (user) => {
+        this.user = user;
+        this.populateForm();
+        this.isEditing = this.route.snapshot.queryParamMap.get('edit') === 'true';
+        this.loading = false;
+      },
+      error: (error) => {
+        this.message.error('Failed to load user: ' + error.message);
+        this.loading = false;
+      }
+    });
   }
 
   loadRoles(): void {
     this.loadingRoles = true;
-    this.userManagementService.getRoles()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (roles) => {
-          this.availableRoles = roles;
-          this.loadingRoles = false;
-        },
-        error: (error) => {
-          console.error('Error loading roles:', error);
-          this.loadingRoles = false;
-        }
-      });
-  }
-
-  private populateForm(): void {
-    if (this.user) {
-      this.form.patchValue({
-        firstName: this.user.firstName || '',
-        lastName: this.user.lastName || '',
-        email: this.user.email || '',
-        phoneNumber: this.user.phoneNumber || '',
-        selectedRoles: this.user.roles.map(role => role.id)
-      });
-    }
+    this.userManagementService.getRoles().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (roles) => {
+        this.availableRoles = roles;
+        this.syncSelectedRolesFromUser();
+        this.loadingRoles = false;
+      },
+      error: () => {
+        this.loadingRoles = false;
+      }
+    });
   }
 
   goBack(): void {
@@ -122,106 +93,59 @@ export class UserDetailsComponent implements OnInit, OnDestroy {
 
   cancelEditing(): void {
     this.isEditing = false;
-    this.populateForm(); // Reset form to original values
+    this.populateForm();
+  }
+
+  onPhoneBlur(): void {
+    applyEthiopianMobileControl(this.form.get('phoneNumber'));
   }
 
   saveChanges(): void {
-    if (!this.user || !this.form.valid) return;
-
+    if (!this.user || !this.form.valid) {
+      return;
+    }
     const formValue = this.form.value;
     const emailChanged = this.user.email !== formValue.email;
+    const phoneNumber = formValue.phoneNumber
+      ? normalizeEthiopianMobile(formValue.phoneNumber) || formValue.phoneNumber
+      : formValue.phoneNumber;
     this.loading = true;
-
-    // Always use the basic update endpoint first
     const updatedUser: User = {
       ...this.user,
       firstName: formValue.firstName,
       lastName: formValue.lastName,
-      email: formValue.email, // Don't update email in basic update if it changed
-      phoneNumber: formValue.phoneNumber
+      email: formValue.email,
+      phoneNumber
     };
-    // Skip username update in basic update if email changed (email update will handle username)
     let updateObservable = this.userManagementService.updateUser(this.userId, updatedUser, emailChanged);
-
-    // If email changed, chain the email update after the basic update
     if (emailChanged) {
       updateObservable = updateObservable.pipe(
         switchMap(() => this.userManagementService.updateUserEmail(this.userId, formValue.email))
       );
     }
-
-    // Chain role updates
-    updateObservable = updateObservable.pipe(
-      switchMap(() => this.updateUserRoles(formValue.selectedRoles))
-    );
-
-    updateObservable.pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.message.success('User updated successfully');
-          // Update the user object with all changes
-          this.user = {
-            ...this.user!,
-            firstName: formValue.firstName,
-            lastName: formValue.lastName,
-            email: formValue.email,
-            phoneNumber: formValue.phoneNumber
-          };
-          this.isEditing = false;
-          this.loading = false;
-        },
-        error: (error) => {
-          this.message.error('Failed to update user: ' + error.message);
-          this.loading = false;
-        }
-      });
-  }
-
-  private updateUserRoles(selectedRoleIds: string[]) {
-    if (!this.user) return of(null);
-
-    const currentRoleIds = this.user.roles.map(role => role.id);
-
-    // Find roles to add
-    const rolesToAdd = selectedRoleIds.filter(roleId => !currentRoleIds.includes(roleId));
-
-    // Find roles to remove
-    const rolesToRemove = currentRoleIds.filter(roleId => !selectedRoleIds.includes(roleId));
-
-    // Create observables for role operations
-    const removeRoleObservables = rolesToRemove.map(roleId =>
-      this.userManagementService.removeRoleFromUser(this.userId, roleId)
-        .pipe(catchError(error => {
-          console.error(`Failed to remove role ${roleId}:`, error);
-          return of(null); // Continue with other operations
-        }))
-    );
-
-    const addRoleObservables = rolesToAdd.map(roleId =>
-      this.userManagementService.assignRoleToUser(this.userId, roleId)
-        .pipe(catchError(error => {
-          console.error(`Failed to add role ${roleId}:`, error);
-          return of(null); // Continue with other operations
-        }))
-    );
-
-    // Execute all role operations in parallel
-    const allRoleOperations = [...removeRoleObservables, ...addRoleObservables];
-
-    if (allRoleOperations.length === 0) {
-      return of(null); // No role changes needed
-    }
-
-    return forkJoin(allRoleOperations).pipe(
-      switchMap(() => {
-        // Reload user data to get updated roles
-        return this.userManagementService.getUserById(this.userId);
-      }),
-      catchError(error => {
-        console.error('Error updating user roles:', error);
-        throw error;
-      })
-    );
+    updateObservable.pipe(
+      switchMap(() => this.updateUserRoles(formValue.selectedRoles || [])),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (updatedUser) => {
+        this.message.success('User updated successfully');
+        const selectedRoleIds: string[] = formValue.selectedRoles || [];
+        this.user = {
+          ...(updatedUser || this.user!),
+          firstName: formValue.firstName,
+          lastName: formValue.lastName,
+          email: formValue.email,
+          phoneNumber,
+          roles: this.availableRoles.filter(role => selectedRoleIds.includes(role.id))
+        };
+        this.isEditing = false;
+        this.loading = false;
+      },
+      error: (error) => {
+        this.message.error('Failed to update user: ' + (error?.message || 'Unknown error'));
+        this.loading = false;
+      }
+    });
   }
 
   getRoleNameById(roleId: string): string {
@@ -229,39 +153,65 @@ export class UserDetailsComponent implements OnInit, OnDestroy {
     return role ? role.name : 'Unknown Role';
   }
 
-  updateUserUsername(newUsername: string): void {
-    if (!this.user) return;
+  private populateForm(): void {
+    if (!this.user) {
+      return;
+    }
+    this.form.patchValue({
+      firstName: this.user.firstName || '',
+      lastName: this.user.lastName || '',
+      email: this.user.email || '',
+      phoneNumber: normalizeEthiopianMobile(this.user.phoneNumber) || this.user.phoneNumber || '',
+      selectedRoles: this.resolveSelectedRoleIds()
+    });
+  }
 
-    this.loading = true;
-    this.userManagementService.updateUserUsername(this.userId, newUsername)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.message.success('Username updated successfully');
-          this.user!.email = newUsername; // Update the user object
-          this.loading = false;
-        },
-        error: (error) => {
-          this.message.error('Failed to update username: ' + error.message);
-          this.loading = false;
+  private syncSelectedRolesFromUser(): void {
+    if (!this.user || !this.availableRoles.length) {
+      return;
+    }
+    this.form.patchValue({ selectedRoles: this.resolveSelectedRoleIds() });
+  }
+
+  private resolveSelectedRoleIds(): string[] {
+    if (!this.user?.roles?.length || !this.availableRoles.length) {
+      return [];
+    }
+    return this.user.roles
+      .map(role => {
+        if (role.id) {
+          const byId = this.availableRoles.find(r => r.id === role.id);
+          if (byId) {
+            return byId.id;
+          }
         }
-      });
+        return this.availableRoles.find(r =>
+          r.name?.localeCompare(role.name || '', undefined, { sensitivity: 'accent' }) === 0
+        )?.id;
+      })
+      .filter((id): id is string => !!id);
   }
 
-  // Legacy methods for backward compatibility
-  onBack(): void {
-    this.goBack();
+  private updateUserRoles(selectedRoleIds: string[]) {
+    if (!this.user) {
+      return of(null);
+    }
+    const roleNames = selectedRoleIds
+      .map(roleId => this.availableRoles.find(role => role.id === roleId)?.name)
+      .filter((name): name is string => !!name);
+    const currentRoleNames = (this.user.roles || [])
+      .map(role => role.name)
+      .filter(name => !!name)
+      .sort((a, b) => a.localeCompare(b));
+    const nextRoleNames = [...roleNames].sort((a, b) => a.localeCompare(b));
+    const unchanged =
+      currentRoleNames.length === nextRoleNames.length &&
+      currentRoleNames.every((name, index) => name === nextRoleNames[index]);
+    if (unchanged) {
+      return of(this.user);
+    }
+    return this.userManagementService.updateUserRoles(this.userId, roleNames).pipe(
+      switchMap(() => this.userManagementService.getUserById(this.userId))
+    );
   }
-
-  onEdit(): void {
-    this.startEditing();
-  }
-
-  onCancel(): void {
-    this.cancelEditing();
-  }
-
-  onSave(): void {
-    this.saveChanges();
-  }
-} 
+}

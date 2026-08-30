@@ -31,7 +31,7 @@ export class AddAcadamicProgrammeStatusComponent implements OnInit {
       this.action = "Edit Programme Status";
       this.submit = "Update";
       this._crudService
-        .getList("/AcadamicProgrammeStatuss" + "/" + this.progStatusId)
+        .getById("/AcadamicProgrammeStatuss", this.progStatusId)
         .subscribe((data: any) => {
           this.patchValues(data);
         });

@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { SESSION_CONSTANTS } from './session-management.constants';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +12,8 @@ export class BrowserCloseService {
 
   private heartbeatInterval: any;
   private lastHeartbeat: number = Date.now();
-  private readonly HEARTBEAT_INTERVAL = 1000; // 1 second
-  private readonly HEARTBEAT_TIMEOUT = 3000; // 3 seconds
+  private readonly HEARTBEAT_INTERVAL = 1000;
+  private readonly HEARTBEAT_TIMEOUT = 3000;
 
   constructor() {
     this.initializeBrowserCloseDetection();
@@ -21,16 +23,16 @@ export class BrowserCloseService {
   private initializeBrowserCloseDetection(): void {
     let isClosing = false;
     let tabHiddenTime = 0;
-    window.addEventListener('beforeunload', (event) => {
+
+    window.addEventListener('beforeunload', () => {
       isClosing = true;
-      if (navigator.sendBeacon) {
-        const data = new FormData();
-        data.append('event', 'beforeunload');
-        data.append('timestamp', Date.now().toString());
-        navigator.sendBeacon('/api/authentication/beacon-logout', data);
-      }
+      const data = new FormData();
+      data.append('event', 'beforeunload');
+      data.append('timestamp', Date.now().toString());
+      navigator.sendBeacon?.(`${environment.secureUrl}${SESSION_CONSTANTS.API_ENDPOINTS.BEACON_LOGOUT}`, data);
     });
-    window.addEventListener('pagehide', (event) => {
+
+    window.addEventListener('pagehide', event => {
       if (event.persisted === false && isClosing) {
         this.handleBrowserClose();
       }
@@ -40,16 +42,14 @@ export class BrowserCloseService {
       if (document.visibilityState === 'hidden') {
         tabHiddenTime = Date.now();
         setTimeout(() => {
-          const timeHidden = Date.now() - tabHiddenTime;
-          if (document.visibilityState === 'hidden' && timeHidden > 5000) {
+          if (document.visibilityState === 'hidden' && Date.now() - tabHiddenTime > 5000) {
             this.handleBrowserClose();
           }
         }, 5000);
-
-      } else {
-        tabHiddenTime = 0;
-        isClosing = false;
+        return;
       }
+      tabHiddenTime = 0;
+      isClosing = false;
     });
 
     window.addEventListener('unload', () => {
@@ -58,12 +58,10 @@ export class BrowserCloseService {
       }
     });
 
-    window.addEventListener('storage', (event) => {
-      if (event.key === 'browserClosing' && event.newValue === 'true') {
+    window.addEventListener('storage', event => {
+      if (event.key === SESSION_CONSTANTS.STORAGE_KEYS.BROWSER_CLOSING && event.newValue === 'true') {
         this.handleBrowserClose();
       }
-    });
-    window.addEventListener('blur', () => {
     });
 
     window.addEventListener('focus', () => {
@@ -77,38 +75,25 @@ export class BrowserCloseService {
       this.lastHeartbeat = Date.now();
       sessionStorage.setItem('heartbeat', this.lastHeartbeat.toString());
       const storedHeartbeat = sessionStorage.getItem('heartbeat');
-      if (storedHeartbeat) {
-        const timeDiff = Date.now() - parseInt(storedHeartbeat);
-        if (timeDiff > this.HEARTBEAT_TIMEOUT) {
-          this.handleBrowserClose();
-        }
+      if (storedHeartbeat && Date.now() - parseInt(storedHeartbeat, 10) > this.HEARTBEAT_TIMEOUT) {
+        this.handleBrowserClose();
       }
     }, this.HEARTBEAT_INTERVAL);
   }
 
   private handleBrowserClose(): void {
     this.browserClosingSubject.next(true);
-    sessionStorage.setItem('browserClosing', 'true');
+    sessionStorage.setItem(SESSION_CONSTANTS.STORAGE_KEYS.BROWSER_CLOSING, 'true');
     this.clearSessionData();
-    localStorage.removeItem('isLogin');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('firstName');
-    localStorage.removeItem('lastName');
-    localStorage.removeItem('email');
-    localStorage.removeItem('role');
-    localStorage.removeItem('userType');
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    SESSION_CONSTANTS.AUTH_KEYS.forEach(key => localStorage.removeItem(key));
   }
 
-
-
   private clearSessionData(): void {
-    sessionStorage.removeItem('sessionData');
+    sessionStorage.removeItem(SESSION_CONSTANTS.STORAGE_KEYS.SESSION_DATA);
     sessionStorage.removeItem('heartbeat');
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
-    localStorage.removeItem('sessionData');
+    localStorage.removeItem(SESSION_CONSTANTS.STORAGE_KEYS.SESSION_DATA);
   }
 
   public isBrowserClosing(): boolean {
@@ -117,7 +102,7 @@ export class BrowserCloseService {
 
   public resetBrowserClosingState(): void {
     this.browserClosingSubject.next(false);
-    sessionStorage.removeItem('browserClosing');
+    sessionStorage.removeItem(SESSION_CONSTANTS.STORAGE_KEYS.BROWSER_CLOSING);
   }
 
   public destroy(): void {
@@ -125,7 +110,8 @@ export class BrowserCloseService {
       clearInterval(this.heartbeatInterval);
     }
   }
+
   public testBrowserClose(): void {
     this.handleBrowserClose();
   }
-} 
+}

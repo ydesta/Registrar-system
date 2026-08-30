@@ -157,25 +157,29 @@
         </div>
       </nz-tab>
     </nz-tabset> -->
-    <nz-collapse class="custom-collapse" nzAccordion>
-      <nz-collapse-panel *ngFor="let academicYear of studentProfile?.studentAcademicYears"
-        [nzHeader]="academicYear.year.toString()" [nzActive]="false">
+    <div class="academic-record" *ngIf="studentProfile?.studentAcademicYears?.length">
+      <div
+        class="academic-year-section"
+        *ngFor="let academicYear of studentProfile?.studentAcademicYears"
+      >
+        <h3 class="academic-year-heading">Academic Year {{ academicYear.year }}</h3>
         <div class="academic-year-container">
           <div *ngFor="let academicTerm of academicYear?.studentAcademicTerms" class="academic-term">
-            <div style="float: left">
-              <h2>
-                 {{ getAcademicTermStatusDescription(academicTerm.academicTerm) }} - {{
-                academicYear.year.toString() }}
-              </h2>
-            </div>
-            <nz-table [nzData]="academicTerm.studentCoursesTaken" [nzSize]="'middle'" [nzShowPagination]="false"
-              class="table-container">
+            <h4 class="academic-term-heading">
+              {{ getAcademicTermStatusDescription(academicTerm.academicTerm) }} - {{ academicYear.year }}
+            </h4>
+            <nz-table
+              [nzData]="academicTerm.studentCoursesTaken"
+              [nzSize]="'middle'"
+              [nzShowPagination]="false"
+              class="table-container"
+            >
               <thead>
                 <tr>
-                  <th>Course Title</th>
-                  <th>Credit Hours</th>
-                  <th>Grade</th>
-                  <th>Points</th>
+                  <th nzWidth="52%">Course Title</th>
+                  <th nzWidth="16%">Credit Hours</th>
+                  <th nzWidth="16%">Grade</th>
+                  <th nzWidth="16%">Points</th>
                 </tr>
               </thead>
               <tbody>
@@ -188,23 +192,29 @@
               </tbody>
               <tfoot class="footer-total">
                 <tr>
-                  <td>Total</td>
-                  <td>{{ getTotalCreditHours(academicTerm.studentCoursesTaken) }}</td>
+                  <td class="footer-label">Total</td>
+                  <td class="footer-value">{{ getTotalCreditHours(academicTerm.studentCoursesTaken) }}</td>
                   <td></td>
-                  <td>{{ getTotalPoints(academicTerm.studentCoursesTaken) }}</td>
+                  <td class="footer-value">{{ getTotalPoints(academicTerm.studentCoursesTaken) }}</td>
                 </tr>
                 <tr>
-                  <td>GPA</td>
+                  <td class="footer-label">GPA</td>
                   <td></td>
                   <td></td>
-                  <td>{{ getGPA(academicTerm.studentCoursesTaken) | number: '1.2-2' }}</td>
+                  <td class="footer-value">{{ getGPA(academicTerm.studentCoursesTaken) | number: '1.2-2' }}</td>
+                </tr>
+                <tr>
+                  <td class="footer-label">CGPA</td>
+                  <td></td>
+                  <td></td>
+                  <td class="footer-value">{{ getCumulativeCgpa(academicYear, academicTerm) | number: '1.2-2' }}</td>
                 </tr>
               </tfoot>
             </nz-table>
           </div>
         </div>
-      </nz-collapse-panel>
-    </nz-collapse>
+      </div>
+    </div>
 
   </ng-container>
 </div>

@@ -36,9 +36,9 @@
               <a routerLink="/curricula">Curriculum</a>
             </li>
 
-            <li nz-menu-item>
+            <!-- <li nz-menu-item>
               <a routerLink="/curricula/accrediation">Accreditation </a>
-            </li>
+            </li> -->
           </ul>
         </li>
 
@@ -116,23 +116,6 @@
           </ul>
         </li>
 
-        <li nz-submenu nzTitle="Payments" nzIcon="bank">
-          <ul>
-            <li nz-menu-item>
-              <a routerLink="/banks">Payment</a>
-            </li>
-            <li nz-menu-item>
-              <a routerLink="/banks/bank-transacction">Payment Transactions</a>
-            </li>
-            <li nz-menu-item>
-              <a routerLink="/banks/student-payment">Student Payments</a>
-            </li>
-            <li nz-menu-item>
-              <a routerLink="/banks/tuition-fee">Tuition Fees</a>
-            </li>
-          </ul>
-        </li>
-
         <li nz-submenu nzTitle="System Management" nzIcon="tool">
           <ul>
 
@@ -187,6 +170,9 @@
         <li nz-submenu nzTitle="Settings" nzIcon="setting">
           <ul>
             <li nz-menu-item>
+              <a routerLink="/banks">Bank</a>
+            </li>
+            <li nz-menu-item>
               <a routerLink="/staffs">New Staff</a>
             </li>
             <li nz-menu-item>
@@ -204,6 +190,15 @@
             <li nz-menu-item>
               <a routerLink="/colleges/activity">Activities</a>
             </li>
+            <li nz-menu-item>
+              <a routerLink="/colleges/admission-lookup">Admission Lookup</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/colleges/cgpa-credit-hour-limit">CGPA Credit Hour Limits</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/colleges/batch">Batches</a>
+            </li>
           </ul>
         </li>
         <li nz-submenu nzTitle="Reports" nzIcon="form">
@@ -218,13 +213,13 @@
               <a routerLink="/reports/registered-student-per-batch">Registered Student Per Batch</a>
             </li>
             <li nz-menu-item>
+              <a routerLink="/reports/late-registration">Late Registration</a>
+            </li>
+            <li nz-menu-item>
               <a routerLink="/reports/course-offered-per-term">Course Offered Per Term</a>
             </li>
             <li nz-menu-item>
               <a routerLink="/reports/course-report">List of Courses</a>
-            </li>
-            <li nz-menu-item>
-              <a routerLink="/colleges/batch">Batchs</a>
             </li>
 
             <li nz-menu-item>
@@ -241,14 +236,14 @@
             </li>
           </ul>
         </li>
-        <li nz-submenu nzTitle="Data Migration" nzIcon="form">
+        <!-- <li nz-submenu nzTitle="Data Migration" nzIcon="form">
           <ul>
             <li nz-menu-item>
               <a routerLink="/curricula/data-migration">Data Load</a>
             </li>
 
           </ul>
-        </li>
+        </li> -->
       </div>
       <div *ngIf="isUserInstructor">
         <li nz-menu-item>
@@ -346,6 +341,9 @@
               <a routerLink="/reports/registered-student-per-batch">Registered Student Per Batch</a>
             </li>
             <li nz-menu-item>
+              <a routerLink="/reports/late-registration">Late Registration</a>
+            </li>
+            <li nz-menu-item>
               <a routerLink="/reports/course-offered-per-term">Course Offered Per Term</a>
             </li>
 
@@ -403,7 +401,7 @@
               <a routerLink="/students/course-add-request">View Course Request</a>
             </li>
             <li nz-menu-item>
-              <a routerLink="/reports/registration-slip">Payment Slip</a>
+              <a routerLink="/reports/registration-slip">My Registration Slips</a>
             </li>
           </ul>
         </li>

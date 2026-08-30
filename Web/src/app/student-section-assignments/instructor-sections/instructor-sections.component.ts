@@ -59,9 +59,5 @@ export class InstructorSectionsComponent implements OnInit {
     });
   }
 
-  onDataRefreshed(): void {
-    // This method is called when the child component needs to refresh data
-    // The child component handles its own data refresh through the service
-    console.log('Data refresh requested from child component');
-  }
+  onDataRefreshed(): void {}
 }

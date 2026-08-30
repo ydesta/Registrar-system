@@ -14,13 +14,16 @@ namespace SecureAuth.API.Controllers.Admin
     {
         private readonly ISystemHealthService _systemHealthService;
         private readonly IMediator _mediator;
+        private readonly IEmailService _emailService;
 
         public SystemDashboardController(
             ISystemHealthService systemHealthService,
-            IMediator mediator)
+            IMediator mediator,
+            IEmailService emailService)
         {
             _systemHealthService = systemHealthService;
             _mediator = mediator;
+            _emailService = emailService;
         }
 
         [HttpGet("overview")]
@@ -77,6 +80,33 @@ namespace SecureAuth.API.Controllers.Admin
                 {
                     Success = false,
                     Message = "Error checking system health",
+                    Error = ex.Message
+                });
+            }
+        }
+
+        [HttpGet("email-health")]
+        public async Task<IActionResult> CheckEmailHealth()
+        {
+            try
+            {
+                var isHealthy = await _emailService.TestConnectionAsync();
+                return Ok(new
+                {
+                    Success = true,
+                    Message = "Email service health check completed",
+                    Data = new
+                    {
+                        EmailService = new { Status = isHealthy ? "Healthy" : "Unhealthy", LastChecked = DateTime.UtcNow }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    Success = false,
+                    Message = "Email service health check failed",
                     Error = ex.Message
                 });
             }

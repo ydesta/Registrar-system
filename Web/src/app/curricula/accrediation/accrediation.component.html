@@ -23,16 +23,16 @@
     <nz-table #basicTable 
               [nzData]="curriculums" 
               nzBordered
-              [nzPageSize]="pageSize"
-              [nzPageSizeOptions]="pageSizeOption"
+              [nzPageSize]="pager.pageSize"
+              [nzPageSizeOptions]="pager.pageSizeOptions"
               [nzShowSizeChanger]="true"
-              [nzTotal]="totalRecord"
-              [nzPageIndex]="pageindex"
-              (nzPageIndexChange)="paginatedIndexEvent($event)"
-              (nzPageSizeChange)="paginatedSizeEvent($event)"
+              [nzTotal]="pager.total"
+              [nzPageIndex]="pager.pageIndex"
+              (nzPageIndexChange)="pager.onPageIndexChange($event)"
+              (nzPageSizeChange)="pager.onPageSizeChange($event)"
               [nzFrontPagination]="false"
               [nzShowTotal]="rangeTemplate"
-              [nzLoading]="tbLoading"
+              [nzLoading]="pager.loading"
               [nzNoResult]="emptyTpl">
       <ng-template #rangeTemplate let-range="range" let-total>
         {{ range[0] }}-{{ range[1] }} of {{ total }} items

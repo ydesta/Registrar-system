@@ -1,50 +1,30 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
+import { CrudService } from 'src/app/services/crud.service';
 import { environment } from 'src/environments/environment';
-import { PendingStudentPaymentModel } from '../models/pending-sudent-payment.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BankService {
-  baseUrl = environment.baseUrl;
-  private readonly _studentPayment: string = `/${environment.apiVersion}/pay`;
-  private readonly _banks: string = `/${environment.apiVersion}/banks`;
-  getStudentPaymentUrl() {
-    return this.baseUrl + this._studentPayment;
-  }
-  getBankUrl() {
-    return this.baseUrl + this._banks;
-  }
-  constructor(private httpClient: HttpClient) { }
+  private readonly payments = `/${environment.apiVersion}/pay`;
+  private readonly banks = `/${environment.apiVersion}/banks`;
+
+  constructor(private crud: CrudService) { }
+
   create(postData: any): Observable<any> {
-    const endPointUrl = `${this.getStudentPaymentUrl()}`;
-    return this.httpClient.post<any>(endPointUrl, postData).pipe(
-      map(data => {
-        return data;
-      })
-    );
-  }
-  update(id: string, postData: any): Observable<any> {
-    const endPointUrl = `${this.getStudentPaymentUrl()}/${id}`;
-    return this.httpClient.patch<any>(endPointUrl, postData).pipe(
-      map(data => {
-        return data;
-      })
-    );
-  }
-  getstudentPymentById(id: string): Observable<any> {
-    const endpointUrl = `${this.getStudentPaymentUrl()}/${id}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
-  }
-  getBankList(): Observable<any> {
-    const endpointUrl = `${this.getBankUrl()}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.add(this.payments, postData);
   }
 
+  update(id: string, postData: any): Observable<any> {
+    return this.crud.update(this.payments, id, postData);
+  }
+
+  getstudentPymentById(id: string): Observable<any> {
+    return this.crud.getById(this.payments, id);
+  }
+
+  getBankList(): Observable<any> {
+    return this.crud.getList(this.banks);
+  }
 }

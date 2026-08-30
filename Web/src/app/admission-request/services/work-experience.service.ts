@@ -1,46 +1,29 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable, map } from "rxjs";
-import { environment } from "src/environments/environment";
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { CrudService } from 'src/app/services/crud.service';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: "root"
+  providedIn: 'root'
 })
 export class WorkExperienceService {
-  baseUrl = environment.baseUrl;
-  private readonly _workExperience: string = `/${environment.apiVersion}/applicantworkexperiences`;
-  getWorkExperienceUrl() {
-    return this.baseUrl + this._workExperience;
+  private readonly experiences = `/${environment.apiVersion}/applicantworkexperiences`;
+
+  constructor(private crud: CrudService) {}
+
+  getApplicantExperienceByApplicantId(id: string): Observable<any> {
+    return this.crud.getList(`${this.experiences}/applicant/${id}`);
   }
 
-  constructor(private httpClient: HttpClient) {}
-  getApplicantExperienceByApplicantId(id: string): Observable<any> {
-    const endpointUrl = `${this.getWorkExperienceUrl()}/applicant/${id}`;
-    return this.httpClient.get(endpointUrl).pipe(map(result => result as any));
-  }
   createExperience(experience: any): Observable<any> {
-    const endPointUrl = `${this.getWorkExperienceUrl()}`;
-    return this.httpClient.post<any>(endPointUrl, experience).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.add(this.experiences, experience);
   }
+
   update(id: string, experience: any): Observable<any> {
-    const endPointUrl = `${this.getWorkExperienceUrl()}/${id}`;
-    return this.httpClient.patch<any>(endPointUrl, experience).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.update(this.experiences, id, experience);
   }
 
   delete(id: string): Observable<any> {
-    const endPointUrl = `${this.getWorkExperienceUrl()}/${id}`;
-    return this.httpClient.delete<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.delete(this.experiences, id);
   }
 }

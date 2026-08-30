@@ -107,7 +107,6 @@ export class AddCoursePrerequisiteComponent implements OnInit {
     if (id && id !== 'null') {
       this.coursePrerequisiteService.updateCoursePrerequisite(id, formData).subscribe({
         next: () => {
-          console.log('Update success');
           this.message.success('Course prerequisite updated successfully');
           this.router.navigate(['course/course-prerequisite']).then(
             (navigated) => {
@@ -131,7 +130,6 @@ export class AddCoursePrerequisiteComponent implements OnInit {
     } else {
       this.coursePrerequisiteService.createCoursePrerequisite(formData).subscribe({
         next: () => {
-          console.log('Create success');
           this.message.success('Course prerequisite created successfully');
           this.router.navigate(['course/course-prerequisite']).then(
             (navigated) => {

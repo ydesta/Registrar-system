@@ -1,4 +1,3 @@
-/* Education Form Container */
 .education-form-container {
   background: #fff;
   border-radius: 12px;
@@ -8,7 +7,23 @@
   margin: 0 auto;
 }
 
-/* Form Header */
+.duration-year-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+
+  nz-form-item {
+    margin-bottom: 0 !important;
+  }
+
+  @media (max-width: 576px) {
+    grid-template-columns: 1fr;
+  }
+}
+
 .form-header {
   background: linear-gradient(135deg, #1890ff, #096dd9);
   color: white;
@@ -47,30 +62,23 @@
   }
 }
 
-/* Form Content */
 .education-form {
   padding: 32px 24px 24px;
 
-  /* Form Items */
   ::ng-deep .ant-form-item {
     margin-bottom: 24px;
     position: relative;
 
     .ant-form-item-label {
-      display: none; // Hide default labels when using floating labels
+      display: none;
     }
 
     .ant-form-item-control {
-      position: relative; // Added for proper positioning context
+      position: relative;
     }
   }
 }
 
-/* =============================================================================
-   WORKING FLOATING LABEL IMPLEMENTATION
-   ============================================================================= */
-
-/* Working floating label implementation for input fields */
 .input-with-floating-label {
   position: relative;
   width: 100%;
@@ -103,7 +111,26 @@
     }
   }
 
-  /* Ensure the floating label is positioned relative to the input */
+  &.textarea-with-floating-label {
+    height: auto;
+    min-height: 96px;
+    resize: vertical;
+    line-height: 1.5;
+    padding-top: 18px;
+
+    & + .floating-label {
+      top: 12px;
+      transform: none;
+    }
+
+    &:focus + .floating-label,
+    &:not(:placeholder-shown) + .floating-label,
+    &:valid + .floating-label {
+      top: -8px;
+      transform: none;
+    }
+  }
+
   & + .floating-label {
     position: absolute;
     top: 50%;
@@ -132,7 +159,6 @@
     }
   }
 
-  /* Float the label when focused or has content */
   &:focus + .floating-label,
   &:not(:placeholder-shown) + .floating-label {
     top: -8px;
@@ -144,59 +170,10 @@
   }
 }
 
-/* Working floating label implementation for date picker fields */
-.date-picker-with-floating-label {
-  position: relative;
-  width: 100%;
-
-  /* Ensure the floating label is positioned relative to the date picker */
-  & + .floating-label {
-    position: absolute;
-    top: 50%;
-    left: 12px;
-    transform: translateY(-50%);
-    color: #aaa;
-    font-size: 16px;
-    pointer-events: none;
-    transition: 0.2s ease all;
-    background: white;
-    padding: 0 4px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-    z-index: 1;
-
-    .required {
-      color: #ff4d4f;
-      font-weight: 600;
-    }
-
-    i {
-      font-size: 16px;
-      color: #6c757d;
-    }
-  }
-
-  /* Float the label when focused or has value */
-  &:focus + .floating-label,
-  &.ant-picker-focused + .floating-label,
-  &:not(.ant-picker-empty) + .floating-label {
-    top: -8px;
-    left: 12px;
-    font-size: 12px;
-    color: #6c757d;
-    background: white;
-    padding: 0 4px;
-  }
-}
-
-/* Working floating label implementation for select dropdown fields */
 .select-with-floating-label {
   position: relative;
   width: 100%;
 
-  /* Ensure the floating label is positioned relative to the select */
   & + .floating-label {
     position: absolute;
     top: 50%;
@@ -225,19 +202,18 @@
     }
   }
 
-  /* Float the label when focused or has value */
   &:focus + .floating-label,
   &.ant-select-focused + .floating-label,
+  &.ant-select-open + .floating-label,
   &:not(.ant-select-empty) + .floating-label {
     top: -8px;
-    left: 6px;
+    left: 12px;
     font-size: 12px;
     color: #6c757d;
     background: white;
     padding: 0 4px;
   }
 
-  /* Error state styling */
   &.error {
     ::ng-deep .ant-select-selector {
       border-color: #ff4d4f !important;
@@ -246,11 +222,9 @@
   }
 }
 
-/* Ensure proper positioning context for floating labels */
 ::ng-deep .ant-form-item .ant-form-item-control {
-  position: relative; /* Added for proper positioning context */
+  position: relative;
 
-  /* Style the floating labels that are direct children */
   .floating-label {
     position: absolute;
     top: 50%;
@@ -280,8 +254,20 @@
   }
 }
 
-/* File Upload Section */
 .file-upload-section {
+  position: relative;
+  z-index: 0;
+  margin-top: 8px;
+
+  .file-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
   .file-upload-label {
     display: flex;
     align-items: center;
@@ -303,6 +289,11 @@
     .upload-text {
       font-size: 14px;
       font-weight: 500;
+    }
+
+    .required {
+      color: #ff4d4f;
+      font-weight: 600;
     }
   }
 
@@ -332,7 +323,6 @@
     }
   }
 
-  /* Error state styling */
   &.error {
     .file-upload-label {
       border-color: #ff4d4f;
@@ -348,7 +338,6 @@
   }
 }
 
-/* Enhanced Error Message Styling */
 .error-message {
   color: #ff4d4f;
   font-size: 13px;
@@ -361,7 +350,7 @@
   align-items: center;
   gap: 6px;
   animation: fadeIn 0.3s ease;
-  
+
   i {
     font-size: 14px;
     flex-shrink: 0;
@@ -379,7 +368,6 @@
   }
 }
 
-/* Form Actions */
 .form-actions {
   margin-top: 32px;
   padding-top: 24px;
@@ -442,7 +430,6 @@
   }
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .education-form-container {
     margin: 0 16px;
@@ -450,7 +437,7 @@
 
   .form-header {
     padding: 20px;
-    
+
     .header-icon {
       width: 40px;
       height: 40px;
@@ -475,7 +462,7 @@
   .form-actions {
     .action-buttons {
       flex-direction: column;
-      
+
       .cancel-btn,
       .submit-btn {
         width: 100%;

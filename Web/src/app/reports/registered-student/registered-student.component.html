@@ -64,12 +64,23 @@
       Course: <b>{{ this.gradeQueryForm.value["courseCode"] }}</b> &nbsp; &nbsp;
       Acadamic Term: <b>{{ this.gradeQueryForm.value["termCode"] }}</b>
     </p>
+    <input nz-input placeholder="Search by student code, name, or batch..." [(ngModel)]="searchKey"
+      (ngModelChange)="search()" style="max-width: 280px; margin-bottom: 12px;" />
     <nz-table
       nzBordered
       #basicTable
       [nzData]="registeredStudents"
       [nzScroll]="{ y: '500px' }"
-      [nzShowPagination]="false"
+      [nzFrontPagination]="false"
+      [nzShowPagination]="true"
+      [nzShowSizeChanger]="true"
+      [nzPageSize]="pager.pageSize"
+      [nzPageSizeOptions]="pager.pageSizeOptions"
+      [nzTotal]="pager.total"
+      [nzPageIndex]="pager.pageIndex"
+      (nzPageIndexChange)="onPageIndexChange($event)"
+      (nzPageSizeChange)="onPageSizeChange($event)"
+      [nzLoading]="loading || pager.loading"
     >
       <thead>
         <th class="th-row">Student ID</th>
@@ -79,11 +90,11 @@
       <tbody>
         <tr
           tabindex="0"
-          *ngFor="let student of registeredStudents; let i = index"
+          *ngFor="let student of basicTable.data; let i = index"
         >
           <td>{{ student.studentID }}</td>
-          <td>{{ student.student.firstName }}</td>
-          <td>{{ student.student.batchCode }}</td>
+          <td>{{ student.student?.firstName }}</td>
+          <td>{{ student.student?.batchCode }}</td>
         </tr>
       </tbody>
     </nz-table>

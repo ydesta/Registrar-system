@@ -1,9 +1,7 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { BaseModel } from 'src/app/Models/BaseMode';
-import { CourseEquivalencyViewModel, CourseEquivalentModel } from 'src/app/Models/CourseEquivalentModel';
-import { CourseModel } from 'src/app/Models/CourseModel';
+import { CourseEquivalencyViewModel } from 'src/app/Models/CourseEquivalentModel';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 
@@ -13,88 +11,44 @@ import { CustomNotificationService } from 'src/app/services/custom-notification.
   styleUrls: ['./course-equivalent.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class CourseEquivalentComponent implements OnInit {
-
+export class CourseEquivalentComponent implements OnInit, OnDestroy {
   courseEquivalents: CourseEquivalencyViewModel[] = [];
-  loading = false;
-  searchValue = '';
-  filteredData: CourseEquivalencyViewModel[] = [];
-
-  // Table configuration
-  listOfData: CourseEquivalencyViewModel[] = [];
-  listOfDisplayData: CourseEquivalencyViewModel[] = [];
-  sortName: string | null = null;
-  sortValue: string | null = null;
+  pager: ServerPaginator;
   reqId = '';
-  checked = false;
 
   constructor(
     private _customNotificationService: CustomNotificationService,
     private _crudService: CrudService,
     private modal: NzModalService,
-    private router: Router
-  ) { }
-  
+    private paginator: PaginatorService
+  ) {
+    this.pager = this.paginator.create();
+  }
+
   ngOnInit(): void {
+    this.pager.init(() => this.loadCourseEquivalents());
     this.loadCourseEquivalents();
   }
 
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   loadCourseEquivalents(): void {
-    this.loading = true;
-    this._crudService.getList('/CourseEquivalents').subscribe({
-      next: (res: BaseModel<CourseEquivalencyViewModel[]>) => {
-        if (res.status === 'success') {
-          this.courseEquivalents = res.data;
-          this.listOfData = [...this.courseEquivalents];
-          this.listOfDisplayData = [...this.courseEquivalents];
-          this.filteredData = [...this.courseEquivalents];
-        } else {
-          this._customNotificationService.notification('error', 'Error', 'Failed to load course equivalents');
-        }
-        this.loading = false;
+    this.pager.loading = true;
+    this._crudService.getPaginated(`/CourseEquivalents`, this.pager.query()).subscribe({
+      next: (res: any) => {
+        this.courseEquivalents = res.data || [];
+        this.pager.applyResult(res);
       },
-      error: (error) => {
+      error: () => {
+        this.courseEquivalents = [];
+        this.pager.fail();
         this._customNotificationService.notification('error', 'Error', 'Failed to load course equivalents');
-        this.loading = false;
       }
     });
   }
 
-  // Search functionality
-  search(): void {
-    const filterFunc = (item: CourseEquivalencyViewModel) => {
-      return (
-        item.courseCode?.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1 ||
-        item.courseTitle?.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1 ||
-        item.equivalentCourseCode?.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1 ||
-        item.equivalentCourseTitle?.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1 ||
-        item.equivalentCourseId?.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1 ||
-        item.remark?.toLowerCase().indexOf(this.searchValue.toLowerCase()) !== -1
-      );
-    };
-
-    this.filteredData = this.courseEquivalents.filter(item => filterFunc(item));
-    this.listOfDisplayData = this.filteredData;
-  }
-
-  reset(): void {
-    this.searchValue = '';
-    this.search();
-  }
-
-  // Sorting functionality
-  sort(sort: { key: string; value: string } | string): void {
-    if (typeof sort === 'string') {
-      // Handle nz-table sort event
-      this.sortName = sort;
-      this.sortValue = this.sortValue === 'ascend' ? 'descend' : 'ascend';
-    } else {
-      // Handle object format
-      this.sortName = sort.key;
-      this.sortValue = sort.value;
-    }
-    this.search();
-  }
   showDeleteConfirm(id: any): void {
     this.reqId = id;
     this.modal.confirm({
@@ -106,8 +60,7 @@ export class CourseEquivalentComponent implements OnInit {
       nzOnOk: () => {
         this.deleteCourseEquivalent(id);
       },
-      nzCancelText: 'No',
-      nzOnCancel: () => console.log('Cancel')
+      nzCancelText: 'No'
     });
   }
 
@@ -121,10 +74,9 @@ export class CourseEquivalentComponent implements OnInit {
           this._customNotificationService.notification('error', 'Error', res.data);
         }
       },
-      error: (error) => {
+      error: () => {
         this._customNotificationService.notification('error', 'Error', 'Failed to delete course equivalent');
       }
     });
   }
 }
-  

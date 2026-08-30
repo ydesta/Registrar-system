@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
+import { ethiopianMobileValidator, ethiopianHomePhoneValidator, normalizeEthiopianMobile, normalizeEthiopianHomePhone, applyEthiopianMobileControl, applyEthiopianHomePhoneControl } from 'src/app/common/constant';
 
 @Component({
   selector: 'app-add-applicant-contact-person',
@@ -23,8 +24,8 @@ constructor(
     lastModifiedBy :  ['-'] ,
     applicantID :   ['',Validators.required] ,
     fullName :   ['',Validators.required] ,
-    telephoneOffice :   ['',Validators.required] ,
-    telephoneHome :   [''] ,
+    telephoneOffice :   ['',[Validators.required, ethiopianMobileValidator()]] ,
+    telephoneHome :   ['',[ethiopianHomePhoneValidator()]] ,
     relation :   ['',Validators.required] ,
     sourceOfFinance :   ["",Validators.required] ,
     howDidYouComeKnow :   [""] ,
@@ -38,7 +39,7 @@ ngOnInit(): void {
   if(this.progStatusId!="null"){
     this.action="Edit Applicant Contact Person"
     this.submit ='Update';
-    this._crudService.getList('/ApplicantContactPersons' + '/' + this.progStatusId).subscribe((res:any)=>{
+    this._crudService.getById('/ApplicantContactPersons', this.progStatusId).subscribe((res:any)=>{
       this.patchValues(res.data);
     });
   }
@@ -49,15 +50,20 @@ ngOnInit(): void {
 }
 submitForm(){
  if(this.applicantExpForm.valid){
+   const payload = {
+     ...this.applicantExpForm.value,
+     telephoneOffice: normalizeEthiopianMobile(this.applicantExpForm.value.telephoneOffice) || this.applicantExpForm.value.telephoneOffice,
+     telephoneHome: normalizeEthiopianHomePhone(this.applicantExpForm.value.telephoneHome) || this.applicantExpForm.value.telephoneHome || ''
+   };
    if(this.progStatusId=="null") {
-  this._crudService.add('/ApplicantContactPersons',this.applicantExpForm.value).subscribe((res:any)=>{
+  this._crudService.add('/ApplicantContactPersons',payload).subscribe((res:any)=>{
     this._customNotificationService.notification('success','Success',res.data);
     this._route.navigateByUrl('applicants/applicant-contact-person');
     
   })}
   else if(this.progStatusId!="null") {
     if(this.applicantExpForm.valid){
-      this._crudService.update('/ApplicantContactPersons' ,this.progStatusId,this.applicantExpForm.value).subscribe((res:any)=>{
+      this._crudService.update('/ApplicantContactPersons' ,this.progStatusId,payload).subscribe((res:any)=>{
        if(res.status == 'success'){
         this._customNotificationService.notification('success','Success',res.data);
         this._route.navigateByUrl('applicants/applicant-contact-person');
@@ -76,16 +82,23 @@ submitForm(){
  }
 }
 patchValues(data: any) {
-  
   this.applicantExpForm.patchValue({
     applicantID :   data.applicantID ,
     fullName :   data.fullName ,
-    telephoneOffice :   data.telephoneOffice ,
-    telephoneHome :  data.telephoneHome ,
+    telephoneOffice :   normalizeEthiopianMobile(data.telephoneOffice) || data.telephoneOffice ,
+    telephoneHome :  normalizeEthiopianHomePhone(data.telephoneHome) || data.telephoneHome || '' ,
     relation :   data.relation ,
     totalWorkYear :   data.totalWorkYear ,
     sourceOfFinance :  data.sourceOfFinance ,
     howDidYouComeKnow : data.howDidYouComeKnow
  })
 }
+
+  onTelephoneOfficeBlur(): void {
+    applyEthiopianMobileControl(this.applicantExpForm.get('telephoneOffice'));
+  }
+
+  onTelephoneHomeBlur(): void {
+    applyEthiopianHomePhoneControl(this.applicantExpForm.get('telephoneHome'));
+  }
 }

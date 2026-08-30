@@ -1,5 +1,6 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { NzModalService } from "ng-zorro-antd/modal";
+import { PaginatorService, ServerPaginator } from "src/app/reports/services/paginator.service";
 import { CrudService } from "src/app/services/crud.service";
 import { CustomNotificationService } from "src/app/services/custom-notification.service";
 
@@ -8,25 +9,43 @@ import { CustomNotificationService } from "src/app/services/custom-notification.
   templateUrl: "./acadamic-programme-status.component.html",
   styleUrls: ["./acadamic-programme-status.component.scss"]
 })
-export class AcadamicProgrammeStatusComponent implements OnInit {
-  programStatus: any;
+export class AcadamicProgrammeStatusComponent implements OnInit, OnDestroy {
+  programStatus: any[] = [];
   progStatusId = "";
   checked = false;
+  pager: ServerPaginator;
+
   constructor(
     private _customNotificationService: CustomNotificationService,
     private _crudService: CrudService,
-    private modal: NzModalService
-  ) {}
+    private modal: NzModalService,
+    private paginator: PaginatorService
+  ) {
+    this.pager = this.paginator.create();
+  }
 
   ngOnInit(): void {
+    this.pager.init(() => this.fetchProgramStatus());
     this.fetchProgramStatus();
   }
 
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   fetchProgramStatus() {
+    this.pager.loading = true;
     this._crudService
-      .getList("/AcadamicProgrammeStatuss")
-      .subscribe((res: any) => {
-        this.programStatus = res.data;
+      .getPaginated(`/AcadamicProgrammeStatuss`, this.pager.query())
+      .subscribe({
+        next: (res: any) => {
+          this.programStatus = res.data;
+          this.pager.applyResult(res);
+        },
+        error: () => {
+          this.programStatus = [];
+          this.pager.fail();
+        }
       });
   }
 
@@ -34,7 +53,6 @@ export class AcadamicProgrammeStatusComponent implements OnInit {
     this.progStatusId = id;
     this.modal.confirm({
       nzTitle: "Are you sure delete this program status?",
-      // nzContent: '<b style="color: red;">Some descriptions</b>',
       nzOkText: "Yes",
       nzOkType: "primary",
       nzOkDanger: true,
@@ -42,7 +60,6 @@ export class AcadamicProgrammeStatusComponent implements OnInit {
         this._crudService
           .delete("/AcadamicProgrammeStatuss", this.progStatusId)
           .subscribe((res: any) => {
-           // 
             this.fetchProgramStatus();
             if (res.status == "success") {
               this._customNotificationService.notification(
@@ -61,7 +78,7 @@ export class AcadamicProgrammeStatusComponent implements OnInit {
           });
       },
       nzCancelText: "No",
-      nzOnCancel: () => console.log("Cancel")
+      nzOnCancel: () => {}
     });
   }
 
@@ -69,7 +86,6 @@ export class AcadamicProgrammeStatusComponent implements OnInit {
     this._crudService
       .getList("/AcadamicProgrammeStatuss/excel")
       .subscribe((res: any) => {
-        //acadamic-programme
         if (res.data.toString() == "No data found") {
           this._customNotificationService.notification(
             "error",
@@ -79,7 +95,7 @@ export class AcadamicProgrammeStatusComponent implements OnInit {
         } else {
           let fileLists = res.data.split("/");
           this._crudService
-            .expoerExcel("/" + res.data)
+            .exportExcel("/" + res.data)
             .subscribe((data: any) => {
               let downloadURL = window.URL.createObjectURL(data);
               let link = document.createElement("a");

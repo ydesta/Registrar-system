@@ -69,12 +69,66 @@
   }
 }
 
-.pagination-container {
+.search-actions {
   display: flex;
-  justify-content: center;
-  padding: 16px 24px;
-  border-top: 1px solid #f0f0f0;
-  background: #fafafa;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.students-mobile-list {
+  display: none;
+}
+
+.student-card {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.student-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.student-card__code {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.student-card__name {
+  margin: 4px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.35;
+}
+
+.student-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.student-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+
+  button {
+    flex: 1 1 calc(50% - 8px);
+    min-height: 36px;
+  }
 }
 
 // Table styling
@@ -392,36 +446,85 @@ nz-tag {
 // Responsive design
 @media (max-width: 768px) {
   .content-container {
-    padding: 16px;
+    padding: 12px;
+  }
+
+  .header-section,
+  .search-section {
+    padding: 14px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+  }
+
+  .header-section .page-title h1 {
+    font-size: 20px;
+  }
+
+  .search-section {
+    ::ng-deep {
+      .ant-form-item {
+        flex-direction: column;
+        margin-bottom: 12px;
+      }
+
+      .ant-form-item-label,
+      .ant-form-item-control {
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+        width: 100% !important;
+      }
+
+      .ant-form-item-label {
+        padding: 0 0 4px;
+        text-align: left;
+      }
+
+      .ant-input,
+      .ant-select-selector {
+        min-width: 0 !important;
+      }
+    }
+  }
+
+  .search-actions {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+      margin: 0;
+    }
   }
 
   .table-header {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px 14px;
   }
 
-  nz-col[nzSpan="8"] {
-    margin-bottom: 16px;
-  }
+  .page-size-selector {
+    width: 100%;
 
-  ::ng-deep .ant-table-wrapper {
-    .ant-table {
-      font-size: 12px;
-
-      .ant-table-thead > tr > th,
-      .ant-table-tbody > tr > td {
-        padding: 8px;
-      }
-
-      // Ensure sticky action column is visible on mobile
-      .ant-table-thead > tr > th.sticky-action,
-      .ant-table-tbody > tr > td.sticky-action {
-        position: sticky !important;
-        right: 0;
-        z-index: 10;
-      }
+    nz-select {
+      width: 100% !important;
     }
+  }
+
+  .students-desktop-table {
+    display: none;
+  }
+
+  .students-mobile-list {
+    display: block;
+  }
+
+  .pagination-container {
+    padding: 12px;
+    overflow-x: auto;
+  }
+
+  ::ng-deep .ant-pagination-options {
+    display: none;
   }
 }
 

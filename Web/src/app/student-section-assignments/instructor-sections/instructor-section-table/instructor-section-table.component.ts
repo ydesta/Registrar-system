@@ -7,6 +7,7 @@ import { StaticData } from 'src/app/admission-request/model/StaticData';
 import { TermCourseOfferingService } from 'src/app/colleges/services/term-course-offering.service';
 import { Router } from '@angular/router';
 import { InstructorSectionService } from 'src/app/services/instructor-section.service';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 
 @Component({
   selector: 'app-instructor-section-table',
@@ -31,18 +32,24 @@ export class ManageInstructorTableComponent implements OnInit, OnDestroy {
 
   yearList: number[] = [];
   batchList: any[] = [];
+  searchValue = '';
+  hasSearched = false;
+  pager: ServerPaginator;
 
   constructor(private fb: FormBuilder,
     private courseTermOfferingService: TermCourseOfferingService,
     private router: Router,
-    private instructorSectionService: InstructorSectionService
+    private instructorSectionService: InstructorSectionService,
+    private paginator: PaginatorService
   ) {
+    this.pager = this.paginator.create();
     this.initializeSearchForm();
     const currentYear = new Date().getFullYear();
     this.yearList = this.getYearRange(currentYear);
   }
 
   ngOnInit(): void {
+    this.pager.init(() => this.applyFilters(false));
     this.filteredInstructorSections = [];
     this.getListOfAcademicTermStatus();
     this.academicTerm.valueChanges.subscribe(res => {
@@ -68,6 +75,7 @@ export class ManageInstructorTableComponent implements OnInit, OnDestroy {
     return this.searchForm.get('batchCode')!;
   }
   ngOnDestroy(): void {
+    this.pager.destroy();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -94,7 +102,6 @@ export class ManageInstructorTableComponent implements OnInit, OnDestroy {
 
   getListOfBatch(termId: number = 0, termYear: number = 0) {
     this.courseTermOfferingService.getListOfBatchCodeByAcademicTerm(termId, termYear).subscribe(res => {
-      console.log({ res });
       this.batchList = res;
     });
   }
@@ -109,41 +116,54 @@ export class ManageInstructorTableComponent implements OnInit, OnDestroy {
     });
   }
 
-  private applyFilters(): void {
+  private applyFilters(resetPage = true): void {
     const { batchId, academicTerm, year } = this.searchForm.value;
-
-    // Use the service to get filtered data from the API
-    if (academicTerm && year && batchId) {
-      this.loading = true;
-      this.instructorSectionService.getInstructorSectionsByCriteria(academicTerm, year, batchId)
-        .subscribe({
-          next: (res) => {
-            this.filteredInstructorSections = res.data;
-            this.loading = false;
-          },
-          error: (error) => {
-            console.error('Error fetching instructor sections:', error);
-            this.filteredInstructorSections = [];
-            this.loading = false;
-          }
-        });
-    } else {
-      // If not all criteria are selected, clear the results
+    if (!academicTerm || !year || !batchId) {
       this.filteredInstructorSections = [];
+      this.pager.total = 0;
+      return;
     }
+    if (resetPage) {
+      this.pager.pageIndex = 1;
+    }
+    this.hasSearched = true;
+    this.loading = true;
+    this.pager.loading = true;
+    this.instructorSectionService
+      .getInstructorSectionsByCriteriaPaginated(academicTerm, year, batchId, this.pager.query())
+      .subscribe({
+        next: (res: any) => {
+          this.filteredInstructorSections = res.data || [];
+          this.pager.applyResult(res);
+          this.loading = false;
+        },
+        error: () => {
+          this.filteredInstructorSections = [];
+          this.pager.fail();
+          this.loading = false;
+        }
+      });
   }
 
   clearFilters(): void {
     this.searchForm.reset();
     this.filteredInstructorSections = [];
+    this.searchValue = '';
+    this.hasSearched = false;
+    this.pager.pageIndex = 1;
+    this.pager.total = 0;
+    this.pager.searchKey = '';
   }
 
   applySearch(): void {
     if (this.searchForm.valid) {
       this.applyFilters();
-      // Collapse search criteria when search is successful
       this.isSearchCollapsed = true;
     }
+  }
+
+  search(): void {
+    this.pager.onSearch(this.searchValue);
   }
 
   toggleSearchCollapse(): void {

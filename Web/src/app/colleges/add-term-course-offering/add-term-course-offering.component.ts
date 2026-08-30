@@ -71,6 +71,10 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
   searchText = '';
   originalCourses: any;
   private searchSubject = new Subject<string>();
+  selectedQuadrantId: string | null = null;
+  quadrantOptions: { id: string; label: string }[] = [];
+  selectedBreakdownQuadrantId: string | null = null;
+  breakdownQuadrantOptions: { id: string; label: string }[] = [];
 
   searchTextB = '';
   originalBCourses: any;
@@ -121,7 +125,7 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       
       // Update dates from AcademicTerm if form dates are null
       if (!currentStartDate && this.nextAcademicTerm.startDate) {
-        this.RegistrationStartDate?.patchValue(new Date(this.nextAcademicTerm.startDate));
+        this.RegistrationStartDate?.patchValue(this.parseLocalDate(this.nextAcademicTerm.startDate));
       } else if (!currentStartDate) {
         // If AcademicTerm startDate is also null, use current date
         const today = new Date();
@@ -130,7 +134,7 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       }
       
       if (!currentEndDate && this.nextAcademicTerm.endDate) {
-        this.RegistrationEndDate?.patchValue(new Date(this.nextAcademicTerm.endDate));
+        this.RegistrationEndDate?.patchValue(this.parseLocalDate(this.nextAcademicTerm.endDate));
       } else if (!currentEndDate) {
         // If AcademicTerm endDate is also null, use start date + 10 days
         const startDate = this.RegistrationStartDate?.value || new Date();
@@ -260,10 +264,10 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
         
         // Only update if dates are null and we have AcademicTerm dates
         if (!currentStartDate && res.startDate) {
-          this.RegistrationStartDate?.patchValue(new Date(res.startDate));
+          this.RegistrationStartDate?.patchValue(this.parseLocalDate(res.startDate));
         }
         if (!currentEndDate && res.endDate) {
-          this.RegistrationEndDate?.patchValue(new Date(res.endDate));
+          this.RegistrationEndDate?.patchValue(this.parseLocalDate(res.endDate));
         }
         
         // If AcademicTerm dates are null, set defaults (current date and +10 days)
@@ -295,6 +299,9 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
           this.listOfCourseBreakDown = res.courseBreakDownOffering;
           this.originalBCourses = [...this.listOfCourseBreakDown];
           this.numberOfCourseBreakDown = this.listOfCourseBreakDown.length;
+          this.selectedBreakdownQuadrantId = null;
+          this.searchTextB = '';
+          this.breakdownQuadrantOptions = this.buildQuadrantOptions(this.originalBCourses);
           
           // Handle course selection for update mode
           if (isUpdate && this.coursesId && this.coursesId.length > 0) {
@@ -382,8 +389,8 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
     // First, try to get dates from nextAcademicTerm
     if (this.nextAcademicTerm?.startDate && this.nextAcademicTerm?.endDate) {
       return {
-        startDate: new Date(this.nextAcademicTerm.startDate),
-        endDate: new Date(this.nextAcademicTerm.endDate)
+        startDate: this.parseLocalDate(this.nextAcademicTerm.startDate),
+        endDate: this.parseLocalDate(this.nextAcademicTerm.endDate)
       };
     }
     
@@ -438,11 +445,44 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
     course.BatchCode = formModel.batchCode;
     course.CurriculumCode = formModel.curriculumCode;
     course.EntryYear = this.entryYear;
-    course.RegistrationStartDate = formModel.RegistrationStartDate;
-    course.RegistrationEndDate = formModel.RegistrationEndDate;
+    course.RegistrationStartDate = this.formatDateOnly(formModel.RegistrationStartDate);
+    course.RegistrationEndDate = this.formatDateOnly(formModel.RegistrationEndDate);
     course.Year = formModel.Year;
     course.Remark = formModel.remark;
     return course;
+  }
+
+  private formatDateOnly(value: unknown): string | null {
+    if (!value) {
+      return null;
+    }
+    const date = value instanceof Date ? value : new Date(value as string);
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private parseLocalDate(value: unknown): Date | null {
+    if (!value) {
+      return null;
+    }
+    if (value instanceof Date && !isNaN(value.getTime())) {
+      return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+    }
+    const raw = String(value).trim();
+    const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    }
+    const parsed = new Date(raw);
+    if (isNaN(parsed.getTime())) {
+      return null;
+    }
+    return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
   }
   
   //getter and setter
@@ -520,14 +560,22 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       return;
     }
     
-    const selectedCourseBreakDownIds = this.listOfCourseBreakDown
+    const breakdownSource = this.originalBCourses?.length
+      ? this.originalBCourses
+      : this.listOfCourseBreakDown;
+    const additionalSource = this.originalCourses?.length
+      ? this.originalCourses
+      : this.courses;
+
+    const selectedCourseBreakDownIds = (breakdownSource || [])
       .filter(data => this.setOfCheckedId.has(data.courseId))
       .map(data => data.courseId);
-    const selectedCourseIds = this.courses
+    const selectedCourseIds = (additionalSource || [])
       .filter(data => this.setOfCheckedIdA.has(data.courseId))
       .map(data => data.courseId);
     const uniqueCourseId = selectedCourseIds.filter(
-      courseId => !this.listOfSelectedCourseBreakdown.includes(courseId)
+      courseId => !selectedCourseBreakDownIds.includes(courseId)
+        && !this.listOfSelectedCourseBreakdown.includes(courseId)
     );
     const listOfSelectedCouresOffering = selectedCourseBreakDownIds.concat(
       ...uniqueCourseId
@@ -613,8 +661,8 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       remark: data.remark,
       AcademicTermSeason: data.academicTermSeason,
       AcademicTermYear: data.academicTermYear,
-      RegistrationStartDate: data.registrationStartDate,
-      RegistrationEndDate: data.registrationEndDate
+      RegistrationStartDate: this.parseLocalDate(data.registrationStartDate),
+      RegistrationEndDate: this.parseLocalDate(data.registrationEndDate)
     });
 
     // Handle courseId array properly - this should be an array of course IDs
@@ -751,7 +799,10 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
         return this._cachedCreditHours;
       }
       
-      const result = this.listOfCourseBreakDown
+      const source = this.originalBCourses?.length
+        ? this.originalBCourses
+        : this.listOfCourseBreakDown;
+      const result = (source || [])
         .filter(data => this.setOfCheckedId.has(data.courseId))
         .reduce((total, data) => total + (data.creditHours || 0), 0);
       
@@ -778,7 +829,10 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
         return this._cachedAdditionalCreditHours;
       }
       
-      const result = this.courses
+      const source = this.originalCourses?.length
+        ? this.originalCourses
+        : this.courses;
+      const result = (source || [])
         ?.filter(course => this.setOfCheckedIdA.has(course.courseId))
         .reduce((total, course) => total + (course.creditHours || 0), 0) || 0;
       
@@ -932,30 +986,68 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
     if (!this.originalCourses || this.originalCourses.length === 0) {
       return;
     }
+
+    let filtered = [...this.originalCourses];
+
+    if (this.selectedQuadrantId) {
+      const selectedId = String(this.selectedQuadrantId).toLowerCase();
+      filtered = filtered.filter(item => {
+        const courseQuadrantId = String(item?.quadrantId || item?.QuadrantId || '').toLowerCase();
+        return courseQuadrantId === selectedId;
+      });
+    }
     
-    if (this.searchText.trim() === '') {
-      this.courses = [...this.originalCourses];
-    } else {
+    if (this.searchText.trim() !== '') {
       const searchTerm = this.searchText.toLowerCase().trim();
-      
-      this.courses = this.originalCourses.filter(item => {
+      filtered = filtered.filter(item => {
         if (!item) return false;
         
         const courseCode = item.courseCode ? item.courseCode.toLowerCase() : '';
         const courseTitle = item.courseTitle ? item.courseTitle.toLowerCase() : '';
+        const quadrantHeading = item.quadrantHeading ? item.quadrantHeading.toLowerCase() : '';
         
-        const codeMatch = courseCode.includes(searchTerm);
-        const titleMatch = courseTitle.includes(searchTerm);
-        
-        return codeMatch || titleMatch;
+        return courseCode.includes(searchTerm)
+          || courseTitle.includes(searchTerm)
+          || quadrantHeading.includes(searchTerm);
       });
     }
+
+    this.courses = filtered;
     
     // Don't clear checked states during search - they should persist
     // The checked state is maintained in setOfCheckedIdA regardless of filtering
     
     this.invalidateCache();
     this.refreshCheckedStatusA();
+  }
+
+  onQuadrantFilterChange(quadrantId: string | null): void {
+    this.selectedQuadrantId = quadrantId;
+    this.performSearch();
+  }
+
+  onBreakdownQuadrantFilterChange(quadrantId: string | null): void {
+    this.selectedBreakdownQuadrantId = quadrantId;
+    this.performSearchBreak();
+  }
+
+  private buildQuadrantOptions(courses: any[]): { id: string; label: string }[] {
+    const map = new Map<string, string>();
+    (courses || []).forEach(course => {
+      const id = course?.quadrantId || course?.QuadrantId;
+      const heading = course?.quadrantHeading || course?.QuadrantHeading;
+      const code = course?.quadrantCode || course?.QuadrantCode;
+      if (!id) {
+        return;
+      }
+      const key = String(id);
+      if (!map.has(key)) {
+        map.set(key, heading || code || 'Quadrant');
+      }
+    });
+    return Array.from(map.entries())
+      .map(([id, label]) => ({ id, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
   }
   
   onSearchBreak(): void {
@@ -966,24 +1058,34 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
     if (!this.originalBCourses || this.originalBCourses.length === 0) {
       return;
     }
+
+    let filtered = [...this.originalBCourses];
+
+    if (this.selectedBreakdownQuadrantId) {
+      const selectedId = String(this.selectedBreakdownQuadrantId).toLowerCase();
+      filtered = filtered.filter(item => {
+        const courseQuadrantId = String(item?.quadrantId || item?.QuadrantId || '').toLowerCase();
+        return courseQuadrantId === selectedId;
+      });
+    }
     
-    if (this.searchTextB.trim() === '') {
-      this.listOfCourseBreakDown = [...this.originalBCourses];
-    } else {
+    if (this.searchTextB.trim() !== '') {
       const searchTerm = this.searchTextB.toLowerCase().trim();
       
-      this.listOfCourseBreakDown = this.originalBCourses.filter(item => {
+      filtered = filtered.filter(item => {
         if (!item) return false;
         
         const courseCode = item.courseCode ? item.courseCode.toLowerCase() : '';
         const courseTitle = item.courseTitle ? item.courseTitle.toLowerCase() : '';
+        const quadrantHeading = item.quadrantHeading ? item.quadrantHeading.toLowerCase() : '';
         
-        const codeMatch = courseCode.includes(searchTerm);
-        const titleMatch = courseTitle.includes(searchTerm);
-        
-        return codeMatch || titleMatch;
+        return courseCode.includes(searchTerm)
+          || courseTitle.includes(searchTerm)
+          || quadrantHeading.includes(searchTerm);
       });
     }
+
+    this.listOfCourseBreakDown = filtered;
     
     // If in update mode, ensure saved courses remain checked after search
     if (this.isUpdate && this.coursesId && this.coursesId.length > 0) {
@@ -1005,8 +1107,11 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       .getAllCourseByBatchId(curriculumId, batchId, isUpdate, seasonTerm)
       .subscribe({
         next: (res: any) => {
-          this.courses = res;
+          this.courses = res || [];
           this.originalCourses = [...this.courses];
+          this.selectedQuadrantId = null;
+          this.searchText = '';
+          this.quadrantOptions = this.buildQuadrantOptions(this.originalCourses);
           
           // If in update mode and we have saved additional course IDs, restore them
           if (isUpdate && this.savedAdditionalCourseIds && this.savedAdditionalCourseIds.length > 0) {

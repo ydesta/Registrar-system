@@ -22,13 +22,13 @@
           <nz-form-item>
             <nz-form-label [nzSpan]="20" required>Telephone Office</nz-form-label>
             <nz-form-control [nzSpan]="20">
-                <input nz-input formControlName="telephoneOffice" placeholder="enter telephone office"/>
+                <input nz-input formControlName="telephoneOffice" placeholder="+2519… / 09… / 07…" (blur)="onTelephoneOfficeBlur()"/>
             </nz-form-control>
           </nz-form-item> 
           <nz-form-item>
             <nz-form-label [nzSpan]="20" >Telephone Home </nz-form-label>
             <nz-form-control [nzSpan]="20">
-                <input nz-input formControlName="post" placeholder="enter telephone home"/>
+                <input nz-input formControlName="telephoneHome" placeholder="+251… / 01… / 03… / 04… / 09… / 07…" (blur)="onTelephoneHomeBlur()"/>
             </nz-form-control>
           </nz-form-item> 
         </div>

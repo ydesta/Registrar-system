@@ -11,15 +11,14 @@ export class ViewStatusComponent implements OnInit {
   constructor(private _crudService: CrudService) {}
 
   ngOnInit(): void {
+    const userId = localStorage.getItem("userId") || localStorage.getItem("user_id");
+    if (!userId) {
+      return;
+    }
     this._crudService
-      .getList(
-        "/Applicants/" +
-          "ByApplicantUserId/" +
-          localStorage.getItem("userId")
-      )
+      .getById("/Applicants/ByApplicantUserId", userId)
       .subscribe((res: any) => {
         this.applicant = res.data;
-        console.log(this.applicant);
       });
   }
 }

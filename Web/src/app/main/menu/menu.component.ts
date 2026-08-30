@@ -1,51 +1,55 @@
-import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../../services/auth.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-menu',
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.scss'],
 })
-export class MenuComponent implements OnInit {
+export class MenuComponent implements OnInit, OnDestroy {
   isCollapsed = true;
   isLogin = false;
   currentDate = Date();
   shortUserName = '';
   userType = '';
-  public isUserAdmin: boolean = false;
-  public isUserAuthenticated: boolean = false;
-  
+  isUserAdmin = false;
+  isUserAuthenticated = false;
+  private readonly destroy$ = new Subject<void>();
+
   constructor(
     private _authService: AuthService,
     private _router: Router
   ) {}
-  
+
   ngOnInit(): void {
-    // Check authentication status
     this._authService.isAuthenticated().then(isAuth => {
       this.isUserAuthenticated = isAuth;
     });
-    
-    // Subscribe to authentication changes
-    this._authService.currentUser$.subscribe(user => {
+    this._authService.currentUser$.pipe(takeUntil(this.destroy$)).subscribe(user => {
       this.isUserAuthenticated = !!user;
       if (user) {
         this.shortUserName = `${user.firstName} ${user.lastName}`;
-        this.isUserAdmin = this._authService.hasRole('Administrator') || this._authService.hasRole('Admin');
+        this.isUserAdmin = this.isAdmin();
       }
     });
   }
 
-  public login = () => {
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  login = () => {
     this._router.navigate(['/accounts/login']);
   };
 
-  public logout = () => {
+  logout = () => {
     this._authService.logout();
   };
 
-  public isAdmin = () => {
+  isAdmin = () => {
     this.isUserAdmin = this._authService.hasRole('Administrator') || this._authService.hasRole('Admin');
     return this.isUserAdmin;
   };

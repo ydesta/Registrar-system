@@ -1,10 +1,7 @@
 import { MenuRoutingModule } from './menu/menu-routing.module';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NgxPrintModule } from 'ngx-print';
@@ -18,8 +15,6 @@ import { MenuComponent } from './menu/menu.component';
     CommonModule,
     MenuRoutingModule,
     FormsModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
     IconsProviderModule,
     NzLayoutModule,
     NzMenuModule,

@@ -272,12 +272,9 @@ export class ReassignStudentSectionComponent implements OnInit {
     this.successMessage = '';
   }
 
-  select(ret: TransferSelectChange): void {
-    console.log('nzSelectChange', ret);
-  }
+  select(_ret: TransferSelectChange): void {}
 
   change(ret: TransferChange): void {
-    console.log('nzChange', ret);
     const listKeys = ret.list.map(l => l['key']);
     const hasOwnKey = (e: TransferItem): boolean => e.hasOwnProperty('key');
 
@@ -300,10 +297,6 @@ export class ReassignStudentSectionComponent implements OnInit {
     // Update the separate lists based on new directions
     this.leftList = this.list.filter(item => item.direction === 'left' || !item.direction);
     this.rightList = this.list.filter(item => item.direction === 'right');
-
-    // Log the updated lists for debugging
-    console.log('Updated Source Section (Left):', this.leftList.length, 'students');
-    console.log('Updated Target Section (Right):', this.rightList.length, 'students');
 
     // Show notification about the transfer
     const movedStudents = ret.list.length;
@@ -392,14 +385,6 @@ export class ReassignStudentSectionComponent implements OnInit {
       'Transfer Complete',
       `${selectedStudents.length} student(s) transferred from ${fromSection === 'left' ? 'Source' : 'Target'} to ${toSection === 'left' ? 'Source' : 'Target'} Section`
     );
-
-    console.log('Transfer completed:', {
-      fromSection,
-      toSection,
-      studentsMoved: selectedStudents.length,
-      sourceCount: this.leftList.length,
-      targetCount: this.rightList.length
-    });
   }
 
 
@@ -422,13 +407,6 @@ export class ReassignStudentSectionComponent implements OnInit {
 
     const targetStudents = this.rightList
       .map(student => student['studentInfo']?.id || student['key']);
-
-    console.log('Extracted student IDs:', {
-      sourceStudents,
-      targetStudents,
-      sourceCount: sourceStudents.length,
-      targetCount: targetStudents.length
-    });
 
     if (sourceStudents.length === 0 && targetStudents.length === 0) {
       this.notificationService.notification('warning', 'No Students Available', 'No students found in either section.');

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import {
@@ -11,68 +10,60 @@ import {
   PaymentGatewayResponse,
   ResponseDtos
 } from '../interfaces/payment.interface';
+import { CrudService } from 'src/app/services/crud.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PaymentService {
-  private baseUrl = environment.baseUrl;
-  private readonly _payment: string = `/${environment.apiVersion}/payment`;
-  constructor(private httpClient: HttpClient) { }
+  private readonly payment = `/${environment.apiVersion}/payment`;
+
+  constructor(private crud: CrudService) { }
+
   createPaymentOrder(request: PaymentOrderRequest): Observable<ResponseDtos> {
-    const endPointUrl = `${this.baseUrl}${this._payment}/create-payment-order`;
-    return this.httpClient.post<ResponseDtos>(endPointUrl, request);
+    return this.crud.add<ResponseDtos>(`${this.payment}/create-payment-order`, request);
   }
 
   getPaymentOrder(paymentOrderId: string): Observable<PaymentOrder> {
-    const endPointUrl = `${this.baseUrl}${this._payment}/payment-order/${paymentOrderId}`;
-    return this.httpClient.get<PaymentOrder>(endPointUrl);
+    return this.crud.getList<PaymentOrder>(`${this.payment}/payment-order/${paymentOrderId}`);
   }
 
   getPaymentOrderByOrderNumber(orderNumber: string): Observable<PaymentOrder> {
-    const endPointUrl = `${this.baseUrl}${this._payment}/payment-order-by-number/${orderNumber}`;
-    return this.httpClient.get<PaymentOrder>(endPointUrl);
+    return this.crud.getList<PaymentOrder>(`${this.payment}/payment-order-by-number/${orderNumber}`);
   }
+
   initiatePayment(request: PaymentGatewayRequest): Observable<PaymentGatewayResponse> {
-    const endPointUrl = `${this.baseUrl}${this._payment}/initiate-payment`;
-    return this.httpClient.post<PaymentGatewayResponse>(endPointUrl, request);
+    return this.crud.add<PaymentGatewayResponse>(`${this.payment}/initiate-payment`, request);
   }
 
   processCallback(orderId: string, status: string, message: string): Observable<PaymentGatewayResponse> {
-    const endPointUrl = `${this.baseUrl}${this._payment}/callback`;
-    return this.httpClient.post<PaymentGatewayResponse>(endPointUrl, null, {
-      params: {
-        orderId,
-        status,
-        message
-      }
+    return this.crud.add<PaymentGatewayResponse>(`${this.payment}/callback`, null, {
+      orderId,
+      status,
+      message
     });
   }
 
   processRegistrationPayment(request: RegistrationPaymentRequest): Observable<ResponseDtos> {
-    const endPointUrl = `${this.baseUrl}${this._payment}/process-registration-payment`;
-    return this.httpClient.post<ResponseDtos>(endPointUrl, request);
+    return this.crud.add<ResponseDtos>(`${this.payment}/process-registration-payment`, request);
   }
 
   handleRegistrationPaymentCallback(orderId: string, status: string, message: string): Observable<ResponseDtos> {
-    const endPointUrl = `${this.baseUrl}${this._payment}/handle-registration-callback`;
-    return this.httpClient.post<ResponseDtos>(endPointUrl, null, {
-      params: {
-        orderId,
-        status,
-        message
-      }
+    return this.crud.add<ResponseDtos>(`${this.payment}/handle-registration-callback`, null, {
+      orderId,
+      status,
+      message
     });
   }
 
   getRegistrationPaymentStatus(registrationId: string): Observable<ResponseDtos> {
-    const endPointUrl = `${this.baseUrl}${this._payment}/registration-status/${registrationId}`;
-    return this.httpClient.get<ResponseDtos>(endPointUrl);
+    return this.crud.getList<ResponseDtos>(`${this.payment}/registration-status/${registrationId}`);
   }
+
   processCompletePaymentFlow(request: CompletePaymentFlowRequest): Observable<ResponseDtos> {
-    const endPointUrl = `${this.baseUrl}${this._payment}/process-complete-payment-flow`;
-    return this.httpClient.post<ResponseDtos>(endPointUrl, request);
+    return this.crud.add<ResponseDtos>(`${this.payment}/process-complete-payment-flow`, request);
   }
+
   redirectToPaymentGateway(redirectUrl: string): void {
     if (redirectUrl) {
       window.location.href = redirectUrl;
@@ -84,6 +75,7 @@ export class PaymentService {
       this.redirectToPaymentGateway(response.redirectUrl);
     }
   }
+
   createPayment(request: PaymentGatewayRequest): Observable<PaymentGatewayResponse> {
     return this.initiatePayment(request);
   }
@@ -91,19 +83,17 @@ export class PaymentService {
   handlePaymentCallback(orderId: string, status: string, message: string): Observable<ResponseDtos> {
     return this.handleRegistrationPaymentCallback(orderId, status, message);
   }
+
   getPaymentOrderStatus(paymentOrderId: string): Observable<ResponseDtos> {
-    const endPointUrl = `${this.baseUrl}${this._payment}/payment-order-status/${paymentOrderId}`;
-    return this.httpClient.get<ResponseDtos>(endPointUrl);
+    return this.crud.getList<ResponseDtos>(`${this.payment}/payment-order-status/${paymentOrderId}`);
   }
 
   getPaymentOrderById(paymentOrderId: string): Observable<ResponseDtos> {
-    const endPointUrl = `${this.baseUrl}${this._payment}/payment-order/${paymentOrderId}`;
-    return this.httpClient.get<ResponseDtos>(endPointUrl);
+    return this.crud.getList<ResponseDtos>(`${this.payment}/payment-order/${paymentOrderId}`);
   }
 
   processPaymentOrder(paymentOrderId: string, gatewayRequest: PaymentGatewayRequest): Observable<ResponseDtos> {
-    const endPointUrl = `${this.baseUrl}${this._payment}/process-payment-order/${paymentOrderId}`;
-    return this.httpClient.post<ResponseDtos>(endPointUrl, gatewayRequest);
+    return this.crud.add<ResponseDtos>(`${this.payment}/process-payment-order/${paymentOrderId}`, gatewayRequest);
   }
 
   getPaymentStatusText(status: number): string {
@@ -130,8 +120,8 @@ export class PaymentService {
     };
     return statusMap[status] || 'Unknown';
   }
+
   checkOrderStatusAndHandleCallback(orderNumber: string): Observable<ResponseDtos> {
-    const endPointUrl = `${this.baseUrl}${this._payment}/check-and-handle-callback/${orderNumber}`;
-    return this.httpClient.get<ResponseDtos>(endPointUrl);
+    return this.crud.getList<ResponseDtos>(`${this.payment}/check-and-handle-callback/${orderNumber}`);
   }
 }

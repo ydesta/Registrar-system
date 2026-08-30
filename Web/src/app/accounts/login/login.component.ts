@@ -1,14 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { Subject, takeUntil } from 'rxjs';
 import { LoginRequest } from 'src/app/services/auth.interface';
 import { AuthService } from 'src/app/services/auth.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { SharedDataService } from 'src/app/services/shared-data.service';
 import { TokenStorageService } from 'src/app/services/token-storage.service';
-import { environment } from 'src/environments/environment';
 import { RouteRefreshService } from '../services/route-refresh.service';
 import { SecureLoggerService } from 'src/app/services/secure-logger.service';
 
@@ -17,9 +14,7 @@ import { SecureLoggerService } from 'src/app/services/secure-logger.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
-  
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   incorrectLoginAttempt = '';
   isLoading = false;
@@ -40,7 +35,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     private _sharedDataService: SharedDataService,
     private _tokenStorageService: TokenStorageService,
     private _routeRefreshService: RouteRefreshService,
-    private _http: HttpClient,
     private _logger: SecureLoggerService
   ) {
     this.loginForm = _fb.group({
@@ -51,9 +45,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Check for session expiration reason
-    const reason = this._router.url.split('reason=')[1];
-    if (reason && reason.includes('session_expired')) {
+    const reason = new URLSearchParams(window.location.search).get('reason');
+    if (reason?.includes('session_expired')) {
       this._notificationService.notification(
         'info',
         'Session Expired',
@@ -61,257 +54,76 @@ export class LoginComponent implements OnInit, OnDestroy {
       );
     }
 
-    // Check if already authenticated and redirect if necessary
     this._authService.isAuthenticated().then(isAuth => {
       if (isAuth) {
         const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
-        const destination = returnUrl || '/dashboard';
-        this._router.navigate([destination]);
+        this._router.navigate([returnUrl || '/dashboard']);
       }
     });
-
-    // Production-specific debugging
-    if (environment.production) {
-      
-      // Test network connectivity
-      this.testNetworkConnectivity();
-    }
-  }
-
-  private testNetworkConnectivity(): void {
-    // Test if the API endpoint is reachable
-    fetch(`${environment.secureUrl}/health`, { 
-      method: 'GET',
-      mode: 'cors'
-    }).then(response => {
-    }).catch(error => {
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   submitForm(): void {
-    if (this.loginForm.valid && !this.isProcessingLogin) {
-      this.isProcessingLogin = true;
-      this.isLoading = true;
-      this.incorrectLoginAttempt = '';
-
-      const loginRequest: LoginRequest = {
-        email: this.loginForm.value.email,
-        password: this.loginForm.value.password,
-        rememberMe: this.loginForm.value.rememberMe
-      };
-
-
-      this._authService.loginWithCredentials(loginRequest).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          this.isProcessingLogin = false;
-          
-          // Handle lockout status
-          if (response.isLocked) {
-            this.isAccountLocked = true;
-            this.lockoutEndTime = response.lockoutEnd ? new Date(response.lockoutEnd) : null;
-            this.remainingAttempts = 0;
-          } else {
-            this.isAccountLocked = false;
-            this.lockoutEndTime = null;
-            this.remainingAttempts = response.remainingAttempts ?? -1;
-          }
-          
-          if (response.success) {
-            if (response.requiresTwoFactor && !response.token) {
-              this.requiresTwoFactor = true;
-              this.emailForOtp = loginRequest.email;
-              this.startOtpResendCountdown();
-              this._notificationService.notification(
-                'info',
-                'Two-Factor Authentication',
-                'Please check your email for the verification code.'
-              );
-              return; // Don't proceed with login handling
-            }
-            
-            // Only handle successful login if tokens are provided
-            if (response.token) {
-              this.handleSuccessfulLogin(response, loginRequest.email);
-            } else {
-              this._logger.error('Login response missing token');
-              this.incorrectLoginAttempt = 'Login failed. Please try again.';
-            }
-          } else {
-            this._logger.error('Login failed:', { message: response.message });
-            this.incorrectLoginAttempt = response.message;
-            
-            // Show appropriate notification based on lockout status
-            if (response.isLocked) {
-              this._notificationService.notification('warning', 'Account Locked', response.message);
-            } else {
-              this._notificationService.notification('error', 'Login Failed', response.message);
-            }
-          }
-        },
-        error: (error: any) => {
-          this._logger.error('Login error occurred');
-          this.isLoading = false;
-          this.isProcessingLogin = false;
-          
-          // Handle error response that might contain our custom error information
-          let errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-          
-          // Get the original error or error from the custom error wrapper
-          const originalError = error.originalError || error;
-          const errorData = error.error || originalError.error || error;
-          
-          // Check if this is a 401 error with LoginResponse details
-          if ((error.status === 401 || originalError.status === 401) && errorData) {
-            // The backend returns LoginResponse even for failed logins
-            const loginResponse = errorData;
-            
-            if (loginResponse.message) {
-              errorMessage = loginResponse.message;
-            }
-            
-            // Extract remaining attempts and lockout info if available
-            if (loginResponse.remainingAttempts !== undefined) {
-              this.remainingAttempts = loginResponse.remainingAttempts;
-              this._logger.debug('Remaining login attempts:', this.remainingAttempts);
-            }
-            
-            if (loginResponse.isLocked) {
-              this.isAccountLocked = true;
-              if (loginResponse.lockoutEnd) {
-                this.lockoutEndTime = new Date(loginResponse.lockoutEnd);
-              }
-              this._notificationService.notification('warning', 'Account Locked', errorMessage);
-            } else {
-              this._notificationService.notification('error', 'Login Failed', errorMessage);
-            }
-          } else if (error.message) {
-            if (error.message.includes('Network error')) {
-              errorMessage = 'Network error: Unable to connect to the server. Please check your internet connection and try again.';
-            } else if (error.message.includes('timeout')) {
-              errorMessage = 'Request timeout: The server is taking too long to respond. Please try again.';
-            } else if (error.message.includes('Authentication failed')) {
-              errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-            }
-            this._notificationService.notification('error', 'Error', errorMessage);
-          }
-          
-          this.incorrectLoginAttempt = errorMessage;
-        }
-      });
-    } else if (this.isProcessingLogin) {
-      // Prevent multiple login attempts
-      this._logger.debug('Login already in progress, ignoring duplicate request');
-      return;
-    } else {
-      this._logger.debug('Form validation failed');
-      Object.values(this.loginForm.controls).forEach((control) => {
-        if (control.invalid) {
-          control.markAsDirty();
-          control.updateValueAndValidity({ onlySelf: true });
-        }
-      });
-    }
-  }
-
-  private handleSuccessfulLogin(response: any, email: string): void {
-    try {
-      this._logger.debug('Processing successful login');
-      
-      // Save user data first
-      this.saveUserData(response, email);
-      
-      // Update shared data service
-      this._sharedDataService.getLatestValue({
-        type: 'LOGIN_SUCCESS',
-        user: {
-          ...response.user,
-          role: Array.isArray(response.user.roles) ? response.user.roles[0] : (response.user.roles || '')
-        }
-      });
-
-      // Show success notification
-      this._notificationService.notification(
-        'success',
-        'Success',
-        'Login successful!'
-      );
-
-      // Reset form
-      this.loginForm.reset();
-
-      // Use setTimeout to ensure state is properly set before navigation
-      setTimeout(() => {
-        this._logger.debug('Navigating to dashboard...');
-        this._router.navigate(['/dashboard']).then(() => {
-          this._logger.debug('Navigation successful, reloading page...');
-          // Force a page reload to ensure all components are properly initialized
-          window.location.reload();
-        }).catch((error) => {
-          this._logger.error('Navigation failed:', error);
-          // Fallback navigation
-          window.location.href = '/dashboard';
-        });
-      }, 100);
-
-    } catch (error) {
-      this._logger.error('Error during login processing:', error);
-      this._notificationService.notification('error', 'Error', 'Failed to complete login process.');
-    }
-  }
-
-  private saveUserData(response: any, email: string): void {
-    // ✅ FIX: Don't save user data if 2FA is pending (no tokens yet)
-    if (response.requiresTwoFactor && !response.token) {
-      this._logger.debug('2FA pending - skipping user data save');
+    if (!this.loginForm.valid) {
+      this.markInvalid(this.loginForm);
       return;
     }
-    
-    if (response.user && response.user.id) {
-      // Save user data using token storage service
-      this._tokenStorageService.saveUser(response.user);
-      this._tokenStorageService.isLogin('true', response.user.id);
-      
-      // Save tokens - store in localStorage FIRST for immediate availability
-      // Then also store in sessionStorage for better security
-      if (response.token) {
-        // Save to localStorage immediately (ensures immediate availability)
-        localStorage.setItem('access_token', response.token);
-        
-        // Also save to secure token storage (sessionStorage)
-        this._authService.setAccessToken(response.token);
-        
-        // Also save to tokenStorageService for backward compatibility
-        this._tokenStorageService.saveToken(response.token, response.user.id);
-      }
-      
-      if (response.refreshToken) {
-        // Save to localStorage immediately
-        localStorage.setItem('refresh_token', response.refreshToken);
-        
-        // Also save to secure token storage (sessionStorage)
-        this._authService.setRefreshToken(response.refreshToken);
-      }
-      
-      // Save non-sensitive user data to localStorage
-      localStorage.setItem('isLogin', 'true');
-      localStorage.setItem('userId', response.user.id || '');
-      localStorage.setItem('firstName', response.user.firstName || '');
-      localStorage.setItem('lastName', response.user.lastName || '');
-      localStorage.setItem('email', response.user.email || email);
-      const userRoles = response.user.roles || [];
-      localStorage.setItem('role', JSON.stringify(userRoles));
-      localStorage.setItem('userType', userRoles[0] || '');
-
-      // Ensure authentication state is properly set
-      this._authService.updateCurrentUser(response.user);
-      this._authService.updateLoginState(true);
+    if (this.isProcessingLogin) {
+      return;
     }
+
+    this.isProcessingLogin = true;
+    this.isLoading = true;
+    this.incorrectLoginAttempt = '';
+
+    const loginRequest: LoginRequest = {
+      email: this.loginForm.value.email,
+      password: this.loginForm.value.password,
+      rememberMe: this.loginForm.value.rememberMe
+    };
+
+    this._authService.loginWithCredentials(loginRequest).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.isProcessingLogin = false;
+        this.applyLockout(response);
+
+        if (!response.success) {
+          this.incorrectLoginAttempt = response.message;
+          this._notificationService.notification(
+            response.isLocked ? 'warning' : 'error',
+            response.isLocked ? 'Account Locked' : 'Login Failed',
+            response.message
+          );
+          return;
+        }
+
+        if (response.requiresTwoFactor && !response.token) {
+          this.requiresTwoFactor = true;
+          this.emailForOtp = loginRequest.email;
+          this.startOtpResendCountdown();
+          this._notificationService.notification(
+            'info',
+            'Two-Factor Authentication',
+            'Please check your email for the verification code.'
+          );
+          return;
+        }
+
+        if (response.token) {
+          this.handleSuccessfulLogin(response, loginRequest.email);
+          return;
+        }
+
+        this._logger.error('Login response missing token');
+        this.incorrectLoginAttempt = 'Login failed. Please try again.';
+      },
+      error: (error: any) => {
+        this.isLoading = false;
+        this.isProcessingLogin = false;
+        const errorMessage = this.loginErrorMessage(error);
+        this.incorrectLoginAttempt = errorMessage;
+      }
+    });
   }
 
   verifyOtp(otp: string): void {
@@ -319,7 +131,6 @@ export class LoginComponent implements OnInit, OnDestroy {
       this._notificationService.notification('error', 'Error', 'Please enter a valid 6-digit verification code.');
       return;
     }
-
     this.isLoading = true;
     this._authService.verifyOtp(this.emailForOtp, otp).subscribe({
       next: (response) => {
@@ -327,11 +138,11 @@ export class LoginComponent implements OnInit, OnDestroy {
         if (response.success) {
           this.handleSuccessfulLogin(response, this.emailForOtp);
           this.requiresTwoFactor = false;
-        } else {
-          this._notificationService.notification('error', 'Error', response.message);
+          return;
         }
+        this._notificationService.notification('error', 'Error', response.message);
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
         this._notificationService.notification('error', 'Error', 'Failed to verify OTP. Please try again.');
       }
@@ -342,10 +153,9 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (!this.canResendOtp) {
       return;
     }
-
     this.isLoading = true;
     this._authService.resendOtp(this.emailForOtp).subscribe({
-      next: (response) => {
+      next: () => {
         this.isLoading = false;
         this.startOtpResendCountdown();
         this._notificationService.notification(
@@ -354,7 +164,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           'A new verification code has been sent to your email address.'
         );
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
         this._notificationService.notification('error', 'Error', 'Failed to resend verification code. Please try again.');
       }
@@ -364,7 +174,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   startOtpResendCountdown(): void {
     this.canResendOtp = false;
     this.otpResendCountdown = 60;
-    
     const countdownInterval = setInterval(() => {
       this.otpResendCountdown--;
       if (this.otpResendCountdown <= 0) {
@@ -380,10 +189,9 @@ export class LoginComponent implements OnInit, OnDestroy {
       this._notificationService.notification('error', 'Error', 'Please enter your email address first.');
       return;
     }
-
     this.isLoading = true;
     this._authService.forgotPassword(email).subscribe({
-      next: (response) => {
+      next: () => {
         this.isLoading = false;
         this._notificationService.notification(
           'success',
@@ -391,7 +199,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           'If an account with this email exists, you will receive password reset instructions.'
         );
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
         this._notificationService.notification('error', 'Error', 'Failed to process password reset request.');
       }
@@ -404,10 +212,9 @@ export class LoginComponent implements OnInit, OnDestroy {
       this._notificationService.notification('error', 'Error', 'Please enter your email address first.');
       return;
     }
-
     this.isLoading = true;
     this._authService.resendVerificationEmail(email).subscribe({
-      next: (response) => {
+      next: () => {
         this.isLoading = false;
         this._notificationService.notification(
           'success',
@@ -415,7 +222,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           'A new verification email has been sent to your email address. Please check your inbox and click the verification link.'
         );
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
         this._notificationService.notification('error', 'Error', 'Failed to resend verification email. Please try again.');
       }
@@ -432,5 +239,106 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   goToHome(): void {
     this._routeRefreshService.navigateWithRefresh(['/']);
+  }
+
+  private handleSuccessfulLogin(response: any, email: string): void {
+    try {
+      this.saveUserData(response, email);
+      this._sharedDataService.getLatestValue({
+        type: 'LOGIN_SUCCESS',
+        user: {
+          ...response.user,
+          role: Array.isArray(response.user.roles) ? response.user.roles[0] : (response.user.roles || '')
+        }
+      });
+      this._notificationService.notification('success', 'Success', 'Login successful!');
+      this.loginForm.reset();
+      setTimeout(() => {
+        this._router.navigate(['/dashboard']).then(() => {
+          window.location.reload();
+        }).catch(() => {
+          window.location.href = '/dashboard';
+        });
+      }, 100);
+    } catch {
+      this._notificationService.notification('error', 'Error', 'Failed to complete login process.');
+    }
+  }
+
+  private saveUserData(response: any, email: string): void {
+    if (response.requiresTwoFactor && !response.token) {
+      return;
+    }
+    if (!response.user?.id) {
+      return;
+    }
+    this._tokenStorageService.saveUser(response.user);
+    this._tokenStorageService.isLogin('true', response.user.id);
+    if (response.token) {
+      localStorage.setItem('access_token', response.token);
+      this._authService.setAccessToken(response.token);
+      this._tokenStorageService.saveToken(response.token, response.user.id);
+    }
+    if (response.refreshToken) {
+      localStorage.setItem('refresh_token', response.refreshToken);
+      this._authService.setRefreshToken(response.refreshToken);
+    }
+    const userRoles = response.user.roles || [];
+    localStorage.setItem('isLogin', 'true');
+    localStorage.setItem('userId', response.user.id || '');
+    localStorage.setItem('firstName', response.user.firstName || '');
+    localStorage.setItem('lastName', response.user.lastName || '');
+    localStorage.setItem('email', response.user.email || email);
+    localStorage.setItem('role', JSON.stringify(userRoles));
+    localStorage.setItem('userType', userRoles[0] || '');
+    this._authService.updateCurrentUser(response.user);
+    this._authService.updateLoginState(true);
+  }
+
+  private applyLockout(response: any): void {
+    if (response.isLocked) {
+      this.isAccountLocked = true;
+      this.lockoutEndTime = response.lockoutEnd ? new Date(response.lockoutEnd) : null;
+      this.remainingAttempts = 0;
+      return;
+    }
+    this.isAccountLocked = false;
+    this.lockoutEndTime = null;
+    this.remainingAttempts = response.remainingAttempts ?? -1;
+  }
+
+  private loginErrorMessage(error: any): string {
+    const originalError = error.originalError || error;
+    const errorData = error.error || originalError.error || error;
+    if ((error.status === 401 || originalError.status === 401) && errorData) {
+      const errorMessage = errorData.message || 'Invalid email or password. Please check your credentials and try again.';
+      if (errorData.remainingAttempts !== undefined) {
+        this.remainingAttempts = errorData.remainingAttempts;
+      }
+      this.applyLockout(errorData);
+      this._notificationService.notification(
+        errorData.isLocked ? 'warning' : 'error',
+        errorData.isLocked ? 'Account Locked' : 'Login Failed',
+        errorMessage
+      );
+      return errorMessage;
+    }
+    let errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+    if (error.message?.includes('Network error')) {
+      errorMessage = 'Network error: Unable to connect to the server. Please check your internet connection and try again.';
+    } else if (error.message?.includes('timeout')) {
+      errorMessage = 'Request timeout: The server is taking too long to respond. Please try again.';
+    }
+    this._notificationService.notification('error', 'Error', errorMessage);
+    return errorMessage;
+  }
+
+  private markInvalid(form: FormGroup): void {
+    Object.values(form.controls).forEach(control => {
+      if (control.invalid) {
+        control.markAsDirty();
+        control.updateValueAndValidity({ onlySelf: true });
+      }
+    });
   }
 }

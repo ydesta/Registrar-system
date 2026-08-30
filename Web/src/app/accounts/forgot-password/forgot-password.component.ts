@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { RouteRefreshService } from '../services/route-refresh.service';
-import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-forgot-password',
@@ -32,7 +31,6 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Check if user is already authenticated
     this._authService.isAuthenticated().then(isAuth => {
       if (isAuth) {
         this._router.navigate(['/dashboard']);
@@ -41,97 +39,70 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Clear the redirect timer/interval if component is destroyed
     if (this.redirectTimer) {
       clearInterval(this.redirectTimer);
     }
   }
 
   submitForm(): void {
-    if (this.forgotPasswordForm.valid) {
-      this.isLoading = true;
-      const email = this.forgotPasswordForm.value.email;
-      this.emailAddress = email;
-
-      this._authService.forgotPassword(email).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          
-          // Check if the request was successful and email was sent
-          if (response.success === true && response.emailSent === true) {
-            this.emailSent = true;
-            this._notificationService.notification(
-              'success',
-              'Email Sent',
-              'Password reset instructions have been sent to your email address. Please check your inbox and spam folder.'
-            );
-            
-            // Auto-redirect to login page after 2 seconds with countdown
-            this.startRedirectCountdown();
-          } else {
-            // Request processed but no email sent (unregistered email)
-            this._notificationService.notification(
-              'info',
-              'Request Processed',
-              'If an account with this email address exists, you will receive password reset instructions. Please check your email inbox and spam folder.'
-            );
-            
-            // Auto-redirect to login page after 2 seconds for unregistered emails too
-            this.startRedirectCountdown();
-          }
-        },
-        error: (error) => {
-          this.isLoading = false;
-          // Use secure logger - error details are sanitized
-          if (!environment.production) {
-          console.error('Forgot password error:', error);
-          }
-          
-          let errorMessage = 'An error occurred while processing your request. Please try again.';
-          if (error.error && error.error.message) {
-            errorMessage = error.error.message;
-          }
-          
-          this._notificationService.notification('error', 'Error', errorMessage);
-        }
-      });
-    } else {
-      Object.values(this.forgotPasswordForm.controls).forEach((control) => {
+    if (!this.forgotPasswordForm.valid) {
+      Object.values(this.forgotPasswordForm.controls).forEach(control => {
         if (control.invalid) {
           control.markAsDirty();
           control.updateValueAndValidity({ onlySelf: true });
         }
       });
+      return;
     }
+
+    this.isLoading = true;
+    const email = this.forgotPasswordForm.value.email;
+    this.emailAddress = email;
+
+    this._authService.forgotPassword(email).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        if (response.success === true && response.emailSent === true) {
+          this.emailSent = true;
+          this._notificationService.notification(
+            'success',
+            'Email Sent',
+            'Password reset instructions have been sent to your email address. Please check your inbox and spam folder.'
+          );
+        } else {
+          this._notificationService.notification(
+            'info',
+            'Request Processed',
+            'If an account with this email address exists, you will receive password reset instructions. Please check your email inbox and spam folder.'
+          );
+        }
+        this.startRedirectCountdown();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this._notificationService.notification(
+          'error',
+          'Error',
+          error.error?.message || 'An error occurred while processing your request. Please try again.'
+        );
+      }
+    });
   }
 
   goToLogin(): void {
-    if (this.redirectTimer) {
-      clearInterval(this.redirectTimer);
-      this.redirectTimer = null;
-    }
-    this.redirectCountdown = 0;
-    
-    // Navigate with refresh
+    this.clearRedirect();
     this._routeRefreshService.navigateWithRefresh(['/accounts/login']);
   }
 
   goToRegister(): void {
-    if (!environment.production) {
-    console.log('Navigating to register page...');
-    }
     this._routeRefreshService.navigateWithRefresh(['/accounts/register']);
   }
 
   goToHome(): void {
-    if (!environment.production) {
-    console.log('Navigating to home page...');
-    }
     this._routeRefreshService.navigateWithRefresh(['/']);
   }
 
   refreshForgotPassword(): void {
-    // Refresh the current forgot password page
     this._routeRefreshService.navigateWithRefresh(['/accounts/forgot-password']);
   }
 
@@ -140,22 +111,26 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
     this.forgotPasswordForm.reset();
   }
 
-  // Getter methods for form validation
-  get email() { return this.forgotPasswordForm.get('email'); }
+  get email() {
+    return this.forgotPasswordForm.get('email');
+  }
 
   private startRedirectCountdown(): void {
     this.redirectCountdown = 5;
-    
-    const countdownInterval = setInterval(() => {
+    this.redirectTimer = setInterval(() => {
       this.redirectCountdown--;
-      
       if (this.redirectCountdown <= 0) {
-        clearInterval(countdownInterval);
+        this.clearRedirect();
         this._routeRefreshService.navigateWithRefresh(['/accounts/login']);
       }
     }, 1000);
-    
-    // Store interval reference for cleanup
-    this.redirectTimer = countdownInterval;
   }
-} 
+
+  private clearRedirect(): void {
+    if (this.redirectTimer) {
+      clearInterval(this.redirectTimer);
+      this.redirectTimer = null;
+    }
+    this.redirectCountdown = 0;
+  }
+}

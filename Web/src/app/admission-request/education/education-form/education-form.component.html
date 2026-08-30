@@ -1,5 +1,4 @@
 <div class="education-form-container">
-  <!-- Form Header -->
   <div class="form-header">
     <div class="header-icon">
       <i nz-icon nzType="book" nzTheme="outline"></i>
@@ -10,12 +9,11 @@
     </div>
   </div>
 
-  <!-- Form Content -->
   <form nz-form [formGroup]="applicantEducationBacgroundForm" class="education-form">
-    <!-- School/University Name Field -->
     <nz-form-item>
-      <nz-form-control [nzErrorTip]="schoolNameErrorTpl">
-        <input nz-input formControlName="schoollName" placeholder=" " id="schoollName" class="input-with-floating-label"
+      <nz-form-control [nzValidateStatus]="''" [nzErrorTip]="schoolNameErrorTpl">
+        <input nz-input formControlName="schoollName" placeholder=" " id="schoollName"
+          class="input-with-floating-label"
           [class.error]="schoollName.invalid && (schoollName.dirty || schoollName.touched)" />
         <label for="schoollName" class="floating-label">
           <i nz-icon nzType="bank" nzTheme="outline"></i>
@@ -34,13 +32,11 @@
       </nz-form-control>
     </nz-form-item>
 
-    <!-- Degree Obtained Field -->
     <nz-form-item>
-      <nz-form-control [nzErrorTip]="programmeLevelErrorTpl">
-        <nz-select formControlName="programmeLevel" placeholder="Select Education Level" id="programmeLevel"
-          class="select-with-floating-label"
-          [class.error]="programmeLevel.invalid && (programmeLevel.dirty || programmeLevel.touched)" nzShowSearch
-          nzAllowClear>
+      <nz-form-control [nzValidateStatus]="''" [nzErrorTip]="programmeLevelErrorTpl">
+        <nz-select formControlName="programmeLevel" nzPlaceHolder=" " id="programmeLevel"
+          class="select-with-floating-label" nzShowSearch nzAllowClear
+          [class.error]="programmeLevel.invalid && (programmeLevel.dirty || programmeLevel.touched)">
           <nz-option *ngFor="let option of educationLevelOptions" [nzValue]="option.value" [nzLabel]="option.label">
           </nz-option>
         </nz-select>
@@ -57,9 +53,8 @@
       </nz-form-control>
     </nz-form-item>
 
-    <!-- Major Area of Study Field -->
     <nz-form-item *ngIf="isFieldOfStudyVisible">
-      <nz-form-control [nzErrorTip]="fieldOfStudyErrorTpl">
+      <nz-form-control [nzValidateStatus]="''" [nzErrorTip]="fieldOfStudyErrorTpl">
         <input nz-input formControlName="fieldOfStudy" placeholder=" " id="fieldOfStudy"
           class="input-with-floating-label"
           [class.error]="fieldOfStudy.invalid && (fieldOfStudy.dirty || fieldOfStudy.touched)" />
@@ -80,50 +75,63 @@
       </nz-form-control>
     </nz-form-item>
 
-    <!-- Year Range Field -->
-    <nz-form-item>
-      <nz-form-control [nzErrorTip]="graduatedYearErrorTpl">
-        <nz-range-picker nzMode="year" formControlName="graduatedYear" placeholder="['Start Year', 'End Year']"
-          class="date-picker-with-floating-label"
-          [class.error]="graduatedYear.invalid && (graduatedYear.dirty || graduatedYear.touched)"></nz-range-picker>
-        <label class="floating-label">
-          <i nz-icon nzType="calendar" nzTheme="outline"></i>
-          Duration From-To <span class="required">*</span>
-        </label>
-        <ng-template #graduatedYearErrorTpl let-control>
-          <div class="error-message" *ngIf="control.hasError('required')">
-            <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
-            Duration From-To is required
-          </div>
-        </ng-template>
-      </nz-form-control>
-    </nz-form-item>
+    <div class="duration-year-row">
+      <nz-form-item>
+        <nz-form-control [nzValidateStatus]="''" [nzErrorTip]="startYearErrorTpl">
+          <nz-select formControlName="graduatedYearFrom" nzPlaceHolder=" " nzShowSearch nzAllowClear
+            class="select-with-floating-label"
+            [class.error]="graduatedYearFrom.invalid && (graduatedYearFrom.dirty || graduatedYearFrom.touched)">
+            <nz-option *ngFor="let year of yearOptions" [nzValue]="year" [nzLabel]="'' + year"></nz-option>
+          </nz-select>
+          <label class="floating-label">
+            <i nz-icon nzType="calendar" nzTheme="outline"></i>
+            Start Year <span class="required">*</span>
+          </label>
+          <ng-template #startYearErrorTpl let-control>
+            <div class="error-message" *ngIf="control.hasError('required')">
+              <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+              Start year is required
+            </div>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
 
-    <!-- Remark Field -->
-    <nz-form-item>
-      <nz-form-control>
-        <input nz-input formControlName="remark" placeholder=" " id="remark" class="input-with-floating-label" />
-        <label for="remark" class="floating-label">
-          <i nz-icon nzType="file-text" nzTheme="outline"></i>
-          Additional Notes
-        </label>
-      </nz-form-control>
-    </nz-form-item>
+      <nz-form-item>
+        <nz-form-control [nzValidateStatus]="''" [nzErrorTip]="endYearErrorTpl">
+          <nz-select formControlName="graduatedYearTo" nzPlaceHolder=" " nzShowSearch nzAllowClear
+            class="select-with-floating-label"
+            [class.error]="graduatedYearTo.invalid && (graduatedYearTo.dirty || graduatedYearTo.touched)">
+            <nz-option *ngFor="let year of yearOptions" [nzValue]="year" [nzLabel]="'' + year"></nz-option>
+          </nz-select>
+          <label class="floating-label">
+            <i nz-icon nzType="calendar" nzTheme="outline"></i>
+            End Year <span class="required">*</span>
+          </label>
+          <ng-template #endYearErrorTpl let-control>
+            <div class="error-message" *ngIf="control.hasError('required')">
+              <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+              End year is required
+            </div>
+            <div class="error-message" *ngIf="control.hasError('yearRange')">
+              <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
+              End year must be the same as or after start year
+            </div>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
 
-    <!-- File Upload Field -->
     <nz-form-item *ngIf="educationId==undefined">
-      <nz-form-control [nzErrorTip]="fileUploadErrorTpl"
-        [nzValidateStatus]="actualFile.invalid && (actualFile.dirty || actualFile.touched) ? 'error' : ''">
+      <nz-form-control [nzValidateStatus]="''" [nzErrorTip]="fileUploadErrorTpl">
         <div class="file-upload-section" [class.error]="actualFile.invalid && (actualFile.dirty || actualFile.touched)">
           <label class="file-upload-label">
             <i nz-icon nzType="paper-clip" nzTheme="outline"></i>
             <span class="upload-text">Click here to attach documents. If you have more than one document, please merge all the documents into one PDF file. Make sure to include your Grade 12 ESLSE document.</span>
             <span class="required">*</span>
-            <input nz-input type="file" style="visibility: hidden" #f_input
+            <input class="file-input" type="file" #f_input
               (change)="handleFileInputChange(f_input.files)" accept=".pdf, .jpg, .jpeg, .png, .gif" multiple
               required />
           </label>
-          <!-- File List Display -->
           <div class="file-list" *ngIf="file_list.length > 0">
             <div class="file-item" *ngFor="let fileName of file_list">
               <i nz-icon nzType="file" nzTheme="outline"></i>
@@ -140,7 +148,17 @@
       </nz-form-control>
     </nz-form-item>
 
-    <!-- Form Actions -->
+    <nz-form-item>
+      <nz-form-control>
+        <textarea nz-input formControlName="remark" placeholder=" " id="remark" rows="4"
+          class="input-with-floating-label textarea-with-floating-label"></textarea>
+        <label for="remark" class="floating-label">
+          <i nz-icon nzType="file-text" nzTheme="outline"></i>
+          Additional Notes
+        </label>
+      </nz-form-control>
+    </nz-form-item>
+
     <div class="form-actions">
       <div class="action-buttons">
         <button nz-button nzType="default" (click)="closeModal()" class="cancel-btn">

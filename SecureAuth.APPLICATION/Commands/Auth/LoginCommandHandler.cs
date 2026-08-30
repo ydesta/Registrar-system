@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SecureAuth.APPLICATION.Commands.Auth;
 using SecureAuth.APPLICATION.DTOs.Authentication;
+using SecureAuth.APPLICATION.Helpers;
 using SecureAuth.APPLICATION.Interfaces;
 using SecureAuth.DOMAIN.Models;
 using SecureAuth.DOMAIN.Models.Security;
@@ -129,64 +130,24 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 };
             }
 
-            // Check if user is locked out
+            // Auto-unlock if previous lockout has expired
+            if (user.LockoutEnd.HasValue && user.LockoutEnd.Value <= DateTimeOffset.UtcNow)
+            {
+                await _unitOfWork.Users.UnlockUserAsync(user.Id);
+                user.LockoutEnd = null;
+                user.FailedLoginAttempts = 0;
+            }
+
+            // Check if user is currently locked out
             if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
             {
                 await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, GetClientIpAddress(), GetUserAgent(), "Account locked");
-                
+
                 var now = DateTimeOffset.UtcNow;
                 var lockoutEnd = user.LockoutEnd.Value;
-                var timeRemaining = lockoutEnd.Subtract(now);
-                var totalHours = (int)Math.Floor(timeRemaining.TotalHours);
-                var remainingMinutes = (int)Math.Floor(timeRemaining.TotalMinutes % 60);
-                
-                // Debug logging to help diagnose the issue
-                Console.WriteLine($"=== LOCKOUT DEBUG ===");
-                Console.WriteLine($"Now (UTC): {now}");
-                Console.WriteLine($"Lockout End (UTC): {lockoutEnd}");
-                Console.WriteLine($"Time Remaining: {timeRemaining.TotalHours:F2} hours ({timeRemaining.TotalMinutes:F2} minutes)");
-                Console.WriteLine($"Total Hours: {totalHours}");
-                Console.WriteLine($"Remaining Minutes: {remainingMinutes}");
-                Console.WriteLine($"====================");
-                
-                string lockoutMessage;
-                if (totalHours >= 1)
-                {
-                    if (totalHours == 1)
-                    {
-                        lockoutMessage = $"Account is temporarily locked due to multiple failed login attempts. Please try again in approximately {totalHours} hour.";
-                    }
-                    else if (totalHours > 1 && totalHours < 24)
-                    {
-                        lockoutMessage = $"Account is temporarily locked due to multiple failed login attempts. Please try again in approximately {totalHours} hours.";
-                    }
-                    else
-                    {
-                        // For 24+ hours, show in days
-                        int days = totalHours / 24;
-                        int hours = totalHours % 24;
-                        if (hours == 0)
-                        {
-                            lockoutMessage = $"Account is temporarily locked due to multiple failed login attempts. Please try again in {days} day{(days == 1 ? "" : "s")}.";
-                        }
-                        else
-                        {
-                            lockoutMessage = $"Account is temporarily locked due to multiple failed login attempts. Please try again in {days} day{(days == 1 ? "" : "s")} and {hours} hour{(hours == 1 ? "" : "s")}.";
-                        }
-                    }
-                }
-                else if (remainingMinutes >= 1)
-                {
-                    lockoutMessage = $"Account is temporarily locked due to multiple failed login attempts. Please try again in {remainingMinutes} minute{(remainingMinutes == 1 ? "" : "s")}.";
-                }
-                else
-                {
-                    lockoutMessage = $"Account is temporarily locked. Please try again shortly.";
-                }
-                
-                // Log the calculated message for debugging
-                Console.WriteLine($"Final message: {lockoutMessage}");
-                
+                var remainingMinutes = Math.Max(1, (int)Math.Ceiling(lockoutEnd.Subtract(now).TotalMinutes));
+                var lockoutMessage = $"Account is temporarily locked due to multiple failed login attempts. Please try again in {remainingMinutes} minute{(remainingMinutes == 1 ? "" : "s")}.";
+
                 return new LoginResponse
                 {
                     Success = false,
@@ -199,41 +160,31 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 };
             }
 
+            const int maxLoginAttempts = 5;
+            const int lockoutDurationMinutes = 15;
+
             // Verify password
             var passwordResult = await _signInManager.CheckPasswordSignInAsync(user, command.Password, false);
             if (!passwordResult.Succeeded)
             {
-                // Calculate remaining attempts BEFORE incrementing
-                int remainingAttemptsBeforeIncrement = 5 - (user.FailedLoginAttempts + 1);
-                
-                await _unitOfWork.Users.IncrementFailedLoginAttemptsAsync(user.Id);
-                
-                // Check if we should lock the account AFTER incrementing (since we just made it 5)
-                await _unitOfWork.SaveChangesAsync();
-                
-                var shouldLock = user.FailedLoginAttempts >= 5;
-                
-                if (shouldLock)
-                {
-                    var lockoutDurationHours = 12; // Lock account for 12 hours for security
-                    var lockoutEnd = DateTimeOffset.UtcNow.AddHours(lockoutDurationHours);
-                    
-                    Console.WriteLine($"=== LOCKING USER AFTER 5 FAILED ATTEMPTS ===");
-                    Console.WriteLine($"User ID: {user.Id}");
-                    Console.WriteLine($"Current Time: {DateTimeOffset.UtcNow}");
-                    Console.WriteLine($"Lockout End: {lockoutEnd}");
-                    Console.WriteLine($"Duration: {lockoutDurationHours} hours");
-                    
-                    await _unitOfWork.Users.LockUserAsync(user.Id, lockoutEnd);
-                    // Don't call SaveChangesAsync here - LockUserAsync already does it
+                var newAttemptCount = user.FailedLoginAttempts + 1;
+                var remainingAttempts = Math.Max(0, maxLoginAttempts - newAttemptCount);
 
-                    // Record failed login attempt
+                await _unitOfWork.Users.IncrementFailedLoginAttemptsAsync(user.Id);
+                await _unitOfWork.SaveChangesAsync();
+                user.FailedLoginAttempts = newAttemptCount;
+
+                if (newAttemptCount >= maxLoginAttempts)
+                {
+                    var lockoutEnd = DateTimeOffset.UtcNow.AddMinutes(lockoutDurationMinutes);
+                    await _unitOfWork.Users.LockUserAsync(user.Id, lockoutEnd);
+
                     await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, GetClientIpAddress(), GetUserAgent(), "Invalid password - account locked");
-                    
+
                     return new LoginResponse
                     {
                         Success = false,
-                        Message = $"Too many failed login attempts. Your account has been locked for {lockoutDurationHours} hours for security reasons.",
+                        Message = $"Too many failed login attempts. Your account has been locked for {lockoutDurationMinutes} minutes for security reasons.",
                         Token = null,
                         RefreshToken = null,
                         IsLocked = true,
@@ -242,11 +193,10 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                     };
                 }
 
-                // Record failed login attempt
                 await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, GetClientIpAddress(), GetUserAgent(), "Invalid password");
-                
-                string message = remainingAttemptsBeforeIncrement > 0 
-                    ? $"Invalid email or password. {remainingAttemptsBeforeIncrement} attempt(s) remaining before account is locked."
+
+                string message = remainingAttempts > 0
+                    ? $"Invalid email or password. {remainingAttempts} attempt(s) remaining before account is locked."
                     : "Invalid email or password";
 
                 return new LoginResponse
@@ -255,7 +205,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                     Message = message,
                     Token = null,
                     RefreshToken = null,
-                    RemainingAttempts = remainingAttemptsBeforeIncrement
+                    RemainingAttempts = remainingAttempts
                 };
             }
 
@@ -367,7 +317,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                     Email = user.Email ?? string.Empty,
                     FirstName = user.FirstName ?? string.Empty,
                     LastName = user.LastName ?? string.Empty,
-                    PhoneNumber = user.PhoneNumber,
+                    PhoneNumber = EthiopianPhoneNumber.NormalizeOptional(user.PhoneNumber),
                     EmailConfirmed = user.EmailConfirmed,
                     PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                     TwoFactorEnabled = user.TwoFactorEnabled,

@@ -35,8 +35,8 @@ export class SchoolWithStudentAgreementComponent implements OnInit {
 
   createAcademicProgramRequest() {
     this.agreementForm = this.fb.group({
-      sourceOfFinance: ["", [Validators.required]],
-      howDidYouComeKnow: [""],
+      sourceOfFinance: ["", []],
+      howDidYouComeKnow: ["", []],
       selfConfirmedApplicantInformation: [false, [Validators.requiredTrue]]
     });
   }

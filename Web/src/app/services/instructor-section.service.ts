@@ -1,65 +1,71 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { InstructorSectionModel, InstructorSectionRequest, InstructorSectionAssignmentViewModel } from '../Models/InstructorSectionModel';
+import { InstructorSectionRequest } from '../Models/InstructorSectionModel';
 import { ResponseDtos } from '../admission-request/model/response-dtos.model';
 import { StaffTeachingDataViewModel } from '../Models/StaffTeachingDataViewModel';
+import { CrudService } from 'src/app/services/crud.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InstructorSectionService {
-  private apiUrl = `${environment.baseUrl}/${environment.apiVersion}/instructorsections`;
+  private readonly sections = `/${environment.apiVersion}/instructorsections`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private crud: CrudService) {}
 
-  /**
-   * Get all instructor sections
-   */
   getInstructorSections(): Observable<any> {
-    return this.http.get<any>(this.apiUrl);
+    return this.crud.getList(this.sections);
   }
 
-  /**
-   * Get instructor sections by criteria (academic term, year, batch ID)
-   */
   getInstructorSectionsByCriteria(academicTerm: number, year: number, batchId: string): Observable<ResponseDtos> {
-    return this.http.get<ResponseDtos>(`${this.apiUrl}/${academicTerm}/${year}/${batchId}`);
+    return this.crud.getList<ResponseDtos>(`${this.sections}/${academicTerm}/${year}/${batchId}`);
   }
 
-  /**
-   * Get instructor section by ID
-   */
+  getInstructorSectionsByCriteriaPaginated(
+    academicTerm: number,
+    year: number,
+    batchId: string,
+    query: string
+  ): Observable<any> {
+    return this.crud.getPaginated(`${this.sections}/${academicTerm}/${year}/${batchId}`, query);
+  }
+
   getInstructorSectionById(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+    return this.crud.getById(this.sections, id);
   }
 
-  /**
-   * Create new instructor section
-   */
   createInstructorSection(instructorSection: InstructorSectionRequest): Observable<any> {
-    return this.http.post<any>(this.apiUrl, instructorSection);
+    return this.crud.add(this.sections, instructorSection);
   }
 
-  /**
-   * Update instructor section
-   */
   updateInstructorSection(id: number, instructorSection: InstructorSectionRequest): Observable<any> {
-    return this.http.patch<any>(`${this.apiUrl}/${id}`, instructorSection);
+    return this.crud.update(this.sections, id, instructorSection);
   }
 
-  /**
-   * Delete instructor section
-   */
   deleteInstructorSection(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`);
-  }
-  getStaffTeachingDataAsync(staffId: string,academicTerm: number, year: number, sectionType: number): Observable<StaffTeachingDataViewModel> {
-    return this.http.get<StaffTeachingDataViewModel>(`${this.apiUrl}/${staffId}/${academicTerm}/${year}/${sectionType}`);
+    return this.crud.delete(this.sections, id);
   }
 
-  getInstructorSectionAssignmentsByStaff(staffId: string, academicTerm: number, year: number, sectionType: number): Observable<ResponseDtos> {
-    return this.http.get<ResponseDtos>(`${this.apiUrl}/staff/${staffId}/${academicTerm}/${year}/${sectionType}/assignments`);
+  getStaffTeachingDataAsync(
+    staffId: string,
+    academicTerm: number,
+    year: number,
+    sectionType: number
+  ): Observable<StaffTeachingDataViewModel> {
+    return this.crud.getList<StaffTeachingDataViewModel>(
+      `${this.sections}/${staffId}/${academicTerm}/${year}/${sectionType}`
+    );
+  }
+
+  getInstructorSectionAssignmentsByStaff(
+    staffId: string,
+    academicTerm: number,
+    year: number,
+    sectionType: number
+  ): Observable<ResponseDtos> {
+    return this.crud.getList<ResponseDtos>(
+      `${this.sections}/staff/${staffId}/${academicTerm}/${year}/${sectionType}/assignments`
+    );
   }
 }

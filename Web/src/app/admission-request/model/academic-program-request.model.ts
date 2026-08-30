@@ -3,6 +3,7 @@ export class AcademicProgramRequest {
   public acadamicProgrammeId: string;
   public applicantId: string;
   public division: number;
+  public applicantYear: number;
   public studentStatus: number;
   public approvalStatus: number;
   public createdBy: string;

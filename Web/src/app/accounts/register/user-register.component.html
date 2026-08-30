@@ -93,7 +93,8 @@
               type="tel" 
               nz-input 
               formControlName="phoneNumber" 
-              placeholder="Phone Number"
+              placeholder="+2519xxxxxxxx / 09xxxxxxxx / 07xxxxxxxx"
+              (blur)="onPhoneBlur()"
               [attr.aria-describedby]="phoneNumber?.invalid && phoneNumber?.touched ? 'phone-error' : null" />
           </nz-input-group>
         </nz-form-control>

@@ -28,12 +28,15 @@ export class EducationFormComponent implements OnInit {
   
   // Education level options for the select dropdown
   educationLevelOptions = EDUCATION_LEVEL_OPTIONS;
+  yearOptions: number[] = [];
   constructor(
     private modalRef: NzModalRef,
     private _fb: FormBuilder,
     private educationBackgroundService: EducationBackgroundService,
     private _customNotificationService: CustomNotificationService
   ) {
+    const currentYear = new Date().getFullYear();
+    this.yearOptions = Array.from({ length: currentYear - 1969 }, (_, i) => currentYear - i);
     this.createEducationBackground();
   }
 
@@ -41,18 +44,15 @@ export class EducationFormComponent implements OnInit {
     if (this.educationBackground != undefined) {
       this.educationId = this.educationBackground.id;
       
-      // Convert graduatedYear string to array format for range picker
       const educationData: any = { ...this.educationBackground };
       if (educationData.graduatedYear && typeof educationData.graduatedYear === 'string') {
         const yearParts = educationData.graduatedYear.split(',');
         if (yearParts.length === 2) {
-          // Convert to Date objects for the range picker
-          educationData.graduatedYear = [
-            new Date(parseInt(yearParts[0].trim()), 0, 1), // Start year
-            new Date(parseInt(yearParts[1].trim()), 11, 31) // End year
-          ];
+          educationData.graduatedYearFrom = parseInt(yearParts[0].trim(), 10);
+          educationData.graduatedYearTo = parseInt(yearParts[1].trim(), 10);
         }
       }
+      delete educationData.graduatedYear;
       
       this.applicantEducationBacgroundForm.patchValue(educationData);
       
@@ -89,7 +89,8 @@ export class EducationFormComponent implements OnInit {
         "",
         [Validators.required]
       ],
-      graduatedYear: ["", Validators.required],
+      graduatedYearFrom: [null, Validators.required],
+      graduatedYearTo: [null, Validators.required],
       remark: [""],
       ActualFile: ["",Validators.required]
     });
@@ -97,6 +98,13 @@ export class EducationFormComponent implements OnInit {
     // Subscribe to programmeLevel changes to update fieldOfStudy validation
     this.applicantEducationBacgroundForm.get('programmeLevel')?.valueChanges.subscribe(level => {
       this.updateFieldOfStudyValidation(level);
+    });
+
+    this.applicantEducationBacgroundForm.get('graduatedYearFrom')?.valueChanges.subscribe(() => {
+      this.validateYearRange();
+    });
+    this.applicantEducationBacgroundForm.get('graduatedYearTo')?.valueChanges.subscribe(() => {
+      this.validateYearRange();
     });
   }
   private getApplicantEducationBackground(): ApplicantEducationBackgroundRequest {
@@ -106,14 +114,9 @@ export class EducationFormComponent implements OnInit {
     education.createdBy = "";
     education.fieldOfStudy = formModel.fieldOfStudy;
     
-    // Convert graduatedYear array back to string format
-    if (Array.isArray(formModel.graduatedYear) && formModel.graduatedYear.length === 2) {
-      const startYear = formModel.graduatedYear[0].getFullYear();
-      const endYear = formModel.graduatedYear[1].getFullYear();
-      education.graduatedYear = `${startYear},${endYear}`;
-    } else {
-      education.graduatedYear = formModel.graduatedYear ? formModel.graduatedYear.toString() : "";
-    }
+    const startYear = formModel.graduatedYearFrom;
+    const endYear = formModel.graduatedYearTo;
+    education.graduatedYear = startYear && endYear ? `${startYear},${endYear}` : "";
     
     education.programmeLevel = formModel.programmeLevel;
     education.remark = formModel.remark;
@@ -134,8 +137,31 @@ export class EducationFormComponent implements OnInit {
   get programmeLevel() {
     return this.applicantEducationBacgroundForm.get("programmeLevel");
   }
-  get graduatedYear() {
-    return this.applicantEducationBacgroundForm.get("graduatedYear");
+  get graduatedYearFrom() {
+    return this.applicantEducationBacgroundForm.get("graduatedYearFrom");
+  }
+  get graduatedYearTo() {
+    return this.applicantEducationBacgroundForm.get("graduatedYearTo");
+  }
+
+  private validateYearRange(): void {
+    const fromControl = this.graduatedYearFrom;
+    const toControl = this.graduatedYearTo;
+    if (!fromControl || !toControl) {
+      return;
+    }
+
+    const from = fromControl.value;
+    const to = toControl.value;
+    const currentErrors = { ...(toControl.errors || {}) };
+    delete currentErrors['yearRange'];
+
+    if (from != null && to != null && to < from) {
+      currentErrors['yearRange'] = true;
+      toControl.setErrors(Object.keys(currentErrors).length ? currentErrors : null);
+    } else {
+      toControl.setErrors(Object.keys(currentErrors).length ? currentErrors : null);
+    }
   }
   
   get actualFile() {

@@ -8,4 +8,7 @@ export class CourseBreakDownOffering {
   courseTitle: string;
   courseCode: string;
   creditHours: number;
+  quadrantId?: string;
+  quadrantCode?: string;
+  quadrantHeading?: string;
 }

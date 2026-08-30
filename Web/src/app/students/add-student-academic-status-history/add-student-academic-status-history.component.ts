@@ -37,7 +37,7 @@ ngOnInit(): void {
   if(this.progStatusId!="null"){
     this.action="Edit Student Course Attendance"
     this.submit ='Update';
-    this._crudService.getList('/StudentAcademicStatusHistorys' + '/' + this.progStatusId).subscribe((res:any)=>{
+    this._crudService.getById('/StudentAcademicStatusHistorys', this.progStatusId).subscribe((res:any)=>{
       this.patchValues(res.data);
     });
   }

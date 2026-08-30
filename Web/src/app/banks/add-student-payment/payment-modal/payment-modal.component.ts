@@ -20,6 +20,8 @@ export class PaymentModalComponent implements OnInit {
   selectedFile: File | null = null;
   studentCourseRegistrationID: string;
   totalAmount: number;
+  courseAmount = 0;
+  penaltyAmount = 0;
   type: number;
   paidFor: number = 0;
   shouldNavigate: boolean = true; // New parameter to control navigation
@@ -34,10 +36,11 @@ export class PaymentModalComponent implements OnInit {
     const data = this.modalRef.getConfig().nzComponentParams;
     this.studentCourseRegistrationID = data['studentCourseRegistrationID'];
     this.totalAmount = data['totalAmount'];
+    this.courseAmount = data['courseAmount'] ?? data['totalAmount'];
+    this.penaltyAmount = data['penaltyAmount'] || 0;
     this.type = data['type'];
     this.paidFor = data['paidFor'];
-    this.shouldNavigate = data['shouldNavigate'] !== undefined ? data['shouldNavigate'] : true; // Default to true for backward compatibility
-    console.log("###       ", this.studentCourseRegistrationID, this.totalAmount, this.type, this.paidFor, this.shouldNavigate);
+    this.shouldNavigate = data['shouldNavigate'] !== undefined ? data['shouldNavigate'] : true;
     this.paymentForm();
   }
 

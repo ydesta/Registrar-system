@@ -117,13 +117,13 @@
         </div>
         <div class="results-title">
           <h3>Unassigned Students</h3>
-          <p *ngIf="numberOfListOfStudent > 0">Found {{ numberOfListOfStudent }} students without batch assignment</p>
+          <p *ngIf="numberOfListOfStudent > 0">Found {{ pager.total }} students without batch assignment</p>
           <p *ngIf="numberOfListOfStudent === 0">No unassigned students found for the selected criteria</p>
         </div>
       </div>
 
       <!-- No Results Message -->
-      <div class="no-results-container" *ngIf="numberOfListOfStudent === 0">
+      <div class="no-results-container" *ngIf="pager.total === 0 && !pager.searchKey">
         <div class="no-results-content">
           <div class="no-results-icon">
             <span nz-icon nzType="search" nzTheme="outline"></span>
@@ -137,16 +137,27 @@
       </div>
 
       <!-- Table Container -->
-      <div class="table-container" *ngIf="numberOfListOfStudent > 0">
+      <div class="table-container" *ngIf="pager.total > 0 || pager.searchKey">
         <div id="print-section">
+          <div class="table-search" style="margin-bottom: 12px; max-width: 320px;">
+            <input nz-input placeholder="Search name or student ID"
+              [(ngModel)]="pager.searchKey"
+              (ngModelChange)="pager.onSearch($event)" />
+          </div>
           <nz-table 
             #basicTable 
             [nzData]="studentList" 
-            nzShowPagination 
-            nzShowSizeChanger
+            [nzLoading]="pager.loading"
+            [nzPageSize]="pager.pageSize"
+            [nzPageSizeOptions]="pager.pageSizeOptions"
+            [nzShowSizeChanger]="true"
+            [nzTotal]="pager.total"
+            [nzPageIndex]="pager.pageIndex"
+            (nzPageIndexChange)="pager.onPageIndexChange($event)"
+            (nzPageSizeChange)="pager.onPageSizeChange($event)"
+            [nzFrontPagination]="false"
             (nzCurrentPageDataChange)="onCurrentPageDataChange($event)" 
             nzBordered 
-            [nzShowPagination]="true"
             class="students-table"
           >
             <thead>
@@ -181,7 +192,7 @@
       </div>
 
       <!-- Assignment Form -->
-      <div class="assignment-section" *ngIf="numberOfListOfStudent > 0">
+      <div class="assignment-section" *ngIf="pager.total > 0 || setOfCheckedId.size > 0">
         <div class="assignment-header">
           <h4 class="section-title">
             <span nz-icon nzType="link" nzTheme="outline"></span>

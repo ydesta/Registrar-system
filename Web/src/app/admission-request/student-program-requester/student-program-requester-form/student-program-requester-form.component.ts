@@ -1,13 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { NzModalRef } from "ng-zorro-antd/modal";
-import { EducationBackgroundService } from "../../services/education-background.service";
 import { AcademicProgramRequest } from "../../model/academic-program-request.model";
 import { AcademicProgramRequestService } from "../../services/academic-program-request.service";
 import { AcadamicProgramme } from "../../model/acadamic-programme.model";
 import { CustomNotificationService } from "src/app/services/custom-notification.service";
 import { StaticData } from "../../model/StaticData";
-import { Division_Status } from "src/app/common/constant";
+import { APPLICANT_TYPE_STATUS, Division_Status } from "src/app/common/constant";
 
 @Component({
   selector: "app-student-program-requester-form",
@@ -22,6 +21,10 @@ export class StudentProgramRequesterFormComponent implements OnInit {
   academicProgramRequestForm: FormGroup;
   acadamicProgrammes: AcadamicProgramme[] = [];
   divisionStatusist: StaticData[] = [];
+  applicantYearOptions: StaticData[] = APPLICANT_TYPE_STATUS.map(x => ({
+    Id: x.Id,
+    Description: x.Description
+  }));
   id: number;
   constructor(
     private modalRef: NzModalRef,
@@ -32,7 +35,6 @@ export class StudentProgramRequesterFormComponent implements OnInit {
     this.createAcademicProgramRequest();
   }
   ngOnInit(): void {
-    // Validate that we have an applicantId
     if (!this.applicantId) {
       if (this.studentProgramRequester?.applicantId) {
         this.applicantId = this.studentProgramRequester.applicantId;
@@ -52,7 +54,8 @@ export class StudentProgramRequesterFormComponent implements OnInit {
       createdBy: ["-"],
       lastModifiedBy: ["-"],
       division: ["", [Validators.required]],
-      acadamicProgrammeId: ["", [Validators.required]]
+      acadamicProgrammeId: ["", [Validators.required]],
+      applicantYear: [null, [Validators.required]]
     });
   }
 
@@ -60,7 +63,6 @@ export class StudentProgramRequesterFormComponent implements OnInit {
     const formModel = this.academicProgramRequestForm.getRawValue();
     const request = new AcademicProgramRequest();
     
-    // Ensure we have a valid applicantId
     if (!this.applicantId) {
       throw new Error("Applicant ID is required but not available");
     }
@@ -69,6 +71,7 @@ export class StudentProgramRequesterFormComponent implements OnInit {
     request.createdBy = "";
     request.acadamicProgrammeId = formModel.acadamicProgrammeId;
     request.division = formModel.division;
+    request.applicantYear = formModel.applicantYear;
     request.studentStatus = 0;
     request.approvalStatus = 0;
     return request;
@@ -78,6 +81,9 @@ export class StudentProgramRequesterFormComponent implements OnInit {
   }
   get division() {
     return this.academicProgramRequestForm.get("division");
+  }
+  get applicantYear() {
+    return this.academicProgramRequestForm.get("applicantYear");
   }
 
   getAcademicProgramList() {
@@ -91,7 +97,7 @@ export class StudentProgramRequesterFormComponent implements OnInit {
             this.acadamicProgrammes = [];
           }
         },
-        error: (error) => {
+        error: () => {
           this._customNotificationService.notification(
             "error",
             "Error",
@@ -128,7 +134,7 @@ export class StudentProgramRequesterFormComponent implements OnInit {
               );
             }
           },
-          error: (error) => {
+          error: () => {
             this._customNotificationService.notification(
               "error",
               "Error",
@@ -143,7 +149,6 @@ export class StudentProgramRequesterFormComponent implements OnInit {
           .update(this.id, postData)
           .subscribe({
             next: (res) => {
-              // Check if response indicates success
               const isSuccess = res === "success";
               
               if (isSuccess) {
@@ -162,7 +167,7 @@ export class StudentProgramRequesterFormComponent implements OnInit {
                 );
               }
             },
-            error: (error) => {
+            error: () => {
               this._customNotificationService.notification(
                 "error",
                 "Error",

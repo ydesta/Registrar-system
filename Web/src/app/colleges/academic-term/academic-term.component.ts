@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { BaseModel } from 'src/app/Models/BaseMode';
+import { catchError, finalize } from 'rxjs/operators';
 import { AcademicTermModel } from 'src/app/Models/AcademicTermModel';
+import { BaseModel } from 'src/app/Models/BaseMode';
+import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { ACADEMIC_TERM_STATUS, ACADEMIC_YEAR_NUMBER_STATUS } from 'src/app/common/constant';
@@ -13,62 +14,71 @@ import { ACADEMIC_TERM_STATUS, ACADEMIC_YEAR_NUMBER_STATUS } from 'src/app/commo
   templateUrl: './academic-term.component.html',
   styleUrls: ['./academic-term.component.scss'],
 })
-export class AcademicTermComponent implements OnInit {
+export class AcademicTermComponent implements OnInit, OnDestroy {
   academicTerms: AcademicTermModel[] = [];
   filteredAcademicTerms: AcademicTermModel[] = [];
-  checked = false;
-  isLoading = false;
-  isExporting = false;
   termStatusList = ACADEMIC_TERM_STATUS;
   academicYearList = ACADEMIC_YEAR_NUMBER_STATUS;
-  searchTerm = '';
   expandSet = new Set<number>();
-  
-  // Pagination properties
-  pageIndex = 1;
-  pageSize = 10;
-  total = 0;
-  pageSizeOptions = [10, 20, 50, 100];
+  updatingVisibilityId: number | null = null;
+  pager: ServerPaginator;
 
   constructor(
     private _customNotificationService: CustomNotificationService,
     private _crudService: CrudService,
-    private modal: NzModalService
-  ) {}
+    private modal: NzModalService,
+    private paginator: PaginatorService
+  ) {
+    this.pager = this.paginator.create();
+  }
 
   ngOnInit(): void {
+    this.pager.init(() => this.fetchAcademicTerms());
     this.fetchAcademicTerms();
   }
 
+  ngOnDestroy(): void {
+    this.pager.destroy();
+  }
+
   fetchAcademicTerms(): void {
-    this.isLoading = true;
+    this.pager.loading = true;
+    const query = this.pager.query(undefined, this.resolveSearchKey());
     this._crudService
-      .getList('/AcademicTerms')
+      .getPaginated(`/AcademicTerms`, query)
       .pipe(
-        catchError((error) => {
+        catchError(() => {
           this._customNotificationService.notification(
             'error',
             'Error',
             'Failed to fetch academic terms. Please try again.'
           );
-          return of({ data: [] } as BaseModel<AcademicTermModel[]>);
+          this.pager.fail();
+          return of({ data: [], totalRowCount: 0 } as any);
         }),
         finalize(() => {
-          this.isLoading = false;
+          this.pager.loading = false;
         })
       )
-      .subscribe((res: BaseModel<AcademicTermModel[]>) => {
-        if (res && res.data) {
-          // Backend already filters terms from currentYear - 2 onwards
-          this.academicTerms = res.data;
-          this.applyFilter();
-        } else {
-          this.academicTerms = [];
-          this.filteredAcademicTerms = [];
-          this.total = 0;
-          this.pageIndex = 1;
-        }
+      .subscribe((res: any) => {
+        this.academicTerms = res?.data || [];
+        this.filteredAcademicTerms = this.academicTerms;
+        this.pager.applyResult(res);
       });
+  }
+
+  private resolveSearchKey(): string {
+    const raw = this.paginator.sanitizeSearchKey(this.pager.searchKey);
+    if (!raw) {
+      return '';
+    }
+    const matchedTerm = this.termStatusList.find(t =>
+      t.Description.toLowerCase().includes(raw.toLowerCase())
+    );
+    if (matchedTerm && isNaN(Number(raw))) {
+      return String(matchedTerm.Id);
+    }
+    return raw;
   }
 
   getTermName(termId: number): string {
@@ -103,53 +113,71 @@ export class AcademicTermComponent implements OnInit {
     return item.id;
   }
 
-  onSearch(): void {
-    this.pageIndex = 1; // Reset to first page when searching
-    this.applyFilter();
-  }
+  onVisibilityToggle(
+    term: AcademicTermModel,
+    field: 'showRegular' | 'showAdd' | 'showAssessment' | 'showEquivalent',
+    value: boolean
+  ): void {
+    if (!term?.id || this.updatingVisibilityId === term.id) {
+      return;
+    }
 
-  onSearchChange(value: string): void {
-    this.searchTerm = value;
-    this.pageIndex = 1; // Reset to first page when searching
-    this.applyFilter(); // Filter in real-time as user types
-  }
+    const previousValue = term[field] !== false;
+    if (previousValue === value) {
+      return;
+    }
 
-  private applyFilter(): void {
-    if (!this.searchTerm || this.searchTerm.trim() === '') {
-      this.filteredAcademicTerms = [...this.academicTerms];
-    } else {
-      const searchLower = this.searchTerm.toLowerCase().trim();
-      this.filteredAcademicTerms = this.academicTerms.filter(term => {
-        const termName = this.getTermName(term.termId).toLowerCase();
-        const year = term.year.toString();
-        
-        // Format dates for search
-        let startDateStr = '';
-        let endDateStr = '';
-        if (term.startDate) {
-          const startDate = new Date(term.startDate);
-          startDateStr = startDate.toLocaleDateString() + ' ' + startDate.toISOString().split('T')[0];
+    term[field] = value;
+    this.updatingVisibilityId = term.id;
+
+    const payload = {
+      termId: term.termId,
+      year: term.year,
+      startDate: term.startDate,
+      endDate: term.endDate,
+      isCurrentTerm: term.isCurrentTerm,
+      showRegular: term.showRegular !== false,
+      showAdd: term.showAdd !== false,
+      showAssessment: term.showAssessment !== false,
+      showEquivalent: term.showEquivalent !== false
+    };
+
+    this._crudService
+      .update('/AcademicTerms', term.id, payload)
+      .pipe(
+        catchError((error) => {
+          term[field] = previousValue;
+          this._customNotificationService.notification(
+            'error',
+            'Error',
+            error?.error?.data || 'Failed to update registration visibility.'
+          );
+          return of({ status: 'error', data: 'Update failed' });
+        }),
+        finalize(() => {
+          this.updatingVisibilityId = null;
+        })
+      )
+      .subscribe((res: BaseModel<any>) => {
+        if (res.status === 'success') {
+          this._customNotificationService.notification(
+            'success',
+            'Success',
+            'Registration visibility updated.'
+          );
+        } else if (res.status !== 'error') {
+          term[field] = previousValue;
+          this._customNotificationService.notification(
+            'error',
+            'Error',
+            res.data || res.error || 'Failed to update registration visibility.'
+          );
         }
-        if (term.endDate) {
-          const endDate = new Date(term.endDate);
-          endDateStr = endDate.toLocaleDateString() + ' ' + endDate.toISOString().split('T')[0];
-        }
-        
-        return (
-          termName.includes(searchLower) ||
-          year.includes(searchLower) ||
-          startDateStr.includes(searchLower) ||
-          endDateStr.includes(searchLower)
-        );
       });
-    }
-    
-    this.total = this.filteredAcademicTerms.length;
-    // Reset to first page if current page is beyond available data
-    const maxPage = Math.ceil(this.total / this.pageSize);
-    if (this.pageIndex > maxPage && maxPage > 0) {
-      this.pageIndex = 1;
-    }
+  }
+
+  onSearch(): void {
+    this.pager.resetPage();
   }
 
   showDeleteConfirm(id: number | undefined): void {
@@ -198,89 +226,6 @@ export class AcademicTermComponent implements OnInit {
             res.data || res.error || 'Failed to delete academic term.'
           );
         }
-      });
-  }
-
-  exportAcademicTerm(): void {
-    if (this.isExporting) {
-      return;
-    }
-
-    this.isExporting = true;
-    this._crudService
-      .getList('/AcademicTerms/excel')
-      .pipe(
-        catchError((error) => {
-          this._customNotificationService.notification(
-            'error',
-            'Error',
-            'Failed to export academic terms. Please try again.'
-          );
-          this.isExporting = false;
-          return of({ data: null });
-        })
-      )
-      .subscribe((res: BaseModel<string>) => {
-        if (!res || !res.data) {
-          this._customNotificationService.notification(
-            'error',
-            'Error',
-            'No data available to export.'
-          );
-          this.isExporting = false;
-          return;
-        }
-
-        const dataString = res.data.toString();
-        if (dataString === 'No data found' || dataString.trim() === '') {
-          this._customNotificationService.notification(
-            'error',
-            'Error',
-            'No data found to export.'
-          );
-          this.isExporting = false;
-          return;
-        }
-
-        // Handle file path response
-        const filePath = dataString.startsWith('/') ? dataString : '/' + dataString;
-        const fileLists = dataString.split('/');
-        const fileName = fileLists[fileLists.length - 1] || 'academic-terms.xlsx';
-
-        this._crudService
-          .expoerExcel(filePath)
-          .pipe(
-            catchError((error) => {
-              this._customNotificationService.notification(
-                'error',
-                'Error',
-                'Failed to download Excel file. Please try again.'
-              );
-              this.isExporting = false;
-              return of(null);
-            }),
-            finalize(() => {
-              this.isExporting = false;
-            })
-          )
-          .subscribe((blob: Blob | null) => {
-            if (blob) {
-              const downloadURL = window.URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = downloadURL;
-              link.download = fileName;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              window.URL.revokeObjectURL(downloadURL);
-
-              this._customNotificationService.notification(
-                'success',
-                'Success',
-                'Excel file downloaded successfully.'
-              );
-            }
-          });
       });
   }
 }

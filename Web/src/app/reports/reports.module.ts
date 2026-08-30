@@ -25,10 +25,11 @@ import { RegisteredStudentPerBatchComponent } from './registered-student-per-bat
 import { CourseOfferedPerAcademicTermComponent } from './course-offered-per-academic-term/course-offered-per-academic-term.component';
 import { AcademicTermRegistrationSlipComponent } from './academic-term-registration-slip/academic-term-registration-slip.component';
 import { TranscriptSearchComponent } from './transcript-search/transcript-search.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { StudentSemsterCourseRegistrationSlipComponent } from './student-semster-course-registration-slip/student-semster-course-registration-slip.component';
 import { GradeReportComponent } from './grade-report/grade-report.component';
 import { StudentGradeReportComponent } from './student-grade-report/student-grade-report.component';
+import { LateRegistrationComponent } from './late-registration/late-registration.component';
 @NgModule({
   declarations: [
     ReportsComponent,
@@ -42,6 +43,7 @@ import { StudentGradeReportComponent } from './student-grade-report/student-grad
      StudentSemsterCourseRegistrationSlipComponent,
      GradeReportComponent,
      StudentGradeReportComponent,
+     LateRegistrationComponent,
   ],
   imports: [
     CommonModule,
@@ -62,6 +64,7 @@ import { StudentGradeReportComponent } from './student-grade-report/student-grad
     NzProgressModule,
     NzSpinModule,
     NzInputModule,
+    FormsModule,
     ReactiveFormsModule,
   ],
 })

@@ -9,7 +9,7 @@
       <div class="header-actions">
         <div class="search-section">
           <nz-input-group [nzSuffix]="suffixIconSearch">
-            <input type="text" nz-input placeholder="Search by programme, entry year, or fee..." [(ngModel)]="searchKey" (ngModelChange)="onSearch()"/>
+            <input type="text" nz-input placeholder="Search by programme, entry year, or fee..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)"/>
           </nz-input-group>
           <ng-template #suffixIconSearch>
             <span nz-icon nzType="search"></span>
@@ -37,28 +37,30 @@
       <nz-table #basicTable 
                 [nzData]="tuitionFees!" 
                 nzBordered
-                [nzPageSize]="pageSize"
+                [nzPageSize]="pager.pageSize"
+                [nzPageSizeOptions]="pager.pageSizeOptions"
                 [nzShowSizeChanger]="true"
-                [nzTotal]="totalRecord"
-                [nzPageIndex]="pageindex"
-                (nzPageIndexChange)="paginatedIndexEvent($event)"
-                (nzPageSizeChange)="paginatedSizeEvent($event)"
-                [nzLoading]="tbLoading"
+                [nzTotal]="pager.total"
+                [nzPageIndex]="pager.pageIndex"
+                (nzPageIndexChange)="pager.onPageIndexChange($event)"
+                (nzPageSizeChange)="pager.onPageSizeChange($event)"
+                [nzFrontPagination]="false"
+                [nzLoading]="pager.loading"
                 [nzNoResult]="emptyTpl"
                 class="tuition-fees-table">
         <thead>
           <tr>
             <th style="min-width: 60px;">S/N</th>
-            <th style="min-width: 200px;" [nzSortFn]="true" (nzSortOrderChange)="changeSortColumn($event, 'AcadamicProgrammeTitle')">Academic Programme</th>
-            <th style="min-width: 120px;" [nzSortFn]="true" (nzSortOrderChange)="changeSortColumn($event, 'FeePerCredit')">Fee Per Credit</th>
-            <th style="min-width: 120px;" [nzSortFn]="true" (nzSortOrderChange)="changeSortColumn($event, 'EntryYear')">Entry Year</th>
-            <th style="min-width: 150px;" [nzSortFn]="true" (nzSortOrderChange)="changeSortColumn($event, 'Remark')">Remark</th>
+            <th style="min-width: 200px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'AcadamicProgrammeTitle')">Academic Programme</th>
+            <th style="min-width: 120px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'FeePerCredit')">Fee Per Credit</th>
+            <th style="min-width: 120px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'EntryYear')">Entry Year</th>
+            <th style="min-width: 150px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'Remark')">Remark</th>
             <th style="min-width: 100px;">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let data of basicTable.data; let i = index">
-            <td><span class="sn-badge">{{ (pageindex - 1) * pageSize + i + 1 }}</span></td>
+            <td><span class="sn-badge">{{ pager.serial(i) }}</span></td>
             <td>{{ data.acadamicProgramme?.acadamicProgrammeTitle }}</td>
             <td>{{ data.feePerCredit | currency:'USD':'symbol':'1.2-2' }}</td>
             <td>{{ data.entryYear }}</td>

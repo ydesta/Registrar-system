@@ -1,6 +1,7 @@
 export interface StudentModel {
   id: string; 
   applicantId : string ;
+  applicantID?: string;
   studentId: string;
   batchCode: string;
   entryCode:string;
@@ -25,7 +26,15 @@ export interface StudentModel {
   mobile :  string ;
   postalAddress :  string ;
   emailAddress :  string ;
- 
+  applicationDate?: Date;
+  admissionDecision?: string;
+  applicant?: {
+    firstName?: string;
+    fatherName?: string;
+    gender?: string;
+    mobile?: string;
+    emailAddress?: string;
+  };
 }
 export interface StudentProfileViewModel {
   id: string;

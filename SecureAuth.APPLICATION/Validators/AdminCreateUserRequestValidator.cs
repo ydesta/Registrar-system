@@ -1,5 +1,6 @@
 using FluentValidation;
 using SecureAuth.APPLICATION.DTOs.Authentication;
+using SecureAuth.APPLICATION.Helpers;
 
 namespace SecureAuth.APPLICATION.Validators
 {
@@ -26,9 +27,8 @@ namespace SecureAuth.APPLICATION.Validators
 
             RuleFor(x => x.PhoneNumber)
                 .MaximumLength(20)
-                .Matches(@"^(\+[1-9]\d{1,14}|(09|07)\d{8}|0\d{9})$")
-                .When(x => !string.IsNullOrEmpty(x.PhoneNumber))
-                .WithMessage("Phone number must be in valid format: +251xxxxxxxxx, +33xxxxxxxxx, 09xxxxxxxx, 07xxxxxxxx, or 0xxxxxxxxx (10 digits)");
+                .Must(phone => string.IsNullOrWhiteSpace(phone) || EthiopianPhoneNumber.IsValid(phone))
+                .WithMessage(EthiopianPhoneNumber.ErrorMessage);
 
             RuleFor(x => x.RoleNames)
                 .Must(roles => roles == null || roles.All(r => !string.IsNullOrWhiteSpace(r)))
@@ -39,4 +39,4 @@ namespace SecureAuth.APPLICATION.Validators
                 .WithMessage("A user cannot have more than 5 roles");
         }
     }
-} 
+}

@@ -9,7 +9,7 @@
       <div class="header-actions">
         <div class="search-section">
           <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input type="text" nz-input placeholder="Search quadrants..." [(ngModel)]="searchKey" (ngModelChange)="clickSearchKey()" />
+            <input type="text" nz-input placeholder="Search quadrants..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)" />
           </nz-input-group>
           <ng-template #suffixIconButton>
             <button nz-button nzType="primary" class="search-btn" nzSearch>
@@ -53,12 +53,16 @@
         #basicTable
         [nzData]="quadrants!"
         nzBordered
-        [nzPageSize]="pageSize"
-        [nzPageSizeOptions]="pageSizeOption"
+        [nzPageSize]="pager.pageSize"
+        [nzPageSizeOptions]="pager.pageSizeOptions"
         [nzShowSizeChanger]="true"
-        [nzFrontPagination]="true"
+        [nzTotal]="pager.total"
+        [nzPageIndex]="pager.pageIndex"
+        (nzPageIndexChange)="pager.onPageIndexChange($event)"
+        (nzPageSizeChange)="pager.onPageSizeChange($event)"
+        [nzFrontPagination]="false"
         [nzShowTotal]="rangeTemplate"
-        [nzLoading]="isLoading"
+        [nzLoading]="pager.loading"
         [nzNoResult]="emptyTpl"
         class="quadrants-table"
       >
@@ -68,6 +72,7 @@
         <thead>
           <tr>
             <th class="sn-column">S/N</th>
+            <th>Curriculum</th>
             <th>Quadrant ID</th>
             <th>Quadrant Heading</th>
             <th>Date</th>
@@ -78,8 +83,9 @@
         <tbody>
           <tr *ngFor="let data of basicTable.data; let i = index">
             <td class="sn-column">
-              <span class="sn-badge">{{ (basicTable.nzPageIndex - 1) * basicTable.nzPageSize + i + 1 }}</span>
+              <span class="sn-badge">{{ pager.serial(i) }}</span>
             </td>
+            <td>{{ data.curriculumCode }}</td>
             <td>{{ data.quadrantsID }}</td>
             <td>{{ data.quadrantHeading }}</td>
             <td>{{ data.createdDate | date : "yyyy-MM-dd" }}</td>

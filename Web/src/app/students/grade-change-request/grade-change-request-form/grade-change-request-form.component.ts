@@ -109,7 +109,17 @@ export class GradeChangeRequestFormComponent implements OnInit {
   }
 
   onSearchSubmitted(studentId: string): void {
-    this.studentServices.getStudentInformationWithInstructor(this.userId!, studentId).subscribe({
+    const normalizedId = (studentId || '').trim();
+    if (!normalizedId) {
+      this.studentSearchComponent?.setError('Student ID is required');
+      return;
+    }
+    if (!this.userId) {
+      this.studentSearchComponent?.setError('Your session is missing a user id. Please log in again.');
+      return;
+    }
+
+    this.studentServices.getStudentInformationWithInstructor(this.userId, normalizedId).subscribe({
       next: (res: any) => {
         if (res) {
           this.selectedStudent = res;
@@ -125,12 +135,19 @@ export class GradeChangeRequestFormComponent implements OnInit {
             batchCode: res.batchCode
           });
           this.showSearchForm = false;
-        } else {
-          console.warn('Student not found or null response received.');
+          this.studentSearchComponent?.setLoading(false);
+          return;
         }
+
+        this.studentSearchComponent?.setError(
+          'No grades found for this student under your instructor account. Confirm the Student ID and that you submitted the grade.'
+        );
       },
       error: (err) => {
         console.error('Error occurred while fetching student information:', err);
+        this.studentSearchComponent?.setError(
+          err?.message || 'Failed to load student information. Please try again.'
+        );
       }
     });
   }
@@ -154,7 +171,6 @@ export class GradeChangeRequestFormComponent implements OnInit {
       .getAllCourses()
       .subscribe({
         next: (res: any) => {
-          console.log("object      ", res);
           this.courses = res.data || [];
         },
         error: (error) => {

@@ -1,46 +1,51 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { GradeChangeRequest } from '../Models/GradeChangeRequest';
-import { Observable } from 'rxjs';
 import { ChangeRequestViewModel, GradeChangeRequestViewModel } from '../Models/GradeChangeRequestViewModel';
+import { CrudService } from 'src/app/services/crud.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GradeChangeRequestService {
-  private apiUrl = `${environment.baseUrl}/${environment.apiVersion}/gradechangerequests`;
+  private readonly gradeChanges = `/${environment.apiVersion}/gradechangerequests`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private crud: CrudService) { }
 
   getAllPendingGradeChangeRequestForApproval(): Observable<GradeChangeRequestViewModel[]> {
-    return this.http.get<GradeChangeRequestViewModel[]>(this.apiUrl);
+    return this.crud.getList<GradeChangeRequestViewModel[]>(this.gradeChanges);
+  }
+
+  getAllPendingGradeChangeRequestForApprovalPaginated(query: string): Observable<any> {
+    return this.crud.getPaginated(this.gradeChanges, query);
   }
 
   getGradeChangeRequestById(id: number): Observable<GradeChangeRequest> {
-    return this.http.get<GradeChangeRequest>(`${this.apiUrl}/${id}`);
+    return this.crud.getById<GradeChangeRequest>(this.gradeChanges, id);
   }
+
   getGradeChangeRequestByStaffId(staffId: string): Observable<GradeChangeRequestViewModel[]> {
-    return this.http.get<GradeChangeRequestViewModel[]>(`${this.apiUrl}/staff/${staffId}`);
+    return this.crud.getList<GradeChangeRequestViewModel[]>(`${this.gradeChanges}/staff/${staffId}`);
+  }
+
+  getGradeChangeRequestByStaffIdPaginated(staffId: string, query: string): Observable<any> {
+    return this.crud.getPaginated(`${this.gradeChanges}/staff/${staffId}`, query);
   }
 
   createGradeChange(gradeChange: GradeChangeRequest): Observable<GradeChangeRequest> {
-    return this.http.post<GradeChangeRequest>(this.apiUrl, gradeChange);
+    return this.crud.add<GradeChangeRequest>(this.gradeChanges, gradeChange);
   }
 
   updateGradeChange(id: number, gradeChange: GradeChangeRequest): Observable<GradeChangeRequest> {
-    return this.http.put<GradeChangeRequest>(`${this.apiUrl}/${id}`, gradeChange);
+    return this.crud.put<GradeChangeRequest>(`${this.gradeChanges}/${id}`, gradeChange);
   }
 
   deleteGradeChange(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+    return this.crud.delete(this.gradeChanges, id);
   }
+
   reviewGradeChangeRequest(id: number, changeRequest: ChangeRequestViewModel): Observable<boolean> {
-    return this.http.put<boolean>(
-      `${this.apiUrl}/review/${id}`,
-      changeRequest
-    );
+    return this.crud.put<boolean>(`${this.gradeChanges}/review/${id}`, changeRequest);
   }
-
-
 }

@@ -14,8 +14,8 @@
       <input 
         type="text" 
         nz-input 
-        [(ngModel)]="searchKey"
-        (ngModelChange)="onSearch()"
+        [(ngModel)]="pager.searchKey"
+        (ngModelChange)="pager.onSearch($event)"
         placeholder="Search by code, programme, or status..." 
         class="batch-search-input" />
       <ng-template #suffixIconSearch>
@@ -37,16 +37,17 @@
         <nz-table #basicTable 
                 [nzData]="curriculums" 
                 nzBordered
-                [nzPageSize]="pageSize"
-                [nzPageSizeOptions]="pageSizeOption"
+                [nzPageSize]="pager.pageSize"
+                [nzPageSizeOptions]="pager.pageSizeOptions"
                 [nzShowSizeChanger]="true"
-                [nzTotal]="totalRecord"
-                [nzPageIndex]="pageindex"
-                (nzPageIndexChange)="paginatedIndexEvent($event)"
-                (nzPageSizeChange)="paginatedSizeEvent($event)"
+                [nzTotal]="pager.total"
+                [nzPageIndex]="pager.pageIndex"
+                (nzPageIndexChange)="onPageIndexChange($event)"
+                (nzPageSizeChange)="onPageSizeChange($event)"
                 [nzFrontPagination]="false"
+                [nzShowPagination]="true"
                 [nzShowTotal]="rangeTemplate"
-                [nzLoading]="tbLoading"
+                [nzLoading]="pager.loading"
                 [nzNoResult]="emptyTpl"
                 class="responsive-table">
         <ng-template #rangeTemplate let-range="range" let-total>
@@ -57,77 +58,21 @@
         <thead>
           <tr>
             <th style="min-width: 60px;">S/N</th>
-            <th style="min-width: 140px;" 
-                [nzSortOrder]="listOfColumns[0].sortOrder"
-                [nzSortFn]="listOfColumns[0].sortFn" 
-                [nzSortDirections]="listOfColumns[0].sortDirections"
-                [nzFilterMultiple]="listOfColumns[0].filterMultiple" 
-                [nzFilters]="listOfColumns[0].listOfFilter" 
-                [nzFilterFn]="listOfColumns[0].filterFn">
-              {{ listOfColumns[0].name }}
-            </th>
-            <th style="min-width: 180px;" 
-                [nzSortOrder]="listOfColumns[1].sortOrder"
-                [nzSortFn]="listOfColumns[1].sortFn" 
-                [nzSortDirections]="listOfColumns[1].sortDirections"
-                [nzFilterMultiple]="listOfColumns[1].filterMultiple" 
-                [nzFilters]="listOfColumns[1].listOfFilter" 
-                [nzFilterFn]="listOfColumns[1].filterFn">
-              {{ listOfColumns[1].name }}
-            </th>
-            <th style="min-width: 160px;" 
-                [nzSortOrder]="listOfColumns[2].sortOrder"
-                [nzSortFn]="listOfColumns[2].sortFn" 
-                [nzSortDirections]="listOfColumns[2].sortDirections"
-                [nzFilterMultiple]="listOfColumns[2].filterMultiple" 
-                [nzFilters]="listOfColumns[2].listOfFilter" 
-                [nzFilterFn]="listOfColumns[2].filterFn">
-              {{ listOfColumns[2].name }}
-            </th>
-            <th style="min-width: 140px;" 
-                [nzSortOrder]="listOfColumns[3].sortOrder"
-                [nzSortFn]="listOfColumns[3].sortFn" 
-                [nzSortDirections]="listOfColumns[3].sortDirections"
-                [nzFilterMultiple]="listOfColumns[3].filterMultiple" 
-                [nzFilters]="listOfColumns[3].listOfFilter" 
-                [nzFilterFn]="listOfColumns[3].filterFn">
-              {{ listOfColumns[3].name }}
-            </th>
-            <th style="min-width: 140px;" 
-                [nzSortOrder]="listOfColumns[4].sortOrder"
-                [nzSortFn]="listOfColumns[4].sortFn" 
-                [nzSortDirections]="listOfColumns[4].sortDirections"
-                [nzFilterMultiple]="listOfColumns[4].filterMultiple" 
-                [nzFilters]="listOfColumns[4].listOfFilter" 
-                [nzFilterFn]="listOfColumns[4].filterFn">
-              {{ listOfColumns[4].name }}
-            </th>
-            <th style="min-width: 140px;" 
-                [nzSortOrder]="listOfColumns[5].sortOrder"
-                [nzSortFn]="listOfColumns[5].sortFn" 
-                [nzSortDirections]="listOfColumns[5].sortDirections"
-                [nzFilterMultiple]="listOfColumns[5].filterMultiple" 
-                [nzFilters]="listOfColumns[5].listOfFilter" 
-                [nzFilterFn]="listOfColumns[5].filterFn">
-              {{ listOfColumns[5].name }}
-            </th>
-            <th style="min-width: 120px;" 
-                [nzSortOrder]="listOfColumns[6].sortOrder"
-                [nzSortFn]="listOfColumns[6].sortFn" 
-                [nzSortDirections]="listOfColumns[6].sortDirections"
-                [nzFilterMultiple]="listOfColumns[6].filterMultiple" 
-                [nzFilters]="listOfColumns[6].listOfFilter" 
-                [nzFilterFn]="listOfColumns[6].filterFn">
-              {{ listOfColumns[6].name }}
-            </th>
+            <th style="min-width: 140px;" [nzSortFn]="true" (nzSortOrderChange)="onSort($event, 'CurriculumCode')">Curriculum Code</th>
+            <th style="min-width: 180px;" [nzSortFn]="true" (nzSortOrderChange)="onSort($event, 'AcadamicProgrammeTitle')">Programme Title</th>
+            <th style="min-width: 160px;" [nzSortFn]="true" (nzSortOrderChange)="onSort($event, 'MinimumCumlativGPA')">Minimum Cumulative GPA</th>
+            <th style="min-width: 140px;" [nzSortFn]="true" (nzSortOrderChange)="onSort($event, 'MinimumMajorGPA')">Minimum Major GPA</th>
+            <th style="min-width: 140px;" [nzSortFn]="true" (nzSortOrderChange)="onSort($event, 'MinTotalCreditHours')">Min Total Credit Hours</th>
+            <th style="min-width: 140px;" [nzSortFn]="true" (nzSortOrderChange)="onSort($event, 'PassingGrade')">Passing Grade</th>
+            <th style="min-width: 120px;" [nzSortFn]="true" (nzSortOrderChange)="onSort($event, 'Status')">Status</th>
             <th class="sticky-action" style="min-width: 120px;">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let data of basicTable.data; let i = index">
-            <td><span class="sn-badge">{{ (pageindex - 1) * pageSize + i + 1 }}</span></td>
+            <td><span class="sn-badge">{{ pager.serial(i) }}</span></td>
             <td>{{ data.curriculumCode }}</td>
-            <td>{{ data.acadamicProgramme.acadamicProgrammeTitle }}</td>
+            <td>{{ data.acadamicProgramme?.acadamicProgrammeTitle }}</td>
             <td>{{ data.minimumCumlativGPA }}</td>
             <td>{{ data.minimumMajorGPA }}</td>
             <td>{{ data.minTotalCreditHours }}</td>
@@ -148,6 +93,12 @@
                     <button nz-button nzType="default" class="action-item" (click)="goToCurriculumQuadrantBreakdown(data)">
                       <span nz-icon nzType="plus" nzTheme="outline"></span>
                       Add Quadrants Breakdown
+                    </button>
+                  </li>
+                  <li nz-menu-item>
+                    <button nz-button nzType="default" class="action-item" (click)="goToEditQuadrantBreakdown(data)">
+                      <span nz-icon nzType="edit" nzTheme="outline"></span>
+                      Edit Quadrants Breakdown
                     </button>
                   </li>
                   <li nz-menu-item>

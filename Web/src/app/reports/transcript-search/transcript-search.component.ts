@@ -2,6 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { StudentService } from '../../students/services/student.service';
 import { StudentSearchComponent } from '../../shared-module/shared/components/student-search/student-search.component';
 import { PdfExportService } from '../services/pdf-export.service';
+import { ExcelExportService } from '../services/excel-export.service';
 import { StudentTranscriptViewModel } from '../model/student-transcript-view-model.model';
 
 @Component({
@@ -15,10 +16,12 @@ export class TranscriptSearchComponent {
   transcript: StudentTranscriptViewModel | null = null;
   showSearchForm = true;
   isExporting = false;
+  isExportingExcel = false;
 
   constructor(
     private studentService: StudentService,
-    private _pdfExportService: PdfExportService
+    private _pdfExportService: PdfExportService,
+    private _excelExportService: ExcelExportService
   ) {}
 
   onSearchSubmitted(studentId: string): void {
@@ -64,4 +67,16 @@ export class TranscriptSearchComponent {
     this._pdfExportService.exportTranscript(this.transcript, filename);
     this.isExporting = false;
   }
-} 
+
+  exportTranscriptExcel(): void {
+    if (!this.transcript) {
+      return;
+    }
+    this.isExportingExcel = true;
+    const studentName = (this.transcript.fullName || 'Student').replace(/\s+/g, '_');
+    const currentDate = new Date().toISOString().split('T')[0];
+    const filename = `Transcript_${studentName}_${currentDate}`;
+    this._excelExportService.exportTranscript(this.transcript, filename);
+    this.isExportingExcel = false;
+  }
+}

@@ -94,7 +94,7 @@
             <div nz-col [nzSpan]="12">
               <nz-form-item nz-col label="Phone Number">
                 <nz-form-control>
-                  <input nz-input formControlName="phoneNumber" placeholder="Enter phone number" />
+                  <input nz-input formControlName="phoneNumber" placeholder="+2519… / 09… / 07…" (blur)="onPhoneBlur()" />
                 </nz-form-control>
               </nz-form-item>
             </div>
@@ -237,10 +237,6 @@
         </ng-template>
         
         <nz-descriptions nzSize="small" [nzColumn]="2">
-          <nz-descriptions-item nzTitle="User ID">
-            <span nz-icon nzType="idcard" nzTheme="outline"></span>
-            {{ user.id }}
-          </nz-descriptions-item>
           <nz-descriptions-item nzTitle="Email">
             <span nz-icon nzType="user" nzTheme="outline"></span>
             {{ user.email }}

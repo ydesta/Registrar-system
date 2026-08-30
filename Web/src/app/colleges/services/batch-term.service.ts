@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
+import { CrudService } from 'src/app/services/crud.service';
 import { environment } from 'src/environments/environment';
 import { TermViewModel } from '../model/term-view-model';
 
@@ -8,49 +8,44 @@ import { TermViewModel } from '../model/term-view-model';
   providedIn: 'root'
 })
 export class BatchTermService {
-  baseUrl = environment.baseUrl;
-  private readonly _batchTerms: string = `/${environment.apiVersion}/batchterms`;
-  getBatchTermsUrl() {
-    return this.baseUrl + this._batchTerms;
-  }
-  constructor(private httpClient: HttpClient) { }
+  private readonly batchTerms = `/${environment.apiVersion}/batchterms`;
+  private readonly terms = `/${environment.apiVersion}/term`;
+
+  constructor(private crud: CrudService) { }
+
   getNextAcademicTerm(): Observable<any> {
-    const endpointUrl = `${this.getBatchTermsUrl()}`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.getList(this.batchTerms);
   }
+
   GetAcademicTermList(): Observable<TermViewModel[]> {
-    const endpointUrl = `${this.getBatchTermsUrl()}/academicterm/activity`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as TermViewModel[]));
+    return this.crud.getList<TermViewModel[]>(`${this.batchTerms}/academicterm/activity`);
   }
+
   getCurrentAcademicTerm(): Observable<any> {
-    const endpointUrl = `${this.getBatchTermsUrl()}/current-term`;
-    return this.httpClient
-      .get(endpointUrl)
-      .pipe(map(result => result as any[]));
+    return this.crud.getList(`${this.batchTerms}/current-term`);
   }
+
+  getCourseRegistrationVisibility(academicTermId: number): Observable<any> {
+    return this.crud.getList(`${this.terms}/${academicTermId}/registration-visibility`);
+  }
+
   getCourseBreakDownList(
     curriculumId: string,
     seasonTerm: number,
     batchId: string,
     isUpdate: boolean
   ): Observable<any> {
-    const endPointUrl = `${this.getBatchTermsUrl()}/${curriculumId}/${seasonTerm}/${batchId}/${isUpdate}`;
-    return this.httpClient.get<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
-    );
+    return this.crud.getList(`${this.batchTerms}/${curriculumId}/${seasonTerm}/${batchId}/${isUpdate}`);
   }
-  getAllCourseByBatchId(curriculumId: string,batchId: string,isUpdate: boolean,academicTermId: number): Observable<any> {
-    const endPointUrl = `${this.getBatchTermsUrl()}/${curriculumId}/${batchId}/${isUpdate}/${academicTermId}/getAllCourseByBatchId`;
-    return this.httpClient.get<any>(endPointUrl).pipe(
-      map(data => {
-        return data;
-      })
+
+  getAllCourseByBatchId(
+    curriculumId: string,
+    batchId: string,
+    isUpdate: boolean,
+    academicTermId: number
+  ): Observable<any> {
+    return this.crud.getList(
+      `${this.batchTerms}/${curriculumId}/${batchId}/${isUpdate}/${academicTermId}/getAllCourseByBatchId`
     );
   }
 }

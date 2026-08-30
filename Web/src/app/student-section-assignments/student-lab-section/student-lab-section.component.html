@@ -111,7 +111,7 @@
   </nz-alert>
 
   <!-- Export Actions -->
-  <div class="export-section" *ngIf="labSectionAssignedStudents.length > 0">
+  <div class="export-section" *ngIf="pager.total > 0">
     <div class="export-buttons">
       <button nz-button nzType="default" (click)="exportLabSectionList()" class="export-btn">
         <i nz-icon nzType="download" nzTheme="outline"></i>
@@ -121,11 +121,11 @@
   </div>
 
   <!-- Results Table -->
-  <div class="table-container" *ngIf="labSectionAssignedStudents.length > 0">
+  <div class="table-container" *ngIf="pager.total > 0 || pager.searchKey">
     <div class="table-header">
       <div class="page-info">
         <span class="text-muted">
-          Found {{ labSectionAssignedStudents.length }} students in lab sections
+          Found {{ pager.total }} students in lab sections
         </span>
       </div>
       <div class="search-box">
@@ -135,8 +135,16 @@
       </div>
     </div>
 
-    <nz-table #basicTable [nzData]="listOfDisplayData" [nzLoading]="loading" [nzShowPagination]="false"
-      [nzPageSize]="9999" [nzNoResult]="emptyTpl" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;">
+    <nz-table #basicTable [nzData]="listOfDisplayData" [nzLoading]="pager.loading"
+      [nzPageSize]="pager.pageSize"
+      [nzPageSizeOptions]="pager.pageSizeOptions"
+      [nzShowSizeChanger]="true"
+      [nzTotal]="pager.total"
+      [nzPageIndex]="pager.pageIndex"
+      (nzPageIndexChange)="pager.onPageIndexChange($event)"
+      (nzPageSizeChange)="pager.onPageSizeChange($event)"
+      [nzFrontPagination]="false"
+      [nzNoResult]="emptyTpl" [nzScroll]="{ x: '800px' }" style="overflow-x: auto;">
 
       <thead>
         <tr>
@@ -151,7 +159,7 @@
         <tr *ngFor="let student of basicTable.data; let i = index">
           <td>
             <span class="serial-number">
-              {{ i + 1 }}
+              {{ pager.serial(i) }}
             </span>
           </td>
           <td>
@@ -179,7 +187,7 @@
   </div>
 
   <!-- Summary and Actions Section -->
-  <div class="summary-section" *ngIf="labSectionAssignedStudents.length > 0">
+  <div class="summary-section" *ngIf="pager.total > 0">
     <nz-card nzTitle="Summary & Actions" class="summary-card">
       <div class="row">
         <div class="col-md-4">
@@ -206,7 +214,7 @@
                   style="width: 120px;">
                 </nz-input-number>
                 <button nz-button nzType="default" nzSize="small" (click)="suggestOptimalSections()"
-                  [disabled]="labSectionAssignedStudents.length === 0 || generatingAssignments"
+                  [disabled]="pager.total === 0 || generatingAssignments"
                   title="Get optimal section suggestion">
                   <i nz-icon nzType="bulb" nzTheme="outline"></i>
                 </button>
@@ -223,9 +231,9 @@
               <h4>{{ studentsPerSection }}</h4>
               <p>Students per Section</p>
               <small class="text-muted">({{ numberOfSections }} sections)</small>
-              <div *ngIf="labSectionAssignedStudents.length > 0" style="margin-top: 8px;">
+              <div *ngIf="pager.total > 0" style="margin-top: 8px;">
                 <small class="text-info">
-                  Distribution: {{ Math.ceil(labSectionAssignedStudents.length / numberOfSections) }} students per
+                  Distribution: {{ Math.ceil(pager.total / numberOfSections) }} students per
                   section
                 </small>
               </div>
@@ -235,11 +243,10 @@
       </div>
 
       <!-- Section Generation Status -->
-      <div class="row mt-3" *ngIf="labSectionAssignedStudents[0].numberOfGeneratedSections>0">
-        <!-- Show info when lab sections are generated -->
+      <div class="row mt-3" *ngIf="numberOfGeneratedSections > 0">
         <div class="col-md-12" *ngIf="isSectionGenerated">
           <nz-alert nzType="info" [nzMessage]="'Lab Sections Generated'"
-            [nzDescription]="'Number of sections: ' + labSectionAssignedStudents[0].numberOfGeneratedSections " class="mb-3" [nzShowIcon]="true">
+            [nzDescription]="'Number of sections: ' + numberOfGeneratedSections " class="mb-3" [nzShowIcon]="true">
           </nz-alert>
         </div>
 
@@ -270,7 +277,7 @@
           <!-- Generate Lab Section Assignments Button - Disabled when sections are already generated -->
           <button nz-button nzType="primary" nzSize="large" [nzLoading]="generatingAssignments"
             (click)="generateLabSectionAssignments()"
-            [disabled]="labSectionAssignedStudents.length === 0 || (numberOfGeneratedSections > 0 && isSectionGenerated)"
+            [disabled]="pager.total === 0 || (numberOfGeneratedSections > 0 && isSectionGenerated)"
             class="generate-btn">
             <i nz-icon nzType="team" nzTheme="outline"></i>
             {{ generatingAssignments ? 'Generating...' : 'Generate Lab Section Assignments' }}
@@ -282,7 +289,7 @@
 
   <!-- Empty State -->
   <div class="empty-state"
-    *ngIf="!loading && labSectionAssignedStudents.length === 0 && searchForm.get('batchCode')?.value">
+    *ngIf="!pager.loading && pager.total === 0 && !pager.searchKey && searchForm.get('batchCode')?.value">
     <nz-card class="empty-card">
       <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="notFoundContent">
         <ng-template #notFoundContent>

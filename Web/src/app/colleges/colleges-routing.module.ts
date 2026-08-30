@@ -17,6 +17,9 @@ import { CollegesComponent } from './colleges.component';
 import { EntryComponent } from './entry/entry.component';
 import { TermCourseOfferingComponent } from './term-course-offering/term-course-offering.component';
 import { AuthGuard } from '../guards/auth.guard';
+import { AdmissionLookupComponent } from './admission-lookup/admission-lookup.component';
+import { AddAdmissionLookupComponent } from './add-admission-lookup/add-admission-lookup.component';
+import { CgpaCreditHourLimitComponent } from './cgpa-credit-hour-limit/cgpa-credit-hour-limit.component';
 
 const routes: Routes = [
   { path: '', component: CollegesComponent, canActivate: [AuthGuard] },
@@ -35,6 +38,9 @@ const routes: Routes = [
   { path: 'add-academic-term-activity/:id', component: AddAcademicTermActivityComponent, canActivate: [AuthGuard] },
   { path: 'academic-term', component: AcademicTermComponent, canActivate: [AuthGuard] },
   { path: 'add-academic-term/:id', component: AddAcademicTermComponent, canActivate: [AuthGuard] },
+  { path: 'admission-lookup', component: AdmissionLookupComponent, canActivate: [AuthGuard] },
+  { path: 'add-admission-lookup/:id', component: AddAdmissionLookupComponent, canActivate: [AuthGuard] },
+  { path: 'cgpa-credit-hour-limit', component: CgpaCreditHourLimitComponent, canActivate: [AuthGuard] },
 ];
 
 @NgModule({

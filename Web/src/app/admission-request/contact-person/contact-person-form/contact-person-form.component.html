@@ -50,9 +50,10 @@
         <input 
           nz-input 
           formControlName="telephoneOffice" 
-          placeholder=" "
+          placeholder="+2519… / 09… / 07…"
           id="telephoneOffice"
           class="input-with-floating-label"
+          (blur)="onTelephoneOfficeBlur()"
           [class.error]="telephoneOffice.invalid && (telephoneOffice.dirty || telephoneOffice.touched)" 
         />
         <label for="telephoneOffice" class="floating-label">
@@ -82,9 +83,10 @@
         <input 
           nz-input 
           formControlName="telephoneHome" 
-          placeholder=" "
+          placeholder="+251… / 01… / 03… / 04… / 09… / 07…"
           id="telephoneHome"
           class="input-with-floating-label"
+          (blur)="onTelephoneHomeBlur()"
           [class.error]="telephoneHome.invalid && (telephoneHome.dirty || telephoneHome.touched)" 
         />
         <label for="telephoneHome" class="floating-label">
@@ -115,17 +117,17 @@
           class="select-with-floating-label"
           [class.error]="relation.invalid && (relation.dirty || relation.touched)"
         >
+          <nz-option nzValue="Family" nzLabel="Family">
+            <i nz-icon nzType="home" nzTheme="outline"></i>
+            Family
+          </nz-option>
           <nz-option nzValue="Relative" nzLabel="Relative">
             <i nz-icon nzType="heart" nzTheme="outline"></i>
             Relative
           </nz-option>
-          <nz-option nzValue="Employer" nzLabel="Employer">
-            <i nz-icon nzType="briefcase" nzTheme="outline"></i>
-            Employer
-          </nz-option>
-          <nz-option nzValue="Other" nzLabel="Other">
-            <i nz-icon nzType="user" nzTheme="outline"></i>
-            Other
+          <nz-option nzValue="Friends" nzLabel="Friends">
+            <i nz-icon nzType="team" nzTheme="outline"></i>
+            Friends
           </nz-option>
         </nz-select>
         <label class="floating-label">

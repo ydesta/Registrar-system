@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CrudService } from 'src/app/services/crud.service';
-import { ReportService } from 'src/app/reports/services/report.service';
-import { CourseOfferingInstructorAssignmentService } from 'src/app/colleges/services/course-offering-instructor-assignment.service';
 
 interface DashboardStats {
   totalStudents: number;
@@ -36,7 +34,6 @@ interface CourseInsights {
   styleUrls: ['./admin-dashboard.component.scss']
 })
 export class AdminDashboardComponent implements OnInit {
-  // Dashboard Statistics
   stats: DashboardStats = {
     totalStudents: 0,
     totalInstructors: 0,
@@ -47,7 +44,6 @@ export class AdminDashboardComponent implements OnInit {
     graduatesAllTime: 0
   };
 
-  // Enrollment Statistics
   enrollmentStats: EnrollmentStats = {
     newRegistrations: 0,
     departmentBreakdown: [],
@@ -59,41 +55,32 @@ export class AdminDashboardComponent implements OnInit {
     }
   };
 
-  // Course Insights
   courseInsights: CourseInsights = {
     topEnrolledCourses: [],
     upcomingClasses: [],
     coursesWithoutInstructors: []
   };
 
-  constructor(
-    private crudService: CrudService,
-    private reportService: ReportService,
-    private courseInstructorService: CourseOfferingInstructorAssignmentService
-  ) {}
+  constructor(private crudService: CrudService) {}
 
   ngOnInit() {
     this.loadDashboardData();
   }
 
   loadDashboardData() {
-    // Load total students
     this.crudService.getList('/students').subscribe((res: any) => {
       this.stats.totalStudents = res.data.length;
     });
 
-    // Load total instructors
     this.crudService.getList('/instructors').subscribe((res: any) => {
       this.stats.totalInstructors = res.data.length;
     });
 
-    // Load total courses
     this.crudService.getList('/courses').subscribe((res: any) => {
       this.stats.totalCourses = res.data.length;
       this.loadCourseInsights(res.data);
     });
 
-    // Load current semester
     this.crudService.getList('/academicTerms').subscribe((res: any) => {
       const currentTerm = res.data.find((term: any) => term.isCurrent);
       if (currentTerm) {
@@ -101,17 +88,14 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
 
-    // Load pending applications
     this.crudService.getList('/applications').subscribe((res: any) => {
       this.stats.pendingApplications = res.data.filter((app: any) => app.status === 'Pending').length;
     });
 
-    // Load enrollment statistics
     this.loadEnrollmentStats();
   }
 
   loadEnrollmentStats() {
-    // Load department breakdown
     this.crudService.getList('/departments').subscribe((res: any) => {
       this.enrollmentStats.departmentBreakdown = res.data.map((dept: any) => ({
         name: dept.name,
@@ -119,7 +103,6 @@ export class AdminDashboardComponent implements OnInit {
       }));
     });
 
-    // Load student status breakdown
     this.crudService.getList('/students').subscribe((res: any) => {
       const students = res.data;
       this.enrollmentStats.studentStatus = {
@@ -132,7 +115,6 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadCourseInsights(courses: any[]) {
-    // Load top enrolled courses
     this.crudService.getList('/courseEnrollments').subscribe((res: any) => {
       const enrollments = res.data;
       this.courseInsights.topEnrolledCourses = courses
@@ -144,7 +126,6 @@ export class AdminDashboardComponent implements OnInit {
         .slice(0, 5);
     });
 
-    // Load courses without instructors
     this.courseInsights.coursesWithoutInstructors = courses.filter(course => !course.instructorId);
   }
 }

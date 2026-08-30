@@ -20,6 +20,7 @@ constructor(
   public aciveRoute:ActivatedRoute,
   private _route:Router, private _fb:FormBuilder,private _crudService: CrudService, private _customNotificationService:CustomNotificationService) {
   this.acadamicProgramForm = this._fb.group({
+    curriculumCode: ['',Validators.required],
     quadrantsID: ['',Validators.required],
     quadrantHeading:["",Validators.required],
     createdBy: [''],
@@ -33,10 +34,13 @@ ngOnInit(): void {
   if(this.progId!="null"){
     this.action="Edit Quadrant"
     this.submit = 'Update';
-    this._crudService.getList('/Quadrants' + '/' + this.progId).subscribe((res:any)=>{
+    this._crudService.getById('/Quadrants', this.progId).subscribe((res:any)=>{
       this.patchValues(res.data);
     });
   }
+  this._crudService.getList('/Curriculums').subscribe((res:any)=>{
+    this.curricula = res.data;
+  });
 }
 submitForm(){
   if(this.progId=="null"){
@@ -69,7 +73,7 @@ submitForm(){
 }
 patchValues(data: any) {
   this.acadamicProgramForm.patchValue({
-
+    curriculumCode: data.curriculumCode,
     quadrantsID: data.quadrantsID,
     quadrantHeading:data.quadrantHeading,
     createdBy:data.createdBy,

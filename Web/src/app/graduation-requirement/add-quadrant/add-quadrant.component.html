@@ -40,8 +40,25 @@
       class="quadrant-form"
     >
       <div class="form-grid">
-        <!-- Row 1: Quadrant ID & Quadrant Heading -->
         <div class="form-row">
+          <nz-form-item class="form-item">
+            <nz-form-label nzRequired>Curriculum</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                formControlName="curriculumCode"
+                nzPlaceHolder="Select curriculum"
+                nzShowSearch
+                class="form-input"
+              >
+                <nz-option
+                  *ngFor="let item of curricula"
+                  [nzValue]="item.curriculumCode"
+                  [nzLabel]="item.curriculumCode"
+                ></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
           <nz-form-item class="form-item">
             <nz-form-label nzRequired>Quadrant ID</nz-form-label>
             <nz-form-control nzValidatingTip="Validating...">
@@ -53,7 +70,9 @@
               />
             </nz-form-control>
           </nz-form-item>
+        </div>
 
+        <div class="form-row">
           <nz-form-item class="form-item">
             <nz-form-label nzRequired>Quadrant Heading</nz-form-label>
             <nz-form-control>
@@ -67,7 +86,6 @@
           </nz-form-item>
         </div>
 
-        <!-- Row 2: Remark -->
         <div class="form-row">
           <nz-form-item class="form-item">
             <nz-form-label>Remark</nz-form-label>

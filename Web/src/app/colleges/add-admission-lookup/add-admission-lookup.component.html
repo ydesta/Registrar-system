@@ -1,0 +1,250 @@
+<div class="content-container">
+  <div class="header-section">
+    <button nz-button nzType="default" class="back-btn" (click)="goBack()">
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Admission Lookup
+    </button>
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">{{ action }}</h2>
+        <p class="subtitle-text">Map program, division, and applicant year to a batch code</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="search" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>Admission Lookup Information</h3>
+          <p>Fill in the required information to configure admission lookup</p>
+        </div>
+      </div>
+
+      <form nz-form [formGroup]="form" (ngSubmit)="submitForm()" class="lookup-form">
+        <div class="form-sections">
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                Academic Period
+              </h4>
+              <p class="section-description">Select the term and year for this lookup</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Term</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select a term">
+                    <nz-select
+                      formControlName="term"
+                      nzPlaceHolder="Select term"
+                      [nzShowSearch]="true"
+                      [nzShowArrow]="true"
+                      [nzDropdownMatchSelectWidth]="false"
+                      class="professional-select"
+                    >
+                      <nz-option
+                        *ngFor="let item of termList"
+                        [nzValue]="item.Id"
+                        [nzLabel]="item.Description"
+                      ></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Year</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select a year">
+                    <nz-select
+                      formControlName="year"
+                      nzPlaceHolder="Select year"
+                      [nzShowSearch]="true"
+                      [nzShowArrow]="true"
+                      [nzDropdownMatchSelectWidth]="false"
+                      class="professional-select"
+                    >
+                      <nz-option *ngFor="let y of yearOptions" [nzValue]="y" [nzLabel]="'' + y"></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="book" nzTheme="outline"></span>
+                Program Details
+              </h4>
+              <p class="section-description">Select the academic program, division, and applicant year</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Academic Program</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select a program">
+                    <nz-select
+                      formControlName="acadamicProgrammeId"
+                      nzPlaceHolder="Select program"
+                      [nzShowSearch]="true"
+                      [nzAllowClear]="true"
+                      [nzShowArrow]="true"
+                      [nzDropdownMatchSelectWidth]="false"
+                      class="professional-select"
+                    >
+                      <nz-option
+                        *ngFor="let item of acadamicProgrammes"
+                        [nzValue]="item.id"
+                        [nzLabel]="item.acadamicProgrammeTitle"
+                      ></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Division</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select a division">
+                    <nz-select
+                      formControlName="division"
+                      nzPlaceHolder="Select division"
+                      [nzShowSearch]="true"
+                      [nzShowArrow]="true"
+                      [nzDropdownMatchSelectWidth]="false"
+                      class="professional-select"
+                    >
+                      <nz-option
+                        *ngFor="let item of divisionList"
+                        [nzValue]="item.Id"
+                        [nzLabel]="item.Description"
+                      ></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Applicant Type</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select an applicant type">
+                    <nz-select
+                      formControlName="applicantYear"
+                      nzPlaceHolder="Select applicant type"
+                      [nzShowSearch]="true"
+                      [nzShowArrow]="true"
+                      [nzDropdownMatchSelectWidth]="false"
+                      class="professional-select"
+                    >
+                      <nz-option
+                        *ngFor="let item of applicantYearList"
+                        [nzValue]="item.Id"
+                        [nzLabel]="item.Description"
+                      ></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="tag" nzTheme="outline"></span>
+                Batch Mapping
+              </h4>
+              <p class="section-description">Assign the batch and set status</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Batch Code</nz-form-label>
+                  <nz-form-control nzErrorTip="Please select a batch">
+                    <nz-select
+                      formControlName="batchCode"
+                      nzPlaceHolder="Select batch"
+                      [nzShowSearch]="true"
+                      [nzShowArrow]="true"
+                      [nzDropdownMatchSelectWidth]="false"
+                      class="professional-select"
+                    >
+                      <nz-option
+                        *ngFor="let item of batches"
+                        [nzValue]="item.batchCode"
+                        [nzLabel]="item.batchCode"
+                      ></nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label>Active</nz-form-label>
+                  <nz-form-control>
+                    <nz-switch formControlName="isActive"></nz-switch>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-label>Remark</nz-form-label>
+                  <nz-form-control>
+                    <nz-textarea-count [nzMaxCharacterCount]="250">
+                      <textarea
+                        rows="4"
+                        formControlName="remark"
+                        nz-input
+                        class="form-textarea"
+                        placeholder="Enter remarks (optional)"
+                      ></textarea>
+                    </nz-textarea-count>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            nz-button
+            nzType="default"
+            class="cancel-btn"
+            type="button"
+            (click)="goBack()"
+          >
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            class="submit-btn"
+            [disabled]="!form.valid || loading"
+            [nzLoading]="loading"
+          >
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+            {{ submit }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

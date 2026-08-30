@@ -41,17 +41,17 @@
                     nzTheme="outline"
                     class="assignment-panel-help"
                     nz-tooltip
-                    nzTooltipTitle="Pick the section that matches your spreadsheet. Rows are limited to the current academic term and the selected or signed-in instructor."
+                    nzTooltipTitle="Pick the academic term and course section that match your spreadsheet. You can submit grades for the current term or earlier terms that still need submission."
                     nzTooltipPlacement="bottomLeft"
                   ></span>
                 </div>
                 <p class="assignment-panel-lead">
-                  Choose a course section row below. Only assignments for the current term are listed.
+                  Choose a term, then select a course section row below. Previous terms remain available for submission when grades are not yet locked for the current term.
                 </p>
               </div>
 
-              <div class="assignment-toolbar" *ngIf="isAdmin">
-                <div class="toolbar-field">
+              <div class="assignment-toolbar">
+                <div class="toolbar-field" *ngIf="isAdmin">
                   <nz-form-item class="toolbar-form-item">
                     <nz-form-label nzRequired>Instructor</nz-form-label>
                     <nz-form-control>
@@ -73,24 +73,37 @@
                     </nz-form-control>
                   </nz-form-item>
                 </div>
-                <div class="toolbar-aside" *ngIf="currentTermLabel">
-                  <span class="term-pill">
-                    <span nz-icon nzType="calendar" nzTheme="outline" class="term-pill-icon"></span>
-                    {{ currentTermLabel }}
-                  </span>
+                <div class="toolbar-field" *ngIf="!isAdmin && instructorDisplayName">
+                  <nz-form-item class="toolbar-form-item">
+                    <nz-form-label>Instructor</nz-form-label>
+                    <nz-form-control>
+                      <input nz-input [ngModel]="instructorDisplayName" [ngModelOptions]="{standalone: true}" disabled />
+                    </nz-form-control>
+                  </nz-form-item>
                 </div>
-              </div>
-
-              <div
-                class="assignment-toolbar assignment-toolbar-readonly"
-                *ngIf="!isAdmin && (currentTermLabel || instructorDisplayName)"
-              >
-                <span class="term-pill" *ngIf="currentTermLabel">
-                  <span nz-icon nzType="calendar" nzTheme="outline" class="term-pill-icon"></span>
-                  {{ currentTermLabel }}
-                </span>
-                <span class="toolbar-middot" *ngIf="currentTermLabel && instructorDisplayName" aria-hidden="true"></span>
-                <span class="instructor-inline" *ngIf="instructorDisplayName">{{ instructorDisplayName }}</span>
+                <div class="toolbar-field">
+                  <nz-form-item class="toolbar-form-item">
+                    <nz-form-label nzRequired>Academic Term</nz-form-label>
+                    <nz-form-control>
+                      <nz-select
+                        [ngModel]="selectedTermConfigId"
+                        (ngModelChange)="onAcademicTermConfigChange($event)"
+                        [ngModelOptions]="{ standalone: true }"
+                        nzPlaceHolder="Select academic term"
+                        nzShowSearch
+                        [nzShowArrow]="true"
+                        [nzDropdownMatchSelectWidth]="false"
+                        class="professional-select"
+                      >
+                        <nz-option
+                          *ngFor="let t of academicTermOptions"
+                          [nzValue]="t.id"
+                          [nzLabel]="t.academicTerm + ' ' + t.year"
+                        ></nz-option>
+                      </nz-select>
+                    </nz-form-control>
+                  </nz-form-item>
+                </div>
               </div>
 
               <nz-form-item class="assignment-table-form-item">

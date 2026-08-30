@@ -32,16 +32,12 @@ export class CourseEnrollmentDetailsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private initializeComponent(): void {
-    // Initialize component data
-    console.log('Course Enrollment Details Component initialized');
-  }
+  private initializeComponent(): void {}
 
   onTabChange(index: number): void {
     if (index >= 0 && index < this.tabs.length) {
       this.selectedIndex = index;
       this.currentTab = this.tabs[index].key;
-      console.log('Tab changed to:', this.currentTab);
     }
   }
 

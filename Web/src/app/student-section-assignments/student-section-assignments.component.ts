@@ -71,12 +71,8 @@ export class StudentSectionAssignmentsComponent implements OnInit {
     });
 
     this.batchCode.valueChanges.subscribe(res => {
-      // console.log("%%     ", res);
-      // if (res) {
       this.onSearch(res);
-      // }
-
-    })
+    });
   }
 
   private createSearchForm() {
@@ -307,21 +303,11 @@ export class StudentSectionAssignmentsComponent implements OnInit {
     }
   }
 
-  viewCourseDetails(course: StudentRegisteredCoursesModel): void {
-    console.log('Viewing course details:', course);
-    // Implement course details view logic
-  }
+  viewCourseDetails(_course: StudentRegisteredCoursesModel): void {}
 
-  assignSections(course: StudentRegisteredCoursesModel): void {
-    console.log('Assigning sections for course:', course);
-    // Implement section assignment logic
-  }
+  assignSections(_course: StudentRegisteredCoursesModel): void {}
 
-
-  getRecommendations(course: StudentRegisteredCoursesModel): void {
-    console.log('Getting recommendations for course:', course);
-    // Implement recommendations logic
-  }
+  getRecommendations(_course: StudentRegisteredCoursesModel): void {}
 
   toggleDefaultSection(course: StudentRegisteredCoursesModel, isDefault: boolean): void {
     if (isDefault) {
@@ -361,9 +347,6 @@ export class StudentSectionAssignmentsComponent implements OnInit {
     this.generatingAssignments = true;
     this.errorMessage = '';
     this.successMessage = '';
-    
-    // Show initial loading message
-    console.log('Starting section assignment generation...');
 
     const { academicTerm, year, batchCode } = this.searchForm.value;
 
@@ -416,10 +399,6 @@ export class StudentSectionAssignmentsComponent implements OnInit {
       return;
     }
 
-    console.log('Generating student course section assignments with request: ', request);
-    console.log('CreatedBy:', request.createdBy, 'LastModifiedBy:', request.lastModifiedBy);
-
-    // Call the API to generate student course section assignments
     this.studentSectionAssignmentService.assignStudentsToSections(request).subscribe({
       next: (response) => {
         this.generatingAssignments = false;
@@ -434,9 +413,7 @@ export class StudentSectionAssignmentsComponent implements OnInit {
         // Update the section generation status
         this.registeredCourses.isSectionGenerated = true;
         this.registeredCourses.numberOfGeneratedSections = this.numberOfSections;
-        
-        console.log('Section assignments generated successfully:', response);
-        
+
         // Auto-hide success message after 8 seconds
         setTimeout(() => {
           if (this.successMessage.includes('✅ Successfully generated')) {

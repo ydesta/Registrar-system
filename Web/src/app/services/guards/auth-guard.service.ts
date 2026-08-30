@@ -14,35 +14,19 @@ export class AuthGuardService {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const roles = route.data['roles'] as Array<string>;
-    if (!roles) {
-      return this.checkIsUserAuthenticated();
-    } else {
-      return this.checkForRequiredRoles(roles);
-    }
+    return roles ? this.checkForRequiredRoles(roles) : this.checkIsUserAuthenticated();
   }
 
   private checkIsUserAuthenticated() {
-    // Use AuthService.getToken() which checks both sessionStorage and localStorage
     const isLoggedIn = localStorage.getItem('isLogin') === 'true';
-    const hasToken = this._authService.getToken(); // Checks secure storage first, then localStorage
-
-    if (isLoggedIn && hasToken) {
-      return true;
-    } else {
-      return this.redirectToUnauthorized();
-    }
+    const hasToken = this._authService.getToken();
+    return isLoggedIn && hasToken ? true : this.redirectToUnauthorized();
   }
 
   private checkForRequiredRoles(requiredRoles: string[]) {
-    const userRoles = this.getUserRoles();
-
-    // Check if user has any of the required roles
-    // Super Admin has access to everything
-    const hasRequiredRole = userRoles.some(role => 
-      requiredRoles.includes(role) ||
-      role === 'Super Admin'
+    const hasRequiredRole = this.getUserRoles().some(role =>
+      requiredRoles.includes(role) || role === 'Super Admin'
     );
-
     return hasRequiredRole ? true : this.redirectToUnauthorized();
   }
 
@@ -50,26 +34,18 @@ export class AuthGuardService {
     const userRole = localStorage.getItem('role');
     const userType = localStorage.getItem('userType');
     const roles: string[] = [];
-
-    // Add userType if it exists
     if (userType) {
       roles.push(userType);
     }
-
-    // Add role if it exists
-    if (userRole) {
-      try {
-        const parsedRoles = JSON.parse(userRole);
-        if (Array.isArray(parsedRoles)) {
-          roles.push(...parsedRoles);
-        } else {
-          roles.push(userRole);
-        }
-      } catch {
-        roles.push(userRole);
-      }
+    if (!userRole) {
+      return roles;
     }
-
+    try {
+      const parsedRoles = JSON.parse(userRole);
+      roles.push(...(Array.isArray(parsedRoles) ? parsedRoles : [userRole]));
+    } catch {
+      roles.push(userRole);
+    }
     return roles;
   }
 

@@ -34,7 +34,7 @@ ngOnInit(): void {
   if(this.progStatusId!="null"){
     this.action="Edit Feedback"
     this.submit ='Update';
-    this._crudService.getList('/StudentFeedbacks' + '/' + this.progStatusId).subscribe((res:any)=>{
+    this._crudService.getById('/StudentFeedbacks', this.progStatusId).subscribe((res:any)=>{
       this.patchValues(res.data);
     });
   }

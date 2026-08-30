@@ -10,8 +10,8 @@ export class TermCourseOfferingRequest {
   public Remark: string;
   public AcademicTermSeason: number;
   public AcademicTermYear: number;
-  public RegistrationStartDate: Date;
-  public RegistrationEndDate: Date;
+  public RegistrationStartDate: Date | string;
+  public RegistrationEndDate: Date | string;
   public CourseId: string[];
   public Year: number;
 }

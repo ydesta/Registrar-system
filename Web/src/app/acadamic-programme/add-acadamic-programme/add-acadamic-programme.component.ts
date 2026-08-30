@@ -14,6 +14,7 @@ export class AddAcadamicProgrammeComponent implements OnInit {
   acadamicProgramForm: FormGroup;
   acadamicProgramId: string = "";
   submit = "Save";
+  loading = false;
 
   constructor(
     public aciveRoute: ActivatedRoute,
@@ -32,78 +33,85 @@ export class AddAcadamicProgrammeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.acadamicProgramId = this.aciveRoute.snapshot.paramMap.get(
-      "id"
-    )!.toString();
+    this.acadamicProgramId = this.aciveRoute.snapshot.paramMap.get("id")!.toString();
 
     if (this.acadamicProgramId != "null") {
       this.action = "Edit Acadamic Programme";
       this.submit = "Update";
       this._crudService
-        .getList("/AcadamicProgramme" + "/" + this.acadamicProgramId)
+        .getById("/AcadamicProgramme", this.acadamicProgramId)
         .subscribe((data: any) => {
           this.patchValues(data);
         });
     }
   }
 
+  goBack(): void {
+    this._route.navigateByUrl("acadamic-programme");
+  }
+
   submitForm() {
+    if (!this.acadamicProgramForm.valid) {
+      this._customNotificationService.notification(
+        "error",
+        "error",
+        "Enter valid data."
+      );
+      return;
+    }
+
+    this.loading = true;
     if (this.acadamicProgramId == "null") {
-      if (this.acadamicProgramForm.valid) {
-        this._crudService
-          .add("/AcadamicProgramme", this.acadamicProgramForm.value)
-          .subscribe((res: any) => {
+      this._crudService
+        .add("/AcadamicProgramme", this.acadamicProgramForm.value)
+        .subscribe({
+          next: () => {
             this._customNotificationService.notification(
               "success",
               "Success",
               "Acadamic Programme registered successfully."
             );
-            this._route.navigateByUrl("acadamic-programme");
-           // 
-          });
-      } else {
-        this._customNotificationService.notification(
-          "error",
-          "error",
-          "Enter valid data."
-        );
-      }
-    } else if (this.acadamicProgramId != "null") {
-      if (this.acadamicProgramForm.valid) {
-        this._crudService
-          .update(
-            "/AcadamicProgramme",
-            this.acadamicProgramId,
-            this.acadamicProgramForm.value
-          )
-          .subscribe((res: any) => {
-            if (res.status == "success") {
-              this._customNotificationService.notification(
-                "success",
-                "Success",
-                res.data
-              );
-              this._route.navigateByUrl("acadamic-programme");
-            } else {
-              this._customNotificationService.notification(
-                "error",
-                "Error",
-                res.data
-              );
-            }
-          });
-      } else {
-        this._customNotificationService.notification(
-          "error",
-          "error",
-          "Enter valid data."
-        );
-      }
+            this.loading = false;
+            this.goBack();
+          },
+          error: () => {
+            this.loading = false;
+          }
+        });
+      return;
     }
+
+    this._crudService
+      .update(
+        "/AcadamicProgramme",
+        this.acadamicProgramId,
+        this.acadamicProgramForm.value
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.loading = false;
+          if (res.status == "success") {
+            this._customNotificationService.notification(
+              "success",
+              "Success",
+              res.data
+            );
+            this.goBack();
+          } else {
+            this._customNotificationService.notification(
+              "error",
+              "Error",
+              res.data
+            );
+          }
+        },
+        error: () => {
+          this.loading = false;
+        }
+      });
   }
 
   patchValues(data: any) {
-   // ;
     this.acadamicProgramForm.patchValue({
       acadamicProgrammeTitle: data.acadamicProgrammeTitle,
       remark: data.remark,

@@ -36,7 +36,7 @@ ngOnInit(): void {
   if(this.progId!="null"){
     this.action="Edit Graduation Requirement"
     this.submit = 'Update';
-    this._crudService.getList('/GraduationRequirements' + '/' + this.progId).subscribe((res:any)=>{
+    this._crudService.getById('/GraduationRequirements', this.progId).subscribe((res:any)=>{
       this.patchValues(res.data);
     });
   }

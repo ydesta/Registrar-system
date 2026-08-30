@@ -43,6 +43,10 @@ export class AddAcademicTermComponent implements OnInit {
       startDate: [null, [Validators.required]],
       endDate: [null, [Validators.required]],
       isCurrentTerm: [false],
+      showRegular: [true],
+      showAdd: [true],
+      showAssessment: [true],
+      showEquivalent: [true],
     }, { validators: this.dateRangeValidator });
   }
 
@@ -59,7 +63,7 @@ export class AddAcademicTermComponent implements OnInit {
   private loadAcademicTerm(id: string): void {
     this.isLoading = true;
     this._crudService
-      .getList(`/AcademicTerms/${id}`)
+      .getById('/AcademicTerms', id)
       .pipe(
         catchError((error) => {
           this._customNotificationService.notification(
@@ -203,6 +207,10 @@ export class AddAcademicTermComponent implements OnInit {
       startDate: data.startDate ? new Date(data.startDate) : null,
       endDate: data.endDate ? new Date(data.endDate) : null,
       isCurrentTerm: data.isCurrentTerm || false,
+      showRegular: data.showRegular !== false,
+      showAdd: data.showAdd !== false,
+      showAssessment: data.showAssessment !== false,
+      showEquivalent: data.showEquivalent !== false,
     });
   }
 

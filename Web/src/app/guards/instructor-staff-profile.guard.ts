@@ -20,7 +20,7 @@ export class InstructorStaffProfileGuard implements CanActivate {
       return of(true);
     }
 
-    const userId = localStorage.getItem('userId');
+    const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
     if (!userId) {
       return of(this.router.createUrlTree(['/staffs/staff-profile']));
     }
