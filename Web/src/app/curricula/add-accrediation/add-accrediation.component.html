@@ -1,60 +1,196 @@
-<h3 class="h-tag">{{ action }}</h3>
+<div class="content-container">
+  <div class="header-section">
+    <button
+      nz-button
+      nzType="default"
+      class="back-btn"
+      type="button"
+      routerLink="/curricula/accrediation"
+    >
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Accreditation
+    </button>
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">{{ action }}</h2>
+        <p class="subtitle-text">Manage curriculum accreditation dates and division</p>
+      </div>
+    </div>
+  </div>
 
-<div>
-  <form nz-form [formGroup]="acadamicProgramForm" (ngSubmit)="submitForm()">
-    <nz-card>
-      <div nz-row [nzGutter]="24">
-        <div nz-col nzSpan="10">
-          <nz-form-item>
-            <nz-form-label [nzSpan]="7" nzRequired>Curriculum</nz-form-label>
-            <nz-form-control nzValidatingTip="Validating...">
-              <nz-select formControlName="curriculumCode" nzPlaceHolder="Select Curriculum ">
-                <nz-option *ngFor="let item of curricula" [nzValue]="item.curriculumCode"
-                  [nzLabel]="item.curriculumCode"></nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-          <nz-form-item>
-            <nz-form-label [nzSpan]="7" nzRequired>Division</nz-form-label>
-            <nz-form-control nzValidatingTip="Validating...">
-              <input nz-input formControlName="division" placeholder="Enter Division" />
-            </nz-form-control>
-          </nz-form-item>
-          <nz-form-item>
-            <nz-form-label [nzSpan]="7">Remark</nz-form-label>
-            <nz-form-control>
-              <input nz-input formControlName="remark" placeholder="enter remark" />
-            </nz-form-control>
-          </nz-form-item>
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
         </div>
-        <div nz-col nzSpan="12">
-          <nz-form-item>
-            <nz-form-label [nzSpan]="12" nzRequired>Re-accreditation  Submission Date</nz-form-label>
-            <nz-form-control>
-              <nz-date-picker formControlName="reaccreditionSubmissionDate"></nz-date-picker>
-            </nz-form-control>
-          </nz-form-item>
-          <nz-form-item>
-            <nz-form-label [nzSpan]="12" nzRequired>Accreditation Begin Date</nz-form-label>
-            <nz-form-control>
-              <nz-date-picker formControlName="accreditionBeginDate"></nz-date-picker>
-            </nz-form-control>
-          </nz-form-item>
-          <nz-form-item>
-            <nz-form-label [nzSpan]="12" nzRequired>Accreditation End Date</nz-form-label>
-            <nz-form-control>
-              <nz-date-picker formControlName="accreditionEndDate"></nz-date-picker>
-            </nz-form-control>
-          </nz-form-item>
+        <div class="form-title">
+          <h3>Accreditation Information</h3>
+          <p>Fill in accreditation details for the curriculum</p>
         </div>
       </div>
-    <nz-form-item>
-      <nz-form-control [nzOffset]="12" [nzSpan]="12">
-        <button nz-button nzType="primary" class="main-color">
-          {{ submit }}
-        </button>
-      </nz-form-control>
-    </nz-form-item>
-  </nz-card>
-  </form>
+
+      <form
+        nz-form
+        [formGroup]="acadamicProgramForm"
+        (ngSubmit)="submitForm()"
+        class="admin-form"
+      >
+        <div class="form-sections">
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+                Accreditation Details
+              </h4>
+              <p class="section-description">Curriculum, division, and accreditation period</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select a curriculum">
+                    <nz-select
+                      formControlName="curriculumCode"
+                      id="curriculumCode"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
+                      [nzShowSearch]="true"
+                    >
+                      <nz-option
+                        *ngFor="let item of curricula"
+                        [nzValue]="item.curriculumCode"
+                        [nzLabel]="item.curriculumCode"
+                      ></nz-option>
+                    </nz-select>
+                    <label for="curriculumCode" class="floating-label">
+                      <span nz-icon nzType="book" nzTheme="outline"></span>
+                      Curriculum <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please enter a division">
+                    <input
+                      nz-input
+                      id="division"
+                      formControlName="division"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="division" class="floating-label">
+                      <span nz-icon nzType="apartment" nzTheme="outline"></span>
+                      Division <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select a submission date">
+                    <nz-date-picker
+                      formControlName="reaccreditionSubmissionDate"
+                      id="reaccreditionSubmissionDate"
+                      nzPlaceHolder=" "
+                      class="date-with-floating-label"
+                    ></nz-date-picker>
+                    <label for="reaccreditionSubmissionDate" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Re-accreditation Submission Date <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select a begin date">
+                    <nz-date-picker
+                      formControlName="accreditionBeginDate"
+                      id="accreditionBeginDate"
+                      nzPlaceHolder=" "
+                      class="date-with-floating-label"
+                    ></nz-date-picker>
+                    <label for="accreditionBeginDate" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Accreditation Begin Date <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select an end date">
+                    <nz-date-picker
+                      formControlName="accreditionEndDate"
+                      id="accreditionEndDate"
+                      nzPlaceHolder=" "
+                      class="date-with-floating-label"
+                    ></nz-date-picker>
+                    <label for="accreditionEndDate" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Accreditation End Date <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div class="form-col"></div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control>
+                    <input
+                      nz-input
+                      id="remark"
+                      formControlName="remark"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="remark" class="floating-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            nz-button
+            nzType="default"
+            class="cancel-btn"
+            type="button"
+            routerLink="/curricula/accrediation"
+          >
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            class="submit-btn"
+            type="submit"
+            [disabled]="acadamicProgramForm.invalid"
+          >
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+            {{ submit }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

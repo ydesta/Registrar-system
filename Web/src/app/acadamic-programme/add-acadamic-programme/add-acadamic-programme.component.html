@@ -7,7 +7,7 @@
     <div class="header-content">
       <div class="page-title">
         <h2 class="title-text">{{ action }}</h2>
-        <p class="subtitle-text">Add or update academic programme information</p>
+        <p class="subtitle-text">Manage academic programme information and details</p>
       </div>
     </div>
   </div>
@@ -20,7 +20,7 @@
         </div>
         <div class="form-title">
           <h3>Academic Programme Information</h3>
-          <p>Fill in the required information to save the programme</p>
+          <p>Fill in the required information to create or update the programme</p>
         </div>
       </div>
 
@@ -28,7 +28,7 @@
         nz-form
         [formGroup]="acadamicProgramForm"
         (ngSubmit)="submitForm()"
-        class="programme-form"
+        class="admin-form"
       >
         <div class="form-sections">
           <div class="form-section">
@@ -43,28 +43,36 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Academic Programme Code</nz-form-label>
                   <nz-form-control nzErrorTip="Please enter a programme code">
                     <input
                       nz-input
+                      id="acadamicProgrammeCode"
                       formControlName="acadamicProgrammeCode"
-                      placeholder="Enter programme code"
-                      class="form-input"
+                      placeholder=" "
+                      class="input-with-floating-label"
                     />
+                    <label for="acadamicProgrammeCode" class="floating-label">
+                      <span nz-icon nzType="barcode" nzTheme="outline"></span>
+                      Academic Programme Code <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Academic Programme Title</nz-form-label>
                   <nz-form-control nzErrorTip="Please enter a programme title">
                     <input
                       nz-input
+                      id="acadamicProgrammeTitle"
                       formControlName="acadamicProgrammeTitle"
-                      placeholder="Enter programme title"
-                      class="form-input"
+                      placeholder=" "
+                      class="input-with-floating-label"
                     />
+                    <label for="acadamicProgrammeTitle" class="floating-label">
+                      <span nz-icon nzType="book" nzTheme="outline"></span>
+                      Academic Programme Title <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -73,17 +81,21 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label>Remark</nz-form-label>
                   <nz-form-control>
                     <nz-textarea-count [nzMaxCharacterCount]="250">
                       <textarea
+                        id="remark"
                         rows="4"
                         formControlName="remark"
                         nz-input
-                        class="form-textarea"
-                        placeholder="Enter remarks (optional)"
+                        placeholder=" "
+                        class="textarea-with-floating-label"
                       ></textarea>
                     </nz-textarea-count>
+                    <label for="remark" class="floating-label textarea-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>

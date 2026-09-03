@@ -24,7 +24,7 @@
         </div>
       </div>
 
-      <form nz-form [formGroup]="form" (ngSubmit)="submitForm()" class="lookup-form">
+      <form nz-form [formGroup]="form" (ngSubmit)="submitForm()" class="admin-form">
         <div class="form-sections">
           <div class="form-section">
             <div class="section-header">
@@ -38,15 +38,15 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Term</nz-form-label>
                   <nz-form-control nzErrorTip="Please select a term">
                     <nz-select
                       formControlName="term"
-                      nzPlaceHolder="Select term"
+                      id="term"
+                      nzPlaceHolder=" "
                       [nzShowSearch]="true"
                       [nzShowArrow]="true"
                       [nzDropdownMatchSelectWidth]="false"
-                      class="professional-select"
+                      class="select-with-floating-label"
                     >
                       <nz-option
                         *ngFor="let item of termList"
@@ -54,24 +54,32 @@
                         [nzLabel]="item.Description"
                       ></nz-option>
                     </nz-select>
+                    <label for="term" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Term <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Year</nz-form-label>
                   <nz-form-control nzErrorTip="Please select a year">
                     <nz-select
                       formControlName="year"
-                      nzPlaceHolder="Select year"
+                      id="year"
+                      nzPlaceHolder=" "
                       [nzShowSearch]="true"
                       [nzShowArrow]="true"
                       [nzDropdownMatchSelectWidth]="false"
-                      class="professional-select"
+                      class="select-with-floating-label"
                     >
                       <nz-option *ngFor="let y of yearOptions" [nzValue]="y" [nzLabel]="'' + y"></nz-option>
                     </nz-select>
+                    <label for="year" class="floating-label">
+                      <span nz-icon nzType="field-time" nzTheme="outline"></span>
+                      Year <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -90,16 +98,16 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Academic Program</nz-form-label>
                   <nz-form-control nzErrorTip="Please select a program">
                     <nz-select
                       formControlName="acadamicProgrammeId"
-                      nzPlaceHolder="Select program"
+                      id="acadamicProgrammeId"
+                      nzPlaceHolder=" "
                       [nzShowSearch]="true"
                       [nzAllowClear]="true"
                       [nzShowArrow]="true"
                       [nzDropdownMatchSelectWidth]="false"
-                      class="professional-select"
+                      class="select-with-floating-label"
                     >
                       <nz-option
                         *ngFor="let item of acadamicProgrammes"
@@ -107,6 +115,10 @@
                         [nzLabel]="item.acadamicProgrammeTitle"
                       ></nz-option>
                     </nz-select>
+                    <label for="acadamicProgrammeId" class="floating-label">
+                      <span nz-icon nzType="book" nzTheme="outline"></span>
+                      Academic Program <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -115,15 +127,15 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Division</nz-form-label>
                   <nz-form-control nzErrorTip="Please select a division">
                     <nz-select
                       formControlName="division"
-                      nzPlaceHolder="Select division"
+                      id="division"
+                      nzPlaceHolder=" "
                       [nzShowSearch]="true"
                       [nzShowArrow]="true"
                       [nzDropdownMatchSelectWidth]="false"
-                      class="professional-select"
+                      class="select-with-floating-label"
                     >
                       <nz-option
                         *ngFor="let item of divisionList"
@@ -131,21 +143,25 @@
                         [nzLabel]="item.Description"
                       ></nz-option>
                     </nz-select>
+                    <label for="division" class="floating-label">
+                      <span nz-icon nzType="apartment" nzTheme="outline"></span>
+                      Division <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Applicant Type</nz-form-label>
                   <nz-form-control nzErrorTip="Please select an applicant type">
                     <nz-select
                       formControlName="applicantYear"
-                      nzPlaceHolder="Select applicant type"
+                      id="applicantYear"
+                      nzPlaceHolder=" "
                       [nzShowSearch]="true"
                       [nzShowArrow]="true"
                       [nzDropdownMatchSelectWidth]="false"
-                      class="professional-select"
+                      class="select-with-floating-label"
                     >
                       <nz-option
                         *ngFor="let item of applicantYearList"
@@ -153,6 +169,10 @@
                         [nzLabel]="item.Description"
                       ></nz-option>
                     </nz-select>
+                    <label for="applicantYear" class="floating-label">
+                      <span nz-icon nzType="user" nzTheme="outline"></span>
+                      Applicant Type <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -171,15 +191,15 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Batch Code</nz-form-label>
                   <nz-form-control nzErrorTip="Please select a batch">
                     <nz-select
                       formControlName="batchCode"
-                      nzPlaceHolder="Select batch"
+                      id="batchCode"
+                      nzPlaceHolder=" "
                       [nzShowSearch]="true"
                       [nzShowArrow]="true"
                       [nzDropdownMatchSelectWidth]="false"
-                      class="professional-select"
+                      class="select-with-floating-label"
                     >
                       <nz-option
                         *ngFor="let item of batches"
@@ -187,15 +207,21 @@
                         [nzLabel]="item.batchCode"
                       ></nz-option>
                     </nz-select>
+                    <label for="batchCode" class="floating-label">
+                      <span nz-icon nzType="tag" nzTheme="outline"></span>
+                      Batch Code <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label>Active</nz-form-label>
                   <nz-form-control>
-                    <nz-switch formControlName="isActive"></nz-switch>
+                    <div class="switch-field">
+                      <span>Active</span>
+                      <nz-switch formControlName="isActive"></nz-switch>
+                    </div>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -204,17 +230,21 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label>Remark</nz-form-label>
                   <nz-form-control>
                     <nz-textarea-count [nzMaxCharacterCount]="250">
                       <textarea
+                        id="remark"
                         rows="4"
                         formControlName="remark"
                         nz-input
-                        class="form-textarea"
-                        placeholder="Enter remarks (optional)"
+                        class="textarea-with-floating-label"
+                        placeholder=" "
                       ></textarea>
                     </nz-textarea-count>
+                    <label for="remark" class="floating-label textarea-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -237,6 +267,7 @@
             nz-button
             nzType="primary"
             class="submit-btn"
+            type="submit"
             [disabled]="!form.valid || loading"
             [nzLoading]="loading"
           >

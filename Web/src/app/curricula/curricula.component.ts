@@ -206,6 +206,14 @@ export class CurriculaComponent implements OnInit, OnDestroy {
   }
 
   openModal(id: string): void {
+    if (!id) {
+      this._customNotificationService.notification(
+        "error",
+        "Error",
+        "Unable to open status tracking: curriculum id is missing."
+      );
+      return;
+    }
     this._modal.create({
       nzTitle: "Curriculum Status Tracking List",
       nzContent: CurriculumStatusTrackingListComponent,
@@ -214,8 +222,9 @@ export class CurriculaComponent implements OnInit, OnDestroy {
       },
       nzMaskClosable: false,
       nzFooter: null,
-      nzWidth: "50%",
-      nzClassName: "custom-modal"
+      nzWidth: 720,
+      nzBodyStyle: { padding: "16px 20px 20px" },
+      nzClassName: "custom-modal status-tracking-modal-wrap"
     });
   }
 }

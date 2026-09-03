@@ -1,68 +1,216 @@
-<h3 class="h-tag">{{action}}</h3>
-<nz-divider></nz-divider>
-<form nz-form [formGroup]="collegeForm" (ngSubmit)="submitForm()">
-  <nz-card>
-    <div nz-row [nzGutter]="24">
-      <div nz-col nzSpan="12">
-        <nz-form-item>
-          <nz-form-label [nzSpan]="7">Name</nz-form-label>
-          <nz-form-control>
-            <input nz-input formControlName="collegeName" placeholder="enter college name" />
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-label [nzSpan]="7" nzRequired>Country</nz-form-label>
-          <nz-form-control nzValidatingTip="Validating...">
-            <nz-select formControlName="country" nzPlaceHolder="select country">
-              <nz-option nzValue="Ethiopia" nzLabel="Ethiopia"></nz-option>
-            </nz-select>
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-label [nzSpan]="7" nzRequired>City</nz-form-label>
-          <nz-form-control>
-            <nz-select formControlName="city" nzPlaceHolder="select city">
-              <nz-option nzValue="Addis Ababa" nzLabel="Addis Ababa"></nz-option>
-              <nz-option nzValue="Adama" nzLabel="Adama"></nz-option>
-            </nz-select>
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-label [nzSpan]="7">Remark</nz-form-label>
-          <nz-form-control nzErrorTip="Please input your remark!">
-            <nz-textarea-count [nzMaxCharacterCount]="250">
-              <textarea rows="4" formControlName="remark" nz-input></textarea>
-            </nz-textarea-count>
-          </nz-form-control>
-        </nz-form-item>
+<div class="content-container">
+  <div class="header-section">
+    <button
+      nz-button
+      nzType="default"
+      class="back-btn"
+      type="button"
+      routerLink="/colleges"
+    >
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Colleges
+    </button>
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">{{ action }}</h2>
+        <p class="subtitle-text">Manage college profile and contact details</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="bank" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>College Information</h3>
+          <p>Fill in the college location and contact information</p>
+        </div>
       </div>
 
-      <div nz-col nzSpan="11">
-        <nz-form-item>
-          <nz-form-label [nzSpan]="8">Telephone 1</nz-form-label>
-          <nz-form-control>
-            <input nz-input formControlName="telephone1" placeholder="enter telephone 1" />
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-label [nzSpan]="8">Telephone 2</nz-form-label>
-          <nz-form-control>
-            <input nz-input formControlName="telephone2" placeholder="enter telephone 2" />
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-label [nzSpan]="8">Telephone 3</nz-form-label>
-          <nz-form-control>
-            <input nz-input formControlName="telephone3" placeholder="enter telephone 3" />
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-control [nzOffset]="12" [nzSpan]="12" style="margin-top:40px ;">
-            <button nz-button nzType="primary">{{submit}}</button>
-          </nz-form-control>
-        </nz-form-item>
-      </div>
-      
+      <form
+        nz-form
+        [formGroup]="collegeForm"
+        (ngSubmit)="submitForm()"
+        class="admin-form"
+      >
+        <div class="form-sections">
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+                College Details
+              </h4>
+              <p class="section-description">Name, location, and contact numbers</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please enter a college name">
+                    <input
+                      nz-input
+                      id="collegeName"
+                      formControlName="collegeName"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="collegeName" class="floating-label">
+                      <span nz-icon nzType="bank" nzTheme="outline"></span>
+                      Name <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select a country">
+                    <nz-select
+                      formControlName="country"
+                      id="country"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
+                    >
+                      <nz-option nzValue="Ethiopia" nzLabel="Ethiopia"></nz-option>
+                    </nz-select>
+                    <label for="country" class="floating-label">
+                      <span nz-icon nzType="global" nzTheme="outline"></span>
+                      Country <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select a city">
+                    <nz-select
+                      formControlName="city"
+                      id="city"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
+                    >
+                      <nz-option nzValue="Addis Ababa" nzLabel="Addis Ababa"></nz-option>
+                      <nz-option nzValue="Adama" nzLabel="Adama"></nz-option>
+                    </nz-select>
+                    <label for="city" class="floating-label">
+                      <span nz-icon nzType="environment" nzTheme="outline"></span>
+                      City <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please enter telephone 1">
+                    <input
+                      nz-input
+                      id="telephone1"
+                      formControlName="telephone1"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="telephone1" class="floating-label">
+                      <span nz-icon nzType="phone" nzTheme="outline"></span>
+                      Telephone 1 <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control>
+                    <input
+                      nz-input
+                      id="telephone2"
+                      formControlName="telephone2"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="telephone2" class="floating-label">
+                      <span nz-icon nzType="phone" nzTheme="outline"></span>
+                      Telephone 2
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control>
+                    <input
+                      nz-input
+                      id="telephone3"
+                      formControlName="telephone3"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="telephone3" class="floating-label">
+                      <span nz-icon nzType="phone" nzTheme="outline"></span>
+                      Telephone 3
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control>
+                    <nz-textarea-count [nzMaxCharacterCount]="250">
+                      <textarea
+                        id="remark"
+                        rows="4"
+                        formControlName="remark"
+                        nz-input
+                        placeholder=" "
+                        class="textarea-with-floating-label"
+                      ></textarea>
+                    </nz-textarea-count>
+                    <label for="remark" class="floating-label textarea-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            nz-button
+            nzType="default"
+            class="cancel-btn"
+            type="button"
+            routerLink="/colleges"
+          >
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            class="submit-btn"
+            type="submit"
+            [disabled]="collegeForm.invalid"
+          >
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+            {{ submit }}
+          </button>
+        </div>
+      </form>
     </div>
-  </nz-card>
-</form>
+  </div>
+</div>

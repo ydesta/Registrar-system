@@ -131,7 +131,7 @@ export class UserRegisterComponent implements OnInit {
   }
 
   toggleRegistrationLock(): void {
-    this.isRegistrationLocked = !this.isRegistrationLocked;
+    this.isRegistrationLocked = false;
   }
 
   onPhoneBlur(): void {
@@ -150,7 +150,8 @@ export class UserRegisterComponent implements OnInit {
     const modalRef = this._modal.create({
       nzContent: RegistrationSuccessDialogComponent,
       nzComponentParams: {
-        userEmail: this.registerForm.value.email
+        userEmail: this.registerForm.value.email,
+        autoDownloadInstruction: true
       },
       nzWidth: 500,
       nzCentered: true,

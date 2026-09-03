@@ -1,3 +1,7 @@
-.main-color {
-    background-color: rgb(9, 62, 150);
+@import '../../../styles/admin-form-page';
+
+::ng-deep .ant-btn-loading {
+  .anticon {
+    display: none;
+  }
 }

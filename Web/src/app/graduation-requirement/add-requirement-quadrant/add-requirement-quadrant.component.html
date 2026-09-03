@@ -1,71 +1,168 @@
-<h3 class="h-tag">{{ action }}</h3>
+<div class="content-container">
+  <div class="header-section">
+    <button
+      nz-button
+      nzType="default"
+      class="back-btn"
+      type="button"
+      routerLink="/graduation/quandrant-requirement"
+    >
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Requirement Quadrants
+    </button>
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">{{ action }}</h2>
+        <p class="subtitle-text">Link graduation requirements to quadrants</p>
+      </div>
+    </div>
+  </div>
 
-<div>
-  <form
-    nz-form
-    nzLayout="vertical"
-    [formGroup]="requirementQuadrantForm"
-    (ngSubmit)="submitForm()"
-  >
-    <nz-form-item>
-      <nz-form-label [nzSpan]="8" nzRequired
-        >Requirement Quadrant</nz-form-label
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="appstore" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>Requirement Quadrant Information</h3>
+          <p>Assign minimum credit hours per quadrant</p>
+        </div>
+      </div>
+
+      <form
+        nz-form
+        [formGroup]="requirementQuadrantForm"
+        (ngSubmit)="submitForm()"
+        class="admin-form"
       >
-      <nz-form-control [nzSpan]="8" nzValidatingTip="Validating...">
-        <nz-select
-          formControlName="graduationRequirementID"
-          nzPlaceHolder="select graduation requirement"
-        >
-          <nz-option
-            *ngFor="let item of graduationRequirements"
-            [nzValue]="item.id"
-            [nzLabel]="item.passingGrade"
-          ></nz-option>
-        </nz-select>
-      </nz-form-control>
-    </nz-form-item>
+        <div class="form-sections">
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+                Quadrant Requirement Details
+              </h4>
+              <p class="section-description">Select requirement, quadrant, and credit hours</p>
+            </div>
 
-    <nz-form-item>
-      <nz-form-label [nzSpan]="8" nzRequired>Quadrant</nz-form-label>
-      <nz-form-control [nzSpan]="8" nzValidatingTip="Validating...">
-        <nz-select formControlName="quadrantID" nzPlaceHolder="select quadrant">
-          <nz-option
-            *ngFor="let item of quadrants"
-            [nzValue]="item.quadrantsID"
-            [nzLabel]="item.quadrantHeading"
-          ></nz-option>
-        </nz-select>
-      </nz-form-control>
-    </nz-form-item>
-    <nz-form-item>
-      <nz-form-label [nzSpan]="8" nzRequired
-        >Minimum Credit Hours</nz-form-label
-      >
-      <nz-form-control [nzSpan]="8" nzValidatingTip="Validating...">
-        <nz-form-control>
-          <input
-            nz-input
-            formControlName="minimumCreditHours"
-            type="number"
-            placeholder="enter minimum credit hours"
-          />
-        </nz-form-control>
-      </nz-form-control>
-    </nz-form-item>
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select a graduation requirement">
+                    <nz-select
+                      formControlName="graduationRequirementID"
+                      id="graduationRequirementID"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
+                      [nzShowSearch]="true"
+                    >
+                      <nz-option
+                        *ngFor="let item of graduationRequirements"
+                        [nzValue]="item.id"
+                        [nzLabel]="item.passingGrade"
+                      ></nz-option>
+                    </nz-select>
+                    <label for="graduationRequirementID" class="floating-label">
+                      <span nz-icon nzType="trophy" nzTheme="outline"></span>
+                      Requirement Quadrant <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
 
-    <nz-form-item>
-      <nz-form-label [nzSpan]="8">Remark</nz-form-label>
-      <nz-form-control [nzSpan]="8">
-        <input nz-input formControlName="remark" placeholder="enter remark" />
-      </nz-form-control>
-    </nz-form-item>
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select a quadrant">
+                    <nz-select
+                      formControlName="quadrantID"
+                      id="quadrantID"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
+                      [nzShowSearch]="true"
+                    >
+                      <nz-option
+                        *ngFor="let item of quadrants"
+                        [nzValue]="item.quadrantsID"
+                        [nzLabel]="item.quadrantHeading"
+                      ></nz-option>
+                    </nz-select>
+                    <label for="quadrantID" class="floating-label">
+                      <span nz-icon nzType="appstore" nzTheme="outline"></span>
+                      Quadrant <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
 
-    <nz-form-item>
-      <nz-form-control [nzOffset]="8" [nzSpan]="8">
-        <button nz-button nzType="primary" class="main-color">
-          {{ submit }}
-        </button>
-      </nz-form-control>
-    </nz-form-item>
-  </form>
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please enter minimum credit hours">
+                    <input
+                      nz-input
+                      type="number"
+                      id="minimumCreditHours"
+                      formControlName="minimumCreditHours"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="minimumCreditHours" class="floating-label">
+                      <span nz-icon nzType="clock-circle" nzTheme="outline"></span>
+                      Minimum Credit Hours <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div class="form-col"></div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control>
+                    <input
+                      nz-input
+                      id="remark"
+                      formControlName="remark"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="remark" class="floating-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            nz-button
+            nzType="default"
+            class="cancel-btn"
+            type="button"
+            routerLink="/graduation/quandrant-requirement"
+          >
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            class="submit-btn"
+            type="submit"
+            [disabled]="requirementQuadrantForm.invalid"
+          >
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+            {{ submit }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

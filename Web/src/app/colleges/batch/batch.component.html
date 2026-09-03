@@ -1,5 +1,4 @@
 <div class="content-container">
-  <!-- Header Section -->
   <div class="header-section">
     <div class="header-content">
       <div class="page-title">
@@ -7,48 +6,48 @@
         <p class="subtitle-text">View, search, and manage all batches in the system</p>
       </div>
       <div class="header-actions">
-        <div class="search-section">
-          <nz-input-group [nzSuffix]="suffixIconSearch">
-            <input type="text" nz-input placeholder="Search by code, curriculum, or year..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)"/>
-          </nz-input-group>
-          <ng-template #suffixIconSearch>
-            <span nz-icon nzType="search"></span>
-          </ng-template>
+        <div class="search-section floating-label-container">
+          <input
+            type="text"
+            nz-input
+            id="batchSearch"
+            class="input-with-floating-label"
+            placeholder=" "
+            [(ngModel)]="pager.searchKey"
+            (ngModelChange)="pager.onSearch($event)"
+          />
+          <label for="batchSearch" class="floating-label">
+            <span nz-icon nzType="search" nzTheme="outline"></span>
+            Search
+          </label>
         </div>
         <button nz-button nzType="primary" routerLink="../add-batch/null" class="add-btn">
           <span nz-icon nzType="plus" nzTheme="outline"></span>
           Add Batch
         </button>
-        <button nz-button nzType="default" (click)="exportBatch()" class="export-btn">
-          <span nz-icon nzType="file-excel" nzTheme="outline"></span>
-          Export
-        </button>
-        <button nz-button nzType="default" ngxPrint [printSectionId]="'print-section'" [printTitle]="'Batch List'" class="print-btn">
-          <span nz-icon nzType="printer" nzTheme="outline"></span>
-          Print
-        </button>
       </div>
     </div>
   </div>
 
-  <!-- Table Card Container -->
   <div class="table-card">
     <div id="print-section">
-      <nz-table #basicTable 
-                [nzData]="paginatedBatches" 
-                nzBordered
-                [nzPageSize]="pager.pageSize"
-                [nzPageSizeOptions]="pager.pageSizeOptions"
-                [nzShowSizeChanger]="true"
-                [nzTotal]="pager.total"
-                [nzPageIndex]="pager.pageIndex"
-                (nzPageIndexChange)="pager.onPageIndexChange($event)"
-                (nzPageSizeChange)="pager.onPageSizeChange($event)"
-                [nzFrontPagination]="false"
-                [nzShowTotal]="rangeTemplate"
-                [nzLoading]="pager.loading"
-                [nzNoResult]="emptyTpl"
-                class="batch-table">
+      <nz-table
+        #basicTable
+        [nzData]="paginatedBatches"
+        nzBordered
+        [nzPageSize]="pager.pageSize"
+        [nzPageSizeOptions]="pager.pageSizeOptions"
+        [nzShowSizeChanger]="true"
+        [nzTotal]="pager.total"
+        [nzPageIndex]="pager.pageIndex"
+        (nzPageIndexChange)="pager.onPageIndexChange($event)"
+        (nzPageSizeChange)="pager.onPageSizeChange($event)"
+        [nzFrontPagination]="false"
+        [nzShowTotal]="rangeTemplate"
+        [nzLoading]="pager.loading"
+        [nzNoResult]="emptyTpl"
+        class="batch-table"
+      >
         <ng-template #rangeTemplate let-range="range" let-total>
           <span style="color: #6b7280; font-weight: 500;">
             {{ range[0] }}-{{ range[1] }} of {{ total }} batches
@@ -62,24 +61,47 @@
             <th style="min-width: 120px;">Entry Term</th>
             <th style="min-width: 120px;">Entry Year</th>
             <th style="min-width: 120px;">Amount</th>
-            <th style="min-width: 100px;">Actions</th>
+            <th class="action-column">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let batch of paginatedBatches; let i = index">
             <td><span class="sn-badge">{{ pager.serial(i) }}</span></td>
             <td>{{ batch.batchCode }}</td>
-            <td>{{ batch.curriculum.curriculumCode }}</td>
-            <td>{{ batch.academicTerm }}</td>
-            <td>{{ batch.entryYear }}</td>
-            <td>{{ batch.amount }}</td>
+            <td>{{ batch.curriculum?.curriculumCode || '—' }}</td>
             <td>
-              <button nz-button nzType="default" nzSize="small" routerLink="../add-batch/{{ batch.id }}" class="action-btn edit-btn">
-                <span nz-icon nzType="edit" nzTheme="outline"></span>
+              <span [class.missing-term]="!batch.academicTerm">
+                {{ batch.academicTerm || '—' }}
+              </span>
+            </td>
+            <td>{{ batch.entryYear || '—' }}</td>
+            <td>{{ batch.amount }}</td>
+            <td class="action-column">
+              <button
+                nz-button
+                nz-dropdown
+                [nzDropdownMenu]="menu"
+                nzPlacement="bottomRight"
+                class="action-button"
+              >
+                <span nz-icon nzType="more" nzTheme="outline"></span>
               </button>
-              <button nz-button nzType="default" nzSize="small" (click)="showDeleteConfirm(batch.id)" class="action-btn delete-btn">
-                <span nz-icon nzType="delete" nzTheme="outline"></span>
-              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li nz-menu-item>
+                    <a routerLink="../add-batch/{{ batch.id }}" class="action-item edit">
+                      <span nz-icon nzType="edit" nzTheme="outline"></span>
+                      <span>Edit</span>
+                    </a>
+                  </li>
+                  <li nz-menu-item>
+                    <a class="action-item delete" (click)="showDeleteConfirm(batch.id)">
+                      <span nz-icon nzType="delete" nzTheme="outline"></span>
+                      <span>Delete</span>
+                    </a>
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
             </td>
           </tr>
         </tbody>

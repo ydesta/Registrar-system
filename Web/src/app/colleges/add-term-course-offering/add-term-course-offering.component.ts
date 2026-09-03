@@ -440,6 +440,7 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
     const formModel = this.termCourseOfferingForm.getRawValue();
     const course = new TermCourseOfferingRequest();
     course.ID = this.id;
+    course.AcademicTermId = this.academicTermId || this.nextAcademicTerm?.id;
     course.AcademicTermSeason = formModel.AcademicTermSeason;
     course.AcademicTermYear = formModel.AcademicTermYear;
     course.BatchCode = formModel.batchCode;

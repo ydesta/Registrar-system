@@ -28,7 +28,9 @@ export class CurriculumService {
   }
 
   getCurriculumStatusTrackingByCurriculumId(curriculumId: string): Observable<any> {
-    return this.crud.getList(`${this.curricula}/getCurriculumStatusTracking/${curriculumId}`);
+    return this.crud.getList(
+      `/Curriculums/getCurriculumStatusTracking/${curriculumId}`
+    );
   }
 
   getCurriculumById(id: string): Observable<any> {

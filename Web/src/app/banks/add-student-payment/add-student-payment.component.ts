@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StaticData } from 'src/app/admission-request/model/StaticData';
@@ -42,6 +42,7 @@ export class AddStudentPaymentComponent implements OnInit, OnDestroy {
   nextAcademicTerm: any;
   penaltyAmount = 0;
   isLateRegistration = false;
+  stepsDirection: 'horizontal' | 'vertical' = 'horizontal';
 
   constructor(
     public aciveRoute: ActivatedRoute,
@@ -72,6 +73,7 @@ export class AddStudentPaymentComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.updateStepsDirection();
     if (this.requestType != undefined) {
       this.getListOfRegisteredCourses(this.courseRegistrationId, this.batchCode, this.requestType);
     }
@@ -84,6 +86,15 @@ export class AddStudentPaymentComponent implements OnInit, OnDestroy {
 
     const next = sessionStorage.getItem('nextAcademicTerm');
     this.nextAcademicTerm = next ? JSON.parse(next) : null;
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.updateStepsDirection();
+  }
+
+  private updateStepsDirection(): void {
+    this.stepsDirection = window.innerWidth <= 768 ? 'vertical' : 'horizontal';
   }
 
   ngOnDestroy(): void {
@@ -144,7 +155,6 @@ export class AddStudentPaymentComponent implements OnInit, OnDestroy {
   private getStudentPayment(): StudentPaymentRequest {
     const formModel = this.bankTransactionForm.getRawValue();
     const payment = new StudentPaymentRequest();
-    // payment.id = this.progStatusId == undefined ? null : this.progStatusId;
     payment.parentId = this.courseRegistrationId;
     payment.fromBank = formModel.fromBank !== null && formModel.fromBank !== undefined && formModel.fromBank !== '' ? formModel.fromBank : null;
     payment.toBank = formModel.toBank !== null && formModel.toBank !== undefined && formModel.toBank !== '' ? formModel.toBank : null;
@@ -152,6 +162,9 @@ export class AddStudentPaymentComponent implements OnInit, OnDestroy {
     payment.remark = formModel.remark;
     payment.bankTransactionID = formModel.bankTransactionID;
     payment.amount = formModel.amount;
+    if (this.orderNumber) {
+      payment.orderNumber = this.orderNumber;
+    }
     return payment;
   }
 

@@ -1,66 +1,61 @@
 <div class="content-container">
-  <!-- Header Section -->
   <div class="header-section">
     <div class="header-content">
       <div class="page-title">
-        <h3 class="title-text">Academic Terms</h3>
-        <p class="subtitle-text">Manage and view all academic term information</p>
+        <h2 class="title-text">Academic Terms</h2>
+        <p class="subtitle-text">View, search, and manage all academic terms in the system</p>
       </div>
       <div class="header-actions">
-        <div class="search-section">
-          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input 
-              type="text" 
-              nz-input 
-              placeholder="Search academic terms..." 
-              [(ngModel)]="pager.searchKey"
-              (ngModelChange)="pager.onSearch($event)"
-              (keyup.enter)="onSearch()"
-            />
-          </nz-input-group>
-          <ng-template #suffixIconButton>
-            <button nz-button nzType="primary" class="search-btn" (click)="onSearch()">
-              <i nz-icon nzType="search"></i>
-            </button>
-          </ng-template>
+        <div class="search-section floating-label-container">
+          <input
+            type="text"
+            nz-input
+            id="academicTermSearch"
+            class="input-with-floating-label"
+            placeholder=" "
+            [(ngModel)]="pager.searchKey"
+            (ngModelChange)="pager.onSearch($event)"
+          />
+          <label for="academicTermSearch" class="floating-label">
+            <span nz-icon nzType="search" nzTheme="outline"></span>
+            Search
+          </label>
         </div>
         <button
-          routerLink="../add-academic-term/null"
-          class="add-btn"
           nz-button
           nzType="primary"
+          routerLink="../add-academic-term/null"
+          class="add-btn"
         >
-          <i nz-icon nzType="plus" nzTheme="outline"></i>
-          <span>Add Academic Term</span>
+          <span nz-icon nzType="plus" nzTheme="outline"></span>
+          Add Academic Term
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Table Card -->
   <div class="table-card">
     <div id="print-section">
-      <img class="logo" src="../../assets/images/logo.png" />
-      <nz-spin [nzSpinning]="pager.loading">
-        <nz-table
-          #basicTable
-          [nzData]="filteredAcademicTerms"
-          nzBordered
-          [nzShowPagination]="true"
-          [nzLoading]="pager.loading"
-          [nzPageSize]="pager.pageSize"
-          [nzPageIndex]="pager.pageIndex"
-          [nzTotal]="pager.total"
-          [nzPageSizeOptions]="pager.pageSizeOptions"
-          [nzShowSizeChanger]="true"
-          [nzShowQuickJumper]="true"
-          [nzShowTotal]="rangeTemplate"
-          (nzPageIndexChange)="pager.onPageIndexChange($event)"
-          (nzPageSizeChange)="pager.onPageSizeChange($event)"
-          [nzFrontPagination]="false"
-          [nzScroll]="{ x: '1500px' }"
-          class="academic-terms-table"
-        >
+      <nz-table
+        #basicTable
+        [nzData]="filteredAcademicTerms"
+        nzBordered
+        [nzShowPagination]="true"
+        [nzLoading]="pager.loading"
+        [nzPageSize]="pager.pageSize"
+        [nzPageIndex]="pager.pageIndex"
+        [nzTotal]="pager.total"
+        [nzPageSizeOptions]="pager.pageSizeOptions"
+        [nzShowSizeChanger]="true"
+        [nzShowQuickJumper]="true"
+        [nzShowTotal]="rangeTemplate"
+        (nzPageIndexChange)="pager.onPageIndexChange($event)"
+        (nzPageSizeChange)="pager.onPageSizeChange($event)"
+        [nzFrontPagination]="false"
+        [nzScroll]="{ x: '1500px' }"
+        [nzNoResult]="emptyTpl"
+        class="academic-terms-table"
+      >
         <ng-template #rangeTemplate let-range="range" let-total>
           <span>{{ range[0] }}-{{ range[1] }} of {{ total }} terms</span>
         </ng-template>
@@ -85,20 +80,20 @@
               <td class="expand-column">
                 <span
                   class="custom-expand-icon"
-                  [ngClass]="{ 'expanded': expandSet.has(data.id!) }"
+                  [ngClass]="{ expanded: expandSet.has(data.id!) }"
                   (click)="onExpandChange(data.id, !expandSet.has(data.id!))"
                 >
-                  <i
+                  <span
                     nz-icon
                     [nzType]="expandSet.has(data.id!) ? 'minus-square' : 'plus-square'"
                     [style.color]="expandSet.has(data.id!) ? '#ef4444' : '#1890ff'"
-                  ></i>
+                  ></span>
                 </span>
               </td>
               <td>{{ data.year }}</td>
               <td>{{ getTermName(data.termId) }}</td>
-              <td>{{ data.startDate | date : "yyyy-MM-dd" }}</td>
-              <td>{{ data.endDate | date : "yyyy-MM-dd" }}</td>
+              <td>{{ data.startDate | date: 'yyyy-MM-dd' }}</td>
+              <td>{{ data.endDate | date: 'yyyy-MM-dd' }}</td>
               <td>
                 <nz-tag [nzColor]="data.isCurrentTerm ? 'green' : 'default'">
                   {{ data.isCurrentTerm ? 'Yes' : 'No' }}
@@ -110,8 +105,8 @@
                   (ngModelChange)="onVisibilityToggle(data, 'showRegular', $event)"
                   [nzLoading]="updatingVisibilityId === data.id"
                   nzCheckedChildren="Show"
-                  nzUnCheckedChildren="Hide">
-                </nz-switch>
+                  nzUnCheckedChildren="Hide"
+                ></nz-switch>
               </td>
               <td class="visibility-column">
                 <nz-switch
@@ -119,8 +114,8 @@
                   (ngModelChange)="onVisibilityToggle(data, 'showAdd', $event)"
                   [nzLoading]="updatingVisibilityId === data.id"
                   nzCheckedChildren="Show"
-                  nzUnCheckedChildren="Hide">
-                </nz-switch>
+                  nzUnCheckedChildren="Hide"
+                ></nz-switch>
               </td>
               <td class="visibility-column">
                 <nz-switch
@@ -128,8 +123,8 @@
                   (ngModelChange)="onVisibilityToggle(data, 'showAssessment', $event)"
                   [nzLoading]="updatingVisibilityId === data.id"
                   nzCheckedChildren="Show"
-                  nzUnCheckedChildren="Hide">
-                </nz-switch>
+                  nzUnCheckedChildren="Hide"
+                ></nz-switch>
               </td>
               <td class="visibility-column">
                 <nz-switch
@@ -137,49 +132,38 @@
                   (ngModelChange)="onVisibilityToggle(data, 'showEquivalent', $event)"
                   [nzLoading]="updatingVisibilityId === data.id"
                   nzCheckedChildren="Show"
-                  nzUnCheckedChildren="Hide">
-                </nz-switch>
+                  nzUnCheckedChildren="Hide"
+                ></nz-switch>
               </td>
               <td class="action-column" nzRight>
                 <button
                   nz-button
                   nz-dropdown
                   [nzDropdownMenu]="menu"
-                  nzPlacement="bottomLeft"
-                  class="action-button"
+                  nzPlacement="bottomRight"
+                  class="action-dropdown-btn"
                 >
-                  <i nz-icon nzType="more" nzTheme="outline"></i>
+                  <span nz-icon nzType="more" nzTheme="outline"></span>
                 </button>
                 <nz-dropdown-menu #menu="nzDropdownMenu">
                   <ul nz-menu>
-                    <li>
-                      <button nz-button nzType="default" class="action-item detail">
-                        <i nz-icon nzType="eye" nzTheme="fill"></i>
-                        <span>Detail</span>
-                      </button>
-                    </li>
-                    <li>
+                    <li nz-menu-item>
                       <a
                         routerLink="../add-academic-term/{{ data.id }}"
-                        nz-button
-                        nzType="default"
-                        class="action-item edit"
+                        class="action-menu-link"
                       >
-                        <i nz-icon nzType="edit" nzTheme="fill"></i>
+                        <span nz-icon nzType="edit" nzTheme="outline"></span>
                         <span>Edit</span>
                       </a>
                     </li>
-                    <li>
-                      <button
-                        nz-button
-                        nzDanger
-                        nzType="default"
-                        class="action-item delete"
+                    <li nz-menu-item>
+                      <a
+                        class="action-menu-link delete"
                         (click)="showDeleteConfirm(data.id)"
                       >
-                        <i nz-icon nzType="delete" nzTheme="fill"></i>
+                        <span nz-icon nzType="delete" nzTheme="outline"></span>
                         <span>Delete</span>
-                      </button>
+                      </a>
                     </li>
                   </ul>
                 </nz-dropdown-menu>
@@ -188,7 +172,10 @@
             <tr *ngIf="expandSet.has(data.id!)" class="expanded-content">
               <td colspan="11" class="expanded-cell">
                 <div class="batch-terms-container">
-                  <div class="batch-terms-table" *ngIf="data.batchTerms && data.batchTerms.length > 0; else emptyBatchTerms">
+                  <div
+                    class="batch-terms-table"
+                    *ngIf="data.batchTerms && data.batchTerms.length > 0; else emptyBatchTerms"
+                  >
                     <nz-table
                       #batchTable
                       [nzData]="data.batchTerms"
@@ -205,7 +192,9 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <tr *ngFor="let batchTerm of batchTable.data; trackBy: trackByBatchTermId">
+                        <tr
+                          *ngFor="let batchTerm of batchTable.data; trackBy: trackByBatchTermId"
+                        >
                           <td>{{ batchTerm.batchCode }}</td>
                           <td>{{ getAcademicYearName(batchTerm.academicYear) }}</td>
                           <td>{{ getAcademicTermName(batchTerm.academicTerm) }}</td>
@@ -223,8 +212,13 @@
             </tr>
           </ng-container>
         </tbody>
+        <ng-template #emptyTpl>
+          <div class="no-data">
+            <span nz-icon nzType="calendar" nzTheme="outline"></span>
+            <p>No academic terms available</p>
+          </div>
+        </ng-template>
       </nz-table>
-      </nz-spin>
     </div>
   </div>
 </div>

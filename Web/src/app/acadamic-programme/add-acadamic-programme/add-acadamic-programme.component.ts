@@ -10,7 +10,7 @@ import { CustomNotificationService } from "src/app/services/custom-notification.
   styleUrls: ["./add-acadamic-programme.component.scss"]
 })
 export class AddAcadamicProgrammeComponent implements OnInit {
-  action = "Add Acadamic Programme";
+  action = "Add Academic Programme";
   acadamicProgramForm: FormGroup;
   acadamicProgramId: string = "";
   submit = "Save";
@@ -36,7 +36,7 @@ export class AddAcadamicProgrammeComponent implements OnInit {
     this.acadamicProgramId = this.aciveRoute.snapshot.paramMap.get("id")!.toString();
 
     if (this.acadamicProgramId != "null") {
-      this.action = "Edit Acadamic Programme";
+      this.action = "Edit Academic Programme";
       this.submit = "Update";
       this._crudService
         .getById("/AcadamicProgramme", this.acadamicProgramId)

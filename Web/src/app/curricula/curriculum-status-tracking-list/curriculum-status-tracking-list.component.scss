@@ -1,21 +1,104 @@
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  border: 2px solid #eae5ec;
-  border-radius: 5px;
-  background-color: #eae5ec;
-  color: black;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
+.status-tracking-modal {
+  width: 100%;
+  overflow: hidden;
 }
 
-button:hover {
-  background-color: black;
-  color: #eae5ec;
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
-.th-header {
-  font-size: 20px;
+
+.responsive-table {
+  width: 100%;
 }
-.custom-modal .ant-modal-header {
-  font-size: 20px; /* Adjust the font size as needed */
+
+::ng-deep .responsive-table {
+  .ant-table {
+    font-size: 14px;
+  }
+
+  .ant-table-thead > tr > th {
+    background: #f7f7f7 !important;
+    color: #374151;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 12px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+  }
+
+  .ant-table-tbody > tr {
+    transition: background 0.2s;
+
+    &:hover > td {
+      background-color: #f5faff;
+    }
+
+    > td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: middle;
+      color: #1f2937;
+      white-space: nowrap;
+    }
+  }
+
+  .ant-table-container,
+  .ant-table-content,
+  table {
+    width: 100% !important;
+  }
+}
+
+.sn-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-active {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.status-phasing {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.status-retired {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.status-empty {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.no-data {
+  text-align: center;
+  color: #9ca3af;
+  padding: 32px 0;
+
+  span[nz-icon] {
+    font-size: 36px;
+    color: #d1d5db;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
 }

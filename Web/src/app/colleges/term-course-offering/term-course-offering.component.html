@@ -94,7 +94,7 @@
           <tr>
             <th class="expand-column">Courses</th>
             <th class="batch-column" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'BatchCode')">Batch Code</th>
-            <th class="term-column" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'AcademicTermYear')">Academic Term</th>
+            <th class="term-column" [nzSortFn]="true" [nzSortOrder]="termSortOrder" (nzSortOrderChange)="onTermSort($event)">Academic Term</th>
             <th class="date-column" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'RegistrationStartDate')">Registration Start Date</th>
             <th class="date-column" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'RegistrationEndDate')">Registration End Date</th>
             <th class="action-column">Action</th>
@@ -126,7 +126,7 @@
                     <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
                   </button>
                   <nz-dropdown-menu #menu="nzDropdownMenu">
-                    <ul nz-menu style="padding-right: 50px">
+                    <ul nz-menu>
                       <li class="edit">
                         <a style="border-style: none" routerLink="../add-term-course-offering/{{ data.id }}" nz-button
                           nzType="default">
@@ -177,7 +177,7 @@
                                 <i class="more" nz-icon nzType="more" nzTheme="outline"></i>
                               </button>
                               <nz-dropdown-menu #courseMenu="nzDropdownMenu">
-                                <ul nz-menu style="padding-right: 50px">
+                                <ul nz-menu>
                                   <li class="assign-instructor">
                                     <button nz-button nzType="default" (click)="openModal(course)">
                                       <i nz-icon nzType="user-add" nzTheme="outline"></i>

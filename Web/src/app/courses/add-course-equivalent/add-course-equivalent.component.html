@@ -1,7 +1,6 @@
 <div class="content-container">
-  <!-- Header Section -->
   <div class="header-section">
-    <button nz-button nzType="default" class="back-btn" routerLink="/course/course-equivalent">
+    <button nz-button nzType="default" class="back-btn" type="button" routerLink="/course/course-equivalent">
       <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
       Back to Course Equivalents
     </button>
@@ -17,7 +16,6 @@
     </div>
   </div>
 
-  <!-- Form Container -->
   <div class="form-container">
     <div class="form-card">
       <div class="form-header">
@@ -30,9 +28,13 @@
         </div>
       </div>
 
-      <form nz-form [formGroup]="acadamicProgramForm" class="course-equivalent-form" (ngSubmit)="submitForm()">
+      <form
+        nz-form
+        [formGroup]="acadamicProgramForm"
+        (ngSubmit)="submitForm()"
+        class="admin-form"
+      >
         <div class="form-sections">
-          <!-- Course Information Section -->
           <div class="form-section">
             <div class="section-header">
               <h4 class="section-title">
@@ -45,33 +47,58 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Course</nz-form-label>
                   <nz-form-control nzErrorTip="Please select a course">
-                    <nz-select formControlName="courseId" nzPlaceHolder="Select course" nzShowSearch="true" nzAllowClear
-                      [nzLoading]="loading" class="professional-select">
-                      <nz-option *ngFor="let item of courses" [nzValue]="item.id"
-                        [nzLabel]="item.courseCode + ' - ' + item.courseTitle"></nz-option>
+                    <nz-select
+                      formControlName="courseId"
+                      id="courseId"
+                      nzPlaceHolder=" "
+                      nzShowSearch
+                      nzAllowClear
+                      [nzLoading]="loading"
+                      class="select-with-floating-label"
+                    >
+                      <nz-option
+                        *ngFor="let item of courses"
+                        [nzValue]="item.id"
+                        [nzLabel]="item.courseCode + ' - ' + item.courseTitle"
+                      ></nz-option>
                     </nz-select>
+                    <label for="courseId" class="floating-label">
+                      <span nz-icon nzType="book" nzTheme="outline"></span>
+                      Course <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Equivalent Course</nz-form-label>
                   <nz-form-control nzErrorTip="Please select an equivalent course">
-                    <nz-select formControlName="equivalentCourseId" nzPlaceHolder="Select equivalent course"
-                      nzShowSearch nzAllowClear [nzLoading]="loading" class="professional-select">
-                      <nz-option *ngFor="let item of courses" [nzValue]="item.id"
-                        [nzLabel]="item.courseCode + ' - ' + item.courseTitle"></nz-option>
+                    <nz-select
+                      formControlName="equivalentCourseId"
+                      id="equivalentCourseId"
+                      nzPlaceHolder=" "
+                      nzShowSearch
+                      nzAllowClear
+                      [nzLoading]="loading"
+                      class="select-with-floating-label"
+                    >
+                      <nz-option
+                        *ngFor="let item of courses"
+                        [nzValue]="item.id"
+                        [nzLabel]="item.courseCode + ' - ' + item.courseTitle"
+                      ></nz-option>
                     </nz-select>
+                    <label for="equivalentCourseId" class="floating-label">
+                      <span nz-icon nzType="swap" nzTheme="outline"></span>
+                      Equivalent Course <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
             </div>
           </div>
 
-          <!-- Additional Information Section -->
           <div class="form-section">
             <div class="section-header">
               <h4 class="section-title">
@@ -82,35 +109,55 @@
             </div>
 
             <div class="form-row">
-              <div class="form-col form-col-full">
+              <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label>Remark</nz-form-label>
                   <nz-form-control>
                     <nz-textarea-count [nzMaxCharacterCount]="500">
-                      <textarea rows="4" formControlName="remark" nz-input class="form-textarea"
-                        placeholder="Enter any additional remarks about this course equivalent relationship"></textarea>
+                      <textarea
+                        id="remark"
+                        rows="4"
+                        formControlName="remark"
+                        nz-input
+                        placeholder=" "
+                        class="textarea-with-floating-label"
+                      ></textarea>
                     </nz-textarea-count>
+                    <label for="remark" class="floating-label textarea-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
             </div>
           </div>
         </div>
-      </form>
-    </div>
 
-    <!-- Form Actions -->
-    <div class="form-actions">
-      <button nz-button nzType="default" class="cancel-btn" routerLink="/course/course-equivalent"
-        [disabled]="submitting">
-        <span nz-icon nzType="close" nzTheme="outline"></span>
-        Cancel
-      </button>
-      <button nz-button nzType="primary" class="submit-btn" (click)="submitForm()" [nzLoading]="submitting"
-        [disabled]="acadamicProgramForm.invalid">
-        <span nz-icon nzType="save" nzTheme="outline"></span>
-        {{ submit }}
-      </button>
+        <div class="form-actions">
+          <button
+            nz-button
+            nzType="default"
+            class="cancel-btn"
+            type="button"
+            routerLink="/course/course-equivalent"
+            [disabled]="submitting"
+          >
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            class="submit-btn"
+            type="submit"
+            [nzLoading]="submitting"
+            [disabled]="acadamicProgramForm.invalid"
+          >
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+            {{ submit }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

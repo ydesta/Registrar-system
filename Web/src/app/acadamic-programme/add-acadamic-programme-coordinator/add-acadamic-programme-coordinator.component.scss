@@ -1,4 +1,7 @@
-.sumbit{
-    background: rgb(9,62,150);
-    color: white;
+@import '../../../styles/admin-form-page';
+
+::ng-deep .ant-btn-loading {
+  .anticon {
+    display: none;
+  }
 }

@@ -176,10 +176,6 @@ export class AcademicTermComponent implements OnInit, OnDestroy {
       });
   }
 
-  onSearch(): void {
-    this.pager.resetPage();
-  }
-
   showDeleteConfirm(id: number | undefined): void {
     if (!id) {
       return;

@@ -17,6 +17,7 @@ export class AddStaffComponent implements OnInit {
   staffForm: FormGroup;
   progStatusId: any;
   submit = 'Submit';
+  isSubmitting = false;
   employmentTypes = EMPLOYMENT_TYPE;
   instructorTitles = INSTRUCTOR_TITLES;
   countries = COUNTRIES;
@@ -57,6 +58,9 @@ export class AddStaffComponent implements OnInit {
   }
 
   submitForm() {
+    if (this.isSubmitting) {
+      return;
+    }
     if (!this.staffForm.valid) {
       this._customNotificationService.notification('error', 'error', 'Enter valid data.');
       return;
@@ -71,20 +75,40 @@ export class AddStaffComponent implements OnInit {
       mobile,
       userId: localStorage.getItem('userId') || localStorage.getItem('user_id') || ''
     };
+
+    this.isSubmitting = true;
     if (this.progStatusId == 'null') {
-      this._staffService.createStaff(formData as StaffModel).subscribe((res: any) => {
-        this._customNotificationService.notification('success', 'Success', res.data);
-        this._route.navigateByUrl(this.navigationPath());
+      this._staffService.createStaff(formData as StaffModel).subscribe({
+        next: (res: any) => {
+          if (res?.status === 'success') {
+            this._customNotificationService.notification('success', 'Success', res.data);
+            this._route.navigateByUrl(this.navigationPath());
+            return;
+          }
+          this.isSubmitting = false;
+          this._customNotificationService.notification('error', 'Error', res?.data || 'Failed to create profile.');
+        },
+        error: () => {
+          this.isSubmitting = false;
+          this._customNotificationService.notification('error', 'Error', 'Failed to create profile.');
+        }
       });
       return;
     }
-    this._staffService.updateStaff(this.progStatusId, formData as StaffModel).subscribe((res: any) => {
-      if (res.status == 'success') {
-        this._customNotificationService.notification('success', 'Success', res.data);
-        this._route.navigateByUrl(this.navigationPath());
-        return;
+    this._staffService.updateStaff(this.progStatusId, formData as StaffModel).subscribe({
+      next: (res: any) => {
+        if (res.status == 'success') {
+          this._customNotificationService.notification('success', 'Success', res.data);
+          this._route.navigateByUrl(this.navigationPath());
+          return;
+        }
+        this.isSubmitting = false;
+        this._customNotificationService.notification('error', 'Error', res.data);
+      },
+      error: () => {
+        this.isSubmitting = false;
+        this._customNotificationService.notification('error', 'Error', 'Failed to update profile.');
       }
-      this._customNotificationService.notification('error', 'Error', res.data);
     });
   }
 
@@ -116,5 +140,12 @@ export class AddStaffComponent implements OnInit {
 
   private navigationPath(): string {
     return this._authService.hasRole('Instructor') ? '/staffs/staff-profile' : '/staffs';
+  }
+
+  cancel(): void {
+    if (this.isSubmitting) {
+      return;
+    }
+    this._route.navigateByUrl(this.navigationPath());
   }
 }

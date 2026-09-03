@@ -8,5 +8,6 @@ export class StudentPaymentRequest {
     type: number
     paidFor: number
     remark: string;
-    // id: string
+    orderNumber?: string;
+    paymentOrderId?: string;
 }

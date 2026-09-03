@@ -4,10 +4,8 @@ import { CurriculumQuadrantBreakdownService } from "src/app/graduation-requireme
 import { CurriculumBreakdown } from "../../models/CurriculumBreakdown";
 import { ActivatedRoute, Router } from "@angular/router";
 import { CustomNotificationService } from "src/app/services/custom-notification.service";
-import { Course } from "../../models/curriculum-breakdown.model";
 import { AcademicProgrammeService } from "src/app/acadamic-programme/services/academic-programme.service";
-import { TransferChange, TransferItem } from "ng-zorro-antd/transfer";
-import { BehaviorSubject, Subject } from "rxjs";
+import { TransferChange, TransferDirection, TransferItem } from "ng-zorro-antd/transfer";
 
 @Component({
   selector: "app-quadrant-breakdown-form",
@@ -21,11 +19,13 @@ export class QuadrantBreakdownFormComponent implements OnInit {
   progId: any;
   curricula: any;
   courses: any[] = [];
-  listOfUnregisteredCourse: any[] = [];
+  listOfUnregisteredCourse: TransferItem[] = [];
   numberOfCourseList = 0;
   selectiveId: string[] = [];
   quadrants: any;
   submit = "Save";
+  isSubmitting = false;
+  isLoadingCourses = false;
   checkedA = false;
   setOfCheckedIdA = new Set<string>();
   listOfCurrentPageDataA: readonly any[] = [];
@@ -36,16 +36,18 @@ export class QuadrantBreakdownFormComponent implements OnInit {
   academicPrograms: any;
   targetList: TransferItem[] = [];
   targetCourseIds: string[] = [];
+  targetKeys: string[] = [];
+  transferVersion = 0;
   curriculumId: string;
   numberOfSaveQuadrantCourse = 0;
   quadrantId: string;
-  targetCourseIds$ = new BehaviorSubject<string[]>([]);
   curriculumCode: '';
   programCode: ''
   editMode = false;
   isQuadrantLocked = false;
-
   currentQuadrant: string;
+  private courseLoadToken = 0;
+
   constructor(
     private _fb: FormBuilder,
     private _route: Router,
@@ -69,9 +71,10 @@ export class QuadrantBreakdownFormComponent implements OnInit {
         this.submit = "Update";
         this.id = Number(p["id"]) || 0;
       }
-    })
+    });
     this.createQuadrantBreakdown();
   }
+
   ngOnInit(): void {
     this.getAcademicProgramme();
     this.acadamicProgrammeID.patchValue(this.programCode);
@@ -80,22 +83,63 @@ export class QuadrantBreakdownFormComponent implements OnInit {
     this.quadrantsId.valueChanges.subscribe(res => {
       this.quadrantId = res;
       if (this.curriculumId != null && res != null) {
-        this.targetList = [];
-        this.targetCourseIds$.next([]);
+        this.resetCourseSelection();
         if (!this.isQuadrantLocked) {
           this.id = 0;
         }
         this.getCourseList();
+        if (!this.isQuadrantLocked) {
+          this.loadBreakdownMeta();
+        }
       }
     });
 
     if (this.isQuadrantLocked && this.quadrantId) {
-      this.quadrantsId.patchValue(this.quadrantId, { emitEvent: false });
-      this.quadrantsId.disable({ emitEvent: false });
+      this.applySelectedQuadrant();
       this.getCourseList();
       this.loadBreakdownMeta();
     }
   }
+
+  private getQuadrantOptionId(item: any): string {
+    return String(item?.id || item?.ID || "").trim();
+  }
+
+  private resolveQuadrantOptionId(quadrantId: string): string | null {
+    if (!quadrantId || !Array.isArray(this.quadrants) || this.quadrants.length === 0) {
+      return null;
+    }
+    const key = String(quadrantId).trim().toLowerCase();
+    const match = this.quadrants.find((q: any) => {
+      const optionId = this.getQuadrantOptionId(q).toLowerCase();
+      const code = String(q?.quadrantsID || q?.QuadrantsID || "").trim().toLowerCase();
+      return optionId === key || code === key;
+    });
+    return match ? this.getQuadrantOptionId(match) : null;
+  }
+
+  private applySelectedQuadrant(): void {
+    if (!this.isQuadrantLocked || !this.quadrantId) {
+      return;
+    }
+    const resolved = this.resolveQuadrantOptionId(this.quadrantId) || String(this.quadrantId).trim();
+    this.quadrantId = resolved;
+    this.quadrantsId.patchValue(resolved, { emitEvent: false });
+    this.quadrantsId.disable({ emitEvent: false });
+    this.cdr.detectChanges();
+  }
+
+  private resetCourseSelection(): void {
+    this.targetList = [];
+    this.targetCourseIds = [];
+    this.targetKeys = [];
+    this.numberOfSelectiveCourse = 0;
+    this.numberOfSaveQuadrantCourse = 0;
+    this.listOfUnregisteredCourse = [];
+    this.numberOfCourseList = 0;
+    this.transferVersion++;
+  }
+
   private createQuadrantBreakdown() {
     this.quadrantBreakdownForm = this._fb.group({
       createdBy: ["-"],
@@ -106,26 +150,15 @@ export class QuadrantBreakdownFormComponent implements OnInit {
       quadrantsId: ["", Validators.required],
       minimumCreditHours: [0, [Validators.required]],
       remark: [""],
-    })
+    });
   }
+
   getAcademicProgramme() {
     this._academicProgrammeService.getAcademicProgrammeList().subscribe((res: any) => {
       this.academicPrograms = res.data;
     });
   }
 
-  getListOfUnRegisteredCourseById(Id: string, quadrantId: string) {
-    this._curriculumQuadrantBreakdownService.getListOfUnRegisteredCourseById(Id, quadrantId).subscribe(res => {
-      this.numberOfCourseList = res.length;
-      this.listOfUnregisteredCourse = res.map((course) => ({
-        key: course.id,
-        title: `${course.courseCode} - ${course.courseTitle}`,
-        courseCode: course.courseCode,
-        courseTitle: course.courseTitle,
-      }));
-      this.listOfUnregisteredCourse.sort((a, b) => a.courseCode.localeCompare(b.courseCode));
-    })
-  }
   get quadrantsId() {
     return this.quadrantBreakdownForm.get("quadrantsId");
   }
@@ -138,27 +171,108 @@ export class QuadrantBreakdownFormComponent implements OnInit {
   get remark() {
     return this.quadrantBreakdownForm.get("remark");
   }
+
   getCourseList() {
     if (!this.curriculumId || !this.quadrantId) {
       return;
     }
+
+    const token = ++this.courseLoadToken;
+    const curriculumId = this.curriculumId;
+    const quadrantId = this.quadrantId;
+    this.isLoadingCourses = true;
+
     this._curriculumQuadrantBreakdownService
-      .getListOfUnRegisteredCourseById(this.curriculumId, this.quadrantId)
-      .subscribe((res: any) => {
-        this.listOfUnregisteredCourse = (res || []).map((course) => ({
-          key: course.id,
-          title: `${course.courseCode} - ${course.courseTitle}`,
-          courseCode: course.courseCode,
-          courseTitle: course.courseTitle,
-        }));
-        this.listOfUnregisteredCourse.sort((a, b) => a.courseCode.localeCompare(b.courseCode));
-        this.targetList = [];
-        this.numberOfSelectiveCourse = 0;
-        this.updateTargetCourseIds();
-        this.targetCourseIds$.next([]);
-        this.loadSavedCourses(this.curriculumId, this.quadrantId);
+      .getListOfUnRegisteredCourseById(curriculumId, quadrantId)
+      .subscribe({
+        next: (res: any) => {
+          if (token !== this.courseLoadToken) {
+            return;
+          }
+
+          const available = (res || []).map((course) => this.mapCourseTransferItem(course, 'left'));
+          this._curriculumQuadrantBreakdownService.getSavedCourses(curriculumId, quadrantId).subscribe({
+            next: (savedResponse: any) => {
+              if (token !== this.courseLoadToken) {
+                return;
+              }
+              this.applyCourseLists(available, savedResponse, token);
+            },
+            error: () => {
+              if (token !== this.courseLoadToken) {
+                return;
+              }
+              this.applyCourseLists(available, [], token);
+              this._customNotificationService.notification(
+                'error',
+                'Error',
+                'Failed to load selected courses for this quadrant.'
+              );
+            }
+          });
+        },
+        error: () => {
+          if (token !== this.courseLoadToken) {
+            return;
+          }
+          this.isLoadingCourses = false;
+          this.resetCourseSelection();
+          this._customNotificationService.notification(
+            'error',
+            'Error',
+            'Failed to load available courses for this quadrant.'
+          );
+        }
       });
   }
+
+  private applyCourseLists(available: TransferItem[], savedResponse: any, token: number): void {
+    const savedItems = Array.isArray(savedResponse)
+      ? savedResponse
+      : (savedResponse?.data || []);
+
+    this.numberOfSaveQuadrantCourse = savedItems.length;
+    const selected = savedItems.map((item: any) => this.mapCourseTransferItem({
+      id: item.courseId || item.CourseId,
+      courseCode: item.courseCode || item.CourseCode,
+      courseTitle: item.courseTitle || item.CourseTitle,
+      creditHours: item.creditHours || item.CreditHours
+    }, 'right'));
+
+    if (selected.length > 0) {
+      this.id = savedItems[0].parentId || savedItems[0].ParentId || this.id;
+    }
+
+    const selectedKeySet = new Set(selected.map((item) => String(item['key']).toLowerCase()));
+    const mergedAvailable = available.filter(
+      (item) => !selectedKeySet.has(String(item['key']).toLowerCase())
+    );
+
+    this.targetList = [...selected];
+    this.numberOfSelectiveCourse = selected.length;
+    this.updateTargetCourseIds();
+    this.sortTargetList();
+
+    this.listOfUnregisteredCourse = [];
+    this.targetKeys = [];
+    this.transferVersion++;
+    this.cdr.detectChanges();
+
+    this.ngZone.run(() => {
+      setTimeout(() => {
+        if (token !== this.courseLoadToken) {
+          return;
+        }
+        this.listOfUnregisteredCourse = [...mergedAvailable, ...selected]
+          .sort((a, b) => String(a['courseCode']).localeCompare(String(b['courseCode'])));
+        this.numberOfCourseList = this.listOfUnregisteredCourse.length;
+        this.targetKeys = [...this.targetCourseIds];
+        this.isLoadingCourses = false;
+        this.cdr.detectChanges();
+      });
+    });
+  }
+
   getCurriculumsList(id: string) {
     this._curriculumQuadrantBreakdownService
       .getListOfCurriculumByProgramId(id)
@@ -166,6 +280,7 @@ export class QuadrantBreakdownFormComponent implements OnInit {
         this.curricula = res;
       });
   }
+
   getQuadrantsList() {
     if (!this.curriculumCode) {
       this.quadrants = [];
@@ -174,42 +289,15 @@ export class QuadrantBreakdownFormComponent implements OnInit {
     this._curriculumQuadrantBreakdownService
       .getQuadratListByCurriculumCode(this.curriculumCode)
       .subscribe((res: any) => {
-        this.quadrants = res.data || [];
-        if (this.isQuadrantLocked && this.quadrantId) {
-          this.quadrantsId.patchValue(this.quadrantId, { emitEvent: false });
-        }
+        const list = Array.isArray(res) ? res : (res?.data || []);
+        this.quadrants = (list || []).map((item: any) => ({
+          ...item,
+          id: this.getQuadrantOptionId(item)
+        }));
+        this.applySelectedQuadrant();
       });
   }
-  updateCheckedSetA(id: string, checked: boolean): void {
-    if (checked) {
-      this.setOfCheckedIdA.add(id);
-    } else {
-      this.setOfCheckedIdA.delete(id);
-    }
-  }
 
-  refreshCheckedStatusA(): void {
-    const listOfEnabledData = this.listOfCurrentPageDataA.filter(({ disabled }) => !disabled);
-    this.checkedA = listOfEnabledData.every(({ id }) => this.setOfCheckedIdA.has(id));
-    this.indeterminateA = listOfEnabledData.some(({ id }) => this.setOfCheckedIdA.has(id)) && !this.checkedA;
-  }
-
-  onItemCheckedA(id: string, checked: boolean): void {
-    this.updateCheckedSetA(id, checked);
-    this.refreshCheckedStatusA();
-  }
-
-  onAllCheckedA(checked: boolean): void {
-    this.listOfCurrentPageDataA
-      .filter(({ disabled }) => !disabled)
-      .forEach(({ id }) => this.updateCheckedSetA(id, checked));
-    this.refreshCheckedStatusA();
-  }
-
-  onCurrentPageDataChangeA(listOfCurrentPageData: readonly any[]): void {
-    this.listOfCurrentPageDataA = listOfCurrentPageData;
-    this.refreshCheckedStatusA();
-  }
   private getQuadrantBreakdown(): CurriculumBreakdown {
     const formModel = this.quadrantBreakdownForm.getRawValue();
     const course = new CurriculumBreakdown();
@@ -220,47 +308,92 @@ export class QuadrantBreakdownFormComponent implements OnInit {
     course.remark = formModel.remark;
     return course;
   }
+
   submitForm() {
+    if (this.isSubmitting || this.isLoadingCourses) {
+      return;
+    }
     const selectiveCourseId = [...new Set(this.targetList.map(item => item['key']))];
     const postData = this.getQuadrantBreakdown();
     postData.courseId = selectiveCourseId;
+    if (this.numberOfSelectiveCourse === 0) {
+      this._customNotificationService.notification(
+        "error",
+        "Courses Required",
+        "Please select at least one course."
+      );
+      return;
+    }
+    if (this.selectedCreditHours < this.minimumCreditHoursRequired) {
+      this._customNotificationService.notification(
+        "error",
+        "Credit Hours",
+        `Selected total credit hours (T=${this.selectedCreditHours}) must be at least ${this.minimumCreditHoursRequired}.`
+      );
+      return;
+    }
     if (this.quadrantBreakdownForm.valid || (this.isQuadrantLocked && this.quadrantBreakdownForm.getRawValue().minimumCreditHours != null)) {
+      this.isSubmitting = true;
       if (this.id == 0) {
-        this._curriculumQuadrantBreakdownService.createCurriculumBreakdown(postData).subscribe(res => {
-          if (res) {
-            this._customNotificationService.notification(
-              "success",
-              "Success",
-              res.data
-            );
-            this._route.navigateByUrl(
-              `/curricula/quadrant-break-down?id=${this.curriculumId}&code=${this.curriculumCode}&programme=${this.programCode}&mode=edit`
-            );
-          } else {
+        this._curriculumQuadrantBreakdownService.createCurriculumBreakdown(postData).subscribe({
+          next: (res) => {
+            if (res?.status === 'success' || (res && !res.status)) {
+              this._customNotificationService.notification("success", "Success", res.data);
+              this._route.navigateByUrl(
+                `/curricula/quadrant-break-down?id=${this.curriculumId}&code=${this.curriculumCode}&programme=${this.programCode}&mode=edit`
+              );
+              return;
+            }
+            this.isSubmitting = false;
             this._customNotificationService.notification(
               "error",
-              "Duplication Not Allowed",
-              res?.data
+              "Error",
+              res?.data || "Failed to save quadrant breakdown."
+            );
+          },
+          error: () => {
+            this.isSubmitting = false;
+            this._customNotificationService.notification(
+              "error",
+              "Error",
+              "Failed to save quadrant breakdown."
             );
           }
         });
       } else {
-        this._curriculumQuadrantBreakdownService.update(this.id, postData).subscribe(res => {
-          if (res) {
+        this._curriculumQuadrantBreakdownService.update(this.id, postData).subscribe({
+          next: (res) => {
+            if (res?.status === 'success' || (res && !res.status)) {
+              this._customNotificationService.notification(
+                "success",
+                "Success",
+                res.data || "Quadrant breakdown updated successfully."
+              );
+              this._route.navigateByUrl(
+                `/curricula/quadrant-break-down?id=${this.curriculumId}&code=${this.curriculumCode}&programme=${this.programCode}&mode=edit`
+              );
+              return;
+            }
+            this.isSubmitting = false;
             this._customNotificationService.notification(
-              "success",
-              "Success",
-              res.data || "Quadrant breakdown updated successfully."
+              "error",
+              "Error",
+              res?.data || "Failed to update quadrant breakdown."
             );
-            this._route.navigateByUrl(
-              `/curricula/quadrant-break-down?id=${this.curriculumId}&code=${this.curriculumCode}&programme=${this.programCode}&mode=edit`
+          },
+          error: () => {
+            this.isSubmitting = false;
+            this._customNotificationService.notification(
+              "error",
+              "Error",
+              "Failed to update quadrant breakdown."
             );
           }
         });
       }
-
     }
   }
+
   filterOption(inputValue: string, item: any): boolean {
     inputValue = inputValue.toLowerCase();
     const lowerCaseTitle = item.title.toLowerCase();
@@ -271,63 +404,30 @@ export class QuadrantBreakdownFormComponent implements OnInit {
   }
 
   select(event: any): void {
-
   }
 
-  change(ret: any): void {
-    const selectedItem = ret.list.map((item) => item.key)
-  }
   onTransferChange(e: TransferChange): void {
     if (e.to === 'right' && e.from === 'left') {
-      this.targetList = this.targetList.concat(e.list);
+      const moved: TransferItem[] = e.list.map(item => ({
+        ...item,
+        direction: 'right' as TransferDirection
+      }));
+      this.targetList = this.targetList.concat(moved);
       this.numberOfSelectiveCourse = this.targetList.length;
       this.sortTargetList();
     } else if (e.to === 'left' && e.from === 'right') {
-      const removedCourseIds = e.list.map(item => item['key']);
-      this.targetList = this.targetList.filter(item => !removedCourseIds.includes(item['key']));
+      const removedCourseIds = e.list.map(item => String(item['key']));
+      this.targetList = this.targetList.filter(item => !removedCourseIds.includes(String(item['key'])));
       this.numberOfSelectiveCourse = this.targetList.length;
       this.sortTargetList();
     }
-    this.ngZone.runOutsideAngular(() => {
-      setTimeout(() => {
-        this.targetCourseIds$.next(this.targetCourseIds);
-      });
-    });
+    this.updateTargetCourseIds();
+    this.targetKeys = [...this.targetCourseIds];
     this.cdr.detectChanges();
   }
-  updateTargetCourseIds(): void {
-    this.targetCourseIds = this.targetList.map(item => item['key']);
-  }
 
-  loadSavedCourses(curId: string, quadrantId: string) {
-    this._curriculumQuadrantBreakdownService.getSavedCourses(curId, quadrantId).subscribe(savedItems => {
-      this.numberOfSaveQuadrantCourse = savedItems?.length || 0;
-      if (this.numberOfSaveQuadrantCourse > 0) {
-        this.id = savedItems[0].parentId || this.id;
-        this.targetList = savedItems.map(item => ({
-          key: item.courseId,
-          title: `${item.courseCode} - ${item.courseTitle}`,
-          courseCode: item.courseCode,
-          courseTitle: item.courseTitle,
-        }));
-        const existingKeys = new Set(this.listOfUnregisteredCourse.map(c => c.key));
-        for (const item of this.targetList) {
-          if (!existingKeys.has(item['key'])) {
-            this.listOfUnregisteredCourse.push(item);
-          }
-        }
-        this.listOfUnregisteredCourse.sort((a, b) => a.courseCode.localeCompare(b.courseCode));
-        this.numberOfSelectiveCourse = this.targetList.length;
-        this.numberOfCourseList = this.listOfUnregisteredCourse.length;
-        this.updateTargetCourseIds();
-        this.sortTargetList();
-        this.targetCourseIds$.next(this.targetCourseIds);
-        this.cdr.detectChanges();
-      } else {
-        this.numberOfCourseList = this.listOfUnregisteredCourse.length;
-        this.numberOfSelectiveCourse = 0;
-      }
-    });
+  updateTargetCourseIds(): void {
+    this.targetCourseIds = this.targetList.map(item => String(item['key']));
   }
 
   loadBreakdownMeta() {
@@ -345,6 +445,11 @@ export class QuadrantBreakdownFormComponent implements OnInit {
             minimumCreditHours: match.minimumCreditHours ?? 0,
             remark: match.remark || ""
           });
+        } else if (!this.isQuadrantLocked) {
+          this.quadrantBreakdownForm.patchValue({
+            minimumCreditHours: 0,
+            remark: ""
+          });
         }
       });
   }
@@ -352,17 +457,46 @@ export class QuadrantBreakdownFormComponent implements OnInit {
   sortTargetList(): void {
     this.targetList.sort((a, b) => a['courseCode'].localeCompare(b['courseCode']));
   }
-  transferSelected(): void {
-    this.updateTargetCourseIds();
-    this.sortTargetList();
-    this.ngZone.runOutsideAngular(() => {
-      setTimeout(() => {
-        this.targetCourseIds$.next(this.targetCourseIds);
-      });
-    });
+
+  get selectedCreditHours(): number {
+    return this.targetList.reduce((total, item) => total + (Number(item['creditHours']) || 0), 0);
   }
+
+  get minimumCreditHoursRequired(): number {
+    const value = Number(this.quadrantBreakdownForm?.getRawValue()?.minimumCreditHours);
+    return isNaN(value) ? 0 : value;
+  }
+
+  get transferTitles(): string[] {
+    return [
+      'Available Courses',
+      `Selected Courses (T = ${this.selectedCreditHours})`
+    ];
+  }
+
+  applyTotalAsMinimum(): void {
+    this.quadrantBreakdownForm.patchValue({
+      minimumCreditHours: this.selectedCreditHours
+    });
+    this.cdr.detectChanges();
+  }
+
+  private mapCourseTransferItem(course: any, direction: 'left' | 'right' = 'left'): TransferItem {
+    const creditHours = Number(course?.creditHours ?? course?.CreditHours ?? 0) || 0;
+    const courseCode = course?.courseCode || course?.CourseCode || '';
+    const courseTitle = course?.courseTitle || course?.CourseTitle || '';
+    const key = String(course?.id || course?.ID || course?.courseId || course?.CourseId || '');
+    return {
+      key,
+      title: `${courseCode} - ${courseTitle} (${creditHours} cr)`,
+      courseCode,
+      courseTitle,
+      creditHours,
+      direction: direction as TransferDirection
+    } as TransferItem;
+  }
+
   goToCurriculum() {
     this._route.navigateByUrl(`/curricula`);
   }
-
 }

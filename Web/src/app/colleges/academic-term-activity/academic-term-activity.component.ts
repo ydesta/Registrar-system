@@ -77,34 +77,4 @@ export class AcademicTermActivityComponent implements OnInit, OnDestroy {
       nzOnCancel: () => {}
     });
   }
-
-  exportTermActivity() {
-    this.academicTermActivitiesService
-      .getAcademicTermActivityList()
-      .subscribe((res: any) => {
-        if (res.data.toString() == "No data found") {
-          this._customNotificationService.notification(
-            "error",
-            "Error",
-            res.data
-          );
-        } else {
-          let fileLists = res.data.split("/");
-          this.academicTermActivitiesService
-            .getAcademicTermActivityList()
-            .subscribe((data: any) => {
-              let downloadURL = window.URL.createObjectURL(data);
-              let link = document.createElement("a");
-              link.href = downloadURL;
-              link.download = fileLists[fileLists.length - 1];
-              link.click();
-              this._customNotificationService.notification(
-                "success",
-                "Success",
-                "Excel file is downloaded succesfully."
-              );
-            });
-        }
-      });
-  }
 }

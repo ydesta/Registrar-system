@@ -1,89 +1,139 @@
-<div class="header-section">
-  <h3 class="h-tag">Add Semester Registration Payment</h3>
-  <div class="back-button">
-    <!-- <button nz-button nzType="default" (click)="goBack()">
-      <em nz-icon nzType="arrow-left" nzTheme="outline"></em>
+<div class="settle-payment-page">
+  <div class="page-header">
+    <div class="page-header__text">
+      <h1 class="page-title">Settle Semester Payment</h1>
+      <p class="page-subtitle">Review registered courses, confirm the amount, then complete payment</p>
+    </div>
+    <button nz-button nzType="default" class="back-btn" type="button" (click)="goBack()">
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
       Back
-    </button> -->
+    </button>
   </div>
-</div>
 
-<div class="payment-info-section">
-  <nz-alert
-    *ngIf="orderNumber"
-    nzType="success"
-    nzShowIcon
-    [nzMessage]="'Payment Order Number'"
-    [nzDescription]="'Order Number: ' + orderNumber"
-    style="margin-bottom: 16px;">
-  </nz-alert>
-  <nz-alert
-    nzType="info"
-    nzShowIcon
-    [nzMessage]="'Payment Process Information'"
-    [nzDescription]="'Please review your registered courses and total amount before proceeding with the payment. Click the  Payment button to complete your payment.'"
-    style="margin-bottom: 20px;">
-  </nz-alert>
-  
-  <div class="steps-section">
-    <nz-steps [nzCurrent]="0">
-      <nz-step nzTitle="Review Courses" nzDescription="Check your registered courses and total amount"></nz-step>
-      <nz-step nzTitle="Payment" nzDescription="Click Payment to proceed with payment"></nz-step>
-      <nz-step nzTitle="Complete" nzDescription="Submit payment details and attachment"></nz-step>
+  <div class="order-banner" *ngIf="orderNumber; else processBanner">
+    <div class="order-banner__icon">
+      <span nz-icon nzType="check-circle" nzTheme="fill"></span>
+    </div>
+    <div class="order-banner__body">
+      <div class="order-banner__label">Payment Order Number</div>
+      <div class="order-banner__code">{{ orderNumber }}</div>
+      <p class="order-banner__hint">
+        Use this order number on your bank deposit. Review your courses below, then click Payment to continue.
+      </p>
+    </div>
+  </div>
+  <ng-template #processBanner>
+    <div class="order-banner order-banner--info">
+      <div class="order-banner__icon">
+        <span nz-icon nzType="info-circle" nzTheme="fill"></span>
+      </div>
+      <div class="order-banner__body">
+        <div class="order-banner__label">Payment Process</div>
+        <p class="order-banner__hint">
+          Review your registered courses and total amount, then click Payment to submit your payment details.
+        </p>
+      </div>
+    </div>
+  </ng-template>
+
+  <div class="steps-card">
+    <nz-steps [nzCurrent]="0" [nzDirection]="stepsDirection" nzSize="small">
+      <nz-step nzTitle="Review Courses" nzDescription="Confirm courses and amount"></nz-step>
+      <nz-step nzTitle="Payment" nzDescription="Enter bank payment details"></nz-step>
+      <nz-step nzTitle="Complete" nzDescription="Submit receipt and finish"></nz-step>
     </nz-steps>
   </div>
-</div>
 
-<nz-card nzType="inner" nzTitle="Registered Semester Course" style="margin-top: 20px;">
-  <div id="print-section">
-    <nz-table #basicTable [nzData]="courseList" nzShowPagination nzShowSizeChanger nzBordered [nzShowPagination]="false">
-      <thead class="table-header-row">
-        <tr class="table-header-row">
-          <th class="th-row">Course Code</th>
-          <th class="th-row">Course Title</th>
-          <th class="th-row" style="text-align: center;">Credit Hour</th>
-          <th class="th-row" style="text-align: center;">Total Amount(ETB)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <ng-container tabindex="0" *ngFor="let data of basicTable.data; let i = index">
+  <div class="courses-card">
+    <div class="courses-card__header">
+      <div>
+        <h2 class="courses-card__title">Registered Semester Courses</h2>
+        <p class="courses-card__subtitle" *ngIf="batchCode">Batch: {{ batchCode }}</p>
+      </div>
+      <div class="summary-pills">
+        <div class="pill">
+          <span class="pill__label">Courses</span>
+          <strong>{{ courseList?.length || 0 }}</strong>
+        </div>
+        <div class="pill">
+          <span class="pill__label">Credit Hours</span>
+          <strong>{{ getTotalCreditHours() }}</strong>
+        </div>
+        <div class="pill pill--amount">
+          <span class="pill__label">Amount Due</span>
+          <strong>{{ getAmountToPay() | number:'1.2-2' }} ETB</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap" id="print-section">
+      <nz-table
+        #basicTable
+        [nzData]="courseList"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzBordered
+        [nzScroll]="{ x: '640px' }"
+        class="courses-table"
+      >
+        <thead>
           <tr>
-            <td>{{data.courseCode}}</td>
-            <td>{{ data.courseTitle }}</td>
-            <td style="text-align: center;">{{ data.creditHours }}</td>
-            <td style="text-align: center;">{{ data.totalAmount }}</td>
+            <th nzWidth="120px">Course Code</th>
+            <th>Course Title</th>
+            <th nzWidth="110px" class="col-center">Credit Hour</th>
+            <th nzWidth="140px" class="col-right">Total Amount (ETB)</th>
           </tr>
-        </ng-container>
-      </tbody>
-      <tfoot class="footer-row">
-        <tr>
-          <td></td>
-          <td>Total</td>
-          <td style="text-align: center;">{{ getTotalCreditHours() }}</td>
-          <td style="text-align: center;">{{ getTotalAmount() }}</td>
-        </tr>
-      </tfoot>
-    </nz-table>
-  </div>
-  <div class="payment-breakdown" *ngIf="getPenaltyAmount() > 0">
-    <div class="breakdown-row">
-      <span>Selected courses</span>
-      <strong>{{ getTotalAmount() | number:'1.2-2' }} ETB</strong>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of basicTable.data">
+            <td class="mono">{{ data.courseCode }}</td>
+            <td>{{ data.courseTitle }}</td>
+            <td class="col-center">{{ data.creditHours }}</td>
+            <td class="col-right mono">{{ data.totalAmount | number:'1.2-2' }}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="footer-row">
+            <td></td>
+            <td><strong>Total</strong></td>
+            <td class="col-center"><strong>{{ getTotalCreditHours() }}</strong></td>
+            <td class="col-right"><strong>{{ getTotalAmount() | number:'1.2-2' }}</strong></td>
+          </tr>
+        </tfoot>
+      </nz-table>
     </div>
-    <div class="breakdown-row">
-      <span>Late penalty</span>
-      <strong>{{ getPenaltyAmount() | number:'1.2-2' }} ETB</strong>
-    </div>
-    <div class="breakdown-row total">
-      <span>Amount to pay</span>
-      <strong>{{ getAmountToPay() | number:'1.2-2' }} ETB</strong>
-    </div>
-  </div>
 
-  <div class="action-buttons">
-    <div class="button-group">
-      <button nz-button (click)="goBack()">Back</button>
-      <button nz-button nzType="primary" style="margin-left: 8px;" (click)="openPaymentModal()">Payment</button>
+    <div class="payment-breakdown" *ngIf="getPenaltyAmount() > 0">
+      <div class="breakdown-row">
+        <span>Selected courses</span>
+        <strong>{{ getTotalAmount() | number:'1.2-2' }} ETB</strong>
+      </div>
+      <div class="breakdown-row">
+        <span>Late penalty</span>
+        <strong>{{ getPenaltyAmount() | number:'1.2-2' }} ETB</strong>
+      </div>
+      <div class="breakdown-row total">
+        <span>Amount to pay</span>
+        <strong>{{ getAmountToPay() | number:'1.2-2' }} ETB</strong>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button nz-button nzType="default" type="button" (click)="goBack()">
+        <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+        Back
+      </button>
+      <button
+        nz-button
+        nzType="primary"
+        type="button"
+        class="pay-btn"
+        [disabled]="!courseList?.length"
+        (click)="openPaymentModal()"
+      >
+        <span nz-icon nzType="credit-card" nzTheme="outline"></span>
+        Continue to Payment
+      </button>
     </div>
   </div>
-</nz-card>
+</div>

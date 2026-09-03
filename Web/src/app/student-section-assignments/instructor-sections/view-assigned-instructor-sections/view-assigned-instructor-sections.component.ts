@@ -321,8 +321,19 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit, OnDestro
   }
 
   // Helper method for academic term names
-  getAcademicTermName(term: number): string {
-    switch (term) {
+  getAcademicTermName(term: number | string): string {
+    if (term === null || term === undefined || term === '') {
+      return 'Unknown';
+    }
+    if (typeof term === 'string') {
+      const normalized = term.trim().toLowerCase();
+      if (normalized === 'winter' || normalized.startsWith('winter')) return 'Winter';
+      if (normalized === 'spring' || normalized.startsWith('spring')) return 'Spring';
+      if (normalized === 'summer' || normalized.startsWith('summer')) return 'Summer';
+      if (normalized === 'autumn' || normalized.startsWith('autumn')) return 'Autumn';
+      return term;
+    }
+    switch (Number(term)) {
       case 1: return 'Winter';
       case 2: return 'Spring';
       case 3: return 'Summer';

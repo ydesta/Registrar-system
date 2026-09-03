@@ -54,101 +54,119 @@ export class PdfExportService {
 
   generateRegistrationSlipsPdf(slips: StudentRegistrationSlipViewModel[]): void {
     const doc = new jsPDF();
-    const slipHeight = 85; // Reduced from 95 to 85
+    const slipHeight = 85;
 
-    // Helper function to collect all transaction IDs
-    const getAllTransactionIds = (slip: StudentRegistrationSlipViewModel): string[] => {
-      const transactionIds: string[] = [];
-      
-      // Add transaction ID from slip if it exists and is not empty
-      if (slip.bankTransactionId && slip.bankTransactionId.trim() !== '') {
-        transactionIds.push(slip.bankTransactionId.trim());
+    const isValidId = (value?: string | null): boolean => {
+      const trimmed = (value || '').trim();
+      return !!trimmed && trimmed !== '-';
+    };
+
+    const getAllOrderNumbers = (slip: StudentRegistrationSlipViewModel): string[] => {
+      const orderNumbers: string[] = [];
+      if (isValidId(slip.orderNumber)) {
+        orderNumbers.push(slip.orderNumber.trim());
       }
-      
-      // Add transaction IDs from payments array if they exist
-      if (slip.payments && Array.isArray(slip.payments)) {
-        slip.payments.forEach(payment => {
-          if (payment.bankTransactionID && payment.bankTransactionID.trim() !== '') {
-            const txId = payment.bankTransactionID.trim();
-            // Avoid duplicates
-            if (!transactionIds.includes(txId)) {
-              transactionIds.push(txId);
-            }
+      (slip.payments || []).forEach(payment => {
+        if (isValidId(payment.orderNumber)) {
+          const orderNo = payment.orderNumber.trim();
+          if (!orderNumbers.includes(orderNo)) {
+            orderNumbers.push(orderNo);
           }
-        });
-      }
-      
-      // Return array of transaction IDs, or array with '-' if no transactions
+        }
+      });
+      return orderNumbers.length > 0 ? orderNumbers : ['-'];
+    };
+
+    const getAllTransactionIds = (slip: StudentRegistrationSlipViewModel): string[] => {
+      const orderNumbers = new Set(
+        getAllOrderNumbers(slip).filter(v => v !== '-').map(v => v.toUpperCase())
+      );
+      const transactionIds: string[] = [];
+
+      const pushTx = (value?: string | null) => {
+        if (!isValidId(value)) {
+          return;
+        }
+        const txId = value.trim();
+        if (orderNumbers.has(txId.toUpperCase())) {
+          return;
+        }
+        if (!transactionIds.includes(txId)) {
+          transactionIds.push(txId);
+        }
+      };
+
+      pushTx(slip.bankTransactionId);
+      (slip.payments || []).forEach(payment => pushTx(payment.bankTransactionID));
+
       return transactionIds.length > 0 ? transactionIds : ['-'];
     };
 
     slips.forEach((slip, studentIndex) => {
       for (let copy = 0; copy < 3; copy++) {
-        const yOffset = 8 + copy * slipHeight; // Reduced from 10 to 8
-        doc.setFontSize(10); // Reduced from 12 to 10
+        const yOffset = 8 + copy * slipHeight;
+        const orderNumbers = getAllOrderNumbers(slip);
+        const transactionIds = getAllTransactionIds(slip);
+        const extraLines = Math.max(orderNumbers.length, transactionIds.length) - 1;
+        const infoBoxHeight = 28 + Math.max(0, extraLines) * 4;
+
+        doc.setFontSize(10);
         doc.setTextColor(9, 62, 150);
-        doc.text(`HiLCoE Registration ${slip.academicTerm}/Offer Batch ${slip.offeredBatchCode}`, 105, yOffset + 3, { align: 'center' }); // Reduced from 4 to 3
+        doc.text(`HiLCoE Registration ${slip.academicTerm}/Offer Batch ${slip.offeredBatchCode}`, 105, yOffset + 3, { align: 'center' });
         doc.setDrawColor(9, 62, 150);
-        doc.setLineWidth(0.5); // Reduced from 0.7 to 0.5
-        doc.line(20, yOffset + 6, 190, yOffset + 6); // Reduced from 7 to 6
+        doc.setLineWidth(0.5);
+        doc.line(20, yOffset + 6, 190, yOffset + 6);
 
         doc.setDrawColor(41, 128, 185);
         doc.setFillColor(240, 248, 255);
-        doc.roundedRect(25, yOffset + 8, 160, 24, 2, 2, 'FD'); // Reduced height from 28 to 24
-        doc.setFontSize(7); // Reduced from 8 to 7
+        doc.roundedRect(25, yOffset + 8, 160, infoBoxHeight, 2, 2, 'FD');
+        doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
-        doc.text('Student Name:', 30, yOffset + 13); // Reduced from 16 to 13
-        doc.text('Student ID:', 30, yOffset + 17); // Reduced from 21 to 17
-        doc.text('Academic Term:', 110, yOffset + 13); // Reduced from 16 to 13
-        doc.text('Own Batch:', 110, yOffset + 17); // Reduced from 21 to 17
+        doc.text('Student Name:', 30, yOffset + 13);
+        doc.text('Student ID:', 30, yOffset + 17);
+        doc.text('Academic Term:', 110, yOffset + 13);
+        doc.text('Own Batch:', 110, yOffset + 17);
         doc.setFont('helvetica', 'normal');
-        doc.text(slip.fullName || '', 60, yOffset + 13); // Reduced from 16 to 13
-        doc.text(slip.studentCode || '', 60, yOffset + 17); // Reduced from 21 to 17
-        doc.text(slip.academicTerm || '', 145, yOffset + 13); // Reduced from 16 to 13
-        doc.text(slip.owenBatchCode || '', 145, yOffset + 17); // Reduced from 21 to 17
-
-        // Info box two-column layout for extra fields
-        // First row (left)
-        doc.setFont('helvetica', 'bold');
-        doc.text('Bank:', 30, yOffset + 21); // Reduced from 26 to 21
-        doc.setFont('helvetica', 'normal');
-        doc.text(`From: ${slip.fromBank || ''} To: ${slip.toBank || ''}`, 60, yOffset + 21); // Reduced from 26 to 21
+        doc.text(slip.fullName || '', 60, yOffset + 13);
+        doc.text(slip.studentCode || '', 60, yOffset + 17);
+        doc.text(slip.academicTerm || '', 145, yOffset + 13);
+        doc.text(slip.owenBatchCode || '', 145, yOffset + 17);
 
         doc.setFont('helvetica', 'bold');
-        doc.text('FS NO.:', 30, yOffset + 25); // Reduced from 31 to 25
+        doc.text('Bank:', 30, yOffset + 21);
         doc.setFont('helvetica', 'normal');
-        doc.text('____________________', 60, yOffset + 25); // Reduced from 31 to 25
-
-        // First row (right) - Swapped positions
-        doc.setFont('helvetica', 'bold');
-        doc.text('Registration Date:', 110, yOffset + 21); // Swapped: Registration Date now at yOffset + 21
-        doc.setFont('helvetica', 'normal');
-        doc.text(slip.registrationDate || '', 145, yOffset + 21); // Swapped: Registration Date now at yOffset + 21
+        doc.text(`From: ${slip.fromBank || ''} To: ${slip.toBank || ''}`, 60, yOffset + 21);
 
         doc.setFont('helvetica', 'bold');
-        doc.text('Bank Transaction Id .:', 110, yOffset + 25); // Swapped: Bank Transaction Id now at yOffset + 25
+        doc.text('Registration Date:', 110, yOffset + 21);
         doc.setFont('helvetica', 'normal');
-        // Get all transaction IDs as an array
-        const transactionIds = getAllTransactionIds(slip);
-        // Display first transaction ID on the first line
-        if (transactionIds.length > 0) {
-          doc.text(transactionIds[0], 145, yOffset + 25);
-          // Display subsequent transaction IDs on new lines
-          for (let i = 1; i < transactionIds.length; i++) {
-            doc.text(transactionIds[i], 145, yOffset + 25 + (i * 4)); // 4 units spacing between lines
-          }
+        doc.text(slip.registrationDate || '', 145, yOffset + 21);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('FS NO.:', 30, yOffset + 25);
+        doc.setFont('helvetica', 'normal');
+        doc.text('____________________', 60, yOffset + 25);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('Payment Order #:', 30, yOffset + 29);
+        doc.setFont('helvetica', 'normal');
+        doc.text(orderNumbers[0], 60, yOffset + 29);
+        for (let i = 1; i < orderNumbers.length; i++) {
+          doc.text(orderNumbers[i], 60, yOffset + 29 + (i * 4));
         }
 
-        // Calculate the maximum Y position of header content (including multiple transaction IDs)
-        // Base position is yOffset + 25, plus spacing for additional transaction IDs
-        const maxHeaderY = transactionIds.length > 1 
-          ? yOffset + 25 + ((transactionIds.length - 1) * 4) + 4 // Add 4 more units for the last transaction ID height
-          : yOffset + 29; // Base case: yOffset + 25 + 4 units for text height
+        doc.setFont('helvetica', 'bold');
+        doc.text('Bank Transaction Id:', 110, yOffset + 29);
+        doc.setFont('helvetica', 'normal');
+        doc.text(transactionIds[0], 145, yOffset + 29);
+        for (let i = 1; i < transactionIds.length; i++) {
+          doc.text(transactionIds[i], 145, yOffset + 29 + (i * 4));
+        }
 
-        // Table (move up to follow the info box, now below the larger card)
-        // Add spacing (7 units) between header and table to prevent overlap
+        const maxHeaderY = yOffset + 29 + Math.max(0, extraLines) * 4 + 4;
+
         autoTable(doc, {
-          startY: maxHeaderY + 7, // Add spacing to prevent overlap with header
+          startY: maxHeaderY + 4,
           margin: { left: 25, right: 25 },
           head: [['Course Code', 'Course Title', 'Credit Hours', 'Total Amount']],
           body: slip.courses.map(c => [
@@ -160,9 +178,9 @@ export class PdfExportService {
             slip.courses.reduce((sum, c) => sum + c.totalAmount, 0)
           ]],
           theme: 'grid',
-          headStyles: { fillColor: [9, 62, 150], textColor: 255, fontSize: 6 }, // Reduced from 8 to 6
-          footStyles: { fillColor: [245, 245, 245], textColor: 0, fontStyle: 'bold', fontSize: 6 }, // Reduced from 8 to 6
-          styles: { fontSize: 6, cellPadding: 1 }, // Reduced from 8 to 6, and padding from 1.5 to 1
+          headStyles: { fillColor: [9, 62, 150], textColor: 255, fontSize: 6 },
+          footStyles: { fillColor: [245, 245, 245], textColor: 0, fontStyle: 'bold', fontSize: 6 },
+          styles: { fontSize: 6, cellPadding: 1 },
           alternateRowStyles: { fillColor: [245, 250, 255] },
           columnStyles: {
             2: { halign: 'center' },

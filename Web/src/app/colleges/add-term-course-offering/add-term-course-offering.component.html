@@ -1,26 +1,22 @@
 <div class="content-container">
-  <!-- Header Section -->
   <div class="header-section">
+    <button nz-button nzType="default" class="back-btn" type="button" (click)="goToCurriculum()">
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Course Offerings
+    </button>
     <div class="header-content">
       <div class="page-title">
         <h2 class="title-text">{{ action }}</h2>
         <p class="subtitle-text">Create and manage term course offerings for academic programs</p>
       </div>
-    </div>
-    <div class="header-right">
-      <button nz-button nzType="default" class="back-btn" (click)="goToCurriculum()">
-        <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
-        Back to Course Offerings
-      </button>
       <div class="term-info" *ngIf="startDate || endDate || nextTerm">
         <span nz-icon nzType="calendar" nzTheme="outline"></span>
-        <span class="term-duration">Term Duration: {{startDate | date: 'dd-MMM-yy' }} - {{endDate | date: 'dd-MMM-yy'}}</span>
-        <span class="term-name" *ngIf="nextTerm">{{nextTerm}} {{nextTermYear}}</span>
+        <span class="term-duration">Term Duration: {{ startDate | date: 'dd-MMM-yy' }} - {{ endDate | date: 'dd-MMM-yy' }}</span>
+        <span class="term-name" *ngIf="nextTerm">{{ nextTerm }} {{ nextTermYear }}</span>
       </div>
     </div>
   </div>
 
-  <!-- Form Container -->
   <div class="form-container">
     <div class="form-card">
       <div class="form-header">
@@ -33,9 +29,8 @@
         </div>
       </div>
 
-      <form nz-form [formGroup]="termCourseOfferingForm" class="course-offering-form">
+      <form nz-form [formGroup]="termCourseOfferingForm" class="admin-form">
         <div class="form-sections">
-          <!-- Basic Information Section -->
           <div class="form-section">
             <div class="section-header">
               <h4 class="section-title">
@@ -48,24 +43,46 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Batch</nz-form-label>
                   <nz-form-control nzErrorTip="Please select a batch">
-                    <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch" [nzShowSearch]="true"
-                      [nzAllowClear]="true" [nzShowArrow]="true" [nzDropdownMatchSelectWidth]="false"
-                      class="professional-select">
-                      <nz-option *ngFor="let item of batchs" [nzValue]="item.batchCode"
-                        [nzLabel]="item.batchCode"></nz-option>
+                    <nz-select
+                      formControlName="batchCode"
+                      id="batchCode"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
+                      [nzShowSearch]="true"
+                      [nzAllowClear]="true"
+                      [nzShowArrow]="true"
+                      [nzDropdownMatchSelectWidth]="false"
+                    >
+                      <nz-option
+                        *ngFor="let item of batchs"
+                        [nzValue]="item.batchCode"
+                        [nzLabel]="item.batchCode"
+                      ></nz-option>
                     </nz-select>
+                    <label for="batchCode" class="floating-label">
+                      <span nz-icon nzType="team" nzTheme="outline"></span>
+                      Batch <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Batch Entry</nz-form-label>
                   <nz-form-control>
-                    <input nz-input formControlName="entryCode" readonly class="form-input readonly"
-                      placeholder="Auto-populated" />
+                    <input
+                      nz-input
+                      id="entryCode"
+                      formControlName="entryCode"
+                      readonly
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="entryCode" class="floating-label">
+                      <span nz-icon nzType="barcode" nzTheme="outline"></span>
+                      Batch Entry <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -74,25 +91,48 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Offer Year</nz-form-label>
                   <nz-form-control nzErrorTip="Please select an offer year">
-                    <nz-select formControlName="Year" nzPlaceHolder="Select Entry Year" [nzShowSearch]="true"
-                      [nzShowArrow]="true" [nzDropdownMatchSelectWidth]="false" class="professional-select">
-                      <nz-option *ngFor="let item of yearList" [nzValue]="item" [nzLabel]="item.toString()"></nz-option>
+                    <nz-select
+                      formControlName="Year"
+                      id="Year"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
+                      [nzShowSearch]="true"
+                      [nzShowArrow]="true"
+                      [nzDropdownMatchSelectWidth]="false"
+                    >
+                      <nz-option
+                        *ngFor="let item of yearList"
+                        [nzValue]="item"
+                        [nzLabel]="item.toString()"
+                      ></nz-option>
                     </nz-select>
+                    <label for="Year" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Offer Year <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
-
                 <nz-form-item>
-                  <nz-form-label [nzSpan]="10" nzRequired>Registration Start Date</nz-form-label>
                   <nz-form-control>
-                    <nz-date-picker class="ant-calendar-picker"
-                      formControlName="RegistrationStartDate"></nz-date-picker>
-                    <div nz-form-explain
-                      *ngIf="termCourseOfferingForm.controls['RegistrationStartDate'].invalid && (termCourseOfferingForm.controls['RegistrationStartDate'].dirty || termCourseOfferingForm.controls['RegistrationStartDate'].touched)">
+                    <nz-date-picker
+                      formControlName="RegistrationStartDate"
+                      id="RegistrationStartDate"
+                      nzPlaceHolder=" "
+                      class="date-with-floating-label"
+                      style="width: 100%"
+                    ></nz-date-picker>
+                    <label for="RegistrationStartDate" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Registration Start Date <span class="required">*</span>
+                    </label>
+                    <div
+                      nz-form-explain
+                      *ngIf="termCourseOfferingForm.controls['RegistrationStartDate'].invalid && (termCourseOfferingForm.controls['RegistrationStartDate'].dirty || termCourseOfferingForm.controls['RegistrationStartDate'].touched)"
+                    >
                       <span class="error-message">Registration Start Date is required.</span>
                     </div>
                   </nz-form-control>
@@ -102,33 +142,50 @@
 
             <div class="form-row">
               <div class="form-col">
-
                 <nz-form-item>
-                  <nz-form-label nzRequired>Batch Term</nz-form-label>
                   <nz-form-control nzErrorTip="Please select an academic term">
-                    <nz-select formControlName="AcademicTermSeason" nzPlaceHolder="Select Academic Term Season"
-                      [nzShowSearch]="true" [nzDisabled]="true" [nzShowArrow]="true"
-                      [nzDropdownMatchSelectWidth]="false" class="professional-select">
-                      <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
-                        [nzLabel]="item.Description"></nz-option>
+                    <nz-select
+                      formControlName="AcademicTermSeason"
+                      id="AcademicTermSeason"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
+                      [nzShowSearch]="true"
+                      [nzDisabled]="true"
+                      [nzShowArrow]="true"
+                      [nzDropdownMatchSelectWidth]="false"
+                    >
+                      <nz-option
+                        *ngFor="let item of listOfTermNumber"
+                        [nzValue]="item.Id"
+                        [nzLabel]="item.Description"
+                      ></nz-option>
                     </nz-select>
+                    <label for="AcademicTermSeason" class="floating-label">
+                      <span nz-icon nzType="schedule" nzTheme="outline"></span>
+                      Batch Term <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
-
-
               </div>
+
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label [nzSpan]="10" nzRequired>Registration End Date</nz-form-label>
                   <nz-form-control>
-                    <nz-date-picker class="ant-calendar-picker" formControlName="RegistrationEndDate"
-                      [class.error]="termCourseOfferingForm.controls['RegistrationEndDate'].invalid && (termCourseOfferingForm.controls['RegistrationEndDate'].dirty || termCourseOfferingForm.controls['RegistrationEndDate'].touched)"></nz-date-picker>
-                    <!-- <div nz-form-explain
-              *ngIf="termCourseOfferingForm.controls['RegistrationEndDate'].invalid && (termCourseOfferingForm.controls['RegistrationEndDate'].dirty || termCourseOfferingForm.controls['RegistrationEndDate'].touched)">
-              <span class="error-message">Registration End Date is required.</span>
-            </div> -->
+                    <nz-date-picker
+                      formControlName="RegistrationEndDate"
+                      id="RegistrationEndDate"
+                      nzPlaceHolder=" "
+                      class="date-with-floating-label"
+                      style="width: 100%"
+                      [class.error]="termCourseOfferingForm.controls['RegistrationEndDate'].invalid && (termCourseOfferingForm.controls['RegistrationEndDate'].dirty || termCourseOfferingForm.controls['RegistrationEndDate'].touched)"
+                    ></nz-date-picker>
+                    <label for="RegistrationEndDate" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Registration End Date <span class="required">*</span>
+                    </label>
                     <div
-                      *ngIf="termCourseOfferingForm.hasError('dateRangeError', ['RegistrationStartDate', 'RegistrationEndDate'])">
+                      *ngIf="termCourseOfferingForm.hasError('dateRangeError', ['RegistrationStartDate', 'RegistrationEndDate'])"
+                    >
                       <p class="error-message">Start date must be before end date.</p>
                     </div>
                   </nz-form-control>
@@ -136,26 +193,43 @@
               </div>
             </div>
 
-
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label>Curriculum</nz-form-label>
                   <nz-form-control>
-                    <input nz-input formControlName="curriculumCode" readonly class="form-input readonly"
-                      placeholder="Auto-populated" />
+                    <input
+                      nz-input
+                      id="curriculumCode"
+                      formControlName="curriculumCode"
+                      readonly
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="curriculumCode" class="floating-label">
+                      <span nz-icon nzType="book" nzTheme="outline"></span>
+                      Curriculum
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label>Remark</nz-form-label>
                   <nz-form-control>
                     <nz-textarea-count [nzMaxCharacterCount]="250">
-                      <textarea rows="4" formControlName="remark" nz-input class="form-textarea"
-                        placeholder="Enter remarks (optional)"></textarea>
+                      <textarea
+                        id="remark"
+                        rows="4"
+                        formControlName="remark"
+                        nz-input
+                        placeholder=" "
+                        class="textarea-with-floating-label"
+                      ></textarea>
                     </nz-textarea-count>
+                    <label for="remark" class="floating-label textarea-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -165,7 +239,6 @@
       </form>
     </div>
 
-    <!-- Course Selection Section -->
     <div class="course-selection-container">
       <div class="selection-header">
         <h3 class="selection-title">
@@ -176,7 +249,6 @@
       </div>
 
       <div class="course-tabs">
-        <!-- List of Courses -->
         <div class="course-section">
           <div class="section-card">
             <div class="card-header">
@@ -196,23 +268,25 @@
                   nzAllowClear
                   nzPlaceHolder="Course quadrant"
                   nzShowSearch
-                  [nzDisabled]="!quadrantOptions.length">
+                  [nzDisabled]="!quadrantOptions.length"
+                >
                   <nz-option
                     *ngFor="let quadrant of quadrantOptions"
                     [nzValue]="quadrant.id"
-                    [nzLabel]="quadrant.label">
+                    [nzLabel]="quadrant.label"
+                  >
                   </nz-option>
                 </nz-select>
                 <div class="header-stats">
                   <div class="stat-item">
                     <span nz-icon nzType="book" nzTheme="outline"></span>
                     <span class="stat-label">Total Courses:</span>
-                    <span class="stat-value">{{courses?.length || 0}}</span>
+                    <span class="stat-value">{{ courses?.length || 0 }}</span>
                   </div>
                   <div class="stat-item">
                     <span nz-icon nzType="check-square" nzTheme="outline"></span>
                     <span class="stat-label">Selected Credits:</span>
-                    <span class="stat-value">{{selectedAdditionalCreditHours}}</span>
+                    <span class="stat-value">{{ selectedAdditionalCreditHours }}</span>
                   </div>
                 </div>
               </div>
@@ -220,29 +294,54 @@
 
             <div class="search-container">
               <nz-input-group nzSearch class="search-input">
-                <input nz-input placeholder="Search courses..." [(ngModel)]="searchText" (ngModelChange)="onSearch()"
-                  (input)="onSearch()" (keyup)="onSearch()" class="search-field">
+                <input
+                  nz-input
+                  placeholder="Search courses..."
+                  [(ngModel)]="searchText"
+                  (ngModelChange)="onSearch()"
+                  (input)="onSearch()"
+                  (keyup)="onSearch()"
+                  class="search-field"
+                />
               </nz-input-group>
             </div>
 
             <div class="table-container">
               <div *ngIf="!courses || courses.length === 0" class="no-courses-message">
-                <nz-empty nzNotFoundImage="simple"
-                  [nzNotFoundContent]="(originalCourses?.length && (selectedQuadrantId || searchText))
-                    ? 'No courses match the current quadrant/search filters.'
-                    : 'No additional courses available for this batch/curriculum combination. You can still proceed with creating the term course offering using only the curriculum breakdown courses.'">
+                <nz-empty
+                  nzNotFoundImage="simple"
+                  [nzNotFoundContent]="
+                    originalCourses?.length && (selectedQuadrantId || searchText)
+                      ? 'No courses match the current quadrant/search filters.'
+                      : 'No additional courses available for this batch/curriculum combination. You can still proceed with creating the term course offering using only the curriculum breakdown courses.'
+                  "
+                >
                 </nz-empty>
               </div>
 
-              <nz-table *ngIf="courses && courses.length > 0" nzBordered #basicTableA [nzData]="courses"
-                [nzShowPagination]="true" nzShowSizeChanger [nzPageSize]="10" [nzPageSizeOptions]="[5, 10, 20, 50]"
-                (nzCurrentPageDataChange)="onCurrentPageDataChangeA($event)" class="course-table"
-                [nzScroll]="{ x: '100%' }">
+              <nz-table
+                *ngIf="courses && courses.length > 0"
+                nzBordered
+                #basicTableA
+                [nzData]="courses"
+                [nzShowPagination]="true"
+                nzShowSizeChanger
+                [nzPageSize]="10"
+                [nzPageSizeOptions]="[5, 10, 20, 50]"
+                (nzCurrentPageDataChange)="onCurrentPageDataChangeA($event)"
+                class="course-table"
+                [nzScroll]="{ x: '100%' }"
+              >
                 <thead>
                   <tr>
                     <th nzWidth="60px" nzAlign="center" class="checkbox-column">
-                      <label nz-checkbox [nzChecked]="checkedA" [nzIndeterminate]="indeterminateA"
-                        (nzCheckedChange)="onAllCheckedA($event)" class="header-checkbox">
+                      <label
+                        nz-checkbox
+                        [nzChecked]="checkedA"
+                        [nzIndeterminate]="indeterminateA"
+                        (nzCheckedChange)="onAllCheckedA($event)"
+                        class="header-checkbox"
+                      >
                       </label>
                     </th>
                     <th nzWidth="120px" nzAlign="left" class="course-code-column">Course Code</th>
@@ -254,8 +353,12 @@
                 <tbody>
                   <tr *ngFor="let data of basicTableA.data; let i = index" class="course-row">
                     <td nzAlign="center" class="checkbox-cell">
-                      <label nz-checkbox [nzChecked]="setOfCheckedIdA.has(data.courseId)"
-                        (nzCheckedChange)="onItemCheckedA(data.courseId, $event)" class="course-checkbox">
+                      <label
+                        nz-checkbox
+                        [nzChecked]="setOfCheckedIdA.has(data.courseId)"
+                        (nzCheckedChange)="onItemCheckedA(data.courseId, $event)"
+                        class="course-checkbox"
+                      >
                       </label>
                     </td>
                     <td nzAlign="left" class="course-code">{{ data.courseCode }}</td>
@@ -269,7 +372,6 @@
           </div>
         </div>
 
-        <!-- Curriculum Course Breakdown -->
         <div class="course-section">
           <div class="section-card">
             <div class="card-header">
@@ -289,23 +391,25 @@
                   nzAllowClear
                   nzPlaceHolder="Course quadrant"
                   nzShowSearch
-                  [nzDisabled]="!breakdownQuadrantOptions.length">
+                  [nzDisabled]="!breakdownQuadrantOptions.length"
+                >
                   <nz-option
                     *ngFor="let quadrant of breakdownQuadrantOptions"
                     [nzValue]="quadrant.id"
-                    [nzLabel]="quadrant.label">
+                    [nzLabel]="quadrant.label"
+                  >
                   </nz-option>
                 </nz-select>
                 <div class="header-stats">
                   <div class="stat-item">
                     <span nz-icon nzType="book" nzTheme="outline"></span>
                     <span class="stat-label">Total Courses:</span>
-                    <span class="stat-value">{{listOfCourseBreakDown?.length || 0}}</span>
+                    <span class="stat-value">{{ listOfCourseBreakDown?.length || 0 }}</span>
                   </div>
                   <div class="stat-item">
                     <span nz-icon nzType="check-square" nzTheme="outline"></span>
                     <span class="stat-label">Selected Credits:</span>
-                    <span class="stat-value">{{selectedCreditHours}}</span>
+                    <span class="stat-value">{{ selectedCreditHours }}</span>
                   </div>
                 </div>
               </div>
@@ -313,22 +417,41 @@
 
             <div class="search-container">
               <nz-input-group nzSearch class="search-input">
-                <input nz-input placeholder="Search courses..." [(ngModel)]="searchTextB"
-                  (ngModelChange)="onSearchBreak()" (input)="onSearchBreak()" (keyup)="onSearchBreak()"
-                  class="search-field">
+                <input
+                  nz-input
+                  placeholder="Search courses..."
+                  [(ngModel)]="searchTextB"
+                  (ngModelChange)="onSearchBreak()"
+                  (input)="onSearchBreak()"
+                  (keyup)="onSearchBreak()"
+                  class="search-field"
+                />
               </nz-input-group>
             </div>
 
             <div class="table-container">
-              <nz-table nzBordered #basicTable [nzData]="listOfCourseBreakDown || []" [nzShowPagination]="true"
-                nzShowSizeChanger [nzPageSize]="10" [nzPageSizeOptions]="[5, 10, 20, 50]"
-                (nzCurrentPageDataChange)="onCurrentPageDataChange($event)" class="course-table"
-                [nzScroll]="{ x: '100%' }">
+              <nz-table
+                nzBordered
+                #basicTable
+                [nzData]="listOfCourseBreakDown || []"
+                [nzShowPagination]="true"
+                nzShowSizeChanger
+                [nzPageSize]="10"
+                [nzPageSizeOptions]="[5, 10, 20, 50]"
+                (nzCurrentPageDataChange)="onCurrentPageDataChange($event)"
+                class="course-table"
+                [nzScroll]="{ x: '100%' }"
+              >
                 <thead>
                   <tr>
                     <th nzWidth="60px" nzAlign="center" class="checkbox-column">
-                      <label nz-checkbox [nzChecked]="checked" [nzIndeterminate]="indeterminate"
-                        (nzCheckedChange)="onAllChecked($event)" class="header-checkbox">
+                      <label
+                        nz-checkbox
+                        [nzChecked]="checked"
+                        [nzIndeterminate]="indeterminate"
+                        (nzCheckedChange)="onAllChecked($event)"
+                        class="header-checkbox"
+                      >
                       </label>
                     </th>
                     <th nzWidth="120px" nzAlign="left" class="course-code-column">Course Code</th>
@@ -340,8 +463,12 @@
                 <tbody>
                   <tr *ngFor="let data of basicTable.data; let i = index" class="course-row">
                     <td nzAlign="center" class="checkbox-cell">
-                      <label nz-checkbox [nzChecked]="setOfCheckedId.has(data.courseId)"
-                        (nzCheckedChange)="onItemChecked(data.courseId, $event)" class="course-checkbox">
+                      <label
+                        nz-checkbox
+                        [nzChecked]="setOfCheckedId.has(data.courseId)"
+                        (nzCheckedChange)="onItemChecked(data.courseId, $event)"
+                        class="course-checkbox"
+                      >
                       </label>
                     </td>
                     <td nzAlign="left" class="course-code">{{ data.courseCode }}</td>
@@ -356,15 +483,19 @@
         </div>
       </div>
 
-
-      <!-- Form Actions -->
       <div class="form-actions">
         <button nz-button nzType="default" class="cancel-btn" (click)="goToCurriculum()">
           <span nz-icon nzType="close" nzTheme="outline"></span>
           Cancel
         </button>
-        <button nz-button nzType="primary" class="submit-btn" (click)="submitForm()" [nzLoading]="loading"
-          [disabled]="isSubmitDisabled">
+        <button
+          nz-button
+          nzType="primary"
+          class="submit-btn"
+          (click)="submitForm()"
+          [nzLoading]="loading"
+          [disabled]="isSubmitDisabled"
+        >
           <span nz-icon nzType="save" nzTheme="outline"></span>
           {{ submit }}
         </button>

@@ -11,7 +11,7 @@ import {
   numbersOnlyValidator
 } from "src/app/common/constant";
 import { CurriculumQuadrantBreakdownService } from "src/app/graduation-requirement/services/curriculum-quadrant-breakdown.service";
-import { TransferChange, TransferItem } from "ng-zorro-antd/transfer";
+import { TransferChange, TransferDirection, TransferItem } from "ng-zorro-antd/transfer";
 import { BehaviorSubject } from "rxjs";
 
 @Component({
@@ -45,6 +45,7 @@ export class CurriculumBreakdownFormComponent implements OnInit {
   curriculumId = "";
   curriculumCode = "";
   programCode: ''
+  private courseLoadToken = 0;
   constructor(
     public activeRoute: ActivatedRoute,
     private _route: Router,
@@ -70,27 +71,37 @@ export class CurriculumBreakdownFormComponent implements OnInit {
   }
   ngOnInit(): void {
     this.getQuadrantsList();
-    // this.getCourseList();
     this.getCurriculumsList();
     this.getListOfAcademicTermStatus();
     this.getListOfYearNumberStatus();
     this.academicProgrammeID.patchValue(this.programCode);
     this.CurriculumId.patchValue(this.curriculumCode);
-    // this.CurriculumId.valueChanges.subscribe(res => {
-    //   this.curId = res;
-    // });
     this.yearNumber.valueChanges.subscribe(res => {
       this.year = res;
+      this.tryLoadCourses();
     });
     this.termNumber.valueChanges.subscribe(res => {
       this.term = res;
-      if (this.curId && this.term && this.year) {
-        this.targetList = [];
-        this.targetCourseIds$.next([]);
-        this.progId = 0;
-        this.getCourseList();
-      }
+      this.tryLoadCourses();
     });
+  }
+
+  private tryLoadCourses(): void {
+    if (this.curId && this.term && this.year) {
+      this.resetCourseSelection();
+      this.progId = 0;
+      this.getCourseList();
+    }
+  }
+
+  private resetCourseSelection(): void {
+    this.targetList = [];
+    this.targetCourseIds = [];
+    this.numberOfSelectiveCourse = 0;
+    this.numberOfSaveQuadrantCourse = 0;
+    this.courses = [];
+    this.numberOfCourseList = 0;
+    this.targetCourseIds$.next([]);
   }
   getQuadrantsList() {
     if (!this.curriculumCode) {
@@ -121,28 +132,104 @@ export class CurriculumBreakdownFormComponent implements OnInit {
   // }
 
   getCourseList() {
+    if (!this.curId || !this.term || !this.year) {
+      return;
+    }
+
+    const token = ++this.courseLoadToken;
+    const curId = this.curId;
+    const term = this.term;
+    const year = this.year;
+
     this._curriculumTermBreakdownService
-      .getListOfUnRegisteredCourseById(this.curId, this.term, this.year)
-      .subscribe((res: any) => {
+      .getListOfUnRegisteredCourseById(curId, term, year)
+      .subscribe({
+        next: (res: any) => {
+          if (token !== this.courseLoadToken) {
+            return;
+          }
 
-        this.numberOfCourseList = res.length;
-
-        this.courses = res.map(course => ({
-          key: course.id,
-          title: `${course.courseCode} - ${course.courseTitle}`,
-          courseCode: course.courseCode,
-          courseTitle: course.courseTitle
-        }));
-
-        this.courses.sort((a, b) => a.courseCode.localeCompare(b.courseCode));
-
-        if (this.numberOfCourseList > 0) {
-          this.targetList = [];
-          this.updateTargetCourseIds();
-          this.sortTargetList();
-          this.loadSavedCourses(this.curId, this.term, this.year);
+          const available = (res || []).map((course) => this.mapCourseTransferItem(course, 'left'));
+          this._curriculumTermBreakdownService.getSavedCourses(curId, term, year).subscribe({
+            next: (savedResponse: any) => {
+              if (token !== this.courseLoadToken) {
+                return;
+              }
+              this.applyCourseLists(available, savedResponse, token);
+            },
+            error: () => {
+              if (token !== this.courseLoadToken) {
+                return;
+              }
+              this.applyCourseLists(available, [], token);
+            }
+          });
+        },
+        error: () => {
+          if (token !== this.courseLoadToken) {
+            return;
+          }
+          this.resetCourseSelection();
+          this._customNotificationService.notification(
+            'error',
+            'Error',
+            'Failed to load courses for this year/term.'
+          );
         }
       });
+  }
+
+  private applyCourseLists(available: TransferItem[], savedResponse: any, token: number): void {
+    const savedItems = Array.isArray(savedResponse) ? savedResponse : (savedResponse?.data || []);
+    this.numberOfSaveQuadrantCourse = savedItems.length;
+
+    const selected = savedItems.map((item: any) => this.mapCourseTransferItem({
+      id: item.courseId || item.CourseId,
+      courseCode: item.courseCode || item.CourseCode,
+      courseTitle: item.courseTitle || item.CourseTitle,
+      creditHours: item.creditHours || item.CreditHours
+    }, 'right'));
+
+    if (selected.length > 0) {
+      this.progId = savedItems[0].parentId || savedItems[0].ParentId || this.progId;
+    }
+
+    const selectedKeySet = new Set(selected.map((item) => String(item['key']).toLowerCase()));
+    const mergedAvailable = available.filter(
+      (item) => !selectedKeySet.has(String(item['key']).toLowerCase())
+    );
+
+    this.courses = [...mergedAvailable, ...selected]
+      .sort((a, b) => String(a['courseCode']).localeCompare(String(b['courseCode'])));
+    this.targetList = [...selected];
+    this.numberOfSelectiveCourse = selected.length;
+    this.numberOfCourseList = this.courses.length;
+    this.updateTargetCourseIds();
+    this.sortTargetList();
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      if (token !== this.courseLoadToken) {
+        return;
+      }
+      this.targetCourseIds$.next([...this.targetCourseIds]);
+      this.cdr.detectChanges();
+    });
+  }
+
+  private mapCourseTransferItem(course: any, direction: TransferDirection = 'left'): TransferItem {
+    const creditHours = Number(course?.creditHours ?? course?.CreditHours ?? 0) || 0;
+    const courseCode = course?.courseCode || course?.CourseCode || '';
+    const courseTitle = course?.courseTitle || course?.CourseTitle || '';
+    const key = String(course?.id || course?.ID || course?.courseId || course?.CourseId || '');
+    return {
+      key,
+      title: `${courseCode} - ${courseTitle} (${creditHours} cr)`,
+      courseCode,
+      courseTitle,
+      creditHours,
+      direction
+    } as TransferItem;
   }
 
   getCurriculumTermBreakdownsById(id: number) {
@@ -335,19 +422,11 @@ export class CurriculumBreakdownFormComponent implements OnInit {
     this._curriculumTermBreakdownService
       .getSavedCourses(curId, term, year)
       .subscribe(savedItems => {
-        this.numberOfSaveQuadrantCourse = savedItems.length;
-        if (this.numberOfSaveQuadrantCourse > 0) {
-          this.progId = savedItems[0].parentId;
-          this.targetList = savedItems.map(item => ({
-            key: item.courseId,
-            title: `${item.courseCode} - ${item.courseTitle}`,
-            courseCode: item.courseCode,
-            courseTitle: item.courseTitle
-          }));
-
-          this.updateTargetCourseIds();
-          this.sortTargetList();
-        }
+        this.applyCourseLists(
+          this.courses.filter(i => i['direction'] !== 'right'),
+          savedItems,
+          this.courseLoadToken
+        );
       });
   }
 
@@ -368,33 +447,40 @@ export class CurriculumBreakdownFormComponent implements OnInit {
   }
   onTransferChange(e: TransferChange): void {
     if (e.to === "right" && e.from === "left") {
-      this.targetList = this.targetList.concat(e.list);
+      const moved: TransferItem[] = e.list.map(item => ({
+        ...item,
+        direction: 'right' as TransferDirection
+      }));
+      this.targetList = this.targetList.concat(moved);
       this.numberOfSelectiveCourse = this.targetList.length;
       this.sortTargetList();
     } else if (e.to === "left" && e.from === "right") {
-      // Check if the transfer is from the right (target) to the left (source)
-      const removedCourseIds = e.list.map(item => item["key"]);
+      const removedCourseIds = e.list.map(item => String(item["key"]));
       this.targetList = this.targetList.filter(
-        item => !removedCourseIds.includes(item["key"])
+        item => !removedCourseIds.includes(String(item["key"]))
       );
-      //this.targetCourseIds = this.targetList.map(item => item['key']);
       this.numberOfSelectiveCourse = this.targetList.length;
       this.sortTargetList();
     }
+    this.updateTargetCourseIds();
     this.ngZone.runOutsideAngular(() => {
       setTimeout(() => {
-        this.targetCourseIds$.next(this.targetCourseIds);
+        this.targetCourseIds$.next([...this.targetCourseIds]);
       });
     });
     this.cdr.detectChanges();
   }
   updateTargetCourseIds(): void {
-    this.targetCourseIds = this.targetList.map(item => item["key"]);
+    this.targetCourseIds = this.targetList.map(item => String(item["key"]));
   }
   sortTargetList(): void {
     this.targetList.sort((a, b) =>
       a["courseCode"].localeCompare(b["courseCode"])
     );
+  }
+
+  get selectedCreditHours(): number {
+    return this.targetList.reduce((total, item) => total + (Number(item["creditHours"]) || 0), 0);
   }
   transferSelected(): void {
     this.updateTargetCourseIds();

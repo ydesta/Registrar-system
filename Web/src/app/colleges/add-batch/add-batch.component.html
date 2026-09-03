@@ -1,7 +1,6 @@
 <div class="content-container">
-  <!-- Header Section -->
   <div class="header-section">
-    <button nz-button nzType="default" class="back-btn" (click)="goBack()">
+    <button nz-button nzType="default" class="back-btn" type="button" (click)="goBack()">
       <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
       Back to Batches
     </button>
@@ -13,7 +12,6 @@
     </div>
   </div>
 
-  <!-- Form Container -->
   <div class="form-container">
     <div class="form-card">
       <div class="form-header">
@@ -26,9 +24,8 @@
         </div>
       </div>
 
-      <form nz-form [formGroup]="batchForm" (ngSubmit)="submitForm()" class="batch-form">
+      <form nz-form [formGroup]="batchForm" (ngSubmit)="submitForm()" class="admin-form">
         <div class="form-sections">
-          <!-- Academic Information Section -->
           <div class="form-section">
             <div class="section-header">
               <h4 class="section-title">
@@ -37,49 +34,57 @@
               </h4>
               <p class="section-description">Select the curriculum and academic period</p>
             </div>
-            
+
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Curriculum</nz-form-label>
                   <nz-form-control nzErrorTip="Please select a curriculum">
-                    <nz-select 
-                      formControlName="curriculumCode" 
-                      nzPlaceHolder="Select curriculum"
+                    <nz-select
+                      formControlName="curriculumCode"
+                      id="curriculumCode"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
                       [nzShowSearch]="true"
                       [nzAllowClear]="true"
                       [nzShowArrow]="true"
                       [nzDropdownMatchSelectWidth]="false"
-                      class="professional-select"
                     >
-                      <nz-option 
-                        *ngFor="let item of curricula" 
+                      <nz-option
+                        *ngFor="let item of curricula"
                         [nzValue]="item.curriculumCode"
                         [nzLabel]="item.curriculumCode"
                       ></nz-option>
                     </nz-select>
+                    <label for="curriculumCode" class="floating-label">
+                      <span nz-icon nzType="book" nzTheme="outline"></span>
+                      Curriculum <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Entry Year</nz-form-label>
                   <nz-form-control nzErrorTip="Please select an entry year">
-                    <nz-select 
-                      formControlName="entryYear" 
-                      nzPlaceHolder="Select entry year"
+                    <nz-select
+                      formControlName="entryYear"
+                      id="entryYear"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
                       [nzShowSearch]="true"
                       [nzShowArrow]="true"
                       [nzDropdownMatchSelectWidth]="false"
-                      class="professional-select"
                     >
-                      <nz-option 
-                        *ngFor="let item of yearList" 
-                        [nzValue]="item" 
+                      <nz-option
+                        *ngFor="let item of yearList"
+                        [nzValue]="item"
                         [nzLabel]="item.toString()"
                       ></nz-option>
                     </nz-select>
+                    <label for="entryYear" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Entry Year <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -88,42 +93,50 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Entry Term</nz-form-label>
                   <nz-form-control nzErrorTip="Please select an academic term">
-                    <nz-select 
-                      formControlName="entryTerm" 
-                      nzPlaceHolder="Select academic term"
+                    <nz-select
+                      formControlName="entryTerm"
+                      id="entryTerm"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
                       [nzShowSearch]="true"
                       [nzShowArrow]="true"
                       [nzDropdownMatchSelectWidth]="false"
-                      class="professional-select"
                     >
-                      <nz-option 
-                        *ngFor="let item of listOfTermNumber" 
+                      <nz-option
+                        *ngFor="let item of listOfTermNumber"
                         [nzValue]="item.Id"
                         [nzLabel]="item.Description"
                       ></nz-option>
                     </nz-select>
+                    <label for="entryTerm" class="floating-label">
+                      <span nz-icon nzType="schedule" nzTheme="outline"></span>
+                      Entry Term <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
-               <div class="form-col">
+
+              <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Amount</nz-form-label>
                   <nz-form-control nzErrorTip="Please enter a amount">
-                    <input 
-                      nz-input 
-                      formControlName="amount" 
-                      placeholder="Enter amount"
-                      class="form-input"
+                    <input
+                      nz-input
+                      id="amount"
+                      formControlName="amount"
+                      placeholder=" "
+                      class="input-with-floating-label"
                     />
+                    <label for="amount" class="floating-label">
+                      <span nz-icon nzType="dollar" nzTheme="outline"></span>
+                      Amount <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
             </div>
           </div>
 
-          <!-- Batch Details Section -->
           <div class="form-section">
             <div class="section-header">
               <h4 class="section-title">
@@ -132,39 +145,48 @@
               </h4>
               <p class="section-description">Define the batch code and additional information</p>
             </div>
-            
+
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Batch Code</nz-form-label>
                   <nz-form-control nzErrorTip="Please enter a batch code">
-                    <input 
-                      nz-input 
-                      formControlName="batchCode" 
-                      placeholder="Enter batch code"
-                      class="form-input"
+                    <input
+                      nz-input
+                      id="batchCode"
+                      formControlName="batchCode"
+                      placeholder=" "
+                      class="input-with-floating-label"
                     />
+                    <label for="batchCode" class="floating-label">
+                      <span nz-icon nzType="barcode" nzTheme="outline"></span>
+                      Batch Code <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
-                   <div class="form-col">
+
+              <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Education Level</nz-form-label>
                   <nz-form-control nzErrorTip="Please select an education level">
-                    <nz-select 
-                      formControlName="educationLevel" 
-                      nzPlaceHolder="Select education level"
+                    <nz-select
+                      formControlName="educationLevel"
+                      id="educationLevel"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
                       [nzShowSearch]="true"
                       [nzShowArrow]="true"
                       [nzDropdownMatchSelectWidth]="false"
-                      class="professional-select"
                     >
-                      <nz-option 
-                        *ngFor="let item of listOfProgramType" 
-                        [nzValue]="item.Id" 
+                      <nz-option
+                        *ngFor="let item of listOfProgramType"
+                        [nzValue]="item.Id"
                         [nzLabel]="item.Description"
                       ></nz-option>
                     </nz-select>
+                    <label for="educationLevel" class="floating-label">
+                      <span nz-icon nzType="trophy" nzTheme="outline"></span>
+                      Education Level <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -173,17 +195,21 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label>Remark</nz-form-label>
                   <nz-form-control>
                     <nz-textarea-count [nzMaxCharacterCount]="250">
-                      <textarea 
-                        rows="4" 
-                        formControlName="remark" 
+                      <textarea
+                        id="remark"
+                        rows="4"
+                        formControlName="remark"
                         nz-input
-                        class="form-textarea"
-                        placeholder="Enter remarks (optional)"
+                        placeholder=" "
+                        class="textarea-with-floating-label"
                       ></textarea>
                     </nz-textarea-count>
+                    <label for="remark" class="floating-label textarea-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -191,21 +217,16 @@
           </div>
         </div>
 
-        <!-- Form Actions -->
         <div class="form-actions">
-          <button 
-            nz-button 
-            nzType="default" 
-            class="cancel-btn"
-            (click)="goBack()"
-          >
+          <button nz-button nzType="default" class="cancel-btn" type="button" (click)="goBack()">
             <span nz-icon nzType="close" nzTheme="outline"></span>
             Cancel
           </button>
-          <button 
-            nz-button 
-            nzType="primary" 
+          <button
+            nz-button
+            nzType="primary"
             class="submit-btn"
+            type="submit"
             [disabled]="!batchForm.valid || loading"
             [nzLoading]="loading"
           >

@@ -497,6 +497,12 @@ nz-form-item {
   }
 }
 
+.nested-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 // Mobile responsive
 @media (max-width: 768px) {
   .content-container {
@@ -517,6 +523,27 @@ nz-form-item {
   .search-section {
     padding: 16px;
     margin-bottom: 16px;
+
+    ::ng-deep {
+      .ant-form-item {
+        margin-bottom: 12px;
+      }
+
+      .ant-form-item-label {
+        padding-bottom: 4px;
+        text-align: left;
+      }
+
+      .ant-form-item-label > label {
+        height: auto;
+      }
+    }
+  }
+
+  .nested-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .table-header {
@@ -526,7 +553,15 @@ nz-form-item {
 
     .table-actions {
       width: 100%;
-      justify-content: space-between;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+
+      input {
+        max-width: 100% !important;
+        width: 100%;
+        margin-right: 0 !important;
+        margin-bottom: 8px;
+      }
     }
   }
 
@@ -537,6 +572,7 @@ nz-form-item {
 
     .ant-btn {
       width: 100%;
+      margin-right: 0 !important;
     }
   }
 

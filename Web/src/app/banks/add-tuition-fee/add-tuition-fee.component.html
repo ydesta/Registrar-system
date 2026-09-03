@@ -1,48 +1,169 @@
+<div class="content-container">
+  <div class="header-section">
+    <button nz-button nzType="default" class="back-btn" type="button" routerLink="../tuition-fee">
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Tuition Fees
+    </button>
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">{{ action }}</h2>
+        <p class="subtitle-text">Configure tuition fee per credit for academic programmes</p>
+      </div>
+    </div>
+  </div>
 
-<h3 class="h-tag">{{action}}</h3>
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="dollar" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>Tuition Fee Information</h3>
+          <p>Set fee amounts and entry details for the selected programme</p>
+        </div>
+      </div>
 
-<div>
-    <form nz-form  nzLayout="vertical" [formGroup]="tuitionFeeForm" (ngSubmit)="submitForm()">
-      
-        <nz-form-item>
-            <nz-form-label [nzSpan]="8" nzRequired>Academic Programme</nz-form-label>
-            <nz-form-control [nzSpan]="8" nzValidatingTip="Validating...">
-              <nz-select formControlName="acadamicProgrammeCode" nzPlaceHolder="select academic Programme" >
-                  <nz-option *ngFor="let item of acadamicProgrammes" [nzValue]="item.acadamicProgrammeCode" [nzLabel]="item.acadamicProgrammeTitle"></nz-option>
-                </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-          <nz-form-item>
-            <nz-form-label [nzSpan]="8" nzRequired>Entry</nz-form-label>
-            <nz-form-control [nzSpan]="8" nzValidatingTip="Validating...">
-              <nz-select formControlName="entryCode" nzPlaceHolder="select entry" >
-                  <nz-option *ngFor="let item of entries" [nzValue]="item.entryCode" [nzLabel]="item.year"></nz-option>
-                </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-         
-        <nz-form-item>
-          <nz-form-label [nzSpan]="8" nzRequired>Fee Per Credit</nz-form-label>
-          <nz-form-control [nzSpan]="8">
-            <input nz-input formControlName="feePerCredit" placeholder="enter fee per credit" />
-          </nz-form-control>
-        </nz-form-item>  
-        <nz-form-item>
-            <nz-form-label [nzSpan]="8" >Entry Year</nz-form-label>
-            <nz-form-control [nzSpan]="8">
-                <input nz-input formControlName="entryYear" type="number" placeholder="enter entry year" />
-            </nz-form-control>
-          </nz-form-item> 
-          <nz-form-item>
-            <nz-form-label [nzSpan]="8" >Remark</nz-form-label>
-            <nz-form-control [nzSpan]="8">
-                <input nz-input formControlName="remark"  placeholder="enter remark" />
-            </nz-form-control>
-          </nz-form-item> 
-        <nz-form-item>
-          <nz-form-control [nzOffset]="8" [nzSpan]="8">
-            <button nz-button nzType="primary">{{submit}}</button>
-          </nz-form-control>
-        </nz-form-item>
+      <form nz-form [formGroup]="tuitionFeeForm" (ngSubmit)="submitForm()" class="admin-form">
+        <div class="form-sections">
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="book" nzTheme="outline"></span>
+                Programme & Entry
+              </h4>
+              <p class="section-description">Select the academic programme and entry</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select an academic programme">
+                    <nz-select
+                      formControlName="acadamicProgrammeCode"
+                      id="acadamicProgrammeCode"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
+                      [nzShowSearch]="true"
+                    >
+                      <nz-option
+                        *ngFor="let item of acadamicProgrammes"
+                        [nzValue]="item.acadamicProgrammeCode"
+                        [nzLabel]="item.acadamicProgrammeTitle"
+                      ></nz-option>
+                    </nz-select>
+                    <label for="acadamicProgrammeCode" class="floating-label">
+                      <span nz-icon nzType="book" nzTheme="outline"></span>
+                      Academic Programme <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select an entry">
+                    <nz-select
+                      formControlName="entryCode"
+                      id="entryCode"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
+                      [nzShowSearch]="true"
+                    >
+                      <nz-option
+                        *ngFor="let item of entries"
+                        [nzValue]="item.entryCode"
+                        [nzLabel]="item.year"
+                      ></nz-option>
+                    </nz-select>
+                    <label for="entryCode" class="floating-label">
+                      <span nz-icon nzType="schedule" nzTheme="outline"></span>
+                      Entry <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please enter fee per credit">
+                    <input
+                      nz-input
+                      id="feePerCredit"
+                      formControlName="feePerCredit"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="feePerCredit" class="floating-label">
+                      <span nz-icon nzType="dollar" nzTheme="outline"></span>
+                      Fee Per Credit <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control>
+                    <input
+                      nz-input
+                      id="entryYear"
+                      formControlName="entryYear"
+                      type="number"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="entryYear" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Entry Year
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control>
+                    <input
+                      nz-input
+                      id="remark"
+                      formControlName="remark"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="remark" class="floating-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div class="form-col"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            nz-button
+            nzType="default"
+            class="cancel-btn"
+            type="button"
+            routerLink="../tuition-fee"
+          >
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+          <button nz-button nzType="primary" class="submit-btn" type="submit">
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+            {{ submit }}
+          </button>
+        </div>
       </form>
+    </div>
+  </div>
 </div>

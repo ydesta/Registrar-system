@@ -2,81 +2,84 @@
   <div class="header-section">
     <div class="header-content">
       <div class="page-title">
-        <h3 class="title-text">CGPA Credit Hour Limits</h3>
+        <h2 class="title-text">CGPA Credit Hour Limits</h2>
         <p class="subtitle-text">
           Configure maximum credit hours by CGPA. Matching order: student, then batch, then term/year, then global.
         </p>
       </div>
+
       <div class="header-actions">
-        <nz-select
-          [(ngModel)]="filterAcademicTerm"
-          (ngModelChange)="onFilterChange()"
-          nzPlaceHolder="Term"
-          nzAllowClear
-          style="width: 140px"
-        >
-          <nz-option
-            *ngFor="let item of termList"
-            [nzValue]="item.Id"
-            [nzLabel]="item.Description"
-          ></nz-option>
-        </nz-select>
-        <nz-select
-          [(ngModel)]="filterYear"
-          (ngModelChange)="onFilterChange()"
-          nzPlaceHolder="Year"
-          nzAllowClear
-          style="width: 110px"
-        >
-          <nz-option *ngFor="let y of yearOptions" [nzValue]="y" [nzLabel]="'' + y"></nz-option>
-        </nz-select>
-        <nz-select
-          [(ngModel)]="filterLimitLevel"
-          (ngModelChange)="onFilterChange()"
-          nzPlaceHolder="Level"
-          nzAllowClear
-          style="width: 140px"
-        >
-          <nz-option
-            *ngFor="let item of levelList"
-            [nzValue]="item.Id"
-            [nzLabel]="item.Description"
-          ></nz-option>
-        </nz-select>
-        <div class="enable-toggle">
-          <span class="toggle-label">Enforce limits</span>
-          <nz-switch
-            [ngModel]="isEnabled"
-            [nzLoading]="settingLoading"
-            (ngModelChange)="onEnabledChange($event)"
-          ></nz-switch>
-        </div>
-        <div class="search-section">
-          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+        <div class="filters-row">
+          <nz-select
+            [(ngModel)]="filterAcademicTerm"
+            (ngModelChange)="onFilterChange()"
+            nzPlaceHolder="Term"
+            nzAllowClear
+            class="filter-select term-select"
+          >
+            <nz-option
+              *ngFor="let item of termList"
+              [nzValue]="item.Id"
+              [nzLabel]="item.Description"
+            ></nz-option>
+          </nz-select>
+          <nz-select
+            [(ngModel)]="filterYear"
+            (ngModelChange)="onFilterChange()"
+            nzPlaceHolder="Year"
+            nzAllowClear
+            class="filter-select year-select"
+          >
+            <nz-option *ngFor="let y of yearOptions" [nzValue]="y" [nzLabel]="'' + y"></nz-option>
+          </nz-select>
+          <nz-select
+            [(ngModel)]="filterLimitLevel"
+            (ngModelChange)="onFilterChange()"
+            nzPlaceHolder="Level"
+            nzAllowClear
+            class="filter-select level-select"
+          >
+            <nz-option
+              *ngFor="let item of levelList"
+              [nzValue]="item.Id"
+              [nzLabel]="item.Description"
+            ></nz-option>
+          </nz-select>
+          <div class="enable-toggle">
+            <span class="toggle-label">Enforce limits</span>
+            <nz-switch
+              [ngModel]="isEnabled"
+              [nzLoading]="settingLoading"
+              (ngModelChange)="onEnabledChange($event)"
+            ></nz-switch>
+          </div>
+          <div class="search-section floating-label-container">
             <input
               type="text"
               nz-input
-              placeholder="Search by CGPA or credit hours..."
+              id="limitSearch"
+              class="input-with-floating-label"
+              placeholder=" "
               [(ngModel)]="pager.searchKey"
               (ngModelChange)="pager.onSearch($event)"
             />
-          </nz-input-group>
-          <ng-template #suffixIconButton>
-            <button nz-button nzType="primary" class="search-btn" nzSearch>
-              <i nz-icon nzType="search"></i>
-            </button>
-          </ng-template>
+            <label for="limitSearch" class="floating-label">
+              <span nz-icon nzType="search" nzTheme="outline"></span>
+              Search
+            </label>
+          </div>
         </div>
+
         <button class="add-btn" nz-button nzType="primary" (click)="openModal()">
-          <i nz-icon nzType="plus" nzTheme="outline"></i>
-          <span>Add Limit</span>
+          <span nz-icon nzType="plus" nzTheme="outline"></span>
+          Add Limit
         </button>
       </div>
     </div>
   </div>
 
   <div class="status-banner" [class.enabled]="isEnabled" [class.disabled]="!isEnabled">
-    <i nz-icon [nzType]="isEnabled ? 'lock' : 'unlock'" nzTheme="outline"></i>
+    <span nz-icon [nzType]="isEnabled ? 'lock' : 'unlock'" nzTheme="outline"></span>
     <span *ngIf="isEnabled">
       Limits are enabled for {{ getTermLabel(filterAcademicTerm) }} {{ filterYear }}.
     </span>
@@ -140,20 +143,20 @@
               nz-button
               nz-dropdown
               [nzDropdownMenu]="menu"
-              nzPlacement="bottomLeft"
+              nzPlacement="bottomRight"
               class="action-button"
             >
-              <i nz-icon nzType="more" nzTheme="outline"></i>
+              <span nz-icon nzType="more" nzTheme="outline"></span>
             </button>
             <nz-dropdown-menu #menu="nzDropdownMenu">
               <ul nz-menu>
-                <li>
+                <li nz-menu-item>
                   <button nz-button nzType="default" class="action-item edit" (click)="editModal(data)">
-                    <i nz-icon nzType="edit" nzTheme="fill"></i>
+                    <span nz-icon nzType="edit" nzTheme="outline"></span>
                     <span>Edit</span>
                   </button>
                 </li>
-                <li>
+                <li nz-menu-item>
                   <button
                     nz-button
                     nzDanger
@@ -161,7 +164,7 @@
                     class="action-item delete"
                     (click)="showDeleteConfirm(data.id)"
                   >
-                    <i nz-icon nzType="delete" nzTheme="fill"></i>
+                    <span nz-icon nzType="delete" nzTheme="outline"></span>
                     <span>Delete</span>
                   </button>
                 </li>
@@ -172,7 +175,7 @@
       </tbody>
       <ng-template #emptyTpl>
         <div class="no-data">
-          <i nz-icon nzType="database" nzTheme="outline"></i>
+          <span nz-icon nzType="database" nzTheme="outline"></span>
           <p>No CGPA credit hour limits configured</p>
         </div>
       </ng-template>

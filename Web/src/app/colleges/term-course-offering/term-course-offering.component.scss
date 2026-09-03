@@ -154,6 +154,11 @@
     
     &.action-column {
       right: 0;
+      width: 64px !important;
+      min-width: 64px !important;
+      max-width: 64px !important;
+      padding-left: 4px !important;
+      padding-right: 8px !important;
     }
   }
 
@@ -190,6 +195,11 @@
       
       &.action-column {
         right: 0;
+        width: 64px !important;
+        min-width: 64px !important;
+        max-width: 64px !important;
+        padding-left: 4px !important;
+        padding-right: 8px !important;
       }
     }
   }
@@ -226,8 +236,9 @@
 
 // Column-specific styles
 .expand-column {
-  width: 80px;
-  min-width: 80px;
+  width: 72px;
+  min-width: 72px;
+  max-width: 72px;
   text-align: center;
   position: sticky;
   left: 0;
@@ -267,22 +278,25 @@
 
 .batch-column {
   min-width: 120px;
-  width: 15%;
+  width: 18%;
 }
 
 .term-column {
-  min-width: 150px;
-  width: 20%;
+  min-width: 140px;
+  width: 22%;
 }
 
 .date-column {
   min-width: 140px;
-  width: 15%;
+  width: 20%;
 }
 
 .action-column {
-  width: 100px;
-  min-width: 100px;
+  width: 64px !important;
+  min-width: 64px !important;
+  max-width: 64px !important;
+  padding-left: 4px !important;
+  padding-right: 8px !important;
   text-align: center;
   position: sticky;
   right: 0;
@@ -593,13 +607,15 @@
   }
   
   .expand-column {
-    width: 100px;
-    min-width: 100px;
+    width: 72px;
+    min-width: 72px;
+    max-width: 72px;
   }
   
   .action-column {
-    width: 120px;
-    min-width: 120px;
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
   }
   
   .custom-expand-icon {

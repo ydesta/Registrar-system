@@ -1,8 +1,6 @@
-
 <div class="content-container">
-  <!-- Header Section -->
   <div class="header-section">
-    <button nz-button nzType="default" class="back-btn" routerLink="/curricula">
+    <button nz-button nzType="default" class="back-btn" type="button" routerLink="/curricula">
       <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
       Back to Curricula
     </button>
@@ -10,15 +8,10 @@
       <div class="page-title">
         <h2 class="title-text">{{ action }}</h2>
         <p class="subtitle-text">Configure year and term breakdown for curriculum courses</p>
-        <div class="curriculum-info">
-          <span nz-icon nzType="calendar" nzTheme="outline"></span>
-          <span class="curriculum-description">Set up academic year and term requirements for course distribution</span>
-        </div>
       </div>
     </div>
   </div>
 
-  <!-- Form Container -->
   <div class="form-container">
     <div class="form-card">
       <div class="form-header">
@@ -31,9 +24,8 @@
         </div>
       </div>
 
-      <form nz-form [formGroup]="curriculumBreakdownForm" class="curriculum-form">
+      <form nz-form [formGroup]="curriculumBreakdownForm" class="admin-form">
         <div class="form-sections">
-          <!-- Basic Information Section -->
           <div class="form-section">
             <div class="section-header">
               <h4 class="section-title">
@@ -46,18 +38,38 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Academic Programme</nz-form-label>
                   <nz-form-control nzErrorTip="Please select an academic programme">
-                    <input nz-input formControlName="academicProgrammeID" readonly class="form-input readonly" />
+                    <input
+                      nz-input
+                      id="academicProgrammeID"
+                      formControlName="academicProgrammeID"
+                      readonly
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="academicProgrammeID" class="floating-label">
+                      <span nz-icon nzType="book" nzTheme="outline"></span>
+                      Academic Programme <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Curriculum Code</nz-form-label>
                   <nz-form-control nzErrorTip="Please enter curriculum code">
-                    <input nz-input formControlName="CurriculumId" readonly class="form-input readonly" />
+                    <input
+                      nz-input
+                      id="CurriculumId"
+                      formControlName="CurriculumId"
+                      readonly
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="CurriculumId" class="floating-label">
+                      <span nz-icon nzType="barcode" nzTheme="outline"></span>
+                      Curriculum Code <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -66,32 +78,46 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Year Number</nz-form-label>
                   <nz-form-control nzErrorTip="Please select year number">
-                    <nz-select 
-                      formControlName="yearNumber" 
-                      nzPlaceHolder="Select Year Number" 
-                      class="professional-select"
+                    <nz-select
+                      formControlName="yearNumber"
+                      id="yearNumber"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
                     >
-                      <nz-option *ngFor="let item of listOfYearNumber" [nzValue]="item.Id"
-                        [nzLabel]="item.Description"></nz-option>
+                      <nz-option
+                        *ngFor="let item of listOfYearNumber"
+                        [nzValue]="item.Id"
+                        [nzLabel]="item.Description"
+                      ></nz-option>
                     </nz-select>
+                    <label for="yearNumber" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Year Number <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Term Number</nz-form-label>
                   <nz-form-control nzErrorTip="Please select term number">
-                    <nz-select 
-                      formControlName="termNumber" 
-                      nzPlaceHolder="Select Term Number" 
-                      class="professional-select"
+                    <nz-select
+                      formControlName="termNumber"
+                      id="termNumber"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
                     >
-                      <nz-option *ngFor="let item of listOfTermNumber" [nzValue]="item.Id"
-                        [nzLabel]="item.Description"></nz-option>
+                      <nz-option
+                        *ngFor="let item of listOfTermNumber"
+                        [nzValue]="item.Id"
+                        [nzLabel]="item.Description"
+                      ></nz-option>
                     </nz-select>
+                    <label for="termNumber" class="floating-label">
+                      <span nz-icon nzType="schedule" nzTheme="outline"></span>
+                      Term Number <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -100,24 +126,27 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label>Remark</nz-form-label>
                   <nz-form-control>
                     <nz-textarea-count [nzMaxCharacterCount]="250">
-                      <textarea 
-                        rows="4" 
-                        formControlName="remark" 
+                      <textarea
+                        id="remark"
+                        rows="4"
+                        formControlName="remark"
                         nz-input
-                        placeholder="Enter remarks (optional)"
-                        class="form-textarea"
+                        placeholder=" "
+                        class="textarea-with-floating-label"
                       ></textarea>
                     </nz-textarea-count>
+                    <label for="remark" class="floating-label textarea-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
             </div>
           </div>
 
-          <!-- Course Selection Section -->
           <div class="form-section" *ngIf="numberOfCourseList > 0">
             <div class="section-header">
               <h4 class="section-title">
@@ -127,28 +156,33 @@
               <p class="section-description">Select courses for this year and term from the available course list</p>
             </div>
 
+            <div class="credit-summary">
+              <div class="credit-stat">
+                <span class="label">Selected courses</span>
+                <strong>{{ numberOfSelectiveCourse }}</strong>
+              </div>
+              <div class="credit-stat">
+                <span class="label">Total credit hours (T)</span>
+                <strong>{{ selectedCreditHours }}</strong>
+              </div>
+            </div>
+
             <div class="course-transfer-container">
-              <nz-transfer 
-                [nzDataSource]="courses" 
-                [nzDisabled]="disabled" 
-                nzShowSearch 
+              <nz-transfer
+                [nzDataSource]="courses"
+                [nzDisabled]="disabled || isLoading"
+                nzShowSearch
                 [nzFilterOption]="filterOption"
-                (nzSearchChange)="search($event)" 
-                (nzSelectChange)="select($event)" 
+                (nzSearchChange)="search($event)"
+                (nzSelectChange)="select($event)"
                 (nzChange)="onTransferChange($event)"
-                [nzListStyle]="{ 'width.px': 522, 'height.px': 500 }" 
+                [nzListStyle]="{ 'width.px': 522, 'height.px': 500 }"
                 [nzItemsUnit]="'Courses'"
-                [nzTitles]="['Available Courses', 'Selected Courses']" 
-                [nzOperations]="[]"
+                [nzTitles]="['Available Courses', 'Selected Courses (T = ' + selectedCreditHours + ')']"
+                [nzOperations]="['>', '<']"
                 [nzTargetKeys]="targetCourseIds$ | async"
-                class="course-transfer">
-                <ng-template #custom>
-                  <button nz-button nzType="default" [disabled]="targetList.length === 0"
-                    (click)="transferSelected()" class="transfer-btn">
-                    <span nz-icon nzType="swap" nzTheme="outline"></span>
-                    Transfer Selected
-                  </button>
-                </ng-template>
+                class="course-transfer"
+              >
               </nz-transfer>
             </div>
           </div>
@@ -159,9 +193,15 @@
             <span nz-icon nzType="close" nzTheme="outline"></span>
             Cancel
           </button>
-          <button nz-button nzType="primary" class="submit-btn" type="submit" 
-            [disabled]="!curriculumBreakdownForm.valid || isLoading" (click)="submitForm()"
-            [nzLoading]="isLoading">
+          <button
+            nz-button
+            nzType="primary"
+            class="submit-btn"
+            type="submit"
+            [disabled]="!curriculumBreakdownForm.valid || isLoading"
+            (click)="submitForm()"
+            [nzLoading]="isLoading"
+          >
             <span nz-icon nzType="save" nzTheme="outline" *ngIf="!isLoading"></span>
             {{ submit }}
           </button>

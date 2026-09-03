@@ -1,287 +1,237 @@
-<!-- Professional Header Section -->
-<div class="registration-header">
-  <div class="header-content">
-    <div class="header-title">
-      <div class="title-container">
-        <div class="title-icon">
-          <span nz-icon nzType="file-text" nzTheme="outline"></span>
-        </div>
-        <h1>
-          My Registration Slips
-        </h1>
+<div class="slips-page">
+  <div class="page-hero">
+    <div class="hero-copy">
+      <div class="hero-icon">
+        <span nz-icon nzType="file-text" nzTheme="outline"></span>
       </div>
-      <p>
-        View and download your course registration slips
-      </p>
+      <div>
+        <h1>My Registration Slips</h1>
+        <p>View, expand, and download your semester registration slips</p>
+      </div>
     </div>
+    <button nz-button nzType="default" class="refresh-btn" (click)="refreshData()" [nzLoading]="tbLoading">
+      <span nz-icon nzType="reload" nzTheme="outline"></span>
+      Refresh
+    </button>
   </div>
-</div>
 
-<!-- Student Information Header -->
-<div class="academic-header" *ngIf="listOdRegisteredStudent && listOdRegisteredStudent.length > 0">
-  <div class="academic-info">
-    <div class="info-item">
-      <span nz-icon nzType="user" nzTheme="outline" class="info-icon"></span>
-      <div class="info-content">
-        <span class="info-label">Student Name</span>
-        <span class="info-value">{{ listOdRegisteredStudent[0]?.fullName || 'Student Name' }}</span>
+  <div class="profile-strip" *ngIf="studentName">
+    <div class="profile-item">
+      <span nz-icon nzType="user" nzTheme="outline"></span>
+      <div>
+        <span class="label">Student Name</span>
+        <strong>{{ studentName }}</strong>
       </div>
     </div>
-    <div class="info-item">
-      <span nz-icon nzType="idcard" nzTheme="outline" class="info-icon"></span>
-      <div class="info-content">
-        <span class="info-label">Student ID</span>
-        <span class="info-value">{{ listOdRegisteredStudent[0]?.studentCode || 'N/A' }}</span>
+    <div class="profile-item">
+      <span nz-icon nzType="idcard" nzTheme="outline"></span>
+      <div>
+        <span class="label">Student ID</span>
+        <strong>{{ studentCode || '—' }}</strong>
       </div>
     </div>
-    <div class="info-item">
-      <span nz-icon nzType="team" nzTheme="outline" class="info-icon"></span>
-      <div class="info-content">
-        <span class="info-label">Batch Code</span>
-        <span class="info-value">{{ listOdRegisteredStudent[0]?.owenBatchCode || 'N/A' }}</span>
+    <div class="profile-item">
+      <span nz-icon nzType="team" nzTheme="outline"></span>
+      <div>
+        <span class="label">Batch Code</span>
+        <strong>{{ batchCode || '—' }}</strong>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Summary Statistics -->
-<div class="summary-section" *ngIf="listOdRegisteredStudent && listOdRegisteredStudent.length > 0">
-  <div class="summary-grid">
-    <div class="summary-card total-registrations">
-      <div class="icon-container">
-        <div class="icon-background">
-          <span nz-icon nzType="file-text" nzTheme="outline"></span>
-        </div>
+  <div class="stats-grid" *ngIf="listOdRegisteredStudent.length">
+    <div class="stat-card">
+      <div class="stat-icon"><span nz-icon nzType="file-text"></span></div>
+      <div>
+        <div class="stat-value">{{ listOdRegisteredStudent.length }}</div>
+        <div class="stat-label">Registrations</div>
       </div>
-      <div class="summary-number">{{ totalRecord || 0 }}</div>
-      <div class="summary-label">Total Registrations</div>
     </div>
-    <div class="summary-card total-courses">
-      <div class="icon-container">
-        <div class="icon-background">
-          <span nz-icon nzType="book" nzTheme="outline"></span>
-        </div>
+    <div class="stat-card">
+      <div class="stat-icon books"><span nz-icon nzType="book"></span></div>
+      <div>
+        <div class="stat-value">{{ totalCourses }}</div>
+        <div class="stat-label">Total Courses</div>
       </div>
-      <div class="summary-number">{{ getTotalCourses() }}</div>
-      <div class="summary-label">Total Courses</div>
     </div>
-    <div class="summary-card total-credits">
-      <div class="icon-container">
-        <div class="icon-background">
-          <span nz-icon nzType="star" nzTheme="outline"></span>
-        </div>
+    <div class="stat-card">
+      <div class="stat-icon credits"><span nz-icon nzType="star"></span></div>
+      <div>
+        <div class="stat-value">{{ totalCredits }}</div>
+        <div class="stat-label">Total Credits</div>
       </div>
-      <div class="summary-number">{{ getTotalCredits() }}</div>
-      <div class="summary-label">Total Credits</div>
     </div>
-    <div class="summary-card total-amount">
-      <div class="icon-container">
-        <div class="icon-background">
-          <span nz-icon nzType="dollar" nzTheme="outline"></span>
-        </div>
+    <div class="stat-card">
+      <div class="stat-icon amount"><span nz-icon nzType="dollar"></span></div>
+      <div>
+        <div class="stat-value">{{ totalAmount | currency:'ETB':'symbol':'1.0-0' }}</div>
+        <div class="stat-label">Total Amount</div>
       </div>
-      <div class="summary-number">{{ getTotalAmount() | currency:'ETB':'symbol':'1.0-0' }}</div>
-      <div class="summary-label">Total Amount</div>
     </div>
   </div>
-</div>
 
-<!-- Main Content Card -->
-<nz-card class="main-content-card" [nzBodyStyle]="{'background-color': '#f5f7fa'}">
-
-  <!-- Table Section -->
-  <div class="table-section">
-    <div class="table-header">
-      <h3 class="table-title">
-        <span nz-icon nzType="table" nzTheme="outline"></span>
-        Course Registration Records
-      </h3>
-      <div class="table-actions">
-        <nz-input-group nzSearch [nzAddOnAfter]="searchButton" class="search-input">
-          <input type="text" nz-input placeholder="Search students..." [(ngModel)]="searchText" (input)="onSearch()">
-        </nz-input-group>
-        <ng-template #searchButton>
-          <button nz-button nzType="primary" nzSearch (click)="onSearch()">
-            <span nz-icon nzType="search" nzTheme="outline"></span>
-          </button>
-        </ng-template>
+  <div class="records-card">
+    <div class="records-header">
+      <div>
+        <h2>Course Registration Records</h2>
+        <p>Expand a term to review registered courses</p>
+      </div>
+      <div class="search-box">
+        <input
+          nz-input
+          placeholder="Search term, bank, transaction..."
+          [(ngModel)]="searchText"
+          (ngModelChange)="onSearch($event)"
+        />
+        <span nz-icon nzType="search" class="search-icon"></span>
       </div>
     </div>
 
-    <div class="responsive-table-wrapper">
-      <nz-table #basicTable [nzData]="listOdRegisteredStudent" nzBordered [nzPageSize]="pageSize"
-        [nzShowSizeChanger]="true" [nzTotal]="totalRecord" [nzPageIndex]="pageindex"
-        (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)"
-        [nzLoading]="tbLoading" [nzNoResult]="emptyTpl" [nzShowQuickJumper]="true" [nzShowTotal]="totalTemplate"
-        [nzPageSizeOptions]="pageSizeOption" nzSize="middle" [nzScroll]="{ x: '1200px' }"
-        class="professional-table modern-datatable">
-
-        <thead class="table-header-row">
-          <tr class="table-header-row">
-            <th class="paginate">
-              #
-            </th>
-            <th class="th-row" nzSortOrder="null" (nzSortOrderChange)="sort('academicTerm', $event)">
-              Academic Term
-            </th>
-            <th class="th-row" nzSortOrder="null" (nzSortOrderChange)="sort('registrationDate', $event)">
-              Registration Date
-            </th>
-            <th class="th-row" nzSortOrder="null" (nzSortOrderChange)="sort('fromBank', $event)">
-              From Bank
-            </th>
-            <th class="th-row" nzSortOrder="null" (nzSortOrderChange)="sort('toBank', $event)">
-              To Bank
-            </th>
-            <th class="th-row" nzSortOrder="null" (nzSortOrderChange)="sort('bankTransactionId', $event)">
-              Transaction ID
-            </th>
-            <th class="th-row actions-header">
-              Actions
-            </th>
+    <nz-table
+      #basicTable
+      [nzData]="filteredSlips"
+      nzBordered
+      [nzPageSize]="pageSize"
+      [nzShowSizeChanger]="true"
+      [nzTotal]="totalRecord"
+      [nzPageIndex]="pageindex"
+      (nzPageIndexChange)="onPageIndexChange($event)"
+      (nzPageSizeChange)="onPageSizeChange($event)"
+      [nzLoading]="tbLoading"
+      [nzNoResult]="emptyTpl"
+      [nzShowQuickJumper]="true"
+      [nzShowTotal]="totalTemplate"
+      [nzPageSizeOptions]="pageSizeOption"
+      [nzFrontPagination]="true"
+      nzSize="middle"
+      class="slips-table"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="48px" class="col-expand"></th>
+          <th nzWidth="22%" [nzSortFn]="true" (nzSortOrderChange)="sort('academicTerm', $event)">Academic Term</th>
+          <th nzWidth="18%" [nzSortFn]="true" (nzSortOrderChange)="sort('registrationDate', $event)">Registration Date</th>
+          <th nzWidth="20%" [nzSortFn]="true" (nzSortOrderChange)="sort('fromBank', $event)">From Bank</th>
+          <th nzWidth="18%" [nzSortFn]="true" (nzSortOrderChange)="sort('toBank', $event)">To Bank</th>
+          <th nzWidth="80px" class="col-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let data of basicTable.data; let i = index; trackBy: trackBySlip">
+          <tr [class.expanded-row]="expandSet.has(slipKey(data, i))">
+            <td class="col-expand">
+              <button
+                type="button"
+                class="expand-btn"
+                (click)="onExpandChange(slipKey(data, i), !expandSet.has(slipKey(data, i)))"
+                [attr.aria-expanded]="expandSet.has(slipKey(data, i))"
+              >
+                <span
+                  nz-icon
+                  [nzType]="expandSet.has(slipKey(data, i)) ? 'minus-square' : 'plus-square'"
+                  nzTheme="outline"
+                ></span>
+              </button>
+            </td>
+            <td>
+              <span class="term-chip">{{ data.academicTerm || '—' }}</span>
+            </td>
+            <td>{{ data.registrationDate || '—' }}</td>
+            <td>{{ data.fromBank || '—' }}</td>
+            <td>{{ data.toBank || '—' }}</td>
+            <td class="col-actions">
+              <button
+                nz-button
+                nzType="text"
+                nz-dropdown
+                [nzDropdownMenu]="menu"
+                nzPlacement="bottomRight"
+                class="action-btn"
+              >
+                <span nz-icon nzType="more" nzTheme="outline"></span>
+              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li nz-menu-item *ngIf="data.fileName" (click)="getFileName(data.fileName)">
+                    <span nz-icon nzType="eye" nzTheme="outline"></span>
+                    View Attached File
+                  </li>
+                  <li nz-menu-item (click)="downloadStudentSlip(data)">
+                    <span nz-icon nzType="file-pdf" nzTheme="outline"></span>
+                    Download PDF
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          <ng-container *ngFor="let data of basicTable.data; let i = index; trackBy: trackByStudentCode">
-            <tr [class.selected-row]="expandSet.has(data.studentCode)">
-              <td class="paginate">
-                <button nz-button nzType="text" nzSize="small"
-                  (click)="onExpandChange(data.studentCode, !expandSet.has(data.studentCode))" class="expand-button">
-                  <span nz-icon [nzType]="expandSet.has(data.studentCode) ? 'down' : 'right'" nzTheme="outline">
-                  </span>
-                </button>
-              </td>
-              <td>{{ data.academicTerm }}</td>
-              <td>{{ data.registrationDate }}</td>
-              <td>{{ data.fromBank }}</td>
-              <td>{{ data.toBank }}</td>
-              <td>{{ data.bankTransactionId }}</td>
-              <td class="actions-cell">
-                <div class="action-buttons">
-                  <button nz-button nzType="text" nzSize="small" nz-dropdown [nzDropdownMenu]="menu"
-                    nzPlacement="bottomRight" class="action-button modern-action-btn">
-                    <span nz-icon nzType="more" nzTheme="outline"></span>
-                  </button>
-                  <nz-dropdown-menu #menu="nzDropdownMenu">
-                    <ul nz-menu class="action-menu">
-                      <li nz-menu-item *ngIf="data.fileName" (click)="getFileName(data.fileName)">
-                        <span nz-icon nzType="eye" nzTheme="outline"></span>
-                        <span>View Attached File</span>
-                      </li>
 
-                      <li nz-menu-item (click)="downloadStudentSlip(data)">
-                        <span nz-icon nzType="file-pdf" nzTheme="outline"></span>
-                        <span>Download PDF</span>
-                      </li>
-                    </ul>
-                  </nz-dropdown-menu>
+          <tr *ngIf="expandSet.has(slipKey(data, i))" class="detail-row">
+            <td class="detail-cell" colspan="6">
+              <div class="course-panel">
+                <div class="course-panel-header">
+                  <h3>
+                    <span nz-icon nzType="book" nzTheme="outline"></span>
+                    Registered Courses
+                  </h3>
+                  <div class="mini-stats">
+                    <span>{{ getCourseDetails(data, i).length }} courses</span>
+                    <span>{{ getTotalCreditHours(data, i) }} credits</span>
+                    <span>{{ getSlipAmount(data, i) | currency:'ETB':'symbol':'1.0-0' }}</span>
+                  </div>
                 </div>
-              </td>
-            </tr>
 
-            <!-- Expandable Course Details Row -->
-            <tr class="ant-table-row ant-table-row-expanded" *ngIf="expandSet.has(data.studentCode)">
-              <td colspan="6" class="ant-table-cell course-details-cell">
-                <div class="course-details-container">
-                  <div class="course-details-header">
-                    <h4 class="course-details-title">
-                      <span nz-icon nzType="book" nzTheme="outline"></span>
-                      Registered Courses for {{ data.fullName }}
-                    </h4>
-                    <div class="course-summary">
-                      <span class="summary-item">
-                        <span nz-icon nzType="star" nzTheme="outline"></span>
-                        {{ getCourseDetails(data)?.length || 0 }} Courses
-                      </span>
-                      <span class="summary-item">
-                        <span nz-icon nzType="clock-circle" nzTheme="outline"></span>
-                        {{ getTotalCreditHours(data) }} Credits
-                      </span>
-                      <span class="summary-item">
-                        <span nz-icon nzType="dollar" nzTheme="outline"></span>
-                        {{ getTotalAmount(data) | currency:'ETB':'symbol':'1.0-0' }}
-                      </span>
+                <div class="course-grid-wrap">
+                  <div class="course-grid">
+                    <div class="course-grid-head">
+                      <div class="col-num">#</div>
+                      <div class="col-code">Course Code</div>
+                      <div class="col-title">Course Title</div>
+                      <div class="col-credits">Credits</div>
+                      <div class="col-amount">Amount</div>
+                      <div class="col-order">Order #</div>
+                      <div class="col-tx">Transaction ID</div>
+                      <div class="col-tx-date">Transaction Date</div>
+                    </div>
+                    <div class="course-grid-row" *ngFor="let course of getCourseDetails(data, i)">
+                      <div class="col-num">{{ course.number }}</div>
+                      <div class="col-code"><span class="code-badge">{{ course.code }}</span></div>
+                      <div class="col-title">{{ course.title }}</div>
+                      <div class="col-credits">{{ course.creditHours }}</div>
+                      <div class="col-amount">{{ course.amount | currency:'ETB':'symbol':'1.0-0' }}</div>
+                      <div class="col-order mono">{{ course.orderNumber || '—' }}</div>
+                      <div class="col-tx mono">{{ course.bankTransactionId || '—' }}</div>
+                      <div class="col-tx-date">{{ course.transactionDate ? (course.transactionDate | date:'dd-MM-yyyy') : '—' }}</div>
+                    </div>
+                    <div class="course-grid-foot">
+                      <div class="col-num"></div>
+                      <div class="col-code"></div>
+                      <div class="col-title total-label">Total</div>
+                      <div class="col-credits">{{ getTotalCreditHours(data, i) }}</div>
+                      <div class="col-amount">{{ getSlipAmount(data, i) | currency:'ETB':'symbol':'1.0-0' }}</div>
+                      <div class="col-order"></div>
+                      <div class="col-tx"></div>
+                      <div class="col-tx-date"></div>
                     </div>
                   </div>
-
-                  <div class="course-table-wrapper">
-                    <nz-table [nzData]="getCourseDetails(data)" nzBordered [nzShowPagination]="false" nzSize="small"
-                      class="course-table modern-subtable">
-
-                      <thead class="table-header-row">
-                        <tr class="table-header-row">
-                          <th class="paginate">
-                            #
-                          </th>
-                          <th class="th-row">
-                            Course Code
-                          </th>
-                          <th class="th-row">
-                            Course Title
-                          </th>
-                          <th class="th-row">
-                            Credit Hour
-                          </th>
-                          <th class="th-row">
-                            Total Amount
-                          </th>
-                        </tr>
-                      </thead>
-
-        <tbody>
-          <tr *ngFor="let course of getCourseDetails(data); let i = index">
-            <td class="paginate">
-              {{ i + 1 }}
+                </div>
+              </div>
             </td>
-            <td>{{ course.code }}</td>
-            <td>{{ course.title }}</td>
-            <td class="text-center">{{ course.creditHours }}</td>
-            <td class="text-center">{{ course.amount | currency:'ETB':'symbol':'1.0-0' }}</td>
           </tr>
-        </tbody>
+        </ng-container>
+      </tbody>
 
-        <tfoot class="footer-row">
-          <tr>
-            <td colspan="3" class="total-label">Total</td>
-            <td class="total-value text-center">{{ getTotalCreditHours(data) }}</td>
-            <td class="total-value text-center">{{ getTotalAmount(data) | currency:'ETB':'symbol':'1.0-0' }}</td>
-          </tr>
-        </tfoot>
-      </nz-table>
-    </div>
+      <ng-template #emptyTpl>
+        <div class="empty-state">
+          <span nz-icon nzType="inbox" nzTheme="outline"></span>
+          <h3>No registration slips found</h3>
+          <p>There are no course registration records to display.</p>
+          <button nz-button nzType="primary" (click)="refreshData()">Refresh</button>
+        </div>
+      </ng-template>
+    </nz-table>
   </div>
-  </td>
-  </tr>
-  </ng-container>
-
-  </tbody>
-
-  <ng-template #emptyTpl>
-    <div class="empty-state">
-      <div class="empty-icon">
-        <span nz-icon nzType="inbox" nzTheme="outline"></span>
-      </div>
-      <h3 class="empty-title">No Student Registrations Found</h3>
-      <p class="empty-description">
-        There are no student course registrations to display at the moment.
-      </p>
-      <div class="empty-actions">
-        <button nz-button nzType="primary" (click)="refreshData()">
-          <span nz-icon nzType="reload" nzTheme="outline"></span>
-          Refresh Data
-        </button>
-      </div>
-    </div>
-  </ng-template>
-  </nz-table>
-  </div>
-  </div>
-</nz-card>
+</div>
 
 <ng-template #totalTemplate let-total let-range="range">
-  <div class="pagination-info">
-    <span class="pagination-text">
-      Showing {{ range[0] }}-{{ range[1] }} of {{ total }} students
-    </span>
-  </div>
+  <span class="pager-text">Showing {{ range[0] }}-{{ range[1] }} of {{ total }} records</span>
 </ng-template>

@@ -1,21 +1,25 @@
 <div class="content-container">
-  <!-- Header Section -->
   <div class="header-section">
     <div class="header-content">
       <div class="page-title">
-        <h3 class="title-text">Quadrants</h3>
+        <h2 class="title-text">Quadrants</h2>
         <p class="subtitle-text">Manage and view all quadrant information</p>
       </div>
       <div class="header-actions">
-        <div class="search-section">
-          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input type="text" nz-input placeholder="Search quadrants..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)" />
-          </nz-input-group>
-          <ng-template #suffixIconButton>
-            <button nz-button nzType="primary" class="search-btn" nzSearch>
-              <i nz-icon nzType="search"></i>
-            </button>
-          </ng-template>
+        <div class="search-section floating-label-container">
+          <input
+            type="text"
+            nz-input
+            id="quadrantSearch"
+            class="input-with-floating-label"
+            placeholder=" "
+            [(ngModel)]="pager.searchKey"
+            (ngModelChange)="pager.onSearch($event)"
+          />
+          <label for="quadrantSearch" class="floating-label">
+            <span nz-icon nzType="search" nzTheme="outline"></span>
+            Search
+          </label>
         </div>
         <button
           routerLink="../../graduation/add-quadrant/null"
@@ -23,32 +27,15 @@
           nz-button
           nzType="primary"
         >
-          <i nz-icon nzType="plus" nzTheme="outline"></i>
-          <span>Add Quadrant</span>
-        </button>
-        <button nz-button class="export-btn">
-          <i nz-icon nzType="file-excel" nzTheme="outline"></i>
-          <span>Export</span>
-        </button>
-        <button
-          class="print-btn"
-          nz-button
-          nzType="default"
-          printTitle="Quadrant List"
-          printSectionId="print-section"
-          ngxPrint
-        >
-          <i nz-icon nzType="printer" nzTheme="outline"></i>
-          <span>Print</span>
+          <span nz-icon nzType="plus" nzTheme="outline"></span>
+          Add Quadrant
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Table Card -->
   <div class="table-card">
     <div id="print-section">
-      <img class="logo" src="../../../assets/images/logo.png" />
       <nz-table
         #basicTable
         [nzData]="quadrants!"
@@ -67,7 +54,9 @@
         class="quadrants-table"
       >
         <ng-template #rangeTemplate let-range="range" let-total>
-          Showing {{ range[0] }}-{{ range[1] }} of {{ total }} items
+          <span style="color: #6b7280; font-weight: 500;">
+            {{ range[0] }}-{{ range[1] }} of {{ total }} quadrants
+          </span>
         </ng-template>
         <thead>
           <tr>
@@ -95,41 +84,30 @@
                 nz-button
                 nz-dropdown
                 [nzDropdownMenu]="menu"
-                nzPlacement="bottomLeft"
+                nzPlacement="bottomRight"
                 class="action-button"
               >
-                <i nz-icon nzType="more" nzTheme="outline"></i>
+                <span nz-icon nzType="more" nzTheme="outline"></span>
               </button>
               <nz-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
-                  <li>
-                    <button nz-button nzType="default" class="action-item detail">
-                      <i nz-icon nzType="eye" nzTheme="fill"></i>
-                      <span>View Details</span>
-                    </button>
-                  </li>
-                  <li>
+                  <li nz-menu-item>
                     <a
                       routerLink="../../graduation/add-quadrant/{{ data.id }}"
-                      nz-button
-                      nzType="default"
                       class="action-item edit"
                     >
-                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                      <span nz-icon nzType="edit" nzTheme="outline"></span>
                       <span>Edit</span>
                     </a>
                   </li>
-                  <li>
-                    <button
-                      nz-button
-                      nzDanger
-                      nzType="default"
+                  <li nz-menu-item>
+                    <a
                       class="action-item delete"
                       (click)="showDeleteConfirm(data.id)"
                     >
-                      <i nz-icon nzType="delete" nzTheme="fill"></i>
+                      <span nz-icon nzType="delete" nzTheme="outline"></span>
                       <span>Delete</span>
-                    </button>
+                    </a>
                   </li>
                 </ul>
               </nz-dropdown-menu>
@@ -138,7 +116,7 @@
         </tbody>
         <ng-template #emptyTpl>
           <div class="no-data">
-            <i nz-icon nzType="book" nzTheme="outline"></i>
+            <span nz-icon nzType="book" nzTheme="outline"></span>
             <p>No quadrant records available</p>
           </div>
         </ng-template>

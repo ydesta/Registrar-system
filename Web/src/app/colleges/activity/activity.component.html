@@ -1,21 +1,25 @@
 <div class="content-container">
-  <!-- Header Section -->
   <div class="header-section">
     <div class="header-content">
       <div class="page-title">
-        <h3 class="title-text">Activities</h3>
-        <p class="subtitle-text">Manage and view all activity information</p>
+        <h2 class="title-text">Activities</h2>
+        <p class="subtitle-text">View, search, and manage all activities in the system</p>
       </div>
       <div class="header-actions">
-        <div class="search-section">
-          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input type="text" nz-input placeholder="Search activities..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)" />
-          </nz-input-group>
-          <ng-template #suffixIconButton>
-            <button nz-button nzType="primary" class="search-btn" nzSearch>
-              <i nz-icon nzType="search"></i>
-            </button>
-          </ng-template>
+        <div class="search-section floating-label-container">
+          <input
+            type="text"
+            nz-input
+            id="activitySearch"
+            class="input-with-floating-label"
+            placeholder=" "
+            [(ngModel)]="pager.searchKey"
+            (ngModelChange)="pager.onSearch($event)"
+          />
+          <label for="activitySearch" class="floating-label">
+            <span nz-icon nzType="search" nzTheme="outline"></span>
+            Search
+          </label>
         </div>
         <button
           class="add-btn"
@@ -23,34 +27,18 @@
           nzType="primary"
           (click)="openModal()"
         >
-          <i nz-icon nzType="plus" nzTheme="outline"></i>
-          <span>Add Activity</span>
-        </button>
-        <button nz-button class="export-btn" (click)="exportActivities()">
-          <i nz-icon nzType="file-excel" nzTheme="outline"></i>
-          <span>Export</span>
-        </button>
-        <button
-          class="print-btn"
-          nz-button
-          nzType="default"
-          printTitle="Activity List"
-          printSectionId="print-section"
-          ngxPrint
-        >
-          <i nz-icon nzType="printer" nzTheme="outline"></i>
-          <span>Print</span>
+          <span nz-icon nzType="plus" nzTheme="outline"></span>
+          Add Activity
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Table Card -->
   <div class="table-card">
     <div id="print-section">
-      <nz-table 
-        #basicTable 
-        [nzData]="activities!" 
+      <nz-table
+        #basicTable
+        [nzData]="activities!"
         nzBordered
         [nzPageSize]="pager.pageSize"
         [nzPageSizeOptions]="pager.pageSizeOptions"
@@ -66,63 +54,47 @@
         class="activities-table"
       >
         <ng-template #rangeTemplate let-range="range" let-total>
-          Showing {{ range[0] }}-{{ range[1] }} of {{ total }} items
+          <span>{{ range[0] }}-{{ range[1] }} of {{ total }} activities</span>
         </ng-template>
         <thead>
           <tr>
-            <th class="sn-column">S/N</th>
-            <th>Title</th>
-            <th>Date</th>
-            <th class="action-column">Actions</th>
+            <th style="min-width: 60px;">S/N</th>
+            <th style="min-width: 220px;">Title</th>
+            <th style="min-width: 140px;">Date</th>
+            <th style="min-width: 80px; text-align: center;">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let data of basicTable.data; let i = index">
-            <td class="sn-column">
-              <span class="sn-badge">{{ pager.serial(i) }}</span>
-            </td>
+            <td><span class="sn-badge">{{ pager.serial(i) }}</span></td>
             <td>{{ data.title }}</td>
-            <td>{{ data.createdDate | date : "yyyy-MM-dd" }}</td>
-            <td class="action-column">
-              <button 
-                nz-button 
-                nz-dropdown 
-                [nzDropdownMenu]="menu" 
-                nzPlacement="bottomLeft"
-                class="action-button"
+            <td>{{ data.createdDate | date: 'yyyy-MM-dd' }}</td>
+            <td>
+              <button
+                nz-button
+                nz-dropdown
+                [nzDropdownMenu]="menu"
+                nzPlacement="bottomRight"
+                class="action-dropdown-btn"
               >
-                <i nz-icon nzType="more" nzTheme="outline"></i>
+                <span nz-icon nzType="more" nzTheme="outline"></span>
               </button>
               <nz-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
-                  <li>
-                    <button nz-button nzType="default" class="action-item detail">
-                      <i nz-icon nzType="eye" nzTheme="fill"></i>
-                      <span>View Details</span>
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      nz-button
-                      nzType="default"
-                      class="action-item edit"
-                      (click)="editModal(data)"
-                    >
-                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                  <li nz-menu-item>
+                    <a class="action-menu-link" (click)="editModal(data)">
+                      <span nz-icon nzType="edit" nzTheme="outline"></span>
                       <span>Edit</span>
-                    </button>
+                    </a>
                   </li>
-                  <li>
-                    <button
-                      nz-button
-                      nzDanger
-                      nzType="default"
-                      class="action-item delete"
+                  <li nz-menu-item>
+                    <a
+                      class="action-menu-link delete"
                       (click)="showDeleteConfirm(data.id)"
                     >
-                      <i nz-icon nzType="delete" nzTheme="fill"></i>
+                      <span nz-icon nzType="delete" nzTheme="outline"></span>
                       <span>Delete</span>
-                    </button>
+                    </a>
                   </li>
                 </ul>
               </nz-dropdown-menu>
@@ -131,8 +103,8 @@
         </tbody>
         <ng-template #emptyTpl>
           <div class="no-data">
-            <i nz-icon nzType="calendar" nzTheme="outline"></i>
-            <p>No activity records available</p>
+            <span nz-icon nzType="calendar" nzTheme="outline"></span>
+            <p>No activities available</p>
           </div>
         </ng-template>
       </nz-table>

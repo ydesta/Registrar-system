@@ -119,8 +119,8 @@
                       Show Term Year Breakdown
                     </button>
                   </li>
-                  <li nz-menu-item>
-                    <button nz-button nzType="default" class="action-item" (click)="openModal(data.id)">
+                  <li nz-menu-item (click)="openModal(data.id || data.iD)">
+                    <button nz-button nzType="default" class="action-item" type="button">
                       <span nz-icon nzType="eye" nzTheme="outline"></span>
                       Show Status Tracking
                     </button>

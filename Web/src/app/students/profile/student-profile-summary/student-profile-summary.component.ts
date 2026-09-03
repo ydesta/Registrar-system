@@ -214,6 +214,22 @@ export class StudentProfileSummaryComponent implements OnInit {
     );
   }
 
+  isPassingGrade(grade: string): boolean {
+    if (!grade) {
+      return false;
+    }
+    const g = grade.trim().toUpperCase();
+    return ['A', 'A+', 'A-', 'B', 'B+', 'B-', 'C', 'C+', 'C-', 'D', 'D+', 'P'].includes(g);
+  }
+
+  isFailingGrade(grade: string): boolean {
+    if (!grade) {
+      return false;
+    }
+    const g = grade.trim().toUpperCase();
+    return g === 'F' || g === 'NG' || g === 'I';
+  }
+
   getInitials(fullName: string): string {
     if (!fullName) {
       return '';

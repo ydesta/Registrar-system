@@ -5,6 +5,7 @@
 }
 
 .header-section {
+  display: block;
   background: white;
   border-radius: 16px;
   padding: 24px;
@@ -14,35 +15,63 @@
 
   .header-content {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
 
     .page-title {
-      flex: 1;
-      min-width: 240px;
+      width: 100%;
 
       .title-text {
         margin: 0 0 8px 0;
         font-size: 28px;
         font-weight: 700;
         color: #1f2937;
+        line-height: 1.2;
       }
 
       .subtitle-text {
         margin: 0;
         color: #6b7280;
         font-size: 15px;
+        line-height: 1.5;
+        max-width: 720px;
       }
     }
 
     .header-actions {
       display: flex;
-      align-items: center;
-      gap: 12px;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      width: 100%;
       flex-wrap: wrap;
     }
+  }
+}
+
+.filters-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-select {
+  min-width: 120px;
+
+  &.term-select {
+    width: 140px;
+  }
+
+  &.year-select {
+    width: 110px;
+  }
+
+  &.level-select {
+    width: 150px;
   }
 }
 
@@ -54,12 +83,93 @@
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 8px 14px;
+  height: 40px;
 
   .toggle-label {
     font-weight: 600;
     color: #374151;
     white-space: nowrap;
   }
+}
+
+.search-section {
+  position: relative;
+  flex: 0 1 280px;
+  max-width: 320px;
+  min-width: 200px;
+
+  .input-with-floating-label {
+    width: 100%;
+    height: 40px;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1.5px solid #e8e8e8;
+    border-radius: 10px;
+    background: #fafafa;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: #40a9ff;
+      background: #fff;
+    }
+
+    &:focus {
+      border-color: #1890ff;
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    }
+
+    &::placeholder {
+      color: transparent;
+    }
+  }
+
+  .floating-label {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 14px;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    background: white;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    z-index: 1;
+    margin: 0;
+
+    span[nz-icon] {
+      font-size: 14px;
+      color: #1890ff;
+    }
+  }
+
+  .input-with-floating-label:focus + .floating-label,
+  .input-with-floating-label:not(:placeholder-shown) + .floating-label {
+    top: -8px;
+    left: 10px;
+    font-size: 12px;
+    color: #1890ff;
+    transform: none;
+
+    span[nz-icon] {
+      font-size: 12px;
+    }
+  }
+}
+
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  border-radius: 10px;
+  font-weight: 500;
+  margin-left: auto;
 }
 
 .status-banner {
@@ -89,6 +199,7 @@
   border-radius: 16px;
   padding: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
 }
 
 .sn-column {
@@ -108,25 +219,68 @@
 }
 
 .action-column {
-  width: 90px;
+  width: 72px;
+  text-align: center;
 }
 
 .action-button {
-  border: none;
-  box-shadow: none;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .action-item {
   width: 100%;
   text-align: left;
   border: none;
+  background: transparent;
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 8px 12px;
+
+  &.delete {
+    color: #ef4444;
+  }
 }
 
 .no-data {
   text-align: center;
-  padding: 32px;
-  color: #6b7280;
+  padding: 40px 16px;
+  color: #9ca3af;
+
+  span[nz-icon] {
+    font-size: 36px;
+    color: #d1d5db;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .header-section .header-content .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .add-btn {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .search-section {
+    flex: 1 1 100%;
+    max-width: none;
+  }
 }

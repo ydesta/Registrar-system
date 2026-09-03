@@ -1,69 +1,85 @@
 <div class="content-container">
-  <!-- Header Section -->
   <div class="header-section">
+    <button nz-button nzType="default" class="back-btn" type="button" routerLink="../banks">
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Banks
+    </button>
     <div class="header-content">
       <div class="page-title">
-        <h2 class="title-text">{{action}}</h2>
-        <p class="subtitle-text">{{progStatusId == 'null' ? 'Add a new bank to the system' : 'Update bank information'}}</p>
-      </div>
-      <div class="header-actions">
-        <button nz-button nzType="default" routerLink="../banks" class="back-btn">
-          <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
-          Back to Banks
-        </button>
+        <h2 class="title-text">{{ action }}</h2>
+        <p class="subtitle-text">{{ progStatusId == 'null' ? 'Add a new bank to the system' : 'Update bank information' }}</p>
       </div>
     </div>
   </div>
 
-  <!-- Form Card Container -->
-  <div class="form-card">
-    <div class="form-container">
-      <form nz-form [formGroup]="bankForm" (ngSubmit)="submitForm()" class="bank-form">
-        
-        <!-- Bank Name Field -->
-        <nz-form-item>
-          <nz-form-label [nzSpan]="6" nzRequired nzFor="bankName">
-            <span class="label-text">Bank Name</span>
-          </nz-form-label>
-          <nz-form-control [nzSpan]="18" nzErrorTip="Please enter a valid bank name!">
-            <input 
-              id="bankName" 
-              nz-input 
-              formControlName="bankName" 
-              placeholder="Enter bank name"
-              class="form-input"
-            />
-          </nz-form-control>
-        </nz-form-item>
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="bank" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>Bank Information</h3>
+          <p>Enter the bank name to register or update the record</p>
+        </div>
+      </div>
 
-        <!-- Submit Button -->
-        <nz-form-item class="submit-section">
-          <nz-form-control [nzSpan]="18" [nzOffset]="6">
-            <div class="button-group">
-              <button 
-                nz-button 
-                nzType="default" 
-                type="button"
-                routerLink="../banks"
-                class="cancel-btn"
-              >
-                <span nz-icon nzType="close" nzTheme="outline"></span>
-                Cancel
-              </button>
-              <button 
-                nz-button 
-                nzType="primary" 
-                type="submit"
-                [disabled]="!bankForm.valid || isSubmitting"
-                class="submit-btn"
-              >
-                <span nz-icon nzType="save" nzTheme="outline"></span>
-                {{submit}}
-              </button>
+      <form nz-form [formGroup]="bankForm" (ngSubmit)="submitForm()" class="admin-form">
+        <div class="form-sections">
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+                Bank Details
+              </h4>
+              <p class="section-description">Provide the official bank name</p>
             </div>
-          </nz-form-control>
-        </nz-form-item>
 
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please enter a valid bank name!">
+                    <input
+                      id="bankName"
+                      nz-input
+                      formControlName="bankName"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="bankName" class="floating-label">
+                      <span nz-icon nzType="bank" nzTheme="outline"></span>
+                      Bank Name <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div class="form-col"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            nz-button
+            nzType="default"
+            type="button"
+            routerLink="../banks"
+            class="cancel-btn"
+          >
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            type="submit"
+            [disabled]="!bankForm.valid || isSubmitting"
+            class="submit-btn"
+          >
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+            {{ submit }}
+          </button>
+        </div>
       </form>
     </div>
   </div>

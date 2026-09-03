@@ -1,20 +1,46 @@
-<nz-table #basicTable [nzData]="curriculumStatusTrackingLists" nzBordered>
-    <thead class="table-header-row">
-        <tr class="table-header-row">
-            <th class="th-row" [ngStyle]="{'font-size': '16px', 'width': '30%'}">Previous Status</th>
-            <th class="th-row" [ngStyle]="{'font-size': '16px', 'width': '30%'}">Current Status</th>
-            <th class="th-row" [ngStyle]="{'font-size': '16px', 'width': '40%'}">Action Date</th>
+<div class="status-tracking-modal">
+  <div class="table-responsive">
+    <nz-table
+      #basicTable
+      [nzData]="curriculumStatusTrackingLists"
+      [nzLoading]="loading"
+      [nzFrontPagination]="false"
+      [nzShowPagination]="false"
+      [nzNoResult]="emptyTpl"
+      nzBordered
+      class="responsive-table"
+    >
+      <thead>
+        <tr>
+          <th style="min-width: 60px;">S/N</th>
+          <th style="min-width: 160px;">Previous Status</th>
+          <th style="min-width: 160px;">Current Status</th>
+          <th style="min-width: 180px;">Action Date</th>
         </tr>
-    </thead>
-    <tbody>
-        <tr tabindex="0" *ngFor="let data of basicTable.data; let i = index">
-            <td>
-                {{ getCurriculumStatusDescription(data.previousStatus) }}
-            </td>
-            <td>
-                {{ getCurriculumStatusDescription(data.currentStatus)}}
-            </td>
-            <td style="font-size: 18px;">{{ data.actionDate | date : "dd-MM-yyyy HH:SS" }}</td>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of basicTable.data; let i = index">
+          <td><span class="sn-badge">{{ i + 1 }}</span></td>
+          <td>
+            <span [ngClass]="statusClass(data.previousStatus)">
+              {{ getCurriculumStatusDescription(data.previousStatus) || "—" }}
+            </span>
+          </td>
+          <td>
+            <span [ngClass]="statusClass(data.currentStatus)">
+              {{ getCurriculumStatusDescription(data.currentStatus) || "—" }}
+            </span>
+          </td>
+          <td>{{ data.actionDate | date: "dd-MMM-yyyy HH:mm" }}</td>
         </tr>
-    </tbody>
-</nz-table>
+      </tbody>
+    </nz-table>
+  </div>
+
+  <ng-template #emptyTpl>
+    <div class="no-data">
+      <span nz-icon nzType="history" nzTheme="outline"></span>
+      <p>No status tracking records found</p>
+    </div>
+  </ng-template>
+</div>

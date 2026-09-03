@@ -52,8 +52,6 @@ export class ActivityComponent implements OnInit, OnDestroy {
       });
   }
 
-  exportActivities(): void {}
-
   showDeleteConfirm(id: any): void {
     this.reqId = id;
     this.modal.confirm({

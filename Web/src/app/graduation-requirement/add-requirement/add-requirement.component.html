@@ -1,114 +1,218 @@
-<h3 class="h-tag">{{ action }}</h3>
-
-<div>
-  <form
-    nz-form
-    nzLayout="vertical"
-    [formGroup]="acadamicProgramForm"
-    (ngSubmit)="submitForm()"
-  >
-    <div nz-row>
-      <div nz-col nzSpan="8">
-        <nz-form-item>
-          <nz-form-label [nzSpan]="12" nzRequired
-            >Curriculum Code</nz-form-label
-          >
-          <nz-form-control [nzSpan]="12" nzValidatingTip="Validating...">
-            <nz-select
-              formControlName="curriculumCode"
-              nzPlaceHolder="select curriculum code"
-            >
-              <nz-option
-                *ngFor="let item of curricula"
-                [nzValue]="item.curriculumCode"
-                [nzLabel]="item.curriculumCode"
-              ></nz-option>
-            </nz-select>
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-label [nzSpan]="12" nzRequired
-            >Minimum Cumlativ GPA</nz-form-label
-          >
-          <nz-form-control [nzSpan]="12" nzValidatingTip="Validating...">
-            <nz-form-control>
-              <input
-                nz-input
-                formControlName="minimumCumlativGPA"
-                type="number"
-                placeholder="enter minimum Cumlativ GPA"
-              />
-            </nz-form-control>
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-label [nzSpan]="12" nzRequired
-            >Minimum Major GPA</nz-form-label
-          >
-          <nz-form-control [nzSpan]="12" nzValidatingTip="Validating...">
-            <nz-form-control>
-              <input
-                nz-input
-                formControlName="minimumMajorGPA"
-                type="number"
-                placeholder="enter Minimum Major GPA"
-              />
-            </nz-form-control>
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-label [nzSpan]="12" nzRequired
-            >Minimum Total Credit Hours</nz-form-label
-          >
-          <nz-form-control [nzSpan]="12" nzValidatingTip="Validating...">
-            <nz-form-control>
-              <input
-                nz-input
-                formControlName="miniTotalCreditHours"
-                type="number"
-                placeholder="enter minimum Total Credit Hours"
-              />
-            </nz-form-control>
-          </nz-form-control>
-        </nz-form-item>
-      </div>
-      <div nz-col nzSpan="12">
-        <nz-form-item>
-          <nz-form-label [nzSpan]="12" nzRequired>Passing Grade</nz-form-label>
-          <nz-form-control [nzSpan]="12" nzValidatingTip="Validating...">
-            <nz-form-control>
-              <input
-                nz-input
-                formControlName="passingGrade"
-                placeholder="enter passing grade"
-              />
-            </nz-form-control>
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-label [nzSpan]="12" nzRequired>Effective Date</nz-form-label>
-          <nz-form-control>
-            <nz-date-picker formControlName="effectiveDate"></nz-date-picker>
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-label [nzSpan]="12">Remark</nz-form-label>
-          <nz-form-control [nzSpan]="12">
-            <input
-              nz-input
-              formControlName="remark"
-              placeholder="enter remark"
-            />
-          </nz-form-control>
-        </nz-form-item>
+<div class="content-container">
+  <div class="header-section">
+    <button
+      nz-button
+      nzType="default"
+      class="back-btn"
+      type="button"
+      routerLink="/graduation"
+    >
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Graduation Requirements
+    </button>
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">{{ action }}</h2>
+        <p class="subtitle-text">Define GPA, credit hour, and passing grade requirements</p>
       </div>
     </div>
-    <nz-form-item>
-      <nz-form-control [nzOffset]="12" [nzSpan]="12">
-        <button nz-button nzType="primary" class="main-color">
-          {{ submit }}
-        </button>
-      </nz-form-control>
-    </nz-form-item>
-  </form>
+  </div>
+
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="trophy" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>Graduation Requirement Information</h3>
+          <p>Set minimum academic standards for graduation</p>
+        </div>
+      </div>
+
+      <form
+        nz-form
+        [formGroup]="acadamicProgramForm"
+        (ngSubmit)="submitForm()"
+        class="admin-form"
+      >
+        <div class="form-sections">
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+                Requirement Details
+              </h4>
+              <p class="section-description">Curriculum, GPA thresholds, and effective date</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select a curriculum">
+                    <nz-select
+                      formControlName="curriculumCode"
+                      id="curriculumCode"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
+                      [nzShowSearch]="true"
+                    >
+                      <nz-option
+                        *ngFor="let item of curricula"
+                        [nzValue]="item.curriculumCode"
+                        [nzLabel]="item.curriculumCode"
+                      ></nz-option>
+                    </nz-select>
+                    <label for="curriculumCode" class="floating-label">
+                      <span nz-icon nzType="barcode" nzTheme="outline"></span>
+                      Curriculum Code <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please enter a passing grade">
+                    <input
+                      nz-input
+                      id="passingGrade"
+                      formControlName="passingGrade"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="passingGrade" class="floating-label">
+                      <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+                      Passing Grade <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please enter minimum cumulative GPA">
+                    <input
+                      nz-input
+                      type="number"
+                      id="minimumCumlativGPA"
+                      formControlName="minimumCumlativGPA"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="minimumCumlativGPA" class="floating-label">
+                      <span nz-icon nzType="number" nzTheme="outline"></span>
+                      Minimum Cumulative GPA <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please enter minimum major GPA">
+                    <input
+                      nz-input
+                      type="number"
+                      id="minimumMajorGPA"
+                      formControlName="minimumMajorGPA"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="minimumMajorGPA" class="floating-label">
+                      <span nz-icon nzType="number" nzTheme="outline"></span>
+                      Minimum Major GPA <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please enter minimum total credit hours">
+                    <input
+                      nz-input
+                      type="number"
+                      id="miniTotalCreditHours"
+                      formControlName="miniTotalCreditHours"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="miniTotalCreditHours" class="floating-label">
+                      <span nz-icon nzType="clock-circle" nzTheme="outline"></span>
+                      Minimum Total Credit Hours <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select an effective date">
+                    <nz-date-picker
+                      formControlName="effectiveDate"
+                      id="effectiveDate"
+                      nzPlaceHolder=" "
+                      class="date-with-floating-label"
+                    ></nz-date-picker>
+                    <label for="effectiveDate" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Effective Date <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control>
+                    <input
+                      nz-input
+                      id="remark"
+                      formControlName="remark"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="remark" class="floating-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            nz-button
+            nzType="default"
+            class="cancel-btn"
+            type="button"
+            routerLink="/graduation"
+          >
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            class="submit-btn"
+            type="submit"
+            [disabled]="acadamicProgramForm.invalid"
+          >
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+            {{ submit }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

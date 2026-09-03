@@ -1,18 +1,61 @@
-<div class="p-5">
-  <nz-card  [nzBordered]="false" class="shadow-md rounded-lg">
-    <form nz-form nzLayout="vertical" [formGroup]="activityForm" (ngSubmit)="submitForm()">
-      
-      <nz-form-item>
-        <nz-form-label nzFor="title" [nzRequired]="true">Title</nz-form-label>
-        <nz-form-control nzErrorTip="Please enter a title!">
-          <input nz-input id="title" formControlName="title" placeholder="Enter activity title" />
-        </nz-form-control>
-      </nz-form-item>
-
-      <div class="flex justify-end mt-4 gap-2">
-        <button nz-button nzType="primary" [disabled]="activityForm.invalid">{{submit}}</button>
+<form
+  nz-form
+  [formGroup]="activityForm"
+  (ngSubmit)="submitForm()"
+  class="admin-form"
+>
+  <div class="form-sections">
+    <div class="form-section">
+      <div class="section-header">
+        <h4 class="section-title">
+          <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+          Activity Details
+        </h4>
+        <p class="section-description">Enter the activity title</p>
       </div>
 
-    </form>
-  </nz-card>
-</div>
+      <div class="form-row">
+        <div class="form-col">
+          <nz-form-item>
+            <nz-form-control nzErrorTip="Please enter a title!">
+              <input
+                nz-input
+                id="title"
+                formControlName="title"
+                placeholder=" "
+                class="input-with-floating-label"
+              />
+              <label for="title" class="floating-label">
+                <span nz-icon nzType="edit" nzTheme="outline"></span>
+                Title <span class="required">*</span>
+              </label>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button
+      nz-button
+      nzType="default"
+      class="cancel-btn"
+      type="button"
+      (click)="cancel()"
+    >
+      <span nz-icon nzType="close" nzTheme="outline"></span>
+      Cancel
+    </button>
+    <button
+      nz-button
+      nzType="primary"
+      class="submit-btn"
+      type="submit"
+      [disabled]="activityForm.invalid"
+    >
+      <span nz-icon nzType="save" nzTheme="outline"></span>
+      {{ submit }}
+    </button>
+  </div>
+</form>

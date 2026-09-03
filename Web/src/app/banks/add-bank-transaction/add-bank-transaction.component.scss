@@ -1,0 +1,7 @@
+@import '../../../styles/admin-form-page';
+
+::ng-deep .ant-btn-loading {
+  .anticon {
+    display: none;
+  }
+}

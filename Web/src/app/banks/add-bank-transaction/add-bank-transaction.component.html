@@ -1,38 +1,157 @@
+<div class="content-container">
+  <div class="header-section">
+    <button
+      nz-button
+      nzType="default"
+      class="back-btn"
+      type="button"
+      routerLink="/banks/bank-transacction"
+    >
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Bank Transactions
+    </button>
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">{{ action }}</h2>
+        <p class="subtitle-text">Record bank payment transactions</p>
+      </div>
+    </div>
+  </div>
 
-<h3 class="h-tag">{{action}}</h3>
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="transaction" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>Bank Transaction Information</h3>
+          <p>Enter payment details for the selected bank</p>
+        </div>
+      </div>
 
-<div>
-    <form nz-form  nzLayout="vertical" [formGroup]="bankTransactionForm" (ngSubmit)="submitForm()">
-        <nz-form-item>
-            <nz-form-label [nzSpan]="7" nzRequired>Bank"</nz-form-label>
-            <nz-form-control [nzSpan]="7" nzValidatingTip="Validating...">
-              <nz-select formControlName="bankID" nzPlaceHolder="select bank" >
-                  <nz-option *ngFor="let item of banks" [nzValue]="item.id" [nzLabel]="item.bankName "></nz-option>
-                </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-          <nz-form-item>
-            <nz-form-label [nzSpan]="7" nzRequired>Transaction ID</nz-form-label>
-            <nz-form-control [nzSpan]="7" nzValidatingTip="Validating...">
-                <input nz-input formControlName="transactionID" placeholder="enter transactionID" />
-            </nz-form-control>
-          </nz-form-item>
-          <nz-form-item>
-            <nz-form-label [nzSpan]="7" nzRequired>Payment Date</nz-form-label>
-            <nz-form-control [nzSpan]="7">
-                <nz-date-picker formControlName="paymentDate"></nz-date-picker>
-            </nz-form-control>
-          </nz-form-item>
-        <nz-form-item>
-          <nz-form-label [nzSpan]="7" nzRequired>Amount</nz-form-label>
-          <nz-form-control [nzSpan]="7">
-            <input nz-input formControlName="amount" placeholder="enter amount" />
-          </nz-form-control>
-        </nz-form-item>   
-        <nz-form-item>
-          <nz-form-control [nzOffset]="7" [nzSpan]="7">
-            <button nz-button nzType="primary">{{submit}}</button>
-          </nz-form-control>
-        </nz-form-item>
+      <form
+        nz-form
+        [formGroup]="bankTransactionForm"
+        (ngSubmit)="submitForm()"
+        class="admin-form"
+      >
+        <div class="form-sections">
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+                Transaction Details
+              </h4>
+              <p class="section-description">Bank, transaction ID, date, and amount</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select a bank">
+                    <nz-select
+                      formControlName="bankID"
+                      id="bankID"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
+                      [nzShowSearch]="true"
+                    >
+                      <nz-option
+                        *ngFor="let item of banks"
+                        [nzValue]="item.id"
+                        [nzLabel]="item.bankName"
+                      ></nz-option>
+                    </nz-select>
+                    <label for="bankID" class="floating-label">
+                      <span nz-icon nzType="bank" nzTheme="outline"></span>
+                      Bank <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please enter a transaction ID">
+                    <input
+                      nz-input
+                      id="transactionID"
+                      formControlName="transactionID"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="transactionID" class="floating-label">
+                      <span nz-icon nzType="barcode" nzTheme="outline"></span>
+                      Transaction ID <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select a payment date">
+                    <nz-date-picker
+                      formControlName="paymentDate"
+                      id="paymentDate"
+                      nzPlaceHolder=" "
+                      class="date-with-floating-label"
+                    ></nz-date-picker>
+                    <label for="paymentDate" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Payment Date <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please enter an amount">
+                    <input
+                      nz-input
+                      id="amount"
+                      formControlName="amount"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="amount" class="floating-label">
+                      <span nz-icon nzType="dollar" nzTheme="outline"></span>
+                      Amount <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            nz-button
+            nzType="default"
+            class="cancel-btn"
+            type="button"
+            routerLink="/banks/bank-transacction"
+          >
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            class="submit-btn"
+            type="submit"
+            [disabled]="bankTransactionForm.invalid"
+          >
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+            {{ submit }}
+          </button>
+        </div>
       </form>
+    </div>
+  </div>
 </div>

@@ -57,8 +57,12 @@ export class AddCurriculumComponent implements OnInit {
     this.action = "Edit Curriculum";
     this.submit = "Update";
     this._curriculumService.getCurriculumById(id).subscribe(res => {
-      this.academicProgramForm.patchValue(res.data);
-    })
+      const data = res.data;
+      this.academicProgramForm.patchValue({
+        ...data,
+        effectiveDate: data.effectiveDate ? new Date(data.effectiveDate) : null
+      });
+    });
   }
   getAcademicProgramme() {
     this._academicProgrammeService.getAcademicProgrammeList().subscribe((res: any) => {
@@ -67,54 +71,69 @@ export class AddCurriculumComponent implements OnInit {
   }
 
   submitForm() {
+    if (!this.academicProgramForm.valid) {
+      Object.values(this.academicProgramForm.controls).forEach(control => {
+        control.markAsDirty();
+        control.updateValueAndValidity({ onlySelf: true });
+      });
+      this._customNotificationService.notification(
+        "error",
+        "error",
+        "Enter valid data."
+      );
+      return;
+    }
+
     if (this.progId == "null") {
-      if (this.academicProgramForm.valid) {
-        this._curriculumService
-          .create(this.academicProgramForm.value)
-          .subscribe((res: any) => {
+      this._curriculumService
+        .create(this.academicProgramForm.value)
+        .subscribe({
+          next: () => {
             this._customNotificationService.notification(
               "success",
               "Success",
               "Curriculum registered successfully."
             );
             this._route.navigateByUrl("/curricula");
-            
-          });
-      } else {
-        this._customNotificationService.notification(
-          "error",
-          "error",
-          "Enter valid data."
-        );
-      }
-    } else if (this.progId != "null") {
-      if (this.academicProgramForm.valid) {
-        this._curriculumService
-          .update(this.progId, this.academicProgramForm.value)
-          .subscribe((res: any) => {
-            if (res.status == "success") {
-              this._customNotificationService.notification(
-                "success",
-                "Success",
-                res.data
-              );
-              this._route.navigateByUrl("/curricula");
-            } else {
-              this._customNotificationService.notification(
-                "error",
-                "Error",
-                res.data
-              );
-            }
-          });
-      } else {
-        this._customNotificationService.notification(
-          "error",
-          "error",
-          "Enter valid data."
-        );
-      }
+          },
+          error: () => {
+            this._customNotificationService.notification(
+              "error",
+              "Error",
+              "Failed to save curriculum. Please try again."
+            );
+          }
+        });
+      return;
     }
+
+    this._curriculumService
+      .update(this.progId, this.academicProgramForm.value)
+      .subscribe({
+        next: (res: any) => {
+          if (res.status == "success") {
+            this._customNotificationService.notification(
+              "success",
+              "Success",
+              res.data
+            );
+            this._route.navigateByUrl("/curricula");
+          } else {
+            this._customNotificationService.notification(
+              "error",
+              "Error",
+              res.data
+            );
+          }
+        },
+        error: () => {
+          this._customNotificationService.notification(
+            "error",
+            "Error",
+            "Failed to update curriculum. Please try again."
+          );
+        }
+      });
   }
 
   goBack(): void {

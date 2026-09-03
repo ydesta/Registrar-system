@@ -35,6 +35,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   isActiveFilter: boolean | null = true;
   yearFilter: number | null = null;
   yearOptions: number[] = [];
+  termSortOrder: string | null = "descend";
 
   constructor(
     private _customNotificationService: CustomNotificationService,
@@ -58,12 +59,19 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.getListOfAcademicTermStatus();
     this.getListOfYearNumberStatus();
+    this.pager.sortColumn = "Year";
+    this.pager.sortOrder = "desc";
     this.pager.init(() => this.fetchProgram());
     this.fetchProgram();
   }
 
   ngOnDestroy(): void {
     this.pager.destroy();
+  }
+
+  onTermSort(order: string | null): void {
+    this.termSortOrder = order;
+    this.pager.onSort(order, "Year");
   }
   // // populateIntialData() {
   // //   this._crudService

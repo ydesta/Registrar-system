@@ -135,6 +135,21 @@
         }
       }
 
+      &.instruction-section {
+        background: #f0f5ff;
+        border-left: 4px solid #1890ff;
+        border: 1px solid #d6e4ff;
+
+        .instruction-icon {
+          color: #1890ff;
+        }
+
+        &:hover {
+          background: #e6f4ff;
+          border-color: #1890ff;
+        }
+      }
+
       // Contact Section
       &.contact-section {
         background: #fff7e6;

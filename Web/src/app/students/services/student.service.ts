@@ -199,28 +199,50 @@ export class StudentService {
   }
 
   getListOfTermRegisteredCourseList(
-    termId: string,
-    startDate: string,
-    endDate: string,
-    studentId
+    filters: {
+      studentId?: string | null;
+      academicTerm?: number | null;
+      year?: number | null;
+      batchCode?: string | null;
+      startDate?: string | null;
+      endDate?: string | null;
+    }
   ): Observable<StudentRegistrationSlipViewModel[]> {
     return this.crud.getList<StudentRegistrationSlipViewModel[]>(
       `${this.offerings}/student/getListOfTermRegisteredCourseList`,
-      { studentId, termId, startDate, endDate }
+      {
+        studentId: filters.studentId || undefined,
+        academicTerm: filters.academicTerm ?? undefined,
+        year: filters.year ?? undefined,
+        batchCode: filters.batchCode || undefined,
+        startDate: filters.startDate || undefined,
+        endDate: filters.endDate || undefined
+      }
     );
   }
 
   getListOfTermRegisteredCourseListPaginated(
-    termId: string,
-    startDate: string,
-    endDate: string,
-    studentId: string,
+    filters: {
+      studentId?: string | null;
+      academicTerm?: number | null;
+      year?: number | null;
+      batchCode?: string | null;
+      startDate?: string | null;
+      endDate?: string | null;
+    },
     query: string
   ): Observable<any> {
     return this.crud.getPaginated(
       `${this.offerings}/student/getListOfTermRegisteredCourseList`,
       query,
-      { studentId, termId, startDate, endDate }
+      {
+        studentId: filters.studentId || undefined,
+        academicTerm: filters.academicTerm ?? undefined,
+        year: filters.year ?? undefined,
+        batchCode: filters.batchCode || undefined,
+        startDate: filters.startDate || undefined,
+        endDate: filters.endDate || undefined
+      }
     );
   }
 

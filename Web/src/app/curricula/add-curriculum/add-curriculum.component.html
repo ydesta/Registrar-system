@@ -1,5 +1,4 @@
 <div class="content-container">
-  <!-- Header Section -->
   <div class="header-section">
     <button nz-button nzType="default" class="back-btn" type="button" (click)="goBack()">
       <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
@@ -9,15 +8,10 @@
       <div class="page-title">
         <h2 class="title-text">{{ action }}</h2>
         <p class="subtitle-text">Add or update curriculum information for academic programs</p>
-        <div class="curriculum-info">
-          <span nz-icon nzType="book" nzTheme="outline"></span>
-          <span class="curriculum-description">Configure curriculum details and academic requirements</span>
-        </div>
       </div>
     </div>
   </div>
 
-  <!-- Form Container -->
   <div class="form-container">
     <div class="form-card">
       <div class="form-header">
@@ -30,9 +24,8 @@
         </div>
       </div>
 
-      <form nz-form [formGroup]="academicProgramForm" class="curriculum-form">
+      <form nz-form [formGroup]="academicProgramForm" (ngSubmit)="submitForm()" class="admin-form">
         <div class="form-sections">
-          <!-- Basic Information Section -->
           <div class="form-section">
             <div class="section-header">
               <h4 class="section-title">
@@ -45,13 +38,13 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Academic Programme</nz-form-label>
                   <nz-form-control nzErrorTip="Please select an academic programme">
                     <nz-select
                       formControlName="acadamicProgrammeID"
+                      id="acadamicProgrammeID"
                       nzShowSearch
-                      nzPlaceHolder="Select program"
-                      class="professional-select"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
                     >
                       <nz-option
                         *ngFor="let item of academicPrograms"
@@ -59,20 +52,28 @@
                         [nzLabel]="item.acadamicProgrammeTitle"
                       ></nz-option>
                     </nz-select>
+                    <label for="acadamicProgrammeID" class="floating-label">
+                      <span nz-icon nzType="book" nzTheme="outline"></span>
+                      Academic Programme <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Curriculum Code</nz-form-label>
                   <nz-form-control nzErrorTip="Please enter curriculum code">
                     <input
                       nz-input
+                      id="curriculumCode"
                       formControlName="curriculumCode"
-                      placeholder="Enter curriculum code"
-                      class="form-input"
+                      placeholder=" "
+                      class="input-with-floating-label"
                     />
+                    <label for="curriculumCode" class="floating-label">
+                      <span nz-icon nzType="barcode" nzTheme="outline"></span>
+                      Curriculum Code <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -81,33 +82,41 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Effective Date</nz-form-label>
                   <nz-form-control nzErrorTip="Please select effective date">
                     <nz-date-picker
                       formControlName="effectiveDate"
-                      class="form-date-picker"
+                      id="effectiveDate"
+                      nzPlaceHolder=" "
+                      class="date-with-floating-label"
                     ></nz-date-picker>
+                    <label for="effectiveDate" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Effective Date <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Duration Of Study</nz-form-label>
                   <nz-form-control nzErrorTip="Please enter duration of study">
                     <input
                       nz-input
+                      id="durationOfStudy"
                       formControlName="durationOfStudy"
-                      placeholder="Enter duration of Study"
-                      class="form-input"
+                      placeholder=" "
+                      class="input-with-floating-label"
                     />
+                    <label for="durationOfStudy" class="floating-label">
+                      <span nz-icon nzType="field-time" nzTheme="outline"></span>
+                      Duration Of Study <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
             </div>
           </div>
 
-          <!-- Academic Requirements Section -->
           <div class="form-section">
             <div class="section-header">
               <h4 class="section-title">
@@ -120,36 +129,44 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Minimum Cumulative GPA</nz-form-label>
                   <nz-form-control nzErrorTip="Please enter minimum cumulative GPA">
                     <input
                       nz-input
+                      id="minimumCumlativGPA"
                       formControlName="minimumCumlativGPA"
                       type="number"
                       step="0.01"
                       min="0"
                       max="4"
-                      placeholder="Enter minimum cumulative GPA"
-                      class="form-input"
+                      placeholder=" "
+                      class="input-with-floating-label"
                     />
+                    <label for="minimumCumlativGPA" class="floating-label">
+                      <span nz-icon nzType="rise" nzTheme="outline"></span>
+                      Minimum Cumulative GPA <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Minimum Major GPA</nz-form-label>
                   <nz-form-control nzErrorTip="Please enter minimum major GPA">
                     <input
                       nz-input
+                      id="minimumMajorGPA"
                       formControlName="minimumMajorGPA"
                       type="number"
                       step="0.01"
                       min="0"
                       max="4"
-                      placeholder="Enter minimum major GPA"
-                      class="form-input"
+                      placeholder=" "
+                      class="input-with-floating-label"
                     />
+                    <label for="minimumMajorGPA" class="floating-label">
+                      <span nz-icon nzType="line-chart" nzTheme="outline"></span>
+                      Minimum Major GPA <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -158,37 +175,44 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Min Total Credit Hours</nz-form-label>
                   <nz-form-control nzErrorTip="Please enter minimum total credit hours">
                     <input
                       nz-input
+                      id="minTotalCreditHours"
                       formControlName="minTotalCreditHours"
                       type="number"
                       min="0"
-                      placeholder="Enter minimum total credit hours"
-                      class="form-input"
+                      placeholder=" "
+                      class="input-with-floating-label"
                     />
+                    <label for="minTotalCreditHours" class="floating-label">
+                      <span nz-icon nzType="number" nzTheme="outline"></span>
+                      Min Total Credit Hours <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Passing Grade</nz-form-label>
                   <nz-form-control nzErrorTip="Please enter passing grade">
                     <input
                       nz-input
+                      id="passingGrade"
                       formControlName="passingGrade"
-                      placeholder="Enter passing grade"
-                      class="form-input"
+                      placeholder=" "
+                      class="input-with-floating-label"
                     />
+                    <label for="passingGrade" class="floating-label">
+                      <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+                      Passing Grade <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
             </div>
           </div>
 
-          <!-- Additional Information Section -->
           <div class="form-section">
             <div class="section-header">
               <h4 class="section-title">
@@ -201,13 +225,13 @@
             <div class="form-row">
               <div class="form-col" *ngIf="progId != 'null'">
                 <nz-form-item>
-                  <nz-form-label>Status</nz-form-label>
                   <nz-form-control>
                     <nz-select
                       formControlName="status"
+                      id="status"
                       nzShowSearch
-                      nzPlaceHolder="Select status"
-                      class="professional-select"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
                     >
                       <nz-option
                         *ngFor="let item of listOfCurriculumStatus"
@@ -215,23 +239,31 @@
                         [nzLabel]="item.Description"
                       ></nz-option>
                     </nz-select>
+                    <label for="status" class="floating-label">
+                      <span nz-icon nzType="flag" nzTheme="outline"></span>
+                      Status
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label>Remark</nz-form-label>
                   <nz-form-control>
                     <nz-textarea-count [nzMaxCharacterCount]="250">
-                      <textarea 
-                        rows="4" 
-                        formControlName="remark" 
+                      <textarea
+                        id="remark"
+                        rows="4"
+                        formControlName="remark"
                         nz-input
-                        placeholder="Enter remarks (optional)"
-                        class="form-textarea"
+                        placeholder=" "
+                        class="textarea-with-floating-label"
                       ></textarea>
                     </nz-textarea-count>
+                    <label for="remark" class="floating-label textarea-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>

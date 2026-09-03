@@ -7,26 +7,25 @@
         <p class="subtitle-text">View, search, and manage all academic programmes in the system</p>
       </div>
       <div class="header-actions">
-        <div class="search-section">
-          <nz-input-group [nzSuffix]="suffixIconSearch">
-            <input type="text" nz-input placeholder="Search by code, title, or remark..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)"/>
-          </nz-input-group>
-          <ng-template #suffixIconSearch>
-            <span nz-icon nzType="search"></span>
-          </ng-template>
+        <div class="search-section floating-label-container">
+          <input
+            type="text"
+            nz-input
+            id="programmeSearch"
+            class="input-with-floating-label"
+            placeholder=" "
+            [(ngModel)]="pager.searchKey"
+            (ngModelChange)="pager.onSearch($event)"
+          />
+          <label for="programmeSearch" class="floating-label">
+            <span nz-icon nzType="search" nzTheme="outline"></span>
+            Search
+          </label>
         </div>
         <button nz-button nzType="primary" routerLink="../acadamic-programme/add-programme/null" class="add-btn">
           <span nz-icon nzType="plus" nzTheme="outline"></span>
           Add Programme
         </button>
-        <!-- <button nz-button nzType="default" (click)="exportAcadamicProgram()" class="export-btn">
-          <span nz-icon nzType="file-excel" nzTheme="outline"></span>
-          Export
-        </button>
-        <button nz-button nzType="default" printTitle="." [useExistingCss]="true" printSectionId="print-section" ngxPrint class="print-btn">
-          <span nz-icon nzType="printer" nzTheme="outline"></span>
-          Print
-        </button> -->
       </div>
     </div>
   </div>
@@ -55,7 +54,7 @@
             <th style="min-width: 200px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'AcadamicProgrammeTitle')">Programme Title</th>
             <th style="min-width: 150px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'Remark')">Remark</th>
             <th style="min-width: 120px;" [nzSortFn]="true" (nzSortOrderChange)="pager.onSort($event, 'CreatedDate')">Created Date</th>
-            <th style="min-width: 100px;">Actions</th>
+            <th style="min-width: 80px; text-align: center;">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -66,12 +65,31 @@
             <td>{{ data.remark }}</td>
             <td>{{ data.createdDate | date:'dd-MM-yyyy' }}</td>
             <td>
-              <button nz-button nzType="default" nzSize="small" routerLink="../acadamic-programme/add-programme/{{data.id}}" class="action-btn edit-btn">
-                <span nz-icon nzType="edit" nzTheme="outline"></span>
+              <button
+                nz-button
+                nz-dropdown
+                [nzDropdownMenu]="menu"
+                nzPlacement="bottomRight"
+                class="action-dropdown-btn"
+              >
+                <span nz-icon nzType="more" nzTheme="outline"></span>
               </button>
-              <button nz-button nzType="default" nzSize="small" (click)="showDeleteConfirm(data.id)" class="action-btn delete-btn">
-                <span nz-icon nzType="delete" nzTheme="outline"></span>
-              </button>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li nz-menu-item>
+                    <a routerLink="../acadamic-programme/add-programme/{{data.id}}" class="action-menu-link">
+                      <span nz-icon nzType="edit" nzTheme="outline"></span>
+                      <span>Edit</span>
+                    </a>
+                  </li>
+                  <li nz-menu-item>
+                    <a (click)="showDeleteConfirm(data.id)" class="action-menu-link delete">
+                      <span nz-icon nzType="delete" nzTheme="outline"></span>
+                      <span>Delete</span>
+                    </a>
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
             </td>
           </tr>
         </tbody>

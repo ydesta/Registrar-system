@@ -88,9 +88,9 @@ export class ManageQuadrantBreakdownComponent implements OnInit {
   }
 
   editQuadrant(quadrant: CurriculumBreakdown): void {
-    const quadrantId = quadrant.quadrantsID || "";
+    const quadrantId = quadrant.quadrantsID || (quadrant as any).quadrantsId || "";
     this.router.navigateByUrl(
-      `curricula/quadrant-break-down-form?id=${quadrant.id}&curriculum-id=${this.curriculumId}&curriculum-code=${this.code}&program=${this.programme}&quadrant-id=${quadrantId}&mode=edit`
+      `curricula/quadrant-break-down-form?id=${quadrant.id}&curriculum-id=${this.curriculumId}&curriculum-code=${this.code}&program=${this.programme}&quadrant-id=${encodeURIComponent(quadrantId)}&mode=edit`
     );
   }
 }

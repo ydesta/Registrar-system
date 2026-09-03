@@ -64,6 +64,7 @@ export class StudentRegistrationSlipViewModel {
     public toBank: string;
     public registrationDate: string;
     public bankTransactionId: string;
+    public orderNumber?: string;
     public fileName: string;
     public courses: CourseViewModel[]
     public payments: CoursePaymentViewModel[]
@@ -74,6 +75,9 @@ export class CourseViewModel {
     public courseCode: string
     public creditHours: number;
     public totalAmount: number;
+    public orderNumber?: string;
+    public bankTransactionId?: string;
+    public transactionDate?: Date | string;
 }
 export class RegisteredNewStudentViewModel {
     public id: string

@@ -265,19 +265,49 @@
 }
 
 .register-actions {
+  display: flex;
+  gap: 12px;
   margin-bottom: 20px;
 
+  .download-button,
   .register-button {
-    width: 100%;
+    flex: 1;
     height: 40px;
     border-radius: 6px;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
+  }
+
+  .download-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid #1890ff;
+    color: #1890ff;
+    background: #fff;
+
+    &:hover {
+      color: #096dd9;
+      border-color: #096dd9;
+      background: #f0f7ff;
+    }
+  }
+
+  .register-button {
     background: #1890ff;
     border: none;
+    color: #fff;
 
     &:hover {
       background: #096dd9;
+    }
+  }
+
+  &.locked-actions {
+    .download-button {
+      width: 100%;
+      flex: none;
     }
   }
 }
@@ -336,6 +366,15 @@
     .form-row {
       grid-template-columns: 1fr;
       gap: 0;
+    }
+  }
+
+  .register-actions {
+    flex-direction: column;
+
+    .download-button,
+    .register-button {
+      width: 100%;
     }
   }
 }

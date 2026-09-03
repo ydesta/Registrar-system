@@ -35,6 +35,9 @@
             <li nz-menu-item>
               <a routerLink="/curricula">Curriculum</a>
             </li>
+            <li nz-menu-item>
+              <a routerLink="/graduation/quadrant">Quadrant</a>
+            </li>
 
             <!-- <li nz-menu-item>
               <a routerLink="/curricula/accrediation">Accreditation </a>
@@ -65,10 +68,6 @@
             </li> -->
             <li nz-menu-item>
               <a routerLink="/students/course-add-approval">Course Add Request</a>
-            </li>
-            <li nz-menu-item>
-              <!-- <i nz-icon nzType="sliders"></i> -->
-              <span> <a routerLink="/students/grade-change-request-for-approval">Grade Change Request</a></span>
             </li>
             <li nz-menu-item>
               <a routerLink="/students/special-case-manual-registration">Manual Registration</a>
@@ -105,14 +104,21 @@
               <a routerLink="/students">View Students</a>
             </li>
             <li nz-menu-item>
-              <a routerLink="/students/import-student-grade">Import Student Grade</a>
-            </li>
-            <li nz-menu-item>
               <a routerLink="/course/course-exemption-list">Course Exemptions</a>
             </li>
             <!-- <li nz-menu-item>
               <a routerLink="/applicants">Review Applicants</a>
             </li> -->
+          </ul>
+        </li>
+        <li nz-submenu nzTitle="Grade Management" nzIcon="file-done">
+          <ul>
+            <li nz-menu-item>
+              <a routerLink="/students/grade-change-request-for-approval">Grade Change Request</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/import-student-grade">Import Student Grade</a>
+            </li>
           </ul>
         </li>
 
@@ -173,16 +179,7 @@
               <a routerLink="/banks">Bank</a>
             </li>
             <li nz-menu-item>
-              <a routerLink="/staffs">New Staff</a>
-            </li>
-            <li nz-menu-item>
               <a routerLink="/colleges/academic-term">Academic Terms</a>
-            </li>
-            <li nz-menu-item>
-              <a routerLink="/graduation/quadrant">Quadrant</a>
-            </li>
-            <li nz-menu-item>
-              <a routerLink="/colleges">Colleges</a>
             </li>
             <li nz-menu-item>
               <a routerLink="/colleges/academic-term-activity">Academic Term Activities</a>
@@ -195,9 +192,6 @@
             </li>
             <li nz-menu-item>
               <a routerLink="/colleges/cgpa-credit-hour-limit">CGPA Credit Hour Limits</a>
-            </li>
-            <li nz-menu-item>
-              <a routerLink="/colleges/batch">Batches</a>
             </li>
           </ul>
         </li>

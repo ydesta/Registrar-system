@@ -1,7 +1,6 @@
 <div class="content-container">
-  <!-- Header Section -->
   <div class="header-section">
-    <button nz-button nzType="default" class="back-btn" (click)="goToCurriculum()">
+    <button nz-button nzType="default" class="back-btn" type="button" (click)="goToCurriculum()">
       <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
       Back to Curricula
     </button>
@@ -9,15 +8,10 @@
       <div class="page-title">
         <h2 class="title-text">{{ action }}</h2>
         <p class="subtitle-text">Configure quadrant breakdown and course requirements for curriculum</p>
-        <div class="curriculum-info">
-          <span nz-icon nzType="appstore" nzTheme="outline"></span>
-          <span class="curriculum-description">Set up quadrant requirements and select courses for each quadrant</span>
-        </div>
       </div>
     </div>
   </div>
 
-  <!-- Form Container -->
   <div class="form-container">
     <div class="form-card">
       <div class="form-header">
@@ -30,9 +24,8 @@
         </div>
       </div>
 
-      <form nz-form [formGroup]="quadrantBreakdownForm" class="curriculum-form" (ngSubmit)="submitForm()">
+      <form nz-form [formGroup]="quadrantBreakdownForm" class="admin-form" (ngSubmit)="submitForm()">
         <div class="form-sections">
-          <!-- Basic Information Section -->
           <div class="form-section">
             <div class="section-header">
               <h4 class="section-title">
@@ -45,18 +38,38 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Academic Programme</nz-form-label>
                   <nz-form-control nzErrorTip="Please select an academic programme">
-                    <input nz-input formControlName="acadamicProgrammeID" readonly class="form-input readonly" />
+                    <input
+                      nz-input
+                      id="acadamicProgrammeID"
+                      formControlName="acadamicProgrammeID"
+                      readonly
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="acadamicProgrammeID" class="floating-label">
+                      <span nz-icon nzType="book" nzTheme="outline"></span>
+                      Academic Programme <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Curriculum Code</nz-form-label>
                   <nz-form-control nzErrorTip="Please enter curriculum code">
-                    <input nz-input formControlName="CurriculumId" readonly class="form-input readonly" />
+                    <input
+                      nz-input
+                      id="CurriculumId"
+                      formControlName="CurriculumId"
+                      readonly
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="CurriculumId" class="floating-label">
+                      <span nz-icon nzType="barcode" nzTheme="outline"></span>
+                      Curriculum Code <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -65,34 +78,45 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Quadrant</nz-form-label>
                   <nz-form-control nzErrorTip="Please select a quadrant">
-                    <nz-select 
-                      formControlName="quadrantsId" 
-                      nzPlaceHolder="Select Quadrant" 
+                    <nz-select
+                      formControlName="quadrantsId"
+                      id="quadrantsId"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
                       nzShowSearch
                       [nzDisabled]="isQuadrantLocked"
-                      class="professional-select"
                     >
-                      <nz-option *ngFor="let item of quadrants" [nzValue]="item.id"
-                        [nzLabel]="(item.quadrantsID ? item.quadrantsID + ' - ' : '') + item.quadrantHeading"></nz-option>
+                      <nz-option
+                        *ngFor="let item of quadrants"
+                        [nzValue]="item.id"
+                        [nzLabel]="(item.quadrantsID || item.QuadrantsID ? (item.quadrantsID || item.QuadrantsID) + ' - ' : '') + (item.quadrantHeading || item.QuadrantHeading)"
+                      ></nz-option>
                     </nz-select>
+                    <label for="quadrantsId" class="floating-label">
+                      <span nz-icon nzType="appstore" nzTheme="outline"></span>
+                      Quadrant <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label nzRequired>Minimum Credit Hours</nz-form-label>
                   <nz-form-control nzErrorTip="Please enter minimum credit hours">
                     <input
                       nz-input
+                      id="minimumCreditHours"
                       formControlName="minimumCreditHours"
                       type="number"
                       min="0"
-                      placeholder="Enter minimum credit hours"
-                      class="form-input"
+                      placeholder=" "
+                      class="input-with-floating-label"
                     />
+                    <label for="minimumCreditHours" class="floating-label">
+                      <span nz-icon nzType="number" nzTheme="outline"></span>
+                      Minimum Credit Hours <span class="required">*</span>
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -101,24 +125,27 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
-                  <nz-form-label>Remark</nz-form-label>
                   <nz-form-control>
                     <nz-textarea-count [nzMaxCharacterCount]="250">
-                      <textarea 
-                        rows="4" 
-                        formControlName="remark" 
+                      <textarea
+                        id="remark"
+                        rows="4"
+                        formControlName="remark"
                         nz-input
-                        placeholder="Enter remarks (optional)"
-                        class="form-textarea"
+                        placeholder=" "
+                        class="textarea-with-floating-label"
                       ></textarea>
                     </nz-textarea-count>
+                    <label for="remark" class="floating-label textarea-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
             </div>
           </div>
-        </div>
-          <!-- Course Selection Section -->
+
           <div class="form-section" *ngIf="numberOfCourseList > 0 || numberOfSelectiveCourse > 0 || editMode">
             <div class="section-header">
               <h4 class="section-title">
@@ -130,39 +157,79 @@
               </p>
             </div>
 
+            <div class="credit-summary" [class.credit-ok]="selectedCreditHours >= minimumCreditHoursRequired" [class.credit-short]="selectedCreditHours < minimumCreditHoursRequired">
+              <div class="credit-stat">
+                <span class="label">Selected courses</span>
+                <strong>{{ numberOfSelectiveCourse }}</strong>
+              </div>
+              <div class="credit-stat">
+                <span class="label">Total credit hours (T)</span>
+                <strong>{{ selectedCreditHours }}</strong>
+              </div>
+              <div class="credit-stat">
+                <span class="label">Minimum required</span>
+                <strong>{{ minimumCreditHoursRequired }}</strong>
+              </div>
+              <div class="credit-hint" *ngIf="selectedCreditHours < minimumCreditHoursRequired">
+                Select more courses until total credit hours reach at least {{ minimumCreditHoursRequired }}.
+              </div>
+              <div class="credit-hint ok" *ngIf="numberOfSelectiveCourse > 0 && selectedCreditHours >= minimumCreditHoursRequired">
+                Selected credit hours meet the minimum requirement.
+              </div>
+            </div>
+
             <div class="course-transfer-container">
-              <nz-transfer 
-                [nzDataSource]="listOfUnregisteredCourse" 
-                [nzDisabled]="disabled" 
+              <div class="courses-loading" *ngIf="isLoadingCourses">
+                <span nz-icon nzType="loading" nzTheme="outline"></span>
+                Loading courses for selected quadrant...
+              </div>
+
+              <nz-transfer
+                *ngIf="!isLoadingCourses"
+                [nzDataSource]="listOfUnregisteredCourse"
+                [nzDisabled]="disabled || isSubmitting"
                 nzShowSearch
-                [nzFilterOption]="filterOption" 
-                (nzSearchChange)="search($event)" 
+                [nzFilterOption]="filterOption"
+                (nzSearchChange)="search($event)"
                 (nzSelectChange)="select($event)"
-                (nzChange)="onTransferChange($event)" 
+                (nzChange)="onTransferChange($event)"
                 [nzListStyle]="{ 'width.px': 500, 'height.px': 500 }"
-                [nzItemsUnit]="'Courses'" 
-                [nzTitles]="['Available Courses', 'Selected Courses']" 
-                [nzOperations]="[]"
-                [nzTargetKeys]="targetCourseIds$ | async"
-                class="course-transfer">
-                <ng-template #custom>
-                  <button nz-button nzType="default" [disabled]="targetList.length === 0"
-                    (click)="transferSelected()" class="transfer-btn">
-                    <span nz-icon nzType="swap" nzTheme="outline"></span>
-                    Transfer Selected
-                  </button>
-                </ng-template>
+                [nzItemsUnit]="'Courses'"
+                [nzTitles]="transferTitles"
+                [nzOperations]="['>', '<']"
+                [nzTargetKeys]="targetKeys"
+                class="course-transfer"
+              >
               </nz-transfer>
+
+              <div class="transfer-actions" *ngIf="!isLoadingCourses">
+                <button
+                  nz-button
+                  nzType="default"
+                  type="button"
+                  [disabled]="selectedCreditHours === 0 || isSubmitting"
+                  (click)="applyTotalAsMinimum()"
+                >
+                  Set minimum to T ({{ selectedCreditHours }})
+                </button>
+              </div>
             </div>
           </div>
+        </div>
 
         <div class="form-actions">
-          <button nz-button nzType="default" class="cancel-btn" type="button" (click)="goToCurriculum()">
+          <button nz-button nzType="default" class="cancel-btn" type="button" [disabled]="isSubmitting" (click)="goToCurriculum()">
             <span nz-icon nzType="close" nzTheme="outline"></span>
             Cancel
           </button>
-          <button nz-button nzType="primary" class="submit-btn" type="submit" 
-            [disabled]="(isQuadrantLocked ? false : quadrantBreakdownForm.invalid) || numberOfSelectiveCourse == 0">
+          <button
+            nz-button
+            nzType="primary"
+            class="submit-btn"
+            type="submit"
+            [nzLoading]="isSubmitting"
+            [disabled]="isSubmitting || (isQuadrantLocked ? false : quadrantBreakdownForm.invalid) || numberOfSelectiveCourse == 0 || selectedCreditHours < minimumCreditHoursRequired"
+          >
             <span nz-icon nzType="save" nzTheme="outline"></span>
             {{ submit }}
           </button>

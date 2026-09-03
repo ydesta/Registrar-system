@@ -2,33 +2,34 @@
   <div class="header-section">
     <div class="header-content">
       <div class="page-title">
-        <h3 class="title-text">{{ code }} — {{ programme }}</h3>
+        <h2 class="title-text">{{ code }} — {{ programme }}</h2>
         <p class="subtitle-text">Manage quadrant breakdown and course distribution</p>
       </div>
       <div class="header-actions">
-        <div class="search-section" *ngIf="numberOfQuadrantBreakdown">
-          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input
-              type="text"
-              nz-input
-              placeholder="Search quadrant..."
-              [(ngModel)]="searchKey"
-            />
-          </nz-input-group>
-          <ng-template #suffixIconButton>
-            <button nz-button nzType="primary" class="search-btn" nzSearch>
-              <i nz-icon nzType="search"></i>
-            </button>
-          </ng-template>
+        <div class="search-section floating-label-container" *ngIf="numberOfQuadrantBreakdown">
+          <input
+            type="text"
+            nz-input
+            id="quadrantBreakdownSearch"
+            class="input-with-floating-label"
+            placeholder=" "
+            [(ngModel)]="searchKey"
+          />
+          <label for="quadrantBreakdownSearch" class="floating-label">
+            <span nz-icon nzType="search" nzTheme="outline"></span>
+            Search
+          </label>
         </div>
-        <button nz-button nzType="primary" class="add-btn" (click)="doAction()">
-          <i nz-icon nzType="plus" nzTheme="outline"></i>
-          <span>Add Quadrant</span>
-        </button>
-        <button nz-button nzType="default" class="back-btn" (click)="goToCurriculum()">
-          <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
-          Back
-        </button>
+        <div class="action-buttons">
+          <button nz-button nzType="primary" class="add-btn" (click)="doAction()">
+            <span nz-icon nzType="plus" nzTheme="outline"></span>
+            Add Quadrant
+          </button>
+          <button nz-button nzType="default" class="back-btn" (click)="goToCurriculum()">
+            <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+            Back
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -43,19 +44,18 @@
       [nzShowSizeChanger]="true"
       [nzFrontPagination]="true"
       [nzLoading]="loading"
-      [nzScroll]="{ x: '860px' }"
       [nzNoResult]="emptyTpl"
-      class="activities-table"
+      class="academic-table"
     >
       <thead>
         <tr>
           <th nzWidth="48px"></th>
-          <th class="sn-column">S/N</th>
-          <th>Quadrant</th>
-          <th>Courses</th>
-          <th>Min Credit Hours</th>
-          <th>Remark</th>
-          <th class="action-column">Actions</th>
+          <th style="min-width: 60px;">S/N</th>
+          <th style="min-width: 160px;">Quadrant</th>
+          <th style="min-width: 100px;">Courses</th>
+          <th style="min-width: 140px;">Min Credit Hours</th>
+          <th style="min-width: 180px;">Remark</th>
+          <th style="min-width: 80px; text-align: center;">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -65,32 +65,30 @@
               [nzExpand]="expandSet.has(data.id)"
               (nzExpandChange)="onExpandChange(data.id, $event)"
             ></td>
-            <td class="sn-column">
-              <span class="sn-badge">{{ i + 1 }}</span>
-            </td>
+            <td><span class="sn-badge">{{ i + 1 }}</span></td>
             <td>{{ data.quadrantCode }}</td>
             <td>
               <nz-tag [nzColor]="'blue'">{{ courseCount(data) }}</nz-tag>
             </td>
             <td>{{ data.minimumCreditHours ?? '-' }}</td>
             <td>{{ data.remark || '-' }}</td>
-            <td class="action-column">
+            <td style="text-align: center;">
               <button
                 nz-button
                 nz-dropdown
                 [nzDropdownMenu]="menu"
-                nzPlacement="bottomLeft"
-                class="action-button"
+                nzPlacement="bottomRight"
+                class="action-dropdown-btn"
               >
-                <i nz-icon nzType="more" nzTheme="outline"></i>
+                <span nz-icon nzType="more" nzTheme="outline"></span>
               </button>
               <nz-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
-                  <li>
-                    <button nz-button nzType="default" class="action-item edit" (click)="editQuadrant(data)">
-                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                  <li nz-menu-item>
+                    <a class="action-menu-link" (click)="editQuadrant(data)">
+                      <span nz-icon nzType="edit" nzTheme="outline"></span>
                       <span>Edit Quadrant & Courses</span>
-                    </button>
+                    </a>
                   </li>
                 </ul>
               </nz-dropdown-menu>
@@ -103,7 +101,7 @@
       </tbody>
       <ng-template #emptyTpl>
         <div class="no-data">
-          <i nz-icon nzType="search" nzTheme="outline"></i>
+          <span nz-icon nzType="search" nzTheme="outline"></span>
           <p>No quadrants match your search</p>
         </div>
       </ng-template>
@@ -113,9 +111,9 @@
   <ng-template #elseBlock>
     <div class="table-card empty-card" *ngIf="!loading">
       <div class="no-data">
-        <i nz-icon nzType="appstore" nzTheme="outline"></i>
+        <span nz-icon nzType="appstore" nzTheme="outline"></span>
         <p>No quadrant breakdown has been recorded for this curriculum.</p>
-        <button nz-button nzType="primary" (click)="doAction()">
+        <button nz-button nzType="primary" class="add-btn" (click)="doAction()">
           <span nz-icon nzType="plus" nzTheme="outline"></span>
           Create Quadrant Breakdown
         </button>

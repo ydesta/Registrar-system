@@ -80,4 +80,8 @@ export class AddActivityComponent implements OnInit {
 
     })
   }
+
+  cancel() {
+    this.modalRef.destroy();
+  }
 }

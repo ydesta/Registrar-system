@@ -75,7 +75,7 @@ export class AddBatchComponent implements OnInit {
       curriculumCode: ["", [Validators.required]],
       batchCode: ["", Validators.required],
       remark: [""],
-      entryYear: [null, []],
+      entryYear: [null, [Validators.required]],
       entryTerm: [null, [Validators.required]],
       amount: [null, [Validators.required]],
       educationLevel: [null, [Validators.required]]

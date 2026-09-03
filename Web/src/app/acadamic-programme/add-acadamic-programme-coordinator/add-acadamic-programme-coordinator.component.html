@@ -1,43 +1,171 @@
-<h3 class="h-tag">{{action}}</h3>
+<div class="content-container">
+  <div class="header-section">
+    <button
+      nz-button
+      nzType="default"
+      class="back-btn"
+      type="button"
+      routerLink="/acadamic-program/program-coordinator"
+    >
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Coordinators
+    </button>
+    <div class="header-content">
+      <div class="page-title">
+        <h2 class="title-text">{{ action }}</h2>
+        <p class="subtitle-text">Assign or update an academic programme coordinator</p>
+      </div>
+    </div>
+  </div>
 
-<div>
-    <form nz-form  nzLayout="vertical" [formGroup]="acadamicProgramCoordinatorForm" (ngSubmit)="submitForm()">
-        <nz-form-item>
-          <nz-form-label [nzSpan]="7" nzRequired>Acadamic Programme</nz-form-label>
-          <nz-form-control [nzSpan]="7" nzValidatingTip="Validating...">
-            <nz-select formControlName="acadamicProgrammeCode" nzPlaceHolder="select programme" >
-                <nz-option *ngFor="let item of acadamicPrograms" [nzValue]="item.acadamicProgrammeCode" [nzLabel]="item.acadamicProgrammeTitle"></nz-option>
-              </nz-select>
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>  
-          <nz-form-label [nzSpan]="7" nzRequired>Staff Id</nz-form-label>
-          <nz-form-control [nzSpan]="7">
-            <input nz-input formControlName="staffId" placeholder="enter programme status" />
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-            <nz-form-label [nzSpan]="7" nzRequired>Start Date</nz-form-label>
-            <nz-form-control [nzSpan]="7">
-                <nz-date-picker formControlName="startDate"></nz-date-picker>
-            </nz-form-control>
-          </nz-form-item>
-          <nz-form-item>
-            <nz-form-label [nzSpan]="7" nzRequired>End Date</nz-form-label>
-            <nz-form-control [nzSpan]="7">
-                <nz-date-picker formControlName="endDate"></nz-date-picker>
-            </nz-form-control>
-          </nz-form-item>
-        <nz-form-item>
-          <nz-form-label [nzSpan]="7" >Remark</nz-form-label>
-          <nz-form-control [nzSpan]="7">
-            <input nz-input formControlName="remark" placeholder="enter remark" />
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-control >
-            <button nz-button class="sumbit">{{submit}}</button>
-          </nz-form-control>
-        </nz-form-item>
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="user" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>Coordinator Information</h3>
+          <p>Link a staff member to an academic programme with start and end dates</p>
+        </div>
+      </div>
+
+      <form
+        nz-form
+        [formGroup]="acadamicProgramCoordinatorForm"
+        (ngSubmit)="submitForm()"
+        class="admin-form"
+      >
+        <div class="form-sections">
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="idcard" nzTheme="outline"></span>
+                Assignment Details
+              </h4>
+              <p class="section-description">Select the programme, staff, and assignment period</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select an academic programme">
+                    <nz-select
+                      formControlName="acadamicProgrammeCode"
+                      id="acadamicProgrammeCode"
+                      nzPlaceHolder=" "
+                      class="select-with-floating-label"
+                      [nzShowSearch]="true"
+                    >
+                      <nz-option
+                        *ngFor="let item of acadamicPrograms"
+                        [nzValue]="item.acadamicProgrammeCode"
+                        [nzLabel]="item.acadamicProgrammeTitle"
+                      ></nz-option>
+                    </nz-select>
+                    <label for="acadamicProgrammeCode" class="floating-label">
+                      <span nz-icon nzType="book" nzTheme="outline"></span>
+                      Academic Programme <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please enter staff ID">
+                    <input
+                      nz-input
+                      id="staffId"
+                      formControlName="staffId"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="staffId" class="floating-label">
+                      <span nz-icon nzType="user" nzTheme="outline"></span>
+                      Staff Id <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select start date">
+                    <nz-date-picker
+                      formControlName="startDate"
+                      id="startDate"
+                      nzPlaceHolder=" "
+                      class="date-with-floating-label"
+                    ></nz-date-picker>
+                    <label for="startDate" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      Start Date <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Please select end date">
+                    <nz-date-picker
+                      formControlName="endDate"
+                      id="endDate"
+                      nzPlaceHolder=" "
+                      class="date-with-floating-label"
+                    ></nz-date-picker>
+                    <label for="endDate" class="floating-label">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      End Date <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control>
+                    <input
+                      nz-input
+                      id="remark"
+                      formControlName="remark"
+                      placeholder=" "
+                      class="input-with-floating-label"
+                    />
+                    <label for="remark" class="floating-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div class="form-col"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            nz-button
+            nzType="default"
+            class="cancel-btn"
+            type="button"
+            routerLink="/acadamic-program/program-coordinator"
+          >
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+          <button nz-button nzType="primary" class="submit-btn" type="submit">
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+            {{ submit }}
+          </button>
+        </div>
       </form>
+    </div>
+  </div>
 </div>

@@ -8,6 +8,7 @@ export class TermCourseOfferingRequest {
   public ApprovedDate: Date;
   public StaffID: string;
   public Remark: string;
+  public AcademicTermId: number;
   public AcademicTermSeason: number;
   public AcademicTermYear: number;
   public RegistrationStartDate: Date | string;

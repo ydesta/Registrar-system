@@ -262,3 +262,25 @@ body {
 .fade-in {
   animation: fadeIn 0.5s ease-in;
 }
+
+.status-tracking-modal-wrap {
+  .ant-modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .ant-modal-header {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 16px 20px;
+  }
+
+  .ant-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .ant-modal-body {
+    overflow-x: auto;
+  }
+}

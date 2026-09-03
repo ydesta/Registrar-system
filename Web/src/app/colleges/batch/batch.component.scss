@@ -1,16 +1,3 @@
-/* Component specific styles can be added here */
-
-// The following styles are now handled by global CSS classes:
-// - content-container
-// - header-section
-// - action-buttons
-// - action-button
-// - action-item
-// - no-data
-// - table styles (nz-table)
-// - pagination styles (nz-pagination)
-
-// Content Container
 .content-container {
   padding: 24px;
   background: #f5f7fa;
@@ -18,8 +5,8 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-// Header Section
 .header-section {
+  display: block;
   background: white;
   border-radius: 16px;
   padding: 24px;
@@ -31,14 +18,11 @@
 
   .header-content {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
 
     .page-title {
-      flex: 1;
-      min-width: 0;
       .title-text {
         margin: 0 0 8px 0;
         font-size: 28px;
@@ -46,6 +30,7 @@
         color: #1f2937;
         line-height: 1.2;
       }
+
       .subtitle-text {
         margin: 0;
         color: #6b7280;
@@ -53,42 +38,99 @@
         font-weight: 400;
       }
     }
+
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
+      gap: 16px;
+      width: 100%;
+
       .search-section {
-        max-width: 260px;
-        flex: 1;
-        nz-input-group {
+        position: relative;
+        flex: 0 1 420px;
+        max-width: 420px;
+        margin: 0;
+
+        .input-with-floating-label {
+          width: 100%;
+          height: 44px;
+          padding: 12px 16px;
+          font-size: 14px;
+          border: 1.5px solid #e8e8e8;
           border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          background: #fafafa;
           transition: all 0.3s ease;
-          input {
-            border: none;
-            padding: 12px 16px;
-            font-size: 14px;
-            &:focus {
-              box-shadow: none;
-            }
+
+          &:hover {
+            border-color: #40a9ff;
+            background: #fff;
           }
-          .ant-input-suffix {
-            padding-right: 16px;
-            span[nz-icon] {
-              color: #9ca3af;
-              font-size: 16px;
-            }
+
+          &:focus {
+            border-color: #1890ff;
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+          }
+
+          &::placeholder {
+            color: transparent;
+          }
+        }
+
+        .floating-label {
+          position: absolute;
+          top: 50%;
+          left: 12px;
+          transform: translateY(-50%);
+          color: #9ca3af;
+          font-size: 14px;
+          pointer-events: none;
+          transition: 0.2s ease all;
+          background: white;
+          padding: 0 4px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          white-space: nowrap;
+          z-index: 1;
+          margin: 0;
+
+          span[nz-icon] {
+            font-size: 14px;
+            color: #9ca3af;
+          }
+        }
+
+        .input-with-floating-label:focus + .floating-label,
+        .input-with-floating-label:not(:placeholder-shown) + .floating-label {
+          top: -8px;
+          left: 10px;
+          font-size: 12px;
+          color: #1890ff;
+          background: white;
+
+          span[nz-icon] {
+            color: #1890ff;
+            font-size: 12px;
           }
         }
       }
+
       .add-btn {
+        flex: 0 0 auto;
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
         background: #1890ff;
         color: white;
         border-radius: 10px;
         font-weight: 500;
         box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
         padding: 0 20px;
+        height: 40px;
+
         &:hover {
           background: #40a9ff;
           color: white;
@@ -96,23 +138,10 @@
           box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
         }
       }
-      .export-btn, .print-btn {
-        background: #f1f5f9;
-        color: #374151;
-        border-radius: 10px;
-        font-weight: 500;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        padding: 0 18px;
-        &:hover {
-          background: #e0e7ef;
-          color: #1890ff;
-        }
-      }
     }
   }
 }
 
-// Table Card
 .table-card {
   background: white;
   border-radius: 16px;
@@ -122,12 +151,13 @@
   padding: 0 0 24px 0;
 }
 
-// Table Styling
 .batch-table {
   background: transparent;
   font-size: 15px;
+
   ::ng-deep .ant-table {
     background: transparent;
+
     .ant-table-thead > tr > th {
       background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
       border-bottom: 2px solid #e2e8f0;
@@ -135,221 +165,134 @@
       color: #374151;
       padding: 16px;
       font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
+
     .ant-table-tbody > tr > td {
       border-bottom: 1px solid #f1f5f9;
       padding: 16px;
-      transition: all 0.3s ease;
     }
+
     .ant-table-tbody > tr:hover > td {
-      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-      transform: scale(1.01);
+      background: #f8fafc;
     }
+
     .ant-table-tbody > tr:nth-child(even) > td {
       background: #fafafa;
     }
-    .ant-table-tbody > tr:nth-child(even):hover > td {
-      background: #f0f0f0;
-    }
+
     .ant-table-pagination {
-      margin: 16px 0 0 0;
+      margin: 16px 24px 0 24px;
+      padding: 16px 0;
+      border-top: 1px solid #f1f5f9;
     }
   }
-}
-
-// Action Buttons
-.action-btn {
-  margin-right: 6px;
-  border-radius: 8px;
-  padding: 0 10px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  transition: all 0.2s;
-  &.edit-btn {
-    color: #1890ff;
-    border: 1px solid #e5e7eb;
-    background: #f5faff;
-    &:hover {
-      background: #e6f7ff;
-      color: #096dd9;
-      border-color: #1890ff;
-    }
-  }
-  &.delete-btn {
-    color: #ef4444;
-    border: 1px solid #fbeaea;
-    background: #fff5f5;
-    &:hover {
-      background: #ffeaea;
-      color: #b91c1c;
-      border-color: #ef4444;
-    }
-  }
-}
-
-// No Data State
-.no-data {
-  text-align: center;
-  color: #9ca3af;
-  padding: 40px 0;
-  span[nz-icon] {
-    font-size: 40px;
-    color: #bdbdbd;
-    margin-bottom: 8px;
-  }
-  p {
-    margin: 0;
-    font-size: 16px;
-    color: #9ca3af;
-  }
-}
-
-// Responsive Design
-@media (max-width: 900px) {
-  .header-section {
-    padding: 16px;
-    .header-content {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
-      .header-actions {
-        width: 100%;
-        flex-wrap: wrap;
-        gap: 8px;
-        .search-section {
-          width: 100%;
-          max-width: 100%;
-        }
-        .add-btn, .export-btn, .print-btn {
-          width: 100%;
-          justify-content: center;
-        }
-      }
-    }
-  }
-  .table-card {
-    border-radius: 10px;
-    padding: 0 0 12px 0;
-  }
-  .batch-table {
-    font-size: 13px;
-    ::ng-deep .ant-table-thead > tr > th,
-    ::ng-deep .ant-table-tbody > tr > td {
-      padding: 10px;
-    }
-  }
-}
-
-.search-section {
-  margin-right: 16px;
-  width: 240px;
-
-  .ant-input-group {
-    .ant-input {
-      &:focus, &:hover {
-        border-color: #1890ff;
-      }
-    }
-  }
-}
-
-.logo {
-    display: none;
-}
-
-.add-button {
-    background: rgb(9, 62, 150);
-    color: white;
-}
-
-nz-table {
-    padding-top: 10px;
-}
-
-button {
-    //margin: 3px;
-    border-style: none;
-}
-
-.edit {
-    color: rgb(23, 131, 198);
-    border-color: rgb(23, 131, 198);
-}
-
-.detail {
-    color: rgb(23, 131, 198);
-    border-color: rgb(23, 131, 198)
-}
-
-.more {
-    color: rgb(23, 131, 198);
-    font-size: 20px;
-}
-
-// .th-row{
-//     color: rgb(23, 131, 198);
-// }
-.export {
-    border-style: solid;
-    border-color: rgb(9, 62, 150);
-    color: #e2ecf1;
-}
-
-.serch {
-    background: rgb(9, 62, 150);
-    color: white;
-}
-
-.group-delete {
-    border-style: solid;
-    border-color: rgb(181, 38, 38);
-    //color: rgb(23, 131, 198);
-}
-
-::ng-deep .ant-table-tbody>tr>td {
-    border-bottom: 1px solid #f0f0f0;
-    border-top: 1px solid #f0f0f0;
-}
-
-::ng-deep .ant-table-tbody>tr:current {
-    background-color: red;
-}
-
-.th-row {
-    color: rgb(23, 131, 198);
-}
-
-.main-color {
-    background-color: rgb(9, 62, 150);
-}
-
-@media print {
-    .paginate {
-        display: none;
-    }
-
-    .logo {
-        display: block;
-    }
 }
 
 .sn-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #1890ff;
-  color: #fff;
-  font-weight: 700;
-  font-size: 15px;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.08);
-  letter-spacing: 0.5px;
-  margin: 0 auto;
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 24px;
+}
+
+.missing-term {
+  color: #9ca3af;
+}
+
+.action-column {
+  width: 80px;
+  text-align: center;
+}
+
+.action-button {
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  background: #f9fafb;
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    border-color: #1890ff;
+    color: #1890ff;
+    background: rgba(24, 144, 255, 0.05);
+  }
+}
+
+::ng-deep .ant-dropdown-menu {
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e2e8f0;
+  padding: 8px;
+
+  .ant-dropdown-menu-item {
+    border-radius: 8px;
+    margin: 2px 0;
+    padding: 0;
+
+    .action-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      width: 100%;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 500;
+
+      &.delete {
+        color: #ef4444;
+      }
+    }
+  }
+}
+
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: #6b7280;
+  text-align: center;
+
+  span[nz-icon] {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #d1d5db;
+  }
+
+  p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 900px) {
+  .header-section .header-content .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+
+    .search-section {
+      max-width: none;
+      flex: 1 1 auto;
+    }
+
+    .add-btn {
+      margin-left: 0;
+      width: 100%;
+      justify-content: center;
+    }
+  }
 }

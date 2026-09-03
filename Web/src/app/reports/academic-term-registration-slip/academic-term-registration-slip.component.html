@@ -27,15 +27,15 @@
         </ng-template>
 
         <form nz-form [formGroup]="formCourseOffered">
-          <div nz-row [nzGutter]="24">
+          <div nz-row [nzGutter]="[16, 8]">
             <!-- Academic Term -->
-            <div nz-col [nzSpan]="12">
+            <div nz-col [nzXs]="24" [nzMd]="12">
               <nz-form-item>
-                <nz-form-label [nzSpan]="8">
+                <nz-form-label [nzXs]="24" [nzSm]="8">
                   Academic Term 
                   <span class="required" *ngIf="(!startDate?.value || !endDate?.value) && !studentId?.value">*</span>
                 </nz-form-label>
-                <nz-form-control [nzSpan]="16" [nzValidateStatus]="termId.invalid && termId.touched ? 'error' : ''"
+                <nz-form-control [nzXs]="24" [nzSm]="16" [nzValidateStatus]="termId.invalid && termId.touched ? 'error' : ''"
                   [nzErrorTip]="termId.invalid && termId.touched ? 'Academic Term is required' : ''">
                   <nz-select formControlName="termId" nzPlaceHolder="Select Academic Term" nzShowSearch nzAllowClear
                     style="width: 100%;">
@@ -47,13 +47,13 @@
             </div>
 
             <!-- Term Year -->
-            <div nz-col [nzSpan]="12">
+            <div nz-col [nzXs]="24" [nzMd]="12">
               <nz-form-item>
-                <nz-form-label [nzSpan]="8">
+                <nz-form-label [nzXs]="24" [nzSm]="8">
                   Term Year 
                   <span class="required" *ngIf="(!startDate?.value || !endDate?.value) && !studentId?.value">*</span>
                 </nz-form-label>
-                <nz-form-control [nzSpan]="16" [nzValidateStatus]="termYear.invalid && termYear.touched ? 'error' : ''"
+                <nz-form-control [nzXs]="24" [nzSm]="16" [nzValidateStatus]="termYear.invalid && termYear.touched ? 'error' : ''"
                   [nzErrorTip]="termYear.invalid && termYear.touched ? 'Term Year is required' : ''">
                   <nz-select formControlName="termYear" nzPlaceHolder="Select Term Year" nzShowSearch nzAllowClear
                     style="width: 100%;">
@@ -64,18 +64,18 @@
             </div>
 
             <!-- Batch Code -->
-            <div nz-col [nzSpan]="12">
+            <div nz-col [nzXs]="24" [nzMd]="12">
               <nz-form-item>
-                <nz-form-label [nzSpan]="8">
+                <nz-form-label [nzXs]="24" [nzSm]="8">
                   Batch Code 
                   <span class="required" *ngIf="(!startDate?.value || !endDate?.value) && !studentId?.value">*</span>
                 </nz-form-label>
-                <nz-form-control [nzSpan]="16"
+                <nz-form-control [nzXs]="24" [nzSm]="16"
                   [nzValidateStatus]="batchCode.invalid && batchCode.touched ? 'error' : ''"
                   [nzErrorTip]="batchCode.invalid && batchCode.touched ? 'Batch Code is required' : ''">
                   <nz-select formControlName="batchCode" nzPlaceHolder="Select Batch Code" nzShowSearch nzAllowClear
                     style="width: 100%;">
-                    <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.id"
+                    <nz-option *ngFor="let item of listOfBatch" [nzValue]="item.batchCode"
                       [nzLabel]="item.batchCode"></nz-option>
                   </nz-select>
                 </nz-form-control>
@@ -83,10 +83,10 @@
             </div>
 
             <!-- Start Date -->
-            <div nz-col [nzSpan]="12">
+            <div nz-col [nzXs]="24" [nzMd]="12">
               <nz-form-item>
-                <nz-form-label [nzSpan]="8">Start Date</nz-form-label>
-                <nz-form-control [nzSpan]="16">
+                <nz-form-label [nzXs]="24" [nzSm]="8">Start Date</nz-form-label>
+                <nz-form-control [nzXs]="24" [nzSm]="16">
                   <nz-date-picker formControlName="startDate" nzPlaceHolder="Select Start Date" nzAllowClear
                     style="width: 100%;"></nz-date-picker>
                 </nz-form-control>
@@ -94,10 +94,10 @@
             </div>
 
             <!-- End Date -->
-            <div nz-col [nzSpan]="12">
+            <div nz-col [nzXs]="24" [nzMd]="12">
               <nz-form-item>
-                <nz-form-label [nzSpan]="8">End Date</nz-form-label>
-                <nz-form-control [nzSpan]="16"
+                <nz-form-label [nzXs]="24" [nzSm]="8">End Date</nz-form-label>
+                <nz-form-control [nzXs]="24" [nzSm]="16"
                   [nzValidateStatus]="endDate?.invalid && endDate?.touched ? 'error' : ''"
                   [nzErrorTip]="endDate?.errors?.['dateRangeInvalid'] ? 'End date cannot be less than start date' : ''">
                   <nz-date-picker formControlName="endDate" nzPlaceHolder="Select End Date" nzAllowClear
@@ -105,10 +105,10 @@
                 </nz-form-control>
               </nz-form-item>
             </div>
-            <div nz-col [nzSpan]="12">
+            <div nz-col [nzXs]="24" [nzMd]="12">
               <nz-form-item>
-                <nz-form-label [nzSpan]="8">Student Id</nz-form-label>
-                <nz-form-control [nzSpan]="16">
+                <nz-form-label [nzXs]="24" [nzSm]="8">Student Id</nz-form-label>
+                <nz-form-control [nzXs]="24" [nzSm]="16">
                   <input nz-input formControlName="studentId" class="form-input" placeholder="Auto-populated" />
                 </nz-form-control>
               </nz-form-item>
@@ -208,26 +208,29 @@
               <td colspan="7">
 
                 <!-- Payments Table -->
-                <div *ngIf="getPaymentDetails(data).length > 0" style="margin-top: 20px;">
+                <div *ngIf="getPaymentDetails(data).length > 0" class="nested-table-wrap" style="margin-top: 20px;">
                   <h4 style="margin-bottom: 10px;">Payment Details</h4>
                   <nz-table [nzData]="getPaymentDetails(data)" nzBordered [nzShowPagination]="false"
-                    style="table-layout: fixed; width: 100%;">
+                    [nzScroll]="{ x: '900px' }"
+                    style="width: 100%;">
                     <thead>
                       <tr>
-                        <th style="width: 100px;">From Bank</th>
-                        <th style="width: 100px;">To Bank</th>
-                        <th style="width: 150px;">Transaction Date</th>
-                        <th style="width: 150px;">Transaction ID</th>
-                        <th style="width: 100px;">Amount</th>
-                        <th style="width: 100px;">Action</th>
+                        <th nzWidth="120px">Payment Order #</th>
+                        <th nzWidth="100px">From Bank</th>
+                        <th nzWidth="100px">To Bank</th>
+                        <th nzWidth="140px">Transaction Date</th>
+                        <th nzWidth="140px">Transaction ID</th>
+                        <th nzWidth="100px">Amount</th>
+                        <th nzWidth="100px">Action</th>
                       </tr>
                     </thead>
         <tbody>
           <tr *ngFor="let payment of getPaymentDetails(data); let i = index">
+            <td>{{ payment.orderNumber || '-' }}</td>
             <td>{{ payment.fromBank || '-' }}</td>
             <td>{{ formatToBank(payment.toBank) }}</td>
             <td>{{ payment.transactionDate | date : "dd-MM-yyyy" }}</td>
-            <td>{{ payment.bankTransactionID || '-' }}</td>
+            <td>{{ (payment.bankTransactionID && payment.bankTransactionID !== '-') ? payment.bankTransactionID : '-' }}</td>
             <td>{{ payment.amount | number:'1.2-2' }}</td>
             <td>
               <button *ngIf="payment.fileName" nz-button nzType="link" nzSize="small"
@@ -244,6 +247,7 @@
             <td></td>
             <td></td>
             <td></td>
+            <td></td>
             <td><strong>Total</strong></td>
             <td><strong>{{ getTotalPaymentAmount(data) | number:'1.2-2' }}</strong></td>
             <td></td>
@@ -254,15 +258,17 @@
 
 
     <!-- Courses Table -->
+    <div class="nested-table-wrap">
     <nz-table [nzData]="getCourseDetails(data)" nzBordered [nzShowPagination]="false"
-      style="table-layout: fixed; width: 100%; margin-bottom: 20px;">
+      [nzScroll]="{ x: '640px' }"
+      style="width: 100%; margin-bottom: 20px;">
       <thead>
         <tr>
-          <th style="width: 80px;">Serial No.</th>
-          <th style="width: 100px;">Course Code</th>
-          <th style="width: 280px;">Course Title</th>
-          <th style="width: 80px;">Credit H.</th>
-          <th style="width: 100px;">Total Amount</th>
+          <th nzWidth="80px">Serial No.</th>
+          <th nzWidth="100px">Course Code</th>
+          <th nzWidth="280px">Course Title</th>
+          <th nzWidth="80px">Credit H.</th>
+          <th nzWidth="100px">Total Amount</th>
         </tr>
       </thead>
       <tbody>
@@ -281,10 +287,10 @@
           <td>Total </td>
           <td>{{ getTotalCreditHours(data) }}</td>
           <td>{{getTotalAmount(data)}}</td>
-          <td></td>
         </tr>
       </tfoot>
     </nz-table>
+    </div>
 
 
     </td>

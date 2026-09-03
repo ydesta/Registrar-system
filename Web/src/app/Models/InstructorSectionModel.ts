@@ -2,7 +2,7 @@ export interface InstructorSectionModel {
   id: number;
   staffId: string;
   sectionId: number;
-  academicTerm: number;
+  academicTerm: number | string;
   year: number;
   courseId: string;
   batchId: string;
@@ -35,7 +35,7 @@ export interface InstructorSectionAssignmentViewModel {
   batchCode: string;
   staffId: string;
   sectionId: number;
-  academicTerm: number;
+  academicTerm: number | string;
   year: number;
   courseId: string;
   batchId: string;

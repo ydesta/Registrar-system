@@ -170,7 +170,7 @@ export class InstructorSectionFormComponent implements OnInit {
     }
 
     // Load batch list first
-    this.getListOfBatch(data.academicTerm, data.year);
+    this.getListOfBatch(this.toAcademicTermId(data.academicTerm), data.year);
 
     // Load sections and courses after batch is loaded
     setTimeout(() => {
@@ -248,13 +248,13 @@ export class InstructorSectionFormComponent implements OnInit {
         }
       });
   }
-  getListOfBatch(termId: number = 0, termYear: number = 0) {
-    // Validate parameters before making API call
-    if (!termId || !termYear) {
+  getListOfBatch(termId: number | string = 0, termYear: number = 0) {
+    const resolvedTermId = this.toAcademicTermId(termId);
+    if (!resolvedTermId || !termYear) {
       return;
     }
 
-    this.courseTermOfferingService.getListOfBatchCodeByAcademicTerm(termId, termYear).subscribe({
+    this.courseTermOfferingService.getListOfBatchCodeByAcademicTerm(resolvedTermId, termYear).subscribe({
       next: (res) => {
         this.listOfBatch = res;
       },
@@ -262,6 +262,23 @@ export class InstructorSectionFormComponent implements OnInit {
         // Handle error silently or add user notification if needed
       }
     });
+  }
+
+  private toAcademicTermId(term: number | string | null | undefined): number {
+    if (term === null || term === undefined || term === '') {
+      return 0;
+    }
+    if (typeof term === 'number') {
+      return term;
+    }
+    const asNumber = Number(term);
+    if (!isNaN(asNumber) && asNumber > 0) {
+      return asNumber;
+    }
+    const match = this.listOfTermNumber.find(
+      t => t.Description.toLowerCase() === String(term).trim().toLowerCase()
+    );
+    return match ? match.Id : 0;
   }
   loadInstructorSection(id: number): void {
     this.loading = true;
@@ -349,7 +366,7 @@ export class InstructorSectionFormComponent implements OnInit {
       this.form.patchValue({
         staffId: data.staffId,
         sectionId: data.sectionId,
-        academicTerm: data.academicTerm,
+        academicTerm: this.toAcademicTermId(data.academicTerm),
         year: data.year,
         courseId: data.courseId,
         batchId: data.batchId,

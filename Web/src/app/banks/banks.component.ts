@@ -48,10 +48,6 @@ export class BanksComponent implements OnInit, OnDestroy {
     });
   }
 
-  exportBanks() {
-    this._customNotificationService.notification('info', 'Info', 'Export functionality will be implemented');
-  }
-
   showDeleteConfirm(id: any): void {
     this.reqId = id;
     this.modal.confirm({

@@ -171,11 +171,12 @@ export class ManageInstructorTableComponent implements OnInit, OnDestroy {
   }
 
 
-  getTermColor(term: number): string {
-    switch (term) {
-      case 1: return 'blue';
-      case 2: return 'green';
-      case 3: return 'orange';
+  getTermColor(term: number | string): string {
+    switch (this.getTermDescription(term)) {
+      case 'Winter': return 'blue';
+      case 'Spring': return 'green';
+      case 'Summer': return 'orange';
+      case 'Autumn': return 'purple';
       default: return 'default';
     }
   }
@@ -186,9 +187,28 @@ export class ManageInstructorTableComponent implements OnInit, OnDestroy {
       this.router.navigate(['/student-section/instructor-section-form']);
     }
   }
-  getTermDescription(termId: number): string {
-    const term = this.academicTermList.find(t => t.Id === termId);
-    return term ? term.Description : 'Unknown';
+  getTermDescription(term: number | string): string {
+    if (term === null || term === undefined || term === '') {
+      return 'Unknown';
+    }
+
+    if (typeof term === 'string') {
+      const byName = this.academicTermList.find(
+        t => t.Description.toLowerCase() === term.toLowerCase()
+      );
+      if (byName) {
+        return byName.Description;
+      }
+
+      const termWord = term.split(/\s+/)[0];
+      const byWord = this.academicTermList.find(
+        t => t.Description.toLowerCase() === termWord.toLowerCase()
+      );
+      return byWord ? byWord.Description : term;
+    }
+
+    const byId = this.academicTermList.find(t => t.Id === Number(term));
+    return byId ? byId.Description : 'Unknown';
   }
 
   onEdit(item: InstructorSectionAssignmentViewModel): void {

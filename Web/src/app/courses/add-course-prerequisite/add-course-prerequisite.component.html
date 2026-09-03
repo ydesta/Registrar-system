@@ -1,131 +1,150 @@
 <div class="content-container">
-  <!-- Header Section -->
   <div class="header-section">
+    <button nz-button nzType="default" class="back-btn" type="button" routerLink="../course-prerequisite">
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Back to Prerequisites
+    </button>
     <div class="header-content">
       <div class="page-title">
-        <h3 class="title-text">{{ action }}</h3>
+        <h2 class="title-text">{{ action }}</h2>
         <p class="subtitle-text">Add or update course prerequisite relationships</p>
-      </div>
-      <div class="header-actions">
-        <button 
-          routerLink="../course-prerequisite" 
-          nz-button 
-          nzType="default" 
-          class="back-btn"
-        >
-          <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
-          <span>Back to Prerequisites</span>
-        </button>
       </div>
     </div>
   </div>
 
-  <!-- Form Card -->
-  <div class="form-card">
-    <div class="form-header">
-      <div class="form-icon">
-        <i nz-icon nzType="link" nzTheme="outline"></i>
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <span nz-icon nzType="link" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>Prerequisite Information</h3>
+          <p>Please select the course and its prerequisite below</p>
+        </div>
       </div>
-      <div class="form-title">
-        <h4>Prerequisite Information</h4>
-        <p>Please select the course and its prerequisite below</p>
-      </div>
+
+      <form
+        nz-form
+        [formGroup]="prerequisiteForm"
+        (ngSubmit)="submitForm()"
+        class="admin-form"
+      >
+        <div class="form-sections">
+          <div class="form-section">
+            <div class="section-header">
+              <h4 class="section-title">
+                <span nz-icon nzType="link" nzTheme="outline"></span>
+                Prerequisite Details
+              </h4>
+              <p class="section-description">Select the course and its required prerequisite</p>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control nzValidatingTip="Validating...">
+                    <nz-select
+                      formControlName="courseId"
+                      id="courseId"
+                      nzPlaceHolder=" "
+                      nzShowSearch
+                      [nzLoading]="isLoading"
+                      class="select-with-floating-label"
+                    >
+                      <nz-option
+                        *ngFor="let course of courses"
+                        [nzValue]="course.id"
+                        [nzLabel]="course.courseTitle"
+                      ></nz-option>
+                    </nz-select>
+                    <label for="courseId" class="floating-label">
+                      <span nz-icon nzType="book" nzTheme="outline"></span>
+                      Course <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control>
+                    <nz-select
+                      formControlName="preRequisiteCourseId"
+                      id="preRequisiteCourseId"
+                      nzPlaceHolder=" "
+                      nzShowSearch
+                      [nzLoading]="isLoading"
+                      class="select-with-floating-label"
+                    >
+                      <nz-option
+                        *ngFor="let course of courses"
+                        [nzValue]="course.id"
+                        [nzLabel]="course.courseTitle"
+                      ></nz-option>
+                    </nz-select>
+                    <label for="preRequisiteCourseId" class="floating-label">
+                      <span nz-icon nzType="node-index" nzTheme="outline"></span>
+                      Prerequisite Course <span class="required">*</span>
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <nz-form-item>
+                  <nz-form-control>
+                    <nz-textarea-count [nzMaxCharacterCount]="250">
+                      <textarea
+                        id="remark"
+                        rows="4"
+                        formControlName="remark"
+                        nz-input
+                        placeholder=" "
+                        class="textarea-with-floating-label"
+                      ></textarea>
+                    </nz-textarea-count>
+                    <label for="remark" class="floating-label textarea-label">
+                      <span nz-icon nzType="form" nzTheme="outline"></span>
+                      Remark
+                    </label>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+
+            <div class="error-message global-error" *ngIf="prerequisiteForm.errors?.['sameCourse']">
+              <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+              <span>The same course cannot be selected as a prerequisite</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            nz-button
+            nzType="default"
+            class="cancel-btn"
+            type="button"
+            routerLink="../course-prerequisite"
+          >
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+            Cancel
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            class="submit-btn"
+            type="submit"
+            [disabled]="prerequisiteForm.invalid || isLoading || prerequisiteForm.errors?.['sameCourse']"
+          >
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+            {{ submit }}
+          </button>
+        </div>
+      </form>
     </div>
-
-    <form
-      nz-form
-      nzLayout="vertical"
-      [formGroup]="prerequisiteForm"
-      (ngSubmit)="submitForm()"
-      class="course-form"
-    >
-      <div class="form-grid">
-        <!-- Row 1: Course & Prerequisite Course -->
-        <div class="form-row">
-          <nz-form-item class="form-item">
-            <nz-form-label nzRequired>Course</nz-form-label>
-            <nz-form-control nzValidatingTip="Validating...">
-              <nz-select
-                formControlName="courseId"
-                nzPlaceHolder="Select course"
-                nzShowSearch
-                [nzLoading]="isLoading"
-              >
-                <nz-option
-                  *ngFor="let course of courses"
-                  [nzValue]="course.id"
-                  [nzLabel]="course.courseTitle">
-                </nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-
-          <nz-form-item class="form-item">
-            <nz-form-label nzRequired>Prerequisite Course</nz-form-label>
-            <nz-form-control>
-              <nz-select
-                formControlName="preRequisiteCourseId"
-                nzPlaceHolder="Select prerequisite course"
-                nzShowSearch
-                [nzLoading]="isLoading"
-              >
-                <nz-option
-                  *ngFor="let course of courses"
-                  [nzValue]="course.id"
-                  [nzLabel]="course.courseTitle">
-                </nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-        </div>
-
-        <!-- Row 2: Remark -->
-        <div class="form-row">
-          <nz-form-item class="form-item full-width">
-            <nz-form-label>Remark</nz-form-label>
-            <nz-form-control>
-              <nz-textarea-count [nzMaxCharacterCount]="250">
-                <textarea
-                  rows="4"
-                  formControlName="remark"
-                  nz-input
-                  placeholder="Enter remark (optional)"
-                  class="form-input">
-                </textarea>
-              </nz-textarea-count>
-            </nz-form-control>
-          </nz-form-item>
-        </div>
-
-        <!-- Error Message for Same Course -->
-        <div class="error-message global-error" *ngIf="prerequisiteForm.errors?.['sameCourse']">
-          <i nz-icon nzType="exclamation-circle" nzTheme="fill"></i>
-          <span>The same course cannot be selected as a prerequisite</span>
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button 
-          nz-button 
-          nzType="default" 
-          class="cancel-btn"
-          type="button"
-          routerLink="../course-prerequisite"
-        >
-          <i nz-icon nzType="close" nzTheme="outline"></i>
-          <span>Cancel</span>
-        </button>
-        <button 
-          nz-button 
-          nzType="primary" 
-          class="submit-btn"
-          type="submit"
-          [disabled]="prerequisiteForm.invalid || isLoading || prerequisiteForm.errors?.['sameCourse']"
-        >
-          <i nz-icon nzType="save" nzTheme="outline"></i>
-          <span>{{ submit }}</span>
-        </button>
-      </div>
-    </form>
   </div>
 </div>

@@ -231,11 +231,16 @@ export class AcademicTermRegistrationSlipComponent implements OnInit, OnDestroy 
     const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
     const studentId = formModel.studentId ? formModel.studentId.toString().trim() : null;
     const batchCode = formModel.batchCode || null;
-    this._studentService.getListOfTermRegisteredCourseListPaginated(
+    const filters = {
+      studentId,
+      academicTerm: formModel.termId || null,
+      year: formModel.termYear || null,
       batchCode,
       startDate,
-      endDate,
-      studentId,
+      endDate
+    };
+    this._studentService.getListOfTermRegisteredCourseListPaginated(
+      filters,
       this.pager.query()
     ).subscribe({
       next: (res: any) => {
@@ -340,8 +345,16 @@ export class AcademicTermRegistrationSlipComponent implements OnInit, OnDestroy 
       const endDate = formModel.endDate ? this.formatDate(formModel.endDate) : '';
       const studentId = formModel.studentId ? formModel.studentId.toString().trim() : null;
       const batchCode = formModel.batchCode || null;
+      const filters = {
+        studentId,
+        academicTerm: formModel.termId || null,
+        year: formModel.termYear || null,
+        batchCode,
+        startDate,
+        endDate
+      };
       
-      this._studentService.getListOfTermRegisteredCourseList(batchCode, startDate, endDate, studentId)
+      this._studentService.getListOfTermRegisteredCourseList(filters)
         .subscribe({
           next: (res) => {
             this.tbLoading = false;
@@ -369,6 +382,9 @@ export class AcademicTermRegistrationSlipComponent implements OnInit, OnDestroy 
           creditHours: c.creditHours,
           amount: c.totalAmount,
           courseId: c.id,
+          orderNumber: c.orderNumber,
+          bankTransactionId: c.bankTransactionId,
+          transactionDate: c.transactionDate
         };
       });
       return courseDetails;

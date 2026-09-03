@@ -66,14 +66,10 @@ export class BatchComponent implements OnInit, OnDestroy {
   }
 
   getListOfAcademicTermStatus() {
-    let division: StaticData = new StaticData();
-    ACADEMIC_TERM_STATUS.forEach(pair => {
-      division = {
-        Id: pair.Id,
-        Description: pair.Description
-      };
-      this.listOfTermNumber.push(division);
-    });
+    this.listOfTermNumber = ACADEMIC_TERM_STATUS.map(pair => ({
+      Id: pair.Id,
+      Description: pair.Description
+    }));
   }
 
   showDeleteConfirm(id: string): void {
@@ -110,41 +106,6 @@ export class BatchComponent implements OnInit, OnDestroy {
               );
             }
           });
-      }
-    });
-  }
-
-  exportBatch() {
-    this._crudService.getList('/batches/excel').subscribe({
-      next: (res: any) => {
-        if (res.data.toString() === 'No data found') {
-          this._customNotificationService.notification(
-            'error',
-            'Error',
-            res.data
-          );
-        } else {
-          const fileLists = res.data.split('/');
-          this._crudService.exportExcel('/' + res.data).subscribe((data: any) => {
-            const downloadURL = window.URL.createObjectURL(data);
-            const link = document.createElement('a');
-            link.href = downloadURL;
-            link.download = fileLists[fileLists.length - 1];
-            link.click();
-            this._customNotificationService.notification(
-              'success',
-              'Success',
-              'Excel file is downloaded successfully.'
-            );
-          });
-        }
-      },
-      error: () => {
-        this._customNotificationService.notification(
-          'error',
-          'Error',
-          'Failed to export data'
-        );
       }
     });
   }
