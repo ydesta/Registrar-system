@@ -301,11 +301,13 @@ export class ApplicantRequestDetailComponent implements OnInit {
     switch (status) {
       case 0:
       case 1:
-        return "error";
+        return "orange";
       case 2:
         return "processing";
       case 3:
         return "success";
+      case 4:
+        return "error";
       default:
         return "default";
     }

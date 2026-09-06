@@ -505,7 +505,7 @@
                     <p class="page-subtitle">Review applicant's emergency contact information and relationships</p>
                 </div>
                 <div class="header-status">
-                    <nz-tag nzColor="blue" class="status-tag">
+                    <nz-tag nzColor="default" class="status-tag">
                         <span nz-icon nzType="contacts" nzTheme="outline"></span>
                         {{ contactPersonLists.length }} Contact(s)
                     </nz-tag>
@@ -514,15 +514,6 @@
         </div>
 
         <div class="table-container">
-            <div class="table-header-section">
-                <div class="table-title">
-                    Emergency Contact Information
-                </div>
-                <div class="table-subtitle">
-                    {{ contactPersonLists.length }} Contact(s) Available
-                </div>
-            </div>
-            
             <nz-table #basicTable [nzData]="contactPersonLists" 
                       nzBordered 
                       nzSize="middle"
@@ -604,8 +595,8 @@
                     <p class="page-subtitle">Review applicant's educational qualifications and academic history</p>
                 </div>
                 <div class="header-status">
-                    <nz-tag nzColor="green" class="status-tag">
-                        <span nz-icon nzType="graduation-cap" nzTheme="outline"></span>
+                    <nz-tag nzColor="default" class="status-tag">
+                        <span nz-icon nzType="book" nzTheme="outline"></span>
                         {{ educationLists.length }} Qualification(s)
                     </nz-tag>
                 </div>
@@ -613,15 +604,6 @@
         </div>
 
         <div class="table-container">
-            <div class="table-header-section">
-                <div class="table-title">
-                    Educational Qualifications
-                </div>
-                <div class="table-subtitle">
-                    {{ educationLists.length }} Qualification(s) Listed
-                </div>
-            </div>
-            
             <nz-table #educationTable [nzData]="educationLists" 
                       nzBordered 
                       nzSize="middle"
@@ -722,16 +704,25 @@
     </div>
 
     <div tabContent="workExperience">
-        <div class="table-container">
-            <div class="table-header-section">
-                <div class="table-title">
-                    Professional Work Experience
+        <div class="professional-header">
+            <div class="header-content">
+                <div class="header-icon">
+                    <span nz-icon nzType="idcard" nzTheme="outline"></span>
                 </div>
-                <div class="table-subtitle">
-                    {{ workExperienceLists.length }} Experience(s) Recorded
+                <div class="header-text">
+                    <h1 class="page-title">Work Experience</h1>
+                    <p class="page-subtitle">Review applicant's professional work history</p>
+                </div>
+                <div class="header-status">
+                    <nz-tag nzColor="default" class="status-tag">
+                        <span nz-icon nzType="idcard" nzTheme="outline"></span>
+                        {{ workExperienceLists.length }} Experience(s)
+                    </nz-tag>
                 </div>
             </div>
-            
+        </div>
+
+        <div class="table-container">
             <nz-table #experinceTable [nzData]="workExperienceLists" 
                       nzBordered 
                       nzSize="middle"
@@ -840,7 +831,7 @@
                     <p class="page-subtitle">Review and make decisions on applicant's academic program requests</p>
                 </div>
                 <div class="header-status">
-                    <nz-tag nzColor="purple" class="status-tag">
+                    <nz-tag nzColor="default" class="status-tag">
                         <span nz-icon nzType="file-text" nzTheme="outline"></span>
                         {{ applicationProgramRequestList.length }} Application(s)
                     </nz-tag>
@@ -849,15 +840,6 @@
         </div>
 
         <div class="table-container">
-            <div class="table-header-section">
-                <div class="table-title">
-                    Academic Program Applications
-                </div>
-                <div class="table-subtitle">
-                    {{ applicationProgramRequestList.length }} Application(s) Submitted
-                </div>
-            </div>
-            
             <nz-table #basicsTable [nzData]="applicationProgramRequestList" 
                       nzBordered 
                       nzSize="middle"
@@ -908,7 +890,6 @@
                             <div class="program-card">
                                 <div class="program-details">
                                     <div class="program-name">{{ getAcademicProgramDescription(data.acadamicProgrammeId) }}</div>
-                                    <div class="program-type">Academic Program</div>
                                 </div>
                             </div>
                         </td>
@@ -916,7 +897,6 @@
                             <div class="division-card">
                                 <div class="division-details">
                                     <div class="division-name">{{ getDivisionStatusDescription(data.division) }}</div>
-                                    <div class="division-type">Department</div>
                                 </div>
                             </div>
                         </td>
@@ -924,7 +904,6 @@
                             <div class="division-card">
                                 <div class="division-details">
                                     <div class="division-name">{{ getApplicantYearDescription(data.applicantYear) }}</div>
-                                    <div class="division-type">Year Level</div>
                                 </div>
                             </div>
                         </td>
@@ -946,7 +925,6 @@
                             <div class="date-card">
                                 <div class="date-details">
                                     <div class="date-value">{{ data.createdDate | date:'dd-MM-yyyy'}}</div>
-                                    <div class="date-label">Applied On</div>
                                 </div>
                             </div>
                         </td>
@@ -954,7 +932,7 @@
                             <div class="action-buttons">
                                 <button *ngIf="isUserReviewer && canMakeDecision(data)" 
                                         nz-button 
-                                        nzType="link"
+                                        nzType="primary"
                                         (click)="openDecisionModal(data)"
                                         class="enhanced-action-button">
                                     Make Decision

@@ -138,11 +138,12 @@
           nz-button 
           nzType="primary" 
           (click)="onSave()"
-          [disabled]="!applicantWorkExpForm.valid"
+          [disabled]="isSubmitting || !applicantWorkExpForm.valid"
+          [nzLoading]="isSubmitting"
           class="submit-btn"
         >
-          <i nz-icon nzType="save" nzTheme="outline"></i>
-          {{ workExperinceId ? 'Update' : 'Save' }}
+          <i nz-icon nzType="save" nzTheme="outline" *ngIf="!isSubmitting"></i>
+          {{ isSubmitting ? 'Saving...' : (workExperinceId ? 'Update' : 'Save') }}
         </button>
       </div>
     </div>

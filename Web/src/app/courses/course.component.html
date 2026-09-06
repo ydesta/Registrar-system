@@ -3,44 +3,36 @@
   <div class="header-section">
     <div class="header-content">
       <div class="page-title">
-        <h3 class="title-text">Courses</h3>
+        <h2 class="title-text">Courses</h2>
         <p class="subtitle-text">Manage and view all course information</p>
       </div>
       <div class="header-actions">
-        <div class="search-section">
-          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input type="text" nz-input placeholder="Search courses..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)" />
-          </nz-input-group>
-          <ng-template #suffixIconButton>
-            <button nz-button nzType="primary" class="search-btn" nzSearch>
-              <i nz-icon nzType="search"></i>
-            </button>
-          </ng-template>
+        <div class="search-section floating-label-container">
+          <input
+            type="text"
+            nz-input
+            id="courseSearch"
+            class="input-with-floating-label"
+            placeholder=" "
+            [(ngModel)]="pager.searchKey"
+            (ngModelChange)="pager.onSearch($event)"
+          />
+          <label for="courseSearch" class="floating-label">
+            <span nz-icon nzType="search" nzTheme="outline"></span>
+            Search
+          </label>
         </div>
-        <button
-          routerLink="../course/add-course/null"
-          class="add-btn"
-          nz-button
-          nzType="primary"
-        >
-          <i nz-icon nzType="plus" nzTheme="outline"></i>
-          <span>Add Course</span>
-        </button>
-        <button nz-button class="export-btn" (click)="exportCourses()">
-          <i nz-icon nzType="file-excel" nzTheme="outline"></i>
-          <span>Export</span>
-        </button>
-        <button
-          class="print-btn"
-          nz-button
-          nzType="default"
-          printTitle="Course List"
-          printSectionId="print-section"
-          ngxPrint
-        >
-          <i nz-icon nzType="printer" nzTheme="outline"></i>
-          <span>Print</span>
-        </button>
+        <div class="action-buttons">
+          <button
+            routerLink="../course/add-course/null"
+            class="add-btn"
+            nz-button
+            nzType="primary"
+          >
+            <span nz-icon nzType="plus" nzTheme="outline"></span>
+            Add Course
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -77,7 +69,7 @@
             <th>Lecture Hours</th>
             <th>Lab Hours</th>
             <th>Remark</th>
-            <th class="action-column">Actions</th>
+            <th class="action-column" style="text-align: center;">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -92,45 +84,28 @@
             <td>{{ data.labHours }}</td>
             <td>{{ data.remark }}</td>
             <td class="action-column">
-              <button 
-                nz-button 
-                nz-dropdown 
-                [nzDropdownMenu]="menu" 
-                nzPlacement="bottomLeft"
-                class="action-button"
+              <button
+                nz-button
+                nz-dropdown
+                [nzDropdownMenu]="menu"
+                nzPlacement="bottomRight"
+                class="action-dropdown-btn"
               >
-                <i nz-icon nzType="more" nzTheme="outline"></i>
+                <span nz-icon nzType="more" nzTheme="outline"></span>
               </button>
               <nz-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
-                  <li>
-                    <button nz-button nzType="default" class="action-item detail">
-                      <i nz-icon nzType="eye" nzTheme="fill"></i>
-                      <span>View Details</span>
-                    </button>
-                  </li>
-                  <li>
-                    <a
-                      routerLink="../course/add-course/{{ data.id }}"
-                      nz-button
-                      nzType="default"
-                      class="action-item edit"
-                    >
-                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                  <li nz-menu-item>
+                    <a routerLink="../course/add-course/{{ data.id }}" class="action-menu-link">
+                      <span nz-icon nzType="edit" nzTheme="outline"></span>
                       <span>Edit</span>
                     </a>
                   </li>
-                  <li>
-                    <button
-                      nz-button
-                      nzDanger
-                      nzType="default"
-                      class="action-item delete"
-                      (click)="showDeleteConfirm(data.id)"
-                    >
-                      <i nz-icon nzType="delete" nzTheme="fill"></i>
+                  <li nz-menu-item>
+                    <a (click)="showDeleteConfirm(data.id)" class="action-menu-link delete">
+                      <span nz-icon nzType="delete" nzTheme="outline"></span>
                       <span>Delete</span>
-                    </button>
+                    </a>
                   </li>
                 </ul>
               </nz-dropdown-menu>
@@ -139,7 +114,7 @@
         </tbody>
         <ng-template #emptyTpl>
           <div class="no-data">
-            <i nz-icon nzType="book" nzTheme="outline"></i>
+            <span nz-icon nzType="book" nzTheme="outline"></span>
             <p>No course records available</p>
           </div>
         </ng-template>

@@ -27,8 +27,8 @@ export class PaymentOptionsComponent implements OnInit, OnDestroy {
   currency = 'ETB';
   orderNumber: string;
   paymentOrderId: string;
-  academicTerm: number
-  academicYear: number
+  academicTerm: number | string;
+  academicYear: number | string;
   selectedPaymentOption: 'receipt' | 'gateway' | null = null;
 
   isUploadingReceipt = false;
@@ -87,11 +87,25 @@ export class PaymentOptionsComponent implements OnInit, OnDestroy {
         const registration = response.data.registration;
         this.registrationData = registration;
         this.selectedCourses = data.paymentOrder?.selectedCourses || [];
-        this.numberOfCourses = data.paymentOrder?.numberOfCourses || 0;
-        this.orderNumber = data.paymentOrder?.orderNumber || '';
-        this.academicTerm = data.paymentOrder?.academicTerm || '';
-        this.academicYear = data.paymentOrder?.academicYear || '';
-        this.totalAmount = result?.amount || 0;
+        this.numberOfCourses = data.paymentOrder?.numberOfCourses
+          || data.paymentDetails?.numberOfCourses
+          || 0;
+        this.orderNumber = data.paymentOrder?.orderNumber
+          || data.paymentDetails?.orderNumber
+          || '';
+        // AcademicTerm on payment order may be enum name or number; fall back to registration.
+        const termFromOrder = data.paymentOrder?.academicTerm;
+        this.academicTerm = (typeof termFromOrder === 'number' ? termFromOrder : null)
+          ?? this.parseAcademicTerm(termFromOrder)
+          ?? registration?.academicTermSeason
+          ?? registration?.academicTerm
+          || '';
+        this.academicYear = data.paymentOrder?.academicYear
+          || data.paymentDetails?.academicYear
+          || registration?.academicTermYear
+          || registration?.academicYear
+          || '';
+        this.totalAmount = result?.amount || data.paymentOrder?.totalAmount || 0;
         this.penaltyAmount = result?.penaltyAmount ?? registration?.unpaidPenaltyAmount ?? 0;
         this.isLateRegistration = !!(result?.isLateRegistration ?? registration?.isLateRegistration);
         this.courseAmount = result?.courseAmount != null
@@ -295,14 +309,38 @@ export class PaymentOptionsComponent implements OnInit, OnDestroy {
     return canProcess;
   }
 
-  getAcademicTermDescription(termId: number): string {
+  getAcademicTermDescription(termId: number | string): string {
+    if (termId === null || termId === undefined || termId === '') {
+      return '';
+    }
+    if (typeof termId === 'string' && isNaN(Number(termId))) {
+      return termId;
+    }
+    const id = Number(termId);
     const academicTerms = [
       { Id: 1, Description: "Winter" },
       { Id: 2, Description: "Spring" },
       { Id: 3, Description: "Summer" },
       { Id: 4, Description: "Autumn" },
     ];
-    const term = academicTerms.find(t => t.Id === termId);
-    return term ? term.Description : `Term ${termId}`;
+    const term = academicTerms.find(t => t.Id === id);
+    return term ? term.Description : '';
+  }
+
+  private parseAcademicTerm(value: any): number | null {
+    if (value == null || value === '') {
+      return null;
+    }
+    if (typeof value === 'number') {
+      return value;
+    }
+    const asNumber = Number(value);
+    if (!isNaN(asNumber) && asNumber > 0) {
+      return asNumber;
+    }
+    const names: { [key: string]: number } = {
+      Winter: 1, Spring: 2, Summer: 3, Autumn: 4
+    };
+    return names[String(value)] ?? null;
   }
 }

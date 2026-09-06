@@ -1,9 +1,6 @@
 ﻿using MimeKit;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SecureAuth.DOMAIN.Models
 {
@@ -15,18 +12,17 @@ namespace SecureAuth.DOMAIN.Models
         public string HtmlContent { get; set; }
 
         public Message(IEnumerable<string> to, string subject, string content)
+            : this(to, subject, content, content)
         {
-            To = new List<MailboxAddress>();
-            To.AddRange(to.Select(x => new MailboxAddress("email", x)));
-            Subject = subject;
-            Content = content;
-            HtmlContent = content;
         }
 
         public Message(IEnumerable<string> to, string subject, string content, string htmlContent)
         {
             To = new List<MailboxAddress>();
-            To.AddRange(to.Select(x => new MailboxAddress("email", x)));
+            foreach (var address in to.Where(x => !string.IsNullOrWhiteSpace(x)))
+            {
+                To.Add(MailboxAddress.Parse(address.Trim()));
+            }
             Subject = subject;
             Content = content;
             HtmlContent = htmlContent;

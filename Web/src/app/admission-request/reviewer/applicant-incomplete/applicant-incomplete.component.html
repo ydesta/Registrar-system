@@ -12,43 +12,47 @@
   <!-- Summary Statistics -->
   <div class="summary-section">
     <div class="summary-cards">
-      <div class="summary-card">
+      <div class="summary-card card-total">
         <div class="summary-icon">
           <span nz-icon nzType="user" nzTheme="outline"></span>
         </div>
         <div class="summary-content">
           <div class="summary-number">{{ total }}</div>
-          <div class="summary-label">Total Applications</div>
+          <div class="summary-label">Not Submitted</div>
+          <div class="summary-hint">Applicants who started but have not final-submitted</div>
         </div>
       </div>
-      
-      <div class="summary-card">
-        <div class="summary-icon">
-          <span nz-icon nzType="check-circle" nzTheme="outline"></span>
-        </div>
-        <div class="summary-content">
-          <div class="summary-number">{{ getCompletedCount() }}</div>
-          <div class="summary-label">Completed Sections</div>
-        </div>
-      </div>
-      
-      <div class="summary-card">
+
+      <div class="summary-card card-missing">
         <div class="summary-icon">
           <span nz-icon nzType="exclamation-circle" nzTheme="outline"></span>
         </div>
         <div class="summary-content">
-          <div class="summary-number">{{ getIncompleteCount() }}</div>
-          <div class="summary-label">Incomplete Sections</div>
+          <div class="summary-number">{{ getMissingRequiredCount() }}</div>
+          <div class="summary-label">Missing Required Info</div>
+          <div class="summary-hint">On this page: education, contact, program, or payment incomplete</div>
         </div>
       </div>
-      
-      <div class="summary-card">
+
+      <div class="summary-card card-ready">
+        <div class="summary-icon">
+          <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+        </div>
+        <div class="summary-content">
+          <div class="summary-number">{{ getReadyToSubmitCount() }}</div>
+          <div class="summary-label">Ready to Finalize</div>
+          <div class="summary-hint">On this page: required sections done, waiting for final submit</div>
+        </div>
+      </div>
+
+      <div class="summary-card card-rate">
         <div class="summary-icon">
           <span nz-icon nzType="percentage" nzTheme="outline"></span>
         </div>
         <div class="summary-content">
-          <div class="summary-number">{{ getCompletionPercentage() }}%</div>
-          <div class="summary-label">Overall Completion</div>
+          <div class="summary-number">{{ getReadyToSubmitPercentage() }}%</div>
+          <div class="summary-label">Ready on This Page</div>
+          <div class="summary-hint">Percent of applicants shown that can finalize now</div>
         </div>
       </div>
     </div>

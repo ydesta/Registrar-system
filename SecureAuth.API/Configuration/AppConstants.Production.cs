@@ -62,7 +62,7 @@ namespace SecureAuth.API.Configuration
             public const int Port = 465;
             public const string Username = "hsis@hilcoeschool.com";
             // SECURITY: Change this password
-            public const string Password = "7EjPlvFN@fFa{v,B";
+            public const string Password = "EcW^)pv=Z!eL+ukN";
             public const string BaseUrl = "https://hilcoe.edu.et:5001";
         }
 

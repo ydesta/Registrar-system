@@ -1,22 +1,28 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
 .custom-tabset {
   display: flex;
   flex-direction: column;
   width: 100%;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 0;
-  overflow: visible;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   background: #fff;
   margin: 0;
   max-width: 100%;
+  border: 1px solid #e8e8e8;
 
   ::ng-deep {
     .ant-tabs-nav {
-      margin-bottom: 16px;
-      background: #fff;
+      margin-bottom: 0;
+      background: #fafafa;
       border-radius: 0;
       box-shadow: none;
-      padding: 0 8px;
+      padding: 0 12px;
       border-bottom: 1px solid #f0f0f0;
 
       &::before {
@@ -26,31 +32,34 @@
       .ant-tabs-nav-list {
         width: 100%;
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-start;
+        gap: 4px;
 
         .ant-tabs-tab {
-          padding: 14px 20px;
+          padding: 14px 16px;
           margin: 0;
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 500;
           color: #595959;
-          transition: all 0.2s ease;
+          transition: color 0.2s ease, background 0.2s ease;
           border: none;
           background: transparent;
           position: relative;
 
           &:hover {
             color: #1890ff;
+            background: rgba(24, 144, 255, 0.04);
           }
 
           .anticon {
             margin-right: 8px;
+            font-size: 14px;
           }
 
           &.ant-tabs-tab-active {
             background: transparent;
             color: #1890ff;
-            
+
             .ant-tabs-tab-btn {
               color: #1890ff !important;
               font-weight: 600;
@@ -63,6 +72,7 @@
 
             &:hover {
               color: rgba(0, 0, 0, 0.25);
+              background: transparent;
             }
           }
         }
@@ -71,9 +81,17 @@
 
     .ant-tabs-ink-bar {
       display: block;
-      height: 3px;
+      height: 2px;
       background: #1890ff;
-      border-radius: 3px 3px 0 0;
+      border-radius: 2px 2px 0 0;
+    }
+
+    .ant-tabs-content-holder {
+      background: #f7f8fa;
+    }
+
+    .ant-tabs-tabpane {
+      outline: none;
     }
   }
 }
@@ -84,19 +102,21 @@
   height: 100%;
   min-height: inherit;
   position: relative;
-  background: #fff;
-  padding: 8px 4px 16px;
+  background: transparent;
+  padding: 16px 16px 8px;
   border-radius: 0;
   box-shadow: none;
   overflow: visible;
+  box-sizing: border-box;
 }
 
 .custom-buttons {
-  margin-top: 24px;
-  padding: 16px;
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin: 0 16px 16px;
+  padding: 12px 16px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -104,9 +124,9 @@
 
 .custom-button {
   margin: 0;
-  padding: 0 24px;
-  height: 40px;
-  font-size: 14px;
+  padding: 0 20px;
+  height: 36px;
+  font-size: 13px;
   font-weight: 500;
   border-radius: 6px;
   display: flex;
@@ -114,10 +134,10 @@
   justify-content: center;
   gap: 8px;
   min-width: 100px;
-  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-  
+  transition: all 0.2s ease;
+
   .anticon {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   &[disabled] {
@@ -128,29 +148,29 @@
       box-shadow: none !important;
     }
   }
-  
+
   &[nzType="primary"] {
-    background: linear-gradient(135deg, #1890ff, #096dd9);
-    border: none;
-    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);
-    
+    background: #1890ff;
+    border: 1px solid #1890ff;
+    box-shadow: none;
+
     &:hover {
-      background: linear-gradient(135deg, #40a9ff, #1890ff);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.45);
+      background: #096dd9;
+      border-color: #096dd9;
+      transform: none;
+      box-shadow: 0 2px 6px rgba(24, 144, 255, 0.25);
     }
 
     &:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 4px rgba(24, 144, 255, 0.35);
+      background: #0050b3;
     }
   }
-  
+
   &[nzType="default"] {
     background: #fff;
     border: 1px solid #d9d9d9;
     color: #595959;
-    
+
     &:hover {
       color: #1890ff;
       border-color: #1890ff;
@@ -166,7 +186,7 @@
   &.save-button {
     background-color: #52c41a;
     border-color: #52c41a;
-    
+
     &:hover {
       background-color: #73d13d;
       border-color: #73d13d;
@@ -176,7 +196,7 @@
   &.submit-button {
     background-color: #1890ff;
     border-color: #1890ff;
-    
+
     &:hover {
       background-color: #40a9ff;
       border-color: #40a9ff;
@@ -187,7 +207,7 @@
 ::ng-deep .ant-table-wrapper {
   width: 100%;
   overflow-x: auto;
-  
+
   .ant-table {
     min-width: 100%;
     overflow-x: auto;
@@ -197,7 +217,7 @@
 ::ng-deep form {
   width: 100%;
   max-width: 100%;
-  
+
   nz-form-item {
     margin-right: 0;
     margin-left: 0;
@@ -207,19 +227,28 @@
 @media (max-width: 768px) {
   .custom-tabset {
     padding: 0;
+    border-radius: 8px;
+  }
+
+  .tab-content {
+    padding: 12px 12px 4px;
   }
 
   ::ng-deep .ant-tabs-tab {
-    padding: 12px 16px !important;
+    padding: 12px 12px !important;
+    font-size: 12px !important;
   }
 
   .custom-buttons {
-    justify-content: center;
+    margin: 0 12px 12px;
+    justify-content: stretch;
+    flex-wrap: wrap;
     padding: 12px;
   }
 
   .custom-button {
-    min-width: 90px;
-    padding: 0 16px;
+    min-width: 0;
+    flex: 1;
+    padding: 0 12px;
   }
-} 
+}

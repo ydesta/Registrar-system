@@ -1,15 +1,23 @@
 <div class="application-fee-container">
-  <div class="fee-card">
-    <div class="form-header">
+  <div class="professional-header">
+    <div class="header-content">
       <div class="header-icon">
-        <i nz-icon nzType="wallet" nzTheme="outline"></i>
+        <span nz-icon nzType="wallet" nzTheme="outline"></span>
       </div>
-      <div class="header-content">
-        <h2 class="form-title">Application Fee Payment</h2>
-        <p class="form-subtitle">Review the fee, deposit to the account below, then attach your receipt</p>
+      <div class="header-text">
+        <h1 class="page-title">Application Fee Payment</h1>
+        <p class="page-subtitle">Review the fee, deposit to the account below, then attach your receipt</p>
+      </div>
+      <div class="header-status" *ngIf="!loading && applicationFee">
+        <nz-tag nzColor="default" class="status-tag">
+          <span nz-icon nzType="credit-card" nzTheme="outline"></span>
+          {{ paymentStatus }}
+        </nz-tag>
       </div>
     </div>
+  </div>
 
+  <div class="fee-card">
     <div class="fee-body" *ngIf="!loading">
       <div class="summary-grid">
         <div class="summary-item">

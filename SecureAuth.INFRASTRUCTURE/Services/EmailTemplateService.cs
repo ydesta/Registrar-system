@@ -37,44 +37,54 @@ namespace SecureAuth.INFRASTRUCTURE.Services
         {
             return actionType.ToLower() switch
             {
-                "password_reset" => "Password Reset Request",
-                "email_verification" => "Confirm Your Email Address",
-                _ => "Action Required"
+                "password_reset" => "Password Reset Request - HiLCoE Registrar",
+                "email_verification" => "Confirm Your HiLCoE Applicant Email",
+                _ => "Action Required - HiLCoE Registrar"
             };
+        }
+
+        private static bool IsNonExpiring(string actionType, DateTime expiresAt)
+        {
+            return actionType.Equals("email_verification", StringComparison.OrdinalIgnoreCase)
+                || expiresAt == DateTime.MaxValue
+                || expiresAt.Year >= 9000;
+        }
+
+        private string GetExpiryText(string actionType, DateTime expiresAt)
+        {
+            if (IsNonExpiring(actionType, expiresAt))
+            {
+                return "This confirmation link does not expire. You can use it anytime to activate your account.";
+            }
+
+            return $"This link will expire at {expiresAt:g} UTC.";
         }
 
         private string GetPlainTextContent(string actionType, string url, DateTime expiresAt, string customMessage)
         {
-            var actionDescription = actionType.ToLower() switch
-            {
-                "password_reset" => "reset your password",
-                "email_verification" => "confirm your email address",
-                _ => "complete this action"
-            };
-
             var actionInstructions = actionType.ToLower() switch
             {
                 "password_reset" => "You have requested to reset your password. Please click the link below to reset your password:",
-                "email_verification" => "Thank you for registering with our application. To complete your registration, please confirm your email address by clicking the link below:",
+                "email_verification" => "Thank you for registering as an applicant with HiLCoE. To complete your registration, please confirm your email address by clicking the link below:",
                 _ => customMessage ?? "Please click the link below to complete this action:"
             };
 
             return $@"
-                    Dear User,
+Dear Applicant,
 
-                    {actionInstructions}
+{actionInstructions}
 
-                    {url}
+{url}
 
-                    If the link above doesn't work, you can copy and paste the following URL into your browser:
-                    {url}
+If the link above doesn't work, you can copy and paste the following URL into your browser:
+{url}
 
-                    This link will expire at {expiresAt:g}.
+{GetExpiryText(actionType, expiresAt)}
 
-                    If you didn't request this action, please ignore this email.
+If you didn't request this action, please ignore this email.
 
-                    Best regards,
-                    The SecureAuth Team";
+Best regards,
+HiLCoE Registrar Office";
         }
 
         private string GetHtmlContent(string actionType, string url, DateTime expiresAt, string customMessage)
@@ -96,7 +106,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services
             var actionInstructions = actionType.ToLower() switch
             {
                 "password_reset" => "You have requested to reset your password. Please click the button below to reset your password:",
-                "email_verification" => "Thank you for registering with our application. To complete your registration, please confirm your email address by clicking the button below:",
+                "email_verification" => "Thank you for registering as an applicant with HiLCoE. To complete your registration, please confirm your email address by clicking the button below:",
                 _ => customMessage ?? "Please click the button below to complete this action:"
             };
 
@@ -114,50 +124,36 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                 _ => "#6c757d"
             };
 
+            var expiryText = GetExpiryText(actionType, expiresAt);
+
             return $@"
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset='utf-8'>
-                        <title>{title}</title>
-                        <style>
-                            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                            .header {{ background-color: {headerColor}; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
-                            .content {{ background-color: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }}
-                            .button {{ display: inline-block; background-color: {buttonColor}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }}
-                            .footer {{ text-align: center; margin-top: 20px; color: #6c757d; font-size: 0.9em; }}
-                            .url-box {{ word-break: break-all; background-color: #e9ecef; padding: 10px; border-radius: 5px; margin: 15px 0; }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class='container'>
-                            <div class='header'>
-                                <h1>{title}</h1>
-                            </div>
-                            <div class='content'>
-                                <p>Dear User,</p>
-                                <p>{actionInstructions}</p>
-
-                                <div style='text-align: center;'>
-                                    <a href='{url}' class='button'>{buttonText}</a>
-                                </div>
-
-                                <p>If the button above doesn't work, you can copy and paste the following URL into your browser:</p>
-                                <div class='url-box'>{url}</div>
-
-                                <p><strong>This link will expire at {expiresAt:g}.</strong></p>
-
-                                <p>If you didn't request this action, please ignore this email.</p>
-
-                                <p>Best regards,<br>The SecureAuth Team</p>
-                            </div>
-                            <div class='footer'>
-                                <p>This is an automated message, please do not reply to this email.</p>
-                            </div>
-                        </div>
-                    </body>
-                    </html>";
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>{title}</title>
+</head>
+<body style='margin:0;padding:0;background:#f5f7fa;font-family:Arial,Helvetica,sans-serif;color:#333;'>
+    <div style='max-width:600px;margin:24px auto;padding:0 16px;'>
+        <div style='background:{headerColor};color:#ffffff;padding:20px;text-align:center;border-radius:8px 8px 0 0;'>
+            <h1 style='margin:0;font-size:22px;'>{title}</h1>
+        </div>
+        <div style='background:#ffffff;padding:24px;border:1px solid #e8eef5;border-top:none;border-radius:0 0 8px 8px;'>
+            <p>Dear Applicant,</p>
+            <p>{actionInstructions}</p>
+            <p style='text-align:center;margin:28px 0;'>
+                <a href='{url}' style='display:inline-block;background:{buttonColor};color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;'>{buttonText}</a>
+            </p>
+            <p>If the button above doesn't work, copy and paste this URL into your browser:</p>
+            <p style='word-break:break-all;background:#f1f5f9;padding:12px;border-radius:6px;font-size:13px;'>{url}</p>
+            <p><strong>{expiryText}</strong></p>
+            <p>If you didn't request this action, please ignore this email.</p>
+            <p>Best regards,<br>HiLCoE Registrar Office</p>
+        </div>
+        <p style='text-align:center;margin-top:16px;color:#6c757d;font-size:12px;'>This is an automated message from HiLCoE Registrar. Please do not reply to this email.</p>
+    </div>
+</body>
+</html>";
         }
     }
 
@@ -167,4 +163,4 @@ namespace SecureAuth.INFRASTRUCTURE.Services
         public string Content { get; set; }
         public string HtmlContent { get; set; }
     }
-} 
+}

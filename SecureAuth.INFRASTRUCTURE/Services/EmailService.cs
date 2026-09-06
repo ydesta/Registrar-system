@@ -22,6 +22,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services
             _emailConfiguration = new EmailConfiguration
             {
                 From = configuration["EmailConfiguration:From"],
+                DisplayName = configuration["EmailConfiguration:DisplayName"] ?? "HiLCoE Registrar",
                 SmtpServer = configuration["EmailConfiguration:SmtpServer"],
                 Port = int.Parse(configuration["EmailConfiguration:Port"] ?? "587"),
                 UserName = configuration["EmailConfiguration:Username"],
@@ -194,13 +195,13 @@ namespace SecureAuth.INFRASTRUCTURE.Services
         public async Task SendEmailConfirmationAsync(string email, string token)
         {
             var confirmationUrl = $"{_frontendUrl}/accounts/verify-email";
-            await SendActionEmailAsync(email, token, "email_verification", confirmationUrl, DateTime.UtcNow.AddHours(24));
+            await SendActionEmailAsync(email, token, "email_verification", confirmationUrl, DateTime.MaxValue);
         }
 
         public async Task SendEmailConfirmationWithUrlAsync(string email, string token, string baseUrl)
         {
             var confirmationUrl = $"{baseUrl}/accounts/verify-email";
-            await SendActionEmailAsync(email, token, "email_verification", confirmationUrl, DateTime.UtcNow.AddHours(24));
+            await SendActionEmailAsync(email, token, "email_verification", confirmationUrl, DateTime.MaxValue);
         }
 
         public async Task SendUserCredentialsAsync(string email, string username, string password, string firstName, string lastName)
@@ -513,6 +514,26 @@ namespace SecureAuth.INFRASTRUCTURE.Services
             }
         }
 
+        public async Task SendTestEmailAsync(string toEmail)
+        {
+            if (string.IsNullOrWhiteSpace(toEmail))
+            {
+                throw new ArgumentException("Recipient email is required.", nameof(toEmail));
+            }
+
+            var subject = "HiLCoE Registrar - SMTP Test";
+            var content = $"This is a test email from HiLCoE Registrar SMTP diagnostics at {DateTime.UtcNow:u} UTC.";
+            var htmlContent = $@"
+                <html><body>
+                <h2>SMTP Test Successful</h2>
+                <p>{content}</p>
+                <p>From: {_emailConfiguration.From}<br/>SMTP: {_emailConfiguration.SmtpServer}:{_emailConfiguration.Port}</p>
+                </body></html>";
+
+            var message = new Message(new[] { toEmail.Trim() }, subject, content, htmlContent);
+            await SendEmailAsync(message);
+        }
+
         private void Send(MimeMessage mailMessage)
         {
             SendAsync(mailMessage).GetAwaiter().GetResult();
@@ -533,9 +554,9 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                     client.AuthenticationMechanisms.Remove("XOAUTH2");
                     _logger.LogInformation("Authenticating with SMTP server using username: {UserName}", _emailConfiguration.UserName);
                     await client.AuthenticateAsync(_emailConfiguration.UserName, _emailConfiguration.Password);
-                    _logger.LogInformation("Sending email to: {To}", string.Join(", ", mailMessage.To.Select(t => t.Name)));
+                    _logger.LogInformation("Sending email to: {To}", string.Join(", ", mailMessage.To.Mailboxes.Select(t => t.Address)));
                     await client.SendAsync(mailMessage);
-                    _logger.LogInformation("Email sent successfully to: {To}", string.Join(", ", mailMessage.To.Select(t => t.Name)));
+                    _logger.LogInformation("Email sent successfully to: {To}", string.Join(", ", mailMessage.To.Mailboxes.Select(t => t.Address)));
                     return;
                 }
                 catch (SmtpCommandException)
@@ -547,7 +568,7 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                     if (attempt == MaxRetryAttempts)
                     {
                         _logger.LogError(ex, "Failed to send email to: {To}. SMTP Server: {SmtpServer}:{Port}, Username: {UserName}. Error: {ErrorMessage}",
-                            string.Join(", ", mailMessage.To.Select(t => t.Name)),
+                            string.Join(", ", mailMessage.To.Mailboxes.Select(t => t.Address)),
                             _emailConfiguration.SmtpServer,
                             _emailConfiguration.Port,
                             _emailConfiguration.UserName,
@@ -573,23 +594,40 @@ namespace SecureAuth.INFRASTRUCTURE.Services
         private MimeMessage CreateEmailMessage(Message message)
         {
             var emailMessage = new MimeMessage();
-            emailMessage.From.Add(new MailboxAddress("SecureAuth", _emailConfiguration.From));
+            var displayName = string.IsNullOrWhiteSpace(_emailConfiguration.DisplayName)
+                ? "HiLCoE Registrar"
+                : _emailConfiguration.DisplayName;
+
+            emailMessage.From.Add(new MailboxAddress(displayName, _emailConfiguration.From));
+            emailMessage.ReplyTo.Add(new MailboxAddress(displayName, _emailConfiguration.From));
+            emailMessage.MessageId = $"<{Guid.NewGuid():N}@{GetFromDomain()}>";
+            emailMessage.Headers.Add("X-Mailer", "HiLCoE Registrar System");
+            emailMessage.Headers.Add("X-Auto-Response-Suppress", "All");
+            emailMessage.Headers.Add("Precedence", "bulk");
+
             foreach (var recipient in message.To)
             {
                 emailMessage.To.Add(recipient);
             }
-            
+
             emailMessage.Subject = message.Subject;
-            
+
             var textPart = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message.Content };
             var htmlPart = new TextPart(MimeKit.Text.TextFormat.Html) { Text = message.HtmlContent };
-            
+
             var multipart = new MultipartAlternative();
             multipart.Add(textPart);
             multipart.Add(htmlPart);
-            
+
             emailMessage.Body = multipart;
             return emailMessage;
+        }
+
+        private string GetFromDomain()
+        {
+            var from = _emailConfiguration.From ?? string.Empty;
+            var at = from.LastIndexOf('@');
+            return at >= 0 && at < from.Length - 1 ? from[(at + 1)..] : "hilcoeschool.com";
         }
     }
 } 

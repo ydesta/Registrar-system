@@ -31,6 +31,7 @@ using SecureAuth.DOMAIN.Models;
 using SecureAuth.DOMAIN.Models.Security;
 using SecureAuth.INFRASTRUCTURE.Data;
 using SecureAuth.INFRASTRUCTURE.Services;
+using SecureAuth.INFRASTRUCTURE.Services.Identity;
 using SecureAuth.INFRASTRUCTURE.Services.Repositories;
 using SecureAuth.INFRASTRUCTURE.Services.Security;
 using System.Text;
@@ -184,16 +185,28 @@ namespace SecureAuth.INFRASTRUCTURE.DependencyInjection
 
                 // User settings
                 options.User.RequireUniqueEmail = true;
+
+                // Signup email confirmation links should not expire
+                options.Tokens.EmailConfirmationTokenProvider = "EmailConfirmation";
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddTokenProvider<EmailConfirmationTokenProvider<ApplicationUser>>("EmailConfirmation");
 
             // Configure Identity options
             services.Configure<Microsoft.AspNetCore.Identity.IdentityOptions>(
                 opts => opts.SignIn.RequireConfirmedEmail = true);
 
+            // Password reset / default tokens still expire
             services.Configure<Microsoft.AspNetCore.Identity.DataProtectionTokenProviderOptions>(
                 opts => opts.TokenLifespan = TimeSpan.FromHours(10));
+
+            // Email confirmation tokens effectively never expire
+            services.Configure<EmailConfirmationTokenProviderOptions>(opts =>
+            {
+                opts.Name = "EmailConfirmation";
+                opts.TokenLifespan = TimeSpan.FromDays(36500);
+            });
 
             // Add JWT Authentication
             services.AddAuthentication(options =>

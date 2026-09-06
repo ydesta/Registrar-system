@@ -14,18 +14,13 @@
     <div class="dialog-body">
         <form nz-form [formGroup]="reviewerForm" (ngSubmit)="submitForm()" class="decision-form">
             <div class="form-section">
-                <div class="section-header">
-                    <span nz-icon nzType="check-circle" nzTheme="outline"></span>
-                    <h3 class="section-title">Decision Details</h3>
-                </div>
-                
                 <div class="form-group">
                     <nz-form-item>
                         <nz-form-label nzRequired nzFor="decision" class="form-label">
                             Admission Decision
                         </nz-form-label>
                         <nz-form-control nzErrorTip="Please select an admission decision!">
-                            <nz-select id="decision" formControlName="admissionDecision" 
+                            <nz-select id="decision" formControlName="admissionDecision"
                                 nzPlaceHolder="Select admission decision"
                                 nzShowSearch="true" nzAllowClear="true" class="decision-select">
                                 <nz-option nzValue="2" nzLabel="Pending"></nz-option>
@@ -35,7 +30,46 @@
                         </nz-form-control>
                     </nz-form-item>
                 </div>
-                
+
+                <div class="form-group" *ngIf="isAccepted">
+                    <nz-form-item>
+                        <nz-form-label class="form-label">
+                            Academic Programme
+                        </nz-form-label>
+                        <nz-form-control>
+                            <input nz-input [value]="programmeLabel" disabled class="programme-input" />
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+
+                <div class="form-group" *ngIf="isAccepted">
+                    <nz-form-item>
+                        <nz-form-label nzRequired nzFor="batchCode" class="form-label">
+                            Batch
+                        </nz-form-label>
+                        <nz-form-control
+                            [nzErrorTip]="batchLookupError || 'Batch is required from Admission Lookup!'">
+                            <input
+                                id="batchCode"
+                                nz-input
+                                formControlName="batchCode"
+                                readonly
+                                [placeholder]="isResolvingBatch ? 'Resolving batch from Admission Lookup...' : 'Batch from Admission Lookup'"
+                                class="programme-input" />
+                            <div class="batch-lookup-hint" *ngIf="!batchLookupError && lookupBatchCodes.length">
+                                <span class="hint-dot" aria-hidden="true"></span>
+                                <span class="hint-text">
+                                    From Admission Lookup · {{ programmeLabel }} · {{ divisionLabel }} · {{ applicationTypeLabel }}
+                                </span>
+                            </div>
+                            <div class="batch-lookup-error" *ngIf="batchLookupError">
+                                <span class="error-dot" aria-hidden="true"></span>
+                                <span>{{ batchLookupError }}</span>
+                            </div>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+
                 <div class="form-group">
                     <nz-form-item>
                         <nz-form-label nzFor="remark" class="form-label">
@@ -43,7 +77,7 @@
                         </nz-form-label>
                         <nz-form-control nzErrorTip="Please provide your decision remarks!">
                             <nz-textarea-count [nzMaxCharacterCount]="250">
-                                <textarea rows="3" formControlName="remark" nz-input 
+                                <textarea rows="3" formControlName="remark" nz-input
                                     placeholder="Enter your detailed decision remarks here..."
                                     class="decision-textarea"></textarea>
                             </nz-textarea-count>
@@ -60,7 +94,7 @@
                 <span nz-icon nzType="close"></span>
                 Cancel
             </button>
-            <button [disabled]="!reviewerForm.valid || isSubmitting" (click)="submitForm()" 
+            <button [disabled]="!reviewerForm.valid || isSubmitting" (click)="submitForm()"
                 nz-button nzType="primary" class="submit-btn" [nzLoading]="isSubmitting">
                 <span nz-icon nzType="check" *ngIf="!isSubmitting"></span>
                 {{ isSubmitting ? 'Submitting...' : 'Submit Decision' }}

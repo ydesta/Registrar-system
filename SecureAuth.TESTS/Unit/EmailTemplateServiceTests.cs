@@ -28,7 +28,7 @@ namespace SecureAuth.TESTS.Unit
 
             // Assert
             Assert.NotNull(template);
-            Assert.Equal("Password Reset Request", template.Subject);
+            Assert.Equal("Password Reset Request - HiLCoE Registrar", template.Subject);
             Assert.Contains("You have requested to reset your password", template.Content);
             Assert.Contains("Reset Password", template.HtmlContent);
             Assert.Contains("test@example.com", template.HtmlContent);
@@ -51,9 +51,11 @@ namespace SecureAuth.TESTS.Unit
 
             // Assert
             Assert.NotNull(template);
-            Assert.Equal("Confirm Your Email Address", template.Subject);
-            Assert.Contains("Thank you for registering with our application", template.Content);
+            Assert.Equal("Confirm Your HiLCoE Applicant Email", template.Subject);
+            Assert.Contains("Thank you for registering as an applicant with HiLCoE", template.Content);
             Assert.Contains("Confirm Email Address", template.HtmlContent);
+            Assert.Contains("does not expire", template.Content);
+            Assert.Contains("does not expire", template.HtmlContent);
             Assert.Contains("test@example.com", template.HtmlContent);
             Assert.Contains("test-token-123", template.HtmlContent);
             Assert.Contains("http://localhost:4200/accounts/verify-email", template.HtmlContent);
@@ -75,7 +77,7 @@ namespace SecureAuth.TESTS.Unit
 
             // Assert
             Assert.NotNull(template);
-            Assert.Equal("Action Required", template.Subject);
+            Assert.Equal("Action Required - HiLCoE Registrar", template.Subject);
             Assert.Contains(customMessage, template.Content);
             Assert.Contains(customMessage, template.HtmlContent);
         }

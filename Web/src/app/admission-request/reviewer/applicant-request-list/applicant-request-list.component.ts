@@ -6,7 +6,7 @@ import { AcadamicProgramme } from "../../model/acadamic-programme.model";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import { CustomNotificationService } from "src/app/services/custom-notification.service";
 import { AcademicProgramRequestService } from "../../services/academic-program-request.service";
-import { REQUEST_STATUS, ACADEMIC_STUDENT_STATUS_DESCRIPTIONS } from "src/app/common/constant";
+import { REQUEST_STATUS, ACADEMIC_STUDENT_STATUS_DESCRIPTIONS, APPLICANT_TYPE_STATUS } from "src/app/common/constant";
 import { ExcelExportService } from "src/app/reports/services/excel-export.service";
 import { PaginatorService, ServerPaginator } from "src/app/reports/services/paginator.service";
 import * as XLSX from 'xlsx';
@@ -30,6 +30,10 @@ export class ApplicantRequestListComponent implements OnInit, OnDestroy {
       value: Number(key),
       label: ACADEMIC_STUDENT_STATUS_DESCRIPTIONS[Number(key) as REQUEST_STATUS]
     }));
+  applicantTypeOptions = APPLICANT_TYPE_STATUS.map(x => ({
+    value: x.Id,
+    label: x.Description
+  }));
   constructor(
     private generalInformationService: GeneralInformationService,
     private router: Router,
@@ -40,6 +44,8 @@ export class ApplicantRequestListComponent implements OnInit, OnDestroy {
     private paginator: PaginatorService
   ) {
     this.pager = this.paginator.create();
+    this.pager.sortColumn = 'AppliedDate';
+    this.pager.sortOrder = 'desc';
     this.createProgramRequest();
   }
 
@@ -56,10 +62,12 @@ export class ApplicantRequestListComponent implements OnInit, OnDestroy {
   getApplicantRequestList() {
     const academicProgrammeId = this.academicProgramRequestForm.get('acadamicProgrammeId')?.value;
     const status = this.academicProgramRequestForm.get('approvalStatus')?.value;
+    const applicantYear = this.academicProgramRequestForm.get('applicantYear')?.value;
     this.pager.loading = true;
     this.generalInformationService.getApplicantRequestListPaginated(this.pager.query({
       academicProgrammeId,
-      status
+      status,
+      applicantYear
     })).subscribe({
       next: (res: any) => {
         this.applicantsList = res.data || [];
@@ -74,7 +82,8 @@ export class ApplicantRequestListComponent implements OnInit, OnDestroy {
   createProgramRequest() {
     this.academicProgramRequestForm = this._fb.group({
       approvalStatus: [REQUEST_STATUS.Submitted, []], // Default to Submitted status
-      acadamicProgrammeId: [null, []]
+      acadamicProgrammeId: [null, []],
+      applicantYear: [null, []]
     });
   }
   getAcademicProgramList() {
@@ -111,7 +120,8 @@ export class ApplicantRequestListComponent implements OnInit, OnDestroy {
   exportApplicants() {
     const academicProgrammeId = this.academicProgramRequestForm.get('acadamicProgrammeId')?.value;
     const status = this.academicProgramRequestForm.get('approvalStatus')?.value;
-    this.generalInformationService.getApplicantRequestList(academicProgrammeId, status).subscribe(rows => {
+    const applicantYear = this.academicProgramRequestForm.get('applicantYear')?.value;
+    this.generalInformationService.getApplicantRequestList(academicProgrammeId, status, applicantYear).subscribe(rows => {
       if (!rows || rows.length === 0) {
         this._customNotificationService.notification(
           "warning",
@@ -192,12 +202,56 @@ export class ApplicantRequestListComponent implements OnInit, OnDestroy {
   onReset() {
     this.academicProgramRequestForm.reset({
       approvalStatus: REQUEST_STATUS.Submitted,
-      acadamicProgrammeId: null
+      acadamicProgrammeId: null,
+      applicantYear: null
     });
     this.pager.searchKey = '';
     this.hasSearched = false;
     this.isFormCollapsed = false;
     this.pager.resetPage();
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(
+      this.academicProgramRequestForm?.get('approvalStatus')?.value != null ||
+      this.academicProgramRequestForm?.get('acadamicProgrammeId')?.value ||
+      this.academicProgramRequestForm?.get('applicantYear')?.value
+    );
+  }
+
+  getSelectedStatusLabel(): string {
+    const value = this.academicProgramRequestForm?.get('approvalStatus')?.value;
+    if (value == null || value === '') {
+      return '';
+    }
+    return this.getStatusDescription(Number(value));
+  }
+
+  getSelectedProgramLabel(): string {
+    const id = this.academicProgramRequestForm?.get('acadamicProgrammeId')?.value;
+    if (!id) {
+      return '';
+    }
+    return this.getAcademicProgramNameById(id);
+  }
+
+  getSelectedTypeLabel(): string {
+    const value = this.academicProgramRequestForm?.get('applicantYear')?.value;
+    if (value == null || value === '') {
+      return '';
+    }
+    const match = this.applicantTypeOptions.find(x => x.value === value);
+    return match?.label || '';
+  }
+
+  isMale(gender: string): boolean {
+    const value = (gender || '').trim().toLowerCase();
+    return value === 'male' || value === 'm';
+  }
+
+  avatarTone(index: number): string {
+    const tones = ['avatar-blue', 'avatar-teal', 'avatar-violet', 'avatar-rose'];
+    return tones[index % tones.length];
   }
 
   // Method to get status description
@@ -213,7 +267,7 @@ export class ApplicantRequestListComponent implements OnInit, OnDestroy {
       case REQUEST_STATUS.Submitted:
         return 'blue';
       case REQUEST_STATUS.Pending:
-        return 'yellow';
+        return 'gold';
       case REQUEST_STATUS.Approved:
         return 'green';
       case REQUEST_STATUS.Rejected:

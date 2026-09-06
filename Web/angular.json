@@ -39,7 +39,12 @@
               "src/theme.less",
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "exceljs",
+              "file-saver",
+              "xlsx"
+            ]
           },
           "configurations": {
             "production": {

@@ -72,8 +72,14 @@ export class StudentProgramRequesterFormComponent implements OnInit {
     request.acadamicProgrammeId = formModel.acadamicProgrammeId;
     request.division = formModel.division;
     request.applicantYear = formModel.applicantYear;
-    request.studentStatus = 0;
-    request.approvalStatus = 0;
+    // New requests start as draft; edits keep existing workflow statuses
+    if (this.studentProgramRequester) {
+      request.studentStatus = this.studentProgramRequester.studentStatus ?? 0;
+      request.approvalStatus = this.studentProgramRequester.approvalStatus ?? 0;
+    } else {
+      request.studentStatus = 0;
+      request.approvalStatus = 0;
+    }
     return request;
   }
   get acadamicProgrammeId() {
@@ -130,7 +136,7 @@ export class StudentProgramRequesterFormComponent implements OnInit {
               this._customNotificationService.notification(
                 "warn",
                 "Warning",
-                "Academic Program Request already exists or save failed."
+                "You already have an open academic program request, or this request could not be saved."
               );
             }
           },

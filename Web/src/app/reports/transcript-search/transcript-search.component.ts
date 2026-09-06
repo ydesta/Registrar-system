@@ -68,15 +68,18 @@ export class TranscriptSearchComponent {
     this.isExporting = false;
   }
 
-  exportTranscriptExcel(): void {
+  async exportTranscriptExcel(): Promise<void> {
     if (!this.transcript) {
       return;
     }
     this.isExportingExcel = true;
-    const studentName = (this.transcript.fullName || 'Student').replace(/\s+/g, '_');
-    const currentDate = new Date().toISOString().split('T')[0];
-    const filename = `Transcript_${studentName}_${currentDate}`;
-    this._excelExportService.exportTranscript(this.transcript, filename);
-    this.isExportingExcel = false;
+    try {
+      const studentName = (this.transcript.fullName || 'Student').replace(/\s+/g, '_');
+      const currentDate = new Date().toISOString().split('T')[0];
+      const filename = `Transcript_${studentName}_${currentDate}`;
+      await this._excelExportService.exportTranscript(this.transcript, filename);
+    } finally {
+      this.isExportingExcel = false;
+    }
   }
 }

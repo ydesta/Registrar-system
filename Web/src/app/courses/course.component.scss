@@ -8,6 +8,7 @@
 
 // Header Section
 .header-section {
+  display: block;
   background: white;
   border-radius: 16px;
   padding: 24px;
@@ -19,15 +20,11 @@
 
   .header-content {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
 
     .page-title {
-      flex: 1;
-      min-width: 0;
-      
       .title-text {
         margin: 0 0 8px 0;
         font-size: 28px;
@@ -35,7 +32,7 @@
         color: #1f2937;
         line-height: 1.2;
       }
-      
+
       .subtitle-text {
         margin: 0;
         color: #6b7280;
@@ -47,66 +44,103 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
+      gap: 16px;
+      width: 100%;
 
       .search-section {
-        max-width: 260px;
-        flex: 1;
+        position: relative;
+        flex: 0 1 420px;
+        max-width: 420px;
+        margin: 0;
 
-        nz-input-group {
+        .input-with-floating-label {
+          width: 100%;
+          height: 44px;
+          padding: 12px 16px;
+          font-size: 14px;
+          border: 1.5px solid #e8e8e8;
           border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          background: #fafafa;
           transition: all 0.3s ease;
 
-          input {
-            border: none;
-            padding: 12px 16px;
-            font-size: 14px;
-
-            &:focus {
-              box-shadow: none;
-            }
+          &:hover {
+            border-color: #40a9ff;
+            background: #fff;
           }
 
-          .ant-input-suffix {
-            padding-right: 16px;
+          &:focus {
+            border-color: #1890ff;
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+          }
 
-            span[nz-icon] {
-              color: #9ca3af;
-              font-size: 16px;
-            }
+          &::placeholder {
+            color: transparent;
+          }
+        }
+
+        .floating-label {
+          position: absolute;
+          top: 50%;
+          left: 12px;
+          transform: translateY(-50%);
+          color: #9ca3af;
+          font-size: 14px;
+          pointer-events: none;
+          transition: 0.2s ease all;
+          background: white;
+          padding: 0 4px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          white-space: nowrap;
+          z-index: 1;
+          margin: 0;
+
+          span[nz-icon] {
+            font-size: 14px;
+            color: #9ca3af;
+          }
+        }
+
+        .input-with-floating-label:focus + .floating-label,
+        .input-with-floating-label:not(:placeholder-shown) + .floating-label {
+          top: -8px;
+          left: 10px;
+          font-size: 12px;
+          color: #1890ff;
+          background: white;
+
+          span[nz-icon] {
+            color: #1890ff;
+            font-size: 12px;
           }
         }
       }
 
+      .action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-left: auto;
+      }
+
       .add-btn {
+        flex: 0 0 auto;
         background: #1890ff;
         color: white;
         border-radius: 10px;
         font-weight: 500;
         box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
         padding: 0 20px;
+        height: 40px;
 
         &:hover {
           background: #40a9ff;
           color: white;
           transform: translateY(-2px);
           box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
-        }
-      }
-
-      .export-btn, .print-btn {
-        background: #f1f5f9;
-        color: #374151;
-        border-radius: 10px;
-        font-weight: 500;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        padding: 0 18px;
-
-        &:hover {
-          background: #e0e7ef;
-          color: #1890ff;
         }
       }
     }
@@ -313,112 +347,51 @@
   text-align: center;
 }
 
-// Action Button (Dropdown Trigger)
-.action-button {
-  border-radius: 8px;
-  padding: 0 12px;
+// Action Menu
+.action-dropdown-btn {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0 8px;
   height: 32px;
-  border: 1px solid #e2e8f0;
-  background: white;
   color: #6b7280;
-  transition: all 0.3s ease;
 
-  &:hover {
-    border-color: #1890ff;
+  &:hover,
+  &:focus {
     color: #1890ff;
-    background: rgba(24, 144, 255, 0.05);
-  }
-
-  i {
-    font-size: 16px;
+    background: #f0f7ff;
   }
 }
 
-// Action Menu Items
-::ng-deep .ant-dropdown-menu {
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  border: 1px solid #e2e8f0;
-  padding: 8px;
+.action-menu-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #374151;
+  text-decoration: none;
+  width: 100%;
 
-  .ant-dropdown-menu-item {
-    border-radius: 8px;
-    margin: 2px 0;
-    transition: all 0.3s ease;
-
-    &:hover {
-      background: #f8fafc;
-    }
-
-    .action-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border: none;
-      background: transparent;
-      width: 100%;
-      text-align: left;
-      border-radius: 6px;
-      transition: all 0.3s ease;
-
-      i {
-        font-size: 16px;
-      }
-
-      span {
-        font-size: 14px;
-        font-weight: 500;
-      }
-
-      &.detail {
-        color: #1890ff;
-
-        &:hover {
-          background: rgba(24, 144, 255, 0.1);
-        }
-      }
-
-      &.edit {
-        color: #52c41a;
-
-        &:hover {
-          background: rgba(82, 196, 26, 0.1);
-        }
-      }
-
-      &.delete {
-        color: #ff4d4f;
-
-        &:hover {
-          background: rgba(255, 77, 79, 0.1);
-        }
-      }
-    }
+  &.delete {
+    color: #ef4444;
   }
 }
 
 // No Data State
 .no-data {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 24px;
-  color: #6b7280;
   text-align: center;
+  color: #9ca3af;
+  padding: 40px 0;
 
-  i {
-    font-size: 48px;
-    margin-bottom: 16px;
-    color: #d1d5db;
+  span[nz-icon] {
+    font-size: 40px;
+    color: #bdbdbd;
+    margin-bottom: 8px;
   }
 
   p {
     margin: 0;
     font-size: 16px;
-    font-weight: 500;
-    color: #6b7280;
+    color: #9ca3af;
   }
 }
 

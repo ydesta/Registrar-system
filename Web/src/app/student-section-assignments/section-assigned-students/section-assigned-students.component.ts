@@ -12,6 +12,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
+import { ExcelExportService } from 'src/app/reports/services/excel-export.service';
 
 @Component({
   selector: 'app-section-assigned-students',
@@ -48,7 +49,8 @@ export class SectionAssignedStudentsComponent implements OnInit, OnDestroy {
     private studentSectionAssignmentService: StudentSectionAssignmentService,
     private notificationService: CustomNotificationService,
     private courseTermOfferingService: TermCourseOfferingService,
-    private paginator: PaginatorService
+    private paginator: PaginatorService,
+    private excelExportService: ExcelExportService
   ) {
     this.pager = this.paginator.create();
     const currentYear = new Date().getFullYear();
@@ -409,44 +411,30 @@ export class SectionAssignedStudentsComponent implements OnInit, OnDestroy {
     const selectedCourse = this.registeredCourses.find(c => c.courseId === courseId);
     const selectedSection = this.listOfSections.find(s => s.id === sectionId);
     const instructorName = this.getInstructorName();
-    const submissionDate = new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
+    const sectionLabel = selectedSection?.sectionName || 'Section 1';
 
-    const aoa: (string | number)[][] = [];
-    aoa.push(['HILCoE School of Computer Science & Technology']);
-    aoa.push(['Result Submission Sheet']);
-    aoa.push([]);
-    aoa.push(['Class:', this.batchCode.value || 'N/A', '', '', 'Section:', selectedSection?.sectionName || 'N/A']);
-    aoa.push(['Term:', `${this.getAcademicTermName(academicTerm)} ${year}`, '', '', 'Date of Submission:', submissionDate]);
-    aoa.push(['Course Code:', selectedCourse?.courseCode || 'N/A', '', '', 'Signature:', '_________________']);
-    aoa.push(['Instructor:', instructorName || '_________________']);
-    aoa.push([]);
-    aoa.push(['Student Code', 'Full Name', 'Batch', '30%', '60%', '55%', '15%', 'Total(100%)', 'Grade', 'Remark']);
-
-    this.sectionAssignedStudents.forEach(student => {
-      aoa.push([student.studentCode, student.fullName, student.batchCode, '', '', '', '', '', '', '']);
-    });
-
-    const ws = XLSX.utils.aoa_to_sheet(aoa);
-    ws['!cols'] = [
-      { wch: 16 },
-      { wch: 32 },
-      { wch: 14 },
-      { wch: 8 },
-      { wch: 8 },
-      { wch: 8 },
-      { wch: 8 },
-      { wch: 12 },
-      { wch: 10 },
-      { wch: 14 }
-    ];
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Mark List');
-
-    const fileName = `mark-list-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-
-    this.notificationService.notification('success', 'Success', 'Mark list exported successfully');
+    this.excelExportService
+      .exportResultSubmissionMarkList({
+        classBatch: this.batchCode.value || '',
+        sectionName: sectionLabel,
+        termLabel: `${this.getAcademicTermName(academicTerm)} ${year}`,
+        courseCode: selectedCourse?.courseCode || '',
+        instructorName,
+        students: this.sectionAssignedStudents.map(s => ({
+          studentCode: s.studentCode,
+          fullName: s.fullName,
+          batchCode: s.batchCode
+        })),
+        fileName: `mark-list-${selectedCourse?.courseCode || 'course'}-${sectionLabel}-${new Date()
+          .toISOString()
+          .split('T')[0]}.xlsx`
+      })
+      .then(() => {
+        this.notificationService.notification('success', 'Success', 'Mark list exported successfully');
+      })
+      .catch(() => {
+        this.notificationService.notification('error', 'Error', 'Failed to export mark list');
+      });
   }
 
   search(): void {

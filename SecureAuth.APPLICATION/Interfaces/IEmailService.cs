@@ -20,5 +20,6 @@ namespace SecureAuth.APPLICATION.Interfaces
         Task SendOtpEmailAsync(string email, string otp, string purpose, DateTime expiresAt);
         Task SendActionEmailAsync(string email, string token, string actionType, string actionUrl, DateTime expiresAt, string customMessage = null);
         Task<bool> TestConnectionAsync();
+        Task SendTestEmailAsync(string toEmail);
     }
 } 

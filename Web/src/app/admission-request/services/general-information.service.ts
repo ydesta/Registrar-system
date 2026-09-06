@@ -84,10 +84,11 @@ export class GeneralInformationService {
     );
   }
 
-  getApplicantRequestList(academicProgrammeId?: string, status?: number): Observable<ApplicantAcedamicRequestViewModel[]> {
+  getApplicantRequestList(academicProgrammeId?: string, status?: number, applicantYear?: number): Observable<ApplicantAcedamicRequestViewModel[]> {
     return this.crud.getList<ApplicantAcedamicRequestViewModel[]>(`${this.applicants}/request`, {
       academicProgrammeId,
-      status
+      status,
+      applicantYear
     });
   }
 

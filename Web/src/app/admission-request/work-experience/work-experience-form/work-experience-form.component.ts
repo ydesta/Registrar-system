@@ -26,6 +26,7 @@ export class WorkExperienceFormComponent implements OnInit {
   file_list: Array<string> = [];
   @Output() dataUpdated = new EventEmitter<void>();
   workExperinceId: string;
+  isSubmitting = false;
   constructor(
     private _fb: FormBuilder,
     private modalRef: NzModalRef,
@@ -138,52 +139,91 @@ export class WorkExperienceFormComponent implements OnInit {
   }
 
   onSave(): void {
+    if (this.isSubmitting) {
+      return;
+    }
+
     if (this.applicantWorkExpForm.valid) {
       const postData = this.getApplicantWorkExperience();
       if (this.workExperinceId == undefined) {
+        this.isSubmitting = true;
+        const formData = new FormData();
         Object.keys(postData).forEach(key => {
-          if (key !== "ActualFile") {
-            if (this.formData.get(key) != postData[key]) {
-              this.formData.append(key, postData[key]);
-            }
+          if (key !== "ActualFile" && postData[key] != null && postData[key] !== undefined) {
+            formData.append(key, postData[key]);
           }
         });
         if (this.file_store != undefined) {
           for (let i = 0; i < this.file_store.length; i++) {
-            this.formData.append("ActualFile", this.file_store[i]);
+            formData.append("ActualFile", this.file_store[i]);
           }
         }
         this.workExperienceService
-          .createExperience(this.formData)
-          .subscribe(res => {
-            if (res.status == "success") {
+          .createExperience(formData)
+          .subscribe({
+            next: (res) => {
+              this.isSubmitting = false;
+              if (res?.status === "error") {
+                this._customNotificationService.notification(
+                  "warning",
+                  "Duplicate",
+                  res?.error || res?.data || "This work experience record already exists."
+                );
+                return;
+              }
+              if (res?.status == "success" || res) {
+                this._customNotificationService.notification(
+                  "success",
+                  "Success",
+                  "Work experience is saved successfully."
+                );
+              }
+              this.dataUpdated.emit();
+              this.modalRef.close();
+            },
+            error: (error) => {
+              this.isSubmitting = false;
+              const apiMessage =
+                error?.error?.error ||
+                error?.error?.data ||
+                error?.error?.message ||
+                "Failed to save work experience. Please try again.";
               this._customNotificationService.notification(
-                "success",
-                "Success",
-                "Education Record is deleted succesfully."
+                "error",
+                "Error",
+                apiMessage
               );
             }
-            this.dataUpdated.emit();
-            this.modalRef.close();
           });
       } else {
+        this.isSubmitting = true;
         postData.applicantID = this.workExperience.applicantID;
         postData.id = this.workExperinceId;
         this.workExperienceService
           .update(this.workExperinceId, postData)
-          .subscribe(res => {
-            if (res) {
+          .subscribe({
+            next: (res) => {
+              this.isSubmitting = false;
+              if (res) {
+                this._customNotificationService.notification(
+                  "success",
+                  "Success",
+                  "Work experience is updated successfully."
+                );
+              }
+              this.dataUpdated.emit();
+              this.modalRef.close();
+            },
+            error: () => {
+              this.isSubmitting = false;
               this._customNotificationService.notification(
-                "success",
-                "Success",
-                "Education Record is update succesfully."
+                "error",
+                "Error",
+                "Failed to update work experience. Please try again."
               );
             }
-            this.dataUpdated.emit();
-            this.modalRef.close();
           });
       }
-    } else {
     }
   }
 }

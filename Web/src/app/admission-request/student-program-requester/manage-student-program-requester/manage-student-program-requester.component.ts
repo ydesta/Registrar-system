@@ -264,12 +264,12 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
           if (res && res.data) {
             this.applicationProgramRequestList = res.data;
             this.countSubmitionCourse = this.applicationProgramRequestList.length;
-            const requestList = this.applicationProgramRequestList.filter(
+            // Block "Choose Academic Program" while one open request exists
+            // (draft/submitted/pending). After Approved (3) or Rejected (4), allow another.
+            const openRequests = this.applicationProgramRequestList.filter(
               item =>
-                item.studentStatus == 0 ||
-                item.studentStatus == 1 ||
-                item.studentStatus == 2 ||
-                item.approvalStatus == 3
+                item.approvalStatus !== 3 &&
+                item.approvalStatus !== 4
             );
 
             const submiitedList = this.applicationProgramRequestList.filter(
@@ -281,7 +281,7 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
                   item.approvalStatus == 1 ||
                   item.approvalStatus == 2)
             );
-            this.noOfApplicantProgramRequest = requestList.length;
+            this.noOfApplicantProgramRequest = openRequests.length;
             this.isSubmittedApplicationForm = submiitedList.length;
             this.sharedDataService.programUpdateMessage(
               this.isSubmittedApplicationForm
@@ -342,6 +342,16 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
   }
 
   delete(id: number) {
+    const request = this.applicationProgramRequestList.find(r => r.id === id);
+    if (request && !this.canEditOrDelete(request)) {
+      this._customNotificationService.notification(
+        "warning",
+        "Not allowed",
+        "Only draft (not yet submitted) academic program requests can be deleted."
+      );
+      return;
+    }
+
     this._modal.confirm({
       nzTitle: "Are you sure delete this program Record?",
       nzOkText: "Yes",
@@ -351,16 +361,22 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
         try {
           this._academicProgramRequestService.delete(id).subscribe({
             next: (res) => {
-              if (res) {
+              if (res === "success" || res) {
                 this._customNotificationService.notification(
                   "success",
                   "Success",
                   "Academic Program Record is deleted successfully."
                 );
                 this.refreshData();
+              } else {
+                this._customNotificationService.notification(
+                  "warning",
+                  "Warning",
+                  typeof res === "string" ? res : "Delete failed."
+                );
               }
             },
-            error: (error) => {
+            error: () => {
               this._customNotificationService.notification(
                 "error",
                 "Error",
@@ -368,17 +384,27 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
               );
             }
           });
-        } catch (error) {
+        } catch {
           this._customNotificationService.notification(
             "error",
             "Error",
-            "An unexpected error occurred. Please try again."
+            "Failed to delete academic program record. Please try again."
           );
         }
       },
       nzCancelText: "No",
       nzOnCancel: () => {}
     });
+  }
+
+  /** Only unsubmitted drafts may be edited or deleted (not Submitted/Pending/Approved/Rejected). */
+  canEditOrDelete(request: AcademicProgramRequest): boolean {
+    if (!request) {
+      return false;
+    }
+    const approval = Number(request.approvalStatus);
+    const student = Number(request.studentStatus);
+    return approval === 0 && student === 0;
   }
 
   editProgram(index: number) {
@@ -393,6 +419,15 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
         "error",
         "Error",
         "Cannot create program request: Applicant information not loaded. Please refresh the page and try again."
+      );
+      return;
+    }
+
+    if (this.noOfApplicantProgramRequest > 0) {
+      this._customNotificationService.notification(
+        "warning",
+        "Not allowed",
+        "You already have an open academic program request. Wait for approval or delete the draft before adding another."
       );
       return;
     }
@@ -423,6 +458,15 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
   editModal(request: AcademicProgramRequest): void {
     // Validate that we have the required data before opening the modal
     if (!request) {
+      return;
+    }
+
+    if (!this.canEditOrDelete(request)) {
+      this._customNotificationService.notification(
+        "warning",
+        "Not allowed",
+        "Only draft (not yet submitted) academic program requests can be edited."
+      );
       return;
     }
 

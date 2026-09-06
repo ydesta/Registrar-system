@@ -6,230 +6,135 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-// Header Section - matching Manage Instructor Sections
+// Header Section
 .header-section {
+  display: block;
   background: white;
   border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  .page-title {
-    h1 {
-      margin: 0;
-      color: #1f2937;
-      font-size: 24px;
-      font-weight: 600;
-    }
-
-    .subtitle {
-      margin: 8px 0 0 0;
-      color: #6b7280;
-      font-size: 14px;
-    }
-  }
-
-  .header-actions {
-    .add-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 12px 24px;
-      border-radius: 12px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-      border: none;
-      color: white;
-      font-weight: 600;
-      font-size: 14px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      box-shadow: 0 4px 16px rgba(24, 144, 255, 0.25);
-      position: relative;
-      overflow: hidden;
-      min-width: 180px;
-      height: 48px;
-
-      // Professional gradient overlay
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        border-radius: 12px;
-      }
-
-      // Professional hover effects
-      &:hover {
-        background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%);
-        transform: translateY(-2px) scale(1.02);
-        box-shadow: 0 8px 25px rgba(24, 144, 255, 0.35);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-
-        &::before {
-          opacity: 1;
-        }
-
-        i {
-          transform: rotate(90deg) scale(1.1);
-        }
-      }
-
-      // Professional active state
-      &:active {
-        transform: translateY(-1px) scale(1.01);
-        box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3);
-        transition: all 0.1s ease;
-      }
-
-      // Professional focus state
-      &:focus {
-        outline: none;
-        box-shadow: 0 4px 16px rgba(24, 144, 255, 0.25), 0 0 0 3px rgba(24, 144, 255, 0.15);
-      }
-
-      // Professional disabled state
-      &:disabled {
-        background: linear-gradient(135deg, #d9d9d9 0%, #bfbfbf 100%);
-        color: rgba(255, 255, 255, 0.6);
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-        &:hover {
-          transform: none;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-      }
-
-      // Professional icon styling
-      i {
-        color: white;
-        font-size: 18px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-      }
-
-      // Professional text styling
-      span {
-        font-weight: 600;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-      }
-    }
-  }
-}
-
-// Search Section
-.search-section {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  margin-bottom: 24px;
   padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
+  position: relative;
 
-  .search-header {
+  .header-content {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid #f1f5f9;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
 
-    h3 {
-      margin: 0;
-      color: #1f2937;
-      font-size: 18px;
-      font-weight: 600;
+    .page-title {
+      .title-text {
+        margin: 0 0 8px 0;
+        font-size: 28px;
+        font-weight: 700;
+        color: #1f2937;
+        line-height: 1.2;
+      }
+
+      .subtitle-text {
+        margin: 0;
+        color: #6b7280;
+        font-size: 16px;
+        font-weight: 400;
+      }
     }
 
-    .clear-search-btn {
+    .header-actions {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      color: #6b7280;
-      font-size: 12px;
-      font-weight: 500;
-      transition: all 0.3s ease;
+      justify-content: space-between;
+      gap: 16px;
+      width: 100%;
 
-      &:hover {
-        background: #f3f4f6;
-        border-color: #d1d5db;
-        color: #374151;
-        transform: translateY(-1px);
-      }
-
-      i {
-        font-size: 14px;
-      }
-    }
-  }
-
-  .search-controls {
-    .search-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-
-      label {
-        font-size: 13px;
-        font-weight: 600;
-        color: #374151;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+      .search-section {
+        position: relative;
+        flex: 0 1 420px;
+        max-width: 420px;
         margin: 0;
-      }
 
-      nz-input-group {
-        border-radius: 8px;
-        border: 1px solid #e5e7eb;
-        transition: all 0.3s ease;
-
-        &:hover {
-          border-color: #d1d5db;
-        }
-
-        &:focus-within {
-          border-color: #1890ff;
-          box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
-        }
-
-        input {
-          border: none;
-          background: transparent;
+        .input-with-floating-label {
+          width: 100%;
+          height: 44px;
           padding: 12px 16px;
           font-size: 14px;
+          border: 1.5px solid #e8e8e8;
+          border-radius: 12px;
+          background: #fafafa;
+          transition: all 0.3s ease;
 
-          &::placeholder {
-            color: #9ca3af;
-            font-size: 13px;
+          &:hover {
+            border-color: #40a9ff;
+            background: #fff;
           }
 
           &:focus {
-            outline: none;
-            box-shadow: none;
+            border-color: #1890ff;
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+          }
+
+          &::placeholder {
+            color: transparent;
           }
         }
 
-        .ant-input-suffix {
+        .floating-label {
+          position: absolute;
+          top: 50%;
+          left: 12px;
+          transform: translateY(-50%);
           color: #9ca3af;
-          padding-right: 16px;
+          font-size: 14px;
+          pointer-events: none;
+          transition: 0.2s ease all;
+          background: white;
+          padding: 0 4px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          white-space: nowrap;
+          z-index: 1;
+          margin: 0;
+
+          span[nz-icon] {
+            font-size: 14px;
+            color: #9ca3af;
+          }
+        }
+
+        .input-with-floating-label:focus + .floating-label,
+        .input-with-floating-label:not(:placeholder-shown) + .floating-label {
+          top: -8px;
+          left: 10px;
+          font-size: 12px;
+          color: #1890ff;
+          background: white;
+
+          span[nz-icon] {
+            color: #1890ff;
+            font-size: 12px;
+          }
+        }
+      }
+
+      .add-btn {
+        flex: 0 0 auto;
+        margin-left: auto;
+        background: #1890ff;
+        color: white;
+        border-radius: 10px;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+        padding: 0 20px;
+        height: 40px;
+
+        &:hover {
+          background: #40a9ff;
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
         }
       }
     }
@@ -368,92 +273,51 @@
   font-weight: 500;
 }
 
-// Action Button
-.action-button {
+// Action Menu
+.action-dropdown-btn {
+  border: none;
   background: transparent;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  color: #6b7280;
-  transition: all 0.3s ease;
-  width: 32px;
+  box-shadow: none;
+  padding: 0 8px;
   height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: #6b7280;
 
-  &:hover {
-    border-color: #1890ff;
+  &:hover,
+  &:focus {
     color: #1890ff;
-    background: #f0f9ff;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
-  }
-
-  i {
-    font-size: 16px;
+    background: #f0f7ff;
   }
 }
 
-// Action Items
-.action-item {
+.action-menu-link {
   display: flex;
   align-items: center;
   gap: 8px;
+  color: #374151;
+  text-decoration: none;
   width: 100%;
-  justify-content: flex-start;
-  padding: 8px 12px;
-  border: none;
-  background: transparent;
-  transition: all 0.3s ease;
-
-  &.edit {
-    color: #1890ff;
-
-    &:hover {
-      background: #f0f9ff;
-      color: #40a9ff;
-    }
-  }
 
   &.delete {
-    color: #ff4d4f;
-
-    &:hover {
-      background: #fff2f0;
-      color: #ff7875;
-    }
-  }
-
-  i {
-    font-size: 14px;
-  }
-
-  span {
-    font-size: 14px;
-    font-weight: 500;
+    color: #ef4444;
   }
 }
 
 // No Data State
 .no-data {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
+  text-align: center;
   color: #9ca3af;
+  padding: 40px 0;
 
-  i {
-    font-size: 48px;
-    margin-bottom: 16px;
-    color: #d1d5db;
+  span[nz-icon] {
+    font-size: 40px;
+    color: #bdbdbd;
+    margin-bottom: 8px;
   }
 
   p {
     margin: 0;
     font-size: 16px;
-    font-weight: 500;
-    color: #6b7280;
+    color: #9ca3af;
   }
 }
 
@@ -464,52 +328,23 @@
   }
 
   .header-section {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
-
-    .page-title {
-      h1 {
-        font-size: 20px;
-      }
-    }
-
-    .header-actions {
-      .add-btn {
-        min-width: 160px;
-        height: 44px;
-        padding: 10px 20px;
-        font-size: 13px;
-        gap: 8px;
-
-        i {
-          font-size: 16px;
-        }
-      }
-    }
-  }
-
-  .search-section {
     padding: 16px;
 
-    .search-header {
-      flex-direction: column;
-      gap: 12px;
-      text-align: center;
+    .header-content {
+      gap: 14px;
 
-      h3 {
-        font-size: 16px;
-      }
+      .header-actions {
+        flex-direction: column;
+        align-items: stretch;
 
-      .clear-search-btn {
-        align-self: center;
-      }
-    }
+        .search-section {
+          max-width: 100%;
+        }
 
-    .search-controls {
-      .search-group {
-        label {
-          font-size: 12px;
+        .add-btn {
+          width: 100%;
+          margin-left: 0;
+          justify-content: center;
         }
       }
     }
@@ -540,15 +375,6 @@
     height: 28px;
     font-size: 11px;
   }
-
-  .action-button {
-    width: 28px;
-    height: 28px;
-
-    i {
-      font-size: 14px;
-    }
-  }
 }
 
 @media (max-width: 480px) {
@@ -559,55 +385,14 @@
   .header-section {
     padding: 16px;
 
-    .page-title {
-      h1 {
-        font-size: 18px;
-      }
-
-      .subtitle {
-        font-size: 13px;
-      }
-    }
-
-    .header-actions {
-      .add-btn {
-        min-width: 140px;
-        height: 40px;
-        padding: 8px 16px;
-        font-size: 12px;
-        gap: 6px;
-        letter-spacing: 0.3px;
-
-        i {
-          font-size: 14px;
+    .header-content {
+      .page-title {
+        .title-text {
+          font-size: 22px;
         }
-      }
-    }
-  }
 
-  .search-section {
-    padding: 12px;
-
-    .search-header {
-      h3 {
-        font-size: 14px;
-      }
-
-      .clear-search-btn {
-        padding: 4px 8px;
-        font-size: 11px;
-        gap: 4px;
-
-        i {
-          font-size: 12px;
-        }
-      }
-    }
-
-    .search-controls {
-      .search-group {
-        label {
-          font-size: 11px;
+        .subtitle-text {
+          font-size: 13px;
         }
       }
     }

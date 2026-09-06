@@ -2,10 +2,14 @@ import { Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { GeneralInformationService } from "../../services/general-information.service";
 import { AcademicProgramRequest } from "../../model/academic-program-request.model";
+import { AcadamicProgramme } from "../../model/acadamic-programme.model";
+import { AcademicProgramRequestService } from "../../services/academic-program-request.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { CustomNotificationService } from "src/app/services/custom-notification.service";
 import { UserManagementService } from 'src/app/services/user-management.service';
 import { NzModalRef } from "ng-zorro-antd/modal";
+import { AdmissionLookupService } from "src/app/colleges/services/admission-lookup.service";
+import { APPLICANT_TYPE_STATUS, Division_Status } from "src/app/common/constant";
 
 @Component({
   selector: "app-applicant-reviewer-decision",
@@ -21,6 +25,10 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
   reviewerForm: FormGroup;
   id: number;
   isSubmitting = false;
+  isResolvingBatch = false;
+  lookupBatchCodes: string[] = [];
+  batchLookupError: string | null = null;
+  acadamicProgrammes: AcadamicProgramme[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -29,7 +37,9 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
     private router: Router,
     private _customNotificationService: CustomNotificationService,
     private userManagementService: UserManagementService,
-    private modalRef: NzModalRef
+    private modalRef: NzModalRef,
+    private admissionLookupService: AdmissionLookupService,
+    private academicProgramRequestService: AcademicProgramRequestService
   ) {
     this.createReviewerForm();
     route.queryParams.subscribe(p => {
@@ -38,20 +48,121 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadAcademicProgrammes();
     this.admissionDecision.valueChanges.subscribe(value => {
+      const remarkControl = this.reviewerForm.get("remark");
+      const batchControl = this.reviewerForm.get("batchCode");
+
       if (value === "4" || value === "2") {
-        this.reviewerForm.get("remark").setValidators(Validators.required);
+        remarkControl.setValidators([Validators.required, Validators.maxLength(250)]);
       } else {
-        this.reviewerForm.get("remark").clearValidators();
+        remarkControl.setValidators([Validators.maxLength(250)]);
       }
-      this.reviewerForm.get("remark").updateValueAndValidity();
+      remarkControl.updateValueAndValidity();
+
+      if (value === "3") {
+        batchControl.setValidators(Validators.required);
+        this.resolveBatchFromAdmissionLookup();
+      } else {
+        batchControl.clearValidators();
+        batchControl.setValue(null);
+        this.lookupBatchCodes = [];
+        this.batchLookupError = null;
+      }
+      batchControl.updateValueAndValidity();
+    });
+  }
+
+  loadAcademicProgrammes(): void {
+    this.academicProgramRequestService.getAacadamicPrgramtList().subscribe({
+      next: (res: any) => {
+        this.acadamicProgrammes = res?.data || [];
+      }
+    });
+  }
+
+  get programmeLabel(): string {
+    const programmeId =
+      this.academicProgramId ||
+      this.academicProgramRequest?.acadamicProgrammeId;
+    if (!programmeId) {
+      return 'N/A';
+    }
+    const program = this.acadamicProgrammes.find(
+      item => String(item.id) === String(programmeId)
+    );
+    return program?.acadamicProgrammeTitle || 'N/A';
+  }
+
+  get applicationTypeLabel(): string {
+    const year = this.academicProgramRequest?.applicantYear;
+    return APPLICANT_TYPE_STATUS.find(x => x.Id === year)?.Description || 'N/A';
+  }
+
+  get divisionLabel(): string {
+    const division = this.academicProgramRequest?.division;
+    return Division_Status.find(x => x.Id === division)?.Description || 'N/A';
+  }
+
+  resolveBatchFromAdmissionLookup(): void {
+    const programmeId =
+      this.academicProgramId ||
+      this.academicProgramRequest?.acadamicProgrammeId;
+    const division = this.academicProgramRequest?.division;
+    const applicantYear = this.academicProgramRequest?.applicantYear;
+
+    this.lookupBatchCodes = [];
+    this.batchLookupError = null;
+    this.reviewerForm.get("batchCode")?.setValue(null);
+
+    if (!programmeId || division == null || applicantYear == null) {
+      this.batchLookupError =
+        "Cannot resolve batch: program, division, or application type is missing on the request.";
+      return;
+    }
+
+    this.isResolvingBatch = true;
+    this.admissionLookupService.getList().subscribe({
+      next: (res: any) => {
+        const lookups: any[] = res?.data || [];
+        const matches = lookups.filter(x =>
+          x &&
+          x.isActive !== false &&
+          !x.isDeleted &&
+          String(x.acadamicProgrammeId) === String(programmeId) &&
+          Number(x.division) === Number(division) &&
+          Number(x.applicantYear) === Number(applicantYear) &&
+          !!x.batchCode
+        );
+
+        // Prefer distinct batch codes from matching lookups
+        this.lookupBatchCodes = Array.from(
+          new Set(matches.map(m => String(m.batchCode).trim()).filter(Boolean))
+        );
+
+        if (this.lookupBatchCodes.length === 0) {
+          this.batchLookupError =
+            `No active Admission Lookup batch found for this program, ${this.divisionLabel}, and ${this.applicationTypeLabel}.`;
+        } else {
+          // Auto-populate with the resolved batch (first match if multiple)
+          this.reviewerForm.get("batchCode")?.setValue(this.lookupBatchCodes[0]);
+        }
+        this.isResolvingBatch = false;
+        this.reviewerForm.get("batchCode")?.updateValueAndValidity();
+      },
+      error: () => {
+        this.isResolvingBatch = false;
+        this.batchLookupError =
+          "Failed to load Admission Lookup. Please try again.";
+      }
     });
   }
 
   createReviewerForm() {
     this.reviewerForm = this.fb.group({
       admissionDecision: ["", Validators.required],
-      remark: [null, [Validators.maxLength(250)]]
+      remark: [null, [Validators.maxLength(250)]],
+      batchCode: [null]
     });
   }
 
@@ -59,16 +170,22 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
     return this.reviewerForm.get("admissionDecision");
   }
 
+  get isAccepted(): boolean {
+    return this.admissionDecision?.value === "3";
+  }
+
   private getApplicantReviewerDecision(): AcademicProgramRequest {
     const formModel = this.reviewerForm.getRawValue();
     const generalUserInfo = new AcademicProgramRequest();
 
-    // Use the academicProgramRequest ID if available, otherwise use the passed id
     generalUserInfo.id = this.academicProgramRequest?.id || this.id || 0;
     generalUserInfo.applicantId = this.applicantId || this.academicProgramRequest?.applicantId;
     generalUserInfo.acadamicProgrammeId = this.academicProgramId || this.academicProgramRequest?.acadamicProgrammeId;
     generalUserInfo.approvalStatus = formModel.admissionDecision;
     generalUserInfo.remark = formModel.remark;
+    generalUserInfo.batchCode = formModel.batchCode;
+    generalUserInfo.division = this.academicProgramRequest?.division;
+    generalUserInfo.applicantYear = this.academicProgramRequest?.applicantYear;
 
     return generalUserInfo;
   }
@@ -81,6 +198,16 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
           "error",
           "Error",
           "Missing required information: Applicant ID or Academic Program ID."
+        );
+        return;
+      }
+
+      if (Number(postData.approvalStatus) === 3 && !postData.batchCode) {
+        this._customNotificationService.notification(
+          "warning",
+          "Warning",
+          this.batchLookupError ||
+            "No batch found in Admission Lookup for this application type. Configure Admission Lookup first."
         );
         return;
       }
@@ -135,10 +262,14 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
             this.isSubmitting = false;
           }
         }, error => {
+          const apiMessage =
+            error?.error?.message ||
+            error?.error?.title ||
+            "An error occurred while saving the decision. Please try again.";
           this._customNotificationService.notification(
             "error",
             "Error",
-            "An error occurred while saving the decision. Please try again."
+            apiMessage
           );
           this.isSubmitting = false;
         });
@@ -153,21 +284,5 @@ export class ApplicantReviewerDecisionComponent implements OnInit {
 
   cancel() {
     this.modalRef.close();
-  }
-
-  // Helper method to extract data from different response structures
-  // This handles both ApiResponse<T> format (with data wrapper) and direct object format
-  private extractResponseData<T>(res: any): T | null {
-    if (res && typeof res === 'object') {
-      // Check if response has data property (ApiResponse<T> structure)
-      if ('data' in res && res.data) {
-        return res.data;
-      }
-      // Check if response is the data directly
-      else if ('id' in res) {
-        return res;
-      }
-    }
-    return null;
   }
 }

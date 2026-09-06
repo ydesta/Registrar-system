@@ -58,79 +58,85 @@
 // Summary Statistics Section
 .summary-section {
   margin-bottom: 24px;
-  
+
   .summary-cards {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+
     .summary-card {
       background: white;
       border-radius: 16px;
-      padding: 24px;
+      padding: 18px 16px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px);
       display: flex;
-      align-items: center;
-      gap: 16px;
+      align-items: flex-start;
+      gap: 14px;
       transition: all 0.3s ease;
-      
+      min-width: 0;
+
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
       }
-      
+
       .summary-icon {
-        width: 60px;
-        height: 60px;
+        width: 48px;
+        height: 48px;
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
         color: white;
         flex-shrink: 0;
-        
-        // Different colors for different cards
-        &:first-child {
-          background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-        }
-        
-        &:nth-child(2) {
-          background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
-        }
-        
-        &:nth-child(3) {
-          background: linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%);
-        }
-        
-        &:nth-child(4) {
-          background: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
-        }
-        
+
         span[nz-icon] {
-          font-size: 24px;
+          font-size: 22px;
         }
       }
-      
+
+      &.card-total .summary-icon {
+        background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+      }
+
+      &.card-missing .summary-icon {
+        background: linear-gradient(135deg, #fa8c16 0%, #d46b08 100%);
+      }
+
+      &.card-ready .summary-icon {
+        background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+      }
+
+      &.card-rate .summary-icon {
+        background: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
+      }
+
       .summary-content {
         flex: 1;
-        
+        min-width: 0;
+
         .summary-number {
-          font-size: 32px;
+          font-size: 28px;
           font-weight: 700;
           color: #1f2937;
           line-height: 1;
+          margin-bottom: 6px;
+        }
+
+        .summary-label {
+          font-size: 13px;
+          color: #374151;
+          font-weight: 600;
+          line-height: 1.3;
           margin-bottom: 4px;
         }
-        
-        .summary-label {
-          font-size: 14px;
+
+        .summary-hint {
+          font-size: 12px;
           color: #6b7280;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
+          font-weight: 400;
+          line-height: 1.35;
         }
       }
     }
@@ -367,29 +373,32 @@
   
   .summary-section {
     .summary-cards {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
-      
+
       .summary-card {
-        padding: 20px;
-        
+        padding: 16px;
+
         .summary-icon {
-          width: 50px;
-          height: 50px;
-          font-size: 20px;
-          
+          width: 44px;
+          height: 44px;
+
           span[nz-icon] {
             font-size: 20px;
           }
         }
-        
+
         .summary-content {
           .summary-number {
-            font-size: 28px;
+            font-size: 24px;
           }
-          
+
           .summary-label {
-            font-size: 13px;
+            font-size: 12px;
+          }
+
+          .summary-hint {
+            font-size: 11px;
           }
         }
       }
@@ -433,27 +442,30 @@
     .summary-cards {
       grid-template-columns: 1fr;
       gap: 12px;
-      
+
       .summary-card {
         padding: 16px;
-        
+
         .summary-icon {
-          width: 45px;
-          height: 45px;
-          font-size: 18px;
-          
+          width: 42px;
+          height: 42px;
+
           span[nz-icon] {
             font-size: 18px;
           }
         }
-        
+
         .summary-content {
           .summary-number {
-            font-size: 24px;
+            font-size: 22px;
           }
-          
+
           .summary-label {
             font-size: 12px;
+          }
+
+          .summary-hint {
+            font-size: 11px;
           }
         }
       }

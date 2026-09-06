@@ -39,7 +39,9 @@ export class ApplicantIncompleteComponent implements OnInit, OnDestroy {
     this.generalInformationService.getIncompleteApplicantsPaginated(this.pager.query())
       .subscribe({
         next: (response: any) => {
-          this.incompleteApplicantsList = response.data || [];
+          this.incompleteApplicantsList = (response.data || []).filter(
+            (a: ApplicantIncompleteResponse) => a.finalSubmit !== 'Complete'
+          );
           this.incompleteApplicants = this.incompleteApplicantsList;
           this.pager.applyResult(response);
         },
@@ -62,156 +64,154 @@ export class ApplicantIncompleteComponent implements OnInit, OnDestroy {
 
   // Method to get completion status text
   getCompletionStatusText(status: string): string {
-    return status === 'Complete' ? 'Complete' : 'Incomplete';
+    if (status === 'Complete') {
+      return 'Complete';
+    }
+    if (status === 'N/A') {
+      return 'N/A';
+    }
+    return 'Incomplete';
   }
 
   // Method to get completion status color for tags
   getCompletionStatusColor(status: string): string {
-    return status === 'Complete' ? 'green' : 'red';
+    if (status === 'Complete') {
+      return 'green';
+    }
+    if (status === 'N/A') {
+      return 'default';
+    }
+    return 'red';
   }
 
-  // Summary statistics methods
-  getCompletedCount(): number {
-    if (!this.incompleteApplicants || this.incompleteApplicants.length === 0) {
-      return 0;
-    }
-    
-    let completedCount = 0;
-    this.incompleteApplicants.forEach(applicant => {
-      const sections = [
-        applicant.educationBackground,
-        applicant.personalContact,
-        applicant.applicantWorkExperiences,
-        applicant.academicProgramRequest,
-        applicant.studentPayments,
-        applicant.finalSubmit
-      ];
-      
-      completedCount += sections.filter(section => section === 'Complete').length;
-    });
-    
-    return completedCount;
+  /** Applicants on this page still missing a required section (excludes optional Work Exp). */
+  getMissingRequiredCount(): number {
+    return (this.incompleteApplicants || []).filter(a => this.hasMissingRequiredSection(a)).length;
   }
 
-  getIncompleteCount(): number {
-    if (!this.incompleteApplicants || this.incompleteApplicants.length === 0) {
-      return 0;
-    }
-    
-    let incompleteCount = 0;
-    this.incompleteApplicants.forEach(applicant => {
-      const sections = [
-        applicant.educationBackground,
-        applicant.personalContact,
-        applicant.applicantWorkExperiences,
-        applicant.academicProgramRequest,
-        applicant.studentPayments,
-        applicant.finalSubmit
-      ];
-      
-      incompleteCount += sections.filter(section => section === 'Incomplete').length;
-    });
-    
-    return incompleteCount;
+  /** Applicants on this page with all required sections done, waiting on Final Submit. */
+  getReadyToSubmitCount(): number {
+    return (this.incompleteApplicants || []).filter(a =>
+      !this.hasMissingRequiredSection(a) && a.finalSubmit !== 'Complete'
+    ).length;
   }
 
-  getCompletionPercentage(): number {
-    const completed = this.getCompletedCount();
-    const incomplete = this.getIncompleteCount();
-    const total = completed + incomplete;
-    
-    if (total === 0) {
+  getReadyToSubmitPercentage(): number {
+    const pageCount = this.incompleteApplicants?.length || 0;
+    if (pageCount === 0) {
       return 0;
     }
-    
-    return Math.round((completed / total) * 100);
+    return Math.round((this.getReadyToSubmitCount() / pageCount) * 100);
+  }
+
+  private hasMissingRequiredSection(applicant: ApplicantIncompleteResponse): boolean {
+    const required = [
+      applicant.educationBackground,
+      applicant.personalContact,
+      applicant.academicProgramRequest,
+      applicant.studentPayments
+    ];
+    return required.some(section => section !== 'Complete');
   }
 
   exportToExcel(): void {
-    // Check if data exists
-    if (!this.incompleteApplicants || this.incompleteApplicants.length === 0) {
-      this._customNotificationService.notification(
-        "warning",
-        "No Data",
-        "No incomplete applicants data available for export."
-      );
-      return;
-    }
+    // Export must fetch the full incomplete list — table data is only the current page.
+    this.generalInformationService.getIncompleteApplicants().subscribe({
+      next: (res: any) => {
+        let rows: ApplicantIncompleteResponse[] = Array.isArray(res)
+          ? res
+          : (res?.data || []);
 
-    // Prepare data for export
-    const excelData = [
-      ['Incomplete Applicants Report'],
-      [`Generated on: ${new Date().toLocaleDateString()}`],
-      [`Total Incomplete Applications: ${this.total}`],
-      [''],
-      [
-        'Applicant ID',
-        'Full Name',
-        'Mobile',
-        'Request Date',
-        'Education Background',
-        'Personal Contact',
-        'Work Experience',
-        'Academic Program',
-        'Student Payment',
-        'Final Submit',
-        'Overall Status'
-      ],
-      ...this.incompleteApplicants.map(applicant => [
-        applicant.applicantId || 'N/A',
-        applicant.fullName || 'N/A',
-        applicant.mobile || 'N/A',
-        applicant.requestDate || 'N/A',
-        applicant.educationBackground || 'N/A',
-        applicant.personalContact || 'N/A',
-        applicant.applicantWorkExperiences || 'N/A',
-        applicant.academicProgramRequest || 'N/A',
-        applicant.studentPayments || 'N/A',
-        applicant.finalSubmit || 'N/A',
-        this.getOverallStatus(applicant)
-      ])
-    ];
+        // Never export submitted applications.
+        rows = rows.filter(a => a.finalSubmit !== 'Complete');
 
-    // Define merge ranges for headers
-    const merges: XLSX.Range[] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 10 } }, // Title row
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 10 } }, // Date row
-      { s: { r: 2, c: 0 }, e: { r: 2, c: 10 } }  // Total count row
-    ];
+        const search = (this.pager.searchKey || '').trim().toLowerCase();
+        if (search) {
+          rows = rows.filter(a =>
+            (a.applicantId || '').toLowerCase().includes(search) ||
+            (a.fullName || '').toLowerCase().includes(search) ||
+            (a.mobile || '').toLowerCase().includes(search)
+          );
+        }
 
-    this._excelExportService.exportWithCustomLayout(
-      excelData,
-      'Incomplete_Applicants_Report',
-      'Incomplete Applicants',
-      merges
-    );
+        if (!rows.length) {
+          this._customNotificationService.notification(
+            "warning",
+            "No Data",
+            "No incomplete applicants data available for export."
+          );
+          return;
+        }
 
-    this._customNotificationService.notification(
-      "success",
-      "Export Successful",
-      "Incomplete applicants data has been exported to Excel successfully."
-    );
+        const excelData = [
+          ['Incomplete Applicants Report'],
+          [`Generated on: ${new Date().toLocaleDateString()}`],
+          [`Total Incomplete Applications: ${rows.length}`],
+          [''],
+          [
+            'Applicant ID',
+            'Full Name',
+            'Mobile',
+            'Request Date',
+            'Education Background',
+            'Personal Contact',
+            'Work Experience',
+            'Academic Program',
+            'Student Payment',
+            'Final Submit',
+            'Overall Status'
+          ],
+          ...rows.map(applicant => [
+            applicant.applicantId || 'N/A',
+            applicant.fullName || 'N/A',
+            applicant.mobile || 'N/A',
+            applicant.requestDate || 'N/A',
+            applicant.educationBackground || 'N/A',
+            applicant.personalContact || 'N/A',
+            applicant.applicantWorkExperiences || 'N/A',
+            applicant.academicProgramRequest || 'N/A',
+            applicant.studentPayments || 'N/A',
+            applicant.finalSubmit || 'N/A',
+            this.getOverallStatus(applicant)
+          ])
+        ];
+
+        const merges: XLSX.Range[] = [
+          { s: { r: 0, c: 0 }, e: { r: 0, c: 10 } },
+          { s: { r: 1, c: 0 }, e: { r: 1, c: 10 } },
+          { s: { r: 2, c: 0 }, e: { r: 2, c: 10 } }
+        ];
+
+        this._excelExportService.exportWithCustomLayout(
+          excelData,
+          'Incomplete_Applicants_Report',
+          'Incomplete Applicants',
+          merges
+        );
+
+        this._customNotificationService.notification(
+          "success",
+          "Export Successful",
+          `Exported ${rows.length} incomplete applicants to Excel successfully.`
+        );
+      },
+      error: () => {
+        this._customNotificationService.notification(
+          "error",
+          "Error",
+          "Failed to load incomplete applicants for export. Please try again."
+        );
+      }
+    });
   }
 
   private getOverallStatus(applicant: ApplicantIncompleteResponse): string {
-    const sections = [
-      applicant.educationBackground,
-      applicant.personalContact,
-      applicant.applicantWorkExperiences,
-      applicant.academicProgramRequest,
-      applicant.studentPayments,
-      applicant.finalSubmit
-    ];
-    
-    const completedCount = sections.filter(section => section === 'Complete').length;
-    const totalSections = sections.length;
-    
-    if (completedCount === totalSections) {
-      return 'Complete';
-    } else if (completedCount === 0) {
-      return 'Not Started';
-    } else {
-      return `In Progress (${completedCount}/${totalSections})`;
+    if (applicant.finalSubmit === 'Complete') {
+      return 'Submitted';
     }
+    if (this.hasMissingRequiredSection(applicant)) {
+      return 'Incomplete';
+    }
+    return 'Ready to Submit';
   }
 }

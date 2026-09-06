@@ -1,157 +1,233 @@
 <div class="content-container">
-  <!-- Header Section -->
-  <div class="header-section">
-    <div class="header-content">
-      <div class="page-title">
-        <h2 class="title-text">Applicant Requests</h2>
-        <p class="subtitle-text">Review and manage applicant admission requests</p>
+  <section class="hero-bar">
+    <div class="hero-left">
+      <div class="hero-icon">
+        <span nz-icon nzType="audit" nzTheme="outline"></span>
+      </div>
+      <div>
+        <h1>Applicant Requests</h1>
+        <p>Review admission applications and take action as a reviewer</p>
       </div>
     </div>
-  </div>
-
-  <!-- Collapsible Search Form -->
-  <div class="search-section">
-    <nz-collapse>
-      <nz-collapse-panel [nzHeader]="searchHeader" [nzActive]="!isFormCollapsed"
-        (nzActiveChange)="isFormCollapsed = !$event">
-
-        <ng-template #searchHeader>
-          <span>
-            <i nz-icon nzType="search" nzTheme="outline"></i>
-            Search Filters
-          </span>
-        </ng-template>
-
-        <form nz-form [formGroup]="academicProgramRequestForm" (ngSubmit)="onSearch()">
-          <div nz-row [nzGutter]="24">
-            <!-- Academic Program -->
-            <div nz-col [nzSpan]="12">
-              <nz-form-item>
-                <nz-form-label [nzSpan]="10">Academic Program</nz-form-label>
-                <nz-form-control [nzSpan]="14">
-                  <nz-select formControlName="acadamicProgrammeId" nzPlaceHolder="Select Academic Program" nzShowSearch
-                    nzAllowClear style="width: 100%;">
-                    <nz-option *ngFor="let program of acadamicProgrammes" [nzValue]="program.id"
-                      [nzLabel]="program.acadamicProgrammeTitle"></nz-option>
-                  </nz-select>
-                </nz-form-control>
-              </nz-form-item>
-            </div>
-
-            <!-- Approval Status -->
-            <div nz-col [nzSpan]="12">
-              <nz-form-item>
-                <nz-form-label [nzSpan]="10">Approval Status</nz-form-label>
-                <nz-form-control [nzSpan]="14">
-                  <nz-select formControlName="approvalStatus" nzPlaceHolder="Select Approval Status" nzShowSearch
-                    nzAllowClear style="width: 100%;">
-                    <nz-option *ngFor="let status of requestStatusOptions" [nzValue]="status.value"
-                      [nzLabel]="status.label"></nz-option>
-                  </nz-select>
-                </nz-form-control>
-              </nz-form-item>
-            </div>
-          </div>
-
-          <!-- Action Buttons -->
-          <div nz-row>
-            <div nz-col [nzSpan]="24" class="form-actions">
-              <button nz-button nzType="default" (click)="onReset()" class="mr-2">
-                <i nz-icon nzType="reload" nzTheme="outline"></i>
-                Reset
-              </button>
-              <button nz-button nzType="primary" (click)="onSearch()">
-                <i nz-icon nzType="search" nzTheme="outline"></i>
-                Search
-              </button>
-            </div>
-          </div>
-        </form>
-      </nz-collapse-panel>
-    </nz-collapse>
-  </div>
-
-  <!-- Search and Export Actions -->
-  <div class="table-actions">
-    <div class="search-section">
-      <nz-input-group [nzSuffix]="suffixIconSearch">
-        <input type="text" nz-input placeholder="Search applicants..." [(ngModel)]="pager.searchKey"
-          (ngModelChange)="pager.onSearch($event)" />
-      </nz-input-group>
-      <ng-template #suffixIconSearch>
-        <span nz-icon nzType="search"></span>
-      </ng-template>
+    <div class="hero-right">
+      <div class="hero-stat">
+        <span class="hero-stat-value">{{ pager.total || 0 }}</span>
+        <span class="hero-stat-label">in this view</span>
+      </div>
     </div>
-    <button nz-button nzType="default" (click)="exportApplicants()" class="export-btn">
-      <span nz-icon nzType="file-excel" nzTheme="outline"></span>
-      Export
-    </button>
-  </div>
+  </section>
 
-  <!-- Table Card Container -->
-  <div class="table-card">
-    <div class="table-wrapper">
-      <nz-table #basicTable [nzData]="applicantsList" nzBordered [nzPageSize]="pager.pageSize"
-        [nzPageSizeOptions]="pager.pageSizeOptions" [nzShowSizeChanger]="true" [nzTotal]="pager.total"
-        [nzPageIndex]="pager.pageIndex" (nzPageIndexChange)="pager.onPageIndexChange($event)"
-        (nzPageSizeChange)="pager.onPageSizeChange($event)" [nzFrontPagination]="false" [nzShowTotal]="rangeTemplate"
-        [nzLoading]="pager.loading" [nzNoResult]="emptyTpl" class="applicant-table">
-        <ng-template #rangeTemplate let-range="range" let-total>
-          <span style="color: #6b7280; font-weight: 500;">
-            {{ range[0] }}-{{ range[1] }} of {{ total }} applicants
-          </span>
+  <section class="insight-row">
+    <article class="insight-card tone-blue">
+      <div class="insight-icon"><span nz-icon nzType="team" nzTheme="outline"></span></div>
+      <div class="insight-body">
+        <span class="insight-kicker">Queue size</span>
+        <strong>{{ pager.total || 0 }}</strong>
+        <span class="insight-caption">Matching requests</span>
+      </div>
+    </article>
+
+    <article class="insight-card tone-indigo">
+      <div class="insight-icon"><span nz-icon nzType="flag" nzTheme="outline"></span></div>
+      <div class="insight-body">
+        <span class="insight-kicker">Status filter</span>
+        <strong>{{ getSelectedStatusLabel() || 'All statuses' }}</strong>
+        <span class="insight-caption">Approval workflow stage</span>
+      </div>
+    </article>
+
+    <article class="insight-card tone-teal">
+      <div class="insight-icon"><span nz-icon nzType="book" nzTheme="outline"></span></div>
+      <div class="insight-body">
+        <span class="insight-kicker">Programme</span>
+        <strong [title]="getSelectedProgramLabel() || 'All programs'">
+          {{ getSelectedProgramLabel() || 'All programs' }}
+        </strong>
+        <span class="insight-caption">Academic programme filter</span>
+      </div>
+    </article>
+
+    <article class="insight-card tone-amber">
+      <div class="insight-icon"><span nz-icon nzType="user-switch" nzTheme="outline"></span></div>
+      <div class="insight-body">
+        <span class="insight-kicker">Applicant type</span>
+        <strong>{{ getSelectedTypeLabel() || 'All types' }}</strong>
+        <span class="insight-caption">Fresh or Transfer</span>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel filters-panel">
+    <div class="panel-head">
+      <div>
+        <h2>Filters</h2>
+        <p>Refine the request list by programme, status, and applicant type</p>
+      </div>
+      <button nz-button nzType="link" class="link-toggle" type="button"
+        (click)="isFormCollapsed = !isFormCollapsed">
+        {{ isFormCollapsed ? 'Expand' : 'Collapse' }}
+        <span nz-icon [nzType]="isFormCollapsed ? 'down' : 'up'"></span>
+      </button>
+    </div>
+
+    <form *ngIf="!isFormCollapsed" class="filters-form" [formGroup]="academicProgramRequestForm"
+      (ngSubmit)="onSearch()">
+      <div class="filters-grid">
+        <label class="field">
+          <span>Academic Program</span>
+          <nz-select formControlName="acadamicProgrammeId" nzPlaceHolder="All programs" nzShowSearch nzAllowClear>
+            <nz-option *ngFor="let program of acadamicProgrammes" [nzValue]="program.id"
+              [nzLabel]="program.acadamicProgrammeTitle"></nz-option>
+          </nz-select>
+        </label>
+
+        <label class="field">
+          <span>Approval Status</span>
+          <nz-select formControlName="approvalStatus" nzPlaceHolder="All statuses" nzShowSearch nzAllowClear>
+            <nz-option *ngFor="let status of requestStatusOptions" [nzValue]="status.value"
+              [nzLabel]="status.label"></nz-option>
+          </nz-select>
+        </label>
+
+        <label class="field">
+          <span>Applicant Type</span>
+          <nz-select formControlName="applicantYear" nzPlaceHolder="All types" nzShowSearch nzAllowClear>
+            <nz-option *ngFor="let type of applicantTypeOptions" [nzValue]="type.value"
+              [nzLabel]="type.label"></nz-option>
+          </nz-select>
+        </label>
+      </div>
+
+      <div class="filters-actions">
+        <button nz-button nzType="default" type="button" (click)="onReset()">
+          <span nz-icon nzType="clear"></span>
+          Reset
+        </button>
+        <button nz-button nzType="primary" type="submit">
+          <span nz-icon nzType="search"></span>
+          Apply Filters
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel list-panel">
+    <div class="list-toolbar">
+      <div class="list-title">
+        <h2>Request List</h2>
+        <span class="pill-count">{{ pager.total || 0 }}</span>
+      </div>
+      <div class="list-tools">
+        <nz-input-group [nzSuffix]="suffixIconSearch" class="list-search">
+          <input nz-input type="text" placeholder="Search name, ID, email, mobile..."
+            [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)" />
+        </nz-input-group>
+        <ng-template #suffixIconSearch>
+          <span nz-icon nzType="search"></span>
         </ng-template>
+        <button nz-button nzType="default" class="export-btn" type="button" (click)="exportApplicants()">
+          <span nz-icon nzType="file-excel"></span>
+          Export
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <nz-table
+        #basicTable
+        class="request-table"
+        [nzData]="applicantsList"
+        [nzScroll]="{ x: '1500px' }"
+        [nzLoading]="pager.loading"
+        [nzFrontPagination]="false"
+        [nzShowSizeChanger]="true"
+        [nzPageSize]="pager.pageSize"
+        [nzPageSizeOptions]="pager.pageSizeOptions"
+        [nzTotal]="pager.total"
+        [nzPageIndex]="pager.pageIndex"
+        (nzPageIndexChange)="pager.onPageIndexChange($event)"
+        (nzPageSizeChange)="pager.onPageSizeChange($event)"
+        [nzShowTotal]="rangeTemplate"
+        [nzNoResult]="emptyTpl"
+        nzBordered
+        nzSize="middle">
+        <ng-template #rangeTemplate let-range="range" let-total>
+          <span class="range-text">{{ range[0] }}–{{ range[1] }} of {{ total }} applicants</span>
+        </ng-template>
+
         <thead>
           <tr>
-            <th style="min-width: 60px;">S/N</th>
-            <th style="min-width: 60px;">Applied Date</th>
-            <th style="min-width: 180px;">Academic Programme</th>
-            <th style="min-width: 140px;">Applicant ID</th>
-            <th style="min-width: 160px;">Applicant</th>
-            <th style="min-width: 100px;">Gender</th>
-            <th style="min-width: 140px;">Mobile</th>
-            <th style="min-width: 200px;">Email</th>
-            <th style="min-width: 120px;">Nationality</th>
-            <th style="min-width: 120px;">Status</th>
-            <th class="sticky-action" style="min-width: 120px;">Actions</th>
+            <th nzWidth="70px">S/N</th>
+            <th nzWidth="120px"
+              [nzSortFn]="true"
+              [nzSortOrder]="pager.sortColumn === 'AppliedDate' ? (pager.sortOrder === 'desc' ? 'descend' : 'ascend') : null"
+              (nzSortOrderChange)="pager.onSort($event, 'AppliedDate')">Applied Date</th>
+            <th nzWidth="190px">Academic Programme</th>
+            <th nzWidth="130px">Applicant ID</th>
+            <th nzWidth="180px">Applicant</th>
+            <th nzWidth="100px">Gender</th>
+            <th nzWidth="150px">Mobile</th>
+            <th nzWidth="210px">Email</th>
+            <th nzWidth="120px">Nationality</th>
+            <th nzWidth="120px">Status</th>
+            <th nzWidth="120px" nzRight>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let data of basicTable.data; let i = index">
             <td><span class="sn-badge">{{ pager.serial(i) }}</span></td>
-            <td>{{ data.appliedDate }}</td>
-            <td>{{ data.academicProgramme }}</td>
-
-            <td>{{ data.applicantId }}</td>
+            <td class="date-cell">{{ data.appliedDate || '—' }}</td>
             <td>
-              <div class="applicant-info">
-                <nz-avatar nzSize="small" [nzText]="data.fullName.charAt(0).toUpperCase()"></nz-avatar>
-                <span class="applicant-name">{{ data.fullName }}</span>
+              <div class="cell-ellipsis" [title]="data.academicProgramme">
+                {{ data.academicProgramme || '—' }}
+              </div>
+            </td>
+            <td><span class="id-cell">{{ data.applicantId || '—' }}</span></td>
+            <td>
+              <div class="person-cell">
+                <nz-avatar
+                  nzSize="small"
+                  [nzText]="(data.fullName || '?').charAt(0).toUpperCase()"
+                  [ngClass]="avatarTone(i)">
+                </nz-avatar>
+                <span class="person-name cell-ellipsis" [title]="data.fullName">
+                  {{ data.fullName || '—' }}
+                </span>
               </div>
             </td>
             <td>
-              <nz-tag [nzColor]="data.gender === 'Male' ? 'blue' : 'pink'">
-                {{ data.gender }}
+              <nz-tag [nzColor]="isMale(data.gender) ? 'blue' : 'magenta'">
+                {{ data.gender || '—' }}
               </nz-tag>
             </td>
-            <td>{{ data.mobile }}</td>
-            <td>{{ data.email }}</td>
-            <td>{{ data.nationality }}</td>
+            <td class="mobile-cell">{{ data.mobile || '—' }}</td>
+            <td>
+              <div class="cell-ellipsis" [title]="data.email">{{ data.email || '—' }}</div>
+            </td>
+            <td>{{ data.nationality || '—' }}</td>
             <td>
               <nz-tag [nzColor]="getStatusColor(data.approvalStatus)">
                 {{ getStatusDescription(data.approvalStatus) }}
               </nz-tag>
             </td>
-            <td class="sticky-action" [class.sticky-action-even]="i % 2 === 1">
-              <button nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomRight" nzTrigger="click"
+            <td nzRight class="actions-cell">
+              <button
+                nz-button
+                nz-dropdown
+                [nzDropdownMenu]="menu"
+                nzPlacement="bottomRight"
+                nzTrigger="click"
                 class="action-button">
                 <span nz-icon nzType="more" nzTheme="outline"></span>
               </button>
               <nz-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
                   <li nz-menu-item>
-                    <button nz-button nzType="default" class="action-item"
-                      (click)="getApplicantRequestDetail(data.id,data.requestId)">
+                    <button
+                      nz-button
+                      nzType="default"
+                      class="action-item"
+                      (click)="getApplicantRequestDetail(data.id, data.requestId)">
                       <span nz-icon nzType="eye" nzTheme="outline"></span>
                       Review Request
                     </button>
@@ -161,13 +237,19 @@
             </td>
           </tr>
         </tbody>
+
         <ng-template #emptyTpl>
-          <div class="no-data">
-            <span nz-icon nzType="user" nzTheme="outline"></span>
-            <p>{{ pager.searchKey ? 'No matching applicants found' : 'No applicant requests available' }}</p>
+          <div class="empty-state">
+            <div class="empty-icon"><span nz-icon nzType="inbox"></span></div>
+            <h3>{{ pager.searchKey ? 'No matches found' : 'No requests to show' }}</h3>
+            <p>
+              {{ pager.searchKey
+                ? 'Try another keyword or clear the search field.'
+                : 'Change or reset filters to load applicant requests.' }}
+            </p>
           </div>
         </ng-template>
       </nz-table>
     </div>
-  </div>
+  </section>
 </div>

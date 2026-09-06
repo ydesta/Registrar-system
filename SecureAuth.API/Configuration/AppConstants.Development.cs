@@ -59,7 +59,7 @@ namespace SecureAuth.API.Configuration
             public const string SmtpServer = "mail.hilcoeschool.com";
             public const int Port = 465;
             public const string Username = "hsis@hilcoeschool.com";
-            public const string Password = "7EjPlvFN@fFa{v,B";
+            public const string Password = "EcW^)pv=Z!eL+ukN";
             public const string BaseUrl = "https://localhost:7123";
         }
 

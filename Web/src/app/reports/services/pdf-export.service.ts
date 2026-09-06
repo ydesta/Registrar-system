@@ -215,13 +215,17 @@ export class PdfExportService {
   }
 
   exportTranscript(transcript: StudentTranscriptViewModel, fileName: string): void {
-    const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+    const doc = new jsPDF({
+      unit: 'pt',
+      format: 'letter',
+      orientation: 'landscape'
+    });
     this.drawWatermark(doc);
     let cursorY = this.drawHeader(doc, transcript);
 
     cursorY += 10;
-    
-    this.drawAcademicTermsTwoColumns(doc, transcript.academicTerms, cursorY + 5, transcript); 
+
+    this.drawAcademicTermsTwoColumns(doc, transcript.academicTerms, cursorY + 5, transcript);
     this.drawSignaturePage(doc);
     doc.save(fileName);
   }
@@ -237,66 +241,66 @@ export class PdfExportService {
   // HEADER
   // ─────────────────────────────────────────────────────────────────────────────
   private drawHeader(doc: jsPDF, transcript?: StudentTranscriptViewModel): number {
-    const y = 30; // Reduced from 40 to 30
-    
+    const y = 30;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const headerWidth = pageWidth - 30;
+
     // Draw header background rectangle
-    doc.setFillColor(240, 240, 240); // Light gray background to match table header
-    doc.rect(15, y - 15, 580, 110, 'F'); // Increased height from 100 to 110 to accommodate medium of instruction
-    
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y - 15, headerWidth, 110, 'F');
+
     // Institution name with enhanced styling
-    doc.setFont('helvetica', 'bold').setFontSize(22); 
-    doc.setTextColor(0, 0, 0); // Black text for contrast
+    doc.setFont('helvetica', 'bold').setFontSize(22);
+    doc.setTextColor(0, 0, 0);
     doc.text('HiLCoE', 20, y - 8);
-    
-    doc.setFontSize(12); 
-    doc.setFont('helvetica', 'bold'); 
-    doc.setTextColor(0, 0, 0); // Black text for contrast
-    doc.text('School of Computer Science & Technology', 20, y + 8); 
-    
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text('School of Computer Science & Technology', 20, y + 8);
+
     // Contact information with subtle styling
-    doc.setFontSize(8); 
-    doc.setFont('helvetica', 'normal'); 
-    doc.setTextColor(80, 80, 80); // Dark gray text
-    doc.text('Tel. (+251-111) 559769, 564900', 20, y + 24); 
-    doc.text('P.O.Box 25304/1000', 20, y + 36); 
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    doc.text('Tel. (+251-111) 559769, 564900', 20, y + 24);
+    doc.text('P.O.Box 25304/1000', 20, y + 36);
     doc.text('e-mail: info@hilcoe.net', 20, y + 48);
-    
+
     // Add medium of instruction in header
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 0);
-    doc.text('Medium of instruction: English', 20, y + 60); 
-    
+    doc.text('Medium of instruction: English', 20, y + 60);
+
     // Right side - Student information (if transcript is provided)
     if (transcript) {
-      const rightX = 450; 
-      let studentY = y - 8; 
-      
-      // Student details with enhanced styling
+      const rightX = pageWidth - 220;
+      let studentY = y - 8;
+
       doc.setFontSize(8);
-      doc.setFont('helvetica', 'bold'); 
-      doc.setTextColor(0, 0, 0); // Black text for contrast
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
       studentY += 12;
-      
+
       const dob = transcript.dateOfBirth
         ? new Date(transcript.dateOfBirth).toLocaleDateString()
         : 'January 15, 1983';
-      
+
       const award = transcript.awardDate
         ? new Date(transcript.awardDate).toLocaleDateString()
         : 'August 15, 2015';
-      
-      // Personal Information (Right side)
+
       doc.text(`Full Name: ${transcript.fullName}`, rightX, studentY);
-      studentY += 14; // Increased from 12 to 14
+      studentY += 14;
       doc.text(`Gender: ${transcript.gender || 'Male'}`, rightX, studentY);
-      studentY += 14; // Increased from 12 to 14
+      studentY += 14;
       doc.text(`Date of Birth: ${dob}`, rightX, studentY);
-      studentY += 14; // Increased from 12 to 14
+      studentY += 14;
       doc.text(`Place of Birth: ${transcript.placeOfBirth || 'Wukro'}`, rightX, studentY);
-      studentY += 14; // Increased from 12 to 14
-      // Format admission date to date-month-year format
-      let admissionDateFormatted = 'September 2012'; // Default
+      studentY += 14;
+
+      let admissionDateFormatted = 'September 2012';
       if (transcript.admissionDate) {
         try {
           const date = new Date(transcript.admissionDate);
@@ -305,41 +309,38 @@ export class PdfExportService {
           const year = date.getFullYear();
           admissionDateFormatted = `${day}-${month}-${year}`;
         } catch (error) {
-          admissionDateFormatted = 'September 2012'; // Fallback
+          admissionDateFormatted = 'September 2012';
         }
       }
       doc.text(`Admission Date: ${admissionDateFormatted}`, rightX, studentY);
-      
-      
-      const leftEndX = 200; 
-      const rightStartX = 450; 
-      const centerX = (leftEndX + rightStartX) / 2 - 40; 
-      studentY = y + 2; 
-      
-      // Center section with enhanced styling and text wrapping
+
+      const leftEndX = 220;
+      const rightStartX = rightX;
+      const centerX = (leftEndX + rightStartX) / 2 - 40;
+      studentY = y + 2;
+
       doc.setFontSize(8);
-      doc.setFont('helvetica', 'bold'); 
-      doc.setTextColor(0, 0, 0); // Black text for contrast
-      
-      // Programme with text wrapping
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+
       const programmeText = `Programme: ${transcript.programme || 'BSc degree in Computer Science'}`;
-      const maxWidth = 120; // Maximum width for text wrapping
+      const maxWidth = 160;
       const programmeLines = doc.splitTextToSize(programmeText, maxWidth);
       programmeLines.forEach((line: string, index: number) => {
         doc.text(line, centerX, studentY + (index * 10));
       });
-      studentY += (programmeLines.length * 10) + 4; // Dynamic spacing based on wrapped lines
-      
+      studentY += (programmeLines.length * 10) + 4;
+
       doc.text(`Division: ${transcript.division || 'Day'}`, centerX, studentY);
-      studentY += 14; // Increased from 12 to 14
+      studentY += 14;
       doc.text(`Status: ${transcript.status || 'Regular'}`, centerX, studentY);
-      studentY += 14; // Increased from 12 to 14
+      studentY += 14;
       doc.text(`Major: ${transcript.major || 'Computer Science'}`, centerX, studentY);
-      studentY += 14; // Increased from 12 to 14
+      studentY += 14;
       doc.text(`Award Date: ${award}`, centerX, studentY);
     }
-    
-    return y + 105; // Increased from 95 to 105 to accommodate larger header background with medium of instruction
+
+    return y + 105;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -396,7 +397,7 @@ export class PdfExportService {
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // ACADEMIC TERMS: TWO TABLES PER ROW
+  // ACADEMIC TERMS: 6 TABLES PER PAGE (2 columns × 3 rows)
   // ─────────────────────────────────────────────────────────────────────────────
   private drawAcademicTermsTwoColumns(
     doc: jsPDF,
@@ -404,66 +405,60 @@ export class PdfExportService {
     startY: number,
     transcript?: StudentTranscriptViewModel
   ): void {
-    const leftX = 20;
-    const rightX = 320; // Increased gap between tables
-    const columnWidth = 240; // Reduced width to accommodate spacing
-    let currentY = startY + 5; // Reduced from 10 to 5 points top margin
+    const TABLES_PER_PAGE = 6;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 18;
+    const gapX = 16;
+    const columnWidth = (pageWidth - margin * 2 - gapX) / 2 - 36;
+    const leftX = margin;
+    const rightX = margin + columnWidth + gapX + 36;
 
-    // Process terms in pairs (2 per row)
-    for (let i = 0; i < terms.length; i += 2) {
-      const term1 = terms[i];
-      const term2 = terms[i + 1];
-      
-      // Align left/right tables by padding to the larger course count
-      const maxCourses = Math.max(
-        term1?.courses?.length || 0,
-        term2?.courses?.length || 0
-      );
-
-      // Calculate the height needed for both tables (same padded height)
-      const maxHeight = this.calculateTableHeight(maxCourses);
-
-      // Check if we need a new page based on available space
-      const pageHeight = doc.internal.pageSize.height;
-      const availableSpace = pageHeight - currentY - 100; // 100 points for footer and margins
-      
-      if (currentY > 60 && maxHeight > availableSpace) {
+    for (let pageStart = 0; pageStart < terms.length; pageStart += TABLES_PER_PAGE) {
+      if (pageStart > 0) {
         doc.addPage();
-        
-        // Draw header on new page
         this.drawHeader(doc, transcript);
-        
-        currentY = 140; // Increased from 120 to 140 to add more space after header
-        
-        // Reset styling context after page break
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
         doc.setFillColor(255, 255, 255);
         doc.setDrawColor(0, 0, 0);
       }
 
-      // Draw left table (Term 1)
-      if (term1) {
-        this.drawSingleTermTable(doc, term1, leftX, currentY, columnWidth, maxCourses);
-      }
+      const pageTerms = terms.slice(pageStart, pageStart + TABLES_PER_PAGE);
+      const isContinuationPage = pageStart > 0;
+      // Tighter bottom gap on page 2+ so tables + signatures fit without an extra page
+      const gapY = isContinuationPage ? 16 : 22;
+      const contentTop = pageStart === 0 ? startY + 5 : 140;
+      let currentY = contentTop;
 
-      // Draw right table (Term 2)
-      if (term2) {
-        this.drawSingleTermTable(doc, term2, rightX, currentY, columnWidth, maxCourses);
-      }
+      for (let i = 0; i < pageTerms.length; i += 2) {
+        const term1 = pageTerms[i];
+        const term2 = pageTerms[i + 1];
+        const maxCourses = Math.max(
+          term1?.courses?.length || 0,
+          term2?.courses?.length || 0,
+          1
+        );
 
-      // Move to next row with reduced spacing
-      currentY += maxHeight + 40; // Reduced spacing between rows from 70 to 40
+        if (term1) {
+          this.drawSingleTermTable(doc, term1, leftX, currentY, columnWidth, maxCourses, true);
+        }
+        if (term2) {
+          this.drawSingleTermTable(doc, term2, rightX, currentY, columnWidth, maxCourses, true);
+        }
+
+        const lastTable = (doc as any).lastAutoTable;
+        currentY = (lastTable?.finalY || currentY + 100) + gapY;
+      }
     }
   }
 
-  private calculateTableHeight(courseCount: number): number {
-    const headerHeight = 15;
-    const tableHeaderHeight = 12;
-    const courseRowHeight = 10;
-    const footerHeight = 30;
-    const spacing = 5;
-    
+  private calculateTableHeight(courseCount: number, compact = false): number {
+    const headerHeight = compact ? 12 : 15;
+    const tableHeaderHeight = compact ? 9 : 12;
+    const courseRowHeight = compact ? 8 : 10;
+    const footerHeight = compact ? 28 : 30;
+    const spacing = compact ? 3 : 5;
+
     return headerHeight + tableHeaderHeight + (courseRowHeight * courseCount) + footerHeight + spacing;
   }
 
@@ -473,41 +468,43 @@ export class PdfExportService {
     x: number,
     y: number,
     columnWidth: number,
-    targetCourseCount: number = 0
+    targetCourseCount: number = 0,
+    compact = false
   ): void {
-    // Styled term header with background
-    const headerWidth = columnWidth + 40; // Increased from 30 to 40 for better coverage
-    const headerHeight = 15; // Reduced height from 20 to 15
-    
-    // Explicitly set all styling properties to ensure consistency
+    // Keep header bar, HR, and table on the same left edge
+    const tableLeft = x;
+    const tableWidth = columnWidth + 36;
+    const headerHeight = compact ? 12 : 15;
+    const fontSize = compact ? 6 : 7;
+    const minCellHeight = compact ? 7 : 10;
+    const cellPadding = compact
+      ? { top: 0.5, right: 0.5, bottom: 1, left: 0.5 }
+      : { top: 1, right: 1, bottom: 1.5, left: 1 };
+
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(0, 0, 0);
     doc.setDrawColor(0, 0, 0);
-        
-    // Draw header background
-    doc.setFillColor(240, 240, 240); // Changed to match table header color
-    doc.rect(x - 9, y - 8, headerWidth, headerHeight, 'F'); // Slightly increased positioning from -8 to -9
-    
-    // Draw header text centered
-    doc.setFont('helvetica', 'bold').setFontSize(11);
-    doc.setTextColor(0, 0, 0); // Changed to black text to match table header
+
+    doc.setFillColor(240, 240, 240);
+    doc.rect(tableLeft, y - 8, tableWidth, headerHeight, 'F');
+
+    doc.setFont('helvetica', 'bold').setFontSize(compact ? 9 : 11);
+    doc.setTextColor(0, 0, 0);
     const termText = `Term: ${term.termName}`;
     const termTextWidth = doc.getTextWidth(termText);
-    const centerX = x + (headerWidth / 2) - (termTextWidth / 2);
-    doc.text(termText, centerX, y + 2); // Centered text positioning
+    const centerX = tableLeft + (tableWidth / 2) - (termTextWidth / 2);
+    doc.text(termText, centerX, y + (compact ? 1 : 2));
 
-    // Add horizontal line below header
-    doc.setDrawColor(200, 200, 200); // Light gray line
+    doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.5);
-    doc.line(x - 9, y + headerHeight - 2, x + headerWidth - 9, y + headerHeight - 2);
+    doc.line(tableLeft, y + headerHeight - 2, tableLeft + tableWidth, y + headerHeight - 2);
 
-    // Build table data
     const body = (term.courses || []).map((c: any) => [
       c.courseCode,
       c.courseTitle,
       String(c.creditHours),
       c.grade,
-      c.gradePoint.toFixed(2),
+      c.gradePoint != null ? Number(c.gradePoint).toFixed(2) : '',
     ]);
 
     const paddedRowCount = Math.max(targetCourseCount, body.length);
@@ -515,80 +512,110 @@ export class PdfExportService {
       body.push(['', '', '', '', '']);
     }
 
-    // Add summary rows to the table footer with proper alignment
     const foot = [
-      ['', 'Total:', term.totalCreditHours.toString(), '', ''],
-      ['', 'Average:', term.termGPA.toFixed(2), '', ''],
-      ['', 'Total Credit Hour:', term.totalCreditHours.toFixed(2), '', ''],
-      ['', 'CGPA:', term.cumulativeGPA.toFixed(2), '', ''],
-      ['', 'Major CGPA:', term.cumulativeMajorGPA.toFixed(2), '']
+      ['', 'Total:', String(term.totalCreditHours ?? term.termTotalCreditHours ?? ''), '', ''],
+      ['', 'Average:', term.termGPA != null ? Number(term.termGPA).toFixed(2) : '', '', ''],
+      [
+        '',
+        'Total Credit Hour:',
+        term.cumulativeCreditHours != null
+          ? Number(term.cumulativeCreditHours).toFixed(2)
+          : term.totalCreditHours != null
+            ? Number(term.totalCreditHours).toFixed(2)
+            : '',
+        '',
+        ''
+      ],
+      ['', 'CGPA:', term.cumulativeGPA != null ? Number(term.cumulativeGPA).toFixed(2) : '', '', ''],
+      [
+        '',
+        'Major CGPA:',
+        term.cumulativeMajorGPA != null ? Number(term.cumulativeMajorGPA).toFixed(2) : '',
+        '',
+        ''
+      ]
     ];
 
-    // Draw the table with explicit styling
-          autoTable(doc, {
-            head: [['Course Code', 'Course Title', 'Credit Hour', 'Grade', 'Grade Point']],
+    // Column widths: keep Credit Hour / Grade Point wide enough that headers don't wrap;
+    // remaining width goes to Course Title (no wasted empty space).
+    const codeW = compact ? 40 : 48;
+    const chW = compact ? 44 : 48;   // fits "Credit Hour"
+    const gradeW = compact ? 24 : 28;
+    const gpW = compact ? 44 : 48;   // fits "Grade Point"
+    const titleW = Math.max(80, tableWidth - (codeW + chW + gradeW + gpW));
+
+    autoTable(doc, {
+      head: [['Course Code', 'Course Title', 'Credit Hour', 'Grade', 'Grade Point']],
       body,
       foot,
-      startY: y + 12, // Reduced from 15 to 12 to account for smaller header
-      margin: { left: x, right: doc.internal.pageSize.width - x - columnWidth },
-            theme: 'grid',
-      styles: { 
-        fontSize: 7, // Reduced from 8 to 7
-        cellPadding: 1, // Reduced from 2 to 1
+      startY: y + (compact ? 8 : 12),
+      tableWidth,
+      margin: {
+        left: tableLeft,
+        right: doc.internal.pageSize.width - tableLeft - tableWidth
+      },
+      theme: 'grid',
+      styles: {
+        fontSize,
+        cellPadding,
         font: 'helvetica',
         textColor: [0, 0, 0],
         lineColor: [0, 0, 0],
         lineWidth: 0.1,
-        minCellHeight: 10
+        minCellHeight,
+        overflow: 'linebreak'
       },
-            headStyles: { 
-              fillColor: [240, 240, 240], 
-              textColor: [0, 0, 0],
-        fontStyle: 'bold', 
-        fontSize: 7, // Reduced from 8 to 7
+      headStyles: {
+        fillColor: [240, 240, 240],
+        textColor: [0, 0, 0],
+        fontStyle: 'bold',
+        fontSize,
         font: 'helvetica',
         lineColor: [0, 0, 0],
-        lineWidth: 0.1
+        lineWidth: 0.1,
+        overflow: 'ellipsize',
+        valign: 'middle',
+        halign: 'center'
       },
-      footStyles: { 
-        fillColor: [245, 245, 245], 
-        textColor: [0, 0, 0], 
+      footStyles: {
+        fillColor: [245, 245, 245],
+        textColor: [0, 0, 0],
         fontStyle: 'bold',
-        fontSize: 7, // Reduced from 8 to 7
+        fontSize,
         font: 'helvetica',
-        lineColor: [255, 255, 255], // Changed to white to hide borders
+        lineColor: [255, 255, 255],
         lineWidth: 0
-            },
-            columnStyles: {
-        0: { cellWidth: 50, halign: 'left' }, // Course Code
-        1: { cellWidth: columnWidth - (50 + 30 + 30), halign: 'left' }, // Course Title
-        2: { cellWidth: 30, halign: 'center' }, // Credit Hour
-        3: { cellWidth: 30, halign: 'center' }, // Grade
-        4: { cellWidth: 30, halign: 'center' }, // Grade Point
       },
-      didDrawPage: (data) => {
-        // Add page number at the bottom center of each page
+      columnStyles: {
+        0: { cellWidth: codeW, halign: 'left', overflow: 'ellipsize' },
+        1: { cellWidth: titleW, halign: 'left', overflow: 'linebreak' },
+        2: { cellWidth: chW, halign: 'center', overflow: 'ellipsize' },
+        3: { cellWidth: gradeW, halign: 'center', overflow: 'ellipsize' },
+        4: { cellWidth: gpW, halign: 'center', overflow: 'ellipsize' }
+      },
+      didDrawPage: () => {
         const pageCount = doc.getNumberOfPages();
-        const pageWidth = doc.internal.pageSize.width;
-        const pageHeight = doc.internal.pageSize.height;
-          
-          doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10);
+        const pw = doc.internal.pageSize.width;
+        const ph = doc.internal.pageSize.height;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
         doc.setTextColor(100, 100, 100);
-        doc.text(`Page ${pageCount}`, pageWidth / 2, pageHeight - 20, { align: 'center' });
+        doc.text(`Page ${pageCount}`, pw / 2, ph - 16, { align: 'center' });
       },
-      didParseCell: function (data) {
-        // Right-align only footer labels (column 1 in footer section)
+      didParseCell: (data) => {
         if (data.section === 'foot' && data.column.index === 1) {
           data.cell.styles.halign = 'right';
         }
-        // Center-align footer values (column 2 in footer section - Credit Hour column)
         if (data.section === 'foot' && data.column.index === 2) {
+          data.cell.styles.halign = 'right';
+        }
+        if (data.section === 'head') {
+          data.cell.styles.overflow = 'ellipsize';
           data.cell.styles.halign = 'center';
         }
       }
-      });
-    }
+    });
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // FOOTER
@@ -638,53 +665,56 @@ export class PdfExportService {
   // SIGNATURE PAGE
   // ─────────────────────────────────────────────────────────────────────────────
   private drawSignaturePage(doc: jsPDF): void {
-    // Use existing page 2 instead of creating new page
     const pageWidth = doc.internal.pageSize.width;
     const pageHeight = doc.internal.pageSize.height;
-    
-    // Add signature section at bottom of page 2
-    const signatureY = pageHeight - 120;
-    
-    // Left signature - Chief Registrar
+    const pageCount = doc.getNumberOfPages();
+    doc.setPage(pageCount);
+
+    const lastTable = (doc as any).lastAutoTable;
+    const contentBottom = lastTable?.finalY || 0;
+    const signatureBlockHeight = 55; // line + names + titles + date
+    const gapAboveSignatures = 12; // compact gap — avoid spawning an extra page
+    const bottomPadding = 16;
+
+    const preferredY = pageHeight - bottomPadding - signatureBlockHeight;
+    // Always keep signatures on the current last page (no new page)
+    const signatureY =
+      contentBottom + gapAboveSignatures <= preferredY
+        ? preferredY
+        : contentBottom + gapAboveSignatures;
+
     const leftX = 80;
-    
-    // Signature line (above name)
+    const rightX = pageWidth - 200;
+
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.5);
     doc.line(leftX - 20, signatureY, leftX + 80, signatureY);
-    
-    // Name and title (below signature line)
+
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 0);
-    doc.text('Mohammed Juhar', leftX, signatureY + 15);
+    doc.text('Mohammed Juhar', leftX, signatureY + 12);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.text('Chief Registrar', leftX, signatureY + 30);
-    
-    // Right signature - Academic Programme Coordinator
-    const rightX = pageWidth - 200;
-    
-    // Signature line (above name)
+    doc.text('Chief Registrar', leftX, signatureY + 24);
+
     doc.line(rightX - 20, signatureY, rightX + 120, signatureY);
-    
-    // Name and title (below signature line)
+
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
-    doc.text('Abdella Endris', rightX, signatureY + 15);
+    doc.text('Abdella Endris', rightX, signatureY + 12);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.text('Academic Programme Coordinator', rightX, signatureY + 30);
-    
-    // Add date
-    const currentDate = new Date().toLocaleDateString('en-US', { 
+    doc.text('Academic Programme Coordinator', rightX, signatureY + 24);
+
+    const currentDate = new Date().toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Date: ${currentDate}`, pageWidth / 2, signatureY + 50, { align: 'center' });
+    doc.text(`Date: ${currentDate}`, pageWidth / 2, signatureY + 40, { align: 'center' });
   }
 
   exportStudentGradeReportToPdf(

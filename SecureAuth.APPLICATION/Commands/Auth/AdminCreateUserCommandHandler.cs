@@ -108,6 +108,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             // Send credentials email if requested
             bool credentialsSent = false;
             bool verificationSent = false;
+            string messageEmailError = null;
             
             if (command.SendCredentialsEmail)
             {
@@ -123,8 +124,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 }
                 catch (Exception ex)
                 {
-                    // Log the error but don't fail the user creation
-                    // The admin can manually send credentials later
+                    messageEmailError = $"Credentials email failed: {ex.Message}";
                 }
             }
 
@@ -139,8 +139,9 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 }
                 catch (Exception ex)
                 {
-                    // Log the error but don't fail the user creation
-                    // The admin can manually send verification later
+                    messageEmailError = string.IsNullOrEmpty(messageEmailError)
+                        ? $"Verification email failed: {ex.Message}"
+                        : $"{messageEmailError}; Verification email failed: {ex.Message}";
                 }
             }
 
@@ -161,9 +162,14 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             {
                 message += "Verification email sent to user.";
             }
-            else
+            else if (command.SendCredentialsEmail || command.RequireEmailConfirmation)
             {
-                message += "No emails sent due to configuration or email errors.";
+                message += "User created, but email was not sent.";
+            }
+
+            if (!string.IsNullOrEmpty(messageEmailError))
+            {
+                message += " " + messageEmailError;
             }
 
             return new AdminCreateUserResponse

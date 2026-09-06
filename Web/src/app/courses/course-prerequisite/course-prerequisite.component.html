@@ -3,19 +3,24 @@
   <div class="header-section">
     <div class="header-content">
       <div class="page-title">
-        <h3 class="title-text">Course Prerequisites</h3>
+        <h2 class="title-text">Course Prerequisites</h2>
         <p class="subtitle-text">Manage and view all course prerequisite relationships</p>
       </div>
       <div class="header-actions">
-        <div class="search-section">
-          <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-            <input type="text" nz-input placeholder="Search prerequisites..." [(ngModel)]="pager.searchKey" (ngModelChange)="pager.onSearch($event)" />
-          </nz-input-group>
-          <ng-template #suffixIconButton>
-            <button nz-button nzType="primary" class="search-btn" nzSearch>
-              <i nz-icon nzType="search"></i>
-            </button>
-          </ng-template>
+        <div class="search-section floating-label-container">
+          <input
+            type="text"
+            nz-input
+            id="prerequisiteSearch"
+            class="input-with-floating-label"
+            placeholder=" "
+            [(ngModel)]="pager.searchKey"
+            (ngModelChange)="pager.onSearch($event)"
+          />
+          <label for="prerequisiteSearch" class="floating-label">
+            <span nz-icon nzType="search" nzTheme="outline"></span>
+            Search
+          </label>
         </div>
         <button
           [routerLink]="['/course/add-course-prerequisite', 'null']"
@@ -23,8 +28,8 @@
           nz-button
           nzType="primary"
         >
-          <i nz-icon nzType="plus" nzTheme="outline"></i>
-          <span>Add Prerequisite</span>
+          <span nz-icon nzType="plus" nzTheme="outline"></span>
+          Add Prerequisite
         </button>
       </div>
     </div>
@@ -61,7 +66,7 @@
             <th>Prerequisite Course Code</th>
             <th>Prerequisite Course Title</th>
             <th>Remark</th>
-            <th class="action-column">Actions</th>
+            <th class="action-column" style="text-align: center;">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -75,39 +80,34 @@
             <td>{{ prerequisite.preRequisiteCourseTitle }}</td>
             <td>{{ prerequisite.remark }}</td>
             <td class="action-column">
-              <button 
-                nz-button 
-                nz-dropdown 
-                [nzDropdownMenu]="menu" 
-                nzPlacement="bottomLeft"
-                class="action-button"
+              <button
+                nz-button
+                nz-dropdown
+                [nzDropdownMenu]="menu"
+                nzPlacement="bottomRight"
+                class="action-dropdown-btn"
               >
-                <i nz-icon nzType="more" nzTheme="outline"></i>
+                <span nz-icon nzType="more" nzTheme="outline"></span>
               </button>
               <nz-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
-                  <li>
+                  <li nz-menu-item>
                     <a
                       [routerLink]="['/course/add-course-prerequisite', prerequisite.id]"
-                      nz-button
-                      nzType="default"
-                      class="action-item edit"
+                      class="action-menu-link"
                     >
-                      <i nz-icon nzType="edit" nzTheme="fill"></i>
+                      <span nz-icon nzType="edit" nzTheme="outline"></span>
                       <span>Edit</span>
                     </a>
                   </li>
-                  <li>
-                    <button
-                      nz-button
-                      nzDanger
-                      nzType="default"
-                      class="action-item delete"
+                  <li nz-menu-item>
+                    <a
                       (click)="showDeleteConfirm(prerequisite.id)"
+                      class="action-menu-link delete"
                     >
-                      <i nz-icon nzType="delete" nzTheme="fill"></i>
+                      <span nz-icon nzType="delete" nzTheme="outline"></span>
                       <span>Delete</span>
-                    </button>
+                    </a>
                   </li>
                 </ul>
               </nz-dropdown-menu>
@@ -116,7 +116,7 @@
         </tbody>
         <ng-template #emptyTpl>
           <div class="no-data">
-            <i nz-icon nzType="book" nzTheme="outline"></i>
+            <span nz-icon nzType="book" nzTheme="outline"></span>
             <p>No course prerequisite records available</p>
           </div>
         </ng-template>

@@ -72,14 +72,18 @@
                     </div>
                     <nz-dropdown-menu #menu="nzDropdownMenu">
                         <ul nz-menu>
-                            <li nz-menu-item (click)="editModal(data)">
+                            <li nz-menu-item
+                                [nzDisabled]="!canEditOrDelete(data)"
+                                (click)="canEditOrDelete(data) && editModal(data)">
                                 <a class="edit">
                                     <span nz-icon nzType="edit" nzTheme="outline"></span>
                                     Edit
                                 </a>
                             </li>
-                            <li nz-menu-item (click)="delete(data.id)">
-                                <button class="delete" nzDanger>
+                            <li nz-menu-item
+                                [nzDisabled]="!canEditOrDelete(data)"
+                                (click)="canEditOrDelete(data) && delete(data.id)">
+                                <button class="delete" nzDanger [disabled]="!canEditOrDelete(data)">
                                     <span nz-icon nzType="delete" nzTheme="outline"></span>
                                     Delete
                                 </button>

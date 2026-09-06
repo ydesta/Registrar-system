@@ -112,6 +112,36 @@ namespace SecureAuth.API.Controllers.Admin
             }
         }
 
+        [HttpPost("email-test")]
+        public async Task<IActionResult> SendTestEmail([FromQuery] string to)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(to))
+                {
+                    return BadRequest(new { Success = false, Message = "Query parameter 'to' is required." });
+                }
+
+                await _emailService.SendTestEmailAsync(to);
+                return Ok(new
+                {
+                    Success = true,
+                    Message = $"Test email sent to {to}",
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    Success = false,
+                    Message = "Failed to send test email",
+                    Error = ex.Message,
+                    Detail = ex.InnerException?.Message
+                });
+            }
+        }
+
         [HttpPost("record-health")]
         public async Task<IActionResult> RecordSystemHealth()
         {

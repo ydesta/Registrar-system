@@ -29,6 +29,7 @@ export class EducationFormComponent implements OnInit {
   // Education level options for the select dropdown
   educationLevelOptions = EDUCATION_LEVEL_OPTIONS;
   yearOptions: number[] = [];
+  isSubmitting = false;
   constructor(
     private modalRef: NzModalRef,
     private _fb: FormBuilder,
@@ -262,6 +263,10 @@ export class EducationFormComponent implements OnInit {
   //#endregion
 
   onSave(): void {
+    if (this.isSubmitting) {
+      return;
+    }
+
     if (this.applicantEducationBacgroundForm.valid) {
       const postData = this.getApplicantEducationBackground();
       if (this.educationId == undefined) {
@@ -274,63 +279,76 @@ export class EducationFormComponent implements OnInit {
           );
           return;
         }
-        
+
+        this.isSubmitting = true;
+        const formData = new FormData();
         Object.keys(postData).forEach(key => {
-          if (key !== "ActualFile") {
-            if (this.formData.get(key) != postData[key]) {
-              this.formData.append(key, postData[key]);
-            }
+          if (key !== "ActualFile" && postData[key] != null && postData[key] !== undefined) {
+            formData.append(key, postData[key]);
           }
         });
-        if (this.file_store != undefined) {
-          for (let i = 0; i < this.file_store.length; i++) {
-            this.formData.append("ActualFile", this.file_store[i]);
-          }
+        for (let i = 0; i < this.file_store.length; i++) {
+          formData.append("ActualFile", this.file_store[i]);
         }
+
         this.educationBackgroundService
-          .createEducation(this.formData)
+          .createEducation(formData)
           .subscribe({
             next: (res) => {
+              this.isSubmitting = false;
+              if (res?.status === "error") {
+                this._customNotificationService.notification(
+                  "warning",
+                  "Duplicate",
+                  res?.error || res?.data || "This education record already exists."
+                );
+                return;
+              }
               if (res) {
                 this._customNotificationService.notification(
                   "success",
                   "Success",
                   "Applicant Education is saved successfully."
                 );
-                // Emit the event when data is successfully saved
                 this.dataUpdated.emit();
-                // Close the modal here if needed
                 this.modalRef.close();
               }
             },
             error: (error) => {
+              this.isSubmitting = false;
+              const apiMessage =
+                error?.error?.error ||
+                error?.error?.data ||
+                error?.error?.message ||
+                "Failed to save education record. Please try again.";
               this._customNotificationService.notification(
                 "error",
                 "Error",
-                "Failed to save education record. Please try again."
+                apiMessage
               );
             }
           });
       } else {
+        this.isSubmitting = true;
         postData.id = this.educationId;
         postData.applicantID = this.educationBackground.applicantID;
         this.educationBackgroundService
           .update(this.educationId, postData)
           .subscribe({
             next: (res) => {
+              this.isSubmitting = false;
               if (res) {
                 this._customNotificationService.notification(
                   "success",
                   "Success",
                   "Applicant Education is updated successfully."
                 );
-                // Emit the event when data is successfully saved
                 this.dataUpdated.emit();
-                // Close the modal here if needed
                 this.modalRef.close();
               }
             },
             error: (error) => {
+              this.isSubmitting = false;
               this._customNotificationService.notification(
                 "error",
                 "Error",
@@ -340,7 +358,6 @@ export class EducationFormComponent implements OnInit {
           });
       }
     } else {
-      // Form is invalid, show validation errors
       this._customNotificationService.notification(
         "warning",
         "Validation Error",

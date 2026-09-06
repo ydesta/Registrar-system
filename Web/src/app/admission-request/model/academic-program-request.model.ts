@@ -9,4 +9,5 @@ export class AcademicProgramRequest {
   public createdBy: string;
   public createdDate: Date;
   public remark: string;
+  public batchCode?: string;
 }

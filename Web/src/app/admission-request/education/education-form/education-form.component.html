@@ -166,10 +166,11 @@
           Cancel
         </button>
         <button nz-button nzType="primary" (click)="onSave()"
-          [disabled]="!applicantEducationBacgroundForm.valid || (educationId == undefined && (!file_store || file_store.length === 0))"
+          [disabled]="isSubmitting || !applicantEducationBacgroundForm.valid || (educationId == undefined && (!file_store || file_store.length === 0))"
+          [nzLoading]="isSubmitting"
           class="submit-btn">
-          <i nz-icon nzType="save" nzTheme="outline"></i>
-          {{ educationId ? 'Update' : 'Save' }}
+          <i nz-icon nzType="save" nzTheme="outline" *ngIf="!isSubmitting"></i>
+          {{ isSubmitting ? 'Saving...' : (educationId ? 'Update' : 'Save') }}
         </button>
       </div>
     </div>
