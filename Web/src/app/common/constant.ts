@@ -285,12 +285,13 @@ export const APPROVAL_STATUS: any[] = [
   { Id: 3, Description: "Rejected" }
 ];
 export const COURSE_REGISTRATION_STATUS: any[] = [
-  { Id: 0, Description: "Registered" },
+  { Id: 0, Description: "Regular" },
   { Id: 1, Description: "Dropped" },
   { Id: 2, Description: "Added" },
   { Id: 3, Description: "Assessment" },
-  { Id: 4, Description: "Registrar Override" },
+  { Id: 4, Description: "Manual Registration" },
   { Id: 5, Description: "Deleted" },
+  { Id: 6, Description: "Equivalent" },
 ];
 export const SECTION_TYPE: any[] = [
   { Id: 0, Description: "Class" },

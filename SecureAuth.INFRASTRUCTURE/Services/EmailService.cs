@@ -514,26 +514,6 @@ namespace SecureAuth.INFRASTRUCTURE.Services
             }
         }
 
-        public async Task SendTestEmailAsync(string toEmail)
-        {
-            if (string.IsNullOrWhiteSpace(toEmail))
-            {
-                throw new ArgumentException("Recipient email is required.", nameof(toEmail));
-            }
-
-            var subject = "HiLCoE Registrar - SMTP Test";
-            var content = $"This is a test email from HiLCoE Registrar SMTP diagnostics at {DateTime.UtcNow:u} UTC.";
-            var htmlContent = $@"
-                <html><body>
-                <h2>SMTP Test Successful</h2>
-                <p>{content}</p>
-                <p>From: {_emailConfiguration.From}<br/>SMTP: {_emailConfiguration.SmtpServer}:{_emailConfiguration.Port}</p>
-                </body></html>";
-
-            var message = new Message(new[] { toEmail.Trim() }, subject, content, htmlContent);
-            await SendEmailAsync(message);
-        }
-
         private void Send(MimeMessage mailMessage)
         {
             SendAsync(mailMessage).GetAwaiter().GetResult();

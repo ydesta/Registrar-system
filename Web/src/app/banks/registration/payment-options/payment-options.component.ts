@@ -95,11 +95,12 @@ export class PaymentOptionsComponent implements OnInit, OnDestroy {
           || '';
         // AcademicTerm on payment order may be enum name or number; fall back to registration.
         const termFromOrder = data.paymentOrder?.academicTerm;
-        this.academicTerm = (typeof termFromOrder === 'number' ? termFromOrder : null)
+        this.academicTerm = (
+          (typeof termFromOrder === 'number' ? termFromOrder : null)
           ?? this.parseAcademicTerm(termFromOrder)
           ?? registration?.academicTermSeason
           ?? registration?.academicTerm
-          || '';
+        ) || '';
         this.academicYear = data.paymentOrder?.academicYear
           || data.paymentDetails?.academicYear
           || registration?.academicTermYear

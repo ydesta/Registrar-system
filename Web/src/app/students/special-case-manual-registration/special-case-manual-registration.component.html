@@ -50,6 +50,10 @@
                         <span>{{studentList.batchCode}}</span>
                     </div>
                     <div class="profile-item">
+                        <strong><i nz-icon nzType="cluster"></i> Offered Batch:</strong>
+                        <span>{{studentList.offerBatchCode || studentList.batchCode}}</span>
+                    </div>
+                    <div class="profile-item">
                         <strong><i nz-icon nzType="trophy"></i> CGPA:</strong>
                         <span>{{studentList.cgpa}}</span>
                     </div>
@@ -246,10 +250,10 @@
             <!-- Action Buttons -->
             <div class="form-actions">
                 <div class="action-summary"
-                    *ngIf="selectedUnregisteredCourses.length > 0 || selectedRegisteredCourses.length > 0">
-                    <div class="summary-item">
+                    *ngIf="getNewlySelectedCourses().length > 0 || selectedRegisteredCourses.length > 0">
+                    <div class="summary-item" *ngIf="getNewlySelectedCourses().length > 0">
                         <i nz-icon nzType="plus-circle"></i>
-                        <span>{{selectedUnregisteredCourses.length}} courses to register</span>
+                        <span>{{getNewlySelectedCourses().length}} courses to register</span>
                     </div>
                     <div class="summary-item" *ngIf="selectedRegisteredCourses.length > 0">
                         <i nz-icon nzType="minus-circle"></i>

@@ -37,20 +37,41 @@ export class ConfirmationModalComponent {
     return this.modalData?.type === 'registration';
   }
 
+  get courseCountLabel(): string {
+    const count = this.modalData?.selectedCourses?.length || 0;
+    return `${count} course${count === 1 ? '' : 's'}`;
+  }
+
   get headerConfig() {
     if (this.isDeletion) {
       return {
-        icon: '🗑️',
-        title: 'Course Deletion Confirmation',
-        subtitle: 'Review the details before proceeding with deletion'
-      };
-    } else {
-      return {
-        icon: '📚',
-        title: 'Course Registration Confirmation',
-        subtitle: 'Review the details before proceeding with registration'
+        icon: 'delete',
+        title: 'Confirm Course Removal',
+        subtitle: 'Please verify the student and course details before removing these registrations.'
       };
     }
+
+    return {
+      icon: 'form',
+      title: 'Confirm Manual Registration',
+      subtitle: 'Please verify the student, term, and selected courses before completing registration.'
+    };
+  }
+
+  get noticeTitle(): string {
+    return this.isDeletion ? 'Important Notice' : 'Please Confirm';
+  }
+
+  get noticeMessage(): string {
+    if (this.isDeletion) {
+      return 'The selected courses will be removed from this student’s registration record. Ensure this action is intentional before continuing.';
+    }
+
+    return 'The selected courses will be registered for this student under the chosen academic term and year. Please confirm that all details are correct before continuing.';
+  }
+
+  get confirmButtonLabel(): string {
+    return this.isDeletion ? 'Confirm Removal' : 'Confirm Registration';
   }
 
   onConfirm(): void {
@@ -60,4 +81,4 @@ export class ConfirmationModalComponent {
   onCancel(): void {
     this.cancelled.emit();
   }
-} 
+}

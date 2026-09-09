@@ -9,6 +9,7 @@ import { ACADEMIC_TERM_STATUS } from 'src/app/common/constant';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ConfirmationModalComponent, ConfirmationModalData } from './confirmation-modal/confirmation-modal.component';
 import { SpecialCaseManualRegistrationRequest, SelectedCourses } from '../models/special-case-manual-registration-request.model';
+import { RegistrationStatus } from 'src/app/common/constant';
 
 @Component({
   selector: 'app-special-case-manual-registration',
@@ -135,9 +136,10 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
       ).subscribe({
         next: (unregisteredCourses) => {
           this.unregisteredCourses = unregisteredCourses || [];
-          // Auto-select courses that are already registered
+          this.selectedUnregisteredCourses = [];
+          // Unpaid (and paid) existing registrations start selected so unpaid can be unselected.
           this.autoSelectRegisteredCourses();
-          this.filterUnregisteredCourses(); // Use filter method which applies sorting
+          this.filterUnregisteredCourses();
           this.updateAllCourses();
           this.updateSubmitButtonState();
         },
@@ -198,86 +200,136 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
 
   // Generate unique key for a course (courseId + batchCode)
   private getCourseUniqueKey(course: CourseBreakDownOffering): string {
-    return `${course.courseId}|${course.batchCode || ''}`;
+    return `${String(course.courseId).toLowerCase()}|${course.batchCode || ''}`;
   }
 
   // Handle unregistered course selection
   onUnregisteredCourseSelectionChange(course: CourseBreakDownOffering, checked: boolean): void {
-    // Prevent selecting paid courses
-    if (checked && course.isPaid === true) {
-      this.message.warning('This course is already paid and cannot be selected.');
+    if (course.isPaid === true) {
+      this.message.warning('This course is already paid and cannot be changed here.');
       return;
     }
 
     const uniqueKey = this.getCourseUniqueKey(course);
+    const courseId = String(course.courseId).toLowerCase();
     if (checked) {
-      // Remove any other courses with the same courseId but different batchCode
       this.selectedUnregisteredCourses = this.selectedUnregisteredCourses.filter(key => {
         const [existingCourseId] = key.split('|');
-        return existingCourseId !== course.courseId;
+        return existingCourseId !== courseId;
       });
-      // Add the newly selected course
       this.selectedUnregisteredCourses.push(uniqueKey);
-    } else {
-      // Don't allow deselecting registered courses
-      if (course.isRegistered === true) {
-        this.message.warning('This course is already registered and cannot be deselected.');
-        return;
-      }
-      this.selectedUnregisteredCourses = this.selectedUnregisteredCourses.filter(key => key !== uniqueKey);
+      this.updateSubmitButtonState();
+      return;
     }
+
+    // Uncheck: if already on the student (unpaid registered), remove from DB
+    if (course.isRegistered === true && course.id) {
+      this.removeUnpaidRegisteredCourse(course, uniqueKey);
+      return;
+    }
+
+    this.selectedUnregisteredCourses = this.selectedUnregisteredCourses.filter(key => key !== uniqueKey);
     this.updateSubmitButtonState();
   }
 
-  // Check if a course should be disabled (same courseId but different batchCode is selected, or if isPaid is true)
+  private removeUnpaidRegisteredCourse(course: CourseBreakDownOffering, uniqueKey: string): void {
+    const takenCourseId = course.id;
+    if (!takenCourseId) {
+      this.selectedUnregisteredCourses = this.selectedUnregisteredCourses.filter(key => key !== uniqueKey);
+      course.isRegistered = false;
+      this.updateSubmitButtonState();
+      return;
+    }
+
+    this.studentServices.updateTakenCourses([takenCourseId], this.fullName).subscribe({
+      next: () => {
+        this.selectedUnregisteredCourses = this.selectedUnregisteredCourses.filter(key => key !== uniqueKey);
+        course.isRegistered = false;
+        course.id = 0;
+        course.courseStatus = 'Not Taken';
+
+        this.courseList = this.courseList.filter(c => c.id !== takenCourseId);
+        if (this.studentList) {
+          this.studentList.courseTermOfferings = this.courseList;
+        }
+        this.selectedRegisteredCourses = this.selectedRegisteredCourses.filter(id => id !== takenCourseId);
+        this.filterRegisteredCourses();
+        this.message.success(`${course.courseCode || 'Course'} removed successfully.`);
+        this.updateSubmitButtonState();
+      },
+      error: () => {
+        if (!this.selectedUnregisteredCourses.includes(uniqueKey)) {
+          this.selectedUnregisteredCourses.push(uniqueKey);
+        }
+        this.message.error('Failed to remove course. Please try again.');
+        this.updateSubmitButtonState();
+      }
+    });
+  }
+
+  // Check if a course should be disabled (paid registered, or same courseId other batch selected)
   isUnregisteredCourseDisabled(course: CourseBreakDownOffering): boolean {
-    // If course is paid, it should be disabled (cannot be selected or deselected)
+    // Paid courses stay checked and cannot be changed from Available
     if (course.isPaid === true) {
       return true;
     }
 
-    // If course is registered, it should be selected but the checkbox should be disabled for deselection
-    // However, we allow it to be checked, so we only disable if it's not selected
-    if (course.isRegistered === true) {
-      const currentCourseKey = this.getCourseUniqueKey(course);
-      // If it's registered and selected, don't disable (so it shows as checked)
-      // If it's registered but not selected, disable it (shouldn't happen, but just in case)
-      return !this.selectedUnregisteredCourses.includes(currentCourseKey);
-    }
-
     const currentCourseKey = this.getCourseUniqueKey(course);
-    
-    // If this course is already selected, don't disable it
     if (this.selectedUnregisteredCourses.includes(currentCourseKey)) {
       return false;
     }
 
-    // Check if there's a selected course with the same courseId but different batchCode
+    const courseId = String(course.courseId).toLowerCase();
     for (const selectedKey of this.selectedUnregisteredCourses) {
       const [selectedCourseId] = selectedKey.split('|');
-      if (selectedCourseId === course.courseId) {
-        // Same courseId is selected, but with different batchCode (since currentCourseKey is not in selected)
-        return true; // Disable this course
+      if (selectedCourseId === courseId) {
+        return true;
       }
     }
     return false;
   }
 
-  // Auto-select courses that are already registered
+  /** Unpaid courses already on the student — shown selected so the registrar can unselect to remove. */
+  private isExistingUnpaidRegistration(course: CourseBreakDownOffering): boolean {
+    if (!course || course.isPaid === true) {
+      return false;
+    }
+    if (course.isRegistered === true) {
+      return true;
+    }
+    if (course.id != null && Number(course.id) > 0) {
+      return true;
+    }
+    const status = (course.courseStatus || '').toLowerCase();
+    return status === 'unpaid' || status === 'manual registration';
+  }
+
+  // Auto-select existing registrations (unpaid can later be unchecked to remove)
   private autoSelectRegisteredCourses(): void {
     for (const course of this.unregisteredCourses) {
-      if (course.isRegistered === true) {
-        const uniqueKey = this.getCourseUniqueKey(course);
-        // Only add if not already selected
-        if (!this.selectedUnregisteredCourses.includes(uniqueKey)) {
-          // Remove any other courses with the same courseId but different batchCode
-          this.selectedUnregisteredCourses = this.selectedUnregisteredCourses.filter(key => {
-            const [existingCourseId] = key.split('|');
-            return existingCourseId !== course.courseId;
-          });
-          // Add the registered course
-          this.selectedUnregisteredCourses.push(uniqueKey);
-        }
+      const shouldSelect =
+        course.isPaid === true ||
+        course.isRegistered === true ||
+        this.isExistingUnpaidRegistration(course);
+
+      if (!shouldSelect) {
+        continue;
+      }
+
+      const uniqueKey = this.getCourseUniqueKey(course);
+      const courseId = String(course.courseId).toLowerCase();
+      if (!this.selectedUnregisteredCourses.includes(uniqueKey)) {
+        this.selectedUnregisteredCourses = this.selectedUnregisteredCourses.filter(key => {
+          const [existingCourseId] = key.split('|');
+          return existingCourseId !== courseId;
+        });
+        this.selectedUnregisteredCourses.push(uniqueKey);
+      }
+
+      // Normalize flags so unpaid rows stay selectable/unselectable consistently
+      if (this.isExistingUnpaidRegistration(course)) {
+        course.isRegistered = true;
+        course.isPaid = false;
       }
     }
   }
@@ -295,46 +347,69 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
   // Handle select all unregistered courses
   onSelectAllUnregisteredCourses(checked: boolean): void {
     if (checked) {
-      // Only select courses that are not disabled
-      // Group by courseId and only select one per courseId
       const courseIdMap = new Map<string, CourseBreakDownOffering>();
       this.filteredUnregisteredCourses
         .filter(course => !this.isUnregisteredCourseDisabled(course))
         .forEach(course => {
-          // If we haven't seen this courseId yet, or if we want to prefer a specific batchCode
           if (!courseIdMap.has(course.courseId)) {
             courseIdMap.set(course.courseId, course);
           }
         });
-      
-      // Get all selectable courses
-      const selectableKeys = Array.from(courseIdMap.values())
-        .map(course => this.getCourseUniqueKey(course));
-      
-      // Add to existing selections (don't replace, in case some are already selected)
-      selectableKeys.forEach(key => {
+
+      Array.from(courseIdMap.values()).forEach(course => {
+        const key = this.getCourseUniqueKey(course);
+        this.selectedUnregisteredCourses = this.selectedUnregisteredCourses.filter(existingKey => {
+          const [existingCourseId] = existingKey.split('|');
+          return existingCourseId !== course.courseId;
+        });
         if (!this.selectedUnregisteredCourses.includes(key)) {
-          // Remove any other courses with the same courseId
-          const [courseId] = key.split('|');
-          this.selectedUnregisteredCourses = this.selectedUnregisteredCourses.filter(existingKey => {
-            const [existingCourseId] = existingKey.split('|');
-            return existingCourseId !== courseId;
-          });
           this.selectedUnregisteredCourses.push(key);
         }
       });
-    } else {
-      // Only deselect courses that are not registered (keep registered courses selected)
-      this.selectedUnregisteredCourses = this.selectedUnregisteredCourses.filter(key => {
-        const [courseId, batchCode] = key.split('|');
-        const course = this.unregisteredCourses.find(c => 
-          c.courseId === courseId && (c.batchCode || '') === (batchCode || '')
-        );
-        // Keep it selected if it's registered
-        return course?.isRegistered === true;
-      });
+      this.updateSubmitButtonState();
+      return;
     }
-    this.updateSubmitButtonState();
+
+    // Uncheck all: remove unpaid registered rows from DB, clear other selections
+    const toRemove = this.filteredUnregisteredCourses.filter(course =>
+      course.isRegistered === true && !course.isPaid && !!course.id &&
+      this.selectedUnregisteredCourses.includes(this.getCourseUniqueKey(course))
+    );
+    const idsToDelete = toRemove.map(c => c.id);
+
+    const clearLocalSelections = () => {
+      this.selectedUnregisteredCourses = [];
+      toRemove.forEach(course => {
+        course.isRegistered = false;
+        course.id = 0;
+        course.courseStatus = 'Not Taken';
+      });
+      if (idsToDelete.length) {
+        this.courseList = this.courseList.filter(c => !idsToDelete.includes(c.id));
+        if (this.studentList) {
+          this.studentList.courseTermOfferings = this.courseList;
+        }
+        this.selectedRegisteredCourses = this.selectedRegisteredCourses.filter(id => !idsToDelete.includes(id));
+        this.filterRegisteredCourses();
+      }
+      this.updateSubmitButtonState();
+    };
+
+    if (idsToDelete.length === 0) {
+      clearLocalSelections();
+      return;
+    }
+
+    this.studentServices.updateTakenCourses(idsToDelete, this.fullName).subscribe({
+      next: () => {
+        this.message.success(`${idsToDelete.length} unpaid course(s) removed successfully.`);
+        clearLocalSelections();
+      },
+      error: () => {
+        this.message.error('Failed to remove unpaid courses. Please try again.');
+        this.updateSubmitButtonState();
+      }
+    });
   }
 
 
@@ -344,9 +419,30 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
       this.formCourseOffered.get('termId')?.value !== undefined;
     const yearSelected = this.formCourseOffered.get('termYear')?.value !== null &&
       this.formCourseOffered.get('termYear')?.value !== undefined;
-    const hasUnregisteredSelections = this.selectedUnregisteredCourses.length > 0;
-    this.canSubmit = termSelected && yearSelected && hasUnregisteredSelections;
+    const hasNewSelections = this.getNewlySelectedCourses().length > 0;
+    this.canSubmit = termSelected && yearSelected && hasNewSelections;
     this.canDelete = this.selectedRegisteredCourses.length > 0;
+  }
+
+  /** Courses checked on Available that are not already saved for the student. */
+  getNewlySelectedCourses(): CourseBreakDownOffering[] {
+    const result: CourseBreakDownOffering[] = [];
+    for (const uniqueKey of this.selectedUnregisteredCourses) {
+      const [courseId, batchCode] = uniqueKey.split('|');
+      const normalizedId = (courseId || '').toLowerCase();
+      let course = this.unregisteredCourses.find(c =>
+        String(c.courseId).toLowerCase() === normalizedId &&
+        (c.batchCode || '') === (batchCode || '')
+      );
+      if (!course) {
+        course = this.unregisteredCourses.find(c => String(c.courseId).toLowerCase() === normalizedId);
+      }
+      // Only brand-new picks are submitted; unpaid existing stay selected but are not re-posted.
+      if (course && !course.isPaid && !course.isRegistered && !this.isExistingUnpaidRegistration(course)) {
+        result.push(course);
+      }
+    }
+    return result;
   }
 
   // Delete selected registered courses
@@ -397,11 +493,11 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
       return;
     }
 
-    // Get selected course details using unique keys
-    const selectedCourseDetails = this.selectedUnregisteredCourses.map(uniqueKey => {
-      const [courseId, batchCode] = uniqueKey.split('|');
-      return this.unregisteredCourses.find(c => c.courseId === courseId && c.batchCode === batchCode);
-    }).filter(course => course !== undefined);
+    const selectedCourseDetails = this.getNewlySelectedCourses();
+    if (!selectedCourseDetails.length) {
+      this.message.error('No new courses selected for registration.');
+      return;
+    }
 
     // Set up confirmation modal data
     this.confirmationModalData = {
@@ -439,41 +535,19 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
   }
 
   private performSubmitRegistration(): void {
-    // Validate that we have selected courses
-    if (!this.selectedUnregisteredCourses || this.selectedUnregisteredCourses.length === 0) {
-      this.message.error('No courses selected for registration.');
+    const newlySelected = this.getNewlySelectedCourses();
+    if (!newlySelected.length) {
+      this.message.error('No new courses selected for registration.');
       return;
     }
 
-    // Build selected courses array with proper validation
-    const selectedCourses: SelectedCourses[] = [];
-    for (const uniqueKey of this.selectedUnregisteredCourses) {
-      const [courseId, batchCode] = uniqueKey.split('|');
-      
-      // Find the course - try with batchCode match first, then fallback to just courseId
-      let course = this.unregisteredCourses.find(c => 
-        c.courseId === courseId && 
-        (c.batchCode || '') === (batchCode || '')
-      );
-      
-      // If not found with batchCode, try without batchCode match (for backward compatibility)
-      if (!course) {
-        course = this.unregisteredCourses.find(c => c.courseId === courseId);
-      }
-      
-      if (!course) {
-        this.message.error(`Course not found: ${courseId}. Please refresh and try again.`);
-        return;
-      }
-      
-      selectedCourses.push({
-        courseId: courseId,
-        priority: 0,
-        registrationStatus: 4,
-        totalAmount: course.totalAmount || 0,
-        batchCode: course.batchCode || batchCode || ''
-      } as SelectedCourses);
-    }
+    const selectedCourses: SelectedCourses[] = newlySelected.map(course => ({
+      courseId: course.courseId,
+      priority: 0,
+      registrationStatus: RegistrationStatus.RegistrarOverride,
+      totalAmount: course.totalAmount || 0,
+      batchCode: course.batchCode || ''
+    } as SelectedCourses));
 
     // Validate required fields
     if (!this.studentList || !this.studentList.id) {
@@ -493,7 +567,7 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
       id: this.studentList.id,
       academicTermId: termId,
       year: termYear,
-      batchCode: this.studentList.batchCode,
+      batchCode: this.studentList.offerBatchCode || this.studentList.batchCode,
       createdBy: this.fullName,
       selectedCourses: selectedCourses
     };
@@ -562,7 +636,11 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
 
   isUnregisteredCourseSelected(course: CourseBreakDownOffering): boolean {
     const uniqueKey = this.getCourseUniqueKey(course);
-    return this.selectedUnregisteredCourses.includes(uniqueKey);
+    if (this.selectedUnregisteredCourses.includes(uniqueKey)) {
+      return true;
+    }
+    // Unpaid existing registrations are assumed selected until the user unselects them
+    return this.isExistingUnpaidRegistration(course);
   }
 
   // Get count of selectable (non-disabled) courses
@@ -687,7 +765,7 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
   // Get color for course status tag
   getCourseStatusColor(courseStatus: string): string {
     if (!courseStatus) {
-      return 'blue'; // Default color for available courses
+      return 'blue';
     }
 
     switch (courseStatus.toLowerCase()) {
@@ -696,7 +774,10 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
       case 'unregistered':
         return 'blue';
       case 'registered':
+      case 'manual registration':
         return 'green';
+      case 'regular':
+        return 'blue';
       case 'taken':
         return 'purple';
       case 'dropped':
@@ -709,6 +790,8 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
         return 'volcano';
       case 'not taken':
         return 'blue';
+      case 'unpaid':
+        return 'gold';
       default:
         return 'default';
     }

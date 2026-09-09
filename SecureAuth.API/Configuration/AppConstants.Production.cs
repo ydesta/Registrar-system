@@ -57,12 +57,11 @@ namespace SecureAuth.API.Configuration
         // ============================================
         public static class Email
         {
-            public const string From = "hsis@hilcoeschool.com";
-            public const string SmtpServer = "mail.hilcoeschool.com";
-            public const int Port = 465;
-            public const string Username = "hsis@hilcoeschool.com";
-            // SECURITY: Change this password
-            public const string Password = "EcW^)pv=Z!eL+ukN";
+            public const string From = "hilcoeschoolcollege@gmail.com";
+            public const string SmtpServer = "smtp.gmail.com";
+            public const int Port = 587;
+            public const string Username = "hilcoeschoolcollege@gmail.com";
+            public const string Password = "hayipqzpaxqrohvg";
             public const string BaseUrl = "https://hilcoe.edu.et:5001";
         }
 

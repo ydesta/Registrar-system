@@ -4,17 +4,15 @@
   [nzFooter]="null"
   [nzWidth]="900"
   [nzBodyStyle]="{ padding: '0' }"
-  (nzOnCancel)="onCancel()"
-  >
-  
+  (nzOnCancel)="onCancel()">
+
   <div *nzModalContent>
     <div class="confirmation-modal">
-             <!-- Header Section -->
-       <div class="modal-header">
+      <div class="modal-header">
         <div class="header-content">
           <div class="header-left">
             <div class="header-icon">
-              <span>{{ headerConfig.icon }}</span>
+              <i nz-icon [nzType]="headerConfig.icon" nzTheme="outline"></i>
             </div>
             <div class="header-text">
               <h2>{{ headerConfig.title }}</h2>
@@ -22,20 +20,18 @@
             </div>
           </div>
           <div class="header-badge">
-            <span>{{ modalData?.selectedCourses?.length }} Course{{ modalData?.selectedCourses?.length > 1 ? 's' : '' }}</span>
+            <span>{{ courseCountLabel }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Content Section -->
       <div class="modal-content">
-        <!-- Student Information Card -->
         <div class="info-card student-card">
           <div class="card-header">
             <div class="card-icon student-icon">
-              <span>👤</span>
+              <i nz-icon nzType="user" nzTheme="outline"></i>
             </div>
-            <h3>Student Information</h3>
+            <h3>Student Details</h3>
           </div>
           <div class="card-grid">
             <div class="info-item">
@@ -55,8 +51,8 @@
               <div class="info-value">{{ modalData?.student?.batchCode }}</div>
             </div>
             <div class="info-item">
-              <div class="info-label">Entry Code</div>
-              <div class="info-value">{{ modalData?.student?.entryCode }}</div>
+              <div class="info-label">Offered Batch</div>
+              <div class="info-value">{{ modalData?.student?.offerBatchCode || modalData?.student?.batchCode }}</div>
             </div>
             <div class="info-item">
               <div class="info-label">CGPA</div>
@@ -65,13 +61,12 @@
           </div>
         </div>
 
-        <!-- Academic Information Card (Registration only) -->
         <div class="info-card academic-card" *ngIf="isRegistration">
           <div class="card-header">
             <div class="card-icon academic-icon">
-              <span>📅</span>
+              <i nz-icon nzType="calendar" nzTheme="outline"></i>
             </div>
-            <h3>Academic Information</h3>
+            <h3>Academic Term</h3>
           </div>
           <div class="card-grid">
             <div class="info-item">
@@ -83,7 +78,7 @@
               <div class="info-value">{{ modalData?.academicYear }}</div>
             </div>
             <div class="info-item">
-              <div class="info-label">Total Courses</div>
+              <div class="info-label">Courses Selected</div>
               <div class="info-value">{{ modalData?.selectedCourses?.length }}</div>
             </div>
             <div class="info-item">
@@ -93,41 +88,39 @@
           </div>
         </div>
 
-        <!-- Courses Card -->
         <div class="info-card courses-card" [ngClass]="isDeletion ? 'deletion-courses' : 'registration-courses'">
           <div class="card-header">
             <div class="card-icon" [ngClass]="isDeletion ? 'deletion-icon' : 'registration-icon'">
-              <span>{{ isDeletion ? '📚' : '📖' }}</span>
+              <i nz-icon [nzType]="isDeletion ? 'book' : 'read'" nzTheme="outline"></i>
             </div>
-            <h3>{{ isDeletion ? 'Courses to be Deleted' : 'Selected Courses' }}</h3>
+            <h3>{{ isDeletion ? 'Courses to Be Removed' : 'Courses to Be Registered' }}</h3>
             <div class="course-count">
-              {{ modalData?.selectedCourses?.length }} Course{{ modalData?.selectedCourses?.length > 1 ? 's' : '' }}
+              {{ courseCountLabel }}
             </div>
           </div>
           <div class="courses-list">
             <div class="course-item" *ngFor="let course of modalData?.selectedCourses">
               <div class="course-header">
                 <div class="course-code">{{ course.courseCode }}</div>
-                <div class="credit-hours">{{ course.creditHours }} Credit Hours</div>
+                <div class="credit-hours">{{ course.creditHours }} credit hours</div>
               </div>
               <div class="course-title">{{ course.courseTitle }}</div>
               <div class="course-footer">
                 <span class="amount-badge">{{ course.totalAmount }} ETB</span>
                 <span class="status-badge" [ngClass]="isDeletion ? 'registered' : 'available'">
-                  {{ isDeletion ? 'Registered' : 'Available' }}
+                  {{ isDeletion ? 'Currently registered' : 'Pending registration' }}
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Summary Card -->
         <div class="info-card summary-card">
           <div class="card-header">
             <div class="card-icon summary-icon">
-              <span>📊</span>
+              <i nz-icon nzType="profile" nzTheme="outline"></i>
             </div>
-            <h3>{{ isDeletion ? 'Deletion Summary' : 'Registration Summary' }}</h3>
+            <h3>{{ isDeletion ? 'Removal Summary' : 'Registration Summary' }}</h3>
           </div>
           <div class="summary-grid">
             <div class="summary-item">
@@ -139,53 +132,43 @@
               <div class="summary-label">Credit Hours</div>
             </div>
             <div class="summary-item">
-                                       <div class="summary-value">{{ totalAmount }} ETB</div>
+              <div class="summary-value">{{ totalAmount }} ETB</div>
               <div class="summary-label">Total Amount</div>
             </div>
             <div class="summary-item">
-              <div class="summary-value">{{ isDeletion ? 'Course Deletion' : 'Manual' }}</div>
-              <div class="summary-label">{{ isDeletion ? 'Action Type' : 'Registration Type' }}</div>
+              <div class="summary-value">{{ isDeletion ? 'Removal' : 'Manual' }}</div>
+              <div class="summary-label">Action Type</div>
             </div>
           </div>
         </div>
 
-        <!-- Warning/Notice Card -->
         <div class="info-card warning-card">
           <div class="card-header">
             <div class="card-icon warning-icon">
-              <span>⚠️</span>
+              <i nz-icon nzType="exclamation-circle" nzTheme="outline"></i>
             </div>
-            <h3>{{ isDeletion ? 'Permanent Action Warning' : 'Registration Notice' }}</h3>
+            <h3>{{ noticeTitle }}</h3>
           </div>
           <div class="warning-content">
-            <p *ngIf="isDeletion">
-              This action will permanently delete the selected courses from the student's registration. 
-              This action cannot be undone. Please review all information carefully before proceeding.
-            </p>
-            <p *ngIf="isRegistration">
-              This action will register the selected courses for the student. 
-              Please review all information carefully before proceeding.
-            </p>
+            <p>{{ noticeMessage }}</p>
           </div>
         </div>
       </div>
 
-             <!-- Footer Section -->
-       <div class="modal-footer">
-         <button nz-button nzType="default" class="ant-btn-default" (click)="onCancel()">
-           <i nz-icon nzType="close"></i>
-           Cancel
-         </button>
-                   <button 
-            nz-button 
-            [nzType]="isDeletion ? 'primary' : 'primary'"
-            [nzDanger]="false"
-            [class]="isDeletion ? 'ant-btn-primary' : 'ant-btn-primary'"
-            (click)="onConfirm()">
-           <i nz-icon [nzType]="isDeletion ? 'delete' : 'check'"></i>
-           {{ isDeletion ? 'Delete Courses' : 'Register Courses' }}
-         </button>
-       </div>
+      <div class="modal-footer">
+        <button nz-button nzType="default" class="ant-btn-default" (click)="onCancel()">
+          <i nz-icon nzType="close"></i>
+          Cancel
+        </button>
+        <button
+          nz-button
+          nzType="primary"
+          class="ant-btn-primary"
+          (click)="onConfirm()">
+          <i nz-icon [nzType]="isDeletion ? 'delete' : 'check'"></i>
+          {{ confirmButtonLabel }}
+        </button>
+      </div>
     </div>
   </div>
-</nz-modal> 
+</nz-modal>
