@@ -94,7 +94,7 @@
                    [nzLoading]="loadingSections"
                    nzShowSearch
                    class="section-select">
-                   <nz-option *ngFor="let section of allSections" 
+                   <nz-option *ngFor="let section of getSectionsForCourse(course.batchCode)" 
                              [nzValue]="section.id" 
                              [nzLabel]="section.sectionName">
                      {{ section.sectionName }}

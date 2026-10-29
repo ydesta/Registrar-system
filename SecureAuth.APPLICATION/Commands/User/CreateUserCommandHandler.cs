@@ -60,7 +60,7 @@ namespace SecureAuth.APPLICATION.Commands.User
                 LastName = command.LastName,
                 PhoneNumber = phoneNumber,
                 IsActive = command.IsActive,
-                EmailConfirmed = !command.RequireEmailConfirmation,
+                EmailConfirmed = true,
                 CreatedAt = DateTime.UtcNow
             };
 

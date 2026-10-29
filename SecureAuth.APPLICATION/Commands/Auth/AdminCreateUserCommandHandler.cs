@@ -83,7 +83,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 FirstName = command.FirstName,
                 LastName = command.LastName,
                 PhoneNumber = command.PhoneNumber,
-                EmailConfirmed = !command.RequireEmailConfirmation,
+                EmailConfirmed = true,
                 PhoneNumberConfirmed = !command.RequirePhoneConfirmation
             };
 
@@ -128,22 +128,22 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 }
             }
 
-            // Send email verification if required
-            if (command.RequireEmailConfirmation)
-            {
-                try
-                {
-                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    await _emailService.SendEmailConfirmationAsync(user.Email, token);
-                    verificationSent = true;
-                }
-                catch (Exception ex)
-                {
-                    messageEmailError = string.IsNullOrEmpty(messageEmailError)
-                        ? $"Verification email failed: {ex.Message}"
-                        : $"{messageEmailError}; Verification email failed: {ex.Message}";
-                }
-            }
+            // Email confirmation notification disabled — users are created as confirmed.
+            // if (command.RequireEmailConfirmation)
+            // {
+            //     try
+            //     {
+            //         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            //         await _emailService.SendEmailConfirmationAsync(user.Email, token);
+            //         verificationSent = true;
+            //     }
+            //     catch (Exception ex)
+            //     {
+            //         messageEmailError = string.IsNullOrEmpty(messageEmailError)
+            //             ? $"Verification email failed: {ex.Message}"
+            //             : $"{messageEmailError}; Verification email failed: {ex.Message}";
+            //     }
+            // }
 
             await _unitOfWork.SaveChangesAsync();
 

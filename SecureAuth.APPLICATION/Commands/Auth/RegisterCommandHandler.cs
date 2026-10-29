@@ -77,7 +77,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                     FirstName = command.FirstName,
                     LastName = command.LastName,
                     PhoneNumber = command.PhoneNumber,
-                    EmailConfirmed = !command.RequireEmailConfirmation,
+                    EmailConfirmed = true,
                     PhoneNumberConfirmed = !command.RequirePhoneConfirmation
                 };
 
@@ -173,25 +173,25 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                     }
                 }
 
-                // Send email verification if required
-                if (command.RequireEmailConfirmation)
-                {
-                    try
-                    {
-                        _logger.LogInformation("Sending email verification to user: {UserId}, Email: {Email}", user.Id, user.Email);
-                        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-                        await _emailService.SendEmailConfirmationAsync(user.Email, token);
-                        _logger.LogInformation("Email verification sent successfully to user: {UserId}", user.Id);
-                        verificationSent = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to generate email verification token for user: {UserId}, Email: {Email}. Error: {ErrorMessage}", 
-                            user.Id, user.Email, ex.Message);
-                        // Don't fail the user creation, just log the error
-                    }
-                }
+                // Email confirmation notification disabled — users are created as confirmed.
+                // if (command.RequireEmailConfirmation)
+                // {
+                //     try
+                //     {
+                //         _logger.LogInformation("Sending email verification to user: {UserId}, Email: {Email}", user.Id, user.Email);
+                //         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                //
+                //         await _emailService.SendEmailConfirmationAsync(user.Email, token);
+                //         _logger.LogInformation("Email verification sent successfully to user: {UserId}", user.Id);
+                //         verificationSent = true;
+                //     }
+                //     catch (Exception ex)
+                //     {
+                //         _logger.LogError(ex, "Failed to generate email verification token for user: {UserId}, Email: {Email}. Error: {ErrorMessage}", 
+                //             user.Id, user.Email, ex.Message);
+                //         // Don't fail the user creation, just log the error
+                //     }
+                // }
 
                 await _unitOfWork.SaveChangesAsync();
                 _logger.LogInformation("Registration completed successfully for user: {UserId}, Email: {Email}", user.Id, user.Email);

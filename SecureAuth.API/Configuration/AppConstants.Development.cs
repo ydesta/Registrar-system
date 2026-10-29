@@ -12,6 +12,7 @@ namespace SecureAuth.API.Configuration
         public static class Database
         {
             public const string Server = "ASK"; // Your development server
+           // public const string DatabaseName = "HiLCoEIdentityDB";
             public const string DatabaseName = "HiLCoEIdentityDB";
             public const string User = ""; // Use Windows Authentication in dev
             public const string Password = ""; // Not needed for Windows Auth
@@ -55,11 +56,11 @@ namespace SecureAuth.API.Configuration
         // ============================================
         public static class Email
         {
-            public const string From = "hilcoeschoolcollege@gmail.com";
+            public const string From = "eliasweldemariam@gmail.com";
             public const string SmtpServer = "smtp.gmail.com";
             public const int Port = 587;
-            public const string Username = "hilcoeschoolcollege@gmail.com";
-            public const string Password = "hayipqzpaxqrohvg";
+            public const string Username = "eliasweldemariam@gmail.com";
+            public const string Password = "wqfuwrmslttxmutn";
             public const string BaseUrl = "https://localhost:7123";
         }
 

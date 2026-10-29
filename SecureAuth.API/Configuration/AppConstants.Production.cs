@@ -12,7 +12,8 @@ namespace SecureAuth.API.Configuration
         public static class Database
         {
             public const string Server = "VMI2515837";
-            public const string DatabaseName = "HiLCoEIdentityDB";
+          //  public const string DatabaseName = "HiLCoEIdentityDB";
+            public const string DatabaseName = "SecureAuthDbA";
             public const string User = "sa";
             public const string Password = "Hilco@2025"; // CHANGE THIS PASSWORD!
             public const int ConnectTimeout = 60;
@@ -57,11 +58,11 @@ namespace SecureAuth.API.Configuration
         // ============================================
         public static class Email
         {
-            public const string From = "hilcoeschoolcollege@gmail.com";
+            public const string From = "eliasweldemariam@gmail.com";
             public const string SmtpServer = "smtp.gmail.com";
             public const int Port = 587;
-            public const string Username = "hilcoeschoolcollege@gmail.com";
-            public const string Password = "hayipqzpaxqrohvg";
+            public const string Username = "eliasweldemariam@gmail.com";
+            public const string Password = "wqfuwrmslttxmutn";
             public const string BaseUrl = "https://hilcoe.edu.et:5001";
         }
 

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { forkJoin, of, Subject } from 'rxjs';
+import { catchError, map, takeUntil } from 'rxjs/operators';
 import { StudentSectionAssignmentService } from '../../services/student-section-assignment.service';
 import { CustomNotificationService } from '../../services/custom-notification.service';
 import { TermCourseOfferingService } from 'src/app/colleges/services/term-course-offering.service';
@@ -43,8 +43,8 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
 
   // Course data
   courses: CourseInfo[] = [];
-  sectionsMap: { [courseId: string]: SectionViewModel[] } = {};
-  allSections: SectionViewModel[] = [];
+  // Sections keyed by the course row's batchCode (e.g. "DRB2302" => sections of DRB2302)
+  sectionsByBatch: Record<string, SectionViewModel[]> = {};
 
   // Validation
   isFormValid: boolean = false;
@@ -66,7 +66,7 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
       this.batchCode = this.student.batchCode;
       this.loadStudentInfo();
       this.loadStudentCourses();
-      this.loadSectionsForBatch();
+      // Sections are loaded per course batch inside loadStudentCourses -> loadSectionsForCourses
     } else {
       this.notificationService.notification(
         'error',
@@ -128,6 +128,8 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
           if (courses && courses.length > 0) {
             this.courses = courses;
             this.buildFormArray();
+            // Fetch sections once we know which batches the courses belong to
+            this.loadSectionsForCourses();
           }
         },
         error: () => {
@@ -155,51 +157,85 @@ export class AssignStudentToSectionComponent implements OnInit, OnDestroy {
 
   }
 
-  private loadSectionsForBatch(): void {
-    if (!this.batchCode || !this.academicTerm || !this.year) return;
+  private loadSectionsForCourses(): void {
+    if (!this.academicTerm || !this.year || !this.courses?.length) return;
+
+    // Collect the unique batches of the courses being assigned.
+    // Sections must come from the COURSE's batch, not the student's home batch,
+    // because Assessment/Equivalent courses live under a different batch.
+    const uniqueBatches = Array.from(
+      new Set(
+        this.courses
+          .map(c => (c.batchCode || '').trim())
+          .filter(batch => batch.length > 0)
+      )
+    );
+
+    if (uniqueBatches.length === 0) {
+      this.sectionsByBatch = {};
+      return;
+    }
 
     this.loadingSections = true;
-    this.sectionService.getListOfSectionAssignedBatch(this.batchCode, this.academicTerm, this.year, this.sectionType)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: any) => {
-          this.loadingSections = false;
-          if (response) {
+    this.sectionsByBatch = {};
 
-            // Handle different response formats
-            let sectionsData: any[] = [];
+    const requests = uniqueBatches.map(batch =>
+      this.sectionService
+        .getListOfSectionAssignedBatch(batch, this.academicTerm, this.year, this.sectionType)
+        .pipe(
+          takeUntil(this.destroy$),
+          map(response => ({ batch, sections: this.normalizeSections(response) })),
+          catchError(() => of({ batch, sections: [] as SectionViewModel[] }))
+        )
+    );
 
-            if (Array.isArray(response)) {
-              sectionsData = response;
-            } else if (response.data && Array.isArray(response.data)) {
-              sectionsData = response.data;
-            } else if (response.sections && Array.isArray(response.sections)) {
-              sectionsData = response.sections;
-            } else if (Array.isArray(response)) {
-              sectionsData = response;
-            }
+    forkJoin(requests).subscribe({
+      next: results => {
+        results.forEach(r => (this.sectionsByBatch[r.batch] = r.sections));
+        this.loadingSections = false;
 
+        const batchesWithoutSections = results
+          .filter(r => r.sections.length === 0)
+          .map(r => r.batch);
 
-            // Map to SectionViewModel format
-            this.allSections = sectionsData.map((item: any) => ({
-              id: item.id || item.sectionId || item.Id || 0,
-              sectionName: item.sectionName || item.name || item.SectionName || item.title || 'Section'
-            }));
-
-          } else {
-            this.allSections = [];
-          }
-        },
-        error: (error) => {
-          this.loadingSections = false;
-          this.allSections = [];
-          this.notificationService.notification('error', 'Error', 'Failed to load sections');
+        if (batchesWithoutSections.length > 0) {
+          this.notificationService.notification(
+            'warning',
+            'No sections found',
+            `No sections exist yet for: ${batchesWithoutSections.join(', ')}. ` +
+            `Create a section for that batch before assigning.`
+          );
         }
-      });
+      },
+      error: () => {
+        this.loadingSections = false;
+        this.notificationService.notification('error', 'Error', 'Failed to load sections');
+      }
+    });
   }
 
-  getSectionsForCourse(): SectionViewModel[] {
-    return this.allSections;
+  private normalizeSections(response: any): SectionViewModel[] {
+    let sectionsData: any[] = [];
+
+    if (Array.isArray(response)) {
+      sectionsData = response;
+    } else if (response?.data && Array.isArray(response.data)) {
+      sectionsData = response.data;
+    } else if (response?.sections && Array.isArray(response.sections)) {
+      sectionsData = response.sections;
+    }
+
+    return sectionsData
+      .map((item: any) => ({
+        id: Number(item.id ?? item.sectionId ?? item.Id ?? 0),
+        sectionName: item.sectionName || item.name || item.SectionName || item.title || 'Section'
+      }))
+      .filter(section => Number.isInteger(section.id) && section.id > 0);
+  }
+
+  getSectionsForCourse(batchCode: string | null | undefined): SectionViewModel[] {
+    if (!batchCode) return [];
+    return this.sectionsByBatch[batchCode] || [];
   }
 
   validateForm(): boolean {

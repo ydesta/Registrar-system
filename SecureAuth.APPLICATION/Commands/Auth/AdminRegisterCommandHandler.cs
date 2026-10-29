@@ -77,7 +77,7 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 FirstName = command.FirstName,
                 LastName = command.LastName,
                 PhoneNumber = command.PhoneNumber,
-                EmailConfirmed = !command.RequireEmailConfirmation,
+                EmailConfirmed = true,
                 PhoneNumberConfirmed = !command.RequirePhoneConfirmation
             };
 
@@ -119,19 +119,20 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 // Log the error but don't fail the user creation
             }
 
-            if (command.RequireEmailConfirmation)
-            {
-                try
-                {
-                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    await _emailService.SendEmailConfirmationAsync(user.Email, token);
-                    verificationSent = true;
-                }
-                catch (Exception ex)
-                {
-                    // Log the error but don't fail the user creation
-                }
-            }
+            // Email confirmation notification disabled — users are created as confirmed.
+            // if (command.RequireEmailConfirmation)
+            // {
+            //     try
+            //     {
+            //         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            //         await _emailService.SendEmailConfirmationAsync(user.Email, token);
+            //         verificationSent = true;
+            //     }
+            //     catch (Exception ex)
+            //     {
+            //         // Log the error but don't fail the user creation
+            //     }
+            // }
 
             await _unitOfWork.SaveChangesAsync();
 
