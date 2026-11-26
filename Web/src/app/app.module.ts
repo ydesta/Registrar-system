@@ -22,6 +22,11 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { CsrfInterceptor } from './interceptors/csrf.interceptor';
 import { RouterModule } from '@angular/router';
 import { PortalModule } from './portal/portal.module';
+import { CardPublicScanComponent } from './students/card-public-scan/card-public-scan.component';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzTagModule } from 'ng-zorro-antd/tag';
 
 registerLocaleData(en);
 
@@ -32,6 +37,7 @@ registerLocaleData(en);
     SignoutRedirectCallbackComponent,
     SigninRedirectCallbackComponent,
     UnauthorizedComponent,
+    CardPublicScanComponent,
   ],
   imports: [
     BrowserModule,
@@ -46,7 +52,10 @@ registerLocaleData(en);
     NgxPrintModule,
     RouterModule,
     PortalModule,
-
+    NzSpinModule,
+    NzAlertModule,
+    NzCardModule,
+    NzTagModule,
   ],
   providers: [
     { provide: NZ_I18N, useValue: en_US },

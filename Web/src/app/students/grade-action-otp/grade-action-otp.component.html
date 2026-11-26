@@ -1,0 +1,61 @@
+<nz-modal
+  [nzVisible]="visible"
+  [nzFooter]="null"
+  [nzTitle]="null"
+  [nzClosable]="true"
+  [nzMaskClosable]="false"
+  [nzWidth]="420"
+  nzClassName="grade-otp-modal"
+  (nzOnCancel)="close()">
+  <div *nzModalContent class="otp-card">
+    <div class="otp-icon" aria-hidden="true">
+      <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+    </div>
+    <h2>Verify code</h2>
+    <p class="otp-lead">
+      Enter the 6-digit code sent to <strong>{{ emailHint }}</strong> to continue this {{ purposeLabel }}.
+    </p>
+
+    <div class="otp-digits" (paste)="onPaste($event)">
+      <input
+        #digitInput
+        *ngFor="let digit of digits; let i = index; trackBy: trackDigit"
+        [value]="digit"
+        inputmode="numeric"
+        maxlength="1"
+        autocomplete="one-time-code"
+        [disabled]="verifying || expired || !codeIssued"
+        (input)="onDigitInput(i, $event)"
+        (keydown)="onDigitKeydown(i, $event)" />
+    </div>
+
+    <p class="otp-timer" [class.urgent]="timerUrgent" [class.expired]="expired" *ngIf="!sending && codeIssued">
+      <span nz-icon nzType="clock-circle" nzTheme="outline"></span>
+      <ng-container *ngIf="!expired">Code expires in {{ timerLabel }}</ng-container>
+      <ng-container *ngIf="expired">Code expired</ng-container>
+    </p>
+    <p class="otp-timer" *ngIf="sending">Sending a new code…</p>
+
+    <p class="otp-error" *ngIf="error">{{ error }}</p>
+
+    <button
+      nz-button
+      nzType="primary"
+      nzBlock
+      class="otp-verify"
+      type="button"
+      [nzLoading]="verifying"
+      [disabled]="sending || verifying || expired || !codeIssued || code.length !== 6"
+      (click)="confirm()">
+      Verify code
+    </button>
+
+    <p class="otp-resend">
+      Didn't receive the code?
+      <button type="button" (click)="send()" [disabled]="!canResend">
+        <ng-container *ngIf="resendCooldownSeconds > 0">Resend in {{ resendCooldownSeconds }}s</ng-container>
+        <ng-container *ngIf="resendCooldownSeconds <= 0">Resend code</ng-container>
+      </button>
+    </p>
+  </div>
+</nz-modal>

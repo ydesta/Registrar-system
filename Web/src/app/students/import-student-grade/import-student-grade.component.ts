@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { forkJoin, of } from "rxjs";
 import { Subscription } from "rxjs";
 import { catchError, distinctUntilChanged } from "rxjs/operators";
@@ -36,6 +36,14 @@ interface ErrorItem {
   message: string;
 }
 
+interface ImportSummary {
+  importedCount: number;
+  skippedNotRegistered: string[];
+  skippedNotFound: string[];
+  skippedInvalid: string[];
+  message: string;
+}
+
 @Component({
   selector: "app-import-student-grade",
   templateUrl: "./import-student-grade.component.html",
@@ -68,6 +76,12 @@ export class ImportStudentGradeComponent implements OnInit {
 
   isErrorModalVisible = false;
   errorList: ErrorItem[] = [];
+  isSummaryModalVisible = false;
+  importSummary: ImportSummary | null = null;
+
+  entryMode: 'excel' | 'single' = 'excel';
+  singleGradeForm: FormGroup;
+  gradeList: string[] = ['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F', 'RC', 'RA', 'NG', '-'];
   
   constructor(
     private _fb: FormBuilder,
@@ -76,6 +90,7 @@ export class ImportStudentGradeComponent implements OnInit {
     private _termCourseOfferingService: TermCourseOfferingService,
     private _batchTermService: BatchTermService,
     private _router: Router,
+    private route: ActivatedRoute,
     private staffService: StaffService,
     private cdr: ChangeDetectorRef,
     private authService: AuthService,
@@ -87,6 +102,7 @@ export class ImportStudentGradeComponent implements OnInit {
       this.authService.hasRole("Super Admin");
 
     this.createImportStudentGradeForm();
+    this.createSingleGradeForm();
   }
 
   ngOnInit(): void {
@@ -97,6 +113,10 @@ export class ImportStudentGradeComponent implements OnInit {
     this.getListOfSectionType();
     this.loadAcademicTermOptions();
     this.loadActiveAcademicTerm();
+
+    if (this.route.snapshot.queryParamMap.get('mode') === 'single') {
+      this.entryMode = 'single';
+    }
 
     if (this.isAdmin) {
       this.importStudentGradeForm.patchValue({ staffId: null });
@@ -131,6 +151,19 @@ export class ImportStudentGradeComponent implements OnInit {
       batchCode: [null, [Validators.required]],
       sectionId: [null, [Validators.required]],
     });
+  }
+
+  private createSingleGradeForm(): void {
+    this.singleGradeForm = this._fb.group({
+      studentCode: ['', [Validators.required]],
+      mark: [null, [Validators.required]],
+      gradeLetter: [null, [Validators.required]],
+      remark: ['']
+    });
+  }
+
+  setEntryMode(mode: 'excel' | 'single'): void {
+    this.entryMode = mode;
   }
 
   private loadAcademicTermOptions(): void {
@@ -579,64 +612,165 @@ export class ImportStudentGradeComponent implements OnInit {
   }
 
 
+  otpVisible = false;
+
   submitForm(): void {
+    if (this.entryMode === 'single') {
+      this.submitSingleGrade();
+      return;
+    }
+    if (this.importStudentGradeForm.valid && this.canSave()) {
+      this.otpVisible = true;
+    }
+  }
+
+  submitSingleGrade(): void {
+    if (!this.canSaveSingle()) {
+      this._customNotificationService.notification(
+        'error',
+        'Error',
+        'Select a course section and enter student code, mark, and grade.'
+      );
+      this.singleGradeForm.markAllAsTouched();
+      return;
+    }
+    this.otpVisible = true;
+  }
+
+  onGradeCodeConfirmed(token: string): void {
+    if (this.entryMode === 'single') {
+      this.saveSingleGrade(token);
+      return;
+    }
+
     if (this.importStudentGradeForm.valid && this.canSave()) {
       this.prepareFormData();
-      this._studentService.uploadGrade(this.formData).subscribe(res => {
-        const hasErrors = res && (
-          (res.errors && res.errors.length > 0) ||
-          (res.error && res.error.length > 0) ||
-          (res.data && res.data.errors && res.data.errors.length > 0) ||
-          (res.data && res.data.error && res.data.error.length > 0)
-        );
-        
-        if (hasErrors) {
-          // Extract errors from different possible locations in the response
-          let errors = [];
-          if (res.errors && res.errors.length > 0) {
-            errors = res.errors;
-          } else if (res.error && res.error.length > 0) {
-            errors = res.error;
-          } else if (res.data && res.data.errors && res.data.errors.length > 0) {
-            errors = res.data.errors;
-          } else if (res.data && res.data.error && res.data.error.length > 0) {
-            errors = res.data.error;
-          }
-          
-          this.errorList = errors;
-          this.isErrorModalVisible = true;
-          this.cdr.detectChanges();
-        } else {
-          this._customNotificationService.notification(
-            "success",
-            "Success",
-            "Grade upload completed successfully."
-          );
-          this._router.navigateByUrl(`/students/StudentGrades`);
-        }
+      this._studentService.uploadGrade(this.formData, token).subscribe(res => {
+        this.handleGradeSaveResult(res, 'Grade upload completed successfully.');
       }, error => {
-        // Handle API errors
         console.error('API Error:', error);
         this._customNotificationService.notification(
           "error",
           "Error",
-          "An error occurred while uploading grades. Please try again."
+          this.gradeActionRetryMessage(error?.error?.error || error?.message)
         );
       });
     } else {
       this._customNotificationService.notification(
         "error",
         "Error",
-        "Please fill in all required fields and upload a file."
+        "Please fill in all required fields and upload a file. Request a new one-time code before submitting again."
       );
     }
+  }
+
+  private saveSingleGrade(token: string): void {
+    if (!this.canSaveSingle()) {
+      this._customNotificationService.notification(
+        'error',
+        'Error',
+        'Select a course section and enter student code, mark, and grade.'
+      );
+      return;
+    }
+
+    const assignment = this.importStudentGradeForm.getRawValue();
+    const single = this.singleGradeForm.getRawValue();
+    const payload = {
+      academicTermYearId: assignment.academicTermYearId,
+      academicTermId: assignment.academicTermId,
+      staffId: assignment.staffId,
+      courseId: assignment.courseId,
+      batchCode: assignment.batchCode,
+      studentCode: String(single.studentCode || '').trim(),
+      gradeLetter: single.gradeLetter,
+      mark: Number(single.mark)
+    };
+
+    this._studentService.recordSingleGrade(payload, token).subscribe({
+      next: (res) => {
+        this.handleGradeSaveResult(res, 'Student grade recorded successfully.');
+        if (!this.hasGradeSaveErrors(res)) {
+          this.singleGradeForm.reset({
+            studentCode: '',
+            mark: null,
+            gradeLetter: null,
+            remark: ''
+          });
+        }
+      },
+      error: (error) => {
+        console.error('API Error:', error);
+        this._customNotificationService.notification(
+          'error',
+          'Error',
+          this.gradeActionRetryMessage(error?.error?.error || error?.message)
+        );
+      }
+    });
+  }
+
+  private gradeActionRetryMessage(detail?: string): string {
+    const base = detail || 'The grade action failed.';
+    return `${base} The one-time code was already used. Request a new code and try again.`;
+  }
+
+  private hasGradeSaveErrors(res: any): boolean {
+    const payload = this.unwrapGradeSaveResult(res);
+    return !!(payload?.errors && payload.errors.length > 0);
+  }
+
+  private unwrapGradeSaveResult(res: any): any {
+    if (!res) {
+      return null;
+    }
+    if (res.data && (res.data.importedCount != null || res.data.errors || res.data.message)) {
+      return res.data;
+    }
+    return res;
+  }
+
+  private handleGradeSaveResult(res: any, successMessage: string): void {
+    const payload = this.unwrapGradeSaveResult(res);
+
+    if (this.hasGradeSaveErrors(res) && !(payload?.importedCount > 0)) {
+      this.errorList = payload?.errors || [];
+      this.isErrorModalVisible = true;
+      this._customNotificationService.notification(
+        'warning',
+        'Issues found',
+        'The one-time code was already used. Fix the issues, then request a new code to submit again.'
+      );
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.importSummary = {
+      importedCount: Number(payload?.importedCount ?? 0),
+      skippedNotRegistered: payload?.skippedNotRegistered || [],
+      skippedNotFound: payload?.skippedNotFound || [],
+      skippedInvalid: payload?.skippedInvalid || [],
+      message: payload?.message || successMessage
+    };
+
+    const hasSkips =
+      this.importSummary.skippedNotRegistered.length > 0 ||
+      this.importSummary.skippedNotFound.length > 0 ||
+      this.importSummary.skippedInvalid.length > 0;
+
+    this.isSummaryModalVisible = true;
+    this._customNotificationService.notification(
+      hasSkips ? 'warning' : 'success',
+      hasSkips ? 'Import finished with skips' : 'Success',
+      this.importSummary.message
+    );
+    this.cdr.detectChanges();
   }
 
   // Modal methods
   showErrorModal(): void {
     this.isErrorModalVisible = true;
   }
-
 
   handleErrorModalOk(): void {
     this.isErrorModalVisible = false;
@@ -646,6 +780,19 @@ export class ImportStudentGradeComponent implements OnInit {
   handleErrorModalCancel(): void {
     this.isErrorModalVisible = false;
     this.errorList = [];
+  }
+
+  handleSummaryModalClose(): void {
+    this.isSummaryModalVisible = false;
+    const imported = this.importSummary?.importedCount ?? 0;
+    this.importSummary = null;
+    if (this.entryMode === 'excel' && imported > 0) {
+      this._router.navigateByUrl(`/students/StudentGrades`);
+    }
+  }
+
+  formatStudentCodes(codes: string[] | null | undefined): string {
+    return (codes && codes.length > 0) ? codes.join(', ') : '—';
   }
 
   private prepareFormData(): void {
@@ -672,10 +819,18 @@ export class ImportStudentGradeComponent implements OnInit {
   goToCourse(): void {
     this._router.navigateByUrl(`/students/StudentGrades`);
   }
+  private hasAssignmentSelection(): boolean {
+    return this.importStudentGradeForm.valid;
+  }
+
   canSave(): boolean {
     return (
-      this.importStudentGradeForm.valid &&
+      this.hasAssignmentSelection() &&
       this.importStudentGradeForm.value.ActualFile !== ""
     );
+  }
+
+  canSaveSingle(): boolean {
+    return this.hasAssignmentSelection() && this.singleGradeForm.valid;
   }
 }

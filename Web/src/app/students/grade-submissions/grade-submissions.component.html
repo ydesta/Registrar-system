@@ -1,0 +1,189 @@
+<div class="content-container">
+  <div class="header-section">
+    <div class="page-title">
+      <h2 class="title-text">Grade Submissions</h2>
+      <p class="subtitle-text">{{ subtitleText }}</p>
+    </div>
+  </div>
+
+  <div class="filters-card">
+    <div class="filters-grid" [class.is-instructor]="!isAdmin">
+      <div class="filter-field">
+        <label>Batch</label>
+        <nz-select
+          nzAllowClear
+          nzPlaceHolder="All batches"
+          [(ngModel)]="filterBatch"
+          (ngModelChange)="applyFilters()">
+          <nz-option *ngFor="let batch of batchOptions" [nzValue]="batch" [nzLabel]="batch"></nz-option>
+        </nz-select>
+      </div>
+      <div class="filter-field">
+        <label>Term</label>
+        <nz-select
+          nzAllowClear
+          nzPlaceHolder="All terms"
+          [(ngModel)]="filterTerm"
+          (ngModelChange)="applyFilters()">
+          <nz-option *ngFor="let term of termOptions" [nzValue]="term" [nzLabel]="term"></nz-option>
+        </nz-select>
+      </div>
+      <div class="filter-field">
+        <label>Course</label>
+        <nz-select
+          nzAllowClear
+          nzPlaceHolder="All courses"
+          [(ngModel)]="filterCourse"
+          (ngModelChange)="onCourseFilterChange($event)">
+          <nz-option *ngFor="let course of courseOptions" [nzValue]="course" [nzLabel]="course"></nz-option>
+        </nz-select>
+      </div>
+      <div class="filter-field" *ngIf="isAdmin">
+        <label>Instructor</label>
+        <nz-select
+          nzAllowClear
+          nzPlaceHolder="All instructors"
+          [(ngModel)]="filterInstructor"
+          (ngModelChange)="applyFilters()">
+          <nz-option *ngFor="let instructor of instructorOptions" [nzValue]="instructor" [nzLabel]="instructor"></nz-option>
+        </nz-select>
+      </div>
+      <div class="filter-actions">
+        <button nz-button type="button" (click)="clearFilters()">Clear</button>
+        <button nz-button nzType="primary" type="button" [nzLoading]="loading" (click)="loadSubmissions()">
+          Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-head">
+      <h3>Submissions</h3>
+    </div>
+    <nz-table
+      #submissionTable
+      [nzData]="filteredSubmissions"
+      [nzLoading]="loading"
+      [nzPageSize]="10"
+      [nzShowSizeChanger]="true"
+      [nzFrontPagination]="true"
+      [nzNoResult]="emptySubmissions"
+      nzBordered
+      class="submissions-table">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Batch</th>
+          <th>Term / Year</th>
+          <th *ngIf="isAdmin">Instructor</th>
+          <th nzWidth="90px">Students</th>
+          <th>Uploaded</th>
+          <th nzWidth="180px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let row of submissionTable.data"
+          [class.is-selected]="selected?.courseId === row.courseId && selected?.staffId === row.staffId && selected?.academicTermId === row.academicTermId && selected?.batchCode === row.batchCode">
+          <td>{{ row.course || '—' }}</td>
+          <td>{{ row.batchCode || '—' }}</td>
+          <td>{{ row.academicTerm || '—' }}</td>
+          <td *ngIf="isAdmin">{{ row.instructor || '—' }}</td>
+          <td>{{ row.studentCount }}</td>
+          <td>{{ formatDate(row.uploadedAt) }}</td>
+          <td class="actions-cell">
+            <button nz-button nzType="link" type="button" (click)="viewSubmission(row)">View</button>
+            <button
+              nz-button
+              nzType="link"
+              type="button"
+              [disabled]="!row.fileUrl && !row.fileName"
+              (click)="downloadFile(row)">
+              Download
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+    <ng-template #emptySubmissions>
+      <nz-empty nzNotFoundContent="No grade submissions found for the current filters."></nz-empty>
+    </ng-template>
+  </div>
+
+  <div class="panel-card detail-card" *ngIf="selected">
+    <div class="detail-header">
+      <div>
+        <div class="detail-kicker">Selected submission</div>
+        <h3>{{ selected.course }}</h3>
+        <p>
+          Batch {{ selected.batchCode || '—' }} · {{ selected.academicTerm || '—' }}
+          <ng-container *ngIf="isAdmin">
+            · Instructor <strong>{{ selected.instructor || '—' }}</strong>
+          </ng-container>
+        </p>
+      </div>
+      <button
+        nz-button
+        nzType="primary"
+        type="button"
+        [disabled]="!selected.fileUrl && !selected.fileName"
+        (click)="downloadFile(selected)">
+        <span nz-icon nzType="download" nzTheme="outline"></span>
+        Download Excel
+      </button>
+    </div>
+
+    <div class="meta-grid" [class.is-instructor]="!isAdmin">
+      <div class="meta-item">
+        <span class="label">File</span>
+        <span class="value">{{ selected.fileName || 'No file linked' }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="label">Imported</span>
+        <span class="value">{{ selected.studentCount }} students</span>
+      </div>
+      <div class="meta-item" *ngIf="isAdmin">
+        <span class="label">Instructor</span>
+        <span class="value">{{ selected.instructor || '—' }}</span>
+      </div>
+    </div>
+
+    <div class="report-title">Grade report</div>
+    <nz-spin [nzSpinning]="detailLoading">
+      <nz-table
+        #detailTable
+        [nzData]="lines"
+        [nzPageSize]="20"
+        [nzShowSizeChanger]="true"
+        [nzFrontPagination]="true"
+        [nzNoResult]="emptyLines"
+        nzBordered
+        class="report-table">
+        <thead>
+          <tr>
+            <th nzWidth="70px">S/N</th>
+            <th>Student code</th>
+            <th>Full name</th>
+            <th nzWidth="100px">Mark</th>
+            <th nzWidth="90px">Grade</th>
+            <th nzWidth="90px">Credit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let line of detailTable.data">
+            <td>{{ line.serialNo }}</td>
+            <td>{{ line.studentCode }}</td>
+            <td>{{ line.fullName || '—' }}</td>
+            <td>{{ line.mark ?? '—' }}</td>
+            <td>{{ line.gradeLetter || '—' }}</td>
+            <td>{{ line.creditHour ?? '—' }}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+      <ng-template #emptyLines>
+        <nz-empty nzNotFoundContent="No grade rows for this submission."></nz-empty>
+      </ng-template>
+    </nz-spin>
+  </div>
+</div>

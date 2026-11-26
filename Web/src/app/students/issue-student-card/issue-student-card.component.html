@@ -1,0 +1,134 @@
+<div class="content-container">
+  <div class="header-section">
+    <div class="page-title">
+      <h1>Issue student ID card</h1>
+      <p class="subtitle">
+        Filter by batch, pick a student without a card, choose the designed template,
+        preview the bound ID, then issue.
+      </p>
+    </div>
+  </div>
+
+  <div class="issue-layout">
+    <div class="form-card">
+      <form nz-form [formGroup]="form" (ngSubmit)="submit()" class="issue-form">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzRequired>Batch</nz-form-label>
+          <nz-form-control [nzSpan]="24" nzErrorTip="Batch is required">
+            <nz-select formControlName="batchCode"
+                       nzShowSearch
+                       nzPlaceHolder="Select batch"
+                       nzAllowClear
+                       [nzLoading]="loadingBatches"
+                       class="full-width">
+              <nz-option *ngFor="let b of batches"
+                         [nzValue]="b.code"
+                         [nzLabel]="b.label"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzRequired>
+            Student
+            <span class="eligible-count" *ngIf="form.value.batchCode">({{ students.length }} not issued)</span>
+          </nz-form-label>
+          <nz-form-control [nzSpan]="24" nzErrorTip="Student is required">
+            <nz-select formControlName="studentId"
+                       nzShowSearch
+                       nzPlaceHolder="Select student without a card"
+                       nzAllowClear
+                       [nzLoading]="loadingStudents"
+                       [nzDisabled]="!form.value.batchCode"
+                       class="full-width">
+              <nz-option *ngFor="let s of students"
+                         [nzValue]="studentGuid(s)"
+                         [nzLabel]="studentLabel(s)"></nz-option>
+            </nz-select>
+            <p class="hint" *ngIf="form.value.batchCode && !loadingStudents && !students.length">
+              No students without a card in this batch.
+            </p>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24">Card design</nz-form-label>
+          <nz-form-control [nzSpan]="24">
+            <nz-select formControlName="cardTemplateId"
+                       nzShowSearch
+                       nzPlaceHolder="Default template"
+                       nzAllowClear
+                       [nzLoading]="loadingTemplates"
+                       class="full-width">
+              <nz-option *ngFor="let t of templates"
+                         [nzValue]="t.id"
+                         [nzLabel]="templateLabel(t)"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24">Photo path</nz-form-label>
+          <nz-form-control [nzSpan]="24">
+            <input nz-input formControlName="photoPath" placeholder="Auto-filled from student profile when available" />
+            <div *ngIf="photoPreview" class="photo-preview">
+              <img [src]="photoPreview" alt="Student photo" />
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24">Remark</nz-form-label>
+          <nz-form-control [nzSpan]="24">
+            <textarea nz-input formControlName="remark" rows="3"></textarea>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control [nzSpan]="24">
+            <label nz-checkbox formControlName="activateImmediately">Activate immediately after issue</label>
+          </nz-form-control>
+        </nz-form-item>
+
+        <div class="form-actions">
+          <button nz-button nzType="primary" [nzLoading]="saving" [disabled]="form.invalid">Issue card</button>
+          <a nz-button nzType="default" routerLink="../student-cards">Cancel</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-title">
+        <h2>Live ID preview</h2>
+        <p>Student data bound to the selected designed template</p>
+      </div>
+      <nz-spin [nzSpinning]="previewLoading">
+        <ng-container *ngIf="frontElements.length; else noPreview">
+          <div class="face-block">
+            <div class="face-label">Front</div>
+            <app-student-card-face
+              [widthMm]="faceWidthMm"
+              [heightMm]="faceHeightMm"
+              [elements]="frontElements"
+              [values]="faceValues"
+              [backgroundUrl]="frontBackgroundUrl">
+            </app-student-card-face>
+          </div>
+          <div class="face-block" *ngIf="backElements.length">
+            <div class="face-label">Back</div>
+            <app-student-card-face
+              [widthMm]="faceWidthMm"
+              [heightMm]="faceHeightMm"
+              [elements]="backElements"
+              [values]="faceValues"
+              [backgroundUrl]="backBackgroundUrl">
+            </app-student-card-face>
+          </div>
+        </ng-container>
+        <ng-template #noPreview>
+          <nz-empty nzNotFoundContent="Select a batch and student to preview the ID"></nz-empty>
+        </ng-template>
+      </nz-spin>
+    </div>
+  </div>
+</div>

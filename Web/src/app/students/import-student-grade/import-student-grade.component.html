@@ -3,7 +3,7 @@
     <div class="header-content">
       <div class="page-title">
         <h2 class="title-text">{{ action }}</h2>
-        <p class="subtitle-text">Import student grades from Excel files</p>
+        <p class="subtitle-text">Import from Excel or record one student for one course</p>
       </div>
       <div class="header-actions">
         <button
@@ -211,7 +211,26 @@
           </div>
 
           <div class="form-section form-section-upload">
-            <div class="upload-panel">
+            <div class="entry-mode-tabs">
+              <button
+                type="button"
+                class="entry-mode-tab"
+                [class.active]="entryMode === 'excel'"
+                (click)="setEntryMode('excel')">
+                <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+                Excel file
+              </button>
+              <button
+                type="button"
+                class="entry-mode-tab"
+                [class.active]="entryMode === 'single'"
+                (click)="setEntryMode('single')">
+                <span nz-icon nzType="user" nzTheme="outline"></span>
+                Single student
+              </button>
+            </div>
+
+            <div class="upload-panel" *ngIf="entryMode === 'excel'">
               <nz-form-item class="upload-form-item">
                 <nz-form-label nzRequired class="upload-form-label">Grade file</nz-form-label>
                 <nz-form-control>
@@ -235,6 +254,60 @@
                 </nz-form-control>
               </nz-form-item>
             </div>
+
+            <div class="single-panel" *ngIf="entryMode === 'single'" [formGroup]="singleGradeForm">
+              <nz-form-item class="upload-form-item">
+                <nz-form-label nzRequired class="upload-form-label">Single student grade</nz-form-label>
+                <nz-form-control>
+                  <p class="upload-field-hint">
+                    Record one grade for one student in the course section selected above. The same one-time code is required.
+                  </p>
+                </nz-form-control>
+              </nz-form-item>
+
+              <div class="single-grade-grid">
+                <nz-form-item>
+                  <nz-form-label nzRequired>Student code</nz-form-label>
+                  <nz-form-control nzErrorTip="Enter the student code.">
+                    <input
+                      nz-input
+                      formControlName="studentCode"
+                      placeholder="e.g. STG1042"
+                      autocomplete="off" />
+                  </nz-form-control>
+                </nz-form-item>
+
+                <nz-form-item>
+                  <nz-form-label nzRequired>Mark</nz-form-label>
+                  <nz-form-control nzErrorTip="Enter the mark.">
+                    <input
+                      nz-input
+                      type="number"
+                      formControlName="mark"
+                      placeholder="Total (100%)"
+                      min="0"
+                      max="100" />
+                  </nz-form-control>
+                </nz-form-item>
+
+                <nz-form-item>
+                  <nz-form-label nzRequired>Grade</nz-form-label>
+                  <nz-form-control nzErrorTip="Select a grade.">
+                    <nz-select
+                      formControlName="gradeLetter"
+                      nzPlaceHolder="Select grade"
+                      nzShowSearch
+                      class="professional-select">
+                      <nz-option
+                        *ngFor="let g of gradeList"
+                        [nzValue]="g"
+                        [nzLabel]="g">
+                      </nz-option>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -254,16 +327,63 @@
             nzType="primary"
             class="submit-btn"
             type="submit"
-            [disabled]="!canSave() || !importStudentGradeForm.valid"
+            [disabled]="entryMode === 'excel' ? (!canSave() || !importStudentGradeForm.valid) : !canSaveSingle()"
           >
-            <span nz-icon nzType="upload" nzTheme="outline"></span>
-            {{ submit }}
+            <span nz-icon [nzType]="entryMode === 'excel' ? 'upload' : 'check'" nzTheme="outline"></span>
+            {{ entryMode === 'excel' ? submit : 'Record grade' }}
           </button>
         </div>
       </form>
     </div>
   </div>
 </div>
+
+<app-grade-action-otp
+  [(visible)]="otpVisible"
+  purpose="GradeImport"
+  (confirmed)="onGradeCodeConfirmed($event)">
+</app-grade-action-otp>
+
+<nz-modal
+  [(nzVisible)]="isSummaryModalVisible"
+  nzTitle="Grade Import Summary"
+  nzWidth="640px"
+  (nzOnCancel)="handleSummaryModalClose()"
+  [nzFooter]="null"
+  [nzMaskClosable]="false"
+  [nzClosable]="true"
+>
+  <div *nzModalContent>
+    <nz-alert
+      *ngIf="importSummary as summary"
+      [nzType]="summary.importedCount > 0 ? 'success' : 'warning'"
+      [nzMessage]="'Total grade imported: ' + summary.importedCount"
+      [nzDescription]="summary.message"
+      [nzShowIcon]="true">
+    </nz-alert>
+
+    <div class="import-summary-block" *ngIf="importSummary as summary">
+      <div class="summary-row">
+        <strong>No registered student for this course</strong>
+        <p>{{ formatStudentCodes(summary.skippedNotRegistered) }}</p>
+      </div>
+      <div class="summary-row" *ngIf="summary.skippedNotFound?.length">
+        <strong>Student not found</strong>
+        <p>{{ formatStudentCodes(summary.skippedNotFound) }}</p>
+      </div>
+      <div class="summary-row" *ngIf="summary.skippedInvalid?.length">
+        <strong>Invalid mark</strong>
+        <p>{{ formatStudentCodes(summary.skippedInvalid) }}</p>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button nz-button nzType="primary" type="button" (click)="handleSummaryModalClose()">
+        Close
+      </button>
+    </div>
+  </div>
+</nz-modal>
 
 <nz-modal
   [(nzVisible)]="isErrorModalVisible"

@@ -1,0 +1,508 @@
+<div class="designer-shell">
+  <header class="header-bar">
+    <div class="title-group">
+      <div class="title-icon"><i nz-icon nzType="idcard" nzTheme="outline"></i></div>
+      <div>
+        <h1>{{ pageTitle }}</h1>
+        <p class="subtitle">Configure sections, fields, and preview the printed student ID card</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/students/card-templates" nz-button nzType="default">
+        <i nz-icon nzType="arrow-left"></i> Back to list
+      </a>
+      <button nz-button nzType="default" (click)="applyClassicStarter()">
+        <i nz-icon nzType="thunderbolt"></i> HiLCoE starter
+      </button>
+      <button nz-button nzType="default" (click)="applyPortraitVerticalStarter()"
+              nz-tooltip="Optional vertical school ID (front + back)">
+        <i nz-icon nzType="idcard"></i> Portrait ID
+      </button>
+      <button nz-button nzType="primary" [nzLoading]="saving" (click)="save()">
+        <i nz-icon nzType="save"></i> Save template
+      </button>
+      <button nz-button nzType="default" (click)="toggleInspector()" nz-tooltip="Field inspector">
+        <i nz-icon nzType="control"></i>
+      </button>
+      <button nz-button nzType="default" (click)="toggleSettings()" nz-tooltip="Template settings">
+        <i nz-icon nzType="setting"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="workspace"
+       [class.settings-collapsed]="!settingsOpen"
+       [class.inspector-collapsed]="!inspectorOpen">
+    <aside class="panel settings-panel" *ngIf="settingsOpen">
+      <div class="panel-title">Template settings</div>
+      <form [formGroup]="form" nz-form nzLayout="vertical" class="settings-form">
+        <nz-form-item>
+          <nz-form-label>Name</nz-form-label>
+          <nz-form-control><input nz-input formControlName="name" /></nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>Description</nz-form-label>
+          <nz-form-control><input nz-input formControlName="description" /></nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>Card type</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="cardTypeId" class="full">
+              <nz-option *ngFor="let t of cardTypes" [nzValue]="t.id" [nzLabel]="t.name + ' (' + t.code + ')'"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>Orientation</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="orientation" class="full" (ngModelChange)="onOrientationChange($event)">
+              <nz-option [nzValue]="2" nzLabel="Landscape (CR80)"></nz-option>
+              <nz-option [nzValue]="1" nzLabel="Portrait (badge)"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <div class="row2">
+          <nz-form-item>
+            <nz-form-label>Width mm</nz-form-label>
+            <nz-form-control><input nz-input type="number" formControlName="widthMm" step="0.01" /></nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Height mm</nz-form-label>
+            <nz-form-control><input nz-input type="number" formControlName="heightMm" step="0.01" /></nz-form-control>
+          </nz-form-item>
+        </div>
+        <div class="checks">
+          <label nz-checkbox formControlName="isDefault">Default template</label>
+          <label nz-checkbox formControlName="isActive">Active</label>
+          <label nz-checkbox
+                 formControlName="includeBack"
+                 (ngModelChange)="onIncludeBackChanged($event)">
+            Include back side
+          </label>
+        </div>
+        <p class="palette-hint" *ngIf="!form.value.includeBack">
+          Back side is off — only the front prints. Turn on <strong>Include back side</strong> to design or print a back.
+        </p>
+
+        <div class="panel-subtitle">Assets</div>
+        <nz-form-item>
+          <nz-form-label>Logo</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="logoAssetId" nzAllowClear nzPlaceHolder="Choose logo" class="full" (ngModelChange)="onLogoChanged()">
+              <nz-option *ngFor="let a of logoAssets" [nzValue]="a.id" [nzLabel]="a.name"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>Front background</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="frontBackgroundAssetId"
+                       nzAllowClear
+                       nzPlaceHolder="Optional"
+                       class="full"
+                       (ngModelChange)="onBackgroundChanged()">
+              <nz-option *ngFor="let a of backgroundAssets" [nzValue]="a.id" [nzLabel]="a.name"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item *ngIf="form.value.includeBack">
+          <nz-form-label>Back background</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="backBackgroundAssetId"
+                       nzAllowClear
+                       nzPlaceHolder="Same as front if empty"
+                       class="full"
+                       (ngModelChange)="onBackgroundChanged()">
+              <nz-option *ngFor="let a of backgroundAssets" [nzValue]="a.id" [nzLabel]="a.name"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <label class="upload-label">Upload logo
+          <input type="file" accept="image/*" (change)="onAssetUpload($event, 1)" />
+        </label>
+        <label class="upload-label">Upload background
+          <input type="file" accept="image/*" (change)="onAssetUpload($event, 2)" />
+        </label>
+
+        <div class="panel-subtitle">Optional overlays</div>
+        <p class="palette-hint">
+          Leave empty unless your college needs them. Watermark and seal only print when selected.
+        </p>
+        <nz-form-item>
+          <nz-form-label>Watermark</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="watermarkAssetId"
+                       nzAllowClear
+                       nzPlaceHolder="None — optional"
+                       class="full"
+                       (ngModelChange)="onOptionalOverlayChanged()">
+              <nz-option *ngFor="let a of watermarkAssets" [nzValue]="a.id" [nzLabel]="a.name"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>Seal / stamp</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="sealAssetId"
+                       nzAllowClear
+                       nzPlaceHolder="None — optional"
+                       class="full"
+                       (ngModelChange)="onOptionalOverlayChanged()">
+              <nz-option *ngFor="let a of sealAssets" [nzValue]="a.id" [nzLabel]="a.name"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <label class="upload-label">Upload watermark
+          <input type="file" accept="image/*" (change)="onAssetUpload($event, 4)" />
+        </label>
+        <label class="upload-label">Upload seal
+          <input type="file" accept="image/*" (change)="onAssetUpload($event, 5)" />
+        </label>
+      </form>
+
+      <div class="panel-subtitle">Field palette</div>
+      <p class="palette-hint">
+        Data fields add a full row (label + value + line).
+        Drag <strong>QR</strong> onto the card, then set its content in the inspector.
+      </p>
+      <div class="palette-btn"
+           role="button"
+           tabindex="0"
+           draggable="true"
+           (dragstart)="onPaletteDragStart($event, { label: 'Color band', type: 'shape', sourcePath: '', group: 'Layout' })"
+           (click)="addShape()"
+           (keydown.enter)="addShape()">
+        Layout · Color band
+      </div>
+      <div class="palette-group" *ngFor="let g of paletteGroups">
+        <div class="palette-group__title">{{ g.group }}</div>
+        <div *ngFor="let p of g.items"
+             class="palette-btn"
+             role="button"
+             tabindex="0"
+             draggable="true"
+             (dragstart)="onPaletteDragStart($event, p)"
+             (click)="addFromPalette(p)"
+             (keydown.enter)="addFromPalette(p)">
+          {{ p.label }}
+        </div>
+      </div>
+    </aside>
+
+    <main class="canvas-panel">
+      <div class="view-bar">
+        <nz-radio-group [(ngModel)]="activeSide" (ngModelChange)="setSide($event)" nzButtonStyle="solid">
+          <label nz-radio-button nzValue="front">Front</label>
+          <label nz-radio-button nzValue="back" [nzDisabled]="!form.value.includeBack">Back</label>
+        </nz-radio-group>
+        <nz-switch
+          class="back-toggle"
+          [ngModel]="form.value.includeBack"
+          (ngModelChange)="onIncludeBackChanged($event)"
+          nzCheckedChildren="Back on"
+          nzUnCheckedChildren="Back off"
+          nz-tooltip="Enable or disable the back side of this ID card">
+        </nz-switch>
+        <span class="view-meta">{{ form.value.widthMm }} × {{ form.value.heightMm }} mm · {{ elements.length }} fields</span>
+        <div class="zoom-bar">
+          <button nz-button nzType="default" nzSize="small" (click)="zoomOut()" nz-tooltip="Zoom out">−</button>
+          <button nz-button nzType="default" nzSize="small" (click)="zoomFit()" nz-tooltip="Fit card in view">{{ zoomPercent }}%</button>
+          <button nz-button nzType="default" nzSize="small" (click)="zoomIn()" nz-tooltip="Zoom in">+</button>
+        </div>
+        <button nz-button nzDanger nzType="default" nzSize="small"
+                (click)="removeSelected()"
+                [disabled]="!selectedId"
+                nz-tooltip="Delete or Backspace">
+          Remove field
+        </button>
+      </div>
+
+      <div class="stage" #stageHost [class.loading]="loading"
+           (dragover)="onCardDragOver($event)"
+           (drop)="onCardDrop($event)">
+        <div class="stage-card"
+             (dragover)="onCardDragOver($event)"
+             (drop)="onCardDrop($event)">
+          <app-student-card-face
+            [widthMm]="form.value.widthMm || 85.6"
+            [heightMm]="form.value.heightMm || 53.98"
+            [elements]="elements"
+            [values]="sample"
+            [backgroundUrl]="backgroundUrl()"
+            [interactive]="true"
+            [selectedId]="selectedId"
+            [scale]="previewScale"
+            (elementMouseDown)="onElementMouseDown($event)"
+            (elementClick)="select($event)">
+          </app-student-card-face>
+          <div class="align-guides" *ngIf="alignGuides.length" aria-hidden="true">
+            <span *ngFor="let g of alignGuides"
+                  class="align-guide"
+                  [class.align-guide--v]="g.axis === 'x'"
+                  [class.align-guide--h]="g.axis === 'y'"
+                  [ngStyle]="guideStyle(g)">
+            </span>
+          </div>
+        </div>
+        <p class="hint">
+          Select a field, then <strong>← ↑ → ↓</strong> to move
+          (label + value + line move together · Shift = 1&nbsp;mm) ·
+          <strong>Ctrl+Z</strong> undo · <strong>Ctrl+U</strong> redo
+        </p>
+      </div>
+    </main>
+
+    <aside class="panel inspector-panel" *ngIf="inspectorOpen">
+      <div class="panel-title">{{ selected?.type === 'image' ? 'Image properties' : 'Selected field' }}</div>
+      <div class="image-list" *ngIf="cardImages.length">
+        <div class="panel-subtitle">Images on this side</div>
+        <button type="button"
+                class="image-list__item"
+                *ngFor="let img of cardImages"
+                [class.is-active]="img.id === selectedId"
+                (click)="select(img)">
+          {{ imageCaption(img) }}
+        </button>
+      </div>
+      <ng-container *ngIf="selected as s; else noSelection">
+        <div class="field-type">{{ s.type === 'image' ? imageCaption(s) : s.type }}</div>
+
+        <div class="logo-shape" *ngIf="s.type === 'image'">
+          <ng-container *ngIf="isCollegeLogo(s)">
+            <div class="logo-shape__subtitle">Shape</div>
+            <label class="qr-field-check">
+              <input type="radio"
+                     name="logo-shape"
+                     [checked]="logoShapeOf(s) === 'circle'"
+                     (change)="setLogoShape(s, 'circle')" />
+              <span>
+                <strong>Circle</strong>
+                <small>Round badge. A wide image is cropped to the emblem.</small>
+              </span>
+            </label>
+            <label class="qr-field-check">
+              <input type="radio"
+                     name="logo-shape"
+                     [checked]="logoShapeOf(s) === 'rectangle'"
+                     (change)="setLogoShape(s, 'rectangle')" />
+              <span>
+                <strong>Rectangular</strong>
+                <small>Full banner, including the wordmark.</small>
+              </span>
+            </label>
+            <div class="logo-shape__subtitle">Width</div>
+            <input class="logo-width__range"
+                   type="range"
+                   [min]="logoWidthMin(s)"
+                   [max]="logoWidthMax(s)"
+                   step="0.5"
+                   [ngModel]="s.wMm"
+                   (ngModelChange)="setLogoWidth(s, $event)" />
+            <div class="logo-width__row">
+              <button nz-button nzType="default" nzSize="small" type="button" (click)="setLogoWidth(s, 'min')">
+                Minimize
+              </button>
+              <button nz-button nzType="default" nzSize="small" type="button" (click)="setLogoWidth(s, 'max')">
+                Maximize
+              </button>
+            </div>
+            <p class="logo-width__value">{{ s.wMm }} mm · {{ logoWidthMin(s) }}–{{ logoWidthMax(s) }} mm</p>
+          </ng-container>
+          <div class="logo-shape__subtitle">Fit</div>
+          <label class="qr-field-check">
+            <input type="radio"
+                   name="image-fit"
+                   [checked]="imageFitOf(s) === 'contain'"
+                   (change)="setImageFit(s, 'contain')" />
+            <span>
+              <strong>Fit</strong>
+              <small>Show the whole image inside the box.</small>
+            </span>
+          </label>
+          <label class="qr-field-check">
+            <input type="radio"
+                   name="image-fit"
+                   [checked]="imageFitOf(s) === 'cover'"
+                   (change)="setImageFit(s, 'cover')" />
+            <span>
+              <strong>Fill</strong>
+              <small>Cover the box and crop the edges.</small>
+            </span>
+          </label>
+          <label class="qr-field-check">
+            <input type="radio"
+                   name="image-fit"
+                   [checked]="imageFitOf(s) === 'fill'"
+                   (change)="setImageFit(s, 'fill')" />
+            <span>
+              <strong>Stretch</strong>
+              <small>Stretch the image to the box.</small>
+            </span>
+          </label>
+          <button nz-button nzType="default" nzSize="small" class="logo-fit-btn" type="button" (click)="fitLogoSize(s)">
+            Fit size
+          </button>
+          <p class="logo-shape__hint">Fit size sets height from the image proportions at the current width.</p>
+          <p class="logo-shape__hint" *ngIf="isCollegeLogo(s) && logoShapeOf(s) === 'rectangle'">
+            A wide banner already includes the school name. Remove the HiLCoE and tagline fields if they sit on top of it.
+          </p>
+        </div>
+
+        <div class="inspector-tip" *ngIf="s.type === 'staticText'">
+          Edit <strong>Label name</strong> below — this is the text printed on the card (e.g. Batch, Issued date).
+        </div>
+        <div class="inspector-tip" *ngIf="s.type === 'text'">
+          This is a <strong>value</strong> field. Data comes from
+          <code>{{ s.sourcePath }}</code>. Use a separate <strong>Static text</strong> item for the printed label.
+        </div>
+        <div class="inspector-tip" *ngIf="s.type === 'qr'">
+          Default: phone scan shows the selected student/card text.
+          Use a website link only when the public site is deployed (not localhost).
+        </div>
+
+        <label class="label-name-field" *ngIf="s.type !== 'qr'">Label name
+          <input nz-input
+                 [ngModel]="labelNameOf(s)"
+                 (ngModelChange)="setLabelName(s, $event)"
+                 [disabled]="isLocked(s)"
+                 placeholder="e.g. Batch" />
+        </label>
+        <label *ngIf="s.type === 'text'">Bound value
+          <input nz-input [ngModel]="s.sourcePath" disabled />
+        </label>
+
+        <div class="qr-fields" *ngIf="s.type === 'qr'">
+          <div class="qr-fields__title">QR content</div>
+
+          <label class="qr-field-check">
+            <input type="radio"
+                   name="qr-mode"
+                   [checked]="isQrCustomDataMode(s)"
+                   (change)="setQrMode(s, 'custom')" />
+            <span>
+              <strong>Card data (recommended)</strong>
+              <small>Scan shows name, student ID, card #, dates, college…</small>
+            </span>
+          </label>
+          <label class="qr-field-check">
+            <input type="radio"
+                   name="qr-mode"
+                   [checked]="!isQrCustomDataMode(s)"
+                   (change)="setQrMode(s, 'link')" />
+            <span>
+              <strong>Website link</strong>
+              <small>Only when a public site URL is available</small>
+            </span>
+          </label>
+
+          <label class="qr-field-check">
+            <input type="checkbox"
+                   [checked]="s.qrLogo !== false"
+                   (change)="setQrLogo(s, $any($event.target).checked)" />
+            <span>
+              <strong>Show college logo</strong>
+              <small>Uses the uploaded logo in the QR center</small>
+            </span>
+          </label>
+
+          <ng-container *ngIf="!isQrCustomDataMode(s)">
+            <div class="qr-fields__subtitle">Value</div>
+            <label class="qr-field-check" *ngFor="let opt of qrContentOptions">
+              <input type="radio"
+                     name="qr-content"
+                     [checked]="qrContentPath(s) === opt.path"
+                     (change)="setQrContent(s, opt.path)" />
+              <span>
+                <strong>{{ opt.label }}</strong>
+              </span>
+            </label>
+          </ng-container>
+
+          <ng-container *ngIf="isQrCustomDataMode(s)">
+            <div class="qr-fields__subtitle">Fields</div>
+            <p class="qr-fields__hint" *ngIf="qrFieldsPreview(s) as preview">{{ preview }}</p>
+            <label class="qr-field-check" *ngFor="let opt of qrDataFieldOptions">
+              <input type="checkbox"
+                     [checked]="isQrFieldSelected(s, opt.path)"
+                     (change)="toggleQrField(s, opt.path, $any($event.target).checked)" />
+              <span>
+                <strong>{{ opt.label }}</strong>
+                <small>{{ opt.group }}</small>
+              </span>
+            </label>
+          </ng-container>
+        </div>
+
+        <button nz-button nzType="default" class="full dup-row-btn"
+                type="button"
+                *ngIf="s.type !== 'qr'"
+                (click)="duplicateSelectedFieldRow()">
+          Duplicate field row
+        </button>
+
+        <div class="prop-grid">
+          <label>X mm
+            <input nz-input type="number" step="0.1"
+                   [ngModel]="s.xMm"
+                   (ngModelChange)="setElementNumber(s, 'xMm', $event)"
+                   [disabled]="isLocked(s)" />
+          </label>
+          <label>Y mm
+            <input nz-input type="number" step="0.1"
+                   [ngModel]="s.yMm"
+                   (ngModelChange)="setElementNumber(s, 'yMm', $event)"
+                   [disabled]="isLocked(s)" />
+          </label>
+          <label>W mm
+            <input nz-input type="number" step="0.1"
+                   [ngModel]="s.wMm"
+                   (ngModelChange)="setElementNumber(s, 'wMm', $event)"
+                   [disabled]="isLocked(s)" />
+          </label>
+          <label>H mm
+            <input nz-input type="number" step="0.1"
+                   [ngModel]="s.hMm"
+                   (ngModelChange)="setElementNumber(s, 'hMm', $event)"
+                   [disabled]="isLocked(s)" />
+          </label>
+        </div>
+        <label *ngIf="s.type === 'text' || s.type === 'staticText'">Font pt
+          <input nz-input type="number" step="0.5"
+                 [ngModel]="s.fontSizePt"
+                 (ngModelChange)="setElementNumber(s, 'fontSizePt', $event)" />
+        </label>
+        <label *ngIf="s.type === 'text' || s.type === 'staticText'">Weight
+          <nz-select class="full"
+                     [ngModel]="s.fontWeight"
+                     (ngModelChange)="setElementProp(s, 'fontWeight', $event)">
+            <nz-option nzValue="normal" nzLabel="Normal"></nz-option>
+            <nz-option nzValue="bold" nzLabel="Bold"></nz-option>
+          </nz-select>
+        </label>
+        <label *ngIf="s.type === 'text' || s.type === 'staticText'">Color
+          <input nz-input type="color"
+                 [ngModel]="s.color"
+                 (ngModelChange)="setElementProp(s, 'color', $event)" />
+        </label>
+        <label *ngIf="s.type === 'text' || s.type === 'staticText'">Align
+          <nz-select class="full"
+                     [ngModel]="s.align"
+                     (ngModelChange)="setElementProp(s, 'align', $event)">
+            <nz-option nzValue="left" nzLabel="Left"></nz-option>
+            <nz-option nzValue="center" nzLabel="Center"></nz-option>
+            <nz-option nzValue="right" nzLabel="Right"></nz-option>
+          </nz-select>
+        </label>
+        <label *ngIf="s.type === 'shape'">Fill
+          <input nz-input type="color"
+                 [ngModel]="s.fill"
+                 (ngModelChange)="setElementProp(s, 'fill', $event)"
+                 [disabled]="isLocked(s)" />
+        </label>
+      </ng-container>
+      <ng-template #noSelection>
+        <p class="empty-inspector">Select an image above, or a field on the card, to edit its properties.</p>
+      </ng-template>
+    </aside>
+  </div>
+</div>

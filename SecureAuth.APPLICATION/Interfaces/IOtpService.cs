@@ -4,6 +4,7 @@ namespace SecureAuth.APPLICATION.Interfaces
 {
     public interface IOtpService
     {
+        int LifetimeSeconds { get; }
         Task<string> GenerateOtpAsync(string userId);
         Task<string> GenerateOtpAsync(string userId, string email, string purpose = "Login");
         Task<bool> ValidateOtpAsync(string userId, string otp);

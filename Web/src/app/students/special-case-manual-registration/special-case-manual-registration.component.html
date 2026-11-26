@@ -7,7 +7,13 @@
                     <h3><i nz-icon nzType="user-add"></i> Student Search</h3>
                     <p>Enter student information to begin the special case registration process</p>
                 </div> -->
-                <app-student-search (searchSubmitted)="onSearchSubmitted($event)">
+                <app-student-search
+                    title="Special Case Registration"
+                    description="Enter the Student ID to begin special-case course registration"
+                    label="Student ID"
+                    placeholder="e.g. STG1042"
+                    [showInfo]="false"
+                    (searchSubmitted)="onSearchSubmitted($event)">
                 </app-student-search>
             </div>
         </div>

@@ -1,8 +1,10 @@
 import { UnauthorizedComponent } from "./unauthorized/unauthorized.component";
 import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
+import { CardPublicScanComponent } from "./students/card-public-scan/card-public-scan.component";
 
 const routes: Routes = [
+  { path: "card-scan/:token", component: CardPublicScanComponent },
   {
     path: "accounts",
     loadChildren: () =>

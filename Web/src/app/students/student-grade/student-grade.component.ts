@@ -5,6 +5,7 @@ import { NzModalService } from "ng-zorro-antd/modal";
 import { StudentGradeViewModel } from "src/app/Models/StudentGradeViewModel";
 import { ColumnItem } from "src/app/curricula/models/ColumnItem";
 import { CustomNotificationService } from "src/app/services/custom-notification.service";
+import { AuthService } from "src/app/services/auth.service";
 import { StudentGradeService } from "../services/student-grade.service";
 import { PaginatorService, ServerPaginator } from "src/app/reports/services/paginator.service";
 
@@ -135,13 +136,16 @@ export class StudentGradeComponent implements OnInit, OnDestroy {
     }
   ];
   
+  canDeleteGrades = false;
+
   constructor(
     private _customNotificationService: CustomNotificationService,
     private modal: NzModalService,
     private _fb: FormBuilder,
     private _route: Router,
     private _studentGradeService: StudentGradeService,
-    private paginator: PaginatorService
+    private paginator: PaginatorService,
+    private authService: AuthService
   ) {
     this.pager = this.paginator.create();
     this.gradeQueryForm = this._fb.group({
@@ -151,6 +155,10 @@ export class StudentGradeComponent implements OnInit, OnDestroy {
       courseCode: [""],
       studentId: [""]
     });
+    this.canDeleteGrades =
+      this.authService.hasRole('Administrator') ||
+      this.authService.hasRole('Admin') ||
+      this.authService.hasRole('Super Admin');
   }
 
   ngOnInit(): void {
@@ -213,14 +221,22 @@ export class StudentGradeComponent implements OnInit, OnDestroy {
     }
   }
   
-  showDeleteConfirm(id: any) {
+  showDeleteConfirm(id: string) {
+    if (!id) {
+      this._customNotificationService.notification('error', 'Error', 'This grade record has no id.');
+      return;
+    }
     this.modal.confirm({
       nzTitle: 'Are you sure you want to delete this grade?',
-      nzContent: 'This action cannot be undone.',
-      nzOkText: 'Yes',
+      nzContent: 'A one-time code is required. This action cannot be undone.',
+      nzOkText: 'Continue',
       nzOkType: 'primary',
       nzOkDanger: true,
-      nzOnOk: () => {},
+      nzOnOk: () => {
+        this.pendingAction = 'delete';
+        this.pendingDeleteId = id;
+        this.otpVisible = true;
+      },
       nzCancelText: 'No',
     });
   }
@@ -242,12 +258,26 @@ export class StudentGradeComponent implements OnInit, OnDestroy {
     this.uploadFile = files;
   }
 
+  otpVisible = false;
+  pendingAction: 'upload' | 'delete' = 'upload';
+  pendingDeleteId: string | null = null;
+
   upload() {
     if (!this.uploadFile) {
       this._customNotificationService.notification('warning', 'Warning', 'Choose a file to upload first');
       return;
     }
-    
+    this.pendingAction = 'upload';
+    this.pendingDeleteId = null;
+    this.otpVisible = true;
+  }
+
+  onGradeCodeConfirmed(token: string): void {
+    if (this.pendingAction === 'delete') {
+      this.deleteGradeWithToken(token);
+      return;
+    }
+
     let fileList = <FileList>this.uploadFile.target.files;
     let formData = new FormData();
     Array.from(fileList).forEach(file => {
@@ -255,15 +285,47 @@ export class StudentGradeComponent implements OnInit, OnDestroy {
     });
     
     this.working = true;
-    this._studentGradeService.uploadGrades(formData).subscribe({
+    this._studentGradeService.uploadGrades(formData, token).subscribe({
       next: (response) => {
         this._customNotificationService.notification('success', 'Success', 'Grades uploaded successfully');
-        this.fetchStudentGrades(); // Refresh the list
+        this.fetchStudentGrades();
         this.working = false;
       },
       error: (error) => {
         console.error('Upload error:', error);
-        this._customNotificationService.notification('error', 'Error', 'Failed to upload grades');
+        this._customNotificationService.notification(
+          'error',
+          'Error',
+          (error?.error?.error || error?.message || 'Failed to upload grades.') +
+            ' The one-time code was already used. Request a new code and try again.'
+        );
+        this.working = false;
+      }
+    });
+  }
+
+  private deleteGradeWithToken(token: string): void {
+    if (!this.pendingDeleteId) {
+      this._customNotificationService.notification('error', 'Error', 'No grade selected for delete.');
+      return;
+    }
+
+    this.working = true;
+    this._studentGradeService.deleteGrade(this.pendingDeleteId, token).subscribe({
+      next: () => {
+        this._customNotificationService.notification('success', 'Success', 'Grade deleted successfully.');
+        this.pendingDeleteId = null;
+        this.fetchStudentGrades();
+        this.working = false;
+      },
+      error: (error) => {
+        console.error('Delete error:', error);
+        this._customNotificationService.notification(
+          'error',
+          'Error',
+          (error?.error?.error || error?.message || 'Failed to delete grade.') +
+            ' The one-time code was already used. Request a new code and try again.'
+        );
         this.working = false;
       }
     });

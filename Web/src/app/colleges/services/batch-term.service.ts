@@ -48,4 +48,16 @@ export class BatchTermService {
       `${this.batchTerms}/${curriculumId}/${batchId}/${isUpdate}/${academicTermId}/getAllCourseByBatchId`
     );
   }
+
+  getBatchTermsByBatchId(batchId: string): Observable<any> {
+    return this.crud.getList(`${this.batchTerms}/by-batch/${batchId}`);
+  }
+
+  updateBatchTerm(id: number, body: {
+    academicTermId: number;
+    academicYear: number;
+    academicTerm: number;
+  }): Observable<any> {
+    return this.crud.update(this.batchTerms, id, body);
+  }
 }

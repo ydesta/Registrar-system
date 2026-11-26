@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grade Record Correction — Prototype</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f5f7fa;
+      color: #1f1f1f;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .page { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .banner {
+      background: #e6f4ff;
+      border: 1px solid #91caff;
+      color: #0958d9;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #f0f0f0;
+    }
+    .header {
+      background: #1677ff;
+      color: #fff;
+      padding: 28px 32px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+    }
+    .header h1 { margin: 0 0 6px; font-size: 22px; font-weight: 600; }
+    .header p { margin: 0; opacity: 0.92; }
+    .search { padding: 28px 32px 32px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font: inherit;
+      background: #fff;
+    }
+    textarea { min-height: 72px; resize: vertical; }
+    .row { display: flex; gap: 12px; align-items: flex-end; }
+    .row .grow { flex: 1; }
+    button {
+      border: 1px solid #d9d9d9;
+      background: #fff;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font: inherit;
+      cursor: pointer;
+    }
+    button.primary { background: #1677ff; border-color: #1677ff; color: #fff; }
+    button.link { border: 0; background: transparent; color: #1677ff; padding: 0 8px; }
+    button.danger { color: #cf1322; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    .body { padding: 24px 32px 32px; }
+    .profile {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px 18px;
+      background: #fafafa;
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      font-size: 14px;
+    }
+    .profile span { color: #595959; display: block; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #f0f0f0; }
+    th { color: #595959; font-weight: 600; font-size: 13px; }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 20;
+    }
+    .modal-backdrop[hidden] { display: none; }
+    .editor {
+      width: min(760px, 100%);
+      max-height: calc(100vh - 48px);
+      overflow: auto;
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px 22px 18px;
+    }
+    .editor h2 { margin: 0 0 4px; font-size: 18px; }
+    .hint { margin: 0 0 14px; color: #595959; font-size: 13px; }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 16px; }
+    .actions { display: flex; gap: 8px; margin-top: 14px; }
+    .message { margin-top: 12px; font-size: 14px; color: #0958d9; }
+    .message.error { color: #cf1322; }
+    .history { margin-top: 28px; }
+    .history h2 { margin: 0 0 4px; font-size: 18px; }
+    .history-note { margin: 0 0 12px; color: #595959; font-size: 13px; }
+    .history-card {
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+    .history-card header { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: #595959; }
+    .history-card strong { color: #1f1f1f; }
+    .changed { color: #0958d9; font-weight: 600; }
+    .same { color: #8c8c8c; }
+    @media (max-width: 800px) {
+      .profile, .grid { grid-template-columns: 1fr; }
+      .header, .row { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="banner">Prototype only. Sample student Abel Mekonnen. Nothing is saved and the current Grade Change Request page is unchanged.</div>
+    <div class="card">
+      <div class="header">
+        <div>
+          <h1>Grade Record Correction</h1>
+          <p>Correct one student's course, term, year, grade, and action before the transcript is generated.</p>
+        </div>
+        <button id="another" type="button" hidden>Search another student</button>
+      </div>
+
+      <div class="search" id="searchPanel">
+        <div class="row">
+          <div class="grow">
+            <label for="studentId">Student ID</label>
+            <input id="studentId" value="STG1042" />
+          </div>
+          <button class="primary" id="searchBtn" type="button">Search</button>
+        </div>
+        <div class="message error" id="searchError"></div>
+      </div>
+
+      <div class="body" id="sheet" hidden>
+        <div class="profile">
+          <div><span>Student ID</span>STG1042</div>
+          <div><span>Full name</span>Abel Mekonnen</div>
+          <div><span>Program</span>BSc Software Engineering</div>
+          <div><span>Batch</span>DRB2501</div>
+          <div><span>Entry year</span>2025</div>
+          <div><span>Transcript</span>Not generated</div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Batch</th><th>Year</th><th>Term</th><th>Course</th><th>Title</th><th>Credit</th><th>Grade</th><th>Action</th><th>Mark</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div class="actions">
+          <button class="primary" id="addBtn" type="button">Add missing course</button>
+        </div>
+
+        <section class="history">
+          <h2>Grade history</h2>
+          <p class="history-note">Each correction stores the previous value and the new value for the grade, the course, and the other fields.</p>
+          <div id="history"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="editor" hidden>
+    <form class="editor" id="editorForm">
+      <h2 id="editorTitle">Correct this transcript line</h2>
+      <p class="hint" id="editorHint">The batch, year, and term must already have a term offering. Batch codes look like DRB2501 or DRB2602.</p>
+      <div class="grid" id="fields">
+            <div>
+              <label>Batch</label>
+              <select id="batch">
+                <option>DRB2501</option>
+                <option>DRB2602</option>
+              </select>
+            </div>
+            <div>
+              <label>Course</label>
+              <select id="course"></select>
+            </div>
+            <div>
+              <label>Year</label>
+              <select id="year"></select>
+            </div>
+            <div>
+              <label>Term</label>
+              <select id="term">
+                <option value="1">Winter</option>
+                <option value="2">Spring</option>
+                <option value="3">Summer</option>
+                <option value="4">Autumn</option>
+              </select>
+            </div>
+            <div>
+              <label>Grade</label>
+              <select id="grade"></select>
+            </div>
+            <div>
+              <label>Action</label>
+              <select id="action">
+                <option>Regular</option>
+                <option>Retake</option>
+                <option>Add</option>
+                <option>Assessment</option>
+                <option>Equivalent</option>
+              </select>
+            </div>
+            <div>
+              <label>Credit hours</label>
+              <input id="credit" type="number" min="1" max="30" />
+            </div>
+            <div>
+              <label>Mark</label>
+              <input id="mark" type="number" min="0" max="100" />
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <label>Reason</label>
+            <textarea id="reason" placeholder="Why this transcript line must change"></textarea>
+          </div>
+          <div class="actions">
+            <button class="primary" id="saveBtn" type="submit">Save correction</button>
+            <button type="button" id="cancelBtn">Cancel</button>
+          </div>
+          <div class="message" id="formMessage"></div>
+    </form>
+  </div>
+  <script>
+    const courses = [
+      { code: "MA101", title: "Calculus I", credit: 3 },
+      { code: "CS201", title: "Data Structures", credit: 3 },
+      { code: "CS301", title: "Database Systems", credit: 3 },
+      { code: "CS415", title: "Computer Networks", credit: 3 },
+      { code: "CN415", title: "Computer Networks", credit: 4 },
+      { code: "SE210", title: "Software Engineering", credit: 3 }
+    ];
+    const grades = ["A+","A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F","RC","RA","NG"];
+    const terms = { 1: "Winter", 2: "Spring", 3: "Summer", 4: "Autumn" };
+    let lines = [
+      { id: 1, batch: "DRB2501", year: 2025, term: 1, course: "MA101", grade: "B", action: "Regular", credit: 3, mark: 78 },
+      { id: 2, batch: "DRB2501", year: 2025, term: 2, course: "CS201", grade: "C", action: "Regular", credit: 3, mark: 62 },
+      { id: 3, batch: "DRB2501", year: 2025, term: 2, course: "CS415", grade: "C", action: "Regular", credit: 3, mark: 68 },
+      { id: 4, batch: "DRB2501", year: 2026, term: 1, course: "CS301", grade: "B+", action: "Regular", credit: 3, mark: 84 }
+    ];
+    let mode = null;
+    let selectedId = null;
+    let nextId = 5;
+    const history = [
+      {
+        when: "12 Nov 2026, 09:15",
+        kind: "Update",
+        reason: "Mark list was entered on the wrong course code.",
+        previous: { batch: "DRB2501", course: "CN415", year: 2025, term: 2, grade: "C", action: "Regular", credit: 4, mark: 68 },
+        next: { batch: "DRB2501", course: "CS415", year: 2025, term: 2, grade: "C", action: "Regular", credit: 3, mark: 68 },
+        by: "Registrar"
+      }
+    ];
+
+    const courseSelect = document.getElementById("course");
+    const yearSelect = document.getElementById("year");
+    const gradeSelect = document.getElementById("grade");
+    courses.forEach(course => {
+      const option = document.createElement("option");
+      option.value = course.code;
+      option.textContent = course.code + " - " + course.title;
+      courseSelect.appendChild(option);
+    });
+    const thisYear = new Date().getFullYear();
+    for (let year = thisYear; year >= thisYear - 15; year--) {
+      const option = document.createElement("option");
+      option.value = year;
+      option.textContent = year;
+      yearSelect.appendChild(option);
+    }
+    grades.forEach(grade => {
+      const option = document.createElement("option");
+      option.value = grade;
+      option.textContent = grade;
+      gradeSelect.appendChild(option);
+    });
+
+    function titleOf(code) {
+      const course = courses.find(item => item.code === code);
+      return course ? course.title : code;
+    }
+
+    function fieldCell(label, previous, next) {
+      const changed = String(previous) !== String(next);
+      return "<tr class='" + (changed ? "changed" : "same") + "'><td>" + label + "</td><td>" + previous + "</td><td>" + next + "</td></tr>";
+    }
+
+    function describe(line) {
+      if (!line) return { batch: "—", course: "—", year: "—", term: "—", grade: "—", action: "—", credit: "—", mark: "—" };
+      return {
+        batch: line.batch,
+        course: line.course + " " + titleOf(line.course),
+        year: line.year,
+        term: terms[line.term] || line.term,
+        grade: line.grade,
+        action: line.action,
+        credit: line.credit,
+        mark: line.mark === "" || line.mark == null ? "—" : line.mark
+      };
+    }
+
+    function renderHistory() {
+      const host = document.getElementById("history");
+      host.innerHTML = history.map(entry => {
+        const previous = describe(entry.previous);
+        const next = describe(entry.next);
+        return "<article class='history-card'>" +
+          "<header><span><strong>" + entry.kind + "</strong> · " + entry.when + " · " + entry.by + "</span><span>" + entry.reason + "</span></header>" +
+          "<table><thead><tr><th>Field</th><th>Previous</th><th>New</th></tr></thead><tbody>" +
+          fieldCell("Batch", previous.batch, next.batch) +
+          fieldCell("Course", previous.course, next.course) +
+          fieldCell("Grade", previous.grade, next.grade) +
+          fieldCell("Year", previous.year, next.year) +
+          fieldCell("Term", previous.term, next.term) +
+          fieldCell("Action", previous.action, next.action) +
+          fieldCell("Credit hours", previous.credit, next.credit) +
+          fieldCell("Mark", previous.mark, next.mark) +
+          "</tbody></table></article>";
+      }).join("");
+    }
+
+    function render() {
+      const body = document.getElementById("rows");
+      body.innerHTML = "";
+      lines
+        .slice()
+        .sort((a, b) => a.year - b.year || a.term - b.term || a.course.localeCompare(b.course))
+        .forEach(line => {
+          const row = document.createElement("tr");
+          row.innerHTML =
+            "<td>" + line.batch + "</td>" +
+            "<td>" + line.year + "</td>" +
+            "<td>" + terms[line.term] + "</td>" +
+            "<td>" + line.course + "</td>" +
+            "<td>" + titleOf(line.course) + "</td>" +
+            "<td>" + line.credit + "</td>" +
+            "<td>" + line.grade + "</td>" +
+            "<td>" + line.action + "</td>" +
+            "<td>" + (line.mark === "" || line.mark == null ? "" : line.mark) + "</td>" +
+            "<td><button class='link' type='button' data-correct='" + line.id + "'>Correct</button>" +
+            "<button class='link danger' type='button' data-remove='" + line.id + "'>Remove</button></td>";
+          body.appendChild(row);
+        });
+    }
+
+    function openEditor(nextMode, line) {
+      mode = nextMode;
+      selectedId = line ? line.id : null;
+      document.getElementById("editor").hidden = false;
+      document.getElementById("fields").hidden = nextMode === "Remove";
+      document.getElementById("editorTitle").textContent =
+        nextMode === "Add" ? "Add a course to the transcript" :
+        nextMode === "Remove" ? "Remove this line from the transcript" :
+        "Correct this transcript line";
+      document.getElementById("editorHint").textContent = nextMode === "Remove"
+        ? "This line stays off the transcript after you confirm."
+        : "The batch, year, and term must already have a term offering. Batch codes look like DRB2501 or DRB2602.";
+      document.getElementById("saveBtn").textContent = nextMode === "Remove" ? "Remove from transcript" : "Save correction";
+      document.getElementById("formMessage").textContent = "";
+      document.getElementById("formMessage").className = "message";
+      if (line) {
+        document.getElementById("batch").value = line.batch;
+        courseSelect.value = line.course;
+        yearSelect.value = line.year;
+        document.getElementById("term").value = line.term;
+        gradeSelect.value = line.grade;
+        document.getElementById("action").value = line.action;
+        document.getElementById("credit").value = line.credit;
+        document.getElementById("mark").value = line.mark;
+      } else {
+        document.getElementById("batch").value = "DRB2501";
+        courseSelect.value = "SE210";
+        yearSelect.value = thisYear;
+        document.getElementById("term").value = "2";
+        gradeSelect.value = "B";
+        document.getElementById("action").value = "Add";
+        document.getElementById("credit").value = 3;
+        document.getElementById("mark").value = "";
+      }
+      document.getElementById("reason").value = "";
+    }
+
+    document.getElementById("searchBtn").onclick = () => {
+      const code = document.getElementById("studentId").value.trim().toUpperCase();
+      const error = document.getElementById("searchError");
+      if (!code) {
+        error.textContent = "Student ID is required.";
+        return;
+      }
+      if (code !== "STG1042") {
+        error.textContent = "This prototype only has sample student STG1042.";
+        return;
+      }
+      error.textContent = "";
+      document.getElementById("searchPanel").hidden = true;
+      document.getElementById("sheet").hidden = false;
+      document.getElementById("another").hidden = false;
+      render();
+      renderHistory();
+    };
+
+    document.getElementById("another").onclick = () => {
+      document.getElementById("searchPanel").hidden = false;
+      document.getElementById("sheet").hidden = true;
+      document.getElementById("another").hidden = true;
+      document.getElementById("editor").hidden = true;
+    };
+
+    document.getElementById("rows").onclick = (event) => {
+      const correctId = event.target.getAttribute("data-correct");
+      const removeId = event.target.getAttribute("data-remove");
+      const id = Number(correctId || removeId);
+      if (!id) return;
+      const line = lines.find(item => item.id === id);
+      openEditor(correctId ? "Update" : "Remove", line);
+    };
+
+    document.getElementById("addBtn").onclick = () => openEditor("Add", null);
+    function closeEditor() {
+      document.getElementById("editor").hidden = true;
+    }
+    document.getElementById("cancelBtn").onclick = closeEditor;
+    document.getElementById("editor").onclick = (event) => {
+      if (event.target.id === "editor") closeEditor();
+    };
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeEditor();
+    });
+    courseSelect.onchange = () => {
+      if (mode === "Add") {
+        const course = courses.find(item => item.code === courseSelect.value);
+        if (course) document.getElementById("credit").value = course.credit;
+      }
+    };
+
+    document.getElementById("editorForm").onsubmit = (event) => {
+      event.preventDefault();
+      const message = document.getElementById("formMessage");
+      const reason = document.getElementById("reason").value.trim();
+      if (!reason) {
+        message.className = "message error";
+        message.textContent = "A reason is required.";
+        return;
+      }
+      const previousLine = lines.find(line => line.id === selectedId) || null;
+      const stamp = new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+      let nextLine = null;
+      if (mode === "Remove") {
+        lines = lines.filter(line => line.id !== selectedId);
+      } else {
+        nextLine = {
+          id: mode === "Add" ? nextId++ : selectedId,
+          batch: document.getElementById("batch").value,
+          year: Number(yearSelect.value),
+          term: Number(document.getElementById("term").value),
+          course: courseSelect.value,
+          grade: gradeSelect.value,
+          action: document.getElementById("action").value,
+          credit: Number(document.getElementById("credit").value),
+          mark: document.getElementById("mark").value
+        };
+        if (mode === "Add") lines.push(nextLine);
+        else lines = lines.map(line => line.id === selectedId ? nextLine : line);
+      }
+      history.unshift({
+        when: stamp,
+        kind: mode,
+        reason: reason,
+        previous: previousLine,
+        next: nextLine,
+        by: "Registrar"
+      });
+      renderHistory();
+      document.getElementById("editor").hidden = true;
+      render();
+    };
+  </script>
+</body>
+</html>

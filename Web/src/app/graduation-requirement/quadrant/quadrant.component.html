@@ -51,6 +51,7 @@
         [nzShowTotal]="rangeTemplate"
         [nzLoading]="pager.loading"
         [nzNoResult]="emptyTpl"
+        [nzScroll]="{ x: '1000px' }"
         class="quadrants-table"
       >
         <ng-template #rangeTemplate let-range="range" let-total>
@@ -61,11 +62,38 @@
         <thead>
           <tr>
             <th class="sn-column">S/N</th>
-            <th>Curriculum</th>
-            <th>Quadrant ID</th>
-            <th>Quadrant Heading</th>
-            <th>Date</th>
-            <th>Remark</th>
+            <th
+              style="min-width: 140px;"
+              [nzSortFn]="true"
+              [nzSortOrder]="pager.sortColumn === 'CurriculumCode' ? (pager.sortOrder === 'desc' ? 'descend' : 'ascend') : null"
+              (nzSortOrderChange)="pager.onSort($event, 'CurriculumCode')">
+              Curriculum
+            </th>
+            <th
+              style="min-width: 110px;"
+              [nzSortFn]="true"
+              (nzSortOrderChange)="pager.onSort($event, 'QuadrantsID')">
+              Quadrant ID
+            </th>
+            <th
+              style="min-width: 180px;"
+              [nzSortFn]="true"
+              [nzSortOrder]="pager.sortColumn === 'QuadrantHeading' ? (pager.sortOrder === 'desc' ? 'descend' : 'ascend') : null"
+              (nzSortOrderChange)="pager.onSort($event, 'QuadrantHeading')">
+              Quadrant Heading
+            </th>
+            <th
+              style="min-width: 120px;"
+              [nzSortFn]="true"
+              (nzSortOrderChange)="pager.onSort($event, 'CreatedDate')">
+              Date
+            </th>
+            <th
+              style="min-width: 140px;"
+              [nzSortFn]="true"
+              (nzSortOrderChange)="pager.onSort($event, 'Remark')">
+              Remark
+            </th>
             <th class="action-column">Actions</th>
           </tr>
         </thead>

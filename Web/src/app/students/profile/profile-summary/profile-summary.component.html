@@ -21,22 +21,63 @@
 <ng-container *ngIf="studentProfile && !isLoading && !error">
   <nz-card nzType="inner" nzTitle="Student Details" class="student-card">
     <div nz-row nzGutter="16">
-      <div nz-col nzSpan="8">
+      <div nz-col nzXs="24" nzSm="24" nzMd="8">
         <div class="photo-container">
-          <ng-container *ngIf="(isValidProfilePicture(profilePicture) || profilePicture); else defaultAvatar">
-            <img class="custom-avatar" [src]="profilePicture" alt="Profile Photo" />
-          </ng-container>
-          <ng-template #defaultAvatar>
-            <div class="default-avatar">
-              {{ initials }}
-            </div>
-          </ng-template>
+          <div class="photo-wrap">
+            <label
+              class="photo-frame"
+              for="studentProfilePhoto"
+              [class.uploading]="isUploadingPhoto"
+              [class.disabled]="isUploadingPhoto"
+              [attr.title]="isValidProfilePicture(profilePicture) ? 'Update photo' : 'Add photo'"
+              [attr.aria-label]="isValidProfilePicture(profilePicture) ? 'Update profile photo' : 'Add profile photo'">
+              <ng-container *ngIf="isValidProfilePicture(profilePicture); else defaultAvatar">
+                <img
+                  class="custom-avatar"
+                  [src]="profilePicture"
+                  [attr.data-version]="photoVersion"
+                  alt="Profile Photo" />
+              </ng-container>
+              <ng-template #defaultAvatar>
+                <div class="default-avatar">
+                  {{ initials }}
+                </div>
+              </ng-template>
+
+              <span class="photo-overlay">
+                <i nz-icon [nzType]="isUploadingPhoto ? 'loading' : 'camera'" nzTheme="outline"></i>
+                <span class="photo-overlay-text">{{
+                  isUploadingPhoto
+                    ? 'Uploading…'
+                    : (isValidProfilePicture(profilePicture) ? 'Change' : 'Add photo')
+                }}</span>
+              </span>
+            </label>
+
+            <!-- Compact affordance: no extra vertical space vs a full button -->
+            <label
+              class="photo-badge"
+              for="studentProfilePhoto"
+              [class.disabled]="isUploadingPhoto"
+              [attr.title]="isValidProfilePicture(profilePicture) ? 'Update photo' : 'Add photo'">
+              <i nz-icon [nzType]="isUploadingPhoto ? 'loading' : 'camera'" nzTheme="outline"></i>
+            </label>
+          </div>
+
+          <input
+            type="file"
+            id="studentProfilePhoto"
+            hidden
+            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+            [disabled]="isUploadingPhoto"
+            (change)="onPhotoSelected($event)" />
+
           <h2 class="student-name">{{ studentProfile.fullName }}</h2>
           <h4 class="student-program">{{ studentProfile.academicProgram }}</h4>
         </div>
       </div>
 
-      <div nz-col nzSpan="10">
+      <div nz-col nzXs="24" nzSm="24" nzMd="10">
         <div class="info-container">
           <div class="info-row">
             <i nz-icon nzType="idcard" class="icon"></i>
@@ -63,7 +104,7 @@
         </div>
       </div>
 
-      <div nz-col nzSpan="6">
+      <div nz-col nzXs="24" nzSm="24" nzMd="6">
         <div class="info-container">
           <div class="info-row">
             <i nz-icon nzType="book" class="icon"></i>
@@ -82,11 +123,6 @@
             <i nz-icon nzType="calendar" class="icon"></i>
             <p><strong>Entry Year:</strong> {{ studentProfile.entryYear }}</p>
           </div>
-
-          <!-- <div class="info-row">
-            <i nz-icon nzType="check-circle" class="icon"></i>
-            <strong>CGPA: {{ getCGPA(studentProfile.studentAcademicYears) | number: '1.2-2' }}</strong>
-          </div> -->
         </div>
       </div>
     </div>

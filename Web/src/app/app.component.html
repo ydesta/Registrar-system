@@ -4,8 +4,9 @@
 
 
 <!-- Main layout for authenticated users -->
-<nz-layout class="app-layout" *ngIf="isLogin && !isAuthRoute && !isPortalRoute">
-  <nz-sider class="menu-sidebar" style="background-color: #e7e5e5;" nzCollapsible nzWidth="316px" nzBreakpoint="md"
+<nz-layout class="app-layout" *ngIf="isLogin && !isAuthRoute && !isPortalRoute" [class.no-sidebar]="hideSidebarForApplicant">
+  <!-- Applicants do not need the sidebar; keep header + application content only. -->
+  <nz-sider *ngIf="!hideSidebarForApplicant" class="menu-sidebar" style="background-color: #e7e5e5;" nzCollapsible nzWidth="316px" nzBreakpoint="md"
     [(nzCollapsed)]="isCollapsed" [nzTrigger]="null">
     <div class="sidebar-logo">
       <a href="#">
@@ -53,6 +54,9 @@
             <li nz-menu-item>
               <a routerLink="/colleges/term-course-offering">Course Offerings</a>
             </li>
+            <li nz-menu-item>
+              <a routerLink="/student-section/instructor-sections">Assign Instructors to Sections</a>
+            </li>
           </ul>
         </li>
 
@@ -92,10 +96,6 @@
             <li nz-menu-item>
               <a routerLink="/student-section/unassigned-students">Unassigned Students</a>
             </li>
-
-            <li nz-menu-item>
-              <a routerLink="/student-section/instructor-sections">Assign Instructors to Sections</a>
-            </li>
           </ul>
         </li>
         <li nz-submenu nzTitle="Students" nzIcon="usergroup-add">
@@ -111,6 +111,31 @@
             </li> -->
           </ul>
         </li>
+        <li nz-submenu nzTitle="ID Card Management" nzIcon="idcard">
+          <ul>
+            <li nz-menu-item>
+              <a routerLink="/students/student-cards">Manage Cards</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/issue-student-card">Issue Student Card</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/bulk-issue-student-cards">Bulk Issue Cards</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/card-print-center">Card Printing</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/card-templates">Card Templates</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/card-template-designer">Card Designer</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/card-verify">Verify Card (Gate)</a>
+            </li>
+          </ul>
+        </li>
         <li nz-submenu nzTitle="Grade Management" nzIcon="file-done">
           <ul>
             <li nz-menu-item>
@@ -118,6 +143,18 @@
             </li>
             <li nz-menu-item>
               <a routerLink="/students/import-student-grade">Import Student Grade</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/grade-submissions">Grade Submissions</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/grade-record-correction">Grade Record Correction</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/reports/transcript-search">Student Transcript</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/grade-encryption-backfill">Grade Encryption Backfill</a>
             </li>
           </ul>
         </li>
@@ -220,9 +257,6 @@
               <a routerLink="/reports/academic-term-registration-slip">Registration Slip Per Term</a>
             </li>
             <li nz-menu-item>
-              <a routerLink="/reports/transcript-search">Student Transcript</a>
-            </li>
-            <li nz-menu-item>
               <a routerLink="/reports/grade-report">Grade Report</a>
             </li>
             <li nz-menu-item>
@@ -279,11 +313,39 @@
           <i nz-icon nzType="dashboard"></i>
           <span> <a routerLink="/dashboard">Dashboard</a></span>
         </li>
+        <li nz-submenu nzTitle="ID Card Management" nzIcon="idcard">
+          <ul>
+            <li nz-menu-item>
+              <a routerLink="/students/student-cards">Manage Cards</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/issue-student-card">Issue Student Card</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/bulk-issue-student-cards">Bulk Issue Cards</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/card-print-center">Card Printing</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/card-templates">Card Templates</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/card-template-designer">Card Designer</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/students/card-verify">Verify Card (Gate)</a>
+            </li>
+          </ul>
+        </li>
         <li nz-submenu nzTitle="Course Offering" nzIcon="folder-open">
           <ul>
 
             <li nz-menu-item>
               <a routerLink="/colleges/term-course-offering">Course Offerings</a>
+            </li>
+            <li nz-menu-item>
+              <a routerLink="/student-section/instructor-sections">Assign Instructors to Sections</a>
             </li>
           </ul>
         </li>
@@ -312,16 +374,19 @@
             <li nz-menu-item>
               <a routerLink="/student-section/section-assigned-students">View Generated Sections</a>
             </li>
-
-            <li nz-menu-item>
-              <a routerLink="/student-section/instructor-sections">Assign Instructors to Sections</a>
-            </li>
           </ul>
         </li>
         <li nz-submenu nzTitle="User Management" nzIcon="team">
           <ul>
             <li nz-menu-item>
               <a routerLink="/user-management/credentials">User Credentials</a>
+            </li>
+          </ul>
+        </li>
+        <li nz-submenu nzTitle="Grade Management" nzIcon="file-done">
+          <ul>
+            <li nz-menu-item>
+              <a routerLink="/reports/transcript-search">Student Transcript</a>
             </li>
           </ul>
         </li>
@@ -343,9 +408,6 @@
 
             <li nz-menu-item>
               <a routerLink="/reports/academic-term-registration-slip">Registration Slip Per Term</a>
-            </li>
-            <li nz-menu-item>
-              <a routerLink="/reports/transcript-search">Student Transcript</a>
             </li>
             <li nz-menu-item>
               <a routerLink="/reports/grade-report">Grade Report</a>
@@ -419,6 +481,12 @@
           </span>
         </li>
         <li nz-menu-item>
+          <i nz-icon nzType="idcard" nzTheme="outline"></i>
+          <span>
+            <a routerLink="/students/my-student-card">My Identification</a>
+          </span>
+        </li>
+        <li nz-menu-item>
           <i nz-icon nzType="usergroup-add" nzTheme="outline"></i>
           <span>
             <a routerLink="/dashboard">My Schedule</a>
@@ -460,6 +528,12 @@
             </li>
           </ul>
         </li>
+        <li nz-menu-item>
+          <i nz-icon nzType="idcard" nzTheme="outline"></i>
+          <span>
+            <a routerLink="/students/card-verify">Verify ID Card</a>
+          </span>
+        </li>
       </div>
       <div *ngIf="isUserSectionReportViewer">
         <li nz-submenu nzTitle="Section Management" nzIcon="form">
@@ -500,7 +574,7 @@
       <div class="app-header">
         <div class="header-container">
           <div class="header-left">
-            <span class="header-trigger" (click)="isCollapsed = !isCollapsed">
+            <span class="header-trigger" *ngIf="!hideSidebarForApplicant" (click)="isCollapsed = !isCollapsed">
               <i class="trigger" nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"></i>
             </span>
           </div>

@@ -12,8 +12,8 @@ namespace SecureAuth.API.Configuration
         public static class Database
         {
             public const string Server = "VMI2515837";
-          //  public const string DatabaseName = "HiLCoEIdentityDB";
-            public const string DatabaseName = "SecureAuthDbA";
+            public const string DatabaseName = "HiLCoEIdentityDB";
+           // public const string DatabaseName = "SecureAuthDbA";
             public const string User = "sa";
             public const string Password = "Hilco@2025"; // CHANGE THIS PASSWORD!
             public const int ConnectTimeout = 60;

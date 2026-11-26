@@ -1,0 +1,67 @@
+<div class="manage-batch-term">
+  <div class="header">
+    <h3>Manage Term</h3>
+    <p>Batch: <strong>{{ batchCode }}</strong> · table <code>BatchTerm</code></p>
+  </div>
+
+  <nz-table
+    #termTable
+    [nzData]="batchTerms"
+    [nzLoading]="loading"
+    [nzFrontPagination]="true"
+    [nzPageSize]="10"
+    nzBordered
+    [nzNoResult]="emptyTpl">
+    <thead>
+      <tr>
+        <th>Academic Term Id</th>
+        <th>Academic Year</th>
+        <th>Academic Term</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of termTable.data">
+        <td>
+          <input nz-input type="number" [(ngModel)]="row.academicTermId" style="width: 110px;" />
+        </td>
+        <td>
+          <nz-select [(ngModel)]="row.academicYear" style="width: 140px;">
+            <nz-option
+              *ngFor="let y of yearOptions"
+              [nzValue]="y.Id"
+              [nzLabel]="y.Description">
+            </nz-option>
+          </nz-select>
+        </td>
+        <td>
+          <nz-select [(ngModel)]="row.academicTerm" style="width: 140px;">
+            <nz-option
+              *ngFor="let t of termOptions"
+              [nzValue]="t.Id"
+              [nzLabel]="t.Description">
+            </nz-option>
+          </nz-select>
+        </td>
+        <td class="actions">
+          <button
+            nz-button
+            nzType="primary"
+            nzSize="small"
+            [nzLoading]="savingId === row.id"
+            (click)="saveRow(row)">
+            Save
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+
+  <ng-template #emptyTpl>
+    <div class="empty">No active batch terms found for this batch.</div>
+  </ng-template>
+
+  <div class="footer">
+    <button nz-button (click)="close()">Close</button>
+  </div>
+</div>

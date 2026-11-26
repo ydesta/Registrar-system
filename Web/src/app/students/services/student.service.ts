@@ -94,8 +94,14 @@ export class StudentService {
     return this.crud.add(`${this.students}/batch-assign`, postData);
   }
 
-  uploadGrade(postData: any): Observable<any> {
-    return this.crud.add(`${this.grades}/upload/excel`, postData);
+  uploadGrade(postData: any, gradeActionToken?: string): Observable<any> {
+    const headers = gradeActionToken ? { 'X-Grade-Action-Token': gradeActionToken } : undefined;
+    return this.crud.add(`${this.grades}/upload/excel`, postData, undefined, headers);
+  }
+
+  recordSingleGrade(postData: any, gradeActionToken?: string): Observable<any> {
+    const headers = gradeActionToken ? { 'X-Grade-Action-Token': gradeActionToken } : undefined;
+    return this.crud.add(`${this.grades}/single`, postData, undefined, headers);
   }
 
   getStudentProfileByStudentId(applicantUserId: string): Observable<StudentProfileViewModel> {
@@ -115,6 +121,13 @@ export class StudentService {
     return this.crud.getList<StudentProfileViewModel>(
       `${this.students}/getStudentProfileByApplicationId/app/student/profile/${applicationId}`
     );
+  }
+
+  updateProfilePhoto(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('photo', file);
+    // Not under student/profile/{id} — that GET template would catch "photo" and return 405 on POST
+    return this.crud.add(`${this.students}/student/profile-photo`, formData);
   }
 
   getAllStudentList(): Observable<any> {

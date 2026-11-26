@@ -11,12 +11,15 @@ import { CustomNotificationService } from 'src/app/services/custom-notification.
 import { InstructorSectionService } from 'src/app/services/instructor-section.service';
 import { StaffService } from 'src/app/services/staff.service';
 import { StudentSectionAssignmentService } from 'src/app/services/student-section-assignment.service';
+import { CourseOfferingInstructorAssignmentService } from 'src/app/colleges/services/course-offering-instructor-assignment.service';
 import { CourseViewModel } from 'src/app/students/models/course-break-down-offering.model';
 import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 import { ExcelExportService } from 'src/app/reports/services/excel-export.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-view-assigned-instructor-sections',
@@ -57,6 +60,7 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit, OnDestro
     private fb: FormBuilder,
     private studentSectionAssignmentService: StudentSectionAssignmentService,
     private instructorSectionService: InstructorSectionService,
+    private courseOfferingInstructorAssignmentService: CourseOfferingInstructorAssignmentService,
     private paginator: PaginatorService,
     private excelExportService: ExcelExportService
   ) {
@@ -76,14 +80,42 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit, OnDestro
   ngOnDestroy(): void {
     this.pager.destroy();
   }
-  private getInstructorName(): string {
-    const staffName = this.staff ? `${this.staff.firstName ?? ''} ${this.staff.lastName ?? ''}`.trim() : '';
-    if (staffName) {
-      return staffName;
+
+  private resolveBatchIdFromSearch(): string | null {
+    const selected = this.form?.get('batchId')?.value;
+    if (!selected) {
+      return null;
     }
-    const firstName = (localStorage.getItem('firstName') || '').trim();
-    const lastName = (localStorage.getItem('lastName') || '').trim();
-    return `${firstName} ${lastName}`.trim();
+    const match = (this.listOfBatch || []).find((b: any) =>
+      String(b?.batchCode || '').toLowerCase() === String(selected).toLowerCase() ||
+      String(b?.batchId || b?.id || '').toLowerCase() === String(selected).toLowerCase()
+    );
+    return match?.batchId || match?.id || null;
+  }
+
+  /** Instructor from course assignment for current search; empty if none assigned. */
+  private getAssignedInstructorName$(): Observable<string> {
+    const academicTerm = this.form?.get('academicTerm')?.value;
+    const year = this.form?.get('year')?.value;
+    const courseId = this.form?.get('courseId')?.value;
+    const batchId = this.resolveBatchIdFromSearch();
+
+    if (!academicTerm || !year || !courseId || !batchId) {
+      return of('');
+    }
+
+    return this.courseOfferingInstructorAssignmentService
+      .getAssignedInstructors(academicTerm, year, batchId, courseId)
+      .pipe(
+        map((res: any) => {
+          const staff = Array.isArray(res) ? res : (res?.data || []);
+          return (staff || [])
+            .map((s: any) => `${s?.firstName || s?.FirstName || ''} ${s?.lastName || s?.LastName || ''}`.trim())
+            .filter((name: string) => !!name)
+            .join(', ');
+        }),
+        catchError(() => of(''))
+      );
   }
   loadStaffProfile(): void {
     const userId = localStorage.getItem('userId');
@@ -403,8 +435,8 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit, OnDestro
 
     const selectedCourse = this.courseList.find(c => c.id === courseId);
     const selectedSection = this.availableSections.find(s => s.id === sectionId);
-    const instructorName = this.getInstructorName();
 
+    this.getAssignedInstructorName$().subscribe((instructorName) => {
     const days = Array.from({ length: 24 }, (_, i) => `${i + 1}`);
     const aoa: (string | number)[][] = [];
 
@@ -415,7 +447,7 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit, OnDestro
     aoa.push(['Term:', `${this.getAcademicTermName(academicTerm)} ${year}`]);
     aoa.push(['Section:', selectedSection?.sectionName || 'N/A']);
     aoa.push(['Course Code:', selectedCourse?.courseCode || 'N/A']);
-    aoa.push(['Instructor:', instructorName || '_________________']);
+    aoa.push(['Instructor:', instructorName || '']);
     aoa.push([]);
 
     aoa.push(['No.', 'Name', 'Batch', ...days]);
@@ -439,6 +471,7 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit, OnDestro
 
     this.notificationService.notification('success', 'Success', 'Attendance sheet exported successfully');
     });
+    });
   }
 
   exportMarkList(): void {
@@ -450,16 +483,16 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit, OnDestro
 
       const selectedCourse = this.courseList.find(c => c.id === courseId);
       const selectedSection = this.availableSections.find(s => s.id === sectionId);
-      const instructorName = this.getInstructorName();
       const sectionLabel = selectedSection?.sectionName || 'Section 1';
 
+      this.getAssignedInstructorName$().subscribe((instructorName) => {
       this.excelExportService
         .exportResultSubmissionMarkList({
           classBatch: this.form.get('batchId')?.value || '',
           sectionName: sectionLabel,
           termLabel: `${this.getAcademicTermName(academicTerm)} ${year}`,
           courseCode: selectedCourse?.courseCode || '',
-          instructorName,
+          instructorName: instructorName || '',
           students: sectionAssignedStudents.map(s => ({
             studentCode: s.studentCode,
             fullName: s.fullName,
@@ -475,6 +508,7 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit, OnDestro
         .catch(() => {
           this.notificationService.notification('error', 'Error', 'Failed to export mark list');
         });
+      });
     });
   }
 
@@ -488,8 +522,8 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit, OnDestro
 
       const selectedCourse = this.courseList.find(c => c.id === courseId);
       const selectedSection = this.availableSections.find(s => s.id === sectionId);
-      const instructorName = this.getInstructorName();
 
+      this.getAssignedInstructorName$().subscribe((instructorName) => {
       const doc = new jsPDF('landscape', 'mm', 'a4');
 
       doc.setFontSize(16);
@@ -515,7 +549,7 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit, OnDestro
       doc.text(`Term: ${this.getAcademicTermName(academicTerm)} ${year}`, 20, 29);
       doc.text(`Section: ${selectedSection?.sectionName || 'N/A'}`, 20, 32);
       doc.text(`Course Code: ${selectedCourse?.courseCode || 'N/A'}`, 20, 35);
-      doc.text(`Instructor: ${instructorName || '_________________'}`, 20, 38);
+      doc.text(`Instructor: ${instructorName || ''}`, 20, 38);
 
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
@@ -611,6 +645,7 @@ export class ViewAssignedInstructorSectionsComponent implements OnInit, OnDestro
       }
 
       this.notificationService.notification('success', 'Success', 'Attendance sheet ready for printing');
+      });
     } catch (error) {
       this.notificationService.notification('error', 'Export Error', 'Failed to generate attendance sheet. Please try again.');
     }

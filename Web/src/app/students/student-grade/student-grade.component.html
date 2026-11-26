@@ -130,6 +130,7 @@
             <th>Batch Code</th>
             <th>Academic Term</th>
             <th>Submission Date</th>
+            <th *ngIf="canDeleteGrades" nzWidth="90px">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -146,6 +147,16 @@
             <td>{{ data.batchCode }}</td>
             <td>{{ data.academicTerm }}</td>
             <td>{{ data.submissionDate | date:'short' }}</td>
+            <td *ngIf="canDeleteGrades">
+              <button
+                nz-button
+                nzType="link"
+                nzDanger
+                type="button"
+                (click)="showDeleteConfirm(data.id)">
+                Delete
+              </button>
+            </td>
           </tr>
         </tbody>
         <ng-template #emptyTpl>
@@ -157,4 +168,9 @@
       </nz-table>
     </div>
   </div>
+  <app-grade-action-otp
+    [(visible)]="otpVisible"
+    purpose="GradeImport"
+    (confirmed)="onGradeCodeConfirmed($event)">
+  </app-grade-action-otp>
 </div>

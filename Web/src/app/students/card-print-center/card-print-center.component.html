@@ -1,0 +1,190 @@
+<div class="content-container">
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h1>Card printing</h1>
+        <p class="subtitle">
+          Select a batch, pick cards that are not printed yet, then print at CR80 card size.
+        </p>
+      </div>
+      <div class="header-actions">
+        <a routerLink="../card-verify" nz-button nzType="default">
+          <i nz-icon nzType="scan" nzTheme="outline"></i>
+          <span>Scan</span>
+        </a>
+        <button nz-button
+                nzType="primary"
+                class="primary-action"
+                [disabled]="!selectedCount || preparing"
+                [nzLoading]="preparing"
+                (click)="printSelected()">
+          <i nz-icon nzType="printer" nzTheme="outline"></i>
+          <span>Print {{ selectedCount || '' }} card{{ selectedCount === 1 ? '' : 's' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-section">
+    <div class="filters">
+      <nz-select class="batch-field"
+                 [(ngModel)]="batchCode"
+                 (ngModelChange)="onBatchChange()"
+                 nzShowSearch
+                 nzAllowClear
+                 nzPlaceHolder="Select batch"
+                 [nzLoading]="loadingBatches">
+        <nz-option *ngFor="let b of batches" [nzValue]="b.code" [nzLabel]="b.label"></nz-option>
+      </nz-select>
+
+      <div class="search-field">
+        <nz-input-group nzSearch [nzAddOnAfter]="searchBtn">
+          <input type="text"
+                 nz-input
+                 placeholder="Search student / name / card #"
+                 [(ngModel)]="searchKey"
+                 (ngModelChange)="onSearchChange()"
+                 [disabled]="!batchCode" />
+        </nz-input-group>
+        <ng-template #searchBtn>
+          <button nz-button nzType="primary" nzSearch [disabled]="!batchCode"><i nz-icon nzType="search"></i></button>
+        </ng-template>
+      </div>
+
+      <nz-select class="printed-field"
+                 [(ngModel)]="rosterFilter"
+                 (ngModelChange)="onRosterFilterChange()"
+                 nzPlaceHolder="Show"
+                 [nzDisabled]="!batchCode">
+        <nz-option nzValue="not-printed" nzLabel="Not printed yet"></nz-option>
+        <nz-option nzValue="printed" nzLabel="Already printed"></nz-option>
+        <nz-option nzValue="all" nzLabel="All with a card"></nz-option>
+        <nz-option nzValue="no-card" nzLabel="No card yet"></nz-option>
+      </nz-select>
+    </div>
+
+    <div class="summary-row" *ngIf="batchCode && summary.count">
+      <span class="summary-pill summary-pill--wait">Not printed {{ summary.notPrintedCount }}</span>
+      <span class="summary-pill summary-pill--done">Printed {{ summary.printedCount }}</span>
+      <span class="summary-pill">No card {{ summary.noCardCount }}</span>
+      <span *ngIf="selectedCount" class="summary-pill summary-pill--sel">{{ selectedCount }} selected</span>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-toolbar" *ngIf="batchCode">
+      <label nz-checkbox
+             [ngModel]="checkedAll"
+             [ngModelOptions]="{standalone: true}"
+             (ngModelChange)="toggleAll($event)"
+             [nzDisabled]="!printableCount">
+        Select all printable (max {{ maxBulk }})
+      </label>
+      <button nz-button
+              nzType="primary"
+              [disabled]="!selectedCount || preparing"
+              [nzLoading]="preparing"
+              (click)="printSelected()">
+        Print selected
+      </button>
+    </div>
+
+    <nz-spin [nzSpinning]="loading">
+      <nz-table [nzData]="rows"
+                nzBordered
+                [nzFrontPagination]="true"
+                [nzPageSize]="20"
+                [nzShowSizeChanger]="true"
+                [nzPageSizeOptions]="[10, 20, 50, 100]"
+                [nzScroll]="{ x: '900px' }"
+                [nzNoResult]="emptyTpl">
+        <thead>
+          <tr>
+            <th nzWidth="48px"></th>
+            <th nzWidth="120px">Student</th>
+            <th nzWidth="220px">Name</th>
+            <th nzWidth="140px">Card #</th>
+            <th nzWidth="120px">Print</th>
+            <th nzWidth="90px" nzRight>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of rows" [class.is-selected]="isChecked(data)">
+            <td>
+              <label nz-checkbox
+                     [ngModel]="isChecked(data)"
+                     [ngModelOptions]="{standalone: true}"
+                     [nzDisabled]="!canPrint(data)"
+                     (ngModelChange)="toggle(data, $event)">
+              </label>
+            </td>
+            <td class="mono">{{ data.studentId || '—' }}</td>
+            <td>{{ data.fullName || '—' }}</td>
+            <td class="mono">{{ data.cardNumber || '—' }}</td>
+            <td>
+              <nz-tag [nzColor]="printStateColor(data)">{{ printStateLabel(data) }}</nz-tag>
+            </td>
+            <td nzRight>
+              <button *ngIf="canPrint(data)"
+                      nz-button
+                      nzType="link"
+                      nzSize="small"
+                      (click)="printOne(data)">
+                Print
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </div>
+</div>
+
+<ng-template #emptyTpl>
+  <nz-empty [nzNotFoundContent]="emptyHint || 'Select a batch to load cards'">
+  </nz-empty>
+</ng-template>
+
+<nz-modal [(nzVisible)]="printVisible"
+          [nzTitle]="faces.length > 1 ? ('Print ' + faces.length + ' cards') : 'Print card'"
+          (nzOnCancel)="printVisible=false"
+          [nzFooter]="printFooter"
+          [nzWidth]="printModalWidth"
+          class="print-preview-modal">
+  <ng-container *nzModalContent>
+    <nz-spin [nzSpinning]="printLoading || preparing">
+      <p class="preview-hint no-print">
+        Front and back print on one page ({{ faces[0]?.widthMm || 85.6 }}×{{ faces[0]?.heightMm || 53.98 }} mm each).
+      </p>
+      <div id="student-card-print-area" class="print-stack">
+        <section class="card-print-page" *ngFor="let face of faces">
+          <div class="card-print-face">
+            <app-student-card-face
+              [widthMm]="face.widthMm"
+              [heightMm]="face.heightMm"
+              [elements]="face.frontElements"
+              [values]="face.values"
+              [backgroundUrl]="face.backgroundUrl">
+            </app-student-card-face>
+          </div>
+          <div class="card-print-face" *ngIf="face.backElements.length">
+            <app-student-card-face
+              [widthMm]="face.widthMm"
+              [heightMm]="face.heightMm"
+              [elements]="face.backElements"
+              [values]="face.values"
+              [backgroundUrl]="face.backBackgroundUrl">
+            </app-student-card-face>
+          </div>
+        </section>
+      </div>
+    </nz-spin>
+  </ng-container>
+</nz-modal>
+
+<ng-template #printFooter>
+  <button nz-button nzType="default" (click)="printVisible=false">Close</button>
+  <button nz-button nzType="primary" (click)="recordAndPrint()" [nzLoading]="printLoading" [disabled]="!faces.length">
+    Print {{ faces.length > 1 ? faces.length + ' cards' : '' }}
+  </button>
+</ng-template>

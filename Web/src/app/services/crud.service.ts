@@ -89,6 +89,10 @@ export class CrudService {
       '/studentcourseofferings': `/${v}/studentcourseofferings`,
       '/studentfeedbacks': `/${v}/studentfeedbacks`,
       '/studentclearances': `/${v}/studentclearances`,
+      '/student-cards': `/${v}/student-cards`,
+      '/studentcards': `/${v}/student-cards`,
+      '/card-templates': `/${v}/card-templates`,
+      '/card-design-assets': `/${v}/card-design-assets`,
       '/studententrytruckings': `/${v}/studententrytruckings`,
       '/studentcourseattendances': `/${v}/studentcourseattendances`,
       '/studentacademicstatushistorys': `/${v}/studentacademicstatushistorys`,
@@ -122,24 +126,24 @@ export class CrudService {
     return this.http.get<T>(this.buildUrl(`${this.trimSlash(path)}/${id}`));
   }
 
-  add<T = any>(path: string, data?: unknown, query?: QueryParams): Observable<T> {
-    return this.http.post<T>(this.buildUrl(path, query), data);
+  add<T = any>(path: string, data?: unknown, query?: QueryParams, headers?: Record<string, string>): Observable<T> {
+    return this.http.post<T>(this.buildUrl(path, query), data, headers ? { headers } : {});
   }
 
-  update<T = any>(path: string, id: string | number, data: unknown): Observable<T> {
-    return this.http.patch<T>(this.buildUrl(`${this.trimSlash(path)}/${id}`), data);
+  update<T = any>(path: string, id: string | number, data: unknown, headers?: Record<string, string>): Observable<T> {
+    return this.http.patch<T>(this.buildUrl(`${this.trimSlash(path)}/${id}`), data, headers ? { headers } : {});
   }
 
-  patch<T = any>(path: string, data?: unknown, query?: QueryParams): Observable<T> {
-    return this.http.patch<T>(this.buildUrl(path, query), data);
+  patch<T = any>(path: string, data?: unknown, query?: QueryParams, headers?: Record<string, string>): Observable<T> {
+    return this.http.patch<T>(this.buildUrl(path, query), data, headers ? { headers } : {});
   }
 
-  put<T = any>(path: string, data?: unknown): Observable<T> {
-    return this.http.put<T>(this.buildUrl(path), data);
+  put<T = any>(path: string, data?: unknown, headers?: Record<string, string>): Observable<T> {
+    return this.http.put<T>(this.buildUrl(path), data, headers ? { headers } : {});
   }
 
-  delete<T = any>(path: string, id: string | number): Observable<T> {
-    return this.http.delete<T>(this.buildUrl(`${this.trimSlash(path)}/${id}`));
+  delete<T = any>(path: string, id: string | number, headers?: Record<string, string>): Observable<T> {
+    return this.http.delete<T>(this.buildUrl(`${this.trimSlash(path)}/${id}`), headers ? { headers } : {});
   }
 
   addResponse<T = any>(path: string, data?: unknown): Observable<HttpResponse<T>> {

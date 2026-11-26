@@ -1,11 +1,11 @@
-import { Component, Input, Output, EventEmitter, AfterContentInit, ContentChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, AfterContentInit, OnChanges, SimpleChanges, ContentChildren, QueryList, ElementRef } from '@angular/core';
 
 @Component({
   selector: 'app-admission-tabs',
   templateUrl: './admission-tabs.component.html',
   styleUrls: ['./admission-tabs.component.scss']
 })
-export class AdmissionTabsComponent implements AfterContentInit {
+export class AdmissionTabsComponent implements AfterContentInit, OnChanges {
   @Input() selectedTabIndex = 0;
   @Input() isTabDisabled: boolean[] = [false, true, true, true, true, true, true, true];
   @Input() showSubmit = false;
@@ -18,6 +18,8 @@ export class AdmissionTabsComponent implements AfterContentInit {
   @Input() flexibleNavigation = false;
   @Input() tabOrder: 'default' | 'reviewer' = 'default'; // New input for tab order configuration
   @Input() academicProgramValid: boolean = false; // New input for Academic Program validation
+  /** Applicants no longer use Agreement; payment auto-submits. */
+  @Input() showAgreementTab = true;
 
   @Output() selectedTabIndexChange = new EventEmitter<number>();
   @Output() nextTabClicked = new EventEmitter<void>();
@@ -29,7 +31,7 @@ export class AdmissionTabsComponent implements AfterContentInit {
 
   // Property to control instruction tab visibility
   showInstructionTab: boolean = true;
-  // Property to control files tab visibility
+  // Property to control files/agreement tab visibility
   showFilesTab: boolean = true;
 
   constructor() {
@@ -43,6 +45,13 @@ export class AdmissionTabsComponent implements AfterContentInit {
         content.nativeElement.style.display = 'block';
       }
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['showAgreementTab'] && !this.isAgreementTabVisible && this.selectedTabIndex === 7) {
+      this.selectedTabIndex = 6;
+      this.selectedTabIndexChange.emit(this.selectedTabIndex);
+    }
   }
 
   /**
@@ -77,20 +86,23 @@ export class AdmissionTabsComponent implements AfterContentInit {
   private checkUserRole(): void {
     const isReviewerOrAcademicDirector = this.isUserReviewer();
     this.showInstructionTab = !isReviewerOrAcademicDirector;
-    // Hide files tab for reviewers and academic directors
+    // Hide agreement/files for reviewers and academic directors
     this.showFilesTab = !isReviewerOrAcademicDirector;
     // If user is reviewer/academic director and instruction tab is selected, move to next tab
     if (!this.showInstructionTab && this.selectedTabIndex === 0) {
       this.selectedTabIndex = 1;
       this.selectedTabIndexChange.emit(this.selectedTabIndex);
     }
-    // If user is reviewer/academic director and files tab is selected, move to previous tab
-    const filesTabIndex = this.tabOrder === 'reviewer' ? 7 : 7; // Both orders have files at index 7
-    if (!this.showFilesTab && this.selectedTabIndex === filesTabIndex) {
-      const previousTabIndex = this.tabOrder === 'reviewer' ? 6 : 6; // Both orders have previous tab at index 6
-      this.selectedTabIndex = previousTabIndex;
+    // If agreement/files tab is hidden and selected, move to Application Fee
+    const filesTabIndex = 7;
+    if (!this.isAgreementTabVisible && this.selectedTabIndex === filesTabIndex) {
+      this.selectedTabIndex = 6;
       this.selectedTabIndexChange.emit(this.selectedTabIndex);
     }
+  }
+
+  get isAgreementTabVisible(): boolean {
+    return this.showFilesTab && this.showAgreementTab;
   }
 
   /**
@@ -98,10 +110,8 @@ export class AdmissionTabsComponent implements AfterContentInit {
    * @returns boolean indicating if current tab is the last tab
    */
   public isLastTabForCurrentUser(): boolean {
-    const isReviewerOrAcademicDirector = this.isUserReviewer();
-    
-    // Both tab orders have files tab at index 7
-    return this.selectedTabIndex === 7;
+    // Without Agreement, Application Fee (index 6) is the last applicant tab
+    return this.selectedTabIndex === (this.isAgreementTabVisible ? 7 : 6);
   }
 
   /**

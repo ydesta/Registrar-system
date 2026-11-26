@@ -55,12 +55,17 @@ import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
+import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { AddCourseApprovalComponent } from './course-registration/course-add/add-course-approval/add-course-approval.component';
 import { AddCourseRequestComponent } from "./course-registration/course-add/add-course-request/add-course-request.component";
 import { RegisteredNewStudentListComponent } from './registered-new-student-list/registered-new-student-list.component';
+import { GradeActionOtpComponent } from './grade-action-otp/grade-action-otp.component';
+import { GradeRecordCorrectionComponent } from './grade-record-correction/grade-record-correction.component';
+import { GradeEncryptionBackfillComponent } from './grade-encryption-backfill/grade-encryption-backfill.component';
+import { GradeSubmissionsComponent } from './grade-submissions/grade-submissions.component';
 import { ManageGradeChangeRequestComponent } from './grade-change-request/manage-grade-change-request/manage-grade-change-request.component';
 import { GradeChangeRequestFormComponent } from './grade-change-request/grade-change-request-form/grade-change-request-form.component';
 import { GradeChangeRequestListForApprovalComponent } from './grade-change-request/grade-change-request-list-for-approval/grade-change-request-list-for-approval.component';
@@ -68,6 +73,17 @@ import { ApprovalDecisionModalComponent } from './grade-change-request/approval-
 import { StudentConfirmationModalComponent } from './components/student-confirmation-modal/student-confirmation-modal.component';
 import { SpecialCaseManualRegistrationComponent } from './special-case-manual-registration/special-case-manual-registration.component';
 import { ConfirmationModalComponent } from './special-case-manual-registration/confirmation-modal/confirmation-modal.component';
+import { StudentCardsComponent } from './student-cards/student-cards.component';
+import { IssueStudentCardComponent } from './issue-student-card/issue-student-card.component';
+import { CardTemplatesComponent } from './card-templates/card-templates.component';
+import { CardTemplateDesignerComponent } from './card-template-designer/card-template-designer.component';
+import { StudentCardFaceComponent } from './shared/student-card-face/student-card-face.component';
+import { MyStudentCardComponent } from './my-student-card/my-student-card.component';
+import { CardVerifyComponent } from './card-verify/card-verify.component';
+import { BulkIssueStudentCardsComponent } from './bulk-issue-student-cards/bulk-issue-student-cards.component';
+import { CardPrintCenterComponent } from './card-print-center/card-print-center.component';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzInputModule } from 'ng-zorro-antd/input';
 
 const routes: Routes = [
   { path: "", component: StudentsComponent },
@@ -115,6 +131,10 @@ const routes: Routes = [
     AddCourseApprovalComponent,
     AddCourseRequestComponent,
     RegisteredNewStudentListComponent,
+    GradeActionOtpComponent,
+    GradeRecordCorrectionComponent,
+    GradeEncryptionBackfillComponent,
+    GradeSubmissionsComponent,
     ManageGradeChangeRequestComponent,
     GradeChangeRequestFormComponent,
     GradeChangeRequestListForApprovalComponent,
@@ -122,6 +142,15 @@ const routes: Routes = [
     StudentConfirmationModalComponent,
     SpecialCaseManualRegistrationComponent,
     ConfirmationModalComponent,
+    StudentCardsComponent,
+    IssueStudentCardComponent,
+    CardTemplatesComponent,
+    CardTemplateDesignerComponent,
+    StudentCardFaceComponent,
+    MyStudentCardComponent,
+    CardVerifyComponent,
+    BulkIssueStudentCardsComponent,
+    CardPrintCenterComponent,
   ],
   imports: [
     CommonModule,
@@ -143,9 +172,12 @@ const routes: Routes = [
     NzButtonModule,
     NzIconModule,
     NzRadioModule,
+    NzSwitchModule,
     NzCheckboxModule,
     NzCardModule,
     NzTabsModule,
+    NzDropDownModule,
+    NzInputModule,
     NzEmptyModule
   ],
   exports: [StudentProfileSummaryComponent, RegistrarStudentProfileSummaryComponent, ProfileSummaryComponent, AddCourseApprovalComponent]

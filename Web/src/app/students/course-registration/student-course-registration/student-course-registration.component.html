@@ -424,7 +424,7 @@
             <li *ngIf="registrationVisibility.showAssessment && listOfCourseAssessment && listOfCourseAssessment.length > 0"><span>Assessment</span><strong>{{ selectedAssessmentCourseCount }}</strong></li>
             <li *ngIf="registrationVisibility.showEquivalent && listOfEquivalentCourses && listOfEquivalentCourses.length > 0"><span>Equivalent</span><strong>{{ selectedEquivalentCourseCount }}</strong></li>
             <li><span>Total Credit Hours</span><strong>{{ summarySelectedCreditHours }}</strong></li>
-            <li><span>Selected Courses</span><strong>{{ getTotalAmount() | number:'1.2-2' }} ETB</strong></li>
+            <li><span>Selected Courses</span><strong>{{ getAllSelectedAmount() | number:'1.2-2' }} ETB</strong></li>
             <li *ngIf="getPenaltyAmount() > 0"><span>Late Penalty</span><strong>{{ getPenaltyAmount() | number:'1.2-2' }} ETB</strong></li>
             <li><span>Amount to Pay</span><strong>{{ getAmountToPay() | number:'1.2-2' }} ETB</strong></li>
           </ul>
@@ -440,7 +440,8 @@
           </div>
           
           <button nz-button nzType="primary"
-            [disabled]="!hasNewCourseSelection || (totalSelectedCreditHours > getMaxAllowedCreditHours() && !studentTermCourseReg?.ignoreGradeLevelValidation)"
+            [disabled]="isSubmitting || !hasNewCourseSelection || (totalSelectedCreditHours > getMaxAllowedCreditHours() && !studentTermCourseReg?.ignoreGradeLevelValidation)"
+            [nzLoading]="isSubmitting"
              (click)="onSubmitClicked()">
             Submit
           </button>

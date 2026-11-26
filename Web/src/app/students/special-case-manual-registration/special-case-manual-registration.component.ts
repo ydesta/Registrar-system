@@ -203,9 +203,16 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
     return `${String(course.courseId).toLowerCase()}|${course.batchCode || ''}`;
   }
 
+  /** RA and RC courses can be selected again for retake on manual registration. */
+  private isRetakeGrade(course: CourseBreakDownOffering): boolean {
+    const grade = String(course?.currentGrade || '').trim().toUpperCase();
+    return grade === 'RA' || grade === 'RC';
+  }
+
   // Handle unregistered course selection
   onUnregisteredCourseSelectionChange(course: CourseBreakDownOffering, checked: boolean): void {
-    if (course.isPaid === true) {
+    // Paid courses stay locked, except RA and RC, which can be selected again.
+    if (course.isPaid === true && !this.isRetakeGrade(course)) {
       this.message.warning('This course is already paid and cannot be changed here.');
       return;
     }
@@ -218,6 +225,13 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
         return existingCourseId !== courseId;
       });
       this.selectedUnregisteredCourses.push(uniqueKey);
+      this.updateSubmitButtonState();
+      return;
+    }
+
+    // Paid RA or RC retake — just uncheck; do not delete the original paid row.
+    if (course.isPaid === true && this.isRetakeGrade(course)) {
+      this.selectedUnregisteredCourses = this.selectedUnregisteredCourses.filter(key => key !== uniqueKey);
       this.updateSubmitButtonState();
       return;
     }
@@ -269,8 +283,8 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
 
   // Check if a course should be disabled (paid registered, or same courseId other batch selected)
   isUnregisteredCourseDisabled(course: CourseBreakDownOffering): boolean {
-    // Paid courses stay checked and cannot be changed from Available
-    if (course.isPaid === true) {
+    // Paid courses stay locked. Paid RA and RC stay enabled so the registrar can register a retake.
+    if (course.isPaid === true && !this.isRetakeGrade(course)) {
       return true;
     }
 
@@ -307,6 +321,11 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
   // Auto-select existing registrations (unpaid can later be unchecked to remove)
   private autoSelectRegisteredCourses(): void {
     for (const course of this.unregisteredCourses) {
+      // Paid RA and RC are left unchecked so the registrar can explicitly select a retake.
+      if (course.isPaid === true && this.isRetakeGrade(course)) {
+        continue;
+      }
+
       const shouldSelect =
         course.isPaid === true ||
         course.isRegistered === true ||
@@ -437,8 +456,18 @@ export class SpecialCaseManualRegistrationComponent implements OnInit {
       if (!course) {
         course = this.unregisteredCourses.find(c => String(c.courseId).toLowerCase() === normalizedId);
       }
+      if (!course) {
+        continue;
+      }
+
+      // RA and RC retake: allow submit even if a previous Regular paid row exists.
+      if (this.isRetakeGrade(course)) {
+        result.push(course);
+        continue;
+      }
+
       // Only brand-new picks are submitted; unpaid existing stay selected but are not re-posted.
-      if (course && !course.isPaid && !course.isRegistered && !this.isExistingUnpaidRegistration(course)) {
+      if (!course.isPaid && !course.isRegistered && !this.isExistingUnpaidRegistration(course)) {
         result.push(course);
       }
     }

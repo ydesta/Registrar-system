@@ -36,6 +36,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   isUserDepartmentHead = false;
   currentUser: any = null;
 
+  /** Applicants only use the application form, so hide the left menu. */
+  get hideSidebarForApplicant(): boolean {
+    return this.userType === 'Applicant' || this.isUserApplicant;
+  }
+
   private redirectInProgress = false;
   private initialLoadComplete = false;
   private readonly destroy$ = new Subject<void>();

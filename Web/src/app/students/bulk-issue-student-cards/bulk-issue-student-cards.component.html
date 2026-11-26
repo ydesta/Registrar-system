@@ -1,0 +1,146 @@
+<div class="content-container">
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h1>Bulk issue</h1>
+        <p class="subtitle">Create cards for a batch, then go to Print.</p>
+      </div>
+      <div class="header-actions">
+        <a routerLink="../card-print-center" nz-button nzType="default">
+          <i nz-icon nzType="printer" nzTheme="outline"></i>
+          <span>Print</span>
+        </a>
+        <button nz-button
+                nzType="primary"
+                [nzLoading]="saving"
+                [disabled]="!selectedCount || form.invalid"
+                (click)="submit()">
+          Issue {{ selectedCount || '' }} card{{ selectedCount === 1 ? '' : 's' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <form nz-form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="search-section">
+      <div class="filters">
+        <nz-form-item class="filter-item">
+          <nz-form-label nzRequired>Batch</nz-form-label>
+          <nz-form-control nzErrorTip="Batch is required">
+            <nz-select formControlName="batchCode"
+                       nzShowSearch
+                       nzPlaceHolder="Select batch"
+                       nzAllowClear
+                       [nzLoading]="loadingBatches"
+                       class="batch-field">
+              <nz-option *ngFor="let b of batches" [nzValue]="b.code" [nzLabel]="b.label"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item class="filter-item">
+          <nz-form-label>Card design</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="cardTemplateId"
+                       nzShowSearch
+                       nzPlaceHolder="Default template"
+                       nzAllowClear
+                       [nzLoading]="loadingTemplates"
+                       class="design-field">
+              <nz-option *ngFor="let t of templates" [nzValue]="t.id" [nzLabel]="templateLabel(t)"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="options-row">
+        <label nz-checkbox formControlName="activateImmediately">Activate immediately</label>
+      </div>
+
+      <div class="summary-row" *ngIf="form.value.batchCode">
+        <span class="summary-pill">Eligible {{ students.length }}</span>
+        <span class="summary-pill summary-pill--sel">Selected {{ selectedCount }}</span>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="table-toolbar">
+        <div>
+          <strong>Students without a card</strong>
+          <span class="toolbar-sub" *ngIf="form.value.batchCode && !loadingStudents">
+            — {{ students.length }} in {{ form.value.batchCode }}
+          </span>
+        </div>
+        <label nz-checkbox
+               *ngIf="students.length"
+               [ngModel]="checkedAll"
+               [ngModelOptions]="{standalone: true}"
+               (ngModelChange)="toggleAll($event)">
+          Select all
+        </label>
+      </div>
+
+      <nz-spin [nzSpinning]="loadingStudents">
+        <nz-table [nzData]="students"
+                  nzBordered
+                  [nzFrontPagination]="true"
+                  [nzPageSize]="20"
+                  [nzShowSizeChanger]="true"
+                  [nzPageSizeOptions]="[10, 20, 50, 100]"
+                  [nzScroll]="{ x: '700px' }"
+                  [nzNoResult]="emptyTpl">
+          <thead>
+            <tr>
+              <th nzWidth="48px"></th>
+              <th nzWidth="140px">Student ID</th>
+              <th nzWidth="240px">Name</th>
+              <th nzWidth="140px">Programme</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of students" [class.is-selected]="isChecked(studentGuid(s))">
+              <td>
+                <label nz-checkbox
+                       [ngModel]="isChecked(studentGuid(s))"
+                       [ngModelOptions]="{standalone: true}"
+                       (ngModelChange)="toggleStudent(studentGuid(s), $event)">
+                </label>
+              </td>
+              <td class="mono">{{ s.studentId || s.StudentId || '—' }}</td>
+              <td>{{ studentName(s) }}</td>
+              <td>{{ s.academicProgrammeCode || '—' }}</td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </nz-spin>
+
+      <div class="table-foot">
+        <a nz-button nzType="default" routerLink="../card-print-center">Back to print</a>
+        <button nz-button nzType="primary" [nzLoading]="saving" [disabled]="!selectedCount || form.invalid">
+          Issue {{ selectedCount || '' }} card{{ selectedCount === 1 ? '' : 's' }}
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <div class="table-container results-block" *ngIf="created.length || skipped.length">
+    <div class="table-toolbar">
+      <div>
+        <strong>Done</strong>
+        <span class="toolbar-sub"> — {{ created.length }} issued · {{ skipped.length }} skipped</span>
+      </div>
+      <button *ngIf="created.length" nz-button nzType="primary" (click)="goToBulkPrint()">
+        <i nz-icon nzType="printer" nzTheme="outline"></i>
+        Print these cards
+      </button>
+    </div>
+  </div>
+</div>
+
+<ng-template #emptyTpl>
+  <nz-empty
+    [nzNotFoundContent]="form.value.batchCode
+      ? 'Everyone in this batch already has a card — go to Print'
+      : 'Select a batch'">
+  </nz-empty>
+</ng-template>

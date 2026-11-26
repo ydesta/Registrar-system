@@ -47,11 +47,21 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 };
             }
 
-            // Generate new OTP
-            var otp = await _otpService.GenerateOtpAsync(user.Id, user.Email, command.Purpose);
+            try
+            {
+                await _otpService.GenerateOtpAsync(user.Id, user.Email, command.Purpose);
+            }
+            catch (Exception)
+            {
+                return new ResendOtpResponse
+                {
+                    Success = false,
+                    Message = "The verification code email could not be sent. Please try again."
+                };
+            }
+
             var expiry = await _otpService.GetOtpExpiryAsync(user.Id);
 
-            // Log OTP resend
             await _activityLogService.LogUserActionAsync(
                 user.Id,
                 "OtpResend",
@@ -59,7 +69,6 @@ namespace SecureAuth.APPLICATION.Commands.Auth
                 user.Id,
                 $"OTP resent for {command.Purpose}");
 
-            // Record security event
             await _securityEventService.RecordLoginAttemptAsync(user.Id, user.Email, false, "127.0.0.1", "Unknown", "OTP resent");
 
             return new ResendOtpResponse 

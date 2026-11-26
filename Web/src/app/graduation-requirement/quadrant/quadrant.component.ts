@@ -24,6 +24,8 @@ export class QuadrantComponent implements OnInit, OnDestroy {
     private paginator: PaginatorService
   ) {
     this.pager = this.paginator.create();
+    this.pager.sortColumn = 'CurriculumCode';
+    this.pager.sortOrder = 'asc';
   }
 
   ngOnInit(): void {

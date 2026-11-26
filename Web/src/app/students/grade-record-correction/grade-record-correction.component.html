@@ -1,0 +1,345 @@
+<div class="container" [class.is-searching]="!sheet" [class.has-sheet]="!!sheet">
+  <div class="search-content" *ngIf="!sheet">
+    <app-student-search
+      [title]="searchTitle"
+      [description]="searchDescription"
+      [label]="searchLabel"
+      [placeholder]="searchPlaceholder"
+      [buttonText]="searchButtonText"
+      [showInfo]="false"
+      (searchSubmitted)="onSearchSubmitted($event)">
+    </app-student-search>
+  </div>
+
+  <div class="content-container" *ngIf="sheet">
+    <div class="header-section">
+      <div class="header-content">
+        <div class="page-title">
+          <h2 class="title-text">Grade Record Correction</h2>
+          <p class="subtitle-text">
+            {{ sheet.fullName }} · {{ sheet.studentCode }} · {{ sheet.program || '—' }}
+          </p>
+        </div>
+        <div class="header-actions">
+          <div class="search-section floating-label-container">
+            <input
+              type="text"
+              nz-input
+              id="lineSearch"
+              class="input-with-floating-label"
+              placeholder=" "
+              [ngModel]="lineSearchKey"
+              (ngModelChange)="onLineSearch($event)"
+            />
+            <label for="lineSearch" class="floating-label">
+              <span nz-icon nzType="search" nzTheme="outline"></span>
+              Search
+            </label>
+          </div>
+          <button nz-button nzType="default" type="button" class="secondary-btn" (click)="searchAnother()">
+            <span nz-icon nzType="search" nzTheme="outline"></span>
+            Search Another Student
+          </button>
+          <button nz-button nzType="primary" type="button" class="add-btn" (click)="openAdd()">
+            <span nz-icon nzType="plus" nzTheme="outline"></span>
+            Add missing course
+          </button>
+        </div>
+      </div>
+
+      <div class="meta-strip">
+        <div class="meta-item">
+          <span class="meta-label">Batch</span>
+          <span class="meta-value">{{ sheet.batchCode || '—' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Entry Year</span>
+          <span class="meta-value">{{ sheet.entryYear || '—' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Transcript</span>
+          <span class="meta-value">{{ sheet.transcriptStatus || '—' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Lines</span>
+          <span class="meta-value">{{ sheet.lines?.length || 0 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <nz-table
+        #linesTable
+        [nzData]="paginatedLines"
+        nzBordered
+        [nzScroll]="{ x: '1280px' }"
+        [nzPageSize]="pageSize"
+        [nzPageSizeOptions]="pageSizeOptions"
+        [nzShowSizeChanger]="true"
+        [nzTotal]="filteredLines.length"
+        [nzPageIndex]="pageIndex"
+        (nzPageIndexChange)="onPageIndexChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+        [nzFrontPagination]="false"
+        [nzShowTotal]="rangeTemplate"
+        [nzLoading]="loading"
+        [nzNoResult]="emptyTpl"
+        class="batch-table">
+        <ng-template #rangeTemplate let-range="range" let-total>
+          <span class="table-range">{{ range[0] }}-{{ range[1] }} of {{ total }} lines</span>
+        </ng-template>
+        <thead>
+          <tr>
+            <th nzWidth="70px">S/N</th>
+            <th nzWidth="120px">On transcript</th>
+            <th nzWidth="90px">Year</th>
+            <th nzWidth="110px">Term</th>
+            <th nzWidth="120px">Course</th>
+            <th nzWidth="260px">Title</th>
+            <th nzWidth="90px">Credit</th>
+            <th nzWidth="90px">Grade</th>
+            <th nzWidth="110px">Action</th>
+            <th nzWidth="90px">Mark</th>
+            <th nzRight nzWidth="90px" class="action-column">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let line of paginatedLines; let i = index">
+            <td><span class="sn-badge">{{ lineSerial(i) }}</span></td>
+            <td>
+              <span class="transcript-flag" [class.is-on]="line.showOnTranscript !== false" [class.is-off]="line.showOnTranscript === false">
+                {{ line.showOnTranscript === false ? 'Off' : 'On' }}
+              </span>
+            </td>
+            <td>{{ line.year || '—' }}</td>
+            <td>{{ line.termName || '—' }}</td>
+            <td>{{ line.courseCode || '—' }}</td>
+            <td>{{ line.courseTitle || '—' }}</td>
+            <td>{{ line.creditHours ?? '—' }}</td>
+            <td>{{ line.gradeLetter || '—' }}</td>
+            <td>{{ line.action || '—' }}</td>
+            <td>{{ line.mark == null ? '—' : line.mark }}</td>
+            <td nzRight class="action-column">
+              <button
+                nz-button
+                nz-dropdown
+                [nzDropdownMenu]="lineMenu"
+                nzPlacement="bottomRight"
+                class="action-button"
+                type="button">
+                <span nz-icon nzType="more" nzTheme="outline"></span>
+              </button>
+              <nz-dropdown-menu #lineMenu="nzDropdownMenu">
+                <ul nz-menu>
+                  <li nz-menu-item>
+                    <a class="action-item edit" (click)="openCorrect(line)">
+                      <span nz-icon nzType="edit" nzTheme="outline"></span>
+                      <span>Correct</span>
+                    </a>
+                  </li>
+                  <!-- Remove disabled — use Show on transcript in Correct modal instead
+                  <li nz-menu-item>
+                    <a class="action-item delete" (click)="openRemove(line)">
+                      <span nz-icon nzType="delete" nzTheme="outline"></span>
+                      <span>Remove</span>
+                    </a>
+                  </li>
+                  -->
+                </ul>
+              </nz-dropdown-menu>
+            </td>
+          </tr>
+        </tbody>
+        <ng-template #emptyTpl>
+          <div class="no-data">
+            <span nz-icon nzType="file-search" nzTheme="outline"></span>
+            <p>No transcript lines available</p>
+          </div>
+        </ng-template>
+      </nz-table>
+    </div>
+
+    <div class="table-card history-card-wrap">
+      <div class="history-header">
+        <div>
+          <h3>Grade History</h3>
+          <p>Previous and new values for each correction on this student.</p>
+        </div>
+      </div>
+
+      <nz-table
+        *ngIf="sheet.history?.length; else noHistory"
+        [nzData]="sheet.history"
+        nzBordered
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        class="batch-table history-table">
+        <thead>
+          <tr>
+            <th nzWidth="110px">Kind</th>
+            <th nzWidth="180px">When</th>
+            <th nzWidth="160px">Performed By</th>
+            <th>Reason</th>
+            <th nzWidth="220px">Changed Fields</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let entry of sheet.history">
+            <td>{{ entry.kind }}</td>
+            <td>{{ entry.createdAt | date:'medium' }}</td>
+            <td>{{ entry.performedBy }}</td>
+            <td>{{ entry.reason }}</td>
+            <td>
+              <span
+                class="changed-chip"
+                *ngFor="let field of historyFields(entry)"
+                [class.is-changed]="isChanged(field.previous, field.current)">
+                {{ field.label }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+
+      <ng-template #noHistory>
+        <div class="no-data">
+          <span nz-icon nzType="history" nzTheme="outline"></span>
+          <p>No corrections yet for this student</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<nz-modal
+  class="correction-editor-modal"
+  [(nzVisible)]="editorVisible"
+  [nzTitle]="editorTitleTpl"
+  [nzWidth]="980"
+  [nzMaskClosable]="false"
+  [nzCentered]="true"
+  (nzOnCancel)="closeEditor()"
+  [nzFooter]="null">
+  <ng-template #editorTitleTpl>
+    <div class="modal-title-block">
+      <div class="modal-title-icon">
+        <span nz-icon [nzType]="editorMode === 'Remove' ? 'delete' : (editorMode === 'Add' ? 'plus' : 'edit')" nzTheme="outline"></span>
+      </div>
+      <div class="modal-title-copy">
+        <h3>{{ editorTitle() }}</h3>
+        <p class="modal-student-name" *ngIf="sheet">
+          {{ sheet.fullName }} · {{ sheet.studentCode }}
+        </p>
+        <p>{{ editorHint() }}</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <div *nzModalContent [formGroup]="editorForm" class="editor-body">
+    <div class="editor-grid" *ngIf="editorMode !== 'Remove'">
+      <nz-form-item>
+        <nz-form-label nzRequired>Batch</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="batchCode" nzShowSearch nzPlaceHolder="Batch code">
+            <nz-option *ngFor="let batch of sheet?.batchCodes || []" [nzValue]="batch" [nzLabel]="batch"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Course</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="courseId" nzShowSearch nzPlaceHolder="Course">
+            <nz-option
+              *ngFor="let course of sheet?.courses || []"
+              [nzValue]="course.id"
+              [nzLabel]="course.code + ' - ' + course.title">
+            </nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Year</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="year" nzPlaceHolder="Year">
+            <nz-option *ngFor="let year of yearList" [nzValue]="year" [nzLabel]="year.toString()"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Term</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="termSeason" nzPlaceHolder="Term">
+            <nz-option *ngFor="let term of termList" [nzValue]="term.id" [nzLabel]="term.name"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Grade</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="gradeLetter" nzPlaceHolder="Grade">
+            <nz-option *ngFor="let grade of gradeList" [nzValue]="grade" [nzLabel]="grade"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Action</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="action" nzPlaceHolder="Action">
+            <nz-option *ngFor="let action of actionList" [nzValue]="action" [nzLabel]="action"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>Show on transcript</nz-form-label>
+        <nz-form-control>
+          <nz-switch formControlName="showOnTranscript" nzCheckedChildren="On" nzUnCheckedChildren="Off"></nz-switch>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Credit hours</nz-form-label>
+        <nz-form-control>
+          <input nz-input type="number" formControlName="creditHours" min="1" max="30" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>Mark</nz-form-label>
+        <nz-form-control>
+          <input nz-input type="number" formControlName="mark" min="0" max="100" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <nz-form-item>
+      <nz-form-label nzRequired>Reason</nz-form-label>
+      <nz-form-control>
+        <textarea nz-input formControlName="reason" rows="3" placeholder="Why this transcript line must change"></textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <div class="editor-actions">
+      <button nz-button type="button" (click)="closeEditor()">Cancel</button>
+      <button
+        nz-button
+        nzType="primary"
+        type="button"
+        [nzLoading]="saving"
+        (click)="submitEditor()">
+        {{ saveLabel() }}
+      </button>
+    </div>
+  </div>
+</nz-modal>
+
+<app-grade-action-otp
+  [(visible)]="otpVisible"
+  purpose="GradeRecordCorrection"
+  (confirmed)="onGradeCodeConfirmed($event)">
+</app-grade-action-otp>

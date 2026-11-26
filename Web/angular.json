@@ -44,6 +44,7 @@
               "exceljs",
               "file-saver",
               "xlsx",
+              "qrcode",
               "clone-deep",
               "canvg",
               "raf",

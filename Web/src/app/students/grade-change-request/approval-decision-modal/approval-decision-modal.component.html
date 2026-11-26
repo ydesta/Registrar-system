@@ -11,6 +11,12 @@
   [nzCancelText]="'Cancel'"
   [nzOkLoading]="loading"
   [nzOkDisabled]="decisionForm.invalid || loading">
+
+  <app-grade-action-otp
+    [(visible)]="otpVisible"
+    purpose="GradeChangeApproval"
+    (confirmed)="onGradeCodeConfirmed($event)">
+  </app-grade-action-otp>
   
   <div class="modal-content" *nzModalContent>
     <!-- Request Information -->

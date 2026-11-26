@@ -1,4 +1,5 @@
 export interface StudentGradeViewModel {
+  id: string;
   batchCode: string;
   academicTerm: string;
   course: string;

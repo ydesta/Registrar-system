@@ -13,8 +13,9 @@
 </div>
 
 <app-admission-tabs [(selectedTabIndex)]="selectedTabIndex" [isTabDisabled]="isTabDisabled"
-    [showSave]="selectedTabIndex === 1" [showSubmit]="selectedTabIndex === 7" [isLastTab]="selectedTabIndex === 7"
-    [saveDisabled]="isSaveButtonDisabled" [saveLoading]="saveLoading" [submitDisabled]="isSubmitButtonDisabled"
+    [showSave]="selectedTabIndex === 1" [showSubmit]="false" [showAgreementTab]="false"
+    [isLastTab]="selectedTabIndex === 6"
+    [saveDisabled]="isSaveButtonDisabled" [saveLoading]="saveLoading" [submitDisabled]="true"
     [nextDisabled]="isNextButtonDisabled()" [tabOrder]="'default'" [academicProgramValid]="isAcademicProgramValid"
     (nextTabClicked)="nextTab()" (previousTabClicked)="previousTab()" (saveClicked)="submitForm()"
     (submitClicked)="onApplicanFormSubmit()">
@@ -491,13 +492,15 @@
     <div tabContent="applicationFee">
         <app-application-fee
             [applicantId]="id"
-            [isTabActive]="selectedTabIndex === 5"
+            [isTabActive]="selectedTabIndex === 6"
             (paymentStatusChange)="onPaymentStatusChange($event)">
         </app-application-fee>
     </div>
+    <!-- Agreement tab removed: paid fee auto-submits the application.
     <div tabContent="files">
         <app-school-with-student-agreement (formValidityChange)="onAgreementFormValidityChange($event)"
             (formValueChange)="onAgreementFormValueChange($event)"></app-school-with-student-agreement>
     </div>
+    -->
 
 </app-admission-tabs>

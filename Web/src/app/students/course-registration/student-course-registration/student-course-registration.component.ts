@@ -794,16 +794,21 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       return true;
     }
 
+    // Already registered for assessment this term — keep locked
+    if (course.courseStatus === 'Registered') {
+      return true;
+    }
+
+    // Unlock RA for assessment even when the course is not in Regular/Add lists
+    // (retake may be offered under another batch of the same program level).
+    if (course.currentGrade === 'RA') {
+      return false;
+    }
+
     // If course exists in either list, unlock it (even if courseStatus is 'Registered' or currentGrade is not 'RA')
     // This allows courses from studentTermCourseReg?.courseTermOfferings to be selectable in assessment list
     if (existsInLists) {
       return false;
-    }
-
-    // If course does NOT exist in the lists, apply normal lock conditions
-    // Lock if course status is 'Registered' - this means it's already been registered in the system
-    if (course.courseStatus === 'Registered') {
-      return true;
     }
 
     // Lock if Current Grade is not empty and not 'RA' (only if course is not in the lists)
@@ -982,6 +987,15 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       .reduce((total, data) => total + data.totalAmount, 0);
   }
 
+  /** Unpaid selected amount across Regular + Assessment + Add + Equivalent. */
+  getAllSelectedAmount(): number {
+    const regular = this.registrationVisibility.showRegular ? this.getTotalAmount() : 0;
+    const assessment = this.registrationVisibility.showAssessment ? this.getTotalAssessmentAmount() : 0;
+    const add = this.registrationVisibility.showAdd ? this.getTotalAddedAmount() : 0;
+    const equivalent = this.registrationVisibility.showEquivalent ? this.getTotalEquivalentAmount() : 0;
+    return regular + assessment + add + equivalent;
+  }
+
   getPenaltyAmount() {
     if (!this.studentTermCourseReg?.isLateRegistration || this.studentTermCourseReg?.isPenaltyPaid) {
       return 0;
@@ -990,7 +1004,7 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   }
 
   getAmountToPay() {
-    return this.getTotalAmount() + this.getPenaltyAmount();
+    return this.getAllSelectedAmount() + this.getPenaltyAmount();
   }
 
   getLateRegistrationMessage() {
@@ -1417,9 +1431,15 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
     this.refreshRegularCourseCheckedStatus();
   }
   sendRequest(): void {
+    if (this.isSubmitting) {
+      return;
+    }
+    this.isSubmitting = true;
+
     // Validate required data before proceeding
     if (!this.studentTermCourseReg) {
       this._customNotificationService.notification('error', 'Error', 'Student course registration data is not available. Please refresh the page and try again.');
+      this.isSubmitting = false;
       return;
     }
 
@@ -1428,11 +1448,13 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
       !this.registrationVisibility.showAssessment &&
       !this.registrationVisibility.showEquivalent) {
       this._customNotificationService.notification('warning', 'Warning', 'No registration sections are open for this academic term.');
+      this.isSubmitting = false;
       return;
     }
 
     if (this.registrationVisibility.showRegular && !this.studentTermCourseReg.courseTermOfferings) {
       this._customNotificationService.notification('error', 'Error', 'No course offerings available for registration.');
+      this.isSubmitting = false;
       return;
     }
 
@@ -1444,10 +1466,10 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
 
     if (!hasRegularCourses && !hasAddCourses && !hasAssessmentCourses && !hasEquivalentCourses) {
       this._customNotificationService.notification('warning', 'Warning', 'Please select at least one course for registration.');
+      this.isSubmitting = false;
       return;
     }
 
-    this.isSubmitting = true;
     const semester = "Semester";
 
     try {
@@ -2023,6 +2045,19 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   }
 
   getCourseAssessmentLockTooltipMessage(course: any): string {
+    if (course.isPaid === true || (course.isRegistered === true && course.isPaid === true)) {
+      return 'Course assessment is locked because it is already paid';
+    }
+
+    if (course.courseStatus === 'Registered') {
+      return 'Course assessment is locked because it is already registered';
+    }
+
+    // RA courses are selectable for assessment (no Regular/Add list requirement)
+    if (course.currentGrade === 'RA') {
+      return 'Course is available for assessment';
+    }
+
     // Lock if Current Grade is not empty and not 'RA'
     if (course.currentGrade && course.currentGrade !== 'RA') {
       return 'Course assessment is locked because the current grade has changed from RA';
@@ -2328,6 +2363,10 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
   }
 
   onSubmitClicked(): void {
+    if (this.isSubmitting) {
+      return;
+    }
+
     // Only check credit hour limit if ignoreGradeLevelValidation is false
     if (!this.studentTermCourseReg?.ignoreGradeLevelValidation && this.totalSelectedCreditHours > this.getMaxAllowedCreditHours()) {
       const cgpa = this.studentTermCourseReg?.cgpa || 0;
@@ -2350,6 +2389,9 @@ export class StudentCourseRegistrationComponent implements OnInit, OnDestroy {
         nzOkDanger: true,
         nzCancelText: 'No, Cancel',
         nzOnOk: () => {
+          if (this.isSubmitting) {
+            return;
+          }
           this._customNotificationService.notification('warning', 'Credit Hour Warning', warningMessage);
           this.sendRequest();
         }

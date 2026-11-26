@@ -1,0 +1,340 @@
+:host {
+  display: inline-block;
+  line-height: 0;
+  max-width: 100%;
+}
+
+.card-face {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  background-color: #fff;
+  border: none;
+  border-radius: 2.2mm;
+  box-shadow:
+    0 1px 2px rgba(14, 47, 102, 0.12),
+    0 14px 32px rgba(14, 47, 102, 0.16);
+  overflow: hidden;
+}
+
+.card-face.has-bg {
+  /* Keep a solid card base under the template background image. */
+  background-color: #ffffff;
+}
+
+/* Printable background layer (CSS background-image is dropped by many printers). */
+.card-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.card-face.interactive .el:not(.el-locked) {
+  cursor: grab;
+  outline: 1px dashed transparent;
+}
+
+.card-face.interactive .el:not(.el-locked):active {
+  cursor: grabbing;
+}
+
+.el {
+  position: absolute;
+  overflow: hidden;
+  line-height: 1.15;
+  padding: 0;
+  user-select: none;
+  -webkit-user-drag: none;
+  box-sizing: border-box;
+  z-index: 1;
+  touch-action: none;
+}
+
+.el.selected {
+  outline: 1px solid #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.22);
+  z-index: 5;
+}
+
+.el-locked {
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+.el-shape {
+  z-index: 0;
+  border: none;
+}
+
+.el img,
+.el .qr-img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.el-text {
+  display: block;
+  width: 100%;
+  height: 100%;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.el img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.el-logo {
+  /* Clean white circular badge — emblem only (name is beside it). */
+  background: #ffffff;
+  border: 0.3mm solid rgba(201, 74, 74, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 0.45mm 1.3mm rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+  padding: 1.1mm;
+  box-sizing: border-box;
+}
+
+/* Soft security watermark behind student fields */
+.el-watermark {
+  z-index: 0 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.el-watermark-logo {
+  opacity: 0.1;
+}
+
+.el-watermark-logo img {
+  object-fit: contain;
+  object-position: center;
+  filter: grayscale(12%) contrast(0.95);
+  background: transparent !important;
+}
+
+.el-watermark-logo .img-ph {
+  background: transparent;
+  color: rgba(27, 79, 156, 0.25);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+}
+
+.el-watermark-text {
+  opacity: 0.055;
+  transform: rotate(-18deg);
+  transform-origin: center center;
+}
+
+.el-watermark-text .el-text {
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+/* Optional official seal / stamp */
+.el-seal {
+  z-index: 3 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 50%;
+  overflow: hidden;
+  opacity: 0.72;
+  padding: 0.4mm;
+  box-sizing: border-box;
+}
+
+.el-seal img {
+  object-fit: contain;
+  object-position: center;
+  background: transparent !important;
+}
+
+.el-seal .img-ph {
+  background: transparent;
+  color: rgba(201, 74, 74, 0.45);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+
+.el-logo img {
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+}
+
+/* Full banner — no circle mask. Width comes from the template preference. */
+.el-logo-rect {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  overflow: hidden;
+}
+
+.el-logo-rect img {
+  object-fit: contain;
+  object-position: left center;
+  background: transparent;
+  border-radius: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.el-photo {
+  background:
+    linear-gradient(160deg, #e8eef8 0%, #d5deec 55%, #c5d0e2 100%);
+  border: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.el-photo img {
+  object-fit: cover;
+  object-position: center top;
+}
+
+/* Soft wave / curve dividers (portrait optional starter) */
+.el-wave {
+  border-radius: 50% !important;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* Profile-style circular photo */
+.el-photo-circle {
+  border-radius: 50% !important;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.el-photo-circle.el-photo {
+  box-shadow:
+    0 0 0 0.35mm rgba(255, 255, 255, 0.95),
+    0 1.2mm 3.2mm rgba(14, 47, 102, 0.28);
+}
+
+.el-photo-circle.el-shape {
+  z-index: 2;
+}
+
+.el-photo-circle img,
+.el-photo-circle .img-ph {
+  border-radius: 50%;
+}
+
+.el-image:not(.el-logo):not(.el-logo-rect):not(.el-photo):not(.el-watermark):not(.el-seal) {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+}
+
+.el-qr {
+  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 1.2mm;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15);
+}
+
+.qr-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #0f172a;
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.qr-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #fff;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.img-ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(255, 255, 255, 0.55), transparent 55%),
+    linear-gradient(165deg, #eef3fa 0%, #d0dae8 100%);
+  font-size: 8px;
+  font-weight: 700;
+  color: #1b4f9c;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.el-photo .img-ph {
+  color: #0e2f66;
+  font-size: 7.5px;
+}
+
+.el-barcode {
+  background: transparent;
+}
+
+.barcode-ph {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+}
+
+.barcode-bars {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    #fff 0 1.5px,
+    transparent 1.5px 3px,
+    #fff 3px 4px,
+    transparent 4px 7px,
+    #fff 7px 8px,
+    transparent 8px 10px
+  );
+  opacity: 0.95;
+}
+
+.barcode-text {
+  margin-top: 1px;
+  font-family: Consolas, monospace;
+  font-size: 7px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

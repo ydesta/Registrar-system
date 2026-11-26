@@ -249,10 +249,22 @@ namespace SecureAuth.APPLICATION.Commands.Auth
             
             if (isTwoFactorRequired && string.IsNullOrEmpty(command.TwoFactorCode))
             {
-                // Generate and send OTP
-                var otp = await _otpService.GenerateOtpAsync(user.Id, user.Email, "Login");
-                
-                // ✅ FIX: Return Success=true so Angular shows OTP form (not error handler)
+                try
+                {
+                    await _otpService.GenerateOtpAsync(user.Id, user.Email, "Login");
+                }
+                catch (Exception)
+                {
+                    return new LoginResponse
+                    {
+                        Success = false,
+                        Message = "The verification code email could not be sent. Please try again.",
+                        Token = null,
+                        RefreshToken = null
+                    };
+                }
+
+                // Success=true so Angular shows OTP form (not error handler)
                 return new LoginResponse
                 {
                     Success = true,

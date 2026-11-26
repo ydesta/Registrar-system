@@ -1,47 +1,47 @@
-<div class="search-header">
-  <h2>Student Information Retrieval</h2>
-  <p>Enter Student ID to access academic records and profile information</p>
-</div>
+<div class="search-shell">
+  <div class="search-header">
+    <div class="search-mark" aria-hidden="true"></div>
+    <h2>{{ title }}</h2>
+    <p>{{ description }}</p>
+  </div>
 
-<form [formGroup]="searchForm" (ngSubmit)="onSubmit()" class="search-form">
-  <div class="form-group">
-    <label for="studentId">Student ID</label>
-    <input
-      type="text"
-      id="studentId"
-      formControlName="studentId"
-      [placeholder]="placeholder"
-      class="form-control"
-      [class.error]="searchForm.get('studentId')?.invalid && searchForm.get('studentId')?.touched"
-    />
-    <div class="error-message" *ngIf="searchForm.get('studentId')?.invalid && searchForm.get('studentId')?.touched">
-      {{ getErrorMessage() }}
+  <form [formGroup]="searchForm" (ngSubmit)="onSubmit()" class="search-form">
+    <div class="form-group">
+      <label for="studentId">{{ label }}</label>
+      <div class="input-row">
+        <input
+          type="text"
+          id="studentId"
+          formControlName="studentId"
+          [placeholder]="placeholder"
+          class="form-control"
+          autocomplete="off"
+          [class.error]="searchForm.get('studentId')?.invalid && searchForm.get('studentId')?.touched"
+        />
+        <button
+          type="submit"
+          class="search-btn"
+          [disabled]="loading">
+          <span *ngIf="!loading">{{ buttonText }}</span>
+          <span *ngIf="loading">{{ loadingText }}</span>
+        </button>
+      </div>
+      <div class="error-message" *ngIf="searchForm.get('studentId')?.invalid && searchForm.get('studentId')?.touched">
+        {{ getErrorMessage() }}
+      </div>
     </div>
-  </div>
+  </form>
 
-  <div class="form-actions">
-    <button
-      type="submit"
-      class="search-btn"
-      [disabled]="searchForm.invalid || loading"
-    >
-      <span *ngIf="!loading">{{ buttonText }}</span>
-      <span *ngIf="loading">{{ loadingText }}</span>
-    </button>
-  </div>
-</form>
-
-<div class="error-container" *ngIf="error">
-  <div class="error-message">
+  <div class="error-container" *ngIf="error">
     <p>{{ error }}</p>
   </div>
-</div>
 
-<div class="search-info" *ngIf="showInfo">
-  <h4>Quick Instructions</h4>
-  <div class="info-items">
-    <span class="info-item">• Enter complete Student ID (e.g., ST2021)</span>
-    <span class="info-item">• Ensure correct format (2 letters + 4 digits)</span>
-    <span class="info-item">• System retrieves complete academic profile</span>
+  <div class="search-info" *ngIf="showInfo">
+    <h4>Quick Instructions</h4>
+    <div class="info-items">
+      <span class="info-item">Enter the complete Student ID</span>
+      <span class="info-item">Use the same ID shown on the student record</span>
+      <span class="info-item">The system loads the academic profile for that student</span>
+    </div>
   </div>
-</div> 
+</div>

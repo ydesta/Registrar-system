@@ -1,0 +1,109 @@
+.grade-otp-modal .ant-modal-content {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.grade-otp-modal .ant-modal-body {
+  padding: 8px 28px 28px;
+}
+
+.grade-otp-modal .otp-card {
+  text-align: center;
+}
+
+.grade-otp-modal .otp-icon {
+  width: 72px;
+  height: 72px;
+  margin: 8px auto 16px;
+  border-radius: 50%;
+  background: #e6f4ff;
+  color: #1677ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+
+.grade-otp-modal h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 650;
+}
+
+.grade-otp-modal .otp-lead {
+  margin: 0 0 20px;
+  color: rgba(0, 0, 0, 0.65);
+  line-height: 1.5;
+}
+
+.grade-otp-modal .otp-digits {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.grade-otp-modal .otp-digits input {
+  width: 46px;
+  height: 52px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.grade-otp-modal .otp-digits input:focus {
+  border-color: #1677ff;
+  outline: 2px solid rgba(22, 119, 255, 0.15);
+}
+
+.grade-otp-modal .otp-digits input:disabled {
+  background: #f5f5f5;
+  color: rgba(0, 0, 0, 0.25);
+}
+
+.grade-otp-modal .otp-timer {
+  margin: 16px 0 0;
+  color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+.grade-otp-modal .otp-timer.urgent,
+.grade-otp-modal .otp-timer.expired {
+  color: #cf1322;
+}
+
+.grade-otp-modal .otp-error {
+  margin: 10px 0 0;
+  color: #cf1322;
+}
+
+.grade-otp-modal .otp-verify {
+  margin-top: 18px;
+  height: 42px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.grade-otp-modal .otp-resend {
+  margin: 14px 0 0;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.grade-otp-modal .otp-resend button {
+  border: 0;
+  background: transparent;
+  color: #1677ff;
+  padding: 0 0 0 4px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.grade-otp-modal .otp-resend button:disabled {
+  color: rgba(0, 0, 0, 0.25);
+  cursor: not-allowed;
+}

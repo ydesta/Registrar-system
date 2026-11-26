@@ -29,7 +29,7 @@
         </div>
       </div>
 
-      <form nz-form [formGroup]="termCourseOfferingForm" class="admin-form">
+      <form nz-form nzLayout="horizontal" [formGroup]="termCourseOfferingForm" class="admin-form">
         <div class="form-sections">
           <div class="form-section">
             <div class="section-header">
@@ -43,46 +43,36 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
+                  <nz-form-label nzRequired>Batch</nz-form-label>
                   <nz-form-control nzErrorTip="Please select a batch">
                     <nz-select
                       formControlName="batchCode"
-                      id="batchCode"
-                      nzPlaceHolder=" "
-                      class="select-with-floating-label"
+                      nzPlaceHolder="Select batch"
+                      class="field-control"
                       [nzShowSearch]="true"
                       [nzAllowClear]="true"
                       [nzShowArrow]="true"
-                      [nzDropdownMatchSelectWidth]="false"
-                    >
+                      [nzDropdownMatchSelectWidth]="false">
                       <nz-option
                         *ngFor="let item of batchs"
                         [nzValue]="item.batchCode"
-                        [nzLabel]="item.batchCode"
-                      ></nz-option>
+                        [nzLabel]="item.batchCode">
+                      </nz-option>
                     </nz-select>
-                    <label for="batchCode" class="floating-label">
-                      <span nz-icon nzType="team" nzTheme="outline"></span>
-                      Batch <span class="required">*</span>
-                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
+                  <nz-form-label nzRequired>Batch Entry</nz-form-label>
                   <nz-form-control>
                     <input
                       nz-input
-                      id="entryCode"
                       formControlName="entryCode"
                       readonly
-                      placeholder=" "
-                      class="input-with-floating-label"
-                    />
-                    <label for="entryCode" class="floating-label">
-                      <span nz-icon nzType="barcode" nzTheme="outline"></span>
-                      Batch Entry <span class="required">*</span>
-                    </label>
+                      placeholder="Batch entry"
+                      class="field-control" />
                   </nz-form-control>
                 </nz-form-item>
               </div>
@@ -91,48 +81,37 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
+                  <nz-form-label nzRequired>Offer Year</nz-form-label>
                   <nz-form-control nzErrorTip="Please select an offer year">
                     <nz-select
                       formControlName="Year"
-                      id="Year"
-                      nzPlaceHolder=" "
-                      class="select-with-floating-label"
+                      nzPlaceHolder="Select offer year"
+                      class="field-control"
                       [nzShowSearch]="true"
                       [nzShowArrow]="true"
-                      [nzDropdownMatchSelectWidth]="false"
-                    >
+                      [nzDropdownMatchSelectWidth]="false">
                       <nz-option
                         *ngFor="let item of yearList"
                         [nzValue]="item"
-                        [nzLabel]="item.toString()"
-                      ></nz-option>
+                        [nzLabel]="item.toString()">
+                      </nz-option>
                     </nz-select>
-                    <label for="Year" class="floating-label">
-                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
-                      Offer Year <span class="required">*</span>
-                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
+                  <nz-form-label nzRequired>Registration Start Date</nz-form-label>
                   <nz-form-control>
                     <nz-date-picker
                       formControlName="RegistrationStartDate"
-                      id="RegistrationStartDate"
-                      nzPlaceHolder=" "
-                      class="date-with-floating-label"
-                      style="width: 100%"
-                    ></nz-date-picker>
-                    <label for="RegistrationStartDate" class="floating-label">
-                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
-                      Registration Start Date <span class="required">*</span>
-                    </label>
+                      nzPlaceHolder="Select start date"
+                      class="field-control"
+                      style="width: 100%">
+                    </nz-date-picker>
                     <div
-                      nz-form-explain
-                      *ngIf="termCourseOfferingForm.controls['RegistrationStartDate'].invalid && (termCourseOfferingForm.controls['RegistrationStartDate'].dirty || termCourseOfferingForm.controls['RegistrationStartDate'].touched)"
-                    >
+                      *ngIf="termCourseOfferingForm.controls['RegistrationStartDate'].invalid && (termCourseOfferingForm.controls['RegistrationStartDate'].dirty || termCourseOfferingForm.controls['RegistrationStartDate'].touched)">
                       <span class="error-message">Registration Start Date is required.</span>
                     </div>
                   </nz-form-control>
@@ -143,49 +122,38 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
+                  <nz-form-label nzRequired>Batch Term</nz-form-label>
                   <nz-form-control nzErrorTip="Please select an academic term">
                     <nz-select
                       formControlName="AcademicTermSeason"
-                      id="AcademicTermSeason"
-                      nzPlaceHolder=" "
-                      class="select-with-floating-label"
+                      nzPlaceHolder="Select batch term"
+                      class="field-control"
                       [nzShowSearch]="true"
                       [nzDisabled]="true"
                       [nzShowArrow]="true"
-                      [nzDropdownMatchSelectWidth]="false"
-                    >
+                      [nzDropdownMatchSelectWidth]="false">
                       <nz-option
                         *ngFor="let item of listOfTermNumber"
                         [nzValue]="item.Id"
-                        [nzLabel]="item.Description"
-                      ></nz-option>
+                        [nzLabel]="item.Description">
+                      </nz-option>
                     </nz-select>
-                    <label for="AcademicTermSeason" class="floating-label">
-                      <span nz-icon nzType="schedule" nzTheme="outline"></span>
-                      Batch Term <span class="required">*</span>
-                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
+                  <nz-form-label nzRequired>Registration End Date</nz-form-label>
                   <nz-form-control>
                     <nz-date-picker
                       formControlName="RegistrationEndDate"
-                      id="RegistrationEndDate"
-                      nzPlaceHolder=" "
-                      class="date-with-floating-label"
-                      style="width: 100%"
-                      [class.error]="termCourseOfferingForm.controls['RegistrationEndDate'].invalid && (termCourseOfferingForm.controls['RegistrationEndDate'].dirty || termCourseOfferingForm.controls['RegistrationEndDate'].touched)"
-                    ></nz-date-picker>
-                    <label for="RegistrationEndDate" class="floating-label">
-                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
-                      Registration End Date <span class="required">*</span>
-                    </label>
+                      nzPlaceHolder="Select end date"
+                      class="field-control"
+                      style="width: 100%">
+                    </nz-date-picker>
                     <div
-                      *ngIf="termCourseOfferingForm.hasError('dateRangeError', ['RegistrationStartDate', 'RegistrationEndDate'])"
-                    >
+                      *ngIf="termCourseOfferingForm.hasError('dateRangeError', ['RegistrationStartDate', 'RegistrationEndDate'])">
                       <p class="error-message">Start date must be before end date.</p>
                     </div>
                   </nz-form-control>
@@ -196,40 +164,31 @@
             <div class="form-row">
               <div class="form-col">
                 <nz-form-item>
+                  <nz-form-label>Curriculum</nz-form-label>
                   <nz-form-control>
                     <input
                       nz-input
-                      id="curriculumCode"
                       formControlName="curriculumCode"
                       readonly
-                      placeholder=" "
-                      class="input-with-floating-label"
-                    />
-                    <label for="curriculumCode" class="floating-label">
-                      <span nz-icon nzType="book" nzTheme="outline"></span>
-                      Curriculum
-                    </label>
+                      placeholder="Curriculum"
+                      class="field-control" />
                   </nz-form-control>
                 </nz-form-item>
               </div>
 
               <div class="form-col">
                 <nz-form-item>
+                  <nz-form-label>Remark</nz-form-label>
                   <nz-form-control>
                     <nz-textarea-count [nzMaxCharacterCount]="250">
                       <textarea
-                        id="remark"
                         rows="4"
                         formControlName="remark"
                         nz-input
-                        placeholder=" "
-                        class="textarea-with-floating-label"
-                      ></textarea>
+                        placeholder="Optional remark"
+                        class="field-control field-textarea">
+                      </textarea>
                     </nz-textarea-count>
-                    <label for="remark" class="floating-label textarea-label">
-                      <span nz-icon nzType="form" nzTheme="outline"></span>
-                      Remark
-                    </label>
                   </nz-form-control>
                 </nz-form-item>
               </div>

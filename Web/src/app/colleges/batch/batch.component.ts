@@ -6,6 +6,7 @@ import { CrudService } from 'src/app/services/crud.service';
 import { CustomNotificationService } from 'src/app/services/custom-notification.service';
 import { StaticData } from 'src/app/admission-request/model/StaticData';
 import { ACADEMIC_TERM_STATUS } from 'src/app/common/constant';
+import { ManageBatchTermComponent } from '../manage-batch-term/manage-batch-term.component';
 
 @Component({
   selector: 'app-batch',
@@ -70,6 +71,23 @@ export class BatchComponent implements OnInit, OnDestroy {
       Id: pair.Id,
       Description: pair.Description
     }));
+  }
+
+  openManageTerm(batch: BatchModel): void {
+    if (!batch?.id) {
+      return;
+    }
+    this.modal.create({
+      nzTitle: null,
+      nzContent: ManageBatchTermComponent,
+      nzComponentParams: {
+        batchId: batch.id,
+        batchCode: batch.batchCode
+      },
+      nzWidth: 820,
+      nzFooter: null,
+      nzMaskClosable: false
+    });
   }
 
   showDeleteConfirm(id: string): void {

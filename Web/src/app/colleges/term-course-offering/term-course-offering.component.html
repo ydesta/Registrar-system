@@ -14,56 +14,156 @@
 </ng-template>
 
 <div class="content-container">
-  <div class="header-section">
-    <div class="header-content">
-      <div class="page-title">
-        <h2 class="title-text">Course Offerings</h2>
-        <p class="subtitle-text">View, search, and manage all term course offerings</p>
+  <!-- Page title + search merged into one card -->
+  <div class="form-container" [class.collapsed]="isSearchCollapsed">
+    <div class="form-card">
+      <div
+        class="form-header"
+        (click)="$event.preventDefault(); $event.stopPropagation(); toggleSearchForm()"
+        style="cursor: pointer;">
+        <div class="form-icon">
+          <span nz-icon nzType="book" nzTheme="outline"></span>
+        </div>
+        <div class="form-title">
+          <h3>Course Offerings</h3>
+          <p>View, search, and manage all term course offerings</p>
+        </div>
+        <div class="collapse-icon">
+          <span nz-icon [nzType]="isSearchCollapsed ? 'down' : 'up'" nzTheme="outline"></span>
+        </div>
+      </div>
+
+      <div class="form-content" [class.hidden]="isSearchCollapsed">
+        <div class="search-form">
+          <div class="form-sections">
+            <div class="form-section">
+              <div class="section-header">
+                <h4 class="section-title">
+                  <span nz-icon nzType="search" nzTheme="outline"></span>
+                  Search Criteria
+                </h4>
+                <p class="section-description">Define the search parameters to load term course offerings</p>
+              </div>
+
+              <div class="form-row">
+                <div class="form-col">
+                  <nz-form-item>
+                    <nz-form-label nzRequired>Academic Term</nz-form-label>
+                    <nz-form-control>
+                      <nz-select
+                        [(ngModel)]="termFilter"
+                        (ngModelChange)="onTermOrYearFilterChange()"
+                        nzPlaceHolder="Select academic term"
+                        [nzShowSearch]="true"
+                        [nzAllowClear]="true"
+                        [nzShowArrow]="true"
+                        class="professional-select">
+                        <nz-option
+                          *ngFor="let term of listOfTermNumber"
+                          [nzValue]="term.Id"
+                          [nzLabel]="term.Description">
+                        </nz-option>
+                      </nz-select>
+                    </nz-form-control>
+                  </nz-form-item>
+                </div>
+
+                <div class="form-col">
+                  <nz-form-item>
+                    <nz-form-label nzRequired>Term Year</nz-form-label>
+                    <nz-form-control>
+                      <nz-select
+                        [(ngModel)]="yearFilter"
+                        (ngModelChange)="onTermOrYearFilterChange()"
+                        nzPlaceHolder="Select term year"
+                        [nzShowSearch]="true"
+                        [nzAllowClear]="true"
+                        [nzShowArrow]="true"
+                        class="professional-select">
+                        <nz-option *ngFor="let year of yearOptions" [nzValue]="year" [nzLabel]="year.toString()"></nz-option>
+                      </nz-select>
+                    </nz-form-control>
+                  </nz-form-item>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-col">
+                  <nz-form-item>
+                    <nz-form-label nzRequired>Batch Code</nz-form-label>
+                    <nz-form-control>
+                      <nz-select
+                        [(ngModel)]="batchFilter"
+                        (ngModelChange)="onBatchFilterChange()"
+                        nzPlaceHolder="Select batch code"
+                        [nzShowSearch]="true"
+                        [nzAllowClear]="true"
+                        [nzShowArrow]="true"
+                        [nzDisabled]="termFilter == null || yearFilter == null"
+                        [nzLoading]="loadingBatches"
+                        class="professional-select">
+                        <nz-option
+                          *ngFor="let batch of batchOptions"
+                          [nzValue]="batch.batchCode"
+                          [nzLabel]="batch.batchCode">
+                        </nz-option>
+                      </nz-select>
+                    </nz-form-control>
+                  </nz-form-item>
+                </div>
+
+                <div class="form-col">
+                  <nz-form-item>
+                    <nz-form-label>Status</nz-form-label>
+                    <nz-form-control>
+                      <nz-select
+                        [(ngModel)]="isActiveFilter"
+                        (ngModelChange)="onIsActiveFilterChange($event)"
+                        nzPlaceHolder="Select status"
+                        [nzShowSearch]="true"
+                        [nzShowArrow]="true"
+                        class="professional-select">
+                        <nz-option [nzValue]="true" nzLabel="Active"></nz-option>
+                        <nz-option [nzValue]="false" nzLabel="Inactive"></nz-option>
+                        <nz-option [nzValue]="null" nzLabel="All"></nz-option>
+                      </nz-select>
+                    </nz-form-control>
+                  </nz-form-item>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button nz-button nzType="default" type="button" class="reset-btn" (click)="clearSearch()">
+                  <span nz-icon nzType="reload" nzTheme="outline"></span>
+                  Reset
+                </button>
+                <button
+                  nz-button
+                  nzType="primary"
+                  type="button"
+                  class="search-btn"
+                  (click)="applyFilters()"
+                  [disabled]="!canApplyFilters()"
+                  [nzLoading]="pager.loading && hasAppliedFilters">
+                  <span nz-icon nzType="search" nzTheme="outline"></span>
+                  {{ pager.loading && hasAppliedFilters ? 'Searching...' : 'Find Offerings' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  
-  <!-- Filter Section -->
-  <div class="filter-section">
-    <div class="filter-row">
-      <nz-input-group [nzSuffix]="suffixIconSearch" class="search-input-group">
-        <input 
-          type="text" 
-          nz-input 
-          [(ngModel)]="pager.searchKey"
-          (ngModelChange)="pager.onSearch($event)"
-          placeholder="Search by batch code..." 
-          class="batch-search-input" />
-        <ng-template #suffixIconSearch>
-          <i nz-icon nzType="search" nzTheme="outline"></i>
-        </ng-template>
-      </nz-input-group>
-      
-      <nz-select 
-        [(ngModel)]="isActiveFilter" 
-        (ngModelChange)="onIsActiveFilterChange($event)"
-        nzPlaceHolder="Filter by Status"
-        class="filter-select"
-        style="width: 150px;">
-        <nz-option [nzValue]="true" nzLabel="Active"></nz-option>
-        <nz-option [nzValue]="false" nzLabel="Inactive"></nz-option>
-        <nz-option [nzValue]="null" nzLabel="All"></nz-option>
-      </nz-select>
-      
-      <nz-select 
-        [(ngModel)]="yearFilter" 
-        (ngModelChange)="onYearFilterChange($event)"
-        nzPlaceHolder="Filter by Year"
-        class="filter-select"
-        [nzAllowClear]="true"
-        style="width: 150px;">
-        <nz-option *ngFor="let year of yearOptions" [nzValue]="year" [nzLabel]="year.toString()"></nz-option>
-      </nz-select>
-    </div>
-  </div>
-  
+
   <div class="table-card">
-    <div class="table-actions">
+    <div class="results-toolbar">
+      <div class="results-title-block">
+        <h3>Results</h3>
+        <p *ngIf="hasAppliedFilters && pager.total > 0">Showing {{ pager.total }} offering(s)</p>
+        <p *ngIf="!hasAppliedFilters">Use search criteria above to load offerings</p>
+        <p *ngIf="hasAppliedFilters && pager.total === 0 && !pager.loading">No offerings match the selected criteria</p>
+      </div>
       <button nz-button nzType="primary" routerLink="../add-term-course-offering/null" class="add-btn">
         <i nz-icon nzType="plus" nzTheme="outline"></i>
         Add Term Course Offering
@@ -220,8 +320,11 @@
         </tbody>
         <ng-template #emptyTpl>
           <div class="no-data">
-            <span nz-icon nzType="book" nzTheme="outline"></span>
-            <p>No course offerings available</p>
+            <span nz-icon nzType="search" nzTheme="outline"></span>
+            <h4 *ngIf="!hasAppliedFilters">Ready to search</h4>
+            <h4 *ngIf="hasAppliedFilters">No offerings found</h4>
+            <p *ngIf="!hasAppliedFilters">Select academic term, year, and batch, then click Find Offerings.</p>
+            <p *ngIf="hasAppliedFilters">Try adjusting your search criteria or add a new term course offering.</p>
           </div>
         </ng-template>
       </nz-table>

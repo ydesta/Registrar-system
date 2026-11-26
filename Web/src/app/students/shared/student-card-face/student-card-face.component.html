@@ -1,0 +1,62 @@
+<div class="card-face"
+     [class.interactive]="interactive"
+     [class.has-bg]="!!safeBackgroundSrc"
+     [style.width.px]="widthPx"
+     [style.height.px]="heightPx">
+  <!-- Real <img> so browsers print the template background (CSS backgrounds are often dropped). -->
+  <img *ngIf="safeBackgroundSrc as bgSrc"
+       class="card-bg"
+       [src]="bgSrc"
+       alt=""
+       draggable="false"
+       crossorigin="anonymous"
+       (load)="onBackgroundLoad()"
+       (error)="onBackgroundError()" />
+  <div *ngFor="let el of elements"
+       class="el"
+       [class.selected]="interactive && el.id === selectedId && !isLocked(el)"
+       [class.el-locked]="isLocked(el)"
+       [class.el-shape]="el.type === 'shape'"
+       [class.el-image]="el.type === 'image'"
+       [class.el-logo]="isCircleLogo(el)"
+       [class.el-logo-rect]="isRectLogo(el)"
+       [class.el-photo]="el.type === 'image' && el.sourcePath === 'student.photo'"
+       [class.el-photo-circle]="isPhotoCircle(el)"
+       [class.el-wave]="isWaveEllipse(el)"
+       [class.el-watermark]="isWatermark(el)"
+       [class.el-watermark-logo]="isWatermarkLogo(el)"
+       [class.el-watermark-text]="isWatermarkText(el)"
+       [class.el-seal]="isSeal(el)"
+       [class.el-qr]="el.type === 'qr'"
+       [class.el-barcode]="el.type === 'barcode'"
+       [ngStyle]="elStyle(el)"
+       (mousedown)="onMouseDown(el, $event)"
+       (click)="onClick(el)">
+    <ng-container *ngIf="el.type === 'shape'"></ng-container>
+    <ng-container *ngIf="el.type === 'image'">
+      <img
+        *ngIf="safeImageSrc(el) as src"
+        [src]="src"
+        alt=""
+        draggable="false"
+        crossorigin="anonymous"
+        decoding="sync"
+        [style.object-fit]="el.imageFit || null" />
+      <span *ngIf="!safeImageSrc(el)" class="img-ph">{{
+        el.sourcePath === 'college.logo' ? 'LOGO' : el.sourcePath === 'college.seal' ? 'SEAL' : el.sourcePath === 'college.watermark' ? 'MARK' : 'PHOTO'
+      }}</span>
+    </ng-container>
+    <ng-container *ngIf="el.type === 'qr'">
+      <img *ngIf="qrUrl(el) as qsrc" class="qr-img" [src]="qsrc" alt="QR" draggable="false" />
+      <span *ngIf="!qrUrl(el)" class="qr-box">QR</span>
+    </ng-container>
+    <ng-container *ngIf="el.type === 'barcode'">
+      <span class="barcode-ph">
+        <span class="barcode-bars" aria-hidden="true"></span>
+        <span class="barcode-text">{{ text(el) }}</span>
+      </span>
+    </ng-container>
+    <span *ngIf="el.type !== 'image' && el.type !== 'qr' && el.type !== 'shape' && el.type !== 'barcode'"
+          class="el-text">{{ text(el) }}</span>
+  </div>
+</div>

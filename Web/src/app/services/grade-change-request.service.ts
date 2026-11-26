@@ -45,7 +45,8 @@ export class GradeChangeRequestService {
     return this.crud.delete(this.gradeChanges, id);
   }
 
-  reviewGradeChangeRequest(id: number, changeRequest: ChangeRequestViewModel): Observable<boolean> {
-    return this.crud.put<boolean>(`${this.gradeChanges}/review/${id}`, changeRequest);
+  reviewGradeChangeRequest(id: number, changeRequest: ChangeRequestViewModel, gradeActionToken?: string): Observable<boolean> {
+    const headers = gradeActionToken ? { 'X-Grade-Action-Token': gradeActionToken } : undefined;
+    return this.crud.put<boolean>(`${this.gradeChanges}/review/${id}`, changeRequest, headers);
   }
 }

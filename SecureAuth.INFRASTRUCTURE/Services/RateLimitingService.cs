@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using SecureAuth.APPLICATION.DTOs.Security;
 using SecureAuth.APPLICATION.Interfaces;
 using SecureAuth.DOMAIN.Models.Security;
 using System.Collections.Concurrent;

@@ -5,6 +5,7 @@ import { SectionViewModel } from '../../Models/SectionViewModel';
 import { CustomNotificationService } from '../../services/custom-notification.service';
 import { ACADEMIC_TERM_STATUS, SECTION_TYPE } from '../../common/constant';
 import { TermCourseOfferingService } from '../../colleges/services/term-course-offering.service';
+import { CourseOfferingInstructorAssignmentService } from '../../colleges/services/course-offering-instructor-assignment.service';
 import { StaticData } from '../../admission-request/model/StaticData';
 import { StudentSectionAssignmentService } from 'src/app/services/student-section-assignment.service';
 import { StudentRegisteredCoursesModel, StudentRegisteredCoursesResult } from 'src/app/Models/StudentRegisteredCoursesModel';
@@ -13,6 +14,8 @@ import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { PaginatorService, ServerPaginator } from 'src/app/reports/services/paginator.service';
 import { ExcelExportService } from 'src/app/reports/services/excel-export.service';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-section-assigned-students',
@@ -49,6 +52,7 @@ export class SectionAssignedStudentsComponent implements OnInit, OnDestroy {
     private studentSectionAssignmentService: StudentSectionAssignmentService,
     private notificationService: CustomNotificationService,
     private courseTermOfferingService: TermCourseOfferingService,
+    private courseOfferingInstructorAssignmentService: CourseOfferingInstructorAssignmentService,
     private paginator: PaginatorService,
     private excelExportService: ExcelExportService
   ) {
@@ -58,10 +62,42 @@ export class SectionAssignedStudentsComponent implements OnInit, OnDestroy {
     this.getListOfAcademicTermStatus();
     this.createSearchForm();
   }
-  private getInstructorName(): string {
-    const firstName = (localStorage.getItem('firstName') || '').trim();
-    const lastName = (localStorage.getItem('lastName') || '').trim();
-    return `${firstName} ${lastName}`.trim();
+
+  private resolveBatchIdFromSearch(): string | null {
+    const selected = this.batchCode?.value;
+    if (!selected) {
+      return null;
+    }
+    const match = (this.listOfBatch || []).find((b: any) =>
+      String(b?.batchCode || b?.BatchCode || '').toLowerCase() === String(selected).toLowerCase() ||
+      String(b?.batchId || b?.id || b?.Id || '').toLowerCase() === String(selected).toLowerCase()
+    );
+    return match?.batchId || match?.id || match?.Id || null;
+  }
+
+  /** Instructor from course assignment for current search; empty if none assigned. */
+  private getAssignedInstructorName$(): Observable<string> {
+    const academicTerm = this.academicTerm?.value;
+    const year = this.year?.value;
+    const courseId = this.courseId?.value;
+    const batchId = this.resolveBatchIdFromSearch();
+
+    if (!academicTerm || !year || !courseId || !batchId) {
+      return of('');
+    }
+
+    return this.courseOfferingInstructorAssignmentService
+      .getAssignedInstructors(academicTerm, year, batchId, courseId)
+      .pipe(
+        map((res: any) => {
+          const staff = Array.isArray(res) ? res : (res?.data || []);
+          return (staff || [])
+            .map((s: any) => `${s?.firstName || s?.FirstName || ''} ${s?.lastName || s?.LastName || ''}`.trim())
+            .filter((name: string) => !!name)
+            .join(', ');
+        }),
+        catchError(() => of(''))
+      );
   }
 
   ngOnInit(): void {
@@ -360,41 +396,42 @@ export class SectionAssignedStudentsComponent implements OnInit, OnDestroy {
 
     const selectedCourse = this.registeredCourses.find(c => c.courseId === courseId);
     const selectedSection = this.listOfSections.find(s => s.id === sectionId);
-    const instructorName = this.getInstructorName();
 
-    const days = Array.from({ length: 24 }, (_, i) => `${i + 1}`);
-    const aoa: (string | number)[][] = [];
+    this.getAssignedInstructorName$().subscribe((instructorName) => {
+      const days = Array.from({ length: 24 }, (_, i) => `${i + 1}`);
+      const aoa: (string | number)[][] = [];
 
-    aoa.push(['HILCoE School of Computer Science & Technology']);
-    aoa.push(['Class Attendance Sheet']);
-    aoa.push([]);
-    aoa.push(['Class:', this.batchCode.value || 'N/A']);
-    aoa.push(['Term:', `${this.getAcademicTermName(academicTerm)} ${year}`]);
-    aoa.push(['Section:', selectedSection?.sectionName || 'N/A']);
-    aoa.push(['Course Code:', selectedCourse?.courseCode || 'N/A']);
-    aoa.push(['Instructor:', instructorName || '_________________']);
-    aoa.push([]);
+      aoa.push(['HILCoE School of Computer Science & Technology']);
+      aoa.push(['Class Attendance Sheet']);
+      aoa.push([]);
+      aoa.push(['Class:', this.batchCode.value || 'N/A']);
+      aoa.push(['Term:', `${this.getAcademicTermName(academicTerm)} ${year}`]);
+      aoa.push(['Section:', selectedSection?.sectionName || 'N/A']);
+      aoa.push(['Course Code:', selectedCourse?.courseCode || 'N/A']);
+      aoa.push(['Instructor:', instructorName || '']);
+      aoa.push([]);
 
-    aoa.push(['No.', 'Name', 'Batch', ...days]);
-    this.sectionAssignedStudents.forEach((student, index) => {
-      aoa.push([index + 1, student.fullName, student.batchCode, ...Array(24).fill('')]);
+      aoa.push(['No.', 'Name', 'Batch', ...days]);
+      this.sectionAssignedStudents.forEach((student, index) => {
+        aoa.push([index + 1, student.fullName, student.batchCode, ...Array(24).fill('')]);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws['!cols'] = [
+        { wch: 6 },
+        { wch: 32 },
+        { wch: 14 },
+        ...Array.from({ length: 24 }, () => ({ wch: 4 }))
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+
+      const fileName = `attendance-sheet-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+
+      this.notificationService.notification('success', 'Success', 'Attendance sheet exported successfully');
     });
-
-    const ws = XLSX.utils.aoa_to_sheet(aoa);
-    ws['!cols'] = [
-      { wch: 6 },
-      { wch: 32 },
-      { wch: 14 },
-      ...Array.from({ length: 24 }, () => ({ wch: 4 }))
-    ];
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
-
-    const fileName = `attendance-sheet-${selectedCourse?.courseCode || 'course'}-${selectedSection?.sectionName || 'section'}-${new Date().toISOString().split('T')[0]}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-
-    this.notificationService.notification('success', 'Success', 'Attendance sheet exported successfully');
   }
 
   exportMarkList(): void {
@@ -410,31 +447,32 @@ export class SectionAssignedStudentsComponent implements OnInit, OnDestroy {
 
     const selectedCourse = this.registeredCourses.find(c => c.courseId === courseId);
     const selectedSection = this.listOfSections.find(s => s.id === sectionId);
-    const instructorName = this.getInstructorName();
     const sectionLabel = selectedSection?.sectionName || 'Section 1';
 
-    this.excelExportService
-      .exportResultSubmissionMarkList({
-        classBatch: this.batchCode.value || '',
-        sectionName: sectionLabel,
-        termLabel: `${this.getAcademicTermName(academicTerm)} ${year}`,
-        courseCode: selectedCourse?.courseCode || '',
-        instructorName,
-        students: this.sectionAssignedStudents.map(s => ({
-          studentCode: s.studentCode,
-          fullName: s.fullName,
-          batchCode: s.batchCode
-        })),
-        fileName: `mark-list-${selectedCourse?.courseCode || 'course'}-${sectionLabel}-${new Date()
-          .toISOString()
-          .split('T')[0]}.xlsx`
-      })
-      .then(() => {
-        this.notificationService.notification('success', 'Success', 'Mark list exported successfully');
-      })
-      .catch(() => {
-        this.notificationService.notification('error', 'Error', 'Failed to export mark list');
-      });
+    this.getAssignedInstructorName$().subscribe((instructorName) => {
+      this.excelExportService
+        .exportResultSubmissionMarkList({
+          classBatch: this.batchCode.value || '',
+          sectionName: sectionLabel,
+          termLabel: `${this.getAcademicTermName(academicTerm)} ${year}`,
+          courseCode: selectedCourse?.courseCode || '',
+          instructorName: instructorName || '',
+          students: this.sectionAssignedStudents.map(s => ({
+            studentCode: s.studentCode,
+            fullName: s.fullName,
+            batchCode: s.batchCode
+          })),
+          fileName: `mark-list-${selectedCourse?.courseCode || 'course'}-${sectionLabel}-${new Date()
+            .toISOString()
+            .split('T')[0]}.xlsx`
+        })
+        .then(() => {
+          this.notificationService.notification('success', 'Success', 'Mark list exported successfully');
+        })
+        .catch(() => {
+          this.notificationService.notification('error', 'Error', 'Failed to export mark list');
+        });
+    });
   }
 
   search(): void {
@@ -484,8 +522,8 @@ export class SectionAssignedStudentsComponent implements OnInit, OnDestroy {
 
       const selectedCourse = this.registeredCourses.find(c => c.courseId === courseId);
       const selectedSection = this.listOfSections.find(s => s.id === sectionId);
-      const instructorName = this.getInstructorName();
 
+      this.getAssignedInstructorName$().subscribe((instructorName) => {
       const doc = new jsPDF('landscape', 'mm', 'a4');
 
       doc.setFontSize(17);
@@ -513,7 +551,7 @@ export class SectionAssignedStudentsComponent implements OnInit, OnDestroy {
       doc.text(`Section: ${selectedSection?.sectionName || 'N/A'}`, 20, 34);
 
       doc.text(`Course Code: ${selectedCourse?.courseCode || 'N/A'}`, 100, 26);
-      doc.text(`Instructor: ${instructorName || '_________________'}`, 100, 31);
+      doc.text(`Instructor: ${instructorName || ''}`, 100, 31);
 
       doc.text(
         `Date: ${new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}`,
@@ -607,6 +645,7 @@ export class SectionAssignedStudentsComponent implements OnInit, OnDestroy {
       }
 
       this.notificationService.notification('success', 'Success', 'Attendance sheet ready for printing');
+      });
     } catch (error) {
       this.notificationService.notification('error', 'Export Error', 'Failed to generate attendance sheet. Please try again.');
     }

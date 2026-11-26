@@ -1,0 +1,45 @@
+<div class="scan-page">
+  <nz-spin [nzSpinning]="loading">
+    <nz-alert *ngIf="error" nzType="error" [nzMessage]="error" nzShowIcon></nz-alert>
+
+    <div class="scan-card"
+         *ngIf="result || (!loading && !error)"
+         [class.scan-card--ok]="copy.tone === 'ok'"
+         [class.scan-card--warn]="copy.tone === 'warn'"
+         [class.scan-card--bad]="copy.tone === 'bad'">
+      <div class="scan-card__header">
+        <img *ngIf="logoUrl as logo" class="scan-card__logo" [src]="logo" alt="College logo" />
+        <div class="scan-card__brand">
+          <div class="scan-card__college">{{ result?.collegeName || 'Student card' }}</div>
+          <div class="scan-card__status" [class.ok]="copy.tone === 'ok'" [class.warn]="copy.tone === 'warn'" [class.bad]="copy.tone === 'bad'">
+            {{ copy.title }}
+          </div>
+        </div>
+      </div>
+
+      <div class="scan-card__body" *ngIf="showHolder && result">
+        <img *ngIf="photoUrl as photo" class="scan-card__photo" [src]="photo" alt="Student photo" />
+        <div class="scan-card__photo scan-card__photo--ph" *ngIf="!photoUrl">ID</div>
+        <div class="scan-card__fields">
+          <h1>{{ result.fullName || '—' }}</h1>
+          <p><span>Student ID</span>{{ result.studentNumber || '—' }}</p>
+          <p><span>Card number</span>{{ result.cardNumber || '—' }}</p>
+          <p *ngIf="result.academicProgrammeCode"><span>Programme</span>{{ result.academicProgrammeCode }}</p>
+          <p *ngIf="result.batchCode"><span>Batch</span>{{ result.batchCode }}</p>
+          <p><span>Expires</span>{{ result.expiresAt ? (result.expiresAt | date:'yyyy-MM-dd') : '—' }}</p>
+          <p *ngIf="statusLabel(result)"><span>Status</span>{{ statusLabel(result) }}</p>
+        </div>
+      </div>
+
+      <div class="scan-card__body scan-card__body--message" *ngIf="!showHolder">
+        <p class="scan-card__message">{{ copy.text || result?.reason || 'This card cannot be accepted.' }}</p>
+        <p class="scan-card__meta" *ngIf="result?.cardNumber"><span>Card</span>{{ result.cardNumber }}</p>
+        <p class="scan-card__meta" *ngIf="statusLabel(result)"><span>Status</span>{{ statusLabel(result) }}</p>
+      </div>
+
+      <p class="scan-card__reason" *ngIf="showHolder && (result?.reason || copy.text)">
+        {{ result?.reason || copy.text }}
+      </p>
+    </div>
+  </nz-spin>
+</div>

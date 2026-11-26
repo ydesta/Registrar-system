@@ -17,6 +17,7 @@ export class ApprovalDecisionModalComponent implements OnInit {
 
   decisionForm: FormGroup;
   loading = false;
+  otpVisible = false;
 
   constructor(
     private fb: FormBuilder,
@@ -52,10 +53,14 @@ export class ApprovalDecisionModalComponent implements OnInit {
 
   handleOk(): void {
     if (this.decisionForm.valid && this.request) {
-      this.submitDecision();
+      this.otpVisible = true;
     } else {
       this.notificationService.notification('error', 'Error', 'Please fill in all required fields');
     }
+  }
+
+  onGradeCodeConfirmed(token: string): void {
+    this.submitDecision(token);
   }
 
   handleCancel(): void {
@@ -69,7 +74,7 @@ export class ApprovalDecisionModalComponent implements OnInit {
     this.loading = false;
   }
 
-  submitDecision(): void {
+  submitDecision(gradeActionToken: string): void {
     if (!this.request) {
       this.notificationService.notification('error', 'Error', 'No request selected');
       return;
@@ -84,7 +89,7 @@ export class ApprovalDecisionModalComponent implements OnInit {
       lastModifiedBy: formData.lastModifiedBy
     };
 
-    this.gradeChangeRequestService.reviewGradeChangeRequest(this.request.id, changeRequest)
+    this.gradeChangeRequestService.reviewGradeChangeRequest(this.request.id, changeRequest, gradeActionToken)
       .subscribe({
         next: (success) => {
           if (success) {
@@ -93,13 +98,22 @@ export class ApprovalDecisionModalComponent implements OnInit {
             this.decisionMade.emit();
             this.closeModal();
           } else {
-            this.notificationService.notification('error', 'Error', 'Failed to process decision');
+            this.notificationService.notification(
+              'error',
+              'Error',
+              'Failed to process decision. The one-time code was already used. Request a new code and try again.'
+            );
           }
           this.loading = false;
         },
         error: (error) => {
           console.error('Error processing decision:', error);
-          this.notificationService.notification('error', 'Error', 'Failed to process decision. Please try again.');
+          this.notificationService.notification(
+            'error',
+            'Error',
+            (error?.error?.error || error?.message || 'Failed to process decision.') +
+              ' The one-time code was already used. Request a new code and try again.'
+          );
           this.loading = false;
         }
       });

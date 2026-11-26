@@ -1,5 +1,176 @@
 @import '../../../styles/admin-form-page';
 
+// Consistent field labels + control text (no floating-label mix)
+.admin-form {
+  .form-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px;
+    align-items: start;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  .form-col {
+    min-width: 0;
+
+    ::ng-deep nz-form-item {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 12px;
+
+      nz-form-label {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        white-space: nowrap !important;
+        font-weight: 600;
+        font-size: 14px;
+        color: #374151;
+        line-height: 1.4;
+        height: auto !important;
+
+        > label {
+          white-space: nowrap !important;
+          height: auto !important;
+        }
+      }
+
+      nz-form-control {
+        flex: 1 1 auto;
+        position: static;
+        min-width: 0;
+
+        .ant-form-item-control-input {
+          min-height: 44px;
+        }
+      }
+    }
+  }
+
+  ::ng-deep {
+    .field-control.ant-select,
+    nz-select.field-control {
+      width: 100%;
+
+      .ant-select-selector {
+        min-height: 44px !important;
+        border-radius: 10px !important;
+        border: 1.5px solid #e5e7eb !important;
+        background: #fff !important;
+        padding: 6px 12px !important;
+        display: flex !important;
+        align-items: center !important;
+      }
+
+      .ant-select-selection-item,
+      .ant-select-selection-placeholder {
+        line-height: 30px !important;
+        font-size: 14px !important;
+        font-weight: 500;
+      }
+
+      .ant-select-selection-item {
+        color: #1f2937 !important;
+      }
+
+      .ant-select-selection-placeholder {
+        color: #9ca3af !important;
+      }
+
+      &.ant-select-focused .ant-select-selector {
+        border-color: #1890ff !important;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.15) !important;
+      }
+    }
+
+    input.field-control.ant-input {
+      height: 44px;
+      border-radius: 10px;
+      border: 1.5px solid #e5e7eb;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1f2937;
+      line-height: 1.4;
+      background: #fff;
+
+      &::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+      }
+
+      &:focus {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.15);
+      }
+
+      &[readonly] {
+        background: #f9fafb;
+        color: #4b5563;
+      }
+    }
+
+    .field-control.ant-picker,
+    nz-date-picker.field-control {
+      width: 100% !important;
+      min-height: 44px;
+      border-radius: 10px;
+      border: 1.5px solid #e5e7eb;
+      padding: 6px 12px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+
+      .ant-picker-input > input {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1f2937;
+
+        &::placeholder {
+          color: #9ca3af;
+          font-weight: 400;
+        }
+      }
+
+      &.ant-picker-focused {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.15);
+      }
+    }
+
+    textarea.field-textarea,
+    .field-textarea.ant-input {
+      min-height: 110px;
+      height: auto;
+      border-radius: 10px;
+      border: 1.5px solid #e5e7eb;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1f2937;
+      line-height: 1.5;
+      resize: vertical;
+
+      &::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+      }
+
+      &:focus {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.15);
+      }
+    }
+  }
+}
+
 .header-section {
   .header-content {
     .term-info {

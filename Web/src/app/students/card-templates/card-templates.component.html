@@ -1,0 +1,74 @@
+<div class="content-container">
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h1>Card templates</h1>
+        <p class="subtitle">Design and manage front/back layouts used when printing student ID cards</p>
+      </div>
+      <div class="header-actions">
+        <a routerLink="../student-cards" nz-button nzType="default">Cards</a>
+        <button nz-button nzType="primary" (click)="create()">
+          <i nz-icon nzType="plus"></i>
+          <span>New template</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="templates-mobile-list" *ngIf="!loading">
+      <nz-empty *ngIf="!templates.length" nzNotFoundContent="No templates yet"></nz-empty>
+      <article class="template-item" *ngFor="let row of templates">
+        <div class="template-item__top">
+          <h3>{{ row.name }}</h3>
+          <nz-tag [nzColor]="row.isDefault ? 'green' : 'default'">{{ row.isDefault ? 'Default' : 'Alt' }}</nz-tag>
+        </div>
+        <div class="template-item__meta">
+          <span>{{ row.widthMm }} × {{ row.heightMm }} mm</span>
+          <span>{{ orientationLabel(row.orientation) }}</span>
+          <span>v{{ row.version }}</span>
+          <span>{{ row.isActive ? 'Active' : 'Inactive' }}</span>
+        </div>
+        <div class="template-item__actions">
+          <button nz-button nzType="primary" (click)="edit(row)">Design</button>
+          <button nz-button nzType="default" (click)="duplicate(row)">Duplicate</button>
+          <button nz-button nzType="default" (click)="setDefault(row)" *ngIf="!row.isDefault">Set default</button>
+        </div>
+      </article>
+    </div>
+
+    <nz-table class="templates-desktop-table"
+              [nzData]="templates"
+              [nzLoading]="loading"
+              nzBordered
+              [nzFrontPagination]="true"
+              [nzScroll]="{ x: '800px' }">
+      <thead>
+        <tr>
+          <th nzWidth="220px">Name</th>
+          <th nzWidth="120px">Size (mm)</th>
+          <th nzWidth="120px">Orientation</th>
+          <th nzWidth="90px">Version</th>
+          <th nzWidth="90px">Default</th>
+          <th nzWidth="90px">Active</th>
+          <th nzWidth="220px">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of templates">
+          <td>{{ row.name }}</td>
+          <td>{{ row.widthMm }} × {{ row.heightMm }}</td>
+          <td>{{ orientationLabel(row.orientation) }}</td>
+          <td>{{ row.version }}</td>
+          <td><nz-tag [nzColor]="row.isDefault ? 'green' : 'default'">{{ row.isDefault ? 'Yes' : 'No' }}</nz-tag></td>
+          <td>{{ row.isActive ? 'Yes' : 'No' }}</td>
+          <td>
+            <button nz-button nzType="link" (click)="edit(row)">Design</button>
+            <button nz-button nzType="link" (click)="setDefault(row)" *ngIf="!row.isDefault">Set default</button>
+            <button nz-button nzType="link" (click)="duplicate(row)">Duplicate</button>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>

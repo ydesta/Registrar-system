@@ -243,16 +243,27 @@ export class QuadrantBreakdownFormComponent implements OnInit {
       this.id = savedItems[0].parentId || savedItems[0].ParentId || this.id;
     }
 
-    const selectedKeySet = new Set(selected.map((item) => String(item['key']).toLowerCase()));
-    const mergedAvailable = available.filter(
-      (item) => !selectedKeySet.has(String(item['key']).toLowerCase())
+    const selectedKeySet = new Set(
+      selected.map((item) => String(item['key']).toLowerCase()).filter((key) => !!key)
     );
+    const mergedAvailable = available
+      .filter((item) => {
+        const key = String(item['key'] || '').toLowerCase();
+        return !!key && !selectedKeySet.has(key);
+      })
+      .map((item) => ({ ...item, direction: 'left' as TransferDirection, hide: false, checked: false }));
 
-    this.targetList = [...selected];
-    this.numberOfSelectiveCourse = selected.length;
+    const selectedItems = selected
+      .filter((item) => !!String(item['key'] || '').trim())
+      .map((item) => ({ ...item, direction: 'right' as TransferDirection, hide: false, checked: false }));
+
+    this.targetList = [...selectedItems];
+    this.numberOfSelectiveCourse = selectedItems.length;
     this.updateTargetCourseIds();
     this.sortTargetList();
 
+    // Destroy transfer first so ng-zorro rebuilds left/right lists cleanly.
+    this.isLoadingCourses = true;
     this.listOfUnregisteredCourse = [];
     this.targetKeys = [];
     this.transferVersion++;
@@ -263,11 +274,11 @@ export class QuadrantBreakdownFormComponent implements OnInit {
         if (token !== this.courseLoadToken) {
           return;
         }
-        this.listOfUnregisteredCourse = [...mergedAvailable, ...selected]
-          .sort((a, b) => String(a['courseCode']).localeCompare(String(b['courseCode'])));
+        this.listOfUnregisteredCourse = [...mergedAvailable, ...selectedItems]
+          .sort((a, b) => String(a['courseCode'] || '').localeCompare(String(b['courseCode'] || '')));
         this.numberOfCourseList = this.listOfUnregisteredCourse.length;
-        this.targetKeys = [...this.targetCourseIds];
         this.isLoadingCourses = false;
+        this.transferVersion++;
         this.cdr.detectChanges();
       });
     });
@@ -394,11 +405,16 @@ export class QuadrantBreakdownFormComponent implements OnInit {
     }
   }
 
-  filterOption(inputValue: string, item: any): boolean {
-    inputValue = inputValue.toLowerCase();
-    const lowerCaseTitle = item.title.toLowerCase();
-    return lowerCaseTitle.includes(inputValue);
-  }
+  filterOption = (inputValue: string, item: any): boolean => {
+    const query = String(inputValue || '').toLowerCase().trim();
+    if (!query) {
+      return true;
+    }
+    const title = String(item?.title || '').toLowerCase();
+    const code = String(item?.courseCode || '').toLowerCase();
+    const courseTitle = String(item?.courseTitle || '').toLowerCase();
+    return title.includes(query) || code.includes(query) || courseTitle.includes(query);
+  };
 
   search(ret: {}): void {
   }
@@ -410,7 +426,9 @@ export class QuadrantBreakdownFormComponent implements OnInit {
     if (e.to === 'right' && e.from === 'left') {
       const moved: TransferItem[] = e.list.map(item => ({
         ...item,
-        direction: 'right' as TransferDirection
+        direction: 'right' as TransferDirection,
+        hide: false,
+        checked: false
       }));
       this.targetList = this.targetList.concat(moved);
       this.numberOfSelectiveCourse = this.targetList.length;
@@ -422,7 +440,6 @@ export class QuadrantBreakdownFormComponent implements OnInit {
       this.sortTargetList();
     }
     this.updateTargetCourseIds();
-    this.targetKeys = [...this.targetCourseIds];
     this.cdr.detectChanges();
   }
 
@@ -485,14 +502,17 @@ export class QuadrantBreakdownFormComponent implements OnInit {
     const creditHours = Number(course?.creditHours ?? course?.CreditHours ?? 0) || 0;
     const courseCode = course?.courseCode || course?.CourseCode || '';
     const courseTitle = course?.courseTitle || course?.CourseTitle || '';
-    const key = String(course?.id || course?.ID || course?.courseId || course?.CourseId || '');
+    const key = String(course?.id || course?.ID || course?.courseId || course?.CourseId || '').trim();
     return {
       key,
       title: `${courseCode} - ${courseTitle} (${creditHours} cr)`,
+      description: `${courseCode} ${courseTitle}`,
       courseCode,
       courseTitle,
       creditHours,
-      direction: direction as TransferDirection
+      direction: direction as TransferDirection,
+      hide: false,
+      checked: false
     } as TransferItem;
   }
 

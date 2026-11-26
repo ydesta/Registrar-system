@@ -338,7 +338,7 @@ export class ExcelExportService {
         this.drawTermTable(ws, right, row, this.RIGHT_START, maxCourses);
       }
 
-      row += blockHeight + 3; // padding below each term-table pair
+      row += blockHeight + 1; // one blank row between term-table pairs
     }
 
     return row;
@@ -715,7 +715,7 @@ export class ExcelExportService {
 
     writeMeta(6, 2, `Course Code: ${courseCode || ''}`);
 
-    writeMeta(7, 2, `Instructor: ${instructorName?.trim() ? instructorName : '_______________'}`);
+    writeMeta(7, 2, `Instructor: ${instructorName?.trim() || ''}`);
     writeMeta(7, 7, 'Signature: _______________');
 
     // Row 9 — table headers

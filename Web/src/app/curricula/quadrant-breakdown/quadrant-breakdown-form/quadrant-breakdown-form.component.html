@@ -185,19 +185,20 @@
               </div>
 
               <nz-transfer
-                *ngIf="!isLoadingCourses"
+                *ngIf="!isLoadingCourses && transferVersion >= 0"
                 [nzDataSource]="listOfUnregisteredCourse"
                 [nzDisabled]="disabled || isSubmitting"
                 nzShowSearch
+                [nzSearchPlaceholder]="'Search courses'"
                 [nzFilterOption]="filterOption"
                 (nzSearchChange)="search($event)"
                 (nzSelectChange)="select($event)"
                 (nzChange)="onTransferChange($event)"
-                [nzListStyle]="{ 'width.px': 500, 'height.px': 500 }"
+                [nzListStyle]="{ width: '500px', height: '500px' }"
                 [nzItemsUnit]="'Courses'"
+                [nzItemUnit]="'Course'"
                 [nzTitles]="transferTitles"
                 [nzOperations]="['>', '<']"
-                [nzTargetKeys]="targetKeys"
                 class="course-transfer"
               >
               </nz-transfer>

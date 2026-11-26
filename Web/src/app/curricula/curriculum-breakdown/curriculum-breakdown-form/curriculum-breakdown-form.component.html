@@ -172,6 +172,7 @@
                 [nzDataSource]="courses"
                 [nzDisabled]="disabled || isLoading"
                 nzShowSearch
+                [nzSearchPlaceholder]="'Search courses'"
                 [nzFilterOption]="filterOption"
                 (nzSearchChange)="search($event)"
                 (nzSelectChange)="select($event)"

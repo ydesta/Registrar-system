@@ -933,6 +933,75 @@
   }
 }
 
+.entry-mode-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.entry-mode-tab {
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  color: #595959;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  &.active {
+    border-color: #1677ff;
+    color: #1677ff;
+    background: #e6f4ff;
+  }
+}
+
+.import-summary-block {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.summary-row {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+
+  strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0;
+    color: #4b5563;
+    word-break: break-word;
+  }
+}
+
+.single-panel {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 16px 18px 8px;
+}
+
+.single-grade-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 12px 16px;
+}
+
+@media (max-width: 900px) {
+  .single-grade-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 ::ng-deep .ant-btn-loading {
   .anticon {
     display: none;

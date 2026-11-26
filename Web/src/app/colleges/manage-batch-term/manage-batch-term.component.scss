@@ -1,0 +1,41 @@
+.manage-batch-term {
+  padding: 8px 4px 0;
+
+  .header {
+    margin-bottom: 16px;
+
+    h3 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0 0 4px;
+      color: #595959;
+    }
+
+    .risk-note {
+      color: #d48806;
+      font-size: 13px;
+    }
+  }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .empty {
+    padding: 24px;
+    text-align: center;
+    color: #8c8c8c;
+  }
+
+  .footer {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+  }
+}

@@ -7,12 +7,13 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./student-search.component.scss']
 })
 export class StudentSearchComponent {
-  @Input() placeholder: string = 'Enter Student ID (e.g., 2021/001)';
-  @Input() buttonText: string = 'Search';
-  @Input() loadingText: string = 'Searching...';
-  @Input() showInfo: boolean = true;
-  @Input() title: string = 'Student Search';
-  @Input() description: string = 'Enter the Student ID to search';
+  @Input() title = 'Student Information Retrieval';
+  @Input() description = 'Enter Student ID to access academic records and profile information';
+  @Input() label = 'Student ID';
+  @Input() placeholder = 'Enter Student ID (e.g., 2021/001)';
+  @Input() buttonText = 'Search';
+  @Input() loadingText = 'Searching...';
+  @Input() showInfo = true;
 
   @Output() searchSubmitted = new EventEmitter<string>();
   @Output() searchError = new EventEmitter<string>();
@@ -28,13 +29,15 @@ export class StudentSearchComponent {
   }
 
   onSubmit(): void {
-    if (this.searchForm.valid) {
-      this.loading = true;
-      this.error = '';
-      
-      const studentId = this.searchForm.get('studentId')?.value;
-      this.searchSubmitted.emit(studentId);
+    this.searchForm.markAllAsTouched();
+    if (!this.searchForm.valid || this.loading) {
+      return;
     }
+
+    this.loading = true;
+    this.error = '';
+    const studentId = this.searchForm.get('studentId')?.value;
+    this.searchSubmitted.emit(studentId);
   }
 
   setLoading(loading: boolean): void {

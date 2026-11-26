@@ -12,6 +12,8 @@ namespace SecureAuth.INFRASTRUCTURE.Services
         private readonly IEmailService _emailService;
         private readonly ILogger<OtpService> _logger;
 
+        public int LifetimeSeconds => (int)OtpLifetime.TotalSeconds;
+
         public OtpService(IEmailService emailService, ILogger<OtpService> logger)
         {
             _emailService = emailService;
@@ -35,21 +37,22 @@ namespace SecureAuth.INFRASTRUCTURE.Services
         {
             var otp = _random.Next(100000, 999999).ToString();
             var expiry = DateTime.UtcNow.Add(OtpLifetime);
-            
-            _otps[userId] = (otp, expiry, purpose);
-            
-            // Send OTP via email
+            var key = StorageKey(userId, purpose);
+
+            _otps[key] = (otp, expiry, purpose);
+
             try
             {
-                await _emailService.SendOtpEmailAsync(email, otp, purpose, expiry);
+                await _emailService.SendOtpEmailAsync(email, otp, EmailPurpose(purpose), expiry);
                 _logger.LogInformation("OTP sent to {Email} for user {UserId}, purpose: {Purpose}", email, userId, purpose);
             }
             catch (Exception ex)
             {
+                _otps.TryRemove(key, out _);
                 _logger.LogError(ex, "Failed to send OTP email to {Email} for user {UserId}", email, userId);
-                // Don't throw here, as the OTP is still generated and stored
+                throw new InvalidOperationException("The one-time code email could not be sent. Try again.", ex);
             }
-            
+
             return otp;
         }
 
@@ -71,14 +74,15 @@ namespace SecureAuth.INFRASTRUCTURE.Services
 
         public Task<bool> VerifyOtpAsync(string userId, string otp, string? purpose = null)
         {
-            if (_otps.TryGetValue(userId, out var entry))
+            var key = StorageKey(userId, purpose);
+            if (_otps.TryGetValue(key, out var entry))
             {
                 if (entry.Otp == otp && entry.Expiry > DateTime.UtcNow)
                 {
                     // Check purpose if specified
                     if (string.IsNullOrEmpty(purpose) || entry.Purpose == purpose)
                     {
-                        _otps.TryRemove(userId, out _); // Remove after successful verification
+                        _otps.TryRemove(key, out _); // Remove after successful verification
                         _logger.LogInformation("OTP verified successfully for user {UserId}, purpose: {Purpose}", userId, purpose);
                         return Task.FromResult(true);
                     }
@@ -140,6 +144,24 @@ namespace SecureAuth.INFRASTRUCTURE.Services
                 return Task.FromResult<DateTime?>(entry.Expiry);
             }
             return Task.FromResult<DateTime?>(null);
+        }
+
+        private static string StorageKey(string userId, string? purpose)
+        {
+            if (string.IsNullOrEmpty(purpose) || purpose == "Login")
+                return userId;
+            return userId + ":" + purpose;
+        }
+
+        private static string EmailPurpose(string purpose)
+        {
+            return purpose switch
+            {
+                "GradeImport" => "grade import",
+                "GradeChangeApproval" => "grade change approval",
+                "GradeRecordCorrection" => "grade record correction",
+                _ => purpose
+            };
         }
     }
 } 

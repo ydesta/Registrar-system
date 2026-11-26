@@ -253,7 +253,10 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
   getNextAcademicTerm() {
     this.batchTermService.getNextAcademicTerm().subscribe((res: any) => {
       this.nextAcademicTerm = res;
-      this.academicTermId = res.id;
+      // Do not overwrite the offering's AcademicTermId while editing
+      if (!this.isUpdate) {
+        this.academicTermId = res.id;
+      }
       this.nextTermYear = res.year;
       this.nextTerm = this.getAcademicTermStatusDescription(res.termId);
       
@@ -440,7 +443,10 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
     const formModel = this.termCourseOfferingForm.getRawValue();
     const course = new TermCourseOfferingRequest();
     course.ID = this.id;
-    course.AcademicTermId = this.academicTermId || this.nextAcademicTerm?.id;
+    // Edit must keep the offering's AcademicTermId (e.g. 114), not next term (e.g. 116)
+    course.AcademicTermId = this.isUpdate
+      ? (this.academicTermId || null)
+      : (this.academicTermId || this.nextAcademicTerm?.id);
     course.AcademicTermSeason = formModel.AcademicTermSeason;
     course.AcademicTermYear = formModel.AcademicTermYear;
     course.BatchCode = formModel.batchCode;
@@ -545,6 +551,15 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
 
 
 
+  private isDuplicateOfferingMessage(message: string): boolean {
+    const text = String(message || '').toLowerCase();
+    return (
+      text.includes('already has a course offering') ||
+      text.includes('already exists') ||
+      text.includes('duplicate')
+    );
+  }
+
   submitForm() {
     // Prevent multiple submissions
     if (this.loading) {
@@ -589,31 +604,60 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
     const postData = this.getTermCourseOffering();
     postData.CourseId = listOfSelectedCouresOffering;
 
+    const duplicateOfferingMessage =
+      "This batch already has a course offering for the selected term and year. Please choose a different batch, term, or year.";
+
     if (this.progStatusId == "null") {
       this._termCourseOfferingService.create(postData).subscribe({
         next: (res) => {
           this.loading = false;
-          if (res.status == "success") {
+          const status = String(res?.status || '').toLowerCase();
+          const responseText = String(res?.data || res?.error || res?.message || '');
+          if (status === 'success') {
             this._customNotificationService.notification(
               "success",
               "Success",
               res.data
             );
             this._route.navigateByUrl("colleges/term-course-offering");
-          } else if (res.status == "depulicate") {
+          } else if (
+            status === 'duplicate' ||
+            this.isDuplicateOfferingMessage(responseText)
+          ) {
             this._customNotificationService.notification(
               "warning",
-              "Duplicate Entry",
-              "This course offering already exists"
+              "Already Exists",
+              duplicateOfferingMessage
+            );
+          } else {
+            this._customNotificationService.notification(
+              "error",
+              "Error",
+              res?.data || res?.error || "Failed to create course offering."
             );
           }
         },
         error: (error) => {
           this.loading = false;
+          const message = String(
+            error?.error?.data ||
+            error?.error?.error ||
+            error?.error?.message ||
+            error?.message ||
+            ""
+          );
+          if (this.isDuplicateOfferingMessage(message)) {
+            this._customNotificationService.notification(
+              "warning",
+              "Already Exists",
+              duplicateOfferingMessage
+            );
+            return;
+          }
           this._customNotificationService.notification(
             "error",
             "Error",
-            "Failed to create course offering. Please try again."
+            message || "Failed to create course offering. Please try again."
           );
         }
       });
@@ -651,6 +695,11 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
   }
   
   patchValues(data: any) {
+    // Keep the offering's AcademicTermId on edit (do not replace with nextAcademicTerm)
+    if (data.academicTermId) {
+      this.academicTermId = data.academicTermId;
+    }
+
     // First patch the basic form values
     this.termCourseOfferingForm.patchValue({
       academicTermCode: data.academicTermCode,
@@ -662,6 +711,7 @@ export class AddTermCourseOfferingComponent implements OnInit, AfterViewInit, On
       remark: data.remark,
       AcademicTermSeason: data.academicTermSeason,
       AcademicTermYear: data.academicTermYear,
+      Year: data.year,
       RegistrationStartDate: this.parseLocalDate(data.registrationStartDate),
       RegistrationEndDate: this.parseLocalDate(data.registrationEndDate)
     });

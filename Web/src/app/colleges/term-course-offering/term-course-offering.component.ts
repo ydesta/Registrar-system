@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { NzModalRef, NzModalService } from "ng-zorro-antd/modal";
 import { BaseModel } from "src/app/Models/BaseMode";
-import { StudentGradeModel } from "src/app/Models/StudentGradeModel";
 import { TermCourseOfferingModel } from "src/app/Models/TermCourseOfferingModel";
 import { StaticData } from "src/app/admission-request/model/StaticData";
 import {
@@ -34,8 +33,19 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   expandSet = new Set<string>();
   isActiveFilter: boolean | null = true;
   yearFilter: number | null = null;
+  termFilter: number | null = null;
+  batchFilter: string | null = null;
+  batchOptions: { batchCode: string }[] = [];
   yearOptions: number[] = [];
   termSortOrder: string | null = "descend";
+  /** Offerings load only after Apply with Term + Year + Batch. */
+  hasAppliedFilters = false;
+  loadingBatches = false;
+  isSearchCollapsed = false;
+
+  toggleSearchForm(): void {
+    this.isSearchCollapsed = !this.isSearchCollapsed;
+  }
 
   constructor(
     private _customNotificationService: CustomNotificationService,
@@ -62,7 +72,8 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
     this.pager.sortColumn = "Year";
     this.pager.sortOrder = "desc";
     this.pager.init(() => this.fetchProgram());
-    this.fetchProgram();
+    // Do not load offerings until Apply is used
+    this.termCourseOfferings = [];
   }
 
   ngOnDestroy(): void {
@@ -71,24 +82,26 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
 
   onTermSort(order: string | null): void {
     this.termSortOrder = order;
+    if (!this.hasAppliedFilters) {
+      return;
+    }
     this.pager.onSort(order, "Year");
   }
-  // // populateIntialData() {
-  // //   this._crudService
-  // //     .getList("/academicTerms")
-  // //     .subscribe((res: BaseModel<StudentGradeModel[]>) => {
-  // //       this.academicTerms = res.data;
-  // //       this.gradeQueryForm.value[
-  // //         "termCode"
-  // //       ] = this.academicTerms[0].academicTermCode;
-  // //     });
-  // }
 
   fetchProgram() {
+    if (!this.hasAppliedFilters || !this.canApplyFilters()) {
+      this.termCourseOfferings = [];
+      this.pager.total = 0;
+      this.pager.loading = false;
+      return;
+    }
+
     this.pager.loading = true;
     const query = this.pager.query({
       isActive: this.isActiveFilter,
-      year: this.yearFilter
+      year: this.yearFilter,
+      academicTermSeason: this.termFilter,
+      batchCode: this.batchFilter
     });
 
     this._crudService
@@ -99,7 +112,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
           this.pager.fail();
           return;
         }
-        
+
         this.termCourseOfferings = res.data.map((item: any) => {
           const term = this.listOfTermNumber.find(t => t.Id === item.academicTermSeason);
           let courseDetails: any[] = [];
@@ -142,6 +155,82 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
       });
   }
 
+  canApplyFilters(): boolean {
+    return this.termFilter != null
+      && this.yearFilter != null
+      && !!this.batchFilter;
+  }
+
+  applyFilters(): void {
+    if (!this.canApplyFilters()) {
+      this._customNotificationService.notification(
+        "warning",
+        "Filter required",
+        "Select Term, Year, and Batch, then click Search."
+      );
+      return;
+    }
+    this.hasAppliedFilters = true;
+    this.pager.pageIndex = 1;
+    this.isSearchCollapsed = true;
+    this.fetchProgram();
+  }
+
+  clearSearch(): void {
+    this.termFilter = null;
+    this.yearFilter = null;
+    this.batchFilter = null;
+    this.isActiveFilter = true;
+    this.batchOptions = [];
+    this.hasAppliedFilters = false;
+    this.termCourseOfferings = [];
+    this.pager.total = 0;
+    this.isSearchCollapsed = false;
+  }
+
+  onTermOrYearFilterChange(): void {
+    this.batchFilter = null;
+    this.batchOptions = [];
+    this.hasAppliedFilters = false;
+    this.termCourseOfferings = [];
+    this.pager.total = 0;
+    this.loadBatchOptions();
+  }
+
+  onBatchFilterChange(): void {
+    this.hasAppliedFilters = false;
+    this.termCourseOfferings = [];
+    this.pager.total = 0;
+  }
+
+  private loadBatchOptions(): void {
+    if (this.termFilter == null || this.yearFilter == null) {
+      return;
+    }
+    this.loadingBatches = true;
+    this.termCourseOfferingService
+      .getListOfBatchCodeByAcademicTerm(this.termFilter, this.yearFilter)
+      .subscribe({
+        next: (res: any) => {
+          const rows = Array.isArray(res) ? res : (res?.data || []);
+          const codes = new Set<string>();
+          this.batchOptions = [];
+          (rows || []).forEach((b: any) => {
+            const batchCode = b.batchCode || b.BatchCode || b;
+            if (batchCode && !codes.has(batchCode)) {
+              codes.add(batchCode);
+              this.batchOptions.push({ batchCode });
+            }
+          });
+          this.loadingBatches = false;
+        },
+        error: () => {
+          this.batchOptions = [];
+          this.loadingBatches = false;
+        }
+      });
+  }
+
   showDeleteConfirm(id: any): void {
     this.reqId = id;
     this.modal.confirm({
@@ -179,7 +268,6 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
     this.reqId = id;
     this.modal.confirm({
       nzTitle: "Are you sure deactivate this Term Course Offering?",
-      // nzContent: '<b style="color: red;">Some descriptions</b>',
       nzOkText: "Yes",
       nzOkType: "primary",
       nzOkDanger: true,
@@ -327,12 +415,6 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
       this.expandSet.delete(id);
     }
   }
-  // getCourseTitles(data: any): string[] {
-  //   if (data.couse && data.couse.length > 0) {
-  //     return data.couse.map((c, index) => `${index + 1}. ${c.courseTitle}`);
-  //   }
-  //   return [];
-  // }
   getCourseDetails(data: any): any[] {
     if (data.couse && data.couse.length > 0) {
       return data.couse.map((c, index) => {
@@ -343,7 +425,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
           creditHours: c.creditHours,
           noOfAssignedInstructor: c.noOfAssignedInstructor,
           courseId: c.id,
-          courseOfferingId: c.id // Use the course ID (should be integer)
+          courseOfferingId: c.id
         };
       });
     }
@@ -366,7 +448,7 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
   }
   openModal(data: any): void {
     const modal: NzModalRef = this.modal.create({
-      nzTitle: null, // We'll use our custom header
+      nzTitle: null,
       nzContent: CourseOfferingInstructorAssignmentComponent,
       nzComponentParams: {
         courseId: data.courseId,
@@ -381,7 +463,6 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
       this.fetchProgram();
     });
   }
-  // For ngFor trackBy optimization
   trackById(index: number, item: any) {
     return item.id;
   }
@@ -391,11 +472,8 @@ export class TermCourseOfferingComponent implements OnInit, OnDestroy {
 
   onIsActiveFilterChange(value: boolean | null): void {
     this.isActiveFilter = value;
-    this.pager.resetPage();
-  }
-
-  onYearFilterChange(value: number | null): void {
-    this.yearFilter = value;
-    this.pager.resetPage();
+    if (this.hasAppliedFilters) {
+      this.pager.resetPage();
+    }
   }
 }

@@ -28,18 +28,13 @@
   </form>
 
   <ng-container *ngIf="studentProfile">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Grade Report</h1>
-        <p class="page-subtitle">Academic performance summary by year and term</p>
-      </div>
-      <div class="cgpa-pill">
-        <span class="cgpa-label">Overall CGPA</span>
-        <span class="cgpa-value">{{ studentProfile.cgpa | number: '1.2-2' }}</span>
-      </div>
-    </div>
-
-    <nz-card nzType="inner" nzTitle="Student Profile" class="student-card">
+    <nz-card nzType="inner" nzTitle="Student Profile" [nzExtra]="cgpaExtra" class="student-card">
+      <ng-template #cgpaExtra>
+        <div class="cgpa-pill">
+          <span class="cgpa-label">Overall CGPA</span>
+          <span class="cgpa-value">{{ studentProfile.cgpa | number: '1.2-2' }}</span>
+        </div>
+      </ng-template>
       <div class="profile-layout">
         <div class="photo-container">
           <ng-container *ngIf="isValidProfilePicture(profilePicture) || profilePicture; else defaultAvatar">

@@ -1,0 +1,148 @@
+<div class="id-page">
+  <div class="id-page__header">
+    <div>
+      <h1>My Identification</h1>
+      <p class="id-page__subtitle">Your official student ID card</p>
+    </div>
+    <div class="id-page__actions" *ngIf="active">
+      <button
+        nz-button
+        nzType="primary"
+        class="id-download-btn"
+        [nzLoading]="downloading"
+        [disabled]="!faceElements.length || downloading"
+        (click)="downloadCard()">
+        <i nz-icon nzType="download" nzTheme="outline"></i>
+        Download
+      </button>
+      <div class="id-page__status">
+        <span class="status-pill" [attr.data-status]="statusLabel(active.status).toLowerCase()">
+          {{ statusLabel(active.status) }}
+        </span>
+        <span class="status-meta" *ngIf="active.expiresAt">
+          Valid until {{ active.expiresAt | date:'d MMM yyyy' }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <nz-spin [nzSpinning]="loading">
+    <nz-alert *ngIf="error" nzType="error" [nzMessage]="error" nzShowIcon class="id-page__alert"></nz-alert>
+
+    <nz-empty
+      *ngIf="!loading && !error && !active"
+      nzNotFoundContent="No student ID has been issued yet. Please contact the registrar.">
+    </nz-empty>
+
+    <div class="id-shell" *ngIf="active">
+      <section class="id-stage" #previewHost aria-label="Student ID card preview">
+        <div class="id-stage__cards" *ngIf="faceElements.length || backElements.length; else cardFallback">
+          <article class="id-stage__face" *ngIf="faceElements.length">
+            <div class="id-stage__face-label" *ngIf="backElements.length">Front</div>
+            <div class="id-stage__frame">
+              <app-student-card-face
+                [widthMm]="faceWidthMm"
+                [heightMm]="faceHeightMm"
+                [elements]="faceElements"
+                [values]="faceValues"
+                [backgroundUrl]="faceBackgroundUrl"
+                [scale]="previewScale">
+              </app-student-card-face>
+            </div>
+          </article>
+
+          <article class="id-stage__face" *ngIf="backElements.length">
+            <div class="id-stage__face-label">Back</div>
+            <div class="id-stage__frame">
+              <app-student-card-face
+                [widthMm]="faceWidthMm"
+                [heightMm]="faceHeightMm"
+                [elements]="backElements"
+                [values]="faceValues"
+                [backgroundUrl]="backBackgroundUrl"
+                [scale]="previewScale">
+              </app-student-card-face>
+            </div>
+          </article>
+        </div>
+
+        <ng-template #cardFallback>
+          <div class="id-stage__fallback">
+            <p class="id-stage__fallback-name">{{ active.fullName }}</p>
+            <p>{{ active.studentNumber }} · {{ active.cardNumber }}</p>
+            <p *ngIf="active.academicProgrammeCode">{{ active.academicProgrammeCode }} / {{ active.batchCode }}</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <section class="id-meta" aria-label="Card details and gate QR">
+        <div class="id-meta__facts">
+          <div class="fact">
+            <span class="fact__label">Student ID</span>
+            <span class="fact__value">{{ active.studentNumber }}</span>
+          </div>
+          <div class="fact">
+            <span class="fact__label">Card number</span>
+            <span class="fact__value fact__value--mono">{{ active.cardNumber }}</span>
+          </div>
+          <div class="fact">
+            <span class="fact__label">Programme</span>
+            <span class="fact__value">{{ active.academicProgrammeCode || '—' }} · {{ active.batchCode || '—' }}</span>
+          </div>
+          <div class="fact">
+            <span class="fact__label">Issued</span>
+            <span class="fact__value">{{ active.issuedAt | date:'d MMM yyyy' }}</span>
+          </div>
+        </div>
+
+        <div class="id-meta__gate" *ngIf="qrDataUrl || active.qrToken">
+          <img *ngIf="qrDataUrl" class="id-meta__qr" [src]="qrDataUrl" alt="Gate verification QR code" />
+          <div class="id-meta__gate-copy">
+            <p class="id-meta__gate-title">Gate verification</p>
+            <p class="id-meta__gate-hint">Present this QR at campus entry for verification.</p>
+            <a *ngIf="active.qrToken" class="id-meta__link" [href]="scanHref" target="_blank" rel="noopener">
+              Open scan page
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Full-size off-screen face for PDF export (avoids scaled-preview / CORS blanks). -->
+      <div class="id-export" aria-hidden="true" #exportHost>
+        <app-student-card-face
+          *ngIf="exportReady"
+          [widthMm]="faceWidthMm"
+          [heightMm]="faceHeightMm"
+          [elements]="faceElements"
+          [values]="exportValues"
+          [backgroundUrl]="exportBackgroundUrl"
+          [scale]="1">
+        </app-student-card-face>
+      </div>
+
+      <section class="id-history" *ngIf="cards.length > 1">
+        <h2>Card history</h2>
+        <div class="id-history__scroll">
+          <nz-table [nzData]="cards" [nzFrontPagination]="true" nzSize="small" [nzPageSize]="5">
+            <thead>
+              <tr>
+                <th>Card #</th>
+                <th>Status</th>
+                <th>Issued</th>
+                <th>Expires</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of cards">
+                <td>{{ c.cardNumber }}</td>
+                <td>{{ statusLabel(c.status) }}</td>
+                <td>{{ c.issuedAt | date:'yyyy-MM-dd' }}</td>
+                <td>{{ c.expiresAt | date:'yyyy-MM-dd' }}</td>
+              </tr>
+            </tbody>
+          </nz-table>
+        </div>
+      </section>
+    </div>
+  </nz-spin>
+</div>

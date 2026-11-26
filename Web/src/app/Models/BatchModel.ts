@@ -13,4 +13,5 @@ export interface BatchModel {
   entryTerm: number;
   academicTerm: string;
   amount: number;
+  educationLevel: number;
 }

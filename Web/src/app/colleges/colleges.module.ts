@@ -26,6 +26,7 @@ import { AdmissionLookupComponent } from './admission-lookup/admission-lookup.co
 import { AddAdmissionLookupComponent } from './add-admission-lookup/add-admission-lookup.component';
 import { CgpaCreditHourLimitComponent } from './cgpa-credit-hour-limit/cgpa-credit-hour-limit.component';
 import { AddCgpaCreditHourLimitComponent } from './add-cgpa-credit-hour-limit/add-cgpa-credit-hour-limit.component';
+import { ManageBatchTermComponent } from './manage-batch-term/manage-batch-term.component';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { AddCgpaCreditHourLimitComponent } from './add-cgpa-credit-hour-limit/ad
     AddCollegeComponent,
     AddBatchComponent,
     BatchComponent,
+    ManageBatchTermComponent,
     ActivityComponent,
     AddActivityComponent,
     AddAcademicTermComponent,

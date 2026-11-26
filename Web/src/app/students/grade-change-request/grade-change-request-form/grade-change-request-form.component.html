@@ -2,7 +2,13 @@
     <div *ngIf="showSearchForm" class="slide-up">
         <div class="search-content">
 
-            <app-student-search (searchSubmitted)="onSearchSubmitted($event)">
+            <app-student-search
+                title="Grade Change Request"
+                description="Enter the Student ID to load courses and submit a grade change"
+                label="Student ID"
+                placeholder="e.g. STG1042"
+                [showInfo]="false"
+                (searchSubmitted)="onSearchSubmitted($event)">
             </app-student-search>
         </div>
     </div>

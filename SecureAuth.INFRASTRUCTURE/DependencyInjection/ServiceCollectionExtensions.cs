@@ -269,6 +269,7 @@ namespace SecureAuth.INFRASTRUCTURE.DependencyInjection
             services.AddSingleton<IRateLimitingService, RateLimitingService>();
             services.AddScoped<IActivityLogService, ActivityLogService>();
             services.AddScoped<IOtpService, OtpService>();
+            services.AddScoped<IGradeActionOtpService, GradeActionOtpService>();
             services.AddScoped<IEmailSender, EmailSenderAdapter>();
             services.AddScoped<IUserProfileService, UserProfileService>();
             services.AddScoped<ISecurityEventService, SecurityEventService>();

@@ -67,6 +67,8 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
   // Add flag to prevent recursive calls
   private isHandlingApplicantError = false;
   private hasAttemptedApplicantFetch = false;
+  /** Prevents repeated auto-submit when fee stays Paid. */
+  private hasTriggeredPaidAutoSubmit = false;
 // Countries list with flags and nationalities
   countries = COUNTRIES;
   constructor(
@@ -142,18 +144,24 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
     this.sharingDataService.currentMessage.pipe(distinctUntilChanged()).subscribe(res => {
       this.countNoOfContact = res;
       this.updateTabDisabledStateOptimized();
+      this.tryOpenPaidSubmitModal();
     });
     this.sharingDataService.otherCurrentMessage.pipe(distinctUntilChanged()).subscribe(res => {
       this.countNoOfEducation = res;
       this.updateTabDisabledStateOptimized();
+      this.tryOpenPaidSubmitModal();
     });
     this.sharingDataService.programCurrentMessage.pipe(distinctUntilChanged()).subscribe(res => {
       this.isSubmittedApplicationForm = res;
+      if (res > 0) {
+        this.isApplicationSubmitted = true;
+      }
       this.updateTabDisabledStateOptimized();
     });
     this.sharingDataService.numberOfRequestCurrentMessage.pipe(distinctUntilChanged()).subscribe(res => {
       this.countSubmitionCourse = res;
       this.updateTabDisabledStateOptimized();
+      this.tryOpenPaidSubmitModal();
     });
 
     this.form.valueChanges.pipe(
@@ -295,13 +303,12 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
     const contactPersonValid = this.countNoOfContact > 0;
     const educationValid = this.countNoOfEducation > 0;
     const academicProgramValid = this.isAcademicProgramValid;
-    const agreementValid = this.agreementFormValid;
 
     if (this.paymentStatus === 'Paid') {
       return true;
     }
 
-    return generalInfoValid && contactPersonValid && educationValid && academicProgramValid && agreementValid;
+    return generalInfoValid && contactPersonValid && educationValid && academicProgramValid;
   }
 
   get isAcademicProgramValid(): boolean {
@@ -324,47 +331,27 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
       case 5:
         return !this.isAcademicProgramValid;
       case 6:
-        return this.paymentStatus !== 'Paid';
-      case 7:
-        return !this.agreementFormValid;
+        // Application Fee is the last tab; Next is hidden there
+        return true;
       default:
         return true;
     }
   }
 
   get isSubmitButtonDisabled(): boolean {
-    if (this.isApplicationSubmitted) {
-      return true;
-    }
+    // Agreement/Review submit removed: payment auto-submits
+    return true;
+  }
 
-    if (this.isSubmittedApplicationForm === 1) {
-      return true;
-    }
-
-    // Check if we're on the last tab (Agreement tab)
-    if (this.selectedTabIndex !== 7) {
-      return true;
-    }
-
-    // Check if agreement form is valid
-    if (!this.agreementFormValid) {
-      return true;
-    }
-
-    // Check if required counts are greater than zero
-    if (this.countNoOfContact <= 0) {
-      return true;
-    }
-
-    if (this.countNoOfEducation <= 0) {
-      return true;
-    }
-
-    if (this.countSubmitionCourse <= 0) {
-      return true;
-    }
-
-    return false;
+  private canAutoSubmitApplication(): boolean {
+    return !!this.id
+      && !this.isApplicationSubmitted
+      && this.isSubmittedApplicationForm === 0
+      && this.paymentStatus === 'Paid'
+      && this.countNoOfContact > 0
+      && this.countNoOfEducation > 0
+      && this.countSubmitionCourse > 0
+      && !this.reviewSubmissionLoading;
   }
 
   get isAcademicProgramProcessed(): boolean {
@@ -452,8 +439,8 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
       agreement: {
         sourceOfFinance: this.agreementFormData?.sourceOfFinance || '',
         howDidYouComeKnow: this.agreementFormData?.howDidYouComeKnow || '',
-        selfConfirmedApplicantInformation: this.agreementFormData?.selfConfirmedApplicantInformation || false,
-        isValid: this.agreementFormValid
+        selfConfirmedApplicantInformation: true,
+        isValid: true
       }
     };
 
@@ -682,6 +669,13 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
 
         this.otherForm.patchValue(academicProgramData);
         this.otherForm.markAsTouched();
+        this.agreementFormData = academicProgramData;
+
+        // Already final-submitted applicants must not reopen the paid auto-submit modal
+        if (academicProgramData.selfConfirmedApplicantInformation) {
+          this.isApplicationSubmitted = true;
+          this.hasTriggeredPaidAutoSubmit = true;
+        }
 
         this.profilePicture =
           environment.fileUrl +
@@ -700,13 +694,14 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
         this.updateTabDisabledStateOptimized();
 
         setTimeout(() => {
-          if (this.schoolAgreementComp && applicantData) {
-            this.schoolAgreementComp.agreementForm.patchValue({
-              sourceOfFinance: applicantData.sourceOfFinance,
-              howDidYouComeKnow: applicantData.howDidYouComeKnow,
-              selfConfirmedApplicantInformation: applicantData.selfConfirmedApplicantInformation
-            });
-          }
+          // Agreement UI removed for applicants.
+          // if (this.schoolAgreementComp && applicantData) {
+          //   this.schoolAgreementComp.agreementForm.patchValue({
+          //     sourceOfFinance: applicantData.sourceOfFinance,
+          //     howDidYouComeKnow: applicantData.howDidYouComeKnow,
+          //     selfConfirmedApplicantInformation: applicantData.selfConfirmedApplicantInformation
+          //   });
+          // }
         });
       },
       error: (error) => {
@@ -1077,62 +1072,63 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
   }
 
   private getApplicantOtherInfo(): OtherInformation {
-    const formModel = this.agreementFormData;
+    const formModel = this.agreementFormData || {};
     const generalUserInfo = new OtherInformation();
     generalUserInfo.applicantID = this.id;
-    generalUserInfo.howDidYouComeKnow = formModel.howDidYouComeKnow;
-    generalUserInfo.sourceOfFinance = formModel.sourceOfFinance;
-    generalUserInfo.selfConfirmedApplicantInformation = formModel.selfConfirmedApplicantInformation;
+    generalUserInfo.howDidYouComeKnow = formModel.howDidYouComeKnow || '';
+    generalUserInfo.sourceOfFinance = formModel.sourceOfFinance || '';
+    // Agreement UI removed; confirm by completing payment
+    generalUserInfo.selfConfirmedApplicantInformation = true;
     return generalUserInfo;
   }
 
   onApplicanFormSubmit() {
+    this.openPaidSubmitModalAndSubmit();
+  }
+
+  /**
+   * When fee is Paid but application is not submitted, open the modal and auto-submit.
+   */
+  private openPaidSubmitModalAndSubmit(): void {
+    if (!this.canAutoSubmitApplication() || this.hasTriggeredPaidAutoSubmit) {
+      return;
+    }
+
+    this.hasTriggeredPaidAutoSubmit = true;
     this.reviewSummaryData = this.collectReviewSummaryData();
 
-    const modalRef = this.modal.confirm({
-      nzTitle: '<div class="modal-title"><i nz-icon nzType="file-text" nzTheme="outline"></i> Application Review & Confirmation</div>',
+    const modalRef = this.modal.info({
+      nzTitle: '<div class="modal-title"><i nz-icon nzType="file-text" nzTheme="outline"></i> Completing your application</div>',
       nzContent: this.reviewSummaryService.generateReviewSummaryContent(this.reviewSummaryData),
       nzWidth: 900,
-      nzOkText: 'Submit',
-      nzCancelText: 'Review & Edit',
-      nzOkType: 'primary',
-      nzOkDanger: false,
+      nzOkText: 'Submitting...',
+      nzOkDisabled: true,
+      nzClosable: false,
+      nzMaskClosable: false,
       nzClassName: 'review-confirmation-modal',
-      nzOkLoading: false,
-      nzStyle: { top: '5%' },
-      nzOnOk: () => {
-        this.submitFinalApplication();
-        return false;
-      },
-      nzOnCancel: () => {
-        // User chose to review and edit
-      }
+      nzStyle: { top: '5%' }
     });
 
     this.currentModalRef = modalRef;
+    // No Agreement checkbox / Review button: payment completion submits automatically
+    this.submitFinalApplication();
   }
 
   private submitFinalApplication() {
     const postData = this.getApplicantOtherInfo();
     postData.applicantID = this.id;
 
-    if (this.currentModalRef) {
-      this.currentModalRef.updateConfig({
-        nzOkLoading: true,
-        nzOkText: 'Submitting...',
-        nzOkDisabled: true,
-        nzCancelDisabled: true
-      });
-    }
     this.reviewSubmissionLoading = true;
 
     this.generalInformationService.finalSubmit(this.id, postData).subscribe({
-      next: (res) => {
+      next: () => {
         this.reviewSubmissionLoading = false;
         this.isApplicationSubmitted = true;
+        this.isSubmittedApplicationForm = 1;
 
         if (this.currentModalRef) {
           this.currentModalRef.close();
+          this.currentModalRef = null;
         }
 
         this.modal.success({
@@ -1148,16 +1144,13 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
           }
         });
       },
-      error: (error) => {
+      error: () => {
         this.reviewSubmissionLoading = false;
+        this.hasTriggeredPaidAutoSubmit = false;
 
         if (this.currentModalRef) {
-          this.currentModalRef.updateConfig({
-            nzOkLoading: false,
-            nzOkText: 'Submit Application',
-            nzOkDisabled: false,
-            nzCancelDisabled: false
-          });
+          this.currentModalRef.close();
+          this.currentModalRef = null;
         }
 
         this._customNotificationService.notification(
@@ -1180,6 +1173,14 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
   onPaymentStatusChange(status: string) {
     this.paymentStatus = status;
     this.updateTabDisabledStateOptimized();
+    this.tryOpenPaidSubmitModal();
+  }
+
+  private tryOpenPaidSubmitModal(): void {
+    if (this.paymentStatus !== 'Paid') {
+      return;
+    }
+    setTimeout(() => this.openPaidSubmitModalAndSubmit(), 300);
   }
 
   onPaymentPolicyAccepted(accepted: boolean) {
@@ -1187,9 +1188,7 @@ export class GeneralInformationComponent implements OnInit, OnDestroy {
   }
 
   onPaymentSuccessful() {
-    // This method is no longer used since we removed the paymentSuccessful event
-    // The application-fee component now handles successful payments internally
-    // without navigating to the next tab, following the ManageEducationComponent pattern
+    // Payment success is handled by onPaymentStatusChange → auto modal/submit
   }
 
   checkPaymentStatusAndUpdateTabs(): void {

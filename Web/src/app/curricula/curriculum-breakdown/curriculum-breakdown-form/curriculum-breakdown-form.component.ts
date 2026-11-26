@@ -430,11 +430,15 @@ export class CurriculumBreakdownFormComponent implements OnInit {
       });
   }
 
-  filterOption(inputValue: string, item: any): boolean {
-    inputValue = inputValue.toLowerCase();
-    const lowerCaseTitle = item.title.toLowerCase();
-    return lowerCaseTitle.includes(inputValue);
-  }
+  filterOption = (inputValue: string, item: any): boolean => {
+    const query = String(inputValue || '').toLowerCase().trim();
+    if (!query) {
+      return true;
+    }
+    const title = String(item?.title || '').toLowerCase();
+    const code = String(item?.courseCode || '').toLowerCase();
+    return title.includes(query) || code.includes(query);
+  };
 
   search(ret: {}): void {
   }

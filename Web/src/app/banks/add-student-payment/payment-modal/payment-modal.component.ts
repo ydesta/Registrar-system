@@ -25,6 +25,7 @@ export class PaymentModalComponent implements OnInit {
   type: number;
   paidFor: number = 0;
   shouldNavigate: boolean = true; // New parameter to control navigation
+  submitting = false;
   constructor(
     private modalRef: NzModalRef,
     private _fb: FormBuilder,
@@ -115,37 +116,68 @@ export class PaymentModalComponent implements OnInit {
   }
 
   submitForm() {
-    if (this.bankTransactionForm.valid) {
-      const formData = new FormData();
-      const payment = this.getStudentPayment();
+    if (this.submitting) {
+      return;
+    }
 
-      for (const key in payment) {
-        if (Object.prototype.hasOwnProperty.call(payment, key)) {
-          const value = (payment as any)[key];
-          // Only append non-null and non-undefined values
-          if (value !== null && value !== undefined && value !== '') {
-            formData.append(key, value);
-          }
+    if (!this.bankTransactionForm.valid) {
+      this._customNotificationService.notification('error', 'error', 'Enter valid data.');
+      return;
+    }
+
+    this.submitting = true;
+    const formData = new FormData();
+    const payment = this.getStudentPayment();
+
+    for (const key in payment) {
+      if (Object.prototype.hasOwnProperty.call(payment, key)) {
+        const value = (payment as any)[key];
+        // Only append non-null and non-undefined values
+        if (value !== null && value !== undefined && value !== '') {
+          formData.append(key, value);
         }
       }
+    }
 
-      if (this.selectedFile) {
-        formData.append('attachment', this.selectedFile);
-      }
+    if (this.selectedFile) {
+      formData.append('attachment', this.selectedFile);
+    }
 
-      this.bankService.create(formData).subscribe((res: any) => {
+    this.bankService.create(formData).subscribe({
+      next: (res: any) => {
+        const status = String(res?.status || '').toLowerCase();
+        if (status && status !== 'success') {
+          this.submitting = false;
+          this._customNotificationService.notification(
+            'warning',
+            'Payment Already Submitted',
+            res?.data || res?.error || 'This payment was already submitted. Please do not submit again.'
+          );
+          return;
+        }
+
         this._customNotificationService.notification('success', 'Success', res.data);
         this.modalRef.close(true);
         if (this.shouldNavigate) {
           this._route.navigateByUrl('students/manage-student-course-registration');
         }
-      });
-    } else {
-      this._customNotificationService.notification('error', 'error', 'Enter valid data.');
-    }
+      },
+      error: (error) => {
+        this.submitting = false;
+        const message =
+          error?.error?.data ||
+          error?.error?.error ||
+          error?.error?.message ||
+          'Failed to submit payment. Please try again.';
+        this._customNotificationService.notification('error', 'Error', message);
+      }
+    });
   }
 
   closeModal() {
+    if (this.submitting) {
+      return;
+    }
     this.modalRef.close();
   }
 } 

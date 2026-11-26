@@ -140,6 +140,18 @@ export class AuthService {
     );
   }
 
+  public sendGradeActionOtp(purpose: string): Observable<any> {
+    return this.crud.secure.post('/authentication/grade-action-otp/send', { purpose }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  public verifyGradeActionOtp(purpose: string, otp: string): Observable<any> {
+    return this.crud.secure.post('/authentication/grade-action-otp/verify', { purpose, otp }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   public verifyOtp(email: string, otp: string): Observable<any> {
     return this.crud.secure.post('/authentication/verify-otp', { email, otp }).pipe(
       catchError(this.handleError),

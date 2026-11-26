@@ -165,7 +165,41 @@ export class AddBatchComponent implements OnInit {
       entryTerm: data.entryTerm,
       remark: data.remark,
       amount: data.amount,
+      educationLevel: this.resolveEducationLevel(data.educationLevel)
     });
+  }
+
+  private resolveEducationLevel(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const asNumber = Number(value);
+    if (!Number.isNaN(asNumber) && this.listOfProgramType.some(x => x.Id === asNumber)) {
+      return asNumber;
+    }
+
+    const asText = String(value).trim().toLowerCase();
+    const byDescription = this.listOfProgramType.find(
+      x => String(x.Description).trim().toLowerCase() === asText
+    );
+    if (byDescription) {
+      return byDescription.Id;
+    }
+
+    const enumNameMap: Record<string, number> = {
+      diploma: 1,
+      degree: 2,
+      "bachelor's degree": 2,
+      master: 3,
+      "master's degree": 3,
+      phd: 4,
+      "ph.d.": 4,
+      bridging: 5,
+      applicant: 6
+    };
+
+    return enumNameMap[asText] ?? null;
   }
   getYearRange(currentYear: number): number[] {
     const startYear = 1998;

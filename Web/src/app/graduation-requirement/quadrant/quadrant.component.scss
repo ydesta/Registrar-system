@@ -143,20 +143,36 @@
 }
 
 .table-card {
+  width: 100%;
+  max-width: 100%;
   background: white;
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
   padding: 0 0 24px 0;
+  box-sizing: border-box;
 }
 
 .quadrants-table {
   background: transparent;
   font-size: 15px;
+  min-width: 1000px;
 
   ::ng-deep .ant-table {
     background: transparent;
+
+    .ant-table-container,
+    .ant-table-content {
+      overflow-x: auto !important;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1000px;
+    }
 
     .ant-table-thead > tr > th {
       background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -165,6 +181,7 @@
       color: #374151;
       padding: 16px;
       font-size: 14px;
+      white-space: nowrap;
 
       &.sn-column {
         width: 80px;

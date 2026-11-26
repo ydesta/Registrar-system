@@ -1,0 +1,93 @@
+<div class="content-container">
+  <div class="header-section">
+    <div class="page-title">
+      <h2 class="title-text">Grade Field Encryption</h2>
+      <p class="subtitle-text">
+        Encrypt legacy GradeLetter, Mark, and Point values into Protected columns.
+      </p>
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-body">
+      <div class="field">
+        <label for="batchSize">Batch size</label>
+        <div class="field-controls">
+          <input
+            id="batchSize"
+            nz-input
+            type="number"
+            min="1"
+            max="1000"
+            [(ngModel)]="batchSize"
+            [disabled]="loading"
+          />
+          <div class="presets">
+            <button
+              *ngFor="let preset of batchPresets"
+              type="button"
+              class="preset"
+              [class.active]="batchSize === preset"
+              [disabled]="loading"
+              (click)="setPreset(preset)">
+              {{ preset }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button
+          nz-button
+          nzType="primary"
+          type="button"
+          [nzLoading]="loading && untilDoneMode"
+          [disabled]="loading"
+          (click)="confirmRunUntilDone()">
+          Run until done
+        </button>
+        <button
+          nz-button
+          nzType="default"
+          type="button"
+          [nzLoading]="loading && !untilDoneMode"
+          [disabled]="loading"
+          (click)="runOnce()">
+          Run one batch
+        </button>
+        <button
+          *ngIf="hasResults"
+          nz-button
+          type="button"
+          [disabled]="loading"
+          (click)="resetTotals()">
+          Reset
+        </button>
+      </div>
+
+      <p class="status-text" *ngIf="statusText">{{ statusText }}</p>
+
+      <div class="results" *ngIf="hasResults">
+        <div class="result">
+          <span class="label">Last batch</span>
+          <span class="value">{{ lastUpdated ?? 0 }}</span>
+        </div>
+        <div class="result">
+          <span class="label">Session total</span>
+          <span class="value">{{ totalUpdated }}</span>
+        </div>
+        <div class="result">
+          <span class="label">Batches</span>
+          <span class="value">{{ batchesCompleted }}</span>
+        </div>
+      </div>
+
+      <nz-alert
+        class="note"
+        nzType="warning"
+        nzShowIcon
+        nzMessage="Admin only — keep plaintext columns until Protected values are verified. Use Run until done with batch size 500 or 1000.">
+      </nz-alert>
+    </div>
+  </div>
+</div>

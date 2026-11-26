@@ -92,7 +92,6 @@
   flex: 1 1 0;
   min-width: 320px;
   border-radius: 10px;
-  overflow: hidden;
 }
 
 ::ng-deep .course-transfer .ant-transfer-list-header {
@@ -101,19 +100,45 @@
 }
 
 ::ng-deep .course-transfer .ant-transfer-list-body {
-  height: calc(100% - 40px);
-  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-::ng-deep .course-transfer .ant-transfer-list-body-with-search {
-  padding-top: 0;
+::ng-deep .course-transfer .ant-transfer-list-body-search-wrapper {
+  flex: none;
+  position: relative;
+  padding: 8px 12px;
 }
 
 ::ng-deep .course-transfer .ant-transfer-list-content {
-  height: 100% !important;
-  max-height: 380px !important;
+  flex: auto;
+  min-height: 0;
+  max-height: none !important;
+  height: auto !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+::ng-deep .course-transfer .ant-transfer-list-content-item {
+  display: flex !important;
+  align-items: flex-start;
+  padding: 6px 12px;
+  min-height: 32px;
+  color: #0f172a;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+::ng-deep .course-transfer .ant-transfer-list-content-item .ant-checkbox-wrapper {
+  display: flex;
+  width: 100%;
+  white-space: normal;
+  word-break: break-word;
+  color: inherit;
 }
 
 ::ng-deep .course-transfer .ant-transfer-list-content::-webkit-scrollbar {

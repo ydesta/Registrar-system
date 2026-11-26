@@ -461,14 +461,15 @@ export class ManageStudentProgramRequesterComponent implements OnInit {
       return;
     }
 
-    if (!this.canEditOrDelete(request)) {
-      this._customNotificationService.notification(
-        "warning",
-        "Not allowed",
-        "Only draft (not yet submitted) academic program requests can be edited."
-      );
-      return;
-    }
+    // Submitted requests can still change program, division, and applicant type.
+    // if (!this.canEditOrDelete(request)) {
+    //   this._customNotificationService.notification(
+    //     "warning",
+    //     "Not allowed",
+    //     "Only draft (not yet submitted) academic program requests can be edited."
+    //   );
+    //   return;
+    // }
 
     const applicantId = request.applicantId || this.applicantId;
     if (!applicantId) {

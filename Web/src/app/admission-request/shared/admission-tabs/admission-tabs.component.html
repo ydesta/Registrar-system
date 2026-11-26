@@ -95,7 +95,8 @@
         </nz-tab>
     </ng-container>
 
-    <nz-tab *ngIf="showFilesTab" [nzTitle]="agreementTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[7]">
+    <!-- Agreement removed for applicants: payment triggers auto-submit. -->
+    <nz-tab *ngIf="isAgreementTabVisible" [nzTitle]="agreementTemplate" class="custom-tab" [nzDisabled]="!flexibleNavigation && isTabDisabled[7]">
         <ng-template #agreementTemplate>
             <span nz-icon [nzType]="isUserReviewer() ? 'check-circle' : 'file-text'" nzTheme="outline"></span>
             {{ isUserReviewer() ? 'Review Decision' : 'Agreement' }}

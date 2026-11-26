@@ -72,9 +72,12 @@
                     </div>
                     <nz-dropdown-menu #menu="nzDropdownMenu">
                         <ul nz-menu>
+                            <!-- Edit stays available after submit.
                             <li nz-menu-item
                                 [nzDisabled]="!canEditOrDelete(data)"
                                 (click)="canEditOrDelete(data) && editModal(data)">
+                            -->
+                            <li nz-menu-item (click)="editModal(data)">
                                 <a class="edit">
                                     <span nz-icon nzType="edit" nzTheme="outline"></span>
                                     Edit

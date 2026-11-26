@@ -24,50 +24,30 @@
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.page-title {
-  margin: 0 0 4px;
-  font-size: 28px;
-  font-weight: 750;
-  color: #0f172a;
-  letter-spacing: -0.02em;
-}
-
-.page-subtitle {
-  margin: 0;
-  color: #64748b;
-  font-size: 14px;
-}
-
 .cgpa-pill {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   align-items: flex-end;
-  padding: 12px 18px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   color: #fff;
-  box-shadow: 0 10px 24px rgba(24, 144, 255, 0.28);
-  min-width: 140px;
+  min-width: 110px;
+  line-height: 1.15;
 }
 
 .cgpa-label {
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  opacity: 0.9;
+  opacity: 0.92;
+  font-weight: 600;
 }
 
 .cgpa-value {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 800;
   line-height: 1.1;
 }
@@ -83,13 +63,30 @@
     background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
     color: #fff !important;
     border-bottom: none !important;
-    min-height: 52px;
+    min-height: 56px;
+    padding: 0 20px !important;
+  }
+
+  ::ng-deep .ant-card-head-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100%;
   }
 
   ::ng-deep .ant-card-head-title {
     color: #fff !important;
     font-weight: 700;
     font-size: 16px;
+    text-align: left !important;
+    padding: 12px 0 !important;
+    flex: 1 1 auto;
+  }
+
+  ::ng-deep .ant-card-extra {
+    float: none !important;
+    margin-left: auto !important;
+    padding: 8px 0 !important;
   }
 
   ::ng-deep .ant-card-body {
@@ -413,8 +410,16 @@
     padding: 16px;
   }
 
-  .page-header {
-    align-items: stretch;
+  .student-card {
+    ::ng-deep .ant-card-head-wrapper {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    ::ng-deep .ant-card-extra {
+      width: 100%;
+      margin-left: 0 !important;
+    }
   }
 
   .cgpa-pill {

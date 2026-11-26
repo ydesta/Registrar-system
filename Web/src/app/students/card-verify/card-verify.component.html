@@ -1,0 +1,60 @@
+<div class="content-container">
+  <div class="header-section">
+    <div class="header-content">
+      <div class="page-title">
+        <h1>Scan card</h1>
+        <p class="subtitle">Paste the QR token from a student ID card to check if it is valid.</p>
+      </div>
+      <div class="header-actions">
+        <a routerLink="../card-print-center" nz-button nzType="default">
+          <i nz-icon nzType="printer" nzTheme="outline"></i>
+          <span>Print</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-section">
+    <form nz-form [formGroup]="form" (ngSubmit)="verify()" class="scan-form">
+      <nz-form-item>
+        <nz-form-label nzRequired>QR token</nz-form-label>
+        <nz-form-control nzErrorTip="QR token is required">
+          <textarea nz-input
+                    formControlName="qrToken"
+                    rows="3"
+                    placeholder="CS1.{id}.{sig}"
+                    (keydown.enter)="$event.preventDefault(); verify()"></textarea>
+        </nz-form-control>
+      </nz-form-item>
+      <div class="scan-actions">
+        <button nz-button nzType="primary" [nzLoading]="checking">
+          <i nz-icon nzType="scan" nzTheme="outline"></i>
+          Check card
+        </button>
+        <button nz-button nzType="default" type="button" (click)="openPublicScan()" [disabled]="!form.value.qrToken">
+          Open public scan page
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <nz-alert *ngIf="error" nzType="error" [nzMessage]="error" nzShowIcon class="scan-alert"></nz-alert>
+
+  <div class="table-container result-card" *ngIf="result">
+    <div class="result-banner" [class.is-ok]="result.isValid" [class.is-bad]="!result.isValid">
+      {{ result.isValid ? 'Valid card' : 'Not accepted' }}
+    </div>
+    <div class="result-body">
+      <img *ngIf="photoUrl(result.photoPath)" class="result-photo" [src]="photoUrl(result.photoPath)" alt="" />
+      <div class="result-photo result-photo--ph" *ngIf="!photoUrl(result.photoPath)">ID</div>
+      <div class="result-fields">
+        <h2>{{ result.fullName || '—' }}</h2>
+        <p><span>Student #</span>{{ result.studentNumber || '—' }}</p>
+        <p><span>Card #</span>{{ result.cardNumber || '—' }}</p>
+        <p><span>Status</span>{{ result.statusName || statusLabel(result.status) }}</p>
+        <p><span>Expires</span>{{ result.expiresAt | date:'yyyy-MM-dd' }}</p>
+        <p class="reason" *ngIf="result.reason">{{ result.reason }}</p>
+      </div>
+    </div>
+  </div>
+</div>
